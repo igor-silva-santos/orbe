@@ -41,17 +41,33 @@ async function anilistApiWithRetry(query: string, variables: any, maxRetries = 5
     let attempt = 0;
     while (attempt < maxRetries) {
         try {
-            return await anilistApi.post('', { query, variables });
+            const response = await anilistApi.post('', { query, variables });
+            // AniList pode retornar 200 OK mas com um array de erros no corpo
+            if (response.data.errors) {
+                const isRetryable = response.data.errors.some((e: any) => e.status === 403 || e.status >= 500);
+                if (isRetryable) {
+                    // Lança um erro customizado para ser pego pelo bloco catch
+                    const error = new Error(`AniList API error: ${response.data.errors[0].message}`);
+                    (error as any).response = { status: response.data.errors[0].status };
+                    throw error;
+                }
+            }
+            return response;
         } catch (error: any) {
             const isNetworkError = error.code === 'ENOTFOUND' || error.code === 'ECONNRESET';
-            const isRateLimitError = error.response && error.response.status === 429;
-            if (isNetworkError || isRateLimitError) {
+            const isRetryableHttpError = error.response && (
+                error.response.status === 429 || // Rate Limit
+                error.response.status === 403 || // Forbidden (AniList downtime)
+                error.response.status >= 500    // Server errors
+            );
+
+            if (isNetworkError || isRetryableHttpError) {
                 attempt++;
                 if (attempt >= maxRetries) {
                     throw error;
                 }
                 const delayTime = initialDelay * Math.pow(2, attempt);
-                const reason = isRateLimitError ? 'rate limit' : 'rede';
+                const reason = isNetworkError ? 'rede' : `HTTP status ${error.response.status}`;
                 logger.info(`Tentativa ${attempt} falhou com erro de ${reason}. Tentando novamente em ${delayTime}ms...`);
                 await delay(delayTime);
             } else {

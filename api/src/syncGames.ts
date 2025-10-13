@@ -112,6 +112,34 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                 const firstReleaseDate = brReleaseDate ? new Date(brReleaseDate * 1000) : (game.first_release_date ? new Date(game.first_release_date * 1000) : null);
                 const coverUrl = game.cover?.url ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') : null;
 
+                // De-duplicate company roles
+                const companyRoles = new Map<string, { role: string; company: any }>();
+                game.involved_companies?.forEach((inv: any) => {
+                  if (inv.company) { // Ensure company object exists
+                    if (inv.developer) {
+                      const key = `${inv.company.id}-developer`;
+                      if (!companyRoles.has(key)) {
+                        companyRoles.set(key, { role: 'developer', company: inv.company });
+                      }
+                    }
+                    if (inv.publisher) {
+                      const key = `${inv.company.id}-publisher`;
+                      if (!companyRoles.has(key)) {
+                        companyRoles.set(key, { role: 'publisher', company: inv.company });
+                      }
+                    }
+                  }
+                });
+                const companiesToCreate = Array.from(companyRoles.values()).map(cr => ({
+                  role: cr.role,
+                  company: {
+                    connectOrCreate: {
+                      where: { igdbId: cr.company.id },
+                      create: { igdbId: cr.company.id, name: cr.company.name }
+                    }
+                  }
+                }));
+
                 const updateData = {
                     name: game.name,
                     summary: game.summary,
@@ -125,24 +153,17 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                     ...updateData,
                     igdbId: game.id,
                     genres: { create: game.genres?.map((genre: any) => ({ genero: { connectOrCreate: { where: { igdbId: genre.id }, create: { igdbId: genre.id, name: genre.name } } } })) ?? [] },
-                    companies: { create: game.involved_companies?.flatMap((inv: any) => {
-                        const roles = [];
-                        if (inv.developer) roles.push('developer');
-                        if (inv.publisher) roles.push('publisher');
-                        return roles.map(role => ({ role: role, company: { connectOrCreate: { where: { igdbId: inv.company.id }, create: { igdbId: inv.company.id, name: inv.company.name } } } }));
-                    }) ?? [] },
+                    companies: { create: companiesToCreate },
                     platforms: { create: game.platforms?.map((platform: any) => ({ plataforma: { connectOrCreate: { where: { igdbId: platform.id }, create: { igdbId: platform.id, name: platform.name } } } })) ?? [] },
                     themes: { create: game.themes?.map((theme: any) => ({ theme: { connectOrCreate: { where: { igdbId: theme.id }, create: { igdbId: theme.id, name: theme.name } } } })) ?? [] },
                     playerPerspectives: { create: game.player_perspectives?.map((persp: any) => ({ perspective: { connectOrCreate: { where: { igdbId: persp.id }, create: { igdbId: persp.id, name: persp.name } } } })) ?? [] },
                     screenshots: { create: game.screenshots?.map((ss: any) => ({ igdbId: ss.id, url: `https:${ss.url.replace('t_thumb', 't_screenshot_huge')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) ?? [] },
                     artworks: { create: game.artworks?.map((art: any) => ({ igdbId: art.id, url: `https:${art.url.replace('t_thumb', 't_1080p')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) ?? [] },
                     websites: { create: game.websites?.filter((w: any) => w.category != null).map((w: any) => ({ url: w.url, category: w.category, igdbId: w.id })) ?? [] },
-                    videos: { create: game.videos?.map((video: any) => ({ key: video.video_id, name: video.name, site: 'YouTube', type: 'Trailer', official: true })) ?? [] },
+                    videos: { create: game.videos?.map((video: any) => ({ key: video.video_id, name: video.name || '', site: 'YouTube', type: 'Trailer', official: true })) ?? [] },
                     gameModes: { create: game.game_modes?.map((mode: any) => ({ gameMode: { connectOrCreate: { where: { id: mode.id }, create: { id: mode.id, name: mode.name, slug: mode.slug } } } })) ?? [] },
                     gameEngines: { create: game.game_engines?.map((engine: any) => ({ gameEngine: { connectOrCreate: { where: { id: engine.id }, create: { id: engine.id, name: engine.name, slug: engine.slug } } } })) ?? [] },
                 };
-
-
 
                 const existingGame = await prisma.jogo.findUnique({ where: { igdbId: game.id } });
 

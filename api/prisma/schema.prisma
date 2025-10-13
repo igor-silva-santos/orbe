@@ -523,6 +523,7 @@ model FilmeOnStreamingProvider {
   filmeId    Int
   provider   StreamingProvider @relation(fields: [providerId], references: [id])
   providerId Int
+  url        String? // Link direto para a mídia na plataforma
 
   @@id([filmeId, providerId])
 }
@@ -561,6 +562,7 @@ model SerieOnStreamingProvider {
   serieId    Int
   provider   StreamingProvider @relation(fields: [providerId], references: [id])
   providerId Int
+  url        String? // Link direto para a mídia na plataforma
 
   @@id([serieId, providerId])
 }

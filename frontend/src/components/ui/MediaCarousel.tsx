@@ -62,7 +62,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       if (selectedItem?.data_lancamento_api) {
         try {
           const date = parseISO(selectedItem.data_lancamento_api);
-          const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
+          const title = format(date, "\'Lançamentos de\' MMMM \'de\' yyyy", { locale: ptBR });
           setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
         } catch (e) { setCurrentTitle("Lançamentos"); }
       }
@@ -104,7 +104,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (initialItem?.data_lancamento_api) {
       try {
         const date = parseISO(initialItem.data_lancamento_api);
-        const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
+        const title = format(date, "\'Lançamentos de\' MMMM \'de\' yyyy", { locale: ptBR });
         setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
       } catch (e) { 
         setCurrentTitle("Lançamentos"); 

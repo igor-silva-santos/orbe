@@ -110,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Pesquisa - Visível apenas em mobile, pois a barra é visível em desktop */}
             <button
               onClick={handleSearchClick}
-              className="md:hidden p-2 orbe-text-primary hover:orbe-text-secondary transition-colors rounded-md hover:bg-muted"
+              className="p-2 orbe-text-primary hover:orbe-text-secondary transition-colors rounded-md hover:bg-muted"
             >
               <Search className="h-5 w-5" />
             </button>

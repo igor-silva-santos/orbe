@@ -58,6 +58,7 @@ const formatDuration = (minutes: number | null) => {
 
 export const mapFilmeToMidia = (filme: any) => {
   const mappedFilme = {
+    type: 'filme', // Adiciona o tipo da mídia
     id: filme.tmdbId,
     avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null, // Normalizado para 0-100
     titulo_api: filme.title,
@@ -69,7 +70,7 @@ export const mapFilmeToMidia = (filme: any) => {
     diretor: getCrewMember(filme.crew, 'Director'),
     escritor: getCrewMember(filme.crew, 'Writer'),
     generos_api: filme.genres?.map((g: any) => g.genero.name) ?? [],
-    plataformas_api: filme.streamingProviders?.map((p: any) => ({ nome: p.provider.name })) ?? [],
+    plataformas_api: filme.streamingProviders?.map((p: any) => ({ nome: p.provider.name, url: p.url, logo_path: p.provider.logoPath })) ?? [],
     elenco: filme.cast?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, personagem: c.character, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
     videos: filme.videos?.map((v: any) => ({ key: v.key, site: v.site, nome: v.name })) ?? [],
     homepage: filme.homepage,
@@ -83,6 +84,7 @@ export const mapFilmeToMidia = (filme: any) => {
 
 export const mapSerieToMidia = (serie: any) => {
   const mappedSerie = {
+    type: 'serie', // Adiciona o tipo da mídia
     id: serie.tmdbId,
     avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null, // Normalizado para 0-100
     titulo_api: serie.name,
@@ -93,7 +95,7 @@ export const mapSerieToMidia = (serie: any) => {
     numero_temporadas: serie.numberOfSeasons,
     numero_episodios: serie.numberOfEpisodes,
     generos_api: serie.genres?.map((g: any) => g.genero.name) ?? [],
-    plataformas_api: serie.streamingProviders?.map((p: any) => ({ nome: p.provider.name })) ?? [],
+    plataformas_api: serie.streamingProviders?.map((p: any) => ({ nome: p.provider.name, url: p.url, logo_path: p.provider.logoPath })) ?? [],
     criadores: serie.createdBy?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
     elenco: serie.cast?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, personagem: c.character, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
     videos: serie.videos?.map((v: any) => ({ key: v.key, site: v.site, nome: v.name })) ?? [],
@@ -110,6 +112,7 @@ export const mapAnimeToMidia = (anime: any) => {
     .sort((a: any, b: any) => a.episode - b.episode)[0];
 
   const mappedAnime = {
+    type: 'anime', // Adiciona o tipo da mídia
     id: anime.anilistId,
     avaliacao: anime.averageScore, // Adicionado para a nota de avaliação (0-100)
     titulo_api: anime.titleRomaji,
@@ -158,6 +161,7 @@ export const mapAnimeToMidia = (anime: any) => {
 
 export const mapJogoToMidia = (jogo: any) => {
     const mappedJogo = {
+      type: 'jogo', // Adiciona o tipo da mídia
       id: jogo.igdbId,
       titulo_api: jogo.name,
       sinopse: jogo.summary,

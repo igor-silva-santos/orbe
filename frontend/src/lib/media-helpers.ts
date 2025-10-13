@@ -110,23 +110,52 @@ export const formatRating = (item: Midia, type: 'filme' | 'serie' | 'anime' | 'j
  * @returns Uma lista de objetos de loja com nome, ícone e URL.
  */
 export const getGameStores = (item: Jogo): { name: string; icon: string; url: string }[] => {
-  const storeMap: Record<number, { name: string; icon: string }> = {
-    13: { name: 'Steam', icon: 'steam' },
-    16: { name: 'Epic Games', icon: 'epic' }, // Ícone precisa ser criado/adicionado
-    26: { name: 'GOG', icon: 'gog' }, // Ícone precisa ser criado/adicionado
-    36: { name: 'PlayStation Store', icon: 'playstation' },
-    37: { name: 'Microsoft Store', icon: 'xbox' },
-    54: { name: 'Nintendo eShop', icon: 'nintendo' },
-  };
-
   if (!item.websites) return [];
 
-  return item.websites
-    .filter(website => storeMap[website.category])
-    .map(website => ({
-      ...storeMap[website.category],
-      url: website.url,
-    }));
+  // Mapeamento de IDs de categoria de website da IGDB para informações da loja
+  const storeCategoryMapping: { [key: number]: { name: string; icon: string; } } = {
+    13: { name: 'Steam', icon: 'steam' },
+    16: { name: 'Epic Games', icon: 'epic-games' },
+    17: { name: 'GOG', icon: 'gog' },
+    10: { name: 'App Store', icon: 'apple' },
+    11: { name: 'App Store', icon: 'apple' },
+    12: { name: 'Google Play', icon: 'google-play' },
+  };
+
+  // Mapeamento de substrings de URL para informações da loja
+  const storeUrlMapping = [
+    { contains: 'store.playstation.com', name: 'PlayStation Store', icon: 'playstation' },
+    { contains: 'xbox.com', name: 'Xbox Store', icon: 'xbox' },
+    { contains: 'nintendo.com', name: 'Nintendo eShop', icon: 'nintendo switch' },
+  ];
+
+  const foundStores = new Map<string, { name: string; icon: string; url: string }>();
+
+  for (const website of item.websites) {
+    let storeInfo: { name: string; icon: string; } | null = null;
+
+    // 1. Tenta encontrar pela categoria
+    if (storeCategoryMapping[website.category]) {
+      storeInfo = storeCategoryMapping[website.category];
+    } 
+    // 2. Se não encontrou, tenta encontrar por substring da URL
+    else {
+      const urlMatch = storeUrlMapping.find(mapping => website.url.includes(mapping.contains));
+      if (urlMatch) {
+        storeInfo = urlMatch;
+      }
+    }
+
+    // Se encontrou uma loja e ela ainda não foi adicionada, adiciona à lista
+    if (storeInfo && !foundStores.has(storeInfo.name)) {
+      foundStores.set(storeInfo.name, {
+        ...storeInfo,
+        url: website.url,
+      });
+    }
+  }
+
+  return Array.from(foundStores.values());
 };
 
 /**

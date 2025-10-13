@@ -6,6 +6,7 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from 'next/image';
+import PlatformIcon from '@/components/ui/PlatformIcons';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -73,6 +74,29 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Sinopse</h2>
           <p className="text-muted-foreground leading-relaxed">{filme.overview}</p>
+        </section>
+      )}
+
+      {/* Disponível Em */}
+      {filme.streamingProviders && filme.streamingProviders.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
+          <div className="flex flex-wrap gap-4 mt-2">
+            {filme.streamingProviders.map((p) => (
+              p.url && (
+                <a 
+                  key={p.provider.name} 
+                  href={p.url}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
+                >
+                  <PlatformIcon platform={p.provider.name} className="h-5 w-5" />
+                  <span>{p.provider.name}</span>
+                </a>
+              )
+            ))}
+          </div>
         </section>
       )}
       

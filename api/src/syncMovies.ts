@@ -149,7 +149,6 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
         posterPath: movieDetails.poster_path,
         backdropPath: movieDetails.backdrop_path,
         imdbId: movieDetails.imdb_id,
-        releaseType: relevantRelease?.type ? String(relevantRelease.type) : null,
         collection: movieDetails.belongs_to_collection ? {
           connectOrCreate: {
             where: { id: movieDetails.belongs_to_collection.id },
@@ -186,7 +185,15 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
             create: movieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube').map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: movieDetails['watch/providers']?.results?.BR?.flatrate?.map((provider: any) => ({ provider: { connectOrCreate: { where: { tmdbId: provider.provider_id }, create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } } } }))
+            create: movieDetails['watch/providers']?.results?.BR?.flatrate?.map((provider: any) => ({ 
+                url: movieDetails['watch/providers']?.results?.BR?.link, // Adiciona a URL da página "Onde Assistir"
+                provider: { 
+                    connectOrCreate: { 
+                        where: { tmdbId: provider.provider_id }, 
+                        create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } 
+                    } 
+                }
+            }))
         }
       };
 

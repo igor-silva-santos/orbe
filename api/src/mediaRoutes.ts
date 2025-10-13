@@ -824,55 +824,88 @@ router.get('/jogos/by-year', async (req, res) => {
 
 // Rota para Conteúdo em Alta (Trending)
 router.get('/trending', async (req, res) => {
-  const { limit = 10 } = req.query;
+  const { type, limit = 10 } = req.query;
   const take = parseInt(limit as string, 10);
 
   try {
-    const popularFilmes = prisma.filme.findMany({
-      orderBy: { popularity: 'desc' },
-      take,
-    });
+    let results: any[] = [];
 
-    const popularSeries = prisma.serie.findMany({
-      orderBy: { popularity: 'desc' },
-      take,
-    });
+    if (type === 'filmes') {
+      const popularFilmes = await prisma.filme.findMany({
+        orderBy: { popularity: 'desc' },
+        take,
+      });
+      results = popularFilmes.map(mapFilmeToMidia);
+    } else if (type === 'series') {
+      const popularSeries = await prisma.serie.findMany({
+        orderBy: { popularity: 'desc' },
+        take,
+      });
+      results = popularSeries.map(mapSerieToMidia);
+    } else if (type === 'animes') {
+      const popularAnimes = await prisma.anime.findMany({
+        orderBy: { popularity: 'desc' },
+        take,
+      });
+      results = popularAnimes.map(mapAnimeToMidia);
+    } else if (type === 'jogos') {
+      const popularJogos = await prisma.jogo.findMany({
+        orderBy: { rating: 'desc' }, // Jogos usam 'rating' para popularidade
+        take,
+      });
+      results = popularJogos.map(mapJogoToMidia);
+    } else {
+      // Restaurando a lógica, mas sem o shuffle para depuração.
+      const takeForEach = Math.ceil(take / 4) + 2; // Pega um pouco mais de cada para garantir 10 no final
 
-    const popularAnimes = prisma.anime.findMany({
-      orderBy: { popularity: 'desc' },
-      take,
-    });
+      const popularFilmes = prisma.filme.findMany({
+        where: { popularity: { gt: 0 } },
+        orderBy: { popularity: 'desc' },
+        take: takeForEach,
+      });
+      const popularSeries = prisma.serie.findMany({
+        where: { popularity: { gt: 0 } },
+        orderBy: { popularity: 'desc' },
+        take: takeForEach,
+      });
+      const popularAnimes = prisma.anime.findMany({
+        where: { popularity: { gt: 0 } },
+        orderBy: { popularity: 'desc' },
+        take: takeForEach,
+      });
+      const popularJogos = prisma.jogo.findMany({
+        where: { rating: { gt: 0 } },
+        orderBy: { rating: 'desc' },
+        take: takeForEach,
+      });
 
-    const popularJogos = prisma.jogo.findMany({
-      orderBy: { rating: 'desc' }, // Jogos usam 'rating' para popularidade
-      take,
-    });
+      const [filmes, series, animes, jogos] = await Promise.all([
+        popularFilmes,
+        popularSeries,
+        popularAnimes,
+        popularJogos,
+      ]);
 
-    const [filmes, series, animes, jogos] = await Promise.all([
-      popularFilmes,
-      popularSeries,
-      popularAnimes,
-      popularJogos,
-    ]);
+      const trendingResults = [
+        ...filmes.map(mapFilmeToMidia),
+        ...series.map(mapSerieToMidia),
+        ...animes.map(mapAnimeToMidia),
+        ...jogos.map(mapJogoToMidia),
+      ];
 
-    const trendingResults = [
-      ...filmes.map(mapFilmeToMidia),
-      ...series.map(mapSerieToMidia),
-      ...animes.map(mapAnimeToMidia),
-      ...jogos.map(mapJogoToMidia),
-    ];
+      // Apenas pega os primeiros 10 resultados combinados, sem embaralhar
+      results = trendingResults.slice(0, take);
+    }
 
-    // Embaralhar e limitar o resultado final para diversidade
-    const shuffled = trendingResults.sort(() => 0.5 - Math.random());
-    res.json(shuffled.slice(0, take));
+    res.json(results);
 
   } catch (error) {
-    logger.error(`Erro ao buscar conteúdo em alta: $Failed to edit, Expected 1 occurrence but found 2 for old_string in file: C:\Users\igor.ssantos\OneDrive - JSL SA\Documentos\orbe_novo\api\src\mediaRoutes.ts`);
+    logger.error(`Erro ao buscar conteúdo em alta: ${error}`);
     res.status(500).json({ error: 'Erro interno ao buscar conteúdo em alta.' });
   }
 });
 
-// Rota de Pesquisa Global Avançada
+// Rota de Pesquisa Global (Reconstruída)
 router.get('/pesquisa', async (req, res) => {
   const { q, category } = req.query;
 
@@ -884,88 +917,44 @@ router.get('/pesquisa', async (req, res) => {
     const searchFilter = { contains: q, mode: 'insensitive' as const };
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
 
-    let animePromise = Promise.resolve([] as any[]);
-    let filmePromise = Promise.resolve([] as any[]);
-    let seriePromise = Promise.resolve([] as any[]);
-    let jogoPromise = Promise.resolve([] as any[]);
-
-    if (!categoryFilter || categoryFilter === 'animes') {
-      animePromise = prisma.anime.findMany({
-        where: {
-          OR: [
-            { titleRomaji: searchFilter },
-            { titleEnglish: searchFilter },
-            { titleNative: searchFilter },
-            { synonyms: { has: q } },
-            { genres: { some: { genero: { name: searchFilter } } } },
-            { tags: { some: { tag: { name: searchFilter } } } },
-            { staff: { some: { staff: { name: searchFilter } } } },
-            { characters: { some: { character: { name: searchFilter } } } },
-            { characters: { some: { voiceActors: { some: { dublador: { name: searchFilter } } } } } },
-          ],
-        },
-      });
-    }
+    const promises = [];
 
     if (!categoryFilter || categoryFilter === 'filmes') {
-      filmePromise = prisma.filme.findMany({
-        where: {
-          OR: [
-            { title: searchFilter },
-            { originalTitle: searchFilter },
-            { genres: { some: { genero: { name: searchFilter } } } },
-            { cast: { some: { pessoa: { name: searchFilter } } } },
-            { crew: { some: { pessoa: { name: searchFilter } } } },
-          ],
-        },
-      });
+      promises.push(prisma.filme.findMany({ where: { OR: [{ title: searchFilter }, { originalTitle: searchFilter }] } }));
+    } else {
+      promises.push(Promise.resolve([])); // Placeholder
     }
 
     if (!categoryFilter || categoryFilter === 'series') {
-      seriePromise = prisma.serie.findMany({
-        where: {
-          OR: [
-            { name: searchFilter },
-            { originalName: searchFilter },
-            { genres: { some: { genero: { name: searchFilter } } } },
-            { cast: { some: { pessoa: { name: searchFilter } } } },
-            { crew: { some: { pessoa: { name: searchFilter } } } },
-            { createdBy: { some: { pessoa: { name: searchFilter } } } },
-          ],
-        },
-      });
+      promises.push(prisma.serie.findMany({ where: { OR: [{ name: searchFilter }, { originalName: searchFilter }] } }));
+    } else {
+      promises.push(Promise.resolve([])); // Placeholder
+    }
+
+    if (!categoryFilter || categoryFilter === 'animes') {
+      promises.push(prisma.anime.findMany({ where: { OR: [{ titleRomaji: searchFilter }, { titleEnglish: searchFilter }, { titleNative: searchFilter }] } }));
+    } else {
+      promises.push(Promise.resolve([])); // Placeholder
     }
 
     if (!categoryFilter || categoryFilter === 'jogos') {
-      jogoPromise = prisma.jogo.findMany({
-        where: {
-          OR: [
-            { name: searchFilter },
-            { genres: { some: { genero: { name: searchFilter } } } },
-            { themes: { some: { theme: { name: searchFilter } } } },
-            { companies: { some: { company: { name: searchFilter } } } },
-          ],
-        },
-      });
+      promises.push(prisma.jogo.findMany({ where: { name: searchFilter } }));
+    } else {
+      promises.push(Promise.resolve([])); // Placeholder
     }
 
-    const [animes, filmes, series, jogos] = await Promise.all([
-      animePromise,
-      filmePromise,
-      seriePromise,
-      jogoPromise,
-    ]);
+    const [filmes, series, animes, jogos] = await Promise.all(promises);
 
     res.json({
-      animes: animes.map(mapAnimeToMidia),
       filmes: filmes.map(mapFilmeToMidia),
       series: series.map(mapSerieToMidia),
+      animes: animes.map(mapAnimeToMidia),
       jogos: jogos.map(mapJogoToMidia),
     });
 
   } catch (error) {
-    logger.error(`Erro ao realizar pesquisa avançada: ${error}`);
-    res.status(500).json({ error: 'Erro interno ao realizar pesquisa avançada.' });
+    logger.error(`Erro ao realizar pesquisa: ${error}`);
+    res.status(500).json({ error: 'Erro interno ao realizar pesquisa.' });
   }
 });
 
@@ -1156,5 +1145,34 @@ router.get('/animes/by-season', async (req, res) => {
 });
 
 
+
+router.get('/debug-search', async (req, res) => {
+  try {
+    const searchFilter = { contains: 'tron', mode: 'insensitive' as const };
+    const filmes = await prisma.filme.findMany({
+      where: { title: searchFilter },
+      select: { title: true, popularity: true },
+    });
+    res.json(filmes);
+  } catch (error) {
+    logger.error(`Erro no endpoint de debug-search: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar dados de debug-search.' });
+  }
+});
+
+// Rota de Depuração para Trending
+router.get('/debug-trending', async (req, res) => {
+  try {
+    const filmes = await prisma.filme.findMany({
+      take: 20,
+      orderBy: { popularity: 'desc' },
+      select: { title: true, popularity: true, voteCount: true, releaseDate: true },
+    });
+    res.json(filmes);
+  } catch (error) {
+    logger.error(`Erro no endpoint de debug: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar dados de debug.' });
+  }
+});
 
 export default router;

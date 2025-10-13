@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -8,7 +8,6 @@ import {
   Star,
   Check,
   EyeOff,
-  Ticket
 } from 'lucide-react';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { format, parseISO } from 'date-fns';
@@ -60,32 +59,28 @@ const useCountdown = (targetDate: string | undefined) => {
   return timeLeft;
 };
 
-const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
-
 const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   {
     midia,
     type,
     userInteractions = [],
     onInteraction,
+    onClick,
     isFocused,
   }, ref) => {
 
   if (!midia) {
-    return null; // Ou um skeleton/placeholder
+    return null;
   }
 
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Processar dados com helpers
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
   const providers = getStreamingProviders(midia);
   const platforms = type === 'jogo' ? getGamePlatforms(midia as Jogo) : [];
   const dubStatus = type === 'anime' ? getAnimeDubStatus(midia as Anime) : null;
-
-
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
@@ -99,9 +94,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     interaction => interaction.midia_id === midia.id && interaction.tipo_midia === type
   );
 
-  const isAdultContent = isAnime && (midia as any).isAdult === true;
-
-
+  const isAdultContent = (midia as any).isAdult === true;
 
   const formatReleaseDate = () => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
@@ -116,8 +109,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
       return 'Data inválida';
     }
   };
-
-
 
   const hasReleased = (() => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
@@ -166,7 +157,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
           <div className="relative group" ref={ref}>
             <div
               className={`relative bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 w-[200px] ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
-              onClick={handleCardClick}
+              onClick={onClick || handleCardClick}
             >
               <div className="relative w-[200px] h-[300px] overflow-hidden">
                 <Image
@@ -178,11 +169,12 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   loading="lazy"
                   className={`object-cover object-center transition-all duration-300 group-hover:scale-105 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                 />
-                                {type === 'filme' && (midia as any).em_prevenda && (
-                                  <div className="absolute top-2 right-2 z-10 rounded-md bg-yellow-500 dark:bg-blue-500 px-2 py-1 text-xs font-bold text-white">
-                                    PRÉ-VENDA
-                                  </div>
-                                )}                <div className="absolute top-2 right-2">
+                {type === 'filme' && (midia as any).em_prevenda && (
+                  <div className="absolute top-2 right-2 z-10 rounded-md bg-yellow-500 dark:bg-blue-500 px-2 py-1 text-xs font-bold text-white">
+                    PRÉ-VENDA
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
                   <button
                     onClick={handleMenuToggle}
                     className="bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
@@ -207,7 +199,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 </div>
               </div>
               <div className="p-3 flex flex-col h-[calc(100% - 300px)]">
-                {/* Título e Avaliação */}
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="font-bold text-base truncate pr-2 flex-grow">{midia.titulo_curado || midia.titulo_api}</h3>
                   {rating && (
@@ -217,8 +208,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </div>
                   )}
                 </div>
-
-                {/* Data de Lançamento ou Cronômetro para Anime */}
                 {type === 'anime' ? (
                   isFutureRelease ? (
                     <p className="text-xs text-gray-400 mb-2">Lançamento: {formatReleaseDate()}</p>
@@ -232,8 +221,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     Lançamento: {formatReleaseDate()}
                   </p>
                 )}
-
-                {/* Gêneros */}
                 <div className="flex flex-wrap items-center gap-1 mb-1">
                   {genres.slice(0, 2).map(genre => (
                     <span key={genre} className="bg-yellow-200 text-yellow-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-semibold truncate transition-colors">
@@ -241,8 +228,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
-
-                {/* Dub Status */}
                 {dubStatus && (
                   <div className="mt-1">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
@@ -250,11 +235,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   </div>
                 )}
-
-                {/* Spacer to push providers to the bottom */}
                 <div className="flex-grow" />
-
-                {/* Provedores/Plataformas */}
                 <div className="flex flex-col gap-1 pt-1 min-h-[32px]">
                   {(type === 'jogo' ? platforms : providers).slice(0, 2).map(p => (
                     <div key={p.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">

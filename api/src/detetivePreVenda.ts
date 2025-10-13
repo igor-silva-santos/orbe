@@ -2,7 +2,7 @@ import { prisma } from './clients';
 import { logger } from './logger';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { broadcast } from './index';
+
 
 
 
@@ -57,7 +57,7 @@ async function checkPreSaleStatus() {
           // Notificar usuários se a pré-venda foi ativada
           if (newPreSaleStatus === true) {
             // TODO: Criar notificação para usuários que favoritaram o filme
-            broadcast({ type: 'PRE_VENDA_DISPONIVEL', mediaType: 'filme', data: movie });
+            // broadcast({ type: 'PRE_VENDA_DISPONIVEL', mediaType: 'filme', data: movie });
           }
         } else {
             await prisma.filme.update({

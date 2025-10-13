@@ -8,6 +8,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { translateRole } from '@/lib/media-helpers';
 import Image from 'next/image';
 
+import PlatformIcon from '@/components/ui/PlatformIcons';
+
 interface AnimeModalContentProps {
   anime: Anime;
   openCalendarModal: (data: CalendarModalData) => void;
@@ -109,8 +111,27 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
           <p className="text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: anime.sinopse }}></p>
         </section>
       )}
-      
-      {/* Trailer */}
+
+      {/* Disponível Em */}
+      {anime.plataformas_api && anime.plataformas_api.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
+          <div className="flex flex-wrap gap-4 mt-2">
+            {anime.plataformas_api.map((platform) => (
+              <a 
+                key={platform.nome} 
+                href={platform.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <PlatformIcon platform={platform.nome} className="h-5 w-5" />
+                <span>{platform.nome}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
       {trailerKey && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Trailer</h2>

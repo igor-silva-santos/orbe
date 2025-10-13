@@ -27,6 +27,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const { toggleTheme } = useTheme();
 
   // Conexão com WebSocket para notificações em tempo real
+  /*
   useEffect(() => {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
     let ws: WebSocket;
@@ -97,6 +98,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
     };
   }, [addNotification]);
+  */
 
   // Carregamento inicial de dados do usuário
   useEffect(() => {

@@ -1,6 +1,8 @@
 import express from 'express';
 import http from 'http';
+/*
 import { WebSocketServer, WebSocket } from 'ws';
+*/
 import { prisma } from './clients';
 import { logger } from './logger';
 import bcrypt from 'bcrypt';
@@ -14,11 +16,13 @@ import syncRoutes from './syncRoutes';
 
 const app = express();
 const server = http.createServer(app);
+/*
 const wss = new WebSocketServer({ server, path: '/api/ws' });
-
+*/
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
+/*
 // Gerenciamento de conexões WebSocket
 const clients = new Set<WebSocket>();
 
@@ -47,6 +51,7 @@ export const broadcast = (message: object) => {
     }
   });
 };
+*/
 
 app.use(cors());
 app.use(express.json());
@@ -157,6 +162,15 @@ app.get('/profile', async (req, res) => {
     } catch (error) {
         res.status(401).json({ error: 'Token inválido.' });
     }
+});
+
+import { runDetetive } from './detetive';
+import cron from 'node-cron';
+
+// Agendador para o Detetive Digital (roda todo dia às 3:00)
+cron.schedule('0 3 * * *', () => {
+  logger.info('Executando o Detetive Digital agendado...');
+  runDetetive();
 });
 
 const PORT = process.env.PORT || 3001;

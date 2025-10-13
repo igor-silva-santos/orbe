@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { X, Search } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { SearchResultItem } from '@/types';
 
@@ -22,20 +23,80 @@ const SearchOverlay: React.FC = () => {
 
 
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setSearchQuery('');
     setSelectedCategory('todos');
     setSearchResults([]);
     closeSearch();
-  };
+  }, [closeSearch]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'todos' | 'filmes' | 'series' | 'animes' | 'jogos'>('todos');
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
-  const [trendingContent] = useState<SearchResultItem[]>([]);
-  const [isLoading] = useState(false);
-  const [focusedIndex] = useState(-1);
+  const [trendingContent, setTrendingContent] = useState<SearchResultItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') handleClose();
+    };
+    const handlePopState = () => {
+      handleClose();
+    };
+
+    if (isSearchOpen) {
+      document.body.style.overflow = 'hidden';
+      window.history.pushState({ modal: 'search' }, '');
+      window.addEventListener('popstate', handlePopState);
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSearchOpen, handleClose]);
+
+  // Fetch trending content on mount
+  useEffect(() => {
+    const fetchTrending = async () => {
+      if (isSearchOpen && trendingContent.length === 0) {
+        setIsLoading(true);
+        const trending = await realApi.getTrending();
+        setTrendingContent(trending);
+        setIsLoading(false);
+      }
+    };
+    fetchTrending();
+  }, [isSearchOpen]);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+    const debounceTimer = setTimeout(async () => {
+      const results = await realApi.search(searchQuery);
+      const allResults = [
+        ...results.filmes, 
+        ...results.series, 
+        ...results.animes, 
+        ...results.jogos
+      ];
+      setSearchResults(allResults);
+      setIsLoading(false);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   const displayContent = useMemo(() => {
     if (searchQuery.trim()) return searchResults;
@@ -103,7 +164,12 @@ const SearchOverlay: React.FC = () => {
           <div className="space-y-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input type="text" placeholder="Digite o nome do filme, série, anime ou jogo..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground" autoFocus />
+              <input type="text" placeholder="Digite o nome do filme, série, anime ou jogo..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-10 py-3 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground" autoFocus />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-muted-foreground hover:text-primary">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
             <div className="space-y-3">
               <h3 className="text-sm font-medium orbe-text-secondary">Categorias</h3>
@@ -120,7 +186,7 @@ const SearchOverlay: React.FC = () => {
           <div className="space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide pr-4 -mr-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold orbe-text-primary">{searchQuery.trim() ? 'Resultados da Pesquisa' : 'Em Alta'}</h3>
-              {totalResults > 0 && (<span className="text-sm text-muted-foreground">{totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}</span>)}
+              {!isLoading && totalResults > 0 && (<span className="text-sm text-muted-foreground">{totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}</span>)}
             </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
@@ -137,7 +203,7 @@ const SearchOverlay: React.FC = () => {
                 <p className="text-sm text-muted-foreground mt-2">Tente pesquisar por outro termo ou categoria</p>
               </div>
             ) : (
-              <div className="text-center py-12"><p className="text-muted-foreground">Carregando conteúdo em alta...</p></div>
+              <div className="text-center py-12"><p className="text-muted-foreground">Nenhum conteúdo em alta disponível no momento.</p></div>
             )}
           </div>
         </div>

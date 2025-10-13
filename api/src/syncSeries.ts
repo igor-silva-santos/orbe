@@ -154,6 +154,7 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient): Prom
         },
         streamingProviders: {
             create: brProviders.flatrate?.map((provider: any) => ({
+                url: brProviders.link, // Adiciona a URL da página "Onde Assistir"
                 provider: { connectOrCreate: { where: { tmdbId: provider.provider_id }, create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } } }
             }))
         }

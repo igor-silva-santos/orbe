@@ -6,8 +6,9 @@
   "scripts": {
     "vercel-build": "npx prisma generate && tsc",
     "start": "ts-node src/index.ts",
-    "build": "npx prisma generate && tsc",
+    "build": "tsc",
     "dev": "nodemon src/index.ts",
+    "prisma:generate": "npx prisma generate",
     "sync": "cross-env LOG_TO_FILE=true ts-node src/sync.ts",
     "sync:movies": "cross-env LOG_TO_FILE=true ts-node src/syncMovies.ts",
     "sync:series": "cross-env LOG_TO_FILE=true ts-node src/syncSeries.ts",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@types/node-cron": "^3.0.11",
     "@types/puppeteer": "^5.4.7",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
@@ -28,6 +30,7 @@
     "ioredis": "^5.8.0",
     "jsonwebtoken": "^9.0.2",
     "moviedb-promise": "^4.0.7",
+    "node-cron": "^4.2.1",
     "prisma": "^6.17.1",
     "puppeteer": "^24.23.1",
     "string-similarity": "^4.0.4"

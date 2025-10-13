@@ -97,9 +97,9 @@ export interface Midia {
 // Interfaces específicas por tipo de mídia
 export interface Filme extends Midia {
   homepage?: string;
-  duracao: number;
-  diretor: string;
-  escritor: string;
+  duracao: string | null;
+  diretor: string | null;
+  escritor: string | null;
   elenco: CastMember[];
   ingresso_link?: string;
   em_prevenda: boolean;
@@ -115,6 +115,11 @@ export interface Temporada {
   episodios: number;
 }
 
+export interface SerieStreamingProvider {
+  provider: StreamingProviderInfo;
+  url: string | null;
+}
+
 export interface Serie extends Midia {
   homepage?: string;
   numero_temporadas: number;
@@ -123,6 +128,7 @@ export interface Serie extends Midia {
   elenco: CastMember[];
   videos?: Video[];
   temporadas?: Temporada[];
+  streamingProviders?: SerieStreamingProvider[]; // Adicionado para consistência
 }
 
 export interface Relation {
@@ -460,7 +466,15 @@ export interface StreamingProviderInfo {
 
 export interface FilmeStreamingProvider {
 
+
+
   provider: StreamingProviderInfo;
+
+
+
+  url: string | null;
+
+
 
 }
 
