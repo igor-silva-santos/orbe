@@ -114,11 +114,27 @@ router.put('/filmes/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache para esta mídia
+    // Invalidar o cache para esta mídia e listagens relacionadas
     if (redisClient) {
-      const cacheKey = `cache:/api/filmes/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
+      try {
+        const keysToInvalidate = [
+          `cache:/api/filmes/${id}/details`,
+          'cache:/api/filmes', // Limpa a listagem geral
+          'cache:/api/trending?type=filmes', // Limpa tendências
+          'cache:/api/pesquisa' // Limpa pesquisa (opcional, mas recomendado)
+        ];
+        
+        for (const key of keysToInvalidate) {
+          // Usamos um padrão para limpar chaves que podem ter query params
+          const keys = await redisClient.keys(`${key}*`);
+          if (keys.length > 0) {
+            await redisClient.del(...keys);
+            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
+          }
+        }
+      } catch (cacheErr) {
+        logger.error(`Erro ao invalidar cache de filme: ${cacheErr}`);
+      }
     }
     res.json(mapFilmeToMidia(updatedFilme));
   } catch (error) {
@@ -600,9 +616,23 @@ router.put('/animes/:id', adminMiddleware, async (req, res) => {
 
     // Invalidar o cache
     if (redisClient) {
-      const cacheKey = `cache:/api/animes/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
+      try {
+        const keysToInvalidate = [
+          `cache:/api/animes/${id}/details`,
+          'cache:/api/animes',
+          'cache:/api/trending?type=animes',
+          'cache:/api/pesquisa'
+        ];
+        for (const key of keysToInvalidate) {
+          const keys = await redisClient.keys(`${key}*`);
+          if (keys.length > 0) {
+            await redisClient.del(...keys);
+            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
+          }
+        }
+      } catch (cacheErr) {
+        logger.error(`Erro ao invalidar cache de anime: ${cacheErr}`);
+      }
     }
 
     res.json(mapAnimeToMidia(updatedAnime));
@@ -955,6 +985,39 @@ router.get('/pesquisa', async (req, res) => {
   } catch (error) {
     logger.error(`Erro ao realizar pesquisa: ${error}`);
     res.status(500).json({ error: 'Erro interno ao realizar pesquisa.' });
+  }
+});
+
+// Rota para Filtros de Premiações
+router.get('/premios/filtros', async (req, res) => {
+  try {
+    // Busca nomes e anos únicos dos campos JSON de todas as tabelas de mídia
+    const query = `
+      SELECT DISTINCT 
+        award->>'nome' as nome,
+        (award->>'ano')::int as ano
+      FROM (
+        SELECT jsonb_array_elements(CASE WHEN jsonb_typeof(premiacoes) = 'array' THEN premiacoes ELSE '[]'::jsonb END) as award FROM "Filme"
+        UNION ALL
+        SELECT jsonb_array_elements(CASE WHEN jsonb_typeof(premiacoes) = 'array' THEN premiacoes ELSE '[]'::jsonb END) as award FROM "Serie"
+        UNION ALL
+        SELECT jsonb_array_elements(CASE WHEN jsonb_typeof(premiacoes) = 'array' THEN premiacoes ELSE '[]'::jsonb END) as award FROM "Anime"
+        UNION ALL
+        SELECT jsonb_array_elements(CASE WHEN jsonb_typeof(premiacoes) = 'array' THEN premiacoes ELSE '[]'::jsonb END) as award FROM "Jogo"
+      ) sub
+      WHERE award->>'nome' IS NOT NULL
+      ORDER BY ano DESC, nome ASC
+    `;
+
+    const results: any[] = await prisma.$queryRawUnsafe(query);
+    
+    const names = [...new Set(results.map(r => r.nome))].sort();
+    const years = [...new Set(results.map(r => r.ano))].sort((a, b) => b - a);
+
+    res.json({ names, years });
+  } catch (error) {
+    logger.error(`Erro ao buscar filtros de premiações: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar filtros de premiações.' });
   }
 });
 

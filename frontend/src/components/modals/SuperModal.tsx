@@ -109,8 +109,69 @@ const SuperModal: React.FC = () => {
     setUserInteraction((prev) => ({ ...prev, [action]: !prev[action] }));
   };
 
-  const handleCalendarAction = (eventType: 'release' | 'ticket', details?: unknown) => {
-    console.log(`Adicionar ao calendário: ${eventType}`, details);
+  const handleCalendarAction = (eventType: 'release' | 'ticket', eventDetails?: any) => {
+    if (!details || !midia) return;
+
+    const eventsToAdd: any[] = [];
+    const baseDate = (details as any).releaseDate || (details as any).firstAirDate || (details as any).startDate;
+
+    if (!baseDate && eventType === 'release') {
+      console.warn('Mídia sem data de lançamento base.');
+      closeCalendarModal();
+      return;
+    }
+
+    if (eventType === 'release') {
+      if (eventDetails?.recurring && (type === 'anime' || type === 'serie')) {
+        // Lógica de Recorrência (Episódios Semanais)
+        const totalEpisodes = (details as any).episodes || (details as any).numberOfEpisodes || 12;
+        const startDate = new Date(baseDate);
+
+        for (let i = 0; i < totalEpisodes; i++) {
+          const episodeDate = new Date(startDate);
+          episodeDate.setDate(startDate.getDate() + (i * 7));
+          
+          const titleText = (details as any).title || (details as any).titleRomaji || (details as any).titulo_api || 'Episódio';
+
+          eventsToAdd.push({
+            title: `${titleText} - Ep ${i + 1}`,
+            date: episodeDate.toISOString().split('T')[0],
+            type: 'episode',
+            midiaId: midia.id,
+            mediaType: type
+          });
+        }
+      } else {
+        // Evento Único de Estreia
+        const titleText = (details as any).title || (details as any).titleRomaji || (details as any).titulo_api || 'Estreia';
+        eventsToAdd.push({
+          title: `Estreia: ${titleText}`,
+          date: new Date(baseDate).toISOString().split('T')[0],
+          type: 'release',
+          midiaId: midia.id,
+          mediaType: type
+        });
+      }
+    } else if (eventType === 'ticket') {
+      // Evento de Cinema
+      const titleText = (details as any).title || (details as any).titulo_api || 'Filme';
+      eventsToAdd.push({
+        title: `Cinema: ${titleText}`,
+        date: eventDetails.date,
+        time: eventDetails.time,
+        location: eventDetails.location,
+        type: 'cinema',
+        midiaId: midia.id,
+        mediaType: type
+      });
+    }
+
+    // TODO: Persistir no banco de dados via API
+    console.log('Eventos a serem adicionados:', eventsToAdd);
+    
+    // Feedback visual (pode ser um toast no futuro)
+    alert(`${eventsToAdd.length} evento(s) adicionado(s) ao seu calendário local.`);
+    
     closeCalendarModal();
   };
 
@@ -183,7 +244,7 @@ const SuperModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto" onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors">
+        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative">
           <>
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               {user?.role === 'admin' && (

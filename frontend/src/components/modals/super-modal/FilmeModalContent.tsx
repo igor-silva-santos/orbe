@@ -1,12 +1,16 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { FilmeDetalhes, CalendarModalData } from '@/types';
 import FilmeInfoBlock from './FilmeInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import orbeNerdApi from '@/lib/api';
+import { User, Send, MessageSquare } from 'lucide-react';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -14,6 +18,40 @@ interface FilmeModalContentProps {
 }
 
 const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalendarModal }) => {
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadComments = async () => {
+      try {
+        const data = await orbeNerdApi.getComments('filme', filme.tmdbId);
+        setComments(data);
+      } catch (error) {
+        console.error('Erro ao carregar comentários:', error);
+      }
+    };
+    if (filme) loadComments();
+  }, [filme]);
+
+  const handleSendComment = async () => {
+    if (!newComment.trim()) return;
+    setIsSubmitting(true);
+    try {
+      const comment = await orbeNerdApi.createComment({
+        midia_id: filme.tmdbId,
+        tipo_midia: 'filme',
+        texto: newComment
+      });
+      setComments([comment, ...comments]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Erro ao enviar comentário:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!filme) {
     return <div>Carregando...</div>;
   }
@@ -154,6 +192,68 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
           </TooltipProvider>
         </section>
       )}
+
+      {/* Seção de Comentários */}
+      <section className="pt-8 border-t border-muted">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-yellow-500 dark:text-blue-400">
+          <MessageSquare className="h-5 w-5" />
+          Comentários ({comments.length})
+        </h2>
+
+        {/* Formulário de Novo Comentário */}
+        <div className="bg-muted/30 p-4 rounded-xl mb-8 space-y-3">
+          <Textarea 
+            placeholder="O que você achou desta obra? Compartilhe sua opinião..."
+            className="bg-background border-muted-foreground/20 resize-none min-h-[100px]"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <div className="flex justify-end">
+            <Button 
+              disabled={isSubmitting || !newComment.trim()} 
+              onClick={handleSendComment}
+              className="gap-2"
+            >
+              {isSubmitting ? 'Enviando...' : 'Comentar'}
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Lista de Comentários */}
+        <div className="space-y-6">
+          {comments.length > 0 ? (
+            comments.map((comment) => (
+              <div key={comment.id} className="flex gap-4 p-4 bg-muted/20 rounded-xl border border-muted/50">
+                <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0 overflow-hidden border border-muted-foreground/10">
+                  {comment.usuario.avatar ? (
+                    <Image src={comment.usuario.avatar} alt={comment.usuario.nome} width={40} height={40} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-foreground">{comment.usuario.nome || 'Usuário Orbe'}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(comment.data_criacao).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {comment.texto}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground italic">
+              Seja o primeiro a comentar sobre este filme!
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };

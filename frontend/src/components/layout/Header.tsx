@@ -74,13 +74,13 @@ const Header: React.FC<HeaderProps> = ({
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo e Navegação Principal */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-6">
             <Link 
               href="/" 
               className="flex items-center space-x-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="text-2xl font-bold orbe-gradient">
+              <span className="text-xl md:text-2xl font-bold orbe-gradient whitespace-nowrap">
                 Orbe Nerd
               </span>
             </Link>

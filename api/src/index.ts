@@ -1,8 +1,6 @@
 import express from 'express';
 import http from 'http';
-/*
 import { WebSocketServer, WebSocket } from 'ws';
-*/
 import { prisma } from './clients';
 import { logger } from './logger';
 import bcrypt from 'bcrypt';
@@ -13,16 +11,16 @@ import mediaRoutes from './mediaRoutes';
 import webhookRoutes from './webhookRoutes';
 import userRoutes from './userRoutes';
 import syncRoutes from './syncRoutes';
+import watchlistRoutes from './watchlistRoutes';
+import profileRoutes from './profileRoutes';
+import commentRoutes from './commentRoutes';
 
 const app = express();
 const server = http.createServer(app);
-/*
 const wss = new WebSocketServer({ server, path: '/api/ws' });
-*/
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
-/*
 // Gerenciamento de conexões WebSocket
 const clients = new Set<WebSocket>();
 
@@ -44,14 +42,13 @@ wss.on('connection', (ws) => {
 // Função para enviar mensagem para todos os clientes conectados
 export const broadcast = (message: object) => {
   const messageString = JSON.stringify(message);
-  logger.info(`Enviando broadcast para ${clients.size} clientes: ${messageString}`);
+  logger.info(`Enviando broadcast para ${clients.size} clientes`);
   clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(messageString);
     }
   });
 };
-*/
 
 app.use(cors());
 app.use(express.json());
@@ -61,6 +58,9 @@ app.use('/api', mediaRoutes);
 app.use('/api', webhookRoutes);
 app.use('/api', userRoutes);
 app.use('/api', syncRoutes);
+app.use('/api', watchlistRoutes);
+app.use('/api/users', profileRoutes);
+app.use('/api', commentRoutes);
 
 // Rota de Registro
 app.post('/register', async (req, res) => {

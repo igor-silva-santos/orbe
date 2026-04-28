@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award, Calendar } from 'lucide-react';
-import { realApi } from '@/data/realApi';
+import orbeNerdApi from '@/lib/api';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Filme, Serie, Anime, Jogo } from '@/types';
 
@@ -16,15 +16,27 @@ export default function PremiosPage() {
   const [selectedAwardName, setSelectedAwardName] = useState<string>('todos');
   const [selectedYear, setSelectedYear] = useState<string>('todos');
 
-  // TODO: Buscar nomes de prêmios e anos disponíveis da API
-  const availableAwardNames = ['todos', 'Oscar', 'Globo de Ouro', 'The Game Awards'];
-  const availableYears = ['todos', 2024, 2023, 2022];
+  const [availableAwards, setAvailableAwards] = useState<string[]>([]);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+
+  useEffect(() => {
+    const loadFilters = async () => {
+      try {
+        const filters = await orbeNerdApi.getAwardFilters();
+        setAvailableAwards(filters.names);
+        setAvailableYears(filters.years);
+      } catch (error) {
+        console.error('Erro ao carregar filtros de prêmios:', error);
+      }
+    };
+    loadFilters();
+  }, []);
 
   useEffect(() => {
     const loadAwards = async () => {
       setIsLoading(true);
       try {
-        const response = await realApi.getAwards({
+        const response = await orbeNerdApi.getAwards({
           awardName: selectedAwardName === 'todos' ? undefined : selectedAwardName,
           year: selectedYear === 'todos' ? undefined : parseInt(selectedYear),
         });
@@ -53,7 +65,7 @@ export default function PremiosPage() {
             <Award className="h-4 w-4 text-muted-foreground" />
             <select value={selectedAwardName} onChange={(e) => setSelectedAwardName(e.target.value)} className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="todos">Todos os Prêmios</option>
-              {availableAwardNames.map(name => (
+              {availableAwards.map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
@@ -64,7 +76,7 @@ export default function PremiosPage() {
             <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="todos">Todos os Anos</option>
               {availableYears.map(year => (
-                <option key={year} value={year}>{year}</option>
+                <option key={year} value={year.toString()}>{year}</option>
               ))}
             </select>
           </div>

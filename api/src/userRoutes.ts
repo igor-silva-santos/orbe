@@ -55,7 +55,7 @@ router.post('/me/interactions', authMiddleware, async (req: AuthRequest, res: Re
         return res.status(403).json({ error: 'Usuário não autenticado.' });
     }
 
-    const { midia_id, tipo_midia, status } = req.body;
+    const { midia_id, tipo_midia, status, avaliacao, comentario } = req.body;
 
     if (!midia_id || !tipo_midia || !status) {
         return res.status(400).json({ error: 'Dados da interação incompletos.' });
@@ -70,12 +70,18 @@ router.post('/me/interactions', authMiddleware, async (req: AuthRequest, res: Re
                     tipo_midia: tipo_midia,
                 }
             },
-            update: { status },
+            update: { 
+                status,
+                avaliacao: avaliacao || undefined,
+                comentario: comentario || undefined
+            },
             create: { 
                 usuario_id: userId,
                 midia_id: midia_id,
                 tipo_midia: tipo_midia,
                 status: status,
+                avaliacao: avaliacao || null,
+                comentario: comentario || null
             },
         });
         res.status(201).json(interaction);

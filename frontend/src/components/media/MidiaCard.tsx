@@ -86,6 +86,17 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
   const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
+  // Lógica para detectar novo episódio (lançado nas últimas 24h)
+  const isNewEpisode = (() => {
+    if (!isAnime || !midia.data_lancamento_api) return false;
+    const releaseDate = new Date(midia.data_lancamento_api);
+    const now = new Date();
+    const diffInMs = now.getTime() - releaseDate.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+    // Se o anime já estreou e o lançamento foi há menos de 24h
+    return diffInHours > 0 && diffInHours <= 24;
+  })();
+
   const animeReleaseDate = isAnime ? new Date((midia as Anime).data_lancamento_api) : null;
   const isFutureRelease = animeReleaseDate ? animeReleaseDate > new Date() : false;
   const hasNextEpisode = !!nextAiringEpisode;

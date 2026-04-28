@@ -8,6 +8,7 @@ import SearchOverlay from "@/components/modals/SearchOverlay";
 import SuperModal from "@/components/modals/SuperModal";
 import NotificationModal from "@/components/modals/NotificationModal";
 import RatingModal from "@/components/modals/RatingModalWrapper";
+import { ClientOnly } from "@/components/layout/ClientOnly";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,15 +66,17 @@ export default function RootLayout({
       >
         <AppProvider>
           <div className="min-h-screen bg-background text-foreground transition-colors duration-500">
-            <Header />
-            <main className="pt-16 min-h-screen">
-              {children}
-            </main>
-            <Footer />
-            <SearchOverlay />
-            <SuperModal />
-            <NotificationModal />
-            <RatingModal />
+            <ClientOnly>
+              <Header />
+              <main className="pt-16 min-h-screen">
+                {children}
+              </main>
+              <Footer />
+              <SearchOverlay />
+              <SuperModal />
+              <NotificationModal />
+              <RatingModal />
+            </ClientOnly>
           </div>
         </AppProvider>
       </body>

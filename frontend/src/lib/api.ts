@@ -58,6 +58,14 @@ export const apiClient = {
       headers,
     });
 
+    if (response.status === 401) {
+      removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?error=session_expired';
+      }
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
+    }
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -80,6 +88,14 @@ export const apiClient = {
       headers,
       body: JSON.stringify(data),
     });
+
+    if (response.status === 401) {
+      removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?error=session_expired';
+      }
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -212,6 +228,10 @@ export const orbeNerdApi = {
     return apiClient.get('/premios', params);
   },
 
+  getAwardFilters: async () => {
+    return apiClient.get('/premios/filtros');
+  },
+
   // Pesquisa
   search: async (query: string, category?: string, page?: number) => {
     return apiClient.get('/pesquisa', { q: query, category, page });
@@ -233,6 +253,24 @@ export const orbeNerdApi = {
 
   getCurrentUser: async () => {
     return apiClient.get('/auth/me');
+  },
+
+  // Perfil e Configurações
+  getUserProfile: async () => {
+    return apiClient.get('/users/me');
+  },
+
+  updateUserProfile: async (data: { nome?: string; bio?: string; avatar?: string; preferencias?: any; perfil_publico?: boolean }) => {
+    return apiClient.get('/users/me');
+  },
+
+  // Comentários
+  getComments: async (tipo: string, id: number) => {
+    return apiClient.get(`/comments/${tipo}/${id}`);
+  },
+
+  createComment: async (data: { midia_id: number; tipo_midia: string; texto: string; spoiler?: boolean }) => {
+    return apiClient.post('/comments', data);
   },
 
   // Interações do Usuário

@@ -772,13 +772,56 @@ model User {
   id              Int                          @id @default(autoincrement())
   email           String                       @unique
   hashed_password String
+  nome            String?
+  bio             String?                      @db.Text
+  avatar          String?                      // URL ou caminho da imagem
+  preferencias    Json?                        // Armazena temas, notificações, etc.
+  perfil_publico  Boolean                      @default(true)
   role            String                       @default("user")
   quer_avaliar    Boolean                      @default(true)
   data_criacao    DateTime                     @default(now())
 
   // Relacionamento com as preferências do usuário
-  preferencias    preferencias_usuario_midia[]
+  interacoes      preferencias_usuario_midia[]
   notifications   Notification[]
+  watchlistItems  WatchlistItem[]
+  comments        Comment[]
+}
+
+model Comment {
+  id             Int      @id @default(autoincrement())
+  usuario_id     Int
+  usuario        User     @relation(fields: [usuario_id], references: [id])
+  midia_id       Int      // ID da API externa
+  tipo_midia     String   // 'filme', 'serie', 'anime', 'jogo'
+  texto          String   @db.Text
+  spoiler        Boolean  @default(false)
+  data_criacao   DateTime @default(now())
+  data_atualizacao DateTime @updatedAt
+
+  @@index([midia_id, tipo_midia])
+}
+
+model WatchlistItem {
+  id          String   @id // UID vindo do frontend
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  malId       Int?
+  tmdbId      Int?
+  title       String?
+  ep          Int?
+  season      Int?
+  dub         Int?     @default(0) // 0: No, 1: Yes
+  st          String   // Status (continuar, comecar, etc.)
+  lists       String[] // Tags/Listas
+  note        String?
+  badge       String?
+  badgeLabel  String?
+  updatedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  isRemoved   Boolean  @default(false)
+
+  @@unique([userId, id])
 }
 
 model Notification {
@@ -800,6 +843,7 @@ model preferencias_usuario_midia {
   tipo_midia     String   // 'filme', 'serie', 'anime', 'jogo'
   status         String   // 'favorito', 'quero_assistir', 'acompanhando', 'assistido', 'oculto'
   avaliacao      String?  // 'gostei', 'amei', 'nao_gostei'
+  comentario     String?  @db.Text
   data_interacao DateTime @default(now())
 
   // Relacionamento com o usuário

@@ -7,6 +7,7 @@ import { tmdb, tmdbApi } from './clients';
 import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
+import { broadcast } from './index';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -241,6 +242,8 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
     let monthlyIds = await fetchMovieIdsForPeriod(startStr, endStr);
     
     if (monthlyIds.length > 0) {
+        broadcast({ type: 'SYNC_START', mediaType: 'movies', total: monthlyIds.length, period: `${startStr} - ${endStr}` });
+        
         if (limit) {
             monthlyIds = monthlyIds.slice(0, limit);
             logger.info(`Limitando a sincronização deste mês a ${limit} itens.`);
@@ -251,6 +254,13 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote de filmes do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
             await processMovieBatch(batch, prisma);
+            
+            broadcast({ 
+                type: 'SYNC_PROGRESS', 
+                mediaType: 'movies', 
+                current: Math.min(i + batchSize, monthlyIds.length), 
+                total: monthlyIds.length 
+            });
         }
     }
 

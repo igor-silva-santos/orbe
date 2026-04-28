@@ -13,7 +13,11 @@ const fetchInitialMediaData = async (mediaType: 'filmes' | 'series' | 'jogos') =
     throw new Error(`Failed to fetch initial data for ${mediaType}`);
   }
   const data = await response.json();
-  return data.sort((a: Midia, b: Midia) => new Date(a.data_lancamento_api).getTime() - new Date(b.data_lancamento_api).getTime());
+  return data.sort((a: Midia, b: Midia) => {
+    const dateA = a.data_lancamento_api ? new Date(a.data_lancamento_api).getTime() : 0;
+    const dateB = b.data_lancamento_api ? new Date(b.data_lancamento_api).getTime() : 0;
+    return dateA - dateB;
+  });
 };
 
 const fetchInitialAnimeData = async () => {
@@ -38,7 +42,13 @@ const calculateStartIndex = (data: Midia[]) => {
     if (!data || data.length === 0) return 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const index = data.findIndex(item => new Date(item.data_lancamento_api) >= today);
+    
+    const index = data.findIndex(item => {
+      if (!item.data_lancamento_api) return false;
+      const releaseDate = new Date(item.data_lancamento_api);
+      return !isNaN(releaseDate.getTime()) && releaseDate >= today;
+    });
+    
     return index > -1 ? index : data.length - 1;
 }
 

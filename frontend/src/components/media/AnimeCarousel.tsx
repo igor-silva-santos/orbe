@@ -110,11 +110,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     
     if (season === currentSeason && year === currentYear) {
         const { startDate } = getSeasonDateRange(year, season);
-        const fourWeeksInMs = 4 * 7 * 24 * 60 * 60 * 1000;
-        const seasonStartPlusFourWeeks = startDate.getTime() + fourWeeksInMs;
-        setViewMode(today.getTime() > seasonStartPlusFourWeeks ? 'weekly' : 'launch');
+        const diffInMs = today.getTime() - startDate.getTime();
+        const diffInWeeks = Math.ceil(diffInMs / (7 * 24 * 60 * 60 * 1000));
+        
+        // Se estivermos na semana 4 ou mais, priorizamos a Agenda Semanal
+        if (diffInWeeks >= 4) {
+          setViewMode('weekly');
+          setCurrentTitle(`Agenda: Semana ${diffInWeeks} de ${SEASON_NAMES[season]}`);
+        } else {
+          setViewMode('launch');
+          setCurrentTitle(`Estreias de ${SEASON_NAMES[season]} ${year}`);
+        }
     } else {
         setViewMode('launch');
+        setCurrentTitle(`Temporada de ${SEASON_NAMES[currentSeason]} ${currentYear}`);
     }
   }, [currentSeason, currentYear]);
 
@@ -349,16 +358,16 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex -ml-6">
+      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef}>
+        <div className="flex -ml-4 md:-ml-6">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
-                <div key={`skeleton-${index}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-6">
+                <div key={`skeleton-${index}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   <MidiaCardSkeleton />
                 </div>
               ))
             : carouselItems.map((item) => (
-                <div key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-6">
+                <div key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   {item.type === 'separator' 
                     ? <DaySeparatorCard dayName={item.dayName} /> 
                     : <MidiaCard midia={item.data} type="anime" />}
