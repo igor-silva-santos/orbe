@@ -92,3 +92,5 @@ frontend/BACKEND_INTEGRATION.md
 frontend/IMPLEMENTACAO_ICONES.md
 frontend/INTEGRACAO_BACKEND.md
 api/TMDB_API_ANALYSIS.md
+.vercel
+.env*
