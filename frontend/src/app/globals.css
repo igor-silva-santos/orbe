@@ -5,88 +5,97 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Tema Claro - Branco/Dourado */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Tema Claro — Pulp Gráfico (design-preview/orbe-redesign-05-pulp-dual-theme.html) */
+  --card: #FFFFFF;
+  --card-foreground: #17151F;
+  --popover: #FFFFFF;
+  --popover-foreground: #17151F;
+  --primary: #E8482B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F3EFE6;
+  --secondary-foreground: #17151F;
+  --muted: #EDE8DC;
+  --muted-foreground: #6B6577;
+  --accent: #EDE8DC;
+  --accent-foreground: #17151F;
+  --destructive: #DC2626;
   --destructive-foreground: #ffffff;
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #17151F;
+  --input: #D6D0C2;
+  --ring: #E8482B;
   --radius: 0.625rem;
 
-  /* Orbe Nerd Custom Colors - Light Theme (Branco/Dourado) */
-  --orbe-gradient-start: #b8860b;
-  --orbe-gradient-end: #ffd700;
-  --orbe-text-primary: #000000;
-  --orbe-text-secondary: #b8860b;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Orbe Nerd — marca pulp (laranja/vermelho + sombra dura) */
+  --orbe-gradient-start: #E8482B;
+  --orbe-gradient-end: #B4650B;
+  --orbe-text-primary: #17151F;
+  --orbe-text-secondary: #E8482B;
+  --orbe-accent: #E8482B;
+  --orbe-accent-2: #B4650B;
+  --orbe-block-border: #17151F;
+  --orbe-block-shadow: #17151F;
+  --background: #F3EFE6;
+  --foreground: #17151F;
+  --dot-color: rgba(23, 21, 31, 0.06);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #17151F;
+  --sidebar-primary: #E8482B;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EDE8DC;
+  --sidebar-accent-foreground: #17151F;
+  --sidebar-border: #D6D0C2;
+  --sidebar-ring: #E8482B;
 }
 
 .dark {
-  /* Tema Escuro - Preto/Azul com acentos coloridos */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Tema Escuro — Pulp Gráfico */
+  --background: #0B0B10;
+  --foreground: #F5F1E8;
+  --card: #131318;
+  --card-foreground: #F5F1E8;
+  --popover: #131318;
+  --popover-foreground: #F5F1E8;
+  --primary: #FF5A36;
+  --primary-foreground: #0B0B10;
+  --secondary: #1A1A22;
+  --secondary-foreground: #F5F1E8;
+  --muted: #1A1A22;
+  --muted-foreground: #9C97A6;
+  --accent: #1A1A22;
+  --accent-foreground: #F5F1E8;
+  --destructive: #EF4444;
   --destructive-foreground: #ffffff;
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: #F5F1E8;
+  --input: rgba(245, 241, 232, 0.15);
+  --ring: #FF5A36;
 
-  /* Orbe Nerd Custom Colors - Dark Theme (Preto/Azul) */
-  --orbe-gradient-start: #4f46e5;
-  --orbe-gradient-end: #0066ff;
-  --orbe-text-primary: #ffffff;
-  --orbe-text-secondary: #4f46e5;
+  --orbe-gradient-start: #FF5A36;
+  --orbe-gradient-end: #FFC145;
+  --orbe-text-primary: #F5F1E8;
+  --orbe-text-secondary: #FF5A36;
+  --orbe-accent: #FF5A36;
+  --orbe-accent-2: #FFC145;
+  --orbe-block-border: #F5F1E8;
+  --orbe-block-shadow: #F5F1E8;
+  --dot-color: rgba(245, 241, 232, 0.06);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #131318;
+  --sidebar-foreground: #F5F1E8;
+  --sidebar-primary: #FF5A36;
+  --sidebar-primary-foreground: #0B0B10;
+  --sidebar-accent: #1A1A22;
+  --sidebar-accent-foreground: #F5F1E8;
+  --sidebar-border: rgba(245, 241, 232, 0.12);
+  --sidebar-ring: #FF5A36;
 }
 
 @theme inline {
@@ -109,8 +118,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -137,9 +147,10 @@
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+  background-image: radial-gradient(var(--dot-color) 1.4px, transparent 1.4px);
+  background-size: 18px 18px;
 }
 
-/* Utilitários personalizados */
 .orbe-gradient {
   background: linear-gradient(135deg, var(--orbe-gradient-start), var(--orbe-gradient-end));
   -webkit-background-clip: text;
@@ -161,6 +172,41 @@ body {
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* ===== Identidade "Pulp Gráfico" — blocos com sombra dura ===== */
+.font-display {
+  font-family: var(--font-display), 'Russo One', sans-serif;
+}
+
+.orbe-block {
+  border: 2.5px solid var(--orbe-block-border);
+  box-shadow: 5px 5px 0 var(--orbe-block-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.orbe-block-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--orbe-block-shadow);
+}
+
+.orbe-block-sm {
+  border: 2.5px solid var(--orbe-block-border);
+  box-shadow: 3px 3px 0 var(--orbe-block-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.orbe-block-sm-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--orbe-block-shadow);
+  background: var(--orbe-accent);
+  border-color: var(--orbe-accent);
+  color: var(--background);
+}
+
+.orbe-pill-active {
+  background: var(--orbe-block-border);
+  color: var(--background);
+}
+
 .hover-scale {
   transition: transform 0.2s ease-in-out;
 }
@@ -178,14 +224,12 @@ body {
   display: none;
 }
 
-/* Header fixo (sticky) */
 .header-sticky {
   position: sticky;
   top: 0;
   z-index: 50;
 }
 
-/* Animações personalizadas */
 @keyframes countdown-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -195,7 +239,6 @@ body {
   animation: countdown-pulse 2s infinite;
 }
 
-/* Overlay de pesquisa */
 .search-overlay {
   position: fixed;
   inset: 0;
@@ -205,7 +248,6 @@ body {
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Layout de pesquisa - barra à esquerda, cards à direita */
 .search-layout {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -223,35 +265,19 @@ body {
   }
 }
 
-/* Header Fixo */
 .header-fixed {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 40;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid hsl(var(--border));
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 3px solid var(--orbe-block-border);
   transition: background-color 0.3s ease;
 }
 
-.dark .header-fixed {
-  background: rgba(0, 0, 0, 0.95);
-}
-
-/* Scrollbar personalizada */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Scrollbar customizada para carrossel */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: #9ca3af #e5e7eb;
@@ -276,7 +302,6 @@ body {
   background: #6b7280;
 }
 
-/* Scrollbar para tema escuro */
 .dark .scrollbar-thin {
   scrollbar-color: #4b5563 #374151;
 }
@@ -293,12 +318,10 @@ body {
   background: #6b7280;
 }
 
-/* Animações suaves */
 .transition-smooth {
   transition: all 0.3s ease-in-out;
 }
 
-/* Melhorias de fluidez para carrossel */
 .carousel-smooth {
   -webkit-overflow-scrolling: touch;
   will-change: scroll-position;
@@ -308,7 +331,6 @@ body {
   display: none;
 }
 
-/* Otimizações de performance para drag */
 .carousel-dragging {
   cursor: grabbing !important;
   user-select: none;
@@ -321,7 +343,6 @@ body {
   pointer-events: none;
 }
 
-/* Hover effects para cards */
 .card-hover {
   transition: transform 0.2s ease-in-out;
 }
@@ -331,7 +352,6 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Estados de loading */
 .loading-spinner {
   animation: spin 1s linear infinite;
   border: 2px solid hsl(var(--primary));
@@ -344,7 +364,6 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Melhorias de acessibilidade */
 .focus-visible {
   outline: none;
 }
@@ -354,7 +373,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Animações de entrada */
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -402,4 +420,3 @@ body {
 .blocked-poster:hover {
   filter: blur(0);
 }
-

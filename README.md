@@ -1,59 +1,58 @@
-<div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=1a2540&height=160&section=header&text=Orbe&fontSize=60&fontColor=a8b8d0&fontAlignY=45" />
-</div>
+# Orbe Nerd
 
-<div align="center">
+Hub de descoberta e acompanhamento de filmes, séries, animes e jogos.
 
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel)](https://orbe-seven.vercel.app)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+**Demo:** https://orbe-seven.vercel.app  
+**UI:** direção visual [Pulp Gráfico](DESIGN.md) (`design-preview/orbe-redesign-05-pulp-dual-theme.html`)
 
-**Plataforma web moderna desenvolvida com Next.js e TypeScript.**
-
-[▶ Ver Demo ao Vivo](https://orbe-seven.vercel.app)
-
-</div>
-
----
-
-## ✨ Destaques
-
-- ⚡ **Performance** otimizada com Next.js SSR/SSG
-- 🎨 **Design moderno** e interfaces fluídas
-- 📱 **Totalmente responsivo**
-- 🔒 **TypeScript** — código tipado e seguro
-- 🚀 **Deploy automático** via Vercel
-
-## 🛠️ Stack Técnica
+## Stack
 
 | Camada | Tecnologia |
-|--------|-----------|
-| Framework | Next.js 14 |
-| Linguagem | TypeScript |
-| Estilização | Tailwind CSS |
-| Deploy | Vercel |
+|--------|------------|
+| Frontend | Next.js 14, Tailwind CSS |
+| Backend | Flask (Python) |
+| Banco | PostgreSQL (Prisma no sync) |
+| APIs | TMDB, Anilist, IGDB |
+| Auth | JWT |
 
-## 🚀 Rodando Localmente
+## Funcionalidades
+
+- Catálogo por categoria com carrosséis de lançamentos
+- Busca global com filtros
+- Detalhe de mídia (modal), watchlist e interações do usuário
+- Tema claro/escuro
+- Sync de conteúdo a partir das APIs externas
+
+## Como rodar
+
+### Backend
 
 ```bash
-# Clone o repositório
-git clone https://github.com/igor-silva-santos/orbe.git
+cd backend
+python -m venv venv
+# Windows: .\venv\Scripts\activate
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
 
-# Instale as dependências
-cd orbe
+### Frontend
+
+```bash
+cd frontend
 npm install
-
-# Rode em desenvolvimento
 npm run dev
 ```
 
-Acesse `http://localhost:3000`
+Build de produção do frontend: `npm run build`.
 
----
+## Design
 
-<div align="center">
+A direção visual ativa está documentada em [`DESIGN.md`](DESIGN.md). Os protótipos HTML ficam em `design-preview/`.
 
-Desenvolvido por **[Igor Santos](https://github.com/igor-silva-santos)** · Full Stack Developer
+## Roadmap
 
-</div>
+- [ ] Deploy de produção estável (Vercel + backend)
+- [ ] Watchlist sincronizada
+- [ ] Notificações em tempo real
+- [ ] PWA
