@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, Russo_One } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/components/providers/AppProvider";
 import Header from "@/components/layout/Header";
@@ -10,9 +10,16 @@ import NotificationModal from "@/components/modals/NotificationModal";
 import RatingModal from "@/components/modals/RatingModalWrapper";
 import { ClientOnly } from "@/components/layout/ClientOnly";
 
-const inter = Inter({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
+});
+
+const russoOne = Russo_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -62,7 +69,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased`}
+        className={`${bricolage.variable} ${russoOne.variable} font-sans antialiased`}
       >
         <AppProvider>
           <div className="min-h-screen bg-background text-foreground transition-colors duration-500">

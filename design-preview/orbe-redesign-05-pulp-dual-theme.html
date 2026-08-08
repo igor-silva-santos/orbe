@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbe Nerd — Estilo 5: Pulp Gráfico (claro/escuro real)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --radius:10px;
+    --font-body:'Bricolage Grotesque',system-ui,sans-serif;
+    --font-display:'Russo One',sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg:#0B0B10;
+    --bg-elevated:#131318;
+    --fg:#F5F1E8;
+    --muted-fg:#9C97A6;
+    --border:#F5F1E8;
+    --accent:#FF5A36;
+    --accent2:#FFC145;
+    --shadow-color:var(--accent);
+    --dot-color:rgba(245,241,232,0.06);
+  }
+  html[data-theme="light"]{
+    --bg:#F3EFE6;
+    --bg-elevated:#FFFFFF;
+    --fg:#17151F;
+    --muted-fg:#6B6577;
+    --border:#17151F;
+    --accent:#E8482B;
+    --accent2:#B4650B;
+    --shadow-color:var(--fg);
+    --dot-color:rgba(23,21,31,0.06);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    transition:background-color .3s ease, color .3s ease;
+    background-image:radial-gradient(var(--dot-color) 1.4px, transparent 1.4px);
+    background-size:18px 18px;
+  }
+  a{color:inherit; text-decoration:none;}
+  .container{max-width:1400px; margin:0 auto; padding:0 32px;}
+  @media(max-width:768px){.container{padding:0 18px;}}
+
+  header{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); border-bottom:3px solid var(--border);}
+  .header-inner{display:flex; align-items:center; justify-content:space-between; height:78px;}
+  .logo{font-family:var(--font-display); font-size:21px; display:flex; align-items:center; gap:12px; letter-spacing:0.5px;}
+  .logo-seal{width:34px; height:34px; border-radius:50%; border:3px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:13px; background:var(--accent); color:var(--bg-elevated);}
+  nav{display:flex; gap:6px; font-size:13.5px; font-weight:600;}
+  nav a{padding:9px 16px; border:2px solid transparent; border-radius:100px; transition:.2s;}
+  nav a:hover{border-color:var(--border);}
+  nav a.active{background:var(--fg); color:var(--bg);}
+  .header-actions{display:flex; gap:12px; align-items:center;}
+  .icon-btn{width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border:2.5px solid var(--border); cursor:pointer; transition:.15s; font-size:16px;}
+  .icon-btn:hover{background:var(--accent); border-color:var(--accent); color:var(--bg-elevated);}
+  #theme-toggle{font-size:15px;}
+  @media(max-width:940px){nav{display:none;}}
+
+  .hero{padding:70px 0 54px; border-bottom:3px solid var(--border);}
+  .hero-grid{display:grid; grid-template-columns:1.15fr 0.85fr; gap:48px; align-items:center;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+  .hero-eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:1px; background:var(--accent2); color:var(--bg); padding:7px 14px; border-radius:100px; margin-bottom:22px; border:2.5px solid var(--border);}
+  .hero-title{font-family:var(--font-display); font-size:clamp(34px,5vw,54px); line-height:1.06; margin-bottom:20px;}
+  .hero-title .hl{color:var(--accent); -webkit-text-stroke:1px var(--border);}
+  .hero-desc{font-size:16px; line-height:1.65; color:var(--muted-fg); max-width:520px; margin-bottom:30px;}
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{padding:15px 26px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; border:2.5px solid var(--border); display:inline-flex; align-items:center; gap:10px; transition:.15s; font-family:var(--font-body);}
+  .btn-primary{background:var(--accent); color:var(--bg-elevated); box-shadow:5px 5px 0 var(--border);}
+  .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--border);}
+  .btn-ghost{background:var(--bg-elevated); color:var(--fg); box-shadow:5px 5px 0 var(--border);}
+  .btn-ghost:hover{transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--border);}
+
+  .hero-cover{position:relative; height:320px;}
+  .cover-card{position:absolute; border:3px solid var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:44px; background:var(--bg-elevated);}
+  .cc1{width:170px; height:240px; top:0; right:40px; transform:rotate(5deg); box-shadow:7px 7px 0 var(--accent); background:var(--accent);}
+  .cc2{width:150px; height:200px; bottom:0; left:0; transform:rotate(-7deg); box-shadow:7px 7px 0 var(--accent2); background:var(--accent2);}
+  .cc-badge{position:absolute; top:20px; left:70px; width:76px; height:76px; border-radius:50%; border:3px solid var(--border); background:var(--bg-elevated); display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--font-display); font-size:10px; text-align:center; line-height:1.2; transform:rotate(-8deg); box-shadow:4px 4px 0 var(--border);}
+
+  main{padding:56px 0 40px;}
+  .section{margin-bottom:60px;}
+  .section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;}
+  .section-title{font-family:var(--font-display); font-size:22px; display:flex; align-items:center; gap:12px;}
+  .section-title .chip{font-family:var(--font-body); font-size:11.5px; font-weight:700; background:var(--fg); color:var(--bg); padding:4px 10px; border-radius:100px;}
+  .car-controls{display:flex; gap:8px;}
+  .car-btn{width:40px; height:40px; border-radius:50%; background:var(--bg-elevated); border:2.5px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; transition:.15s;}
+  .car-btn:hover{background:var(--accent); border-color:var(--accent); color:var(--bg-elevated);}
+
+  .carousel-track{display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; padding:6px 4px 16px;}
+  .carousel-track::-webkit-scrollbar{display:none;}
+  .card{scroll-snap-align:start; flex:0 0 auto; width:206px; cursor:pointer;}
+  .poster{
+    width:206px; height:290px; border-radius:var(--radius); position:relative; overflow:hidden;
+    border:3px solid var(--border); box-shadow:5px 5px 0 var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:48px;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
+  }
+  .poster::after{content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(0,0,0,0.12) 1.6px, transparent 1.6px); background-size:9px 9px; mix-blend-mode:multiply; opacity:0.5;}
+  .poster > span{position:relative; z-index:2;}
+  .card:hover .poster{transform:translate(-4px,-4px); box-shadow:9px 9px 0 var(--border);}
+  .badge{position:absolute; top:9px; right:9px; font-size:10.5px; font-weight:700; background:var(--bg); color:var(--fg); border:2px solid var(--border); padding:3px 8px; border-radius:100px; z-index:2;}
+  .card-title{margin-top:12px; font-size:14px; font-weight:700;}
+  .card-sub{font-size:12px; color:var(--muted-fg); margin-top:4px; font-weight:600;}
+  .card-sub .star{color:var(--accent);}
+
+  footer{border-top:3px solid var(--border); padding:36px 0; color:var(--muted-fg); font-size:13px; font-weight:600;}
+  .footer-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  .note{position:fixed; bottom:18px; right:18px; max-width:290px; background:var(--bg-elevated); border:2.5px solid var(--border); padding:14px 16px; border-radius:12px; font-size:12.5px; color:var(--muted-fg); z-index:60; box-shadow:5px 5px 0 var(--border); font-weight:600;}
+  .note b{color:var(--fg);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a href="#" class="logo"><span class="logo-seal">O</span>ORBE NERD</a>
+    <nav>
+      <a href="#" class="active">Início</a>
+      <a href="#filmes">Filmes</a>
+      <a href="#series">Séries</a>
+      <a href="#animes">Animes</a>
+      <a href="#jogos">Jogos</a>
+    </nav>
+    <div class="header-actions">
+      <div class="icon-btn" title="Buscar">🔍</div>
+      <div class="icon-btn" id="theme-toggle" title="Alternar tema">🌙</div>
+      <div class="icon-btn" title="Perfil">👤</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="hero-eyebrow">◆ Edição especial 2026</span>
+      <h1 class="hero-title">O catálogo <span class="hl">nerd</span> que respeita seus olhos</h1>
+      <p class="hero-desc">Filmes, séries, animes e jogos — visual gráfico, autoral, com tema claro e escuro de verdade. Teste o botão de tema no canto superior.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary">▶ Explorar catálogo</button>
+        <button class="btn btn-ghost">🎮 Ver jogos em alta</button>
+      </div>
+    </div>
+    <div class="hero-cover">
+      <div class="cover-card cc1">🎬</div>
+      <div class="cover-card cc2">🎮</div>
+      <div class="cc-badge">141<br>TÍTULOS</div>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="section" id="filmes">
+    <div class="section-head">
+      <h2 class="section-title">Filmes <span class="chip">HOT</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="series">
+    <div class="section-head">
+      <h2 class="section-title">Séries <span class="chip">NEW</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="animes">
+    <div class="section-head">
+      <h2 class="section-title">Animes <span class="chip">S2026</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="jogos">
+    <div class="section-head">
+      <h2 class="section-title">Jogos <span class="chip">PLAY</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© 2026 Orbe Nerd — protótipo visual 5/5</span>
+    <span>Estilo: Pulp Gráfico · Bricolage Grotesque + Russo One · tema claro/escuro real</span>
+  </div>
+</footer>
+
+<div class="note"><b>Protótipo 5 — Pulp Gráfico.</b> Distinto como o 3, mas com tema claro/escuro de verdade (botão 🌙 no header) e sem clichê de glass/neon.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const DATA = {
+  filmes: [
+    ['Duna: Parte Dois','2024',8.7,'🏜️'], ['Oppenheimer','2023',8.5,'💥'],
+    ['Pobres Criaturas','2023',8.0,'🧠'], ['John Wick 4','2023',7.8,'🔫'],
+    ['Godzilla e Kong','2024',7.1,'🦖'], ['Deadpool & Wolverine','2024',8.0,'🗡️'],
+    ['Divertida Mente 2','2024',7.8,'🎭'], ['Coringa 2','2024',5.9,'🃏']
+  ],
+  series: [
+    ['The Bear','2024',8.6,'🍳'], ['Shogun','2024',8.7,'⚔️'],
+    ['Fallout','2024',8.3,'☢️'], ['House of the Dragon','2024',8.4,'🐉'],
+    ['O Pinguim','2024',8.5,'🐧'], ['Arcane','2024',9.0,'⚡'],
+    ['Ripley','2024',7.9,'🖋️'], ['True Detective','2024',7.6,'❄️']
+  ],
+  animes: [
+    ['Jujutsu Kaisen','2024',8.6,'👹'], ['Frieren','2023',9.0,'🧙‍♀️'],
+    ['Solo Leveling','2024',8.3,'⚔️'], ['Chainsaw Man','2022',8.5,'🪚'],
+    ['Vinland Saga','2023',8.8,'🛶'], ['Kaiju No. 8','2024',7.8,'👾'],
+    ['Demon Slayer','2024',8.5,'🔥'], ['Oshi no Ko','2023',8.4,'🌟']
+  ],
+  jogos: [
+    ['Elden Ring','2022',9.5,'🗡️'], ["Baldur's Gate 3",'2023',9.6,'🎲'],
+    ['Helldivers 2','2024',8.5,'🚀'], ['God of War Ragnarok','2022',9.3,'⚡'],
+    ['Hades II','2024',9.0,'🔥'], ['Black Myth: Wukong','2024',8.4,'🐒'],
+    ['FF VII Rebirth','2024',8.9,'🌌'], ['Silent Hill 2','2024',8.6,'🌫️']
+  ]
+};
+
+// Paleta "capa de pulp magazine" — cada pôster é um tom diferente,
+// como uma banca de revistas antigas. Evita o efeito monocromático.
+const PALETTE = ['#FF5A36','#FFC145','#2EC4B6','#4C6EF5','#F72585','#8AC926'];
+
+function renderCarousels(){
+  document.querySelectorAll('.carousel-track').forEach(track=>{
+    const key = track.closest('.section').id;
+    const items = DATA[key] || DATA.filmes;
+    track.innerHTML = items.map(([title,year,rating,emoji],i)=>`
+      <div class="card">
+        <div class="poster" style="background:${PALETTE[i % PALETTE.length]};">
+          <span class="badge">${year}</span>
+          <span>${emoji}</span>
+        </div>
+        <div class="card-title">${title}</div>
+        <div class="card-sub"><span class="star">★</span> ${rating}</div>
+      </div>
+    `).join('');
+  });
+}
+renderCarousels();
+
+document.querySelectorAll('.section').forEach(section=>{
+  const track = section.querySelector('[data-track]');
+  section.querySelector('.prev').addEventListener('click',()=> track.scrollBy({left:-track.clientWidth*0.85, behavior:'smooth'}));
+  section.querySelector('.next').addEventListener('click',()=> track.scrollBy({left:track.clientWidth*0.85, behavior:'smooth'}));
+});
+
+const themeBtn = document.getElementById('theme-toggle');
+const root = document.documentElement;
+themeBtn.addEventListener('click', ()=>{
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  themeBtn.textContent = next === 'dark' ? '🌙' : '☀️';
+});
+
+gsap.registerPlugin(ScrollTrigger);
+gsap.from('.hero-eyebrow, .hero-title, .hero-desc, .hero-ctas', {opacity:0, y:24, duration:.65, stagger:0.08, ease:'power2.out'});
+gsap.from('.cover-card, .cc-badge', {opacity:0, scale:0.5, duration:0.6, stagger:0.12, ease:'back.out(1.7)', delay:0.15});
+
+document.querySelectorAll('.section').forEach(section=>{
+  gsap.from(section.querySelectorAll('.card'), {
+    opacity:0, scale:0.9, y:18, duration:0.4,
+    stagger:{each:0.05, from:'start'}, ease:'back.out(1.4)',
+    scrollTrigger:{trigger:section, start:'top 85%', toggleActions:'play none none reverse'}
+  });
+});
+</script>
+</body>
+</html>

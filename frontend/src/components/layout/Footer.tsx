@@ -38,14 +38,17 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="bg-muted/50 border-t border-border mt-16">
+    <footer className="bg-background border-t-[3px] border-[var(--orbe-block-border)] mt-16">
       <div className="container mx-auto px-4 py-12">
         {/* Logo e Descrição */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-block mb-4">
-              <h3 className="text-2xl font-bold orbe-gradient-text">
-                Orbe Nerd
+            <Link href="/" className="inline-flex items-center gap-3 mb-4">
+              <span className="w-8 h-8 rounded-full border-[3px] border-[var(--orbe-block-border)] bg-[var(--orbe-accent)] text-[var(--background)] font-display text-xs flex items-center justify-center">
+                O
+              </span>
+              <h3 className="font-display text-xl orbe-text-primary">
+                ORBE NERD
               </h3>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
@@ -61,7 +64,7 @@ const Footer: React.FC = () => {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-background hover:bg-muted rounded-lg transition-colors"
+                  className="orbe-block-sm orbe-block-sm-hover p-2 bg-card rounded-full"
                   aria-label={social.label}
                 >
                   <social.icon className="h-4 w-4 orbe-text-primary" />

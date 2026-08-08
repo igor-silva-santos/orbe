@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbe Nerd — Estilo 3: Vibrante Anime-Pop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#4F46E5;
+    --secondary:#818CF8;
+    --accent:#EA580C;
+    --bg:#EEF2FF;
+    --fg:#1E1B4B;
+    --muted:#EBEEF8;
+    --muted-fg:#585a91;
+    --border:#C7D2FE;
+    --radius:20px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:'Chakra Petch',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 100% 0%, rgba(129,140,248,0.25), transparent 45%), radial-gradient(circle at 0% 100%, rgba(234,88,12,0.12), transparent 45%);
+  }
+  .display{font-family:'Russo One',sans-serif;}
+  a{color:inherit; text-decoration:none;}
+  .container{max-width:1440px; margin:0 auto; padding:0 32px;}
+  @media(max-width:768px){.container{padding:0 16px;}}
+
+  header{position:sticky; top:0; z-index:50; background:rgba(238,242,255,0.85); backdrop-filter:blur(12px); border-bottom:3px solid var(--fg);}
+  .header-inner{display:flex; align-items:center; justify-content:space-between; height:78px;}
+  .logo{font-family:'Russo One',sans-serif; font-size:22px; display:flex; align-items:center; gap:10px;}
+  .logo-orb{width:24px; height:24px; border-radius:50%; background:conic-gradient(from 180deg, var(--primary), var(--accent), var(--primary)); box-shadow:3px 3px 0 var(--fg);}
+  nav{display:flex; gap:8px; font-size:14px; font-weight:600;}
+  nav a{padding:9px 16px; border-radius:100px; transition:.2s; border:2px solid transparent;}
+  nav a:hover{border-color:var(--fg); background:#fff;}
+  nav a.active{background:var(--fg); color:#fff;}
+  .header-actions{display:flex; gap:12px;}
+  .icon-btn{width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#fff; border:2.5px solid var(--fg); cursor:pointer; transition:.15s; box-shadow:3px 3px 0 var(--fg);}
+  .icon-btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--fg);}
+  @media(max-width:900px){nav{display:none;}}
+
+  .hero{padding:70px 0 50px; position:relative; overflow:hidden;}
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+  .hero-tag{display:inline-flex; gap:8px; align-items:center; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background:var(--accent); color:#fff; padding:8px 16px; border-radius:100px; margin-bottom:20px; border:2.5px solid var(--fg); box-shadow:3px 3px 0 var(--fg);}
+  .hero-title{font-family:'Russo One',sans-serif; font-size:clamp(36px,5.5vw,58px); line-height:1.05; margin-bottom:20px;}
+  .hero-title span{color:var(--primary); -webkit-text-stroke:1.5px var(--fg);}
+  .hero-desc{font-size:16px; line-height:1.65; color:var(--muted-fg); max-width:520px; margin-bottom:30px; font-weight:500;}
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{padding:15px 26px; border-radius:14px; font-weight:700; font-size:14.5px; cursor:pointer; border:2.5px solid var(--fg); display:inline-flex; align-items:center; gap:10px; transition:.15s; font-family:'Chakra Petch',sans-serif;}
+  .btn-primary{background:var(--primary); color:#fff; box-shadow:4px 4px 0 var(--fg);}
+  .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--fg);}
+  .btn-ghost{background:#fff; color:var(--fg); box-shadow:4px 4px 0 var(--fg);}
+  .btn-ghost:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--fg);}
+  .hero-visual{position:relative; height:340px;}
+  .hero-block{position:absolute; border-radius:20px; border:3px solid var(--fg);}
+  .hb1{width:180px; height:240px; background:var(--primary); top:0; right:60px; transform:rotate(6deg); box-shadow:6px 6px 0 var(--fg);}
+  .hb2{width:150px; height:200px; background:var(--accent); bottom:0; left:20px; transform:rotate(-8deg); box-shadow:6px 6px 0 var(--fg);}
+  .hb3{width:90px; height:90px; border-radius:50%; background:#facc15; top:40px; left:100px; box-shadow:5px 5px 0 var(--fg);}
+
+  main{padding:20px 0 40px;}
+  .section{margin-bottom:58px;}
+  .section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;}
+  .section-title{font-family:'Russo One',sans-serif; font-size:22px; display:flex; align-items:center; gap:12px;}
+  .section-title .chip{font-family:'Chakra Petch',sans-serif; font-size:12px; font-weight:700; background:var(--fg); color:#fff; padding:4px 10px; border-radius:100px;}
+  .car-controls{display:flex; gap:8px;}
+  .car-btn{width:40px; height:40px; border-radius:12px; background:#fff; border:2.5px solid var(--fg); cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow:3px 3px 0 var(--fg); transition:.15s;}
+  .car-btn:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--fg);}
+
+  .carousel-track{display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; padding:6px 4px 16px;}
+  .carousel-track::-webkit-scrollbar{display:none;}
+  .card{scroll-snap-align:start; flex:0 0 auto; width:210px; cursor:pointer;}
+  .poster{
+    width:210px; height:296px; border-radius:var(--radius); position:relative; overflow:hidden;
+    border:3px solid var(--fg); box-shadow:5px 5px 0 var(--fg);
+    display:flex; align-items:center; justify-content:center; font-size:50px;
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+  }
+  .card:hover .poster{transform:translate(-4px,-4px) rotate(-2deg); box-shadow:9px 9px 0 var(--fg);}
+  .badge{position:absolute; top:10px; right:10px; font-size:11px; font-weight:700; background:#fff; border:2px solid var(--fg); padding:3px 8px; border-radius:100px; z-index:2;}
+  .card-title{margin-top:12px; font-size:14.5px; font-weight:700;}
+  .card-sub{font-size:12.5px; color:var(--muted-fg); margin-top:4px; display:flex; gap:8px; align-items:center; font-weight:600;}
+  .card-sub .star{color:var(--accent);}
+
+  footer{border-top:3px solid var(--fg); padding:36px 0; color:var(--muted-fg); font-size:13.5px; font-weight:600;}
+  .footer-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  .note{position:fixed; bottom:18px; right:18px; max-width:280px; background:#fff; border:2.5px solid var(--fg); padding:14px 16px; border-radius:14px; font-size:12.5px; color:var(--muted-fg); z-index:60; box-shadow:5px 5px 0 var(--fg); font-weight:600;}
+  .note b{color:var(--fg);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a href="#" class="logo"><span class="logo-orb"></span>ORBE NERD</a>
+    <nav>
+      <a href="#" class="active">Início</a>
+      <a href="#filmes">Filmes</a>
+      <a href="#series">Séries</a>
+      <a href="#animes">Animes</a>
+      <a href="#jogos">Jogos</a>
+    </nav>
+    <div class="header-actions">
+      <div class="icon-btn" title="Buscar">🔍</div>
+      <div class="icon-btn" title="Perfil">👤</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="hero-tag">⚡ Season Pass 2026</span>
+      <h1 class="hero-title">Todo o universo <span>nerd</span> num só lugar</h1>
+      <p class="hero-desc">Filmes, séries, animes e jogos — descubra lançamentos, monte sua watchlist e nunca mais perca uma estreia.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary">▶ Começar agora</button>
+        <button class="btn btn-ghost">🎮 Ver jogos em alta</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-block hb1"></div>
+      <div class="hero-block hb2"></div>
+      <div class="hero-block hb3"></div>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="section" id="filmes">
+    <div class="section-head">
+      <h2 class="section-title">Filmes <span class="chip">HOT</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="series">
+    <div class="section-head">
+      <h2 class="section-title">Séries <span class="chip">NEW</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="animes">
+    <div class="section-head">
+      <h2 class="section-title">Animes <span class="chip">S2026</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+  <section class="section" id="jogos">
+    <div class="section-head">
+      <h2 class="section-title">Jogos <span class="chip">PLAY</span></h2>
+      <div class="car-controls"><button class="car-btn prev">‹</button><button class="car-btn next">›</button></div>
+    </div>
+    <div class="carousel-track" data-track></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© 2026 Orbe Nerd — protótipo visual 3/4</span>
+    <span>Estilo: Vibrante Anime-Pop · Russo One + Chakra Petch</span>
+  </div>
+</footer>
+
+<div class="note"><b>Protótipo 3 — Anime-Pop.</b> Blocos geométricos, sombras "hard shadow", cores saturadas. Carrosséis com hover mais brincalhão.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const DATA = {
+  filmes: [
+    ['Duna: Parte Dois','2024',8.7,'🏜️'], ['Oppenheimer','2023',8.5,'💥'],
+    ['Pobres Criaturas','2023',8.0,'🧠'], ['John Wick 4','2023',7.8,'🔫'],
+    ['Godzilla e Kong','2024',7.1,'🦖'], ['Deadpool & Wolverine','2024',8.0,'🗡️'],
+    ['Divertida Mente 2','2024',7.8,'🎭'], ['Coringa 2','2024',5.9,'🃏']
+  ],
+  series: [
+    ['The Bear','2024',8.6,'🍳'], ['Shogun','2024',8.7,'⚔️'],
+    ['Fallout','2024',8.3,'☢️'], ['House of the Dragon','2024',8.4,'🐉'],
+    ['O Pinguim','2024',8.5,'🐧'], ['Arcane','2024',9.0,'⚡'],
+    ['Ripley','2024',7.9,'🖋️'], ['True Detective','2024',7.6,'❄️']
+  ],
+  animes: [
+    ['Jujutsu Kaisen','2024',8.6,'👹'], ['Frieren','2023',9.0,'🧙‍♀️'],
+    ['Solo Leveling','2024',8.3,'⚔️'], ['Chainsaw Man','2022',8.5,'🪚'],
+    ['Vinland Saga','2023',8.8,'🛶'], ['Kaiju No. 8','2024',7.8,'👾'],
+    ['Demon Slayer','2024',8.5,'🔥'], ['Oshi no Ko','2023',8.4,'🌟']
+  ],
+  jogos: [
+    ['Elden Ring','2022',9.5,'🗡️'], ["Baldur's Gate 3",'2023',9.6,'🎲'],
+    ['Helldivers 2','2024',8.5,'🚀'], ['God of War Ragnarok','2022',9.3,'⚡'],
+    ['Hades II','2024',9.0,'🔥'], ['Black Myth: Wukong','2024',8.4,'🐒'],
+    ['FF VII Rebirth','2024',8.9,'🌌'], ['Silent Hill 2','2024',8.6,'🌫️']
+  ]
+};
+const PALETTE = ['#4F46E5','#EA580C','#facc15','#22c55e','#818CF8'];
+
+function renderCarousels(){
+  document.querySelectorAll('.carousel-track').forEach(track=>{
+    const key = track.closest('.section').id;
+    const items = DATA[key] || DATA.filmes;
+    track.innerHTML = items.map(([title,year,rating,emoji],i)=>`
+      <div class="card">
+        <div class="poster" style="background:${PALETTE[i % PALETTE.length]}22; background-color:${PALETTE[i % PALETTE.length]};">
+          <span class="badge">${year}</span>
+          <span>${emoji}</span>
+        </div>
+        <div class="card-title">${title}</div>
+        <div class="card-sub"><span class="star">★</span> ${rating}</div>
+      </div>
+    `).join('');
+  });
+}
+renderCarousels();
+
+document.querySelectorAll('.section').forEach(section=>{
+  const track = section.querySelector('[data-track]');
+  section.querySelector('.prev').addEventListener('click',()=> track.scrollBy({left:-track.clientWidth*0.85, behavior:'smooth'}));
+  section.querySelector('.next').addEventListener('click',()=> track.scrollBy({left:track.clientWidth*0.85, behavior:'smooth'}));
+});
+
+gsap.registerPlugin(ScrollTrigger);
+gsap.from('.hero-tag, .hero-title, .hero-desc, .hero-ctas', {opacity:0, y:26, duration:.7, stagger:0.08, ease:'power2.out'});
+gsap.from('.hero-block', {opacity:0, scale:0.5, rotate:0, duration:0.7, stagger:0.12, ease:'back.out(1.7)', delay:0.2});
+
+document.querySelectorAll('.section').forEach(section=>{
+  gsap.from(section.querySelectorAll('.card'), {
+    opacity:0, scale:0.9, y:20, duration:0.45,
+    stagger:{each:0.06, from:'start'}, ease:'back.out(1.4)',
+    scrollTrigger:{trigger:section, start:'top 85%', toggleActions:'play none none reverse'}
+  });
+});
+</script>
+</body>
+</html>

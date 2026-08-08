@@ -167,21 +167,21 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
         <TooltipTrigger asChild>
           <div className="relative group" ref={ref}>
             <div
-              className={`relative bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 w-[200px] ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
+              className={`relative bg-card rounded-[10px] overflow-hidden cursor-pointer w-[206px] ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
             >
-              <div className="relative w-[200px] h-[300px] overflow-hidden">
+              <div className="relative w-[206px] h-[290px] overflow-hidden rounded-[10px] border-[3px] border-[var(--orbe-block-border)] shadow-[5px_5px_0_var(--orbe-block-border)] transition-transform duration-200 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:shadow-[9px_9px_0_var(--orbe-block-border)]">
                 <Image
                   src={midia.poster_url_api || '/placeholder.svg'}
                   alt={midia.titulo_api || 'Imagem da Mídia'}
-                  width={200}
-                  height={300}
+                  width={206}
+                  height={290}
                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 17vw"
                   loading="lazy"
                   className={`object-cover object-center transition-all duration-300 group-hover:scale-105 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                 />
                 {type === 'filme' && (midia as any).em_prevenda && (
-                  <div className="absolute top-2 right-2 z-10 rounded-md bg-yellow-500 dark:bg-blue-500 px-2 py-1 text-xs font-bold text-white">
+                  <div className="absolute top-2 right-2 z-10 rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
                     PRÉ-VENDA
                   </div>
                 )}
@@ -223,7 +223,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   isFutureRelease ? (
                     <p className="text-xs text-gray-400 mb-2">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode ? (
-                    <p className="text-xs font-semibold text-yellow-600 dark:text-blue-400 mb-2">Ep. {(midia as Anime).numero_episodio_atual} em: {countdown}</p>
+                    <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mb-2">Ep. {(midia as Anime).numero_episodio_atual} em: {countdown}</p>
                   ) : (
                     <p className="text-xs text-gray-400 mb-2">Lançamento: {formatReleaseDate()}</p>
                   )
@@ -234,7 +234,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 )}
                 <div className="flex flex-wrap items-center gap-1 mb-1">
                   {genres.slice(0, 2).map(genre => (
-                    <span key={genre} className="bg-yellow-200 text-yellow-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-semibold truncate transition-colors">
+                    <span key={genre} className="bg-[var(--orbe-accent)]/15 text-[var(--orbe-accent)] border border-[var(--orbe-accent)]/30 px-2 py-0.5 rounded-full text-xs font-semibold truncate transition-colors">
                       {genre}
                     </span>
                   ))}

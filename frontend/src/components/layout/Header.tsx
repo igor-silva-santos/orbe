@@ -75,27 +75,30 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex h-16 items-center justify-between">
           {/* Logo e Navegação Principal */}
           <div className="flex items-center space-x-2 md:space-x-6">
-            <Link 
-              href="/" 
-              className="flex items-center space-x-2"
+            <Link
+              href="/"
+              className="flex items-center space-x-3"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="text-xl md:text-2xl font-bold orbe-gradient whitespace-nowrap">
-                Orbe Nerd
+              <span className="w-[34px] h-[34px] rounded-full flex-shrink-0 border-[3px] border-[var(--orbe-block-border)] bg-[var(--orbe-accent)] text-[var(--background)] font-display text-[13px] flex items-center justify-center">
+                O
+              </span>
+              <span className="font-display text-lg md:text-[21px] orbe-text-primary whitespace-nowrap tracking-wide">
+                ORBE NERD
               </span>
             </Link>
 
             {/* Navegação Desktop */}
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="hidden md:flex items-center space-x-1.5">
               {navigationLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-primary flex items-center ${
+                  className={`text-[13.5px] font-semibold transition-colors flex items-center px-4 py-2 rounded-full border-2 border-transparent ${
                     isActiveLink(link.href)
-                      ? 'orbe-text-secondary border-b-2 border-primary'
-                      : 'orbe-text-primary hover:orbe-text-secondary'
-                  } ${link.href === '/apoie' ? 'text-rose-500 hover:text-rose-600' : ''}`}
+                      ? 'orbe-pill-active'
+                      : 'orbe-text-primary hover:border-[var(--orbe-block-border)]'
+                  } ${link.href === '/apoie' ? 'text-[var(--orbe-accent)]' : ''}`}
                 >
                   {link.icon && <link.icon className="mr-1 h-4 w-4" />}
                   {link.label}
@@ -110,7 +113,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Pesquisa - Visível apenas em mobile, pois a barra é visível em desktop */}
             <button
               onClick={handleSearchClick}
-              className="p-2 orbe-text-primary hover:orbe-text-secondary transition-colors rounded-md hover:bg-muted"
+              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -118,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Tema */}
             <button
               onClick={handleThemeToggle}
-              className="p-2 orbe-text-primary hover:orbe-text-secondary transition-colors rounded-md hover:bg-muted"
+              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -127,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Notificações */}
             <button
               onClick={handleNotificationClick}
-              className="relative p-2 orbe-text-primary hover:orbe-text-secondary transition-colors rounded-md hover:bg-muted"
+              className="orbe-block-sm orbe-block-sm-hover relative w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
@@ -179,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  className="orbe-block orbe-block-hover px-4 py-2 text-sm font-bold bg-primary text-primary-foreground rounded-[10px]"
                 >
                   Inscreva-se
                 </Link>
