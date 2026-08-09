@@ -1,38 +1,48 @@
 # Setup produção — passos manuais restantes
 
-O projeto Vercel `orbe` já existia com vars Supabase antigas.
-O host `yajxqpwtrruuyhhusewg.supabase.co` **não resolve mais** (projeto removido/pausado).
-Por isso `prisma migrate deploy` falhou com `tenant/user ... not found`.
+## Status automático (2026-08-09)
 
-## 1. Criar projeto Supabase `orbe`
+| Item | Status |
+|------|--------|
+| Código auth FE↔BE (`/api/auth/*`) | Feito (commits locais) |
+| `.env.example` + README Express/Prisma | Feito |
+| `render.yaml` + `api/railway.toml` | Feito |
+| Projeto Vercel `orbe` linkado | Feito (`portifolio-igor-silva-santos/orbe`) |
+| Secrets no Vercel (TMDB/IGDB/Supabase vars) | Presentes (nomes confirmados) |
+| Supabase antigo `yajxqpwtrruuyhhusewg` | **Morto** (DNS não resolve; migrate falhou) |
+| `prisma migrate deploy` | **Blocked** até novo DB |
+| `vercel --prod` | **Blocked**: `BUILD_ERROR: Resource provisioning failed` (2 tentativas). Provável integração Storage/Supabase quebrada no projeto |
+| API Railway/Fly/Render | **Blocked**: sem CLI/token instalados |
+| Outros projetos Vercel | **Não alterados** |
 
-1. https://supabase.com/dashboard → New project → nome `orbe`
-2. Settings → Database → Connection string:
-   - **URI (Transaction / pooler 6543)** → `DATABASE_URL` (adicione `?pgbouncer=true` se ainda não tiver)
-   - **URI (Session / Direct 5432)** → `DIRECT_URL`
-3. Atualize no Vercel (só projeto **orbe**):
+## 1. Desbloquear deploy Vercel (obrigatório)
+
+No dashboard: [Vercel → orbe → Storage / Integrations](https://vercel.com/portifolio-igor-silva-santos/orbe)
+
+1. **Desconecte** o store Supabase/Postgres antigo (ref `yajxqpwtrruuyhhusewg`).
+2. Crie um **novo** projeto Supabase chamado `orbe`.
+3. Reconecte **ou** cole manualmente:
+   - `DATABASE_URL` = pooler (porta 6543 + `?pgbouncer=true`)
+   - `DIRECT_URL` = conexão direta (5432)
+4. Redeploy:
+
+```bash
+cd frontend
+npx vercel --prod --yes
+```
+
+URL esperada: `https://orbe-portifolio-igor-silva-santos.vercel.app` (alias estável do projeto).
+
+## 2. Migrar schema
 
 ```bash
 cd orbe
-npx vercel env rm DATABASE_URL production --yes
-npx vercel env add DATABASE_URL production
-# cole a URL do pooler
-
-npx vercel env rm DIRECT_URL production --yes
-npx vercel env add DIRECT_URL production
-# cole a URL direct
-
-# Repita para Preview/Development se quiser
-```
-
-4. Local:
-
-```bash
 npx vercel env pull api/.env --environment=production --yes
-cd api && npx prisma migrate deploy
+cd api
+npx prisma migrate deploy
 ```
 
-## 2. Hospedar API (contínua)
+## 3. Hospedar API (contínua)
 
 Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 
@@ -40,7 +50,7 @@ Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 
 1. https://dashboard.render.com → New → Blueprint
 2. Conecte o repo `igor-silva-santos/orbe` e use `render.yaml`
-3. Preencha `DATABASE_URL`, `DIRECT_URL`, `TMDB_API_KEY`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `CORS_ORIGIN`
+3. Preencha `DATABASE_URL`, `DIRECT_URL`, `TMDB_API_KEY`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `CORS_ORIGIN`, `JWT_SECRET`, `SYNC_SECRET`
 4. Anote a URL pública, ex.: `https://orbe-api.onrender.com`
 
 ### Railway
@@ -54,16 +64,20 @@ railway variables set DATABASE_URL=... DIRECT_URL=... JWT_SECRET=... SYNC_SECRET
 railway up
 ```
 
-## 3. Apontar frontend
+## 4. Apontar frontend
 
 ```bash
-# No projeto Vercel orbe apenas:
-echo https://SUA-API/api | npx vercel env add NEXT_PUBLIC_API_URL production
-echo wss://SUA-API | npx vercel env add NEXT_PUBLIC_WS_URL production
-npx vercel --prod
+# Só no projeto Vercel orbe:
+npx vercel env add NEXT_PUBLIC_API_URL production
+# cole: https://SUA-API/api
+
+npx vercel env add NEXT_PUBLIC_WS_URL production
+# cole: wss://SUA-API
+
+npx vercel --prod --yes
 ```
 
-## 4. Sync inicial
+## 5. Sync inicial
 
 ```bash
 curl -X POST https://SUA-API/api/run-sync \
@@ -73,3 +87,9 @@ curl -X POST https://SUA-API/api/run-sync \
 ```
 
 Repita para `series`, `animes` (`startYear`/`endYear`) e `games`.
+
+## Keys confirmadas no Vercel (sem valores)
+
+`DATABASE_URL`, `DIRECT_URL`, `TMDB_API_KEY`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `SECRET_KEY`, vars `POSTGRES_*` / `SUPABASE_*`, `NEXT_PUBLIC_WS_URL`, `NEXT_PUBLIC_SUPABASE_*`.
+
+Falta no Vercel (frontend): `NEXT_PUBLIC_API_URL` (depois da API up).
