@@ -36,8 +36,8 @@ const Header: React.FC<HeaderProps> = ({
 
   const navigationLinks = [
     { href: '/filmes', label: 'Filmes' },
-    { href: '/animes', label: 'Animes' },
     { href: '/series', label: 'Séries' },
+    { href: '/animes', label: 'Animes' },
     { href: '/jogos', label: 'Jogos' },
     { href: '/premios', label: 'Premiações' },
     { href: '/hoje', label: 'Hoje' },
@@ -80,9 +80,7 @@ const Header: React.FC<HeaderProps> = ({
               className="flex items-center space-x-3"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="w-[34px] h-[34px] rounded-full flex-shrink-0 border-[3px] border-[var(--orbe-block-border)] bg-[var(--orbe-accent)] text-[var(--background)] font-display text-[13px] flex items-center justify-center">
-                O
-              </span>
+              <span className="orbe-logo-orb" aria-hidden="true" />
               <span className="font-display text-lg md:text-[21px] orbe-text-primary whitespace-nowrap tracking-wide">
                 ORBE NERD
               </span>
@@ -113,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Pesquisa - Visível apenas em mobile, pois a barra é visível em desktop */}
             <button
               onClick={handleSearchClick}
-              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
+              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -121,7 +119,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Tema */}
             <button
               onClick={handleThemeToggle}
-              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
+              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -130,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Notificações */}
             <button
               onClick={handleNotificationClick}
-              className="orbe-block-sm orbe-block-sm-hover relative w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-full bg-card"
+              className="orbe-block-sm orbe-block-sm-hover relative w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (

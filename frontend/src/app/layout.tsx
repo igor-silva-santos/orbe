@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Russo_One } from "next/font/google";
+import { Chakra_Petch, Russo_One } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/components/providers/AppProvider";
 import Header from "@/components/layout/Header";
@@ -10,9 +10,9 @@ import NotificationModal from "@/components/modals/NotificationModal";
 import RatingModal from "@/components/modals/RatingModalWrapper";
 import { ClientOnly } from "@/components/layout/ClientOnly";
 
-const bricolage = Bricolage_Grotesque({
+const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
 });
 
@@ -69,7 +69,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${bricolage.variable} ${russoOne.variable} font-sans antialiased`}
+        className={`${chakraPetch.variable} ${russoOne.variable} font-sans antialiased`}
       >
         <AppProvider>
           <div className="min-h-screen bg-background text-foreground transition-colors duration-500">

@@ -167,10 +167,10 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
         <TooltipTrigger asChild>
           <div className="relative group" ref={ref}>
             <div
-              className={`relative bg-card rounded-[10px] overflow-hidden cursor-pointer w-[206px] ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
+              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-[206px] ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
             >
-              <div className="relative w-[206px] h-[290px] overflow-hidden rounded-[10px] border-[3px] border-[var(--orbe-block-border)] shadow-[5px_5px_0_var(--orbe-block-border)] transition-transform duration-200 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:shadow-[9px_9px_0_var(--orbe-block-border)]">
+              <div className="relative w-[206px] h-[290px] overflow-hidden rounded-[20px] border-[3px] border-[var(--orbe-block-border)] shadow-[5px_5px_0_var(--orbe-block-border)] transition-transform duration-250 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:-rotate-2 group-hover:shadow-[9px_9px_0_var(--orbe-block-border)]">
                 <Image
                   src={midia.poster_url_api || '/placeholder.svg'}
                   alt={midia.titulo_api || 'Imagem da Mídia'}
