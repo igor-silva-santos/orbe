@@ -28,8 +28,9 @@ develop-eggs/
 dist/
 eggs/
 .eggs/
-lib/
-lib64/
+# Evita ignorar frontend/src/lib (Next) — só venv Python
+/lib/
+/lib64/
 parts/
 sdist/
 var/
