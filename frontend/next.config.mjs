@@ -48,12 +48,19 @@ const nextConfig = {
   
   },
   rewrites: async () => {
-    // Em produção o frontend chama NEXT_PUBLIC_API_URL diretamente.
-    // Em desenvolvimento, faz proxy para a API Express local.
-    if (process.env.NODE_ENV === 'production') {
+    // Proxy /api/* → API Express. Em dev: localhost:3001.
+    // Em produção: API_PROXY_ORIGIN ou origem derivada de NEXT_PUBLIC_API_URL.
+    const apiOrigin =
+      process.env.API_PROXY_ORIGIN?.replace(/\/$/, '') ||
+      (process.env.NEXT_PUBLIC_API_URL
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, '')
+        : null) ||
+      (process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : null);
+
+    if (!apiOrigin) {
       return [];
     }
-    const apiOrigin = process.env.API_PROXY_ORIGIN || 'http://localhost:3001';
+
     return [
       {
         source: '/api/:path*',

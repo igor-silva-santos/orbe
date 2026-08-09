@@ -5,10 +5,11 @@ import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import type { Midia, Anime } from '@/types';
+import { API_BASE } from '@/lib/apiBase';
 
 const fetchInitialMediaData = async (mediaType: 'filmes' | 'series' | 'jogos') => {
   const year = new Date().getFullYear();
-  const response = await fetch(`/api/${mediaType}/by-year?year=${year}`);
+  const response = await fetch(`${API_BASE}/${mediaType}/by-year?year=${year}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch initial data for ${mediaType}`);
   }
@@ -31,7 +32,7 @@ const fetchInitialAnimeData = async () => {
     const year = new Date().getFullYear();
     const season = getSeason(new Date());
 
-    const response = await fetch(`/api/animes/by-season?year=${year}&season=${season}`);
+    const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
     if (!response.ok) {
         throw new Error(`Failed to fetch animes`);
     }

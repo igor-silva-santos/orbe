@@ -2,6 +2,7 @@
 
 import RatingModal from './RatingModal';
 import { useAppStore } from '@/stores/appStore';
+import { API_BASE } from '@/lib/apiBase';
 
 const RatingModalWrapper = () => {
   const { 
@@ -27,7 +28,7 @@ const RatingModalWrapper = () => {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/me/interactions`, {
+      const response = await fetch(`${API_BASE}/me/interactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

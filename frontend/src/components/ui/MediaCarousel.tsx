@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
 import type { Midia, TipoMidia, Filme, Serie, Anime, Jogo } from '@/types';
+import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface MediaCarouselProps {
@@ -39,7 +40,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
     fetchingYears.current.add(year);
     try {
-      const response = await fetch(`/api/${mediaType}/by-year?year=${year}`);
+      const response = await fetch(`${API_BASE}/${mediaType}/by-year?year=${year}`);
       const data: Midia[] = await response.json();
       loadedYears.current.add(year);
       return data.sort((a, b) => new Date(a.data_lancamento_api).getTime() - new Date(b.data_lancamento_api).getTime());

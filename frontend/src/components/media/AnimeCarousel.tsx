@@ -8,6 +8,7 @@ import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
 import DaySeparatorCard from './DaySeparatorCard';
 import { Anime } from '@/types';
+import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 type CarouselItem = 
@@ -79,7 +80,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     fetchingSeasons.current.add(seasonId);
 
     try {
-      const response = await fetch(`/api/animes/by-season?year=${year}&season=${season}`);
+      const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
       const animes: Anime[] = await response.json();
       const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
       const newAnimes = animes.filter(anime => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult);
