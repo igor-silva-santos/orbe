@@ -51,7 +51,11 @@ export const broadcast = (message: object) => {
   });
 };
 
-app.use(cors());
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({
+  origin: corsOrigin === '*' ? true : corsOrigin.split(',').map((o) => o.trim()),
+  credentials: true,
+}));
 app.use(express.json());
 
 // Usar as rotas de mídia e webhooks

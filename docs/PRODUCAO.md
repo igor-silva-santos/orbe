@@ -4,16 +4,19 @@
 
 | Item | Status |
 |------|--------|
-| Código auth FE↔BE (`/api/auth/*`) | Feito (commits locais) |
+| Código auth FE↔BE (`/api/auth/*`) | Feito |
+| Proxy `/api` em produção (`next.config.mjs`) | **Feito** — rewrites usam `NEXT_PUBLIC_API_URL` ou `API_PROXY_ORIGIN` |
+| `apiBase.ts` centralizado no frontend | **Feito** |
 | `.env.example` + README Express/Prisma | Feito |
 | `render.yaml` + `api/railway.toml` | Feito |
 | Projeto Vercel `orbe` linkado | Feito (`portifolio-igor-silva-santos/orbe`) |
-| Secrets no Vercel (TMDB/IGDB/Supabase vars) | Presentes (nomes confirmados) |
-| Supabase antigo `yajxqpwtrruuyhhusewg` | **Morto** (DNS não resolve; migrate falhou) |
-| `prisma migrate deploy` | **Blocked** até novo DB |
-| `vercel --prod` | **Blocked**: `BUILD_ERROR: Resource provisioning failed` (2 tentativas). Provável integração Storage/Supabase quebrada no projeto |
-| API Railway/Fly/Render | **Blocked**: sem CLI/token instalados |
-| Outros projetos Vercel | **Não alterados** |
+| Secrets no Vercel (TMDB/IGDB/Supabase vars) | Presentes — **apontam ao Supabase antigo morto** |
+| Supabase antigo `yajxqpwtrruuyhhusewg` | **Morto** (DNS não resolve) |
+| Supabase novo `prvzdcwohdvhgpfwsznl` | Configurado em `api/.env.local` (local) |
+| `prisma migrate deploy` | **Blocked** até novo DB no Vercel/API host |
+| `vercel --prod` (projeto orbe raiz) | **Blocked**: `BUILD_ERROR: Resource provisioning failed` |
+| API Railway/Fly/Render | Em deploy — `Dockerfile` na raiz + `render.yaml` corrigidos |
+| `NEXT_PUBLIC_API_URL` no Vercel | **Falta** — usar `https://orbe-7bu0.onrender.com/api` |
 
 ## 1. Desbloquear deploy Vercel (obrigatório)
 
@@ -48,10 +51,32 @@ Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 
 ### Render (Blueprint já no repo)
 
-1. https://dashboard.render.com → New → Blueprint
-2. Conecte o repo `igor-silva-santos/orbe` e use `render.yaml`
-3. Preencha `DATABASE_URL`, `DIRECT_URL`, `TMDB_API_KEY`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `CORS_ORIGIN`, `JWT_SECRET`, `SYNC_SECRET`
-4. Anote a URL pública, ex.: `https://orbe-api.onrender.com`
+1. https://dashboard.render.com → New → Blueprint **ou** Web Service conectado ao repo
+2. Conecte o repo `igor-silva-santos/orbe`
+3. **Runtime recomendado:** Node (usa `render.yaml` com `rootDir: api`)
+4. **Se o serviço estiver em Docker:** use o `Dockerfile` na **raiz** do repo (contexto = raiz) **ou** defina Root Directory = `api` e Dockerfile = `api/Dockerfile`
+5. Preencha as variáveis abaixo no dashboard
+6. No Supabase, libere os IPs do Render: `74.220.50.0/24`, `74.220.58.0/24`
+7. URL pública atual: `https://orbe-7bu0.onrender.com`
+
+#### Variáveis de ambiente (Render)
+
+| Variável | Obrigatória | Descrição |
+|----------|-------------|-----------|
+| `NODE_ENV` | sim | `production` |
+| `PORT` | sim | `3001` (Render injeta `PORT` automaticamente — manter compatível) |
+| `DATABASE_URL` | sim | Pooler Supabase (6543 + `?pgbouncer=true`) |
+| `DIRECT_URL` | sim | Conexão direta Supabase (5432) |
+| `JWT_SECRET` | sim | String longa e aleatória |
+| `SYNC_SECRET` | sim | Segredo para `/api/run-sync` |
+| `TMDB_API_KEY` | sim | Chave TMDB |
+| `IGDB_CLIENT_ID` | sim | Client ID IGDB |
+| `IGDB_CLIENT_SECRET` | sim | Client secret IGDB |
+| `CORS_ORIGIN` | sim | `https://orbe-seven.vercel.app,http://localhost:3000` |
+| `REDIS_URL` | não | Deixe vazio se não usar cache Redis |
+| `IGDB_WEBHOOK_SECRET` | não | Só se webhooks IGDB estiverem ativos |
+
+Health check: `GET /api/health` → `{ "ok": true, "db": true }`
 
 ### Railway
 
@@ -66,14 +91,20 @@ railway up
 
 ## 4. Apontar frontend
 
+No dashboard Vercel (projeto com `orbe-seven.vercel.app` — Root Directory = `frontend`):
+
+```
+NEXT_PUBLIC_API_URL = https://orbe-7bu0.onrender.com/api
+NEXT_PUBLIC_WS_URL = wss://orbe-7bu0.onrender.com
+NEXT_PUBLIC_APP_URL = https://orbe-seven.vercel.app
+```
+
+Ou use `API_PROXY_ORIGIN=https://SUA-API` (sem `/api`).
+
+O `next.config.mjs` faz proxy de `/api/*` → API Express em produção (evita CORS).
+
 ```bash
-# Só no projeto Vercel orbe:
-npx vercel env add NEXT_PUBLIC_API_URL production
-# cole: https://SUA-API/api
-
-npx vercel env add NEXT_PUBLIC_WS_URL production
-# cole: wss://SUA-API
-
+cd frontend
 npx vercel --prod --yes
 ```
 
