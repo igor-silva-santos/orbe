@@ -5,10 +5,13 @@
   "main": "src/index.ts",
   "scripts": {
     "vercel-build": "npx prisma generate && tsc",
-    "start": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "start:dev": "ts-node src/index.ts",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "prisma:generate": "npx prisma generate",
+    "prisma:deploy": "npx prisma migrate deploy",
+    "release": "npx prisma migrate deploy && npm run build",
     "sync": "cross-env LOG_TO_FILE=true ts-node src/sync.ts",
     "sync:movies": "cross-env LOG_TO_FILE=true ts-node src/syncMovies.ts",
     "sync:series": "cross-env LOG_TO_FILE=true ts-node src/syncSeries.ts",
@@ -17,6 +20,7 @@
     "sync:detetive": "cross-env LOG_TO_FILE=true ts-node src/detetive.ts"
   },
   "dependencies": {
+    "@prisma/client": "^5.14.0",
     "@types/node-cron": "^3.0.11",
     "@types/puppeteer": "^5.4.7",
     "axios": "^1.12.2",
@@ -30,11 +34,12 @@
     "jsonwebtoken": "^9.0.2",
     "moviedb-promise": "^4.0.7",
     "node-cron": "^4.2.1",
+    "prisma": "^5.14.0",
     "puppeteer": "^24.23.1",
-    "string-similarity": "^4.0.4"
+    "string-similarity": "^4.0.4",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@prisma/client": "^5.14.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
@@ -43,7 +48,6 @@
     "@types/string-similarity": "^4.0.2",
     "@types/ws": "^8.18.1",
     "nodemon": "^3.0.1",
-    "prisma": "^5.14.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2"
   },

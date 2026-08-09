@@ -21,15 +21,13 @@ export default function LoginPage() {
 
     try {
       const response = await realApi.login({ email: formData.email, password: formData.password });
-      if (response && response.user) {
+      if (response?.token && response?.user) {
+        localStorage.setItem('token', response.token);
         login(response.user);
-        // Optionally store token in localStorage or cookies
-        // localStorage.setItem('token', response.token);
-        window.location.href = '/'; // Redirect on successful login
+        window.location.href = '/';
       } else {
-        // Handle login error (e.g., display message to user)
         console.error('Login failed: Invalid credentials or API error');
-        alert('Email ou senha inválidos.'); // Simple alert for now
+        alert('Email ou senha inválidos.');
       }
     } catch (error) {
       console.error('Login API call failed:', error);

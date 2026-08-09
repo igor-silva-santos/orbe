@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -62,9 +63,26 @@ app.use('/api', watchlistRoutes);
 app.use('/api/users', profileRoutes);
 app.use('/api', commentRoutes);
 
-// Rota de Registro
-app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+// Healthcheck (sem depender de sync/cron)
+app.get('/api/health', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ ok: true, db: true });
+  } catch {
+    res.status(503).json({ ok: false, db: false });
+  }
+});
+
+type AuthUserPayload = {
+  id: number;
+  email: string;
+  role: string;
+  quer_avaliar: boolean | null;
+  data_criacao: Date;
+};
+
+const registerHandler = async (req: express.Request, res: express.Response) => {
+  const { email, password, nome } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
@@ -85,84 +103,112 @@ app.post('/register', async (req, res) => {
       data: {
         email,
         hashed_password: hashedPassword,
+        ...(nome ? { nome } : {}),
       },
     });
 
-    res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id });
+    const token = jwt.sign({ userId: newUser.id, role: newUser.role }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    const user: AuthUserPayload = {
+      id: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+      quer_avaliar: newUser.quer_avaliar,
+      data_criacao: newUser.data_criacao,
+    };
+
+    res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id, token, user });
   } catch (error) {
     logger.error(`Erro no registro: ${error}`);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
-});
+};
 
-// Rota de Login
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+const loginHandler = async (req: express.Request, res: express.Response) => {
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+  }
+
+  try {
+    const userRecord = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!userRecord) {
+      return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
-    try {
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
+    const isPasswordValid = await bcrypt.compare(password, userRecord.hashed_password);
 
-        if (!user) {
-            return res.status(401).json({ error: 'Credenciais inválidas.' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.hashed_password);
-
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Credenciais inválidas.' });
-        }
-
-        const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
-            expiresIn: '7d',
-        });
-
-        res.json({ token });
-    } catch (error) {
-        logger.error(`Erro no login: ${error}`);
-        res.status(500).json({ error: 'Erro interno do servidor.' });
-    }
-});
-
-
-// Rota de Perfil do Usuário
-app.get('/profile', async (req, res) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-        return res.status(401).json({ error: 'Token não fornecido.' });
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = jwt.sign({ userId: userRecord.id, role: userRecord.role }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
-        
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.userId },
-            select: {
-                id: true,
-                email: true,
-                role: true,
-                quer_avaliar: true,
-                data_criacao: true,
-            },
-        });
+    const user: AuthUserPayload = {
+      id: userRecord.id,
+      email: userRecord.email,
+      role: userRecord.role,
+      quer_avaliar: userRecord.quer_avaliar,
+      data_criacao: userRecord.data_criacao,
+    };
 
-        if (!user) {
-            return res.status(404).json({ error: 'Usuário não encontrado.' });
-        }
+    res.json({ token, user });
+  } catch (error) {
+    logger.error(`Erro no login: ${error}`);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+};
 
-        res.json(user);
-    } catch (error) {
-        res.status(401).json({ error: 'Token inválido.' });
+const meHandler = async (req: express.Request, res: express.Response) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token não fornecido.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        quer_avaliar: true,
+        data_criacao: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
-});
+
+    res.json(user);
+  } catch (error) {
+    res.status(401).json({ error: 'Token inválido.' });
+  }
+};
+
+// Rotas canônicas alinhadas ao frontend (/api/auth/*)
+app.post('/api/auth/register', registerHandler);
+app.post('/api/auth/login', loginHandler);
+app.get('/api/auth/me', meHandler);
+
+// Aliases legados
+app.post('/register', registerHandler);
+app.post('/login', loginHandler);
+app.get('/profile', meHandler);
 
 import { runDetetive } from './detetive';
 import cron from 'node-cron';

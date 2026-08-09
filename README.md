@@ -10,41 +10,58 @@ Hub de descoberta e acompanhamento de filmes, séries, animes e jogos.
 | Camada | Tecnologia |
 |--------|------------|
 | Frontend | Next.js 14, Tailwind CSS |
-| Backend | Flask (Python) |
-| Banco | PostgreSQL (Prisma no sync) |
-| APIs | TMDB, Anilist, IGDB |
+| Backend | Express (TypeScript) + Prisma |
+| Banco | PostgreSQL (Supabase recomendado) |
+| Cache | Redis (opcional) |
+| APIs | TMDB, AniList, IGDB |
 | Auth | JWT |
+| Deploy | Frontend → Vercel; API → host contínuo (Railway / Fly / Render) |
 
-## Funcionalidades
+> A API usa cron, WebSocket e sync longos — **não** rode como serverless puro na Vercel.
 
-- Catálogo por categoria com carrosséis de lançamentos
-- Busca global com filtros
-- Detalhe de mídia (modal), watchlist e interações do usuário
-- Tema claro/escuro
-- Sync de conteúdo a partir das APIs externas
+## Como rodar (local)
 
-## Como rodar
-
-### Backend
+### 1. Infra
 
 ```bash
-cd backend
-python -m venv venv
-# Windows: .\venv\Scripts\activate
-source venv/bin/activate
-pip install -r requirements.txt
-python app.py
+docker compose up -d postgres redis
 ```
 
-### Frontend
+### 2. Backend
+
+```bash
+cd api
+cp .env.example .env   # preencha DATABASE_URL, DIRECT_URL, JWT_SECRET, TMDB/IGDB
+npm install
+npx prisma migrate deploy
+npm run prisma:generate
+npm run dev            # http://localhost:3001
+```
+
+### 3. Frontend
 
 ```bash
 cd frontend
+cp .env.example .env.local
 npm install
-npm run dev
+npm run dev            # http://localhost:3000 (proxy /api → :3001)
 ```
 
-Build de produção do frontend: `npm run build`.
+## Produção
+
+1. **Supabase:** crie o projeto `orbe`, copie pooler → `DATABASE_URL` e direct → `DIRECT_URL`.
+2. **API (Railway/Fly/Render):** deploy da pasta `api/`, injete as envs de `api/.env.example`, rode `prisma migrate deploy` no start/release.
+3. **Frontend (Vercel):** Root Directory = `frontend` (ou use o `vercel.json` da raiz). Defina:
+   - `NEXT_PUBLIC_API_URL` = `https://<sua-api>/api`
+   - `NEXT_PUBLIC_WS_URL` = `wss://<sua-api>`
+4. Sync inicial (com API + DB up):
+
+```bash
+curl -X POST https://<sua-api>/api/run-sync \
+  -H "Content-Type: application/json" \
+  -H "x-sync-secret: $SYNC_SECRET" \
+  -d '{"mediaType":"movies","startDate":"2024-01-01","endDate":"2024-12-31"}'
+```
 
 ## Design
 
@@ -52,7 +69,7 @@ A direção visual ativa está documentada em [`DESIGN.md`](DESIGN.md). Os prot�
 
 ## Roadmap
 
-- [ ] Deploy de produção estável (Vercel + backend)
+- [ ] Deploy de produção estável (Vercel + API contínua + Supabase) — ver [`docs/PRODUCAO.md`](docs/PRODUCAO.md)
 - [ ] Watchlist sincronizada
 - [ ] Notificações em tempo real
 - [ ] PWA

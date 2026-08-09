@@ -1,0 +1,34 @@
+# Render Blueprint — API contínua do Orbe (Express + Prisma + cron/WS)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: orbe-api
+    runtime: node
+    rootDir: api
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SYNC_SECRET
+        generateValue: true
+      - key: TMDB_API_KEY
+        sync: false
+      - key: IGDB_CLIENT_ID
+        sync: false
+      - key: IGDB_CLIENT_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
