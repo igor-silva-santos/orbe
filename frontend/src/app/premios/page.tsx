@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import { Award, Calendar } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
 import MidiaCard from '@/components/media/MidiaCard';
-import type { Filme, Serie, Anime, Jogo } from '@/types';
+import type { Filme, Serie, Anime, Jogo, TipoMidia } from '@/types';
 
-interface AwardItem extends Filme, Serie, Anime, Jogo {
-  type: 'filme' | 'serie' | 'anime' | 'jogo';
-}
+type AwardItem = (Filme | Serie | Anime | Jogo) & { type: TipoMidia };
 
 import PageHeader from '@/components/layout/PageHeader';
 
@@ -93,7 +91,7 @@ export default function PremiosPage() {
       ) : awards.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {awards.map((awardItem) => (
-            <MidiaCard key={`${awardItem.type}-${awardItem.id}`} midia={awardItem} type={awardItem.type} />
+            <MidiaCard key={`${awardItem.type}-${awardItem.id}`} midia={awardItem} type={awardItem.type as TipoMidia} />
           ))}
         </div>
       ) : (

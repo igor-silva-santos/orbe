@@ -12,7 +12,6 @@ export interface Genre {
 }
 
 export interface Award {
-  id: number;
   nome: string;
   categoria: string;
   ano: number;
@@ -247,7 +246,20 @@ export interface Notification {
   importante?: boolean;
 }
 
-// Interface para eventos de anúncio
+// Interface para eventos de games (IGDB)
+export interface Evento {
+  id: number;
+  igdbId: number;
+  nome: string;
+  descricao?: string | null;
+  data_inicio?: string | null;
+  data_fim?: string | null;
+  url?: string | null;
+  total_jogos: number;
+  jogos: Jogo[];
+}
+
+// Interface para eventos de anúncio (legado)
 export interface EventoAnuncio {
   id: number;
   nome: string;

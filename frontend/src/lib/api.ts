@@ -270,6 +270,10 @@ export const orbeNerdApi = {
     return apiClient.get('/premios/filtros');
   },
 
+  getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
+    return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
+  },
+
   // Pesquisa
   search: async (query: string, category?: string, page?: number) => {
     return apiClient.get('/pesquisa', { q: query, category, page });

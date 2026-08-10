@@ -42,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/jogos', label: 'Jogos' },
     { href: '/jogos-em-alta', label: 'Jogos em Alta' },
     { href: '/premios', label: 'Premiações' },
+    { href: '/eventos', label: 'Eventos' },
     { href: '/hoje', label: 'Hoje' },
   ];
 

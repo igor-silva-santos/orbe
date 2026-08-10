@@ -13,6 +13,7 @@ const Footer: React.FC = () => {
       { label: 'Animes', href: '/animes' },
       { label: 'Jogos', href: '/jogos' },
       { label: 'Premiações', href: '/premios' },
+      { label: 'Eventos', href: '/eventos' },
       { label: 'Hoje', href: '/hoje' },
       { label: 'Apoie-nos', href: '/apoie' }
     ],
