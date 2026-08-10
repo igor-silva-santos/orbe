@@ -13,6 +13,7 @@
     "prisma:deploy": "node scripts/prisma-deploy.js",
     "release": "npx prisma migrate deploy && npm run build",
     "sync": "cross-env LOG_TO_FILE=true ts-node src/sync.ts",
+    "sync:2026": "cross-env LOG_TO_FILE=true ts-node src/sync.ts 2026-01-01 2026-12-31",
     "sync:movies": "cross-env LOG_TO_FILE=true ts-node src/syncMovies.ts",
     "sync:series": "cross-env LOG_TO_FILE=true ts-node src/syncSeries.ts",
     "sync:animes": "cross-env LOG_TO_FILE=true ts-node src/syncAnimes.ts",

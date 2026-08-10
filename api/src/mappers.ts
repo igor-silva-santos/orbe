@@ -396,6 +396,86 @@ export const mapJogoToMidia = (jogo: any) => {
   };
 };
 
+/** Payload mínimo para cards de carrossel — sem elenco, vídeos ou sinopse */
+export const mapFilmeToCarouselCard = (filme: any) => ({
+  type: 'filme' as const,
+  id: filme.tmdbId,
+  titulo_api: filme.title,
+  titulo_curado: filme.titulo_curado ?? null,
+  poster_url_api: filme.posterPath ? `${TMDB_IMAGE_BASE_URL}${filme.posterPath}` : null,
+  data_lancamento_api: filme.releaseDate,
+  avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
+  generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
+  plataformas_api: (filme.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+    nome: p.provider.name,
+    url: p.url,
+  })),
+  em_prevenda: filme.em_prevenda ?? false,
+});
+
+export const mapSerieToCarouselCard = (serie: any) => ({
+  type: 'serie' as const,
+  id: serie.tmdbId,
+  titulo_api: serie.name,
+  titulo_curado: serie.titulo_curado ?? null,
+  poster_url_api: serie.posterPath ? `${TMDB_IMAGE_BASE_URL}${serie.posterPath}` : null,
+  data_lancamento_api: serie.firstAirDate,
+  avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
+  generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
+  plataformas_api: (serie.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+    nome: p.provider.name,
+    url: p.url,
+  })),
+});
+
+export const mapJogoToCarouselCard = (jogo: any) => ({
+  type: 'jogo' as const,
+  id: jogo.igdbId,
+  titulo_api: jogo.name,
+  titulo_curado: jogo.titulo_curado ?? null,
+  poster_url_api: resolveIgdbImageUrl(jogo.cover),
+  data_lancamento_api: jogo.firstReleaseDate,
+  avaliacao: jogo.rating,
+  generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)).slice(0, 3) ?? [],
+  plataformas_api: (jogo.platforms ?? []).slice(0, 2).map((p: any) => ({ nome: p.plataforma.name })),
+});
+
+export const mapAnimeToCarouselCard = (anime: any) => {
+  const nextAiring = anime.airingSchedule
+    ?.filter((s: any) => new Date(s.airingAt) > new Date())
+    .sort((a: any, b: any) => new Date(a.airingAt).getTime() - new Date(b.airingAt).getTime())[0];
+
+  const streamingFromLinks = dedupeStreamingLinks(
+    anime.streamingLinks?.map((l: any) => ({ nome: l.site, url: l.url })) ?? []
+  );
+
+  return {
+    type: 'anime' as const,
+    id: anime.anilistId,
+    titulo_api: anime.titleRomaji,
+    titulo_curado: anime.titulo_curado ?? null,
+    titleRomaji: anime.titleRomaji,
+    titleEnglish: anime.titleEnglish,
+    poster_url_api: anime.coverImage,
+    data_lancamento_api: anime.startDate,
+    startDate: anime.startDate ? {
+      year: new Date(anime.startDate).getFullYear(),
+      month: new Date(anime.startDate).getMonth() + 1,
+      day: new Date(anime.startDate).getDate(),
+    } : null,
+    avaliacao: anime.averageScore,
+    generos_api: anime.genres?.map((g: any) => translateAnimeGenre(g.genero.name)).slice(0, 3) ?? [],
+    plataformas_api: streamingFromLinks.slice(0, 2),
+    format: anime.format,
+    isAdult: anime.isAdult,
+    dublagem_info: false,
+    nextAiringEpisode: nextAiring
+      ? { airingAt: new Date(nextAiring.airingAt).toISOString(), episode: nextAiring.episode }
+      : null,
+    numero_episodio_atual: nextAiring?.episode ?? null,
+  };
+};
+
 /** Remove acentos para busca insensível a diacríticos */
 export const normalizeSearchText = (text: string): string =>
   text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

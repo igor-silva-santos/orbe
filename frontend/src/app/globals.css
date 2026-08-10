@@ -338,6 +338,11 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
+.carousel-slide {
+  transform-origin: center center;
+  will-change: transform;
+}
+
 .carousel-smooth {
   -webkit-overflow-scrolling: touch;
   will-change: scroll-position;
