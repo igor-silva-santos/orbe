@@ -4,7 +4,7 @@ import { fetchFilmesPageData, type FilmesPageData } from '@/lib/apiServer';
 const emptyData: FilmesPageData = {
   results: [],
   total: 0,
-  filters: { genres: [], years: [], statuses: [] },
+  filters: { genres: [], years: [], statuses: [], platforms: [] },
 };
 
 export const revalidate = 300;

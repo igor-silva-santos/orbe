@@ -4,7 +4,7 @@ import { fetchSeriesPageData, type SeriesPageData } from '@/lib/apiServer';
 const emptyData: SeriesPageData = {
   results: [],
   total: 0,
-  filters: { genres: [], years: [], statuses: [] },
+  filters: { genres: [], years: [], statuses: [], platforms: [] },
 };
 
 export const revalidate = 300;
