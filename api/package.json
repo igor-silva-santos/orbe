@@ -18,6 +18,7 @@
     "sync:series": "cross-env LOG_TO_FILE=true ts-node src/syncSeries.ts",
     "sync:animes": "cross-env LOG_TO_FILE=true ts-node src/syncAnimes.ts",
     "sync:games": "cross-env LOG_TO_FILE=true ts-node src/syncGames.ts",
+    "sync:awards": "cross-env LOG_TO_FILE=true ts-node src/scrapeAwards.ts",
     "sync:detetive": "cross-env LOG_TO_FILE=true ts-node src/detetive.ts"
   },
   "dependencies": {

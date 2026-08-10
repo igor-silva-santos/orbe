@@ -40,6 +40,7 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/animes', label: 'Animes' },
     { href: '/jogos', label: 'Jogos' },
     { href: '/premios', label: 'Premiações' },
+    { href: '/eventos', label: 'Eventos' },
     { href: '/hoje', label: 'Hoje' },
   ];
 

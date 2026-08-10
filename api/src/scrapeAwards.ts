@@ -267,9 +267,8 @@ export async function runAwardScraper() {
   }
 
   logger.info('Web Scraping para Premiações concluído.');
-  await prisma.$disconnect();
 }
 
 if (require.main === module) {
-  runAwardScraper();
+  runAwardScraper().finally(() => prisma.$disconnect());
 }

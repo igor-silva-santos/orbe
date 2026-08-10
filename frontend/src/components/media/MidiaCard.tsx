@@ -10,6 +10,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -107,6 +108,8 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAdultContent = (midia as any).isAdult === true;
 
+  const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
+
   const formatReleaseDate = () => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
     if (!date) return 'A ser anunciado';
@@ -185,6 +188,17 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 {type === 'filme' && (midia as any).em_prevenda && (
                   <div className="absolute top-2 right-2 z-10 rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
                     PRÉ-VENDA
+                  </div>
+                )}
+                {topAward && (
+                  <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)]">
+                    <AwardIcon
+                      award={topAward.nome}
+                      status={topAward.status}
+                      year={topAward.ano}
+                      size={12}
+                      className="h-3 w-3"
+                    />
                   </div>
                 )}
                 <div className="absolute top-2 right-2">

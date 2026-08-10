@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from './clients';
 import { Prisma } from '@prisma/client';
-import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, normalizeSearchText, withPortugueseTranslation } from './mappers';
+import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText, withPortugueseTranslation, matchesPremiacaoFilters } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
@@ -1105,34 +1105,88 @@ router.get('/premios/filtros', async (req, res) => {
 
 // Rota para Premiações
 router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
-  const { awardName, year } = req.query;
+  const awardName = typeof req.query.awardName === 'string' ? req.query.awardName : undefined;
+  const yearParam = req.query.year;
+  const year = yearParam !== undefined ? parseInt(String(yearParam), 10) : undefined;
+
+  const premioInclude = {
+    genres: { include: { genero: true } },
+    streamingProviders: { include: { provider: true }, take: 3 },
+  };
+
+  const jogoPremioInclude = {
+    genres: { include: { genero: true } },
+    platforms: { include: { plataforma: true }, take: 3 },
+  };
+
   try {
-    const where: any = { premiacoes: { not: Prisma.JsonNull } };
+    const [filmes, series, animes, jogos] = await Promise.all([
+      prisma.filme.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: premioInclude }),
+      prisma.serie.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: premioInclude }),
+      prisma.anime.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: { genres: { include: { genero: true } } } }),
+      prisma.jogo.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: jogoPremioInclude }),
+    ]);
 
-    if (awardName) {
-      where.premiacoes = { path: ['nome'], string_contains: awardName as string };
-    }
-    if (year) {
-      where.premiacoes = { path: ['ano'], equals: parseInt(year as string) };
-    }
-
-    const filmes = await prisma.filme.findMany({ where, select: { id: true, tmdbId: true, title: true, posterPath: true, premiacoes: true } });
-    const series = await prisma.serie.findMany({ where, select: { id: true, tmdbId: true, name: true, posterPath: true, premiacoes: true } });
-    const animes = await prisma.anime.findMany({ where, select: { id: true, anilistId: true, titleRomaji: true, coverImage: true, premiacoes: true } });
-    const jogos = await prisma.jogo.findMany({ where, select: { id: true, igdbId: true, name: true, cover: true, premiacoes: true } });
+    const filterAndMap = <T extends { premiacoes: unknown }>(
+      items: T[],
+      mapper: (item: T) => object
+    ) =>
+      items
+        .filter((item) => matchesPremiacaoFilters(item.premiacoes, awardName, year))
+        .map(mapper);
 
     const allAwards = [
-      ...filmes.map(f => ({ ...f, type: 'filme' })),
-      ...series.map(s => ({ ...s, type: 'serie' })),
-      ...animes.map(a => ({ ...a, type: 'anime' })),
-      ...jogos.map(j => ({ ...j, type: 'jogo' })),
+      ...filterAndMap(filmes, mapFilmeToMidia as (item: typeof filmes[number]) => object),
+      ...filterAndMap(series, mapSerieToMidia as (item: typeof series[number]) => object),
+      ...filterAndMap(animes, mapAnimeToMidia as (item: typeof animes[number]) => object),
+      ...filterAndMap(jogos, mapJogoToMidia as (item: typeof jogos[number]) => object),
     ];
 
     res.json(allAwards);
-
   } catch (error) {
     logger.error(`Erro ao buscar premiações: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar premiações.' });
+  }
+});
+
+// Rota para Eventos de games (IGDB — E3, Gamescom, State of Play, etc.)
+router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const status = typeof req.query.status === 'string' ? req.query.status : 'all';
+  const now = new Date();
+
+  try {
+    let where: Prisma.EventWhereInput = {};
+    if (status === 'upcoming') {
+      where = { start_time: { gte: now } };
+    } else if (status === 'ongoing') {
+      where = {
+        start_time: { lte: now },
+        OR: [{ end_time: { gte: now } }, { end_time: null }],
+      };
+    } else if (status === 'past') {
+      where = { end_time: { lt: now } };
+    }
+
+    const events = await prisma.event.findMany({
+      where,
+      include: {
+        games: {
+          include: {
+            genres: { include: { genero: true } },
+            platforms: { include: { plataforma: true }, take: 3 },
+          },
+          orderBy: { rating: 'desc' },
+          take: 40,
+        },
+        _count: { select: { games: true } },
+      },
+      orderBy: { start_time: 'asc' },
+    });
+
+    res.json(events.map(mapEventToResponse));
+  } catch (error) {
+    logger.error(`Erro ao buscar eventos: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar eventos.' });
   }
 });
 

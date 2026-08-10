@@ -5,6 +5,7 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import { runAwardScraper } from './scrapeAwards';
 
 const router = Router();
 
@@ -82,6 +83,8 @@ router.post('/run-sync-all', async (req, res) => {
     }
     logger.info('--- JOGOS ---');
     await syncGames(prisma, startDate, endDate);
+    logger.info('--- PREMIAÇÕES ---');
+    await runAwardScraper();
     logger.info('✅ Sincronização completa concluída.');
   } catch (error) {
     logger.error('Erro na sincronização completa:', error);

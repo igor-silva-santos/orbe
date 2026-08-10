@@ -9,7 +9,7 @@ import { ptBR } from 'date-fns/locale';
 
 
 import { apiClient } from '@/lib/api';
-import AwardIcon from '@/components/ui/AwardIcons';
+import AwardsBlock from '@/components/ui/AwardsBlock';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import CalendarModal from './CalendarModal';
 import AnimeModalContent from './super-modal/AnimeModalContent';
@@ -255,6 +255,9 @@ const SuperModal: React.FC = () => {
 
   if (!isSuperModalOpen || !midia || !type) return null;
 
+  const displayAwards = (details as { premiacoes?: typeof midia.premiacoes })?.premiacoes
+    ?? midia.premiacoes;
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
       <div className="container mx-auto px-4 py-8 max-w-full">
@@ -270,6 +273,11 @@ const SuperModal: React.FC = () => {
                 <X className="h-5 w-5 text-primary" />
               </button>
             </div>
+            {displayAwards && displayAwards.length > 0 && (
+              <div className="px-4 md:px-6 pt-4">
+                <AwardsBlock awards={displayAwards} />
+              </div>
+            )}
             {/* The content components now handle their own layout, including poster and info */}
             {renderContent()}
           </>

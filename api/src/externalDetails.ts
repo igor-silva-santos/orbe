@@ -1,6 +1,6 @@
 import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
-import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation } from './mappers';
+import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -316,7 +316,7 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
       }),
       prisma.filme.findUnique({
         where: { tmdbId },
-        select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true },
+        select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true, premiacoes: true },
       }),
     ]);
 
@@ -326,7 +326,10 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
     if (details.overview) {
       details.overview = (await withPortugueseTranslation({ overview: details.overview })).overview;
     }
-    return details;
+    return {
+      ...details,
+      premiacoes: parsePremiacoes(dbFilme?.premiacoes),
+    };
   } catch (error: any) {
     if (error?.status === 404 || error?.response?.status === 404) return null;
     logger.error(`Erro ao buscar filme ${tmdbId} no TMDB: ${error}`);
@@ -336,15 +339,25 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
 
 export async function fetchSerieDetailsLive(tmdbId: number) {
   try {
-    const serie = await tmdb.tvInfo({
-      id: tmdbId,
-      language: 'pt-BR',
-      append_to_response: 'credits,videos,watch/providers',
-    });
+    const [serie, dbSerie] = await Promise.all([
+      tmdb.tvInfo({
+        id: tmdbId,
+        language: 'pt-BR',
+        append_to_response: 'credits,videos,watch/providers',
+      }),
+      prisma.serie.findUnique({
+        where: { tmdbId },
+        select: { premiacoes: true },
+      }),
+    ]);
 
     if (!serie?.id) return null;
 
-    return withPortugueseTranslation(mapSerieToMidia(mapTmdbSerieToPrismaLike(serie)));
+    const mapped = await withPortugueseTranslation(mapSerieToMidia(mapTmdbSerieToPrismaLike(serie)));
+    return {
+      ...mapped,
+      premiacoes: parsePremiacoes(dbSerie?.premiacoes),
+    };
   } catch (error: any) {
     if (error?.status === 404 || error?.response?.status === 404) return null;
     logger.error(`Erro ao buscar série ${tmdbId} no TMDB: ${error}`);
@@ -354,10 +367,16 @@ export async function fetchSerieDetailsLive(tmdbId: number) {
 
 export async function fetchAnimeDetailsLive(anilistId: number) {
   try {
-    const response = await anilistApi.post('', {
-      query: ANIME_DETAIL_QUERY,
-      variables: { id: anilistId },
-    });
+    const [response, dbAnime] = await Promise.all([
+      anilistApi.post('', {
+        query: ANIME_DETAIL_QUERY,
+        variables: { id: anilistId },
+      }),
+      prisma.anime.findUnique({
+        where: { anilistId },
+        select: { premiacoes: true },
+      }),
+    ]);
 
     if (response.data.errors?.length) {
       logger.error(`Erro AniList para anime ${anilistId}: ${response.data.errors[0].message}`);
@@ -367,7 +386,11 @@ export async function fetchAnimeDetailsLive(anilistId: number) {
     const anime = response.data.data?.Media;
     if (!anime) return null;
 
-    return withPortugueseTranslation(mapAnimeToMidia(mapAnilistToPrismaLike(anime)));
+    const mapped = await withPortugueseTranslation(mapAnimeToMidia(mapAnilistToPrismaLike(anime)));
+    return {
+      ...mapped,
+      premiacoes: parsePremiacoes(dbAnime?.premiacoes),
+    };
   } catch (error) {
     logger.error(`Erro ao buscar anime ${anilistId} no AniList: ${error}`);
     throw error;
@@ -394,14 +417,24 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       limit 1;
     `;
 
-    const response = await igdbApi.post('/games', query, {
-      headers: { 'Accept-Language': 'pt-BR' },
-    });
+    const [response, dbJogo] = await Promise.all([
+      igdbApi.post('/games', query, {
+        headers: { 'Accept-Language': 'pt-BR' },
+      }),
+      prisma.jogo.findUnique({
+        where: { igdbId },
+        select: { premiacoes: true },
+      }),
+    ]);
 
     const game = response.data?.[0];
     if (!game) return null;
 
-    return withPortugueseTranslation(mapJogoToMidia(mapIgdbToPrismaLike(game)));
+    const mapped = await withPortugueseTranslation(mapJogoToMidia(mapIgdbToPrismaLike(game)));
+    return {
+      ...mapped,
+      premiacoes: parsePremiacoes(dbJogo?.premiacoes),
+    };
   } catch (error) {
     logger.error(`Erro ao buscar jogo ${igdbId} no IGDB: ${error}`);
     throw error;

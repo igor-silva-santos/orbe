@@ -186,6 +186,40 @@ const mapStreamingProviders = (providers: any[] | undefined) =>
     url: p.url,
   })) ?? [];
 
+export type PremiacaoEntry = {
+  nome: string;
+  ano: number;
+  categoria: string;
+  status: 'vencedor' | 'indicado';
+};
+
+export const parsePremiacoes = (raw: unknown): PremiacaoEntry[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((item): item is Record<string, unknown> => item !== null && typeof item === 'object')
+    .map((item) => ({
+      nome: String(item.nome ?? ''),
+      ano: Number(item.ano ?? 0),
+      categoria: String(item.categoria ?? ''),
+      status: (item.status === 'vencedor' ? 'vencedor' : 'indicado') as PremiacaoEntry['status'],
+    }))
+    .filter((entry) => entry.nome && entry.ano > 0);
+};
+
+export const matchesPremiacaoFilters = (
+  premiacoes: unknown,
+  awardName?: string,
+  year?: number
+): boolean => {
+  const awards = parsePremiacoes(premiacoes);
+  if (awards.length === 0) return false;
+  return awards.some((award) => {
+    if (awardName && !award.nome.toLowerCase().includes(awardName.toLowerCase())) return false;
+    if (year !== undefined && !Number.isNaN(year) && award.ano !== year) return false;
+    return true;
+  });
+};
+
 export const mapFilmeToMidia = (filme: any) => {
   return {
     type: 'filme',
@@ -221,6 +255,7 @@ export const mapFilmeToMidia = (filme: any) => {
     status: filme.status,
     budget: filme.budget ? filme.budget.toString() : null,
     revenue: filme.revenue ? filme.revenue.toString() : null,
+    premiacoes: parsePremiacoes(filme.premiacoes),
   };
 };
 
@@ -263,6 +298,7 @@ export const mapSerieToMidia = (serie: any) => {
       nome: s.name,
       poster_url: s.posterPath ? `${TMDB_IMAGE_BASE_URL}${s.posterPath}` : null,
     })) ?? [],
+    premiacoes: parsePremiacoes(serie.premiacoes),
   };
 };
 
@@ -369,6 +405,7 @@ export const mapAnimeToMidia = (anime: any) => {
     airingSchedule: anime.airingSchedule,
     format: anime.format,
     isAdult: anime.isAdult,
+    premiacoes: parsePremiacoes(anime.premiacoes),
   };
 };
 
@@ -393,8 +430,21 @@ export const mapJogoToMidia = (jogo: any) => {
     artworks: jogo.artworks?.map((a: any) => resolveIgdbImageUrl(a.url)) ?? [],
     videos: jogo.videos?.map((v: any) => ({ key: v.key, site: v.site, type: v.type, nome: v.name, official: v.official })) ?? [],
     websites: jogo.websites?.map((w: any) => ({ category: w.category, url: w.url })) ?? [],
+    premiacoes: parsePremiacoes(jogo.premiacoes),
   };
 };
+
+export const mapEventToResponse = (event: any) => ({
+  id: event.igdbId,
+  igdbId: event.igdbId,
+  nome: event.name,
+  descricao: event.description ?? null,
+  data_inicio: event.start_time?.toISOString?.() ?? event.start_time ?? null,
+  data_fim: event.end_time?.toISOString?.() ?? event.end_time ?? null,
+  url: event.url ?? null,
+  total_jogos: event.games?.length ?? event._count?.games ?? 0,
+  jogos: (event.games ?? []).map(mapJogoToMidia),
+});
 
 /** Payload mínimo para cards de carrossel — sem elenco, vídeos ou sinopse */
 export const mapFilmeToCarouselCard = (filme: any) => ({
