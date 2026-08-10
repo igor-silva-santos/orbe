@@ -254,17 +254,43 @@ const capitalizeWeekday = (weekday: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('-');
 
-/** Ex.: "Ep. 6 em 13/08/2026 (Quarta-Feira)" */
-export const formatNextEpisodeSchedule = (
+export const formatNextEpisodeWeekday = (airingAt: string): string => {
+  try {
+    return capitalizeWeekday(format(new Date(airingAt), 'EEEE', { locale: ptBR }));
+  } catch {
+    return '';
+  }
+};
+
+/** Modal — ex.: "Ep. 8 em 16/08/2026 - Domingo" */
+export const formatNextEpisodeDetail = (
   airingAt: string,
-  episode: number
+  episode: number,
 ): string => {
   try {
     const date = new Date(airingAt);
     const dateLabel = format(date, 'dd/MM/yyyy', { locale: ptBR });
-    const weekday = capitalizeWeekday(format(date, 'EEEE', { locale: ptBR }));
-    return `Ep. ${episode} em ${dateLabel} (${weekday})`;
+    const weekday = formatNextEpisodeWeekday(airingAt);
+    return weekday
+      ? `Ep. ${episode} em ${dateLabel} - ${weekday}`
+      : `Ep. ${episode} em ${dateLabel}`;
   } catch {
     return `Ep. ${episode}`;
   }
 };
+
+/** Card — ex.: "Ep 8 em 6d 10h 10m - Domingo" */
+export const formatNextEpisodeCard = (
+  airingAt: string,
+  episode: number,
+  countdown: string,
+): string => {
+  const weekday = formatNextEpisodeWeekday(airingAt);
+  const countdownLabel = countdown || 'em breve';
+  return weekday
+    ? `Ep ${episode} em ${countdownLabel} - ${weekday}`
+    : `Ep ${episode} em ${countdownLabel}`;
+};
+
+/** @deprecated Use formatNextEpisodeDetail */
+export const formatNextEpisodeSchedule = formatNextEpisodeDetail;

@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { ExternalLink, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { NOT_INFORMED, translateAnimeGenre, formatNextEpisodeSchedule } from '@/lib/media-helpers';
+import { NOT_INFORMED, translateAnimeGenre, formatNextEpisodeDetail } from '@/lib/media-helpers';
 
 interface AnimeInfoBlockProps {
   anime: Anime;
@@ -110,7 +110,7 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
         <div>
           <span className={`font-semibold ${labelColor}`}>Próximo episódio:</span>
           <span className="inline-flex ml-2 mt-1 items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-3 py-1 text-xs font-bold text-orange-700 dark:text-orange-300">
-            {formatNextEpisodeSchedule(
+            {formatNextEpisodeDetail(
               anime.nextAiringEpisode.airingAt,
               anime.nextAiringEpisode.episode
             )}
