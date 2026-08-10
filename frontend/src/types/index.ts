@@ -106,6 +106,7 @@ export interface Filme extends Midia {
   ultima_verificacao_ingresso?: string;
   videos?: Video[];
   status?: string;
+  status_label?: string;
 }
 
 export interface Temporada {
@@ -124,6 +125,7 @@ export interface Serie extends Midia {
   numero_temporadas: number;
   numero_episodios: number;
   status?: string;
+  status_label?: string;
   criadores: Creator[];
   elenco: CastMember[];
   videos?: Video[];
@@ -257,6 +259,24 @@ export interface Evento {
   url?: string | null;
   total_jogos: number;
   jogos: Jogo[];
+}
+
+export interface EventoProximos {
+  filmes: Filme[];
+  series: Serie[];
+  animes: Anime[];
+  jogos: Jogo[];
+}
+
+export interface EventoDestaquesRecentes {
+  filmes: Filme[];
+  eventos: Evento[];
+}
+
+export interface EventoResumo {
+  eventos_games: Evento[];
+  proximos: EventoProximos;
+  destaques_recentes: EventoDestaquesRecentes;
 }
 
 // Interface para eventos de anúncio (legado)

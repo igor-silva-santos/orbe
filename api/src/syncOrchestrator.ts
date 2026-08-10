@@ -4,6 +4,7 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import { runAwardScraper } from './scrapeAwards';
 import {
   markPhaseComplete,
   releaseSyncLock,
@@ -14,6 +15,7 @@ import {
   type SyncPhase,
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
+import { invalidateCacheByPatterns } from './cacheInvalidation';
 
 export type FullSyncParams = {
   startDate: string;
@@ -83,7 +85,23 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       logger.info('⏭️ Fase jogos já concluída (checkpoint). Pulando.');
     }
 
+    if (!phaseDone(completed, 'premios')) {
+      logger.info('--- Fase PREMIAÇÕES ---');
+      await updateSyncProgress(prisma, { phase: 'premios' });
+      await runAwardScraper();
+      await markPhaseComplete(prisma, 'premios');
+    } else {
+      logger.info('⏭️ Fase premiações já concluída (checkpoint). Pulando.');
+    }
+
     logger.info('✅ Sincronização completa concluída.');
+    await invalidateCacheByPatterns([
+      'cache:/api/homepage*',
+      'cache:/api/filmes/by-month*',
+      'cache:/api/filmes/by-year*',
+      'cache:/api/premios*',
+      'cache:/api/eventos*',
+    ]);
     await releaseSyncLock(prisma);
   } catch (error) {
     await failSyncRun(prisma, error);

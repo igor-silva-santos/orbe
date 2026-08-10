@@ -1,4 +1,4 @@
-import type { Filme, Serie, Anime, Jogo } from '@/types';
+import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
 
@@ -188,7 +188,7 @@ export const apiClient = {
 // API específica para o Orbe Nerd
 export const orbeNerdApi = {
   // Filmes
-  getFilmes: async (params?: { page?: number; filtro?: string; genero?: string; ano?: string; status?: string }) => {
+  getFilmes: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; ano?: string; mes?: string; status?: string; plataforma?: string }) => {
     return apiClient.get('/filmes', params);
   },
 
@@ -201,7 +201,7 @@ export const orbeNerdApi = {
   },
 
   // Séries
-  getSeries: async (params?: { page?: number; genero?: string; ano?: string; status?: string }) => {
+  getSeries: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; ano?: string; mes?: string; status?: string; plataforma?: string }) => {
     return apiClient.get('/series', params);
   },
 
@@ -214,7 +214,7 @@ export const orbeNerdApi = {
   },
 
   // Animes
-  getAnimes: async (params?: { page?: number; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }) => {
+  getAnimes: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }) => {
     return apiClient.get('/animes', {
       ...params,
       includeAdult: params?.includeAdult ? 'true' : undefined,
@@ -235,7 +235,7 @@ export const orbeNerdApi = {
   },
 
   // Jogos
-  getJogos: async (params?: { page?: number; genero?: string; plataforma?: string; modo?: string; ano?: string }) => {
+  getJogos: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; plataforma?: string; modo?: string; ano?: string }) => {
     return apiClient.get('/jogos', params);
   },
 
@@ -272,6 +272,10 @@ export const orbeNerdApi = {
 
   getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
     return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
+  },
+
+  getEventosResumo: async (): Promise<EventoResumo> => {
+    return apiClient.get('/eventos/resumo');
   },
 
   // Pesquisa

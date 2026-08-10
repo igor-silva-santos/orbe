@@ -33,21 +33,26 @@ async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initial
 }
 
 async function fetchAndSyncEvents(prisma: PrismaClient, startDateStr: string, endDateStr: string): Promise<any[]> {
-    logger.info(`Buscando e sincronizando eventos da IGDB entre ${startDateStr} e ${endDateStr}...`);
+    logger.info(`Buscando e sincronizando eventos da IGDB entre ${startDateStr} e ${endDateStr} (incl. futuros)...`);
     const startDate = Math.floor(new Date(startDateStr).getTime() / 1000);
     const endDate = Math.floor(new Date(endDateStr).getTime() / 1000);
+    const nowTs = Math.floor(Date.now() / 1000);
 
     const query = `
         fields name, description, start_time, end_time, games;
-        where start_time >= ${startDate} & start_time <= ${endDate};
-        limit 50;
+        where (start_time >= ${startDate} & start_time <= ${endDate}) | start_time > ${nowTs};
+        sort start_time asc;
+        limit 200;
     `;
     logger.info(`Query IGDB para eventos: ${query}`);
     try {
         const response = await igdbApiWithRetry(() => igdbApi.post('/events', query));
-        const events = response.data;
+        const events = response.data as any[];
+        const seenIds = new Set<number>();
 
         for (const event of events) {
+            if (seenIds.has(event.id)) continue;
+            seenIds.add(event.id);
             await prisma.event.upsert({
                 where: { igdbId: event.id },
                 update: {

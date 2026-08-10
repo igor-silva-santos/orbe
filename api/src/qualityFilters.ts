@@ -126,14 +126,29 @@ export const filmeQualityFilter: Prisma.FilmeWhereInput = {
   ],
 };
 
+/** Carrossel: critérios relaxados (poster + engajamento mínimo ou curadoria) */
+export const filmeCarouselQualityFilter: Prisma.FilmeWhereInput = {
+  AND: [
+    { posterPath: { not: null } },
+    {
+      OR: [
+        { emCartaz: true },
+        { emBreve: true },
+        { localizacaoPtBr: true },
+        { popularity: { gte: 5 } },
+        { voteCount: { gte: 10 } },
+      ],
+    },
+  ],
+};
+
 /**
  * Carrossel: prioriza filmes com localização pt-BR (campo do sync).
- * Não exclui filmes sem flag (null = ainda não re-sincronizado) nem blockbusters/em cartaz.
+ * Blockbusters e em cartaz/em breve ainda entram sem flag pt-BR explícita.
  */
 export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
   OR: [
     { localizacaoPtBr: true },
-    { localizacaoPtBr: null },
     { emCartaz: true },
     { emBreve: true },
     { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },

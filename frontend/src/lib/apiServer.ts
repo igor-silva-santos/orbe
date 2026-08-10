@@ -10,18 +10,27 @@ export interface HomepageData {
 export interface MediaListResponse<T> {
   results: T[];
   total: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface StatusOption {
+  value: string;
+  label: string;
 }
 
 export interface FilmeFilters {
   genres: string[];
   years: number[];
-  statuses: string[];
+  statuses: StatusOption[];
+  platforms: string[];
 }
 
 export interface SerieFilters {
   genres: string[];
   years: number[];
-  statuses: string[];
+  statuses: StatusOption[];
+  platforms: string[];
 }
 
 export interface AnimeFilters {
@@ -29,7 +38,7 @@ export interface AnimeFilters {
   years: number[];
   formats: string[];
   sources: string[];
-  statuses: string[];
+  statuses: StatusOption[];
 }
 
 export interface JogoFilters {
@@ -110,7 +119,8 @@ export async function fetchFilmesPageData(): Promise<FilmesPageData> {
     filters: {
       genres: filters.genres ?? [],
       years: filters.years ?? [],
-      statuses: (filters.statuses ?? []).filter(Boolean) as string[],
+      statuses: filters.statuses ?? [],
+      platforms: filters.platforms ?? [],
     },
   };
 }
@@ -126,7 +136,8 @@ export async function fetchSeriesPageData(): Promise<SeriesPageData> {
     filters: {
       genres: filters.genres ?? [],
       years: filters.years ?? [],
-      statuses: (filters.statuses ?? []).filter(Boolean) as string[],
+      statuses: filters.statuses ?? [],
+      platforms: filters.platforms ?? [],
     },
   };
 }

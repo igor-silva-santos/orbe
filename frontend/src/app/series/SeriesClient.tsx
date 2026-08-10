@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Filter, Calendar, Star } from 'lucide-react';
+import { Filter, Calendar, Star, Monitor } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Serie } from '@/types';
@@ -9,23 +9,41 @@ import type { SeriesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
 
+const MONTHS = [
+  { value: '1', label: 'Janeiro' },
+  { value: '2', label: 'Fevereiro' },
+  { value: '3', label: 'Março' },
+  { value: '4', label: 'Abril' },
+  { value: '5', label: 'Maio' },
+  { value: '6', label: 'Junho' },
+  { value: '7', label: 'Julho' },
+  { value: '8', label: 'Agosto' },
+  { value: '9', label: 'Setembro' },
+  { value: '10', label: 'Outubro' },
+  { value: '11', label: 'Novembro' },
+  { value: '12', label: 'Dezembro' },
+];
+
 interface SeriesClientProps {
   initialData: SeriesPageData;
 }
 
 export default function SeriesClient({ initialData }: SeriesClientProps) {
   const [series, setSeries] = useState<Serie[]>(initialData.results);
+  const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
 
   const [availableGenres, setAvailableGenres] = useState<string[]>(initialData.filters.genres);
   const [availableYears, setAvailableYears] = useState<number[]>(initialData.filters.years);
-  const [availableStatuses, setAvailableStatuses] = useState<string[]>(initialData.filters.statuses);
+  const [availableStatuses, setAvailableStatuses] = useState(initialData.filters.statuses);
+  const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(initialData.filters.platforms);
 
-  // Estados para os filtros selecionados
   const [selectedGenre, setSelectedGenre] = useState<string>('todos');
   const [selectedYear, setSelectedYear] = useState<string>('todos');
+  const [selectedMonth, setSelectedMonth] = useState<string>('todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('todos');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('todos');
 
   const skipInitialFetch = useRef(true);
 
@@ -41,9 +59,12 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
         const response = await realApi.getSeries({
           genero: selectedGenre === 'todos' ? undefined : selectedGenre,
           ano: selectedYear === 'todos' ? undefined : selectedYear,
+          mes: selectedMonth === 'todos' ? undefined : selectedMonth,
           status: selectedStatus === 'todos' ? undefined : selectedStatus,
+          plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
         });
         setSeries(response.results);
+        setTotalResults(response.total_results);
       } catch (error) {
         console.error('Erro ao carregar séries:', error);
       } finally {
@@ -52,7 +73,7 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
     };
 
     loadSeries();
-  }, [selectedGenre, selectedYear, selectedStatus]);
+  }, [selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
@@ -95,6 +116,23 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
           </div>
 
           <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              disabled={isLoadingFilters}
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            >
+              <option value="todos">Todos os Meses</option>
+              {MONTHS.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 w-full">
             <Star className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={selectedStatus}
@@ -104,8 +142,25 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
             >
               <option value="todos">Todos os Status</option>
               {availableStatuses.map((status) => (
-                <option key={status} value={status!}>
-                  {status}
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 w-full">
+            <Monitor className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select
+              value={selectedPlatform}
+              onChange={(e) => setSelectedPlatform(e.target.value)}
+              disabled={isLoadingFilters}
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            >
+              <option value="todos">Todas as Plataformas</option>
+              {availablePlatforms.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
                 </option>
               ))}
             </select>
@@ -115,7 +170,7 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
 
       <div className="mb-6">
         <p className="text-muted-foreground">
-          {isLoading ? 'Carregando...' : `${series.length} ${series.length === 1 ? 'série encontrada' : 'séries encontradas'}`}
+          {isLoading ? 'Carregando...' : `${totalResults} ${totalResults === 1 ? 'série encontrada' : 'séries encontradas'}`}
         </p>
       </div>
 

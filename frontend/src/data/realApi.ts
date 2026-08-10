@@ -36,7 +36,7 @@ export const realApi = {
   },
 
   // Filmes
-  getFilmes: async (params: { filtro?: string; genero?: string; page?: number; ano?: string; status?: string }): Promise<{ results: Filme[]; total_pages: number; total_results: number }> => {
+  getFilmes: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; ano?: string; mes?: string; status?: string; plataforma?: string }): Promise<{ results: Filme[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getFilmes(params);
       
@@ -44,9 +44,10 @@ export const realApi = {
         ...filme 
       }));
 
+      const limit = response.limit ?? 48;
       return {
         results: mappedResults,
-        total_pages: Math.ceil(response.total / 20),
+        total_pages: Math.ceil(response.total / limit),
         total_results: response.total
       };
     } catch (error) {
@@ -58,7 +59,7 @@ export const realApi = {
   getFilmeFilters: orbeNerdApi.getFilmeFilters,
 
   // Series
-  getSeries: async (params: { filtro?: string; genero?: string; page?: number; ano?: string; status?: string }): Promise<{ results: Serie[]; total_pages: number; total_results: number }> => {
+  getSeries: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; ano?: string; mes?: string; status?: string; plataforma?: string }): Promise<{ results: Serie[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getSeries(params);
       
@@ -66,9 +67,10 @@ export const realApi = {
         ...serie
       }));
 
+      const limit = response.limit ?? 48;
       return {
         results: mappedResults,
-        total_pages: Math.ceil(response.total / 20),
+        total_pages: Math.ceil(response.total / limit),
         total_results: response.total
       };
     } catch (error) {
@@ -80,7 +82,7 @@ export const realApi = {
   getSerieFilters: orbeNerdApi.getSerieFilters,
 
   // Animes
-  getAnimes: async (params: { filtro?: string; genero?: string; page?: number; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }): Promise<{ results: Anime[]; total_pages: number; total_results: number }> => {
+  getAnimes: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }): Promise<{ results: Anime[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getAnimes(params);
       
@@ -88,9 +90,10 @@ export const realApi = {
         ...anime
       }));
 
+      const limit = response.limit ?? 48;
       return {
         results: mappedResults,
-        total_pages: Math.ceil(response.total / 20),
+        total_pages: Math.ceil(response.total / limit),
         total_results: response.total
       };
     } catch (error) {
@@ -102,7 +105,7 @@ export const realApi = {
   getAnimeFilters: orbeNerdApi.getAnimeFilters,
 
   // Jogos
-  getJogos: async (params: { filtro?: string; genero?: string; page?: number; plataforma?: string; modo?: string; ano?: string }): Promise<{ results: Jogo[]; total_pages: number; total_results: number }> => {
+  getJogos: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; plataforma?: string; modo?: string; ano?: string }): Promise<{ results: Jogo[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getJogos(params);
       
@@ -110,9 +113,10 @@ export const realApi = {
           ...jogo
       }));
 
+      const limit = response.limit ?? 48;
       return {
         results: mappedResults,
-        total_pages: Math.ceil(response.total / 20),
+        total_pages: Math.ceil(response.total / limit),
         total_results: response.total
       };
     } catch (error) {
