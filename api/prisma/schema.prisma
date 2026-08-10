@@ -98,6 +98,8 @@ model Serie {
 
   @@index([firstAirDate])
 }
+
+model Anime {
   id             Int       @id @default(autoincrement())
   anilistId      Int       @unique
   malId          Int?      @unique

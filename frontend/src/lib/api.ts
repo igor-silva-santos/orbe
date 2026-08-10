@@ -1,5 +1,6 @@
 import type { Filme, Serie, Anime, Jogo } from '@/types';
 import { API_BASE } from './apiBase';
+import { clearBrowserSession } from './session';
 
 const API_BASE_URL = API_BASE;
 
@@ -23,6 +24,7 @@ export const removeToken = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    clearBrowserSession();
   }
 };
 
@@ -85,6 +87,38 @@ export const apiClient = {
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+
+    if (response.status === 401) {
+      removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?error=session_expired';
+      }
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  patch: async (endpoint: string, data: any) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    const token = getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
       headers,
       body: JSON.stringify(data),
     });
@@ -265,7 +299,7 @@ export const orbeNerdApi = {
   },
 
   updateUserProfile: async (data: { nome?: string; bio?: string; avatar?: string; preferencias?: any; perfil_publico?: boolean }) => {
-    return apiClient.get('/users/me');
+    return apiClient.patch('/users/me', data);
   },
 
   // Comentários
