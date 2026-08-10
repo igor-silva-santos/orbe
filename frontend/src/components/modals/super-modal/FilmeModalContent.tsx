@@ -9,6 +9,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
 import { buildIngressoUrl } from '@/lib/ingresso';
+import { resolveFilmeTitle, resolveFilmePoster } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
 
 interface FilmeModalContentProps {
@@ -27,15 +28,17 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
     || filme.videos?.find((v) => v.type === 'Trailer')?.key
     || filme.videos?.[0]?.key;
 
-  const releaseDate = filme.releaseDate ? new Date(filme.releaseDate) : null;
+  const releaseDateRaw = filme.releaseDate ?? (filme as { data_lancamento_api?: string }).data_lancamento_api;
+  const releaseDate = releaseDateRaw ? new Date(releaseDateRaw) : null;
   const now = new Date();
 
   const isFutureRelease = releaseDate && releaseDate > now;
-  const ingressoUrl = filme.ingresso_link || buildIngressoUrl(filme.title);
+  const filmeTitle = resolveFilmeTitle(filme);
+  const ingressoUrl = filme.ingresso_link || buildIngressoUrl(filmeTitle);
   const canBuyTickets = filme.tem_sessoes === true;
 
   const streamingProviders = (filme.streamingProviders || []).filter(
-    (p) => p.url && !isTmdbProvider(p.provider.name)
+    (p) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name)
   );
 
   return (
@@ -43,8 +46,8 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
       <div className="flex flex-col md:flex-row gap-6">
         <div className="w-40 sm:w-48 flex-shrink-0 mx-auto md:mx-0">
           <SafeImage
-            src={filme.posterPath ? `https://image.tmdb.org/t/p/w500${filme.posterPath}` : null}
-            alt={`Pôster de ${filme.title}`}
+            src={resolveFilmePoster(filme)}
+            alt={`Pôster de ${filmeTitle}`}
             width={500}
             height={750}
             className="rounded-lg shadow-lg w-full"

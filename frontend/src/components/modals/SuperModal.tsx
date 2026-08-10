@@ -53,8 +53,9 @@ const SuperModal: React.FC = () => {
 
   useEffect(() => {
     if (isSuperModalOpen && midia) {
-      // Reset edit mode when modal opens
       setIsEditMode(false);
+      setDetails(null);
+      setIsLoadingDetails(true);
       loadAdditionalData();
     }
   }, [isSuperModalOpen, midia, loadAdditionalData]);
