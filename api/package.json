@@ -10,7 +10,7 @@
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "prisma:generate": "npx prisma generate",
-    "prisma:deploy": "npx prisma migrate deploy",
+    "prisma:deploy": "node scripts/prisma-deploy.js",
     "release": "npx prisma migrate deploy && npm run build",
     "sync": "cross-env LOG_TO_FILE=true ts-node src/sync.ts",
     "sync:movies": "cross-env LOG_TO_FILE=true ts-node src/syncMovies.ts",
