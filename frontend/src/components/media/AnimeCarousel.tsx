@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
 import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
@@ -73,9 +74,19 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
 
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel();
 
+  const setViewportRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      viewportRef.current = node;
+      emblaRef(node);
+    },
+    [emblaRef]
+  );
+
   useFanCarouselSlides(emblaApi);
+  useCtrlWheelCarousel(emblaApi, viewportRef);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;
@@ -349,6 +360,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                 </DropdownMenu>
                 <button onClick={() => navigateSeason('prev')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronLeft className="h-4 w-4"/></button>
                 <button onClick={() => navigateSeason('next')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronRight className="h-4 w-4"/></button>
+                <p className="text-xs text-muted-foreground hidden sm:block">Ctrl + scroll para navegar</p>
             </div>
             {initialData.length > 0 && (
               <button 
@@ -362,7 +374,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
         <div className="flex">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (

@@ -179,7 +179,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
               className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
             >
-              <div className="relative w-full aspect-[206/290] overflow-hidden rounded-[20px] border-[3px] border-[var(--orbe-block-border)] shadow-[5px_5px_0_var(--orbe-block-border)] transition-transform duration-250 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:-rotate-2 group-hover:shadow-[9px_9px_0_var(--orbe-block-border)]">
+              <div className="relative w-full aspect-[206/290] rounded-lg overflow-hidden">
                 <SafeImage
                   src={midia.poster_url_api}
                   alt={midia.titulo_api || 'Imagem da Mídia'}
@@ -188,7 +188,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   sizes="33vw"
                   imageSize="w342"
                   loading="lazy"
-                  className={`object-cover object-center transition-all duration-300 group-hover:scale-105 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
+                  className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
                 {type === 'filme' && (midia as any).em_prevenda && (
