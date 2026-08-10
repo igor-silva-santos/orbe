@@ -149,6 +149,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     void prefetchMonths(now.getFullYear(), now.getMonth() + 1);
     void prefetchMonths(now.getFullYear(), now.getMonth() + 2);
     void prefetchMonths(now.getFullYear(), now.getMonth() + 3);
+    void prefetchMonths(now.getFullYear(), now.getMonth() + 4);
   }, [prefetchMonths]);
 
   const fetchMediaByYear = useCallback(
