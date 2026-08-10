@@ -33,6 +33,7 @@
   --orbe-accent: #4F46E5;
   --orbe-accent-2: #EA580C;
   --orbe-block-border: #1E1B4B;
+  --orbe-divider: color-mix(in srgb, var(--foreground) 12%, transparent);
   --orbe-block-shadow: #1E1B4B;
   --orbe-hero-yellow: #facc15;
   --background: #EEF2FF;
@@ -81,6 +82,7 @@
   --orbe-accent: #818CF8;
   --orbe-accent-2: #FB923C;
   --orbe-block-border: #E0E7FF;
+  --orbe-divider: color-mix(in srgb, var(--foreground) 12%, transparent);
   --orbe-block-shadow: #E0E7FF;
   --orbe-hero-yellow: #facc15;
   --chart-1: oklch(0.65 0.2 275);
@@ -290,7 +292,7 @@ body {
   background: color-mix(in srgb, var(--background) 88%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 3px solid var(--orbe-block-border);
+  border-bottom: 1px solid var(--orbe-divider);
   transition: background-color 0.3s ease;
 }
 

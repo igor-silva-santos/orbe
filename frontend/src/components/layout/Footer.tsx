@@ -31,13 +31,13 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-background border-t-[3px] border-[var(--orbe-block-border)] mt-16">
+    <footer className="bg-background border-t border-[var(--orbe-divider)] mt-16">
       <div className="container mx-auto px-4 py-12">
         {/* Logo e Descrição */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3 mb-4">
-              <span className="w-8 h-8 rounded-full border-[3px] border-[var(--orbe-block-border)] bg-[var(--orbe-accent)] text-[var(--background)] font-display text-xs flex items-center justify-center">
+              <span className="w-8 h-8 rounded-full bg-[var(--orbe-accent)] text-[var(--background)] font-display text-xs flex items-center justify-center">
                 O
               </span>
               <h3 className="font-display text-xl orbe-text-primary">
