@@ -7,6 +7,7 @@ import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
 import { runAwardScraper } from './scrapeAwards';
 import { executeFullSync } from './syncOrchestrator';
+import { invalidateCacheByPatterns } from './cacheInvalidation';
 import {
   acquireSyncLock,
   failSyncRun,
@@ -199,9 +200,12 @@ router.post('/run-sync-awards', protectSync, async (_req, res) => {
   res.status(202).json({ message: 'Scrape de premiações iniciado. Verifique os logs.' });
 
   try {
-    await runAwardScraper();
+    const stats = await runAwardScraper();
     await markPhaseComplete(prisma, 'premios');
-    logger.info('Scrape de premiações concluído.');
+    await invalidateCacheByPatterns(['cache:/api/premios*']);
+    logger.info(
+      `Scrape de premiações concluído. scraped=${stats.scraped}, matched=${stats.matched}, updated=${stats.updated}, notFound=${stats.notFound}`
+    );
   } catch (error) {
     logger.error('Erro no scrape de premiações:', error);
   }

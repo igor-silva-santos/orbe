@@ -1324,6 +1324,7 @@ router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   const awardName = typeof req.query.awardName === 'string' ? req.query.awardName : undefined;
   const yearParam = req.query.year;
   const year = yearParam !== undefined ? parseInt(String(yearParam), 10) : undefined;
+  const { page, limit, skip } = parsePagination(req.query);
 
   const premioInclude = {
     genres: { include: { genero: true } },
@@ -1358,7 +1359,10 @@ router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
       ...filterAndMap(jogos, mapJogoToMidia as (item: typeof jogos[number]) => object),
     ];
 
-    res.json(allAwards);
+    const total = allAwards.length;
+    const results = allAwards.slice(skip, skip + limit);
+
+    res.json({ results, total, page, limit });
   } catch (error) {
     logger.error(`Erro ao buscar premiações: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar premiações.' });
