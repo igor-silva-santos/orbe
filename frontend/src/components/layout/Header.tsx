@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppStore } from '@/stores/appStore';
+import { removeToken } from '@/lib/api';
 import type { HeaderProps } from '@/types';
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -63,9 +64,11 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogout = () => {
+    removeToken();
     logout();
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
+    window.location.href = '/';
   };
 
   return (

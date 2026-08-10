@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, Github } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { realApi } from '@/data/realApi';
+import { establishBrowserSession } from '@/lib/session';
 
 export default function LoginPage() {
   const { login } = useAppStore();
@@ -23,8 +24,11 @@ export default function LoginPage() {
       const response = await realApi.login({ email: formData.email, password: formData.password });
       if (response?.token && response?.user) {
         localStorage.setItem('token', response.token);
+        await establishBrowserSession(response.token);
         login(response.user);
-        window.location.href = '/';
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+        window.location.href = redirect && redirect.startsWith('/') ? redirect : '/';
       } else {
         console.error('Login failed: Invalid credentials or API error');
         alert('Email ou senha inválidos.');
