@@ -14,6 +14,7 @@ import {
   type SyncPhase,
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
+import { invalidateCacheByPatterns } from './cacheInvalidation';
 
 export type FullSyncParams = {
   startDate: string;
@@ -84,6 +85,10 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
     }
 
     logger.info('✅ Sincronização completa concluída.');
+    await invalidateCacheByPatterns([
+      'cache:/api/homepage*',
+      'cache:/api/filmes/by-month*',
+    ]);
     await releaseSyncLock(prisma);
   } catch (error) {
     await failSyncRun(prisma, error);

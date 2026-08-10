@@ -5,6 +5,7 @@ import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapF
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
+  filmeCarouselQualityFilter,
   filmeCarouselLocalizationFilter,
   serieQualityFilter,
   animeQualityFilter,
@@ -82,7 +83,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   try {
     const [filmes, series, jogos, animes] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeQualityFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
+        where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
@@ -138,7 +139,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   try {
     const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeQualityFilter, { emCartaz: true }] },
+        where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
         orderBy: { popularity: 'desc' },
         take: 12,
         include: { streamingProviders: { include: { provider: true } } },
@@ -326,7 +327,7 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
     const filmes = await prisma.filme.findMany({
       where: {
         AND: [
-          filmeQualityFilter,
+          filmeCarouselQualityFilter,
           filmeCarouselLocalizationFilter,
           {
             releaseDate: {
@@ -366,7 +367,7 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
     const filmes = await prisma.filme.findMany({
       where: {
         AND: [
-          filmeQualityFilter,
+          filmeCarouselQualityFilter,
           filmeCarouselLocalizationFilter,
           {
             releaseDate: {
@@ -400,7 +401,7 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   try {
     const filmes = await prisma.filme.findMany({
       where: {
-        AND: [filmeQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: startDate, lte: endDate } }],
+        AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: startDate, lte: endDate } }],
       },
       orderBy: { releaseDate: 'asc' },
       take: CAROUSEL_ITEM_LIMIT,
