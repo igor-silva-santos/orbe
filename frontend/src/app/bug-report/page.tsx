@@ -16,7 +16,7 @@ export default function BugReportPage() {
           <p className="text-sm text-muted-foreground">
             Descreva o bug encontrado com o máximo de detalhes possível: página, ação realizada e o que aconteceu.
           </p>
-          <Link href="/contato" className="orbe-block orbe-block-hover inline-block bg-primary text-primary-foreground font-bold px-6 py-3 rounded-[12px]">
+          <Link href="/contato" className="inline-block bg-primary text-primary-foreground font-medium px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
             Enviar relatório via Contato
           </Link>
         </div>

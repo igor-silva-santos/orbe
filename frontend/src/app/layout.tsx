@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Chakra_Petch, Russo_One } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/components/providers/AppProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import SearchOverlay from "@/components/modals/SearchOverlay";
-import SuperModal from "@/components/modals/SuperModal";
-import NotificationModal from "@/components/modals/NotificationModal";
-import RatingModal from "@/components/modals/RatingModalWrapper";
 import { ClientOnly } from "@/components/layout/ClientOnly";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { getSiteUrl } from "@/lib/siteUrl";
+
+const SearchOverlay = dynamic(() => import("@/components/modals/SearchOverlay"), { ssr: false });
+const SuperModal = dynamic(() => import("@/components/modals/SuperModal"), { ssr: false });
+const NotificationModal = dynamic(() => import("@/components/modals/NotificationModal"), { ssr: false });
+const RatingModal = dynamic(() => import("@/components/modals/RatingModalWrapper"), { ssr: false });
 
 const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -21,6 +25,8 @@ const russoOne = Russo_One({
   weight: "400",
   variable: "--font-display",
 });
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Orbe Nerd - Hub de Estreias",
@@ -38,11 +44,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://orbenerd.com'),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "Orbe Nerd - Hub de Estreias",
     description: "O seu hub de estreias nerd para filmes, séries, animes e jogos.",
-    url: "https://orbenerd.com",
+    url: siteUrl,
     siteName: "Orbe Nerd",
     locale: "pt_BR",
     type: "website",
@@ -76,19 +82,21 @@ export default function RootLayout({
         className={`${chakraPetch.variable} ${russoOne.variable} font-sans antialiased`}
       >
         <AppProvider>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
-            <ClientOnly>
-              <Header />
-              <main className="pt-16 min-h-screen">
-                {children}
-              </main>
-              <Footer />
-              <SearchOverlay />
-              <SuperModal />
-              <NotificationModal />
-              <RatingModal />
-            </ClientOnly>
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
+              <ClientOnly>
+                <Header />
+                <main className="pt-16 min-h-screen">
+                  {children}
+                </main>
+                <Footer />
+                <SearchOverlay />
+                <SuperModal />
+                <NotificationModal />
+                <RatingModal />
+              </ClientOnly>
+            </div>
+          </TooltipProvider>
         </AppProvider>
       </body>
     </html>

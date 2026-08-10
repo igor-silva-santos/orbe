@@ -15,6 +15,13 @@ import syncRoutes from './syncRoutes';
 import watchlistRoutes from './watchlistRoutes';
 import profileRoutes from './profileRoutes';
 import commentRoutes from './commentRoutes';
+import {
+  applySecurityMiddleware,
+  authRateLimiter,
+  assertJwtSecretConfigured,
+} from './securityMiddleware';
+
+assertJwtSecretConfigured();
 
 const app = express();
 const server = http.createServer(app);
@@ -57,6 +64,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+applySecurityMiddleware(app);
 
 // Usar as rotas de mídia e webhooks
 app.use('/api', mediaRoutes);
@@ -67,13 +75,25 @@ app.use('/api', watchlistRoutes);
 app.use('/api/users', profileRoutes);
 app.use('/api', commentRoutes);
 
-// Healthcheck (sem depender de sync/cron)
-app.get('/api/health', async (_req, res) => {
+// Healthcheck — público retorna mínimo; detalhes só com token interno
+app.get('/api/health', async (req, res) => {
+  const healthToken = process.env.HEALTH_CHECK_TOKEN;
+  const provided = req.headers['x-health-token'];
+  const showDetails = healthToken && provided === healthToken;
+
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ ok: true, db: true });
+    const syncStatus = await getSyncStatus(prisma);
+    const body: Record<string, unknown> = { ok: true };
+    if (showDetails) {
+      body.db = true;
+      body.sync = syncStatus;
+    } else if (syncStatus.syncActive || syncStatus.resumeAvailable) {
+      body.syncHint = syncStatus.message ?? 'Ver GET /api/sync/status';
+    }
+    res.json(body);
   } catch {
-    res.status(503).json({ ok: false, db: false });
+    res.status(503).json(showDetails ? { ok: false, db: false } : { ok: false });
   }
 });
 
@@ -205,17 +225,18 @@ const meHandler = async (req: express.Request, res: express.Response) => {
 };
 
 // Rotas canônicas alinhadas ao frontend (/api/auth/*)
-app.post('/api/auth/register', registerHandler);
-app.post('/api/auth/login', loginHandler);
+app.post('/api/auth/register', authRateLimiter, registerHandler);
+app.post('/api/auth/login', authRateLimiter, loginHandler);
 app.get('/api/auth/me', meHandler);
 
 // Aliases legados
-app.post('/register', registerHandler);
-app.post('/login', loginHandler);
+app.post('/register', authRateLimiter, registerHandler);
+app.post('/login', authRateLimiter, loginHandler);
 app.get('/profile', meHandler);
 
 import { runDetetive } from './detetive';
 import cron from 'node-cron';
+import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00)
 cron.schedule('0 3 * * *', () => {
@@ -225,8 +246,9 @@ cron.schedule('0 3 * * *', () => {
 
 const PORT = process.env.PORT || 3001;
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   logger.info(`Servidor rodando na porta ${PORT}`);
+  await checkInterruptedSyncOnStartup(prisma);
 });
 
 

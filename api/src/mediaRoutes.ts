@@ -7,12 +7,15 @@ import {
   filmeQualityFilter,
   serieQualityFilter,
   animeQualityFilter,
+  animeSeasonQualityFilter,
   jogoQualityFilter,
+  getFilmeQualityFilterForYear,
 } from './qualityFilters';
 import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
-import redisClient from './redisClient';
+import { invalidateMediaCaches } from './cacheInvalidation';
+import { searchRateLimiter, homepageRateLimiter } from './securityMiddleware';
 
 
 
@@ -21,6 +24,30 @@ const router = Router();
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
+const HOMEPAGE_ITEM_LIMIT = 80;
+
+/** Janela inicial: mês anterior até +3 meses — cards do período atual sem payload gigante */
+const getHomepageDateWindow = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 4, 0, 23, 59, 59, 999);
+  return { start, end };
+};
+
+const carouselLiteInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 3 },
+};
+
+const animeCarouselInclude = {
+  genres: { include: { genero: true } },
+  streamingLinks: { take: 3 },
+  airingSchedule: {
+    where: { airingAt: { gte: new Date() } },
+    orderBy: { airingAt: 'asc' as const },
+    take: 1,
+  },
+};
 
 const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   const month = new Date().getMonth();
@@ -30,36 +57,45 @@ const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   return 'FALL';
 };
 
-const carouselLiteInclude = {
-  genres: { include: { genero: true } },
-  streamingProviders: { include: { provider: true }, take: 3 },
+const getMonthDateRange = (year: number, month: number) => {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  return { startDate, endDate };
 };
 
-// Homepage — um único request com payload leve para todos os carrosséis
-router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+const parseYearMonthQuery = (query: { year?: string; month?: string }) => {
+  const year = parseInt(query.year ?? '', 10);
+  const month = parseInt(query.month ?? '', 10);
+  if (!year || !month || month < 1 || month > 12) {
+    return null;
+  }
+  return { year, month };
+};
+
+// Homepage — payload leve: janela de ~4 meses centrada no período atual
+router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 31, 23, 59, 59);
+  const { start: windowStart, end: windowEnd } = getHomepageDateWindow();
 
   try {
     const [filmes, series, jogos, animes] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [filmeQualityFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { releaseDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
       }),
       prisma.serie.findMany({
-        where: { AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [serieQualityFilter, { firstAirDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { firstAirDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
       }),
       prisma.jogo.findMany({
-        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { firstReleaseDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: {
           genres: { include: { genero: true } },
           platforms: { include: { plataforma: true }, take: 3 },
@@ -73,16 +109,8 @@ router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
           format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] },
         },
         orderBy: { startDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
-        include: {
-          genres: { include: { genero: true } },
-          streamingLinks: true,
-          airingSchedule: {
-            where: { airingAt: { gte: new Date() } },
-            orderBy: { airingAt: 'asc' },
-            take: 1,
-          },
-        },
+        take: HOMEPAGE_ITEM_LIMIT,
+        include: animeCarouselInclude,
       }),
     ]);
 
@@ -98,11 +126,84 @@ router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   }
 });
 
+// Hoje — cinema + streaming + destaques da semana
+router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAhead = new Date(now);
+  weekAhead.setDate(weekAhead.getDate() + 7);
+
+  try {
+    const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
+      prisma.filme.findMany({
+        where: { AND: [filmeQualityFilter, { emCartaz: true }] },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.filme.findMany({
+        where: {
+          AND: [
+            filmeQualityFilter,
+            { releaseDate: { gte: weekAgo, lte: weekAhead } },
+            { streamingProviders: { some: {} } },
+          ],
+        },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [
+            serieQualityFilter,
+            { streamingProviders: { some: {} } },
+          ],
+        },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.jogo.findMany({
+        where: jogoQualityFilter,
+        orderBy: { rating: 'desc' },
+        take: 8,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 3 },
+        },
+      }),
+    ]);
+
+    res.json({
+      data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      cinema: await Promise.all(cinema.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      streamingFilmes: await Promise.all(streamingFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      streamingSeries: await Promise.all(streamingSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
+      destaquesJogos: await Promise.all(destaquesJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar conteúdo de hoje: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar conteúdo de hoje.' });
+  }
+});
+
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, status } = req.query;
   try {
-    const allConditions: Prisma.FilmeWhereInput[] = [filmeQualityFilter];
+    const allConditions: Prisma.FilmeWhereInput[] = [];
+
+    if (ano && ano !== 'todos') {
+      const year = parseInt(ano as string);
+      allConditions.push(getFilmeQualityFilterForYear(year));
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31, 23, 59, 59);
+      allConditions.push({ releaseDate: { gte: startDate, lte: endDate } });
+    } else {
+      allConditions.push(filmeQualityFilter);
+    }
 
     if (genero && genero !== 'todos') {
       allConditions.push({ genres: { some: { genero: { name: genero as string } } } });
@@ -110,13 +211,6 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     if (status && status !== 'todos') {
       allConditions.push({ status: status as string });
-    }
-
-    if (ano && ano !== 'todos') {
-      const year = parseInt(ano as string);
-      const startDate = new Date(year, 0, 1);
-      const endDate = new Date(year, 11, 31, 23, 59, 59);
-      allConditions.push({ releaseDate: { gte: startDate, lte: endDate } });
     }
 
     const now = new Date();
@@ -139,7 +233,7 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       include: { streamingProviders: { include: { provider: true } } },
       orderBy,
     });
-    res.json({ results: filmes.map(mapFilmeToMidia), total: filmes.length });
+    res.json({ results: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))), total: filmes.length });
   } catch (error) {
     logger.error(`Erro ao buscar filmes: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes.' });
@@ -175,28 +269,7 @@ router.put('/filmes/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache para esta mídia e listagens relacionadas
-    if (redisClient) {
-      try {
-        const keysToInvalidate = [
-          `cache:/api/filmes/${id}/details`,
-          'cache:/api/filmes', // Limpa a listagem geral
-          'cache:/api/trending?type=filmes', // Limpa tendências
-          'cache:/api/pesquisa' // Limpa pesquisa (opcional, mas recomendado)
-        ];
-        
-        for (const key of keysToInvalidate) {
-          // Usamos um padrão para limpar chaves que podem ter query params
-          const keys = await redisClient.keys(`${key}*`);
-          if (keys.length > 0) {
-            await redisClient.del(...keys);
-            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
-          }
-        }
-      } catch (cacheErr) {
-        logger.error(`Erro ao invalidar cache de filme: ${cacheErr}`);
-      }
-    }
+    await invalidateMediaCaches('filmes', id);
     res.json(mapFilmeToMidia(updatedFilme));
   } catch (error) {
     logger.error(`Erro ao editar o filme ID ${id}: ${error}`);
@@ -313,6 +386,30 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
+router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const filmes = await prisma.filme.findMany({
+      where: {
+        AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { releaseDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: carouselLiteInclude,
+    });
+    res.json(filmes.map(mapFilmeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar filmes por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar filmes por mês.' });
+  }
+});
+
 // Rota para Séries
 router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, status } = req.query;
@@ -349,7 +446,7 @@ router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       },
       orderBy,
     });
-    res.json({ results: series.map(mapSerieToMidia), total: series.length });
+    res.json({ results: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))), total: series.length });
   } catch (error) {
     logger.error(`Erro ao buscar séries: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries.' });
@@ -382,13 +479,7 @@ router.put('/series/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      const cacheKey = `cache:/api/series/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
-    }
-
+    await invalidateMediaCaches('series', id);
     res.json(mapSerieToMidia(updatedSerie));
   } catch (error) {
     logger.error(`Erro ao editar a série ID ${id}: ${error}`);
@@ -505,13 +596,42 @@ router.get('/series/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
+router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const series = await prisma.serie.findMany({
+      where: {
+        AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { firstAirDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: carouselLiteInclude,
+    });
+    res.json(series.map(mapSerieToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar séries por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar séries por mês.' });
+  }
+});
+
 const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
 
 // Rota para Animes
 router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, formato, fonte, status, safeSearch } = req.query;
+  const { filtro, genero, ano, formato, fonte, status, safeSearch, includeAdult } = req.query;
   try {
     const where: Prisma.AnimeWhereInput = {};
+    const showAdultContent = includeAdult === 'true';
+
+    if (!showAdultContent) {
+      where.isAdult = false;
+    }
 
     if (genero && genero !== 'todos') {
       where.genres = {
@@ -531,7 +651,7 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       where.seasonYear = parseInt(ano as string);
     }
 
-    if (safeSearch === 'true') {
+    if (safeSearch === 'true' || !showAdultContent) {
       where.tags = {
         none: {
           tag: {
@@ -597,27 +717,7 @@ router.put('/animes/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      try {
-        const keysToInvalidate = [
-          `cache:/api/animes/${id}/details`,
-          'cache:/api/animes',
-          'cache:/api/trending?type=animes',
-          'cache:/api/pesquisa'
-        ];
-        for (const key of keysToInvalidate) {
-          const keys = await redisClient.keys(`${key}*`);
-          if (keys.length > 0) {
-            await redisClient.del(...keys);
-            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
-          }
-        }
-      } catch (cacheErr) {
-        logger.error(`Erro ao invalidar cache de anime: ${cacheErr}`);
-      }
-    }
-
+    await invalidateMediaCaches('animes', id);
     res.json(mapAnimeToMidia(updatedAnime));
   } catch (error) {
     logger.error(`Erro ao editar o anime ID ${id}: ${error}`);
@@ -723,13 +823,7 @@ router.put('/jogos/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      const cacheKey = `cache:/api/jogos/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
-    }
-
+    await invalidateMediaCaches('jogos', id);
     res.json(mapJogoToMidia(updatedJogo));
   } catch (error) {
     logger.error(`Erro ao editar o jogo ID ${id}: ${error}`);
@@ -834,6 +928,33 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
   }
 });
 
+router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const jogos = await prisma.jogo.findMany({
+      where: {
+        AND: [jogoQualityFilter, { firstReleaseDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { firstReleaseDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: {
+        platforms: { include: { plataforma: true }, take: 3 },
+        genres: { include: { genero: true } },
+      },
+    });
+    res.json(jogos.map(mapJogoToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar jogos por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar jogos por mês.' });
+  }
+});
+
 // Jogos em alta da semana — agrupados por categoria, modo e plataforma
 router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const perGroup = 8;
@@ -918,28 +1039,28 @@ router.get('/trending', async (req, res) => {
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularFilmes.map(mapFilmeToMidia);
+      results = await Promise.all(popularFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularSeries.map(mapSerieToMidia);
+      results = await Promise.all(popularSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))));
     } else if (type === 'animes') {
       const popularAnimes = await prisma.anime.findMany({
         where: animeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularAnimes.map(mapAnimeToMidia);
+      results = await Promise.all(popularAnimes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))));
     } else if (type === 'jogos') {
       const popularJogos = await prisma.jogo.findMany({
         where: jogoQualityFilter,
         orderBy: { rating: 'desc' },
         take,
       });
-      results = popularJogos.map(mapJogoToMidia);
+      results = await Promise.all(popularJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))));
     } else {
       const takeForEach = Math.ceil(take / 4) + 2;
 
@@ -972,10 +1093,10 @@ router.get('/trending', async (req, res) => {
       ]);
 
       const trendingResults = [
-        ...filmes.map(mapFilmeToMidia),
-        ...series.map(mapSerieToMidia),
-        ...animes.map(mapAnimeToMidia),
-        ...jogos.map(mapJogoToMidia),
+        ...(await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))))),
+        ...(await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))))),
+        ...(await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))))),
+        ...(await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))))),
       ];
 
       // Apenas pega os primeiros 10 resultados combinados, sem embaralhar
@@ -990,8 +1111,8 @@ router.get('/trending', async (req, res) => {
   }
 });
 
-// Rota de Pesquisa Global (com suporte a acentuação)
-router.get('/pesquisa', async (req, res) => {
+// Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
+const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
   const { q, category } = req.query;
 
   if (!q || typeof q !== 'string') {
@@ -1058,17 +1179,20 @@ router.get('/pesquisa', async (req, res) => {
     const [filmes, series, animes, jogos] = await Promise.all(promises);
 
     res.json({
-      filmes: filmes.map(mapFilmeToMidia),
-      series: series.map(mapSerieToMidia),
-      animes: animes.map(mapAnimeToMidia),
-      jogos: jogos.map(mapJogoToMidia),
+      filmes: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      series: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
+      animes: await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
+      jogos: await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
     });
 
   } catch (error) {
     logger.error(`Erro ao realizar pesquisa: ${error}`);
     res.status(500).json({ error: 'Erro interno ao realizar pesquisa.' });
   }
-});
+};
+
+router.get('/pesquisa', searchRateLimiter, searchHandler);
+router.get('/search', searchRateLimiter, searchHandler);
 
 // Rota para Filtros de Premiações
 router.get('/premios/filtros', async (req, res) => {
@@ -1265,6 +1389,40 @@ const getSeasonDateRange = (year: number, season: string): { startDate: Date, en
   return { startDate, endDate };
 };
 
+// Rota para Animes por Ano (paridade com filmes/séries/jogos)
+router.get('/animes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const { year } = req.query;
+  if (!year || isNaN(parseInt(year as string))) {
+    return res.status(400).json({ error: 'Ano inválido fornecido.' });
+  }
+  const parsedYear = parseInt(year as string);
+  const startDate = new Date(parsedYear, 0, 1);
+  const endDate = new Date(parsedYear, 11, 31, 23, 59, 59);
+
+  try {
+    const animes = await prisma.anime.findMany({
+      where: {
+        AND: [
+          animeQualityFilter,
+          {
+            startDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
+      },
+      orderBy: { startDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: animeCarouselInclude,
+    });
+    res.json(animes.map(mapAnimeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar animes por ano: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar animes por ano.' });
+  }
+});
+
 // Rota para Animes por Temporada e Ano
 router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { year, season } = req.query;
@@ -1281,7 +1439,7 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
 
     const animes = await prisma.anime.findMany({
       where: {
-        ...animeQualityFilter,
+        ...animeSeasonQualityFilter,
         seasonYear: parsedYear,
         season: season as 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL',
         format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA', 'SPECIAL'] },
@@ -1290,7 +1448,7 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
       take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
-        streamingLinks: true,
+        streamingLinks: { take: 3 },
         airingSchedule: {
           where: { airingAt: { gte: new Date() } },
           orderBy: { airingAt: 'asc' },

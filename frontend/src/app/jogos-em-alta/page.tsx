@@ -31,14 +31,21 @@ const TABS: { id: TabId; label: string; icon: typeof Gamepad2 }[] = [
   { id: 'plataformas', label: 'Plataforma', icon: Monitor },
 ];
 
+const tabButtonClass = (isActive: boolean) =>
+  `inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium border transition-colors ${
+    isActive
+      ? 'bg-primary text-primary-foreground border-primary'
+      : 'bg-card orbe-text-primary border-border hover:bg-muted'
+  }`;
+
 const HorizontalRow = ({ section }: { section: GameSection }) => (
-  <section className="orbe-block bg-card rounded-[20px] p-4 md:p-5 space-y-4">
+  <section className="bg-card rounded-lg border border-border p-4 md:p-5 space-y-4">
     <div className="flex items-center justify-between gap-3">
       <h3 className="font-display text-base md:text-lg orbe-text-primary flex items-center gap-2">
-        <span className="orbe-block-sm w-2 h-5 bg-[var(--orbe-accent-2)] rounded-full shrink-0" />
+        <span className="w-2 h-5 bg-[var(--orbe-accent-2)] rounded-full shrink-0" />
         {section.nome}
       </h3>
-      <span className="text-xs font-bold orbe-text-primary bg-muted px-3 py-1 rounded-full border-2 border-[var(--orbe-block-border)]">
+      <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">
         {section.total} jogos
       </span>
     </div>
@@ -55,7 +62,7 @@ const HorizontalRow = ({ section }: { section: GameSection }) => (
 const GroupedTab = ({ sections, emptyMessage }: { sections: GameSection[]; emptyMessage: string }) => {
   if (sections.length === 0) {
     return (
-      <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+      <div className="bg-card rounded-lg border border-border p-10 text-center">
         <p className="text-muted-foreground font-medium">{emptyMessage}</p>
       </div>
     );
@@ -83,12 +90,11 @@ export default function JogosEmAltaPage() {
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
-      {/* Hero — padrão Orbe anime-pop */}
-      <section className="relative overflow-hidden border-b-[3px] border-[var(--orbe-block-border)] py-10 md:py-12">
+      <section className="relative overflow-hidden border-b border-[var(--orbe-divider)] py-10 md:py-12">
         <div className="container mx-auto px-4">
           <Link
             href="/"
-            className="orbe-block-sm inline-flex items-center gap-2 bg-card orbe-text-primary font-bold text-sm px-4 py-2 rounded-[12px] mb-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar
@@ -96,31 +102,31 @@ export default function JogosEmAltaPage() {
 
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <span className="orbe-block-sm inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide bg-[var(--orbe-accent-2)] text-white px-4 py-2 rounded-full mb-4">
-                🔥 {data?.semana || 'Esta semana'}
-              </span>
+              <p className="text-sm text-[var(--orbe-accent-2)] font-medium uppercase tracking-wide mb-4">
+                {data?.semana || 'Esta semana'}
+              </p>
               <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] leading-tight orbe-text-primary flex items-center gap-3">
                 <Gamepad2 className="h-8 w-8 text-[var(--orbe-accent-2)] shrink-0" />
                 Jogos em Alta
               </h1>
-              <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-xl font-medium">
+              <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-xl">
                 Os mais jogados da semana, organizados por categoria, modo de jogo e plataforma.
               </p>
             </div>
 
             {!isLoading && data && (
               <div className="flex gap-3">
-                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                <div className="bg-card rounded-lg border border-border px-4 py-3 text-center min-w-[90px]">
                   <p className="font-display text-2xl orbe-text-primary">{data.destaques.length}</p>
-                  <p className="text-xs text-muted-foreground font-semibold">Destaques</p>
+                  <p className="text-xs text-muted-foreground font-medium">Destaques</p>
                 </div>
-                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                <div className="bg-card rounded-lg border border-border px-4 py-3 text-center min-w-[90px]">
                   <p className="font-display text-2xl orbe-text-primary">{data.categorias.length}</p>
-                  <p className="text-xs text-muted-foreground font-semibold">Categorias</p>
+                  <p className="text-xs text-muted-foreground font-medium">Categorias</p>
                 </div>
-                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                <div className="bg-card rounded-lg border border-border px-4 py-3 text-center min-w-[90px]">
                   <p className="font-display text-2xl orbe-text-primary">{data.plataformas.length}</p>
-                  <p className="text-xs text-muted-foreground font-semibold">Plataformas</p>
+                  <p className="text-xs text-muted-foreground font-medium">Plataformas</p>
                 </div>
               </div>
             )}
@@ -129,7 +135,6 @@ export default function JogosEmAltaPage() {
       </section>
 
       <main className="container mx-auto px-4 py-8 md:py-10 space-y-8">
-        {/* Abas de navegação */}
         <div className="flex flex-wrap gap-2">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -139,11 +144,7 @@ export default function JogosEmAltaPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border-[2.5px] border-[var(--orbe-block-border)] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-[3px_3px_0_var(--orbe-block-border)]'
-                    : 'bg-card orbe-text-primary shadow-[2px_2px_0_var(--orbe-block-border)]'
-                }`}
+                className={tabButtonClass(isActive)}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
@@ -162,7 +163,7 @@ export default function JogosEmAltaPage() {
           <>
             {activeTab === 'destaques' && (
               <section className="space-y-4">
-                <h2 className="font-display text-xl orbe-text-primary border-b-[3px] border-[var(--orbe-block-border)] pb-2">
+                <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2">
                   Top da Semana
                 </h2>
                 {data.destaques.length > 0 ? (
@@ -170,7 +171,7 @@ export default function JogosEmAltaPage() {
                     {data.destaques.map((jogo, index) => (
                       <div key={jogo.id} className="relative w-full max-w-[210px]">
                         {index < 3 && (
-                          <span className="absolute -top-2 -left-1 z-10 orbe-block-sm bg-[var(--orbe-hero-yellow)] orbe-text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+                          <span className="absolute -top-2 -left-1 z-10 bg-[var(--orbe-hero-yellow)] orbe-text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
                             #{index + 1}
                           </span>
                         )}
@@ -179,7 +180,7 @@ export default function JogosEmAltaPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+                  <div className="bg-card rounded-lg border border-border p-10 text-center">
                     <p className="text-muted-foreground">Nenhum destaque disponível esta semana.</p>
                   </div>
                 )}
@@ -199,12 +200,12 @@ export default function JogosEmAltaPage() {
             )}
           </>
         ) : (
-          <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+          <div className="bg-card rounded-lg border border-border p-10 text-center">
             <p className="text-muted-foreground font-medium">Não foi possível carregar os jogos em alta.</p>
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="orbe-block orbe-block-hover mt-4 bg-primary text-primary-foreground font-bold text-sm px-6 py-3 rounded-[14px]"
+              className="mt-4 bg-primary text-primary-foreground font-medium text-sm px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
             >
               Tentar novamente
             </button>

@@ -1,39 +1,78 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import type { EmblaCarouselType } from 'embla-carousel';
 
-/** Efeito leque via DOM — sem re-render React durante o scroll */
+type SlideTweens = {
+  scaleX: gsap.QuickToFunc;
+  scaleY: gsap.QuickToFunc;
+  opacity: gsap.QuickToFunc;
+};
+
+function shouldUseFanEffect(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (window.matchMedia('(max-width: 768px)').matches) return false;
+  return true;
+}
+
+/**
+ * Efeito leque — desativado em mobile e com prefers-reduced-motion para performance.
+ */
 export function useFanCarouselSlides(emblaApi: EmblaCarouselType | undefined) {
+  const tweensRef = useRef(new WeakMap<HTMLElement, SlideTweens>());
+
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !shouldUseFanEffect()) return;
+
+    const getTweens = (slide: HTMLElement): SlideTweens => {
+      let entry = tweensRef.current.get(slide);
+      if (!entry) {
+        gsap.set(slide, { transformOrigin: 'center center', scaleX: 1, scaleY: 1, opacity: 1 });
+        entry = {
+          scaleX: gsap.quickTo(slide, 'scaleX', { duration: 0.45, ease: 'power3.out' }),
+          scaleY: gsap.quickTo(slide, 'scaleY', { duration: 0.45, ease: 'power3.out' }),
+          opacity: gsap.quickTo(slide, 'opacity', { duration: 0.45, ease: 'power3.out' }),
+        };
+        tweensRef.current.set(slide, entry);
+      }
+      return entry;
+    };
 
     const updateSlides = () => {
-      const slides = emblaApi.slideNodes();
-      const selected = emblaApi.selectedScrollSnap();
+      const root = emblaApi.rootNode();
+      const rootRect = root.getBoundingClientRect();
+      const centerX = rootRect.left + rootRect.width / 2;
 
-      slides.forEach((slide, i) => {
-        const dist = Math.abs(i - selected);
-        const scale = dist === 0 ? 1 : dist === 1 ? 0.93 : 0.86;
-        slide.style.transform = `scale(${scale})`;
-        slide.style.zIndex = String(dist === 0 ? 10 : dist === 1 ? 5 : 1);
-        slide.style.opacity = dist > 3 ? '0.65' : '1';
-        slide.style.transition = emblaApi.scrollProgress() === 0 || emblaApi.scrollProgress() === 1
-          ? 'transform 0.2s ease, opacity 0.2s ease'
-          : 'none';
+      emblaApi.slideNodes().forEach((slide) => {
+        const rect = slide.getBoundingClientRect();
+        const slideCenter = rect.left + rect.width / 2;
+        const distance = Math.abs(slideCenter - centerX);
+        const slideWidth = rect.width || 190;
+        const t = Math.min(distance / (slideWidth * 2.1), 1);
+
+        const scale = 1 - t * 0.14;
+        const opacity = 1 - Math.min(t * 0.5, 0.35);
+
+        const { scaleX: toScaleX, scaleY: toScaleY, opacity: toOpacity } = getTweens(slide);
+        toScaleX(scale);
+        toScaleY(scale);
+        toOpacity(opacity);
+        slide.style.zIndex = String(Math.round(100 - t * 90));
       });
     };
 
     emblaApi.on('scroll', updateSlides);
-    emblaApi.on('select', updateSlides);
     emblaApi.on('reInit', updateSlides);
+    emblaApi.on('resize', updateSlides);
     emblaApi.on('settle', updateSlides);
     updateSlides();
 
     return () => {
       emblaApi.off('scroll', updateSlides);
-      emblaApi.off('select', updateSlides);
       emblaApi.off('reInit', updateSlides);
+      emblaApi.off('resize', updateSlides);
       emblaApi.off('settle', updateSlides);
     };
   }, [emblaApi]);

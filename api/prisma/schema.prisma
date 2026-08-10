@@ -55,6 +55,8 @@ model Filme {
   videos          Video[]
   streamingProviders FilmeOnStreamingProvider[]
   premiacoes         Json?
+
+  @@index([releaseDate])
 }
 
 model Serie {
@@ -93,6 +95,8 @@ model Serie {
   videos           Video[]
   streamingProviders SerieOnStreamingProvider[]
   premiacoes         Json?
+
+  @@index([firstAirDate])
 }
 
 model Anime {
@@ -140,6 +144,9 @@ model Anime {
   relatedRelations AnimeRelation[] @relation("RelatedRelations")
   airingSchedule      AiringSchedule[] @relation("AnimeToAiringSchedule")
   premiacoes          Json?
+
+  @@index([seasonYear, season])
+  @@index([startDate])
 }
 
 model Jogo {
@@ -180,6 +187,8 @@ model Jogo {
   eventId               Int?
   event                 Event?         @relation(fields: [eventId], references: [id])
   premiacoes            Json?
+
+  @@index([firstReleaseDate])
 }
 
 // =================================================================================
@@ -853,4 +862,11 @@ model preferencias_usuario_midia {
   usuario        User     @relation(fields: [usuario_id], references: [id])
 
   @@unique([usuario_id, midia_id, tipo_midia], name: "usuario_midia_unique")
+}
+
+// Estado persistente da aplicação (ex.: sync em andamento)
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }

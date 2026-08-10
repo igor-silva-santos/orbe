@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppStore } from '@/stores/appStore';
+import { removeToken } from '@/lib/api';
 import type { HeaderProps } from '@/types';
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -39,6 +40,7 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/series', label: 'Séries' },
     { href: '/animes', label: 'Animes' },
     { href: '/jogos', label: 'Jogos' },
+    { href: '/jogos-em-alta', label: 'Jogos em Alta' },
     { href: '/premios', label: 'Premiações' },
     { href: '/eventos', label: 'Eventos' },
     { href: '/hoje', label: 'Hoje' },
@@ -64,9 +66,11 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogout = () => {
+    removeToken();
     logout();
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
+    window.location.href = '/';
   };
 
   return (
@@ -100,10 +104,10 @@ const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[13.5px] font-semibold transition-colors flex items-center px-4 py-2 rounded-full border-2 border-transparent ${
+                  className={`text-[13.5px] transition-colors flex items-center px-4 py-2 rounded-full ${
                     isActiveLink(link.href)
-                      ? 'orbe-pill-active'
-                      : 'orbe-text-primary hover:border-[var(--orbe-block-border)]'
+                      ? 'text-primary font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {link.label}
@@ -117,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Pesquisa - Visível apenas em mobile, pois a barra é visível em desktop */}
             <button
               onClick={handleSearchClick}
-              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
+              className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -125,7 +129,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Botão de Tema */}
             <button
               onClick={handleThemeToggle}
-              className="orbe-block-sm orbe-block-sm-hover w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
+              className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -134,7 +138,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Notificações */}
             <button
               onClick={handleNotificationClick}
-              className="orbe-block-sm orbe-block-sm-hover relative w-[42px] h-[42px] flex items-center justify-center orbe-text-primary rounded-[12px] bg-card"
+              className="relative w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
@@ -186,7 +190,7 @@ const Header: React.FC<HeaderProps> = ({
                 </Link>
                 <Link
                   href="/register"
-                  className="orbe-block orbe-block-hover px-4 py-2 text-sm font-bold bg-primary text-primary-foreground rounded-[10px]"
+                  className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   Inscreva-se
                 </Link>

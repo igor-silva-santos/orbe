@@ -1,4 +1,5 @@
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
 const gameGenreTranslations: Record<string, string> = {
@@ -452,7 +453,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   id: filme.tmdbId,
   titulo_api: filme.title,
   titulo_curado: filme.titulo_curado ?? null,
-  poster_url_api: filme.posterPath ? `${TMDB_IMAGE_BASE_URL}${filme.posterPath}` : null,
+  poster_url_api: filme.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${filme.posterPath}` : null,
   data_lancamento_api: filme.releaseDate,
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
@@ -468,7 +469,7 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   id: serie.tmdbId,
   titulo_api: serie.name,
   titulo_curado: serie.titulo_curado ?? null,
-  poster_url_api: serie.posterPath ? `${TMDB_IMAGE_BASE_URL}${serie.posterPath}` : null,
+  poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
   data_lancamento_api: serie.firstAirDate,
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
@@ -531,22 +532,31 @@ export const normalizeSearchText = (text: string): string =>
   text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 export async function withPortugueseTranslation(mapped: Record<string, any>) {
-  const { translateToPortuguese, isTranslationError } = await import('./translation');
+  const { resolvePortugueseSynopsis } = await import('./translation');
+  const { fetchTmdbPtOverview } = await import('./tmdbOverview');
   const result = { ...mapped };
 
+  let tmdbPt: string | null = null;
+  if (mapped.type === 'filme' && mapped.id) {
+    tmdbPt = await fetchTmdbPtOverview('movie', mapped.id);
+  } else if (mapped.type === 'serie' && mapped.id) {
+    tmdbPt = await fetchTmdbPtOverview('tv', mapped.id);
+  }
+
   if (typeof result.sinopse === 'string') {
-    const translated = await translateToPortuguese(result.sinopse);
-    if (translated && !isTranslationError(translated)) {
+    const translated = await resolvePortugueseSynopsis(result.sinopse, tmdbPt);
+    if (translated && !translated.match(/MYMEMORY\s+WARNING/i)) {
       result.sinopse = translated;
     }
   }
   if (typeof result.overview === 'string') {
-    const translated = await translateToPortuguese(result.overview);
-    if (translated && !isTranslationError(translated)) {
+    const translated = await resolvePortugueseSynopsis(result.overview, tmdbPt);
+    if (translated && !translated.match(/MYMEMORY\s+WARNING/i)) {
       result.overview = translated;
     }
   }
   if (Array.isArray(result.temas)) {
+    const { translateToPortuguese, isTranslationError } = await import('./translation');
     result.temas = await Promise.all(
       result.temas.map(async (theme: string) => {
         const translated = await translateToPortuguese(theme);

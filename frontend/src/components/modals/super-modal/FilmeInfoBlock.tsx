@@ -1,6 +1,6 @@
 'use client';
 import { FilmeDetalhes } from '@/types';
-import { NOT_INFORMED } from '@/lib/media-helpers';
+import { NOT_INFORMED, resolveFilmeTitle } from '@/lib/media-helpers';
 
 const formatRuntime = (minutes: number | null | undefined) => {
   if (!minutes) return NOT_INFORMED;
@@ -15,12 +15,13 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
   const director = filme.crew?.find(member => member.job === 'Director');
   const voteAverage = (filme as any).voteAverage as number | null | undefined;
   const tagline = (filme as any).tagline as string | null | undefined;
+  const filmeTitle = resolveFilmeTitle(filme);
 
   return (
     <div className="flex flex-col space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">{filme.title}</h1>
-        {filme.originalTitle && filme.title !== filme.originalTitle && (
+        <h1 className="text-3xl font-bold">{filmeTitle}</h1>
+        {filme.originalTitle && filmeTitle !== filme.originalTitle && (
           <h2 className="text-lg text-gray-400">{filme.originalTitle}</h2>
         )}
         {tagline && (
@@ -30,8 +31,10 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span className="font-bold text-yellow-500 dark:text-blue-400">Lançamento: </span>
-          {filme.releaseDate
-            ? new Date(filme.releaseDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+          {filme.releaseDate || (filme as { data_lancamento_api?: string }).data_lancamento_api
+            ? new Date(
+                filme.releaseDate || (filme as { data_lancamento_api?: string }).data_lancamento_api!
+              ).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
             : NOT_INFORMED}
         </div>
         <div>

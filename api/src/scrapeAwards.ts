@@ -270,5 +270,10 @@ export async function runAwardScraper() {
 }
 
 if (require.main === module) {
-  runAwardScraper().finally(() => prisma.$disconnect());
+  runAwardScraper()
+    .then(() => prisma.$disconnect())
+    .catch((err) => {
+      logger.error(err);
+      return prisma.$disconnect();
+    });
 }

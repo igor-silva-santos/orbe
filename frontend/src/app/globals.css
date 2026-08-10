@@ -33,6 +33,7 @@
   --orbe-accent: #4F46E5;
   --orbe-accent-2: #EA580C;
   --orbe-block-border: #1E1B4B;
+  --orbe-divider: color-mix(in srgb, var(--foreground) 12%, transparent);
   --orbe-block-shadow: #1E1B4B;
   --orbe-hero-yellow: #facc15;
   --background: #EEF2FF;
@@ -81,6 +82,7 @@
   --orbe-accent: #818CF8;
   --orbe-accent-2: #FB923C;
   --orbe-block-border: #E0E7FF;
+  --orbe-divider: color-mix(in srgb, var(--foreground) 12%, transparent);
   --orbe-block-shadow: #E0E7FF;
   --orbe-hero-yellow: #facc15;
   --chart-1: oklch(0.65 0.2 275);
@@ -148,8 +150,8 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-image:
-    radial-gradient(circle at 100% 0%, rgba(129, 140, 248, 0.25), transparent 45%),
-    radial-gradient(circle at 0% 100%, rgba(234, 88, 12, 0.12), transparent 45%);
+    radial-gradient(circle at 100% 0%, rgba(129, 140, 248, 0.08), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgba(234, 88, 12, 0.04), transparent 45%);
 }
 
 .orbe-gradient {
@@ -178,57 +180,11 @@ body {
   font-family: var(--font-display), 'Russo One', sans-serif;
 }
 
-.orbe-logo-orb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: conic-gradient(from 180deg, var(--primary), var(--orbe-accent-2), var(--primary));
-  box-shadow: 3px 3px 0 var(--orbe-block-shadow);
-  flex-shrink: 0;
-}
-
-.orbe-block {
-  border: 2.5px solid var(--orbe-block-border);
-  box-shadow: 4px 4px 0 var(--orbe-block-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.orbe-block-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--orbe-block-shadow);
-}
-
-.orbe-block-sm {
-  border: 2.5px solid var(--orbe-block-border);
-  box-shadow: 3px 3px 0 var(--orbe-block-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.orbe-block-sm-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 var(--orbe-block-shadow);
-  background: var(--orbe-accent);
-  border-color: var(--orbe-accent);
-  color: var(--primary-foreground);
-}
-
-.orbe-nerd-stroke {
-  color: var(--primary);
-  -webkit-text-stroke: 1.5px var(--orbe-block-border);
-  paint-order: stroke fill;
-}
-
-.orbe-pill-active {
-  background: var(--orbe-block-border);
-  color: var(--background);
-}
-
-.hover-scale {
-  transition: transform 0.2s ease-in-out;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
+.carousel-slide {
+  transform-origin: center center;
+  will-change: transform, opacity;
+  content-visibility: auto;
+  contain-intrinsic-size: 210px 320px;
 }
 
 .scrollbar-hide {
@@ -290,7 +246,7 @@ body {
   background: color-mix(in srgb, var(--background) 88%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 3px solid var(--orbe-block-border);
+  border-bottom: 1px solid var(--orbe-divider);
   transition: background-color 0.3s ease;
 }
 
@@ -338,9 +294,12 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
-.carousel-slide {
-  transform-origin: center center;
-  will-change: transform;
+.is-wheel-dragging {
+  cursor: grabbing !important;
+}
+
+.is-wheel-dragging .carousel-slide {
+  pointer-events: none;
 }
 
 .carousel-smooth {

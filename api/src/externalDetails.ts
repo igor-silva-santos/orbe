@@ -1,6 +1,8 @@
 import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
 import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
+import { resolvePortugueseSynopsis } from './translation';
+import { fetchTmdbPtOverview } from './tmdbOverview';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -323,8 +325,9 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
     if (!movie?.id) return null;
 
     const details = mapTmdbMovieToDetails(movie, dbFilme ?? undefined);
+    const ptOverview = await fetchTmdbPtOverview('movie', tmdbId);
     if (details.overview) {
-      details.overview = (await withPortugueseTranslation({ overview: details.overview })).overview;
+      details.overview = (await resolvePortugueseSynopsis(details.overview, ptOverview)) ?? details.overview;
     }
     return {
       ...details,
