@@ -5,11 +5,18 @@ import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { parseISO } from 'date-fns';
 import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
-import { adjacentMonthKeys, mergeMediaByDate, monthKeyFromDate } from '@/lib/carousel-utils';
+import {
+  adjacentMonthKeys,
+  calculateCarouselStartIndex,
+  findIndexForMonth,
+  formatCarouselMonthTitle,
+  mergeMediaByDate,
+  monthKeyFromDate,
+  monthTitleFromItem,
+} from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
@@ -44,6 +51,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const previousSelectedIndex = useRef<number>(startIndex);
   const itemsLengthRef = useRef(initialData.length);
   const mediaItemsRef = useRef(mediaItems);
+  const lastTitleMonthKey = useRef<string>('');
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({ startIndex });
@@ -56,6 +64,29 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     [emblaRef]
   );
 
+  const mergeItems = useCallback((incoming: Midia[]): Midia[] => {
+    if (!incoming.length) return mediaItemsRef.current;
+    const merged = mergeMediaByDate(mediaItemsRef.current, incoming);
+    mediaItemsRef.current = merged;
+    setMediaItems(merged);
+    return merged;
+  }, []);
+
+  const genres = useMemo(
+    () => Array.from(new Set(mediaItems.flatMap((item) => item.generos_api || []))).filter(Boolean),
+    [mediaItems]
+  );
+
+  const filteredItems = useMemo(
+    () => (selectedGenre ? mediaItems.filter((item) => item.generos_api?.includes(selectedGenre)) : mediaItems),
+    [mediaItems, selectedGenre]
+  );
+
+  const filteredItemsRef = useRef(filteredItems);
+  useEffect(() => {
+    filteredItemsRef.current = filteredItems;
+  }, [filteredItems]);
+
   useEffect(() => {
     mediaItemsRef.current = mediaItems;
   }, [mediaItems]);
@@ -63,9 +94,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef);
 
-  const mergeItems = useCallback((incoming: Midia[]) => {
-    if (!incoming.length) return;
-    setMediaItems((prev) => mergeMediaByDate(prev, incoming));
+  const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
+    const item = items[index];
+    const title = monthTitleFromItem(item);
+    if (!title || !item?.data_lancamento_api) return;
+
+    const date = parseISO(item.data_lancamento_api);
+    const monthKey = monthKeyFromDate(date);
+    if (monthKey === lastTitleMonthKey.current) return;
+
+    lastTitleMonthKey.current = monthKey;
+    setCurrentTitle(title);
   }, []);
 
   const fetchMediaByMonth = useCallback(
@@ -91,7 +130,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   );
 
   const prefetchMonths = useCallback(
-    async (year: number, month: number) => {
+    async (year: number, month: number): Promise<Midia[]> => {
       const keys = adjacentMonthKeys(year, month);
       const toFetch = keys.filter((key) => !loadedMonths.current.has(key));
       const results = await Promise.all(
@@ -100,7 +139,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           return fetchMediaByMonth(y, m);
         })
       );
-      mergeItems(results.flatMap((r) => r ?? []));
+      return mergeItems(results.flatMap((r) => r ?? []));
     },
     [fetchMediaByMonth, mergeItems]
   );
@@ -136,8 +175,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   useEffect(() => {
     if (!emblaApi) return;
 
+    const onSelect = () => {
+      const items = filteredItemsRef.current;
+      const selectedIndex = emblaApi.selectedScrollSnap();
+      previousSelectedIndex.current = selectedIndex;
+      updateTitleFromIndex(selectedIndex, items);
+    };
+
     const onSettle = async () => {
-      const items = mediaItemsRef.current;
+      const items = filteredItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
       const selectedItem = items[selectedIndex];
@@ -145,11 +191,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       if (selectedItem?.data_lancamento_api) {
         try {
           const date = parseISO(selectedItem.data_lancamento_api);
-          const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
-          setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
           void prefetchMonths(date.getFullYear(), date.getMonth() + 1);
         } catch {
-          setCurrentTitle('Lançamentos');
+          /* ignore */
         }
       }
 
@@ -173,47 +217,57 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       }
     };
 
+    emblaApi.on('select', onSelect);
     emblaApi.on('settle', onSettle);
+    onSelect();
+
     return () => {
+      emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, fetchMediaByYear, mergeItems, prefetchMonths]);
+  }, [emblaApi, fetchMediaByYear, mergeItems, prefetchMonths, updateTitleFromIndex]);
 
   useEffect(() => {
-    if (!emblaApi || !initialData[startIndex]) return;
-
-    const initialItem = initialData[startIndex];
-    if (initialItem?.data_lancamento_api) {
-      try {
-        const date = parseISO(initialItem.data_lancamento_api);
-        const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
-        setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
-      } catch {
-        setCurrentTitle('Lançamentos');
-      }
-    }
-  }, [emblaApi, initialData, startIndex]);
+    if (!emblaApi || !filteredItems[startIndex]) return;
+    updateTitleFromIndex(startIndex, filteredItems);
+  }, [emblaApi, filteredItems, startIndex, updateTitleFromIndex]);
 
   useEffect(() => {
-    if (!emblaApi || itemsLengthRef.current === mediaItems.length) return;
+    if (!emblaApi) return;
 
     const prevLength = itemsLengthRef.current;
-    const added = mediaItems.length - prevLength;
+    const newLength = filteredItems.length;
+    if (prevLength === newLength) return;
+
+    const added = newLength - prevLength;
     const wasPrepend = added > 0 && previousSelectedIndex.current < 15;
 
-    itemsLengthRef.current = mediaItems.length;
+    itemsLengthRef.current = newLength;
     emblaApi.reInit();
 
     if (wasPrepend) {
       emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
-  }, [emblaApi, mediaItems.length]);
+  }, [emblaApi, filteredItems.length]);
+
+  const scrollToToday = useCallback(() => {
+    if (!emblaApi) return;
+    const items = filteredItemsRef.current;
+    const todayIndex = calculateCarouselStartIndex(items);
+    lastTitleMonthKey.current = '';
+    emblaApi.scrollTo(todayIndex, true);
+    updateTitleFromIndex(todayIndex, items);
+  }, [emblaApi, updateTitleFromIndex]);
 
   const navigateByMonth = async (direction: 'next' | 'prev') => {
-    if (!emblaApi || mediaItems.length === 0) return;
+    if (!emblaApi) return;
+
+    const items = filteredItemsRef.current;
+    if (items.length === 0) return;
+
     const selectedIndex = emblaApi.selectedScrollSnap();
-    const currentItem = mediaItems[selectedIndex];
-    if (!currentItem) return;
+    const currentItem = items[selectedIndex];
+    if (!currentItem?.data_lancamento_api) return;
 
     const currentItemDate = parseISO(currentItem.data_lancamento_api);
     const targetDate =
@@ -221,23 +275,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         ? new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() + 1, 1)
         : new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() - 1, 1);
 
-    await prefetchMonths(targetDate.getFullYear(), targetDate.getMonth() + 1);
+    const merged = await prefetchMonths(targetDate.getFullYear(), targetDate.getMonth() + 1);
+    const list = selectedGenre
+      ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
+      : merged;
 
-    const targetIndex = mediaItemsRef.current.findIndex(
-      (item) => new Date(item.data_lancamento_api) >= targetDate
-    );
-    if (targetIndex !== -1) emblaApi.scrollTo(targetIndex);
+    const targetIndex = findIndexForMonth(list, targetDate.getFullYear(), targetDate.getMonth() + 1);
+    if (targetIndex !== -1) {
+      lastTitleMonthKey.current = '';
+      emblaApi.scrollTo(targetIndex, true);
+      updateTitleFromIndex(targetIndex, list);
+    } else {
+      setCurrentTitle(formatCarouselMonthTitle(targetDate));
+    }
   };
-
-  const genres = useMemo(
-    () => Array.from(new Set(mediaItems.flatMap((item) => item.generos_api || []))).filter(Boolean),
-    [mediaItems]
-  );
-
-  const filteredItems = useMemo(
-    () => (selectedGenre ? mediaItems.filter((item) => item.generos_api?.includes(selectedGenre)) : mediaItems),
-    [mediaItems, selectedGenre]
-  );
 
   const virtualRange = useCarouselVirtualRange(emblaApi, filteredItems.length);
   const selectedSnap = emblaApi?.selectedScrollSnap() ?? startIndex;
@@ -246,8 +297,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
-          onClick={() => emblaApi?.scrollTo(startIndex)}
+          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors"
+          onClick={scrollToToday}
+          title="Ir para o mês atual"
         >
           {currentTitle || 'Carregando...'}
         </h3>
@@ -275,7 +327,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-xs text-muted-foreground hidden sm:block ml-2">Ctrl + scroll para navegar</p>
+          <p className="text-xs text-muted-foreground hidden sm:block ml-2">Scroll horizontal para navegar</p>
         </div>
       </div>
       <TooltipProvider delayDuration={300}>

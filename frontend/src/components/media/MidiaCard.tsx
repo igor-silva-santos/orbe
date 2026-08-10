@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -80,19 +80,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const visibilityRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const node = visibilityRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { rootMargin: '120px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
@@ -102,7 +89,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
-  const countdown = useCountdown(isVisible ? nextAiringEpisode?.airingAt : undefined);
+  const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
@@ -190,11 +177,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="relative group" ref={(node) => {
-          visibilityRef.current = node;
-          if (typeof ref === 'function') ref(node);
-          else if (ref) ref.current = node;
-        }}>
+        <div className="relative group" ref={ref}>
             <div
               className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
@@ -287,11 +270,11 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   ))}
                 </div>
                 <div className="h-[20px] mb-1 flex items-center">
-                {dubStatus && (
+                  {dubStatus && (
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
-                )}
+                  )}
                 </div>
                 {(type === 'jogo' ? platforms : providers).length > 0 && (
                   <div className="h-[22px] flex items-center gap-1.5 overflow-hidden">
@@ -299,6 +282,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       <span key={p.name} title={p.name} className="inline-flex shrink-0">
                         <PlatformIcon
                           platform={p.icon}
+                          logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
                           size={18}
                           iconOnly
                           className="h-[18px] w-[18px] rounded-sm"

@@ -4,8 +4,11 @@
 import React from 'react';
 import Image from 'next/image';
 
+const TMDB_LOGO_BASE = 'https://image.tmdb.org/t/p/w45';
+
 interface PlatformIconProps {
   platform?: string | null;
+  logoPath?: string | null;
   className?: string;
   size?: number;
   iconOnly?: boolean;
@@ -38,6 +41,7 @@ const normalizePlatformKey = (platform?: string | null): string => {
 
 const PlatformIcon: React.FC<PlatformIconProps> = ({
   platform,
+  logoPath,
   className = 'h-4 w-4',
   size = 16,
   iconOnly = false,
@@ -52,6 +56,11 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     alt: label,
     title: label || undefined,
   };
+
+  if (logoPath) {
+    const src = logoPath.startsWith('http') ? logoPath : `${TMDB_LOGO_BASE}${logoPath}`;
+    return <Image src={src} unoptimized {...iconProps} />;
+  }
 
   switch (normalizePlatformKey(platform)) {
     case 'netflix':

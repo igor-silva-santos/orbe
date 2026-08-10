@@ -67,6 +67,7 @@ export interface GamePlatform {
 export interface Plataforma {
   nome: string;
   url?: string;
+  logo_path?: string | null;
 }
 
 // Interface base para mídia

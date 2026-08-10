@@ -100,7 +100,19 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   try {
     const [filmes, series, jogos, animes] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
+        where: {
+          AND: [
+            filmeCarouselQualityFilter,
+            filmeCarouselLocalizationFilter,
+            {
+              OR: [
+                { releaseDate: { gte: windowStart, lte: windowEnd } },
+                { emCartaz: true },
+                { emBreve: true },
+              ],
+            },
+          ],
+        },
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
