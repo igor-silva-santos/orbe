@@ -16,7 +16,7 @@ export default function SugestoesPage() {
           <p className="text-sm text-muted-foreground">
             Informe o título, tipo de mídia e, se possível, links de referência (TMDB, AniList, IGDB).
           </p>
-          <Link href="/contato" className="orbe-block orbe-block-hover inline-block bg-primary text-primary-foreground font-bold px-6 py-3 rounded-[12px]">
+          <Link href="/contato" className="inline-block bg-primary text-primary-foreground font-medium px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
             Enviar sugestão via Contato
           </Link>
         </div>
