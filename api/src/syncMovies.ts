@@ -6,7 +6,7 @@ import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
-import { isMovieRelevantForSync, hasPortugueseLocalization } from './qualityFilters';
+import { isMovieRelevantForSync, hasPortugueseLocalization, isConcertOrLiveRecording } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
 import { isOpenPeriod } from './syncDateHelpers';
@@ -212,6 +212,8 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
     region: 'BR',
     'release_date.gte': startDate,
     'release_date.lte': endDate,
+    with_release_type: '2|3',
+    without_genres: '104',
   };
 
   const discoverPasses = openPeriod
@@ -226,6 +228,8 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
             'primary_release_date.gte': startDate,
             'primary_release_date.lte': endDate,
             sort_by: 'primary_release_date.asc',
+            with_release_type: '2|3',
+            without_genres: '104',
           },
           pages: 15,
         },
@@ -314,6 +318,12 @@ async function processMovieBatch(
       const flags = sourceFlags.get(id) ?? {};
       const isCinemaCurated = flags.emCartaz || flags.emBreve;
 
+      if (isConcertOrLiveRecording(movieDetails)) {
+        skippedCount++;
+        logger.info(`⏭️ Filme [${id}] "${movieDetails.title}" ignorado: show/concerto ao vivo (não é filme).`);
+        continue;
+      }
+
       if (
         period &&
         !isCinemaCurated &&
@@ -334,22 +344,15 @@ async function processMovieBatch(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
           `avg=${movieDetails.vote_average ?? 0}, poster=${!!movieDetails.poster_path}, ` +
-          `pt=${hasPortugueseLocalization(movieDetails) ? 'sim' : 'não'}).`
+          `pt=${hasPortugueseLocalization(movieDetails) ? 'sim' : 'não'}, ` +
+          `estreia=${releaseDate.toISOString().split('T')[0]}).`
         );
         continue;
-      }
-
-      if (hasPortugueseLocalization(movieDetails)) {
-        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" com dados PT-BR (título ou sinopse).`);
       }
 
       const translations = (movieDetails.translations?.translations ?? []) as TmdbTranslationEntry[];
       const localizacaoPtBr = detectMovieBrLocalization(movieDetails, translations);
       const brOverview = getBrOverviewFromTranslations(translations);
-
-      if (localizacaoPtBr) {
-        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" — localização pt-BR confirmada (entrada BR ou título/sinopse).`);
-      }
 
       const scalarData = {
         tmdbId: movieDetails.id,
@@ -435,7 +438,9 @@ async function processMovieBatch(
 
       successCount++;
       const flagLabel = flags.emCartaz ? 'em cartaz' : flags.emBreve ? 'em breve' : 'período';
-      logger.info(`✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}) sincronizado.`);
+      logger.info(
+        `✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}, pt-BR: ${localizacaoPtBr ? 'sim' : 'não'}) sincronizado.`,
+      );
 
     } catch (error) {
       errorCount++;

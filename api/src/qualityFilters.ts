@@ -66,6 +66,11 @@ export const SYNC_MIN_GAME_RATING_COUNT = 3;
 export const OBSCURE_GENRE_IDS = [99, 104];
 export const OBSCURE_GENRE_NAMES = ['Documentary', 'Documentário', 'Music', 'Música'];
 
+/** Gêneros narrativos — se presentes com Music, provavelmente é filme (não só concerto) */
+const NARRATIVE_FILM_GENRE_IDS = [
+  28, 12, 16, 35, 80, 18, 10751, 14, 36, 27, 9648, 878, 10770, 53, 10752, 37, 10749,
+];
+
 // ── Prisma filters para exibição ─────────────────────────────────────────────
 
 /** Blockbusters sem entrada BR explícita ainda entram no carrossel */
@@ -265,6 +270,42 @@ function isObscureDocOrMusic(voteCount: number, popularity: number, movie: Movie
   );
 }
 
+const LIVE_SHOW_TITLE_PATTERNS = [
+  /\blive from\b/i,
+  /\blive in\b/i,
+  /\blive at\b/i,
+  /\blive:\s/i,
+  /:\s*live\b/i,
+  /\bworld tour\b/i,
+  /\b tour\b/i,
+  /\bconcert\b/i,
+  /\bstand-?up\b/i,
+  /\bcomedy special\b/i,
+  /\bunplugged\b/i,
+  /\blive performance\b/i,
+];
+
+/**
+ * Show/concerto/gravação ao vivo no TMDB (ex.: "Katy Perry: The Lifetimes Tour - Live from Paris").
+ * Aplica mesmo a em cartaz / em breve — o TMDB classifica isso como filme.
+ */
+export function isConcertOrLiveRecording(movie: MovieLike): boolean {
+  const title = `${movie.title ?? ''} ${movie.original_title ?? ''}`;
+  if (LIVE_SHOW_TITLE_PATTERNS.some((pattern) => pattern.test(title))) {
+    return true;
+  }
+
+  const genreIds = movie.genre_ids ?? movie.genres?.map((g) => g.id).filter(Boolean) ?? [];
+  if (!genreIds.includes(104)) return false;
+
+  const hasNarrativeGenre = genreIds.some((id) => NARRATIVE_FILM_GENRE_IDS.includes(id!));
+  if (hasNarrativeGenre) return false;
+
+  // Só Music, ou Music + Documentary — típico de concert film no TMDB
+  const otherGenres = genreIds.filter((id) => id !== 104 && id !== 99);
+  return otherGenres.length === 0;
+}
+
 function hasSyncEngagement(voteCount: number, popularity: number): boolean {
   return popularity >= SYNC_MIN_POPULARITY || voteCount >= SYNC_MIN_VOTE_COUNT;
 }
@@ -330,6 +371,7 @@ export function isMovieRelevantForDisplay(movie: MovieLike): boolean {
 /** Critérios permissivos para sincronização — exclui porcarias óbvias */
 export function isMovieRelevantForSync(movie: MovieLike): boolean {
   if (movie.adult) return false;
+  if (isConcertOrLiveRecording(movie)) return false;
   if (!hasValidPoster(movie.poster_path)) return false;
 
   const voteCount = movie.vote_count ?? 0;
@@ -337,7 +379,7 @@ export function isMovieRelevantForSync(movie: MovieLike): boolean {
   const voteAverage = movie.vote_average ?? 0;
 
   if (hasPortugueseLocalization(movie)) {
-    if (isTotallyIrrelevant(voteCount, popularity)) return false;
+    // Estreias futuras costumam ter votos zero e popularidade baixa — isso é normal com pt-BR.
     return true;
   }
 
