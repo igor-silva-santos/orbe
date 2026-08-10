@@ -1,4 +1,5 @@
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
 const gameGenreTranslations: Record<string, string> = {
@@ -402,7 +403,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   id: filme.tmdbId,
   titulo_api: filme.title,
   titulo_curado: filme.titulo_curado ?? null,
-  poster_url_api: filme.posterPath ? `${TMDB_IMAGE_BASE_URL}${filme.posterPath}` : null,
+  poster_url_api: filme.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${filme.posterPath}` : null,
   data_lancamento_api: filme.releaseDate,
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
@@ -418,7 +419,7 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   id: serie.tmdbId,
   titulo_api: serie.name,
   titulo_curado: serie.titulo_curado ?? null,
-  poster_url_api: serie.posterPath ? `${TMDB_IMAGE_BASE_URL}${serie.posterPath}` : null,
+  poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
   data_lancamento_api: serie.firstAirDate,
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],

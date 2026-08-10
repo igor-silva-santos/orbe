@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
+import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
 import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
@@ -12,6 +13,7 @@ import DaySeparatorCard from './DaySeparatorCard';
 import { Anime } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 type CarouselItem = 
   | { type: 'media'; data: Anime }
@@ -73,6 +75,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
+  const carouselItemsRef = useRef<CarouselItem[]>([]);
+  const fetchedAnimesRef = useRef<Anime[]>(initialData);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel();
@@ -87,6 +91,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef);
+
+  useEffect(() => {
+    carouselItemsRef.current = carouselItems;
+  }, [carouselItems]);
+
+  useEffect(() => {
+    fetchedAnimesRef.current = fetchedAnimes;
+  }, [fetchedAnimes]);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;
@@ -119,6 +131,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       fetchingSeasons.current.delete(seasonId);
     }
   }, []);
+
+  // Prefetch temporadas adjacentes em paralelo
+  useEffect(() => {
+    const seasonIdx = SEASONS.indexOf(initialSeason);
+    const prevSeason = SEASONS[(seasonIdx - 1 + 4) % 4];
+    const prevYear = seasonIdx === 0 ? initialYear - 1 : initialYear;
+    const nextSeason = SEASONS[(seasonIdx + 1) % 4];
+    const nextYear = seasonIdx === 3 ? initialYear + 1 : initialYear;
+    void fetchSeasonData(prevYear, prevSeason, 'prev');
+    void fetchSeasonData(nextYear, nextSeason, 'next');
+  }, [fetchSeasonData, initialSeason, initialYear]);
 
   useEffect(() => {
     const today = new Date();
@@ -155,8 +178,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
-      
-      const selectedItem = carouselItems[selectedIndex];
+
+      const items = carouselItemsRef.current;
+      const animes = fetchedAnimesRef.current;
+      const selectedItem = items[selectedIndex];
       if (selectedItem?.type === 'media' && selectedItem.data.startDate) {
           const itemDate = new Date(selectedItem.data.startDate.year, selectedItem.data.startDate.month - 1, selectedItem.data.startDate.day);
           const season = getSeason(itemDate);
@@ -167,8 +192,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       }
 
       const buffer = 15;
-      if (carouselItems.length > 0 && selectedIndex >= carouselItems.length - buffer) {
-        const lastAnime = fetchedAnimes[fetchedAnimes.length - 1];
+      if (items.length > 0 && selectedIndex >= items.length - buffer) {
+        const lastAnime = animes[animes.length - 1];
         if (!lastAnime || !lastAnime.startDate) return;
         const lastItemDate = new Date(lastAnime.startDate.year, lastAnime.startDate.month - 1, lastAnime.startDate.day);
         const lastSeason = getSeason(lastItemDate);
@@ -182,8 +207,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         await fetchSeasonData(nextYear, nextSeason, 'next');
       }
 
-      if (carouselItems.length > 0 && selectedIndex < buffer) {
-        const firstAnime = fetchedAnimes[0];
+      if (items.length > 0 && selectedIndex < buffer) {
+        const firstAnime = animes[0];
         if (!firstAnime || !firstAnime.startDate) return;
         const firstItemDate = new Date(firstAnime.startDate.year, firstAnime.startDate.month - 1, firstAnime.startDate.day);
         const firstSeason = getSeason(firstItemDate);
@@ -210,7 +235,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     }
 
     return () => { emblaApi.off('settle', onSettle); };
-  }, [emblaApi, carouselItems, fetchedAnimes, fetchSeasonData]);
+  }, [emblaApi, fetchSeasonData]);
 
   useEffect(() => {
     setCurrentTitle(`Temporada de ${SEASON_NAMES[initialSeason]} ${initialYear}`);
@@ -332,6 +357,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     setCurrentYear(newYear);
   };
 
+  const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
+  const selectedSnap = emblaApi?.selectedScrollSnap() ?? startIndex;
+
   return (
     <div className="overflow-hidden max-w-full">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
@@ -374,6 +402,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
+      <TooltipProvider delayDuration={300}>
       <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
         <div className="flex">
           {carouselItems.length === 0
@@ -382,19 +411,26 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   <MidiaCardSkeleton />
                 </div>
               ))
-            : carouselItems.map((item) => (
+            : carouselItems.map((item, index) => {
+                const isRendered = index >= virtualRange.start && index <= virtualRange.end;
+                const isPriority = Math.abs(index - selectedSnap) <= 4;
+                return (
                 <div
                   key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`}
                   className={SLIDE_CLASS}
                 >
-                  {item.type === 'separator' 
-                    ? <DaySeparatorCard dayName={item.dayName} /> 
-                    : <MidiaCard midia={item.data} type="anime" />}
+                  {!isRendered ? (
+                    <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-muted" aria-hidden />
+                  ) : item.type === 'separator' ? (
+                    <DaySeparatorCard dayName={item.dayName} />
+                  ) : (
+                    <MidiaCard midia={item.data} type="anime" priority={isPriority} />
+                  )}
                 </div>
-              ))
-          }
+              );})}
         </div>
       </div>
+      </TooltipProvider>
     </div>
   );
 };

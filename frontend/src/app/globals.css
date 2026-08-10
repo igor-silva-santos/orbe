@@ -180,57 +180,11 @@ body {
   font-family: var(--font-display), 'Russo One', sans-serif;
 }
 
-.orbe-logo-orb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: conic-gradient(from 180deg, var(--primary), var(--orbe-accent-2), var(--primary));
-  box-shadow: 3px 3px 0 var(--orbe-block-shadow);
-  flex-shrink: 0;
-}
-
-.orbe-block {
-  border: 2.5px solid var(--orbe-block-border);
-  box-shadow: 4px 4px 0 var(--orbe-block-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.orbe-block-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--orbe-block-shadow);
-}
-
-.orbe-block-sm {
-  border: 2.5px solid var(--orbe-block-border);
-  box-shadow: 3px 3px 0 var(--orbe-block-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.orbe-block-sm-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 var(--orbe-block-shadow);
-  background: var(--orbe-accent);
-  border-color: var(--orbe-accent);
-  color: var(--primary-foreground);
-}
-
-.orbe-nerd-stroke {
-  color: var(--primary);
-  -webkit-text-stroke: 1.5px var(--orbe-block-border);
-  paint-order: stroke fill;
-}
-
-.orbe-pill-active {
-  background: var(--orbe-block-border);
-  color: var(--background);
-}
-
-.hover-scale {
-  transition: transform 0.2s ease-in-out;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
+.carousel-slide {
+  transform-origin: center center;
+  will-change: transform, opacity;
+  content-visibility: auto;
+  contain-intrinsic-size: 210px 320px;
 }
 
 .scrollbar-hide {
@@ -338,11 +292,6 @@ body {
 
 .transition-smooth {
   transition: all 0.3s ease-in-out;
-}
-
-.carousel-slide {
-  transform-origin: center center;
-  will-change: transform, opacity;
 }
 
 .is-wheel-dragging {

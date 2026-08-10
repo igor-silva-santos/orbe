@@ -9,15 +9,21 @@ type SlideTweens = {
   opacity: gsap.QuickToFunc;
 };
 
+function shouldUseFanEffect(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (window.matchMedia('(max-width: 768px)').matches) return false;
+  return true;
+}
+
 /**
- * Efeito leque contínuo — escala/opacidade interpoladas pela distância
- * ao centro do viewport (não pelo índice de snap). GSAP quickTo dá inércia visual.
+ * Efeito leque — desativado em mobile e com prefers-reduced-motion para performance.
  */
 export function useFanCarouselSlides(emblaApi: EmblaCarouselType | undefined) {
   const tweensRef = useRef(new WeakMap<HTMLElement, SlideTweens>());
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !shouldUseFanEffect()) return;
 
     const getTweens = (slide: HTMLElement): SlideTweens => {
       let entry = tweensRef.current.get(slide);
