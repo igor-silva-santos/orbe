@@ -279,17 +279,14 @@ export const formatNextEpisodeDetail = (
   }
 };
 
-/** Card — ex.: "Ep 8 em 6d 10h 10m - Domingo" */
+/** Card — ex.: "Ep 8 · 6d 10h" */
 export const formatNextEpisodeCard = (
   airingAt: string,
   episode: number,
   countdown: string,
 ): string => {
-  const weekday = formatNextEpisodeWeekday(airingAt);
   const countdownLabel = countdown || 'em breve';
-  return weekday
-    ? `Ep ${episode} em ${countdownLabel} - ${weekday}`
-    : `Ep ${episode} em ${countdownLabel}`;
+  return `Ep ${episode} · ${countdownLabel}`;
 };
 
 /** @deprecated Use formatNextEpisodeDetail */

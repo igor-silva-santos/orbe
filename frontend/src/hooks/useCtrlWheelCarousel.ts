@@ -12,13 +12,21 @@ export function useCtrlWheelCarousel(
     if (!node || !emblaApi) return;
 
     const onWheel = (e: WheelEvent) => {
-      if (!e.ctrlKey && !e.metaKey) return;
+      const isHorizontalGesture = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const shouldScrollHorizontally = e.ctrlKey || e.metaKey || isHorizontalGesture;
+
+      if (!shouldScrollHorizontally) return;
+
       e.preventDefault();
-      if (e.deltaY > 0) {
-        emblaApi.scrollNext();
-      } else if (e.deltaY < 0) {
-        emblaApi.scrollPrev();
+
+      if (isHorizontalGesture && Math.abs(e.deltaX) > 0) {
+        if (e.deltaX > 0) emblaApi.scrollNext();
+        else emblaApi.scrollPrev();
+        return;
       }
+
+      if (e.deltaY > 0) emblaApi.scrollNext();
+      else if (e.deltaY < 0) emblaApi.scrollPrev();
     };
 
     node.addEventListener('wheel', onWheel, { passive: false });

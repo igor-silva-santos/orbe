@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -80,19 +80,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const visibilityRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const node = visibilityRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { rootMargin: '120px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
@@ -102,7 +89,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
-  const countdown = useCountdown(isVisible ? nextAiringEpisode?.airingAt : undefined);
+  const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
@@ -190,11 +177,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="relative group" ref={(node) => {
-          visibilityRef.current = node;
-          if (typeof ref === 'function') ref(node);
-          else if (ref) ref.current = node;
-        }}>
+        <div className="relative group" ref={ref}>
             <div
               className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col h-full ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
@@ -262,19 +245,19 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </div>
                   )}
                 </div>
-                <div className="h-[28px] mb-2 flex items-start">
+                <div className="h-[22px] mb-2 flex items-center overflow-hidden">
                 {type === 'anime' ? (
                   isFutureRelease ? (
-                    <p className="text-xs text-gray-400 line-clamp-1">Lançamento: {formatReleaseDate()}</p>
+                    <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode && nextEpisodeCardLabel ? (
-                    <span className="inline-flex max-w-full items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-2.5 py-1 text-[10px] font-bold leading-snug text-orange-700 dark:text-orange-300 sm:text-[11px] line-clamp-1">
+                    <span className="inline-flex max-w-full items-center rounded-full border border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-orange-700 dark:text-orange-300 sm:text-[10px] whitespace-nowrap truncate">
                       {nextEpisodeCardLabel}
                     </span>
                   ) : (
-                    <p className="text-xs text-gray-400 line-clamp-1">Lançamento: {formatReleaseDate()}</p>
+                    <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   )
                 ) : (
-                  <p className="text-xs text-gray-400 line-clamp-1">
+                  <p className="text-xs text-gray-400 truncate">
                     Lançamento: {formatReleaseDate()}
                   </p>
                 )}
