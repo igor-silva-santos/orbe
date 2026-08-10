@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
-import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
+import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
@@ -74,17 +73,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: 'center',
-    skipSnaps: true,
-    dragFree: true,
-    containScroll: 'trimSnaps',
-    duration: 20,
-  });
+  const [emblaRef, emblaApi] = useOrbeCarousel();
 
   useFanCarouselSlides(emblaApi);
-
-  useEmblaWheelScroll(emblaApi);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;

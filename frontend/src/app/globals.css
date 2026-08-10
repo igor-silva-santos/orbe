@@ -340,7 +340,15 @@ body {
 
 .carousel-slide {
   transform-origin: center center;
-  will-change: transform;
+  will-change: transform, opacity;
+}
+
+.is-wheel-dragging {
+  cursor: grabbing !important;
+}
+
+.is-wheel-dragging .carousel-slide {
+  pointer-events: none;
 }
 
 .carousel-smooth {
