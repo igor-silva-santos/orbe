@@ -895,7 +895,7 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
       categorias: buildSections(mapped, (j) => j.generos_api || []),
       modos: buildSections(mapped, (j) => j.modos_jogo || []),
       plataformas: buildSections(mapped, (j) =>
-        (j.plataformas_api || []).map((p) => p.nome).filter(Boolean) as string[]
+        (j.plataformas_api || []).map((p: { nome?: string }) => p.nome).filter(Boolean) as string[]
       ),
     });
   } catch (error) {
