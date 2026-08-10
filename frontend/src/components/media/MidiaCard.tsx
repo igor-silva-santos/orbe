@@ -235,7 +235,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   )}
                 </div>
               </div>
-              <div className="p-3 flex flex-col flex-1 min-h-[148px]">
+              <div className="p-3 flex flex-col flex-1 min-h-[132px]">
                 <div className="flex justify-between items-start mb-1 min-h-[40px]">
                   <h3 className="font-bold text-sm sm:text-base line-clamp-2 pr-2 flex-grow orbe-text-primary leading-tight">{midia.titulo_curado || midia.titulo_api}</h3>
                   {rating && (
@@ -269,22 +269,29 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
-                <div className="h-[22px] mb-1">
-                {dubStatus && (
+                {dubStatus ? (
+                  <div className="mb-1">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
+                  </div>
+                ) : null}
+                {(type === 'jogo' ? platforms : providers).length > 0 && (
+                  <div className="mt-auto pt-2 flex items-center gap-1.5 flex-wrap">
+                    {(type === 'jogo' ? platforms : providers).slice(0, 3).map((p) => (
+                      <span key={p.name} title={p.name} className="inline-flex shrink-0">
+                        <PlatformIcon
+                          platform={p.icon}
+                          logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
+                          size={18}
+                          iconOnly
+                          className="h-[18px] w-[18px] rounded-sm"
+                          title={p.name}
+                        />
+                      </span>
+                    ))}
+                  </div>
                 )}
-                </div>
-                <div className="flex-grow" />
-                <div className="flex flex-col gap-1 pt-1 h-[32px] overflow-hidden">
-                  {(type === 'jogo' ? platforms : providers).slice(0, 2).map(p => (
-                    <div key={p.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <PlatformIcon platform={p.icon} size={14} />
-                      <span>{p.name}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
             {isMenuOpen && (
