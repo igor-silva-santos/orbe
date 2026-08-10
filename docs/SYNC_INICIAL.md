@@ -56,7 +56,59 @@ curl -X POST "$API_URL/api/run-sync-awards" \
   -H "x-sync-secret: $SYNC_SECRET"
 ```
 
-## 4. Validar
+## 4. Monitorar progresso (cold start / falhas)
+
+### Status público (sem secret)
+
+```bash
+curl -s "$API_URL/api/sync/status"
+```
+
+Campos importantes:
+
+| Campo | Significado |
+|-------|-------------|
+| `syncActive` | Sync rodando agora |
+| `stale` | Provável crash/cold start — sem progresso há 10+ min |
+| `resumeAvailable` | Há checkpoint para retomar |
+| `phase` | Fase atual (`filmes`, `series`, `animes`, `jogos`) |
+| `progressPercent` | % da fase atual |
+| `completedPhases` | Fases já concluídas no checkpoint |
+
+### Detalhes completos (com secret)
+
+```bash
+curl -s "$API_URL/api/sync/status" -H "x-sync-secret: $SYNC_SECRET"
+```
+
+Inclui `detailed.lastError`, `animesResumeYear`, etc.
+
+### Health com hint de sync
+
+```bash
+curl -s "$API_URL/api/health" -H "x-health-token: $HEALTH_CHECK_TOKEN"
+```
+
+## 5. Retomar após falha (sem recomeçar do zero)
+
+Se o Render reiniciou (cold start) ou o sync quebrou:
+
+```bash
+# 1. Ver status
+curl -s "$API_URL/api/sync/status" -H "x-sync-secret: $SYNC_SECRET"
+
+# 2. Se stale=true, liberar lock preso
+curl -X POST "$API_URL/api/sync/reset-stale" \
+  -H "x-sync-secret: $SYNC_SECRET"
+
+# 3. Retomar — pula fases já em completedPhases
+curl -X POST "$API_URL/api/run-sync-resume" \
+  -H "x-sync-secret: $SYNC_SECRET"
+```
+
+O checkpoint é salvo no Postgres (`AppSetting` / `sync_run`). Fases concluídas: `filmes` → `series` → `animes` (por ano) → `jogos`.
+
+## 6. Validar dados
 
 ```bash
 curl -s "$API_URL/api/health"
@@ -66,6 +118,7 @@ curl -s "$API_URL/api/comments/filme/1"
 
 ## Notas
 
-- Sync pode levar **horas** no plano free do Render.
+- Sync pode levar **horas** no plano free do Render; cold start **interrompe** o processo — use `run-sync-resume`.
+- Logs no Render mostram ETA a cada ~2 min (`⏱️ [FILMES] ...`).
 - Rode premiações **depois** do catálogo — o scraper busca títulos no DB.
 - Comentários: tabela criada pela migration `20260810175000_add_comment_watchlist_user_profile`.
