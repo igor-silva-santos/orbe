@@ -106,6 +106,7 @@ export interface Filme extends Midia {
   ultima_verificacao_ingresso?: string;
   videos?: Video[];
   status?: string;
+  status_label?: string;
 }
 
 export interface Temporada {
@@ -124,6 +125,7 @@ export interface Serie extends Midia {
   numero_temporadas: number;
   numero_episodios: number;
   status?: string;
+  status_label?: string;
   criadores: Creator[];
   elenco: CastMember[];
   videos?: Video[];

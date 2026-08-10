@@ -17,6 +17,7 @@ import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
 import { invalidateMediaCaches } from './cacheInvalidation';
+import { translateTmdbStatus, translateAnimeStatusLabel } from './statusLabels';
 import { searchRateLimiter, homepageRateLimiter } from './securityMiddleware';
 
 
@@ -27,6 +28,22 @@ const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
 const HOMEPAGE_ITEM_LIMIT = 80;
+const DEFAULT_LIST_LIMIT = 48;
+const MAX_LIST_LIMIT = 200;
+
+const parsePagination = (query: { page?: string; limit?: string }) => {
+  const page = Math.max(1, parseInt(query.page ?? '1', 10) || 1);
+  const limit = Math.min(MAX_LIST_LIMIT, Math.max(1, parseInt(query.limit ?? String(DEFAULT_LIST_LIMIT), 10) || DEFAULT_LIST_LIMIT));
+  return { page, limit, skip: (page - 1) * limit };
+};
+
+const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { startDate: Date; endDate: Date } | null => {
+  const month = parseInt(mes ?? '', 10);
+  if (!month || month < 1 || month > 12) return null;
+  const year = ano && ano !== 'todos' ? parseInt(ano, 10) : new Date().getFullYear();
+  if (!year) return null;
+  return getMonthDateRange(year, month);
+};
 
 /** Janela inicial: mês anterior até +3 meses — cards do período atual sem payload gigante */
 const getHomepageDateWindow = () => {
@@ -193,11 +210,21 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, status } = req.query;
+  const { filtro, genero, ano, mes, status, plataforma } = req.query;
+  const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
     const allConditions: Prisma.FilmeWhereInput[] = [];
 
-    if (ano && ano !== 'todos') {
+    const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
+
+    if (monthRange) {
+      allConditions.push({ releaseDate: { gte: monthRange.startDate, lte: monthRange.endDate } });
+      if (ano && ano !== 'todos') {
+        allConditions.push(getFilmeQualityFilterForYear(parseInt(ano as string, 10)));
+      } else {
+        allConditions.push(filmeQualityFilter);
+      }
+    } else if (ano && ano !== 'todos') {
       const year = parseInt(ano as string);
       allConditions.push(getFilmeQualityFilterForYear(year));
       const startDate = new Date(year, 0, 1);
@@ -215,6 +242,12 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       allConditions.push({ status: status as string });
     }
 
+    if (plataforma && plataforma !== 'todos') {
+      allConditions.push({
+        streamingProviders: { some: { provider: { name: plataforma as string } } },
+      });
+    }
+
     const now = new Date();
     if (filtro === 'em_cartaz') {
       allConditions.push({ emCartaz: true });
@@ -230,12 +263,17 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const orderBy: Prisma.FilmeOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { title: 'asc' };
 
-    const filmes = await prisma.filme.findMany({
-      where,
-      include: { streamingProviders: { include: { provider: true } } },
-      orderBy,
-    });
-    res.json({ results: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))), total: filmes.length });
+    const [filmes, total] = await Promise.all([
+      prisma.filme.findMany({
+        where,
+        include: { streamingProviders: { include: { provider: true } } },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.filme.count({ where }),
+    ]);
+    res.json({ results: filmes.map(mapFilmeToMidia), total, page, limit });
   } catch (error) {
     logger.error(`Erro ao buscar filmes: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes.' });
@@ -302,10 +340,20 @@ router.get('/filmes/filtros', async (req, res) => {
         select: { status: true },
     });
 
+    const platforms = await prisma.streamingProvider.findMany({
+      where: { filmes: { some: {} } },
+      orderBy: { name: 'asc' },
+      select: { name: true },
+    });
+
     res.json({
       genres: genres.map(g => g.name),
       years: distinctYears,
-      statuses: statuses.map(s => s.status),
+      statuses: statuses.map(s => ({
+        value: s.status!,
+        label: translateTmdbStatus(s.status) ?? s.status!,
+      })),
+      platforms: platforms.map(p => p.name),
     });
 
   } catch (error) {
@@ -416,41 +464,56 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
 
 // Rota para Séries
 router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, status } = req.query;
+  const { filtro, genero, ano, mes, status, plataforma } = req.query;
+  const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const where: Prisma.SerieWhereInput = {};
+    const allConditions: Prisma.SerieWhereInput[] = [];
 
-    if (genero && genero !== 'todos') {
-      where.genres = {
-        some: { genero: { name: genero as string } },
-      };
-    }
+    const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
 
-    if (status && status !== 'todos') {
-      where.status = status as string;
-    }
-
-    if (ano && ano !== 'todos') {
+    if (monthRange) {
+      allConditions.push({ firstAirDate: { gte: monthRange.startDate, lte: monthRange.endDate } });
+    } else if (ano && ano !== 'todos') {
       const year = parseInt(ano as string);
       const startDate = new Date(year, 0, 1);
       const endDate = new Date(year, 11, 31, 23, 59, 59);
-      where.firstAirDate = {
-        gte: startDate,
-        lte: endDate,
-      };
+      allConditions.push({ firstAirDate: { gte: startDate, lte: endDate } });
     }
+
+    if (genero && genero !== 'todos') {
+      allConditions.push({
+        genres: { some: { genero: { name: genero as string } } },
+      });
+    }
+
+    if (status && status !== 'todos') {
+      allConditions.push({ status: status as string });
+    }
+
+    if (plataforma && plataforma !== 'todos') {
+      allConditions.push({
+        streamingProviders: { some: { provider: { name: plataforma as string } } },
+      });
+    }
+
+    const where: Prisma.SerieWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
 
     const orderBy: Prisma.SerieOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { name: 'asc' };
 
-    const series = await prisma.serie.findMany({
-      where,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
-      orderBy,
-    });
-    res.json({ results: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))), total: series.length });
+    const [series, total] = await Promise.all([
+      prisma.serie.findMany({
+        where,
+        include: {
+          genres: { include: { genero: true } },
+          streamingProviders: { include: { provider: true } },
+        },
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.serie.count({ where }),
+    ]);
+    res.json({ results: series.map(mapSerieToMidia), total, page, limit });
   } catch (error) {
     logger.error(`Erro ao buscar séries: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries.' });
@@ -514,10 +577,20 @@ router.get('/series/filtros', async (req, res) => {
         select: { status: true },
     });
 
+    const platforms = await prisma.streamingProvider.findMany({
+      where: { series: { some: {} } },
+      orderBy: { name: 'asc' },
+      select: { name: true },
+    });
+
     res.json({
       genres: genres.map(g => g.name),
       years: distinctYears,
-      statuses: statuses.map(s => s.status),
+      statuses: statuses.map(s => ({
+        value: s.status!,
+        label: translateTmdbStatus(s.status) ?? s.status!,
+      })),
+      platforms: platforms.map(p => p.name),
     });
 
   } catch (error) {
@@ -629,6 +702,7 @@ const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
 // Rota para Animes
 router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, formato, fonte, status, safeSearch, includeAdult } = req.query;
+  const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
     const where: Prisma.AnimeWhereInput = {};
     const showAdultContent = includeAdult === 'true';
@@ -669,26 +743,31 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const orderBy: Prisma.AnimeOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { titleRomaji: 'asc' };
 
-    const animes = await prisma.anime.findMany({
-      where,
-      include: { 
-        sourceRelations: { 
-          include: { 
-            relatedAnime: { select: { anilistId: true, titleRomaji: true } },
-            sourceAnime: { select: { anilistId: true, titleRomaji: true } }
-          }
+    const [animes, total] = await Promise.all([
+      prisma.anime.findMany({
+        where,
+        include: { 
+          sourceRelations: { 
+            include: { 
+              relatedAnime: { select: { anilistId: true, titleRomaji: true } },
+              sourceAnime: { select: { anilistId: true, titleRomaji: true } }
+            }
+          },
+          relatedRelations: { 
+            include: { 
+              relatedAnime: { select: { anilistId: true, titleRomaji: true } },
+              sourceAnime: { select: { anilistId: true, titleRomaji: true } }
+            }
+          },
+          tags: { include: { tag: true } }
         },
-        relatedRelations: { 
-          include: { 
-            relatedAnime: { select: { anilistId: true, titleRomaji: true } },
-            sourceAnime: { select: { anilistId: true, titleRomaji: true } }
-          }
-        },
-        tags: { include: { tag: true } }
-      },
-      orderBy,
-    });
-    res.json({ results: await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))), total: animes.length });
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.anime.count({ where }),
+    ]);
+    res.json({ results: animes.map(mapAnimeToMidia), total, page, limit });
   } catch (error) {
     logger.error(`Erro ao buscar animes: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar animes.' });
@@ -743,7 +822,10 @@ router.get('/animes/filtros', async (req, res) => {
       years: years.map(y => y.seasonYear).filter(Boolean),
       formats: formats.map(f => f.format).filter(Boolean),
       sources: sources.map(s => s.source).filter(Boolean),
-      statuses: statuses.map(s => s.status).filter(Boolean),
+      statuses: statuses.map(s => ({
+        value: s.status!,
+        label: translateAnimeStatusLabel(s.status) ?? s.status!,
+      })),
     });
 
   } catch (error) {
@@ -775,6 +857,7 @@ router.get('/animes/:id/next-episode', async (req, res) => {
 // Rota para Jogos
 router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, plataforma, modo } = req.query;
+  const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
     const where: Prisma.JogoWhereInput = {};
 
@@ -790,11 +873,16 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const orderBy: Prisma.JogoOrderByWithRelationInput = filtro === 'populares' ? { rating: 'desc' } : { name: 'asc' };
 
-    const jogos = await prisma.jogo.findMany({
-      where,
-      orderBy,
-    });
-    res.json({ results: await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))), total: jogos.length });
+    const [jogos, total] = await Promise.all([
+      prisma.jogo.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.jogo.count({ where }),
+    ]);
+    res.json({ results: jogos.map(mapJogoToMidia), total, page, limit });
   } catch (error) {
     logger.error(`Erro ao buscar jogos: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos.' });

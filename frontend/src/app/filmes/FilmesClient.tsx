@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Filter, Grid, Calendar, Star, TrendingUp } from 'lucide-react';
+import { Filter, Grid, Calendar, Star, TrendingUp, Monitor } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Filme } from '@/types';
@@ -9,24 +9,42 @@ import type { FilmesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
 
+const MONTHS = [
+  { value: '1', label: 'Janeiro' },
+  { value: '2', label: 'Fevereiro' },
+  { value: '3', label: 'Março' },
+  { value: '4', label: 'Abril' },
+  { value: '5', label: 'Maio' },
+  { value: '6', label: 'Junho' },
+  { value: '7', label: 'Julho' },
+  { value: '8', label: 'Agosto' },
+  { value: '9', label: 'Setembro' },
+  { value: '10', label: 'Outubro' },
+  { value: '11', label: 'Novembro' },
+  { value: '12', label: 'Dezembro' },
+];
+
 interface FilmesClientProps {
   initialData: FilmesPageData;
 }
 
 export default function FilmesClient({ initialData }: FilmesClientProps) {
   const [filmes, setFilmes] = useState<Filme[]>(initialData.results);
+  const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
 
   const [availableGenres, setAvailableGenres] = useState<string[]>(initialData.filters.genres);
   const [availableYears, setAvailableYears] = useState<number[]>(initialData.filters.years);
-  const [availableStatuses, setAvailableStatuses] = useState<string[]>(initialData.filters.statuses);
+  const [availableStatuses, setAvailableStatuses] = useState(initialData.filters.statuses);
+  const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(initialData.filters.platforms);
 
-  // Estados para os filtros selecionados
   const [selectedFilter, setSelectedFilter] = useState<'todos' | 'em_cartaz' | 'em_breve' | 'populares'>('todos');
   const [selectedGenre, setSelectedGenre] = useState<string>('todos');
   const [selectedYear, setSelectedYear] = useState<string>('todos');
+  const [selectedMonth, setSelectedMonth] = useState<string>('todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('todos');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('todos');
 
   const filters = [
     { id: 'todos' as const, label: 'Todos os Filmes', icon: Grid },
@@ -37,7 +55,6 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
 
   const skipInitialFetch = useRef(true);
 
-  // Efeito para buscar os filmes com base nos filtros selecionados
   useEffect(() => {
     if (skipInitialFetch.current) {
       skipInitialFetch.current = false;
@@ -47,13 +64,16 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
     const loadFilmes = async () => {
       setIsLoading(true);
       try {
-        const response = await realApi.getFilmes({ 
+        const response = await realApi.getFilmes({
           filtro: selectedFilter === 'todos' ? undefined : selectedFilter,
           genero: selectedGenre === 'todos' ? undefined : selectedGenre,
           ano: selectedYear === 'todos' ? undefined : selectedYear,
+          mes: selectedMonth === 'todos' ? undefined : selectedMonth,
           status: selectedStatus === 'todos' ? undefined : selectedStatus,
+          plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
         });
         setFilmes(response.results);
+        setTotalResults(response.total_results);
       } catch (error) {
         console.error('Erro ao carregar filmes:', error);
       } finally {
@@ -62,7 +82,7 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
     };
 
     loadFilmes();
-  }, [selectedFilter, selectedGenre, selectedYear, selectedStatus]);
+  }, [selectedFilter, selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
@@ -71,9 +91,7 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
         description="Descubra os melhores filmes em cartaz, lançamentos e clássicos do cinema"
       />
 
-      {/* Filtros */}
       <div className="mb-6 md:mb-8 space-y-4">
-        {/* Filtros Principais */}
         <div className="flex flex-wrap gap-2">
           {filters.map((filter) => (
             <button
@@ -91,7 +109,6 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
           ))}
         </div>
 
-        {/* Filtros Secundários */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="flex items-center gap-2 w-full">
             <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -128,6 +145,23 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
           </div>
 
           <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              disabled={isLoadingFilters}
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            >
+              <option value="todos">Todos os Meses</option>
+              {MONTHS.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 w-full">
             <Star className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={selectedStatus}
@@ -137,8 +171,25 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
             >
               <option value="todos">Todos os Status</option>
               {availableStatuses.map((status) => (
-                <option key={status} value={status!}>
-                  {status}
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 w-full">
+            <Monitor className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select
+              value={selectedPlatform}
+              onChange={(e) => setSelectedPlatform(e.target.value)}
+              disabled={isLoadingFilters}
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            >
+              <option value="todos">Todas as Plataformas</option>
+              {availablePlatforms.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
                 </option>
               ))}
             </select>
@@ -146,14 +197,12 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
         </div>
       </div>
 
-      {/* Contador de Resultados */}
       <div className="mb-6">
         <p className="text-muted-foreground">
-          {isLoading ? 'Carregando...' : `${filmes.length} ${filmes.length === 1 ? 'filme encontrado' : 'filmes encontrados'}`}
+          {isLoading ? 'Carregando...' : `${totalResults} ${totalResults === 1 ? 'filme encontrado' : 'filmes encontrados'}`}
         </p>
       </div>
 
-      {/* Grid de Filmes */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="loading-spinner h-8 w-8"></div>
@@ -185,4 +234,3 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
     </div>
   );
 }
-

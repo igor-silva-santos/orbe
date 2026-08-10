@@ -1,3 +1,5 @@
+import { translateTmdbStatus } from './statusLabels';
+
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
@@ -254,6 +256,7 @@ export const mapFilmeToMidia = (filme: any) => {
     ingresso_link: filme.ingresso_link,
     tem_sessoes: filme.tem_sessoes ?? false,
     status: filme.status,
+    status_label: translateTmdbStatus(filme.status),
     budget: filme.budget ? filme.budget.toString() : null,
     revenue: filme.revenue ? filme.revenue.toString() : null,
     premiacoes: parsePremiacoes(filme.premiacoes),
@@ -273,6 +276,7 @@ export const mapSerieToMidia = (serie: any) => {
     numero_temporadas: serie.numberOfSeasons,
     numero_episodios: serie.numberOfEpisodes,
     status: serie.status,
+    status_label: translateTmdbStatus(serie.status),
     generos_api: serie.genres?.map((g: any) => g.genero.name) ?? [],
     plataformas_api: serie.streamingProviders?.map((p: any) => ({
       nome: p.provider.name,

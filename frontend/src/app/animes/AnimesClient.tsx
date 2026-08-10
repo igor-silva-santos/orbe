@@ -27,7 +27,7 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
   const [availableYears, setAvailableYears] = useState<number[]>(initialData.filters.years);
   const [availableFormats, setAvailableFormats] = useState<string[]>(initialData.filters.formats);
   const [availableSources, setAvailableSources] = useState<string[]>(initialData.filters.sources);
-  const [availableStatuses, setAvailableStatuses] = useState<string[]>(initialData.filters.statuses);
+  const [availableStatuses, setAvailableStatuses] = useState(initialData.filters.statuses);
 
   // Estados para os filtros selecionados
   const [selectedGenre, setSelectedGenre] = useState<string>('todos');
@@ -128,7 +128,7 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
             <Star className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
               <option value="todos">Todos os Status</option>
-              {availableStatuses.map(s => <option key={s} value={s!}>{s}</option>)}
+              {availableStatuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
         </div>
