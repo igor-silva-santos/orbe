@@ -1,4 +1,6 @@
 import { Midia, Filme, Serie, Anime, Jogo, Character } from '@/types';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export const NOT_INFORMED = '(não informado)';
 
@@ -244,4 +246,25 @@ export const sanitizeTranslatedText = (text: string | null | undefined): string 
   if (!text) return '';
   if (translationErrorPattern.test(text)) return '';
   return text;
+};
+
+const capitalizeWeekday = (weekday: string) =>
+  weekday
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('-');
+
+/** Ex.: "Ep. 6 em 13/08/2026 (Quarta-Feira)" */
+export const formatNextEpisodeSchedule = (
+  airingAt: string,
+  episode: number
+): string => {
+  try {
+    const date = new Date(airingAt);
+    const dateLabel = format(date, 'dd/MM/yyyy', { locale: ptBR });
+    const weekday = capitalizeWeekday(format(date, 'EEEE', { locale: ptBR }));
+    return `Ep. ${episode} em ${dateLabel} (${weekday})`;
+  } catch {
+    return `Ep. ${episode}`;
+  }
 };
