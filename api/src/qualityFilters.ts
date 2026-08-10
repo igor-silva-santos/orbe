@@ -68,6 +68,10 @@ export const OBSCURE_GENRE_NAMES = ['Documentary', 'Documentário', 'Music', 'M�
 
 // ── Prisma filters para exibição ─────────────────────────────────────────────
 
+/** Blockbusters sem entrada BR explícita ainda entram no carrossel */
+export const CAROUSEL_BYPASS_MIN_POPULARITY = 15;
+export const CAROUSEL_BYPASS_MIN_VOTE_COUNT = 50;
+
 export const filmeQualityFilterRelaxed: Prisma.FilmeWhereInput = {
   AND: [
     { posterPath: { not: null } },
@@ -114,6 +118,21 @@ export const filmeQualityFilter: Prisma.FilmeWhereInput = {
         { voteAverage: { gte: DISPLAY_MIN_VOTE_AVERAGE } },
       ],
     },
+  ],
+};
+
+/**
+ * Carrossel: prioriza filmes com localização pt-BR (campo do sync).
+ * Não exclui filmes sem flag (null = ainda não re-sincronizado) nem blockbusters/em cartaz.
+ */
+export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
+  OR: [
+    { localizacaoPtBr: true },
+    { localizacaoPtBr: null },
+    { emCartaz: true },
+    { emBreve: true },
+    { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
+    { voteCount: { gte: CAROUSEL_BYPASS_MIN_VOTE_COUNT } },
   ],
 };
 

@@ -8,6 +8,7 @@ import { prisma } from './clients';
 import { broadcast } from './index';
 import { isMovieRelevantForSync, hasPortugueseLocalization } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
+import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { updateSyncProgress } from './syncState';
@@ -286,7 +287,7 @@ async function processMovieBatch(
       const movieDetails = await tmdbApiWithRetry(() => tmdb.movieInfo({
         id,
         language: 'pt-BR',
-        append_to_response: 'credits,videos,watch/providers,release_dates',
+        append_to_response: 'credits,videos,watch/providers,release_dates,translations',
       })) as any;
 
       const brReleases = movieDetails.release_dates?.results?.find((r: any) => r.iso_3166_1 === 'BR');
@@ -342,15 +343,24 @@ async function processMovieBatch(
         logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" com dados PT-BR (título ou sinopse).`);
       }
 
+      const translations = (movieDetails.translations?.translations ?? []) as TmdbTranslationEntry[];
+      const localizacaoPtBr = detectMovieBrLocalization(movieDetails, translations);
+      const brOverview = getBrOverviewFromTranslations(translations);
+
+      if (localizacaoPtBr) {
+        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" — localização pt-BR confirmada (entrada BR ou título/sinopse).`);
+      }
+
       const scalarData = {
         tmdbId: movieDetails.id,
         title: movieDetails.title!,
         originalTitle: movieDetails.original_title,
         overview: isLikelyEnglish(movieDetails.overview)
-          ? (await translateSynopsisForStorage(movieDetails.overview, {
+          ? (brOverview
+            ?? (await translateSynopsisForStorage(movieDetails.overview, {
               tmdbId: movieDetails.id,
               mediaType: 'movie',
-            })) ?? movieDetails.overview
+            })) ?? movieDetails.overview)
           : movieDetails.overview,
         releaseDate: releaseDate,
         runtime: movieDetails.runtime,
@@ -368,6 +378,7 @@ async function processMovieBatch(
         adult: movieDetails.adult ?? false,
         emCartaz: flags.emCartaz ?? false,
         emBreve: flags.emBreve ?? false,
+        localizacaoPtBr,
         collection: movieDetails.belongs_to_collection ? {
           connectOrCreate: {
             where: { id: movieDetails.belongs_to_collection.id },

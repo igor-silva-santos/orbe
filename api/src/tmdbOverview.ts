@@ -1,5 +1,10 @@
 import { tmdbApi } from './clients';
 import { logger } from './logger';
+import {
+  findBrTranslation,
+  getBrOverviewFromTranslations,
+  type TmdbTranslationEntry,
+} from './tmdbBrLocalization';
 
 type TmdbMediaType = 'movie' | 'tv';
 
@@ -23,7 +28,25 @@ function isRetryableTmdbError(error: unknown): boolean {
   );
 }
 
-/** Busca overview em português via endpoint de traduções do TMDB (com retry) */
+function pickPtOverview(translations: TmdbTranslationEntry[] | undefined): string | null {
+  if (!translations?.length) return null;
+
+  const brOverview = getBrOverviewFromTranslations(translations);
+  if (brOverview) return brOverview;
+
+  const ptBr = translations.find((t) => t.iso_639_1 === 'pt-BR');
+  const ptBrOverview = ptBr?.data?.overview?.trim();
+  if (ptBrOverview) return ptBrOverview;
+
+  const pt = translations.find((t) => t.iso_639_1 === 'pt' && t.iso_3166_1 !== 'PT');
+  const ptOverview = pt?.data?.overview?.trim();
+  if (ptOverview) return ptOverview;
+
+  const ptPt = translations.find((t) => t.iso_3166_1 === 'PT' && t.iso_639_1 === 'pt');
+  return ptPt?.data?.overview?.trim() || null;
+}
+
+/** Busca overview em português via endpoint de traduções do TMDB (prioriza entrada BR). */
 export async function fetchTmdbPtOverview(
   mediaType: TmdbMediaType,
   id: number,
@@ -34,19 +57,8 @@ export async function fetchTmdbPtOverview(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const { data } = await tmdbApi.get(path);
-      const translations = data?.translations as Array<{
-        iso_639_1?: string;
-        data?: { overview?: string };
-      }> | undefined;
-
-      if (!translations?.length) return null;
-
-      const pt =
-        translations.find((t) => t.iso_639_1 === 'pt') ??
-        translations.find((t) => t.iso_639_1 === 'pt-BR');
-
-      const overview = pt?.data?.overview?.trim();
-      return overview || null;
+      const translations = data?.translations as TmdbTranslationEntry[] | undefined;
+      return pickPtOverview(translations);
     } catch (error) {
       const code = getRetryableErrorCode(error);
       if (!isRetryableTmdbError(error) || attempt >= maxRetries) {
@@ -64,3 +76,5 @@ export async function fetchTmdbPtOverview(
 
   return null;
 }
+
+export { findBrTranslation, type TmdbTranslationEntry };
