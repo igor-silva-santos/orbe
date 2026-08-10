@@ -14,7 +14,12 @@ import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 
 const router = Router();
 
+const isProduction = process.env.NODE_ENV === 'production';
 const SYNC_SECRET = process.env.SYNC_SECRET || 'super-secret-sync-key';
+
+if (isProduction && (!process.env.SYNC_SECRET || SYNC_SECRET === 'super-secret-sync-key')) {
+  throw new Error('SYNC_SECRET não configurado ou inseguro em produção.');
+}
 
 const protectSync = (req: any, res: any, next: any) => {
   const secret = req.headers['x-sync-secret'] || (req.body && req.body.secret);

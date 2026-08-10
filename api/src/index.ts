@@ -75,13 +75,21 @@ app.use('/api', watchlistRoutes);
 app.use('/api/users', profileRoutes);
 app.use('/api', commentRoutes);
 
-// Healthcheck (sem depender de sync/cron)
-app.get('/api/health', async (_req, res) => {
+// Healthcheck — público retorna mínimo; detalhes só com token interno
+app.get('/api/health', async (req, res) => {
+  const healthToken = process.env.HEALTH_CHECK_TOKEN;
+  const provided = req.headers['x-health-token'];
+  const showDetails = healthToken && provided === healthToken;
+
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ ok: true, db: true });
+    if (showDetails) {
+      res.json({ ok: true, db: true });
+    } else {
+      res.json({ ok: true });
+    }
   } catch {
-    res.status(503).json({ ok: false, db: false });
+    res.status(503).json(showDetails ? { ok: false, db: false } : { ok: false });
   }
 });
 
