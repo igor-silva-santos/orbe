@@ -20,7 +20,7 @@ const router = Router();
 
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
-const CAROUSEL_ITEM_LIMIT = 60;
+const CAROUSEL_ITEM_LIMIT = 500;
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
@@ -761,6 +761,76 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
   } catch (error) {
     logger.error(`Erro ao buscar jogos por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos por ano.' });
+  }
+});
+
+// Jogos em alta da semana — agrupados por categoria, modo e plataforma
+router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const perGroup = 8;
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const buildSections = (
+    jogos: ReturnType<typeof mapJogoToMidia>[],
+    getKeys: (jogo: ReturnType<typeof mapJogoToMidia>) => string[]
+  ) => {
+    const keySet = new Set<string>();
+    for (const jogo of jogos) {
+      getKeys(jogo).forEach((k) => keySet.add(k));
+    }
+
+    const sections = Array.from(keySet).map((nome) => {
+      const jogosDoGrupo = jogos
+        .filter((j) => getKeys(j).includes(nome))
+        .slice(0, perGroup);
+      return { nome, jogos: jogosDoGrupo, total: jogosDoGrupo.length };
+    });
+
+    return sections
+      .filter((s) => s.total >= 2)
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'));
+  };
+
+  try {
+    const recentJogos = await prisma.jogo.findMany({
+      where: {
+        AND: [
+          jogoQualityFilter,
+          {
+            OR: [
+              { firstReleaseDate: { gte: weekAgo } },
+              { hypes: { gte: 5 } },
+              { rating: { gte: 75 } },
+            ],
+          },
+        ],
+      },
+      orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
+      take: 150,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+        gameModes: { include: { gameMode: true } },
+      },
+    });
+
+    const mapped = recentJogos.map(mapJogoToMidia);
+
+    const now = new Date();
+    const weekLabel = `Semana ${Math.ceil(now.getDate() / 7)} · ${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
+
+    res.json({
+      semana: weekLabel,
+      destaques: mapped.slice(0, 12),
+      categorias: buildSections(mapped, (j) => j.generos_api || []),
+      modos: buildSections(mapped, (j) => j.modos_jogo || []),
+      plataformas: buildSections(mapped, (j) =>
+        (j.plataformas_api || []).map((p) => p.nome).filter(Boolean) as string[]
+      ),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar jogos em alta: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar jogos em alta.' });
   }
 });
 

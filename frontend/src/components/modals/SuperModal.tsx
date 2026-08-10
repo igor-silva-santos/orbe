@@ -40,12 +40,12 @@ const SuperModal: React.FC = () => {
     if (!midia || !type) return;
 
     setIsLoadingDetails(true);
-    setDetails(null);
     try {
       const data = await apiClient.get(`/${type}s/${midia.id}/details`);
       setDetails(data);
     } catch (error) {
       console.error('Erro ao carregar dados adicionais:', error);
+      setDetails(midia);
     } finally {
       setIsLoadingDetails(false);
     }
@@ -61,14 +61,19 @@ const SuperModal: React.FC = () => {
 
   
 
-  const handleClose = useCallback(() => { window.history.back(); }, []);
+  const handleClose = useCallback(() => {
+    closeSuperModal();
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
+  }, [closeSuperModal]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') handleClose();
     };
-    const handlePopState = (event: PopStateEvent) => {
-      if (!event.state?.modal) closeSuperModal();
+    const handlePopState = () => {
+      closeSuperModal();
     };
 
     if (isSuperModalOpen) {
@@ -196,16 +201,25 @@ const SuperModal: React.FC = () => {
   };
 
   const renderContent = () => {
-    if (isLoadingDetails) {
-      return (
-        <div className="text-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground mt-4">Carregando detalhes...</p>
-        </div>
-      );
+    const displayData = details || midia;
+    if (!displayData) return null;
+
+    if (isLoadingDetails && !details) {
+      switch (type) {
+        case 'anime':
+          return <AnimeModalContent anime={displayData as Anime} openCalendarModal={openCalendarModal} />;
+        case 'filme':
+          return <FilmeModalContent filme={displayData as unknown as FilmeDetalhes} openCalendarModal={openCalendarModal} />;
+        case 'serie':
+          return <SerieModalContent serie={displayData as Serie} openCalendarModal={openCalendarModal} />;
+        case 'jogo':
+          return <JogoModalContent jogo={displayData as Jogo} openCalendarModal={openCalendarModal} />;
+        default:
+          return null;
+      }
     }
 
-    if (!details) {
+    if (!details && !isLoadingDetails) {
       return <div className="text-center p-8 text-destructive">Erro ao carregar detalhes.</div>;
     }
 
@@ -242,9 +256,9 @@ const SuperModal: React.FC = () => {
   if (!isSuperModalOpen || !midia || !type) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto" onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+      <div className="container mx-auto px-4 py-8 max-w-full">
+        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden">
           <>
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               {user?.role === 'admin' && (

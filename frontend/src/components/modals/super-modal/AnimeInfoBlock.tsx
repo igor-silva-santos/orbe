@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { ExternalLink, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { NOT_INFORMED } from '@/lib/media-helpers';
+import { NOT_INFORMED, translateAnimeGenre } from '@/lib/media-helpers';
 
 interface AnimeInfoBlockProps {
   anime: Anime;
@@ -94,7 +94,7 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
           <div className="flex flex-wrap gap-2 mt-2">
             {anime.generos_api.map((genre) => (
               <span key={genre} className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                {genre}
+                {translateAnimeGenre(genre)}
               </span>
             ))}
           </div>
@@ -103,19 +103,6 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
         <div>
           <span className={`font-semibold ${labelColor}`}>Gêneros:</span>
           <span className="text-muted-foreground ml-2">{NOT_INFORMED}</span>
-        </div>
-      )}
-
-      {anime.tags_api && anime.tags_api.length > 0 && (
-        <div>
-          <span className={`font-semibold ${labelColor}`}>Tags:</span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {anime.tags_api.slice(0, 12).map((tag) => (
-              <span key={tag} className="bg-muted/60 text-muted-foreground px-2.5 py-1 rounded-full text-xs">
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
       )}
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
 import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
+import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -32,7 +33,8 @@ const SEASON_NAMES: Record<Season, string> = {
 };
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-// Funções auxiliares
+const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4';
+
 const getSeason = (date: Date): Season => {
   const month = date.getMonth();
   if (month >= 0 && month <= 2) return 'WINTER';
@@ -71,7 +73,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center', skipSnaps: true, dragFree: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'center',
+    skipSnaps: false,
+    dragFree: false,
+    containScroll: 'trimSnaps',
+  });
+
+  const { getSlideStyle } = useFanCarouselSlides(emblaApi);
 
   useEmblaWheelScroll(emblaApi);
 
@@ -94,7 +103,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         setFetchedAnimes(newAnimes);
       } else if (direction === 'next') {
         setFetchedAnimes(prev => [...prev, ...newAnimes]);
-      } else { // prev
+      } else {
         setFetchedAnimes(prev => [...newAnimes, ...prev]);
       }
       
@@ -117,7 +126,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         const diffInMs = today.getTime() - startDate.getTime();
         const diffInWeeks = Math.ceil(diffInMs / (7 * 24 * 60 * 60 * 1000));
         
-        // Se estivermos na semana 4 ou mais, priorizamos a Agenda Semanal
         if (diffInWeeks >= 4) {
           setViewMode('weekly');
           setCurrentTitle(`Agenda: Semana ${diffInWeeks} de ${SEASON_NAMES[season]}`);
@@ -137,7 +145,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const onSettle = async () => {
       if (!emblaApi) return;
 
-      // If a fetch is already in progress, do nothing.
       if (fetchingSeasons.current.size > 0) {
           return;
       }
@@ -189,7 +196,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
     emblaApi.on('settle', onSettle);
 
-    // Set initial title
     const selectedIndex = emblaApi.selectedScrollSnap();
     const selectedItem = carouselItems[selectedIndex];
     if (selectedItem?.type === 'media' && selectedItem.data.startDate) {
@@ -202,7 +208,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     return () => { emblaApi.off('settle', onSettle); };
   }, [emblaApi, carouselItems, fetchedAnimes, fetchSeasonData]);
 
-  // Efeito para definir o título inicial
   useEffect(() => {
     setCurrentTitle(`Temporada de ${SEASON_NAMES[initialSeason]} ${initialYear}`);
   }, [initialSeason, initialYear]);
@@ -247,7 +252,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
         }
 
-    } else { // weekly mode
+    } else {
         const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
         filteredAnimes.forEach(anime => {
             if (anime.nextAiringEpisode) {
@@ -285,7 +290,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         const newLength = emblaApi.slideNodes().length;
         const itemsAdded = newLength - prevLength;
 
-        if (itemsAdded > 0 && previousSelectedIndex.current < 15) { // Heuristic for prepend
+        if (itemsAdded > 0 && previousSelectedIndex.current < 15) {
             emblaApi.scrollTo(previousSelectedIndex.current + itemsAdded, true);
         } else if (startIndex !== previousSelectedIndex.current) {
             emblaApi.scrollTo(startIndex, true);
@@ -322,10 +327,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   };
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-4">
+    <div className="overflow-hidden max-w-full">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3 
-          className="text-xl font-bold h-8 cursor-pointer"
+          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
           onClick={() => emblaApi?.scrollTo(startIndex)}
         >
           {currentTitle || 'Carregando...'}
@@ -334,8 +339,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600">
-                      <Filter />
+                    <button className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5">
+                      <Filter className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -347,13 +352,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <button onClick={() => navigateSeason('prev')} className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600"><ChevronLeft/></button>
-                <button onClick={() => navigateSeason('next')} className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600"><ChevronRight/></button>
+                <button onClick={() => navigateSeason('prev')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronLeft className="h-4 w-4"/></button>
+                <button onClick={() => navigateSeason('next')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronRight className="h-4 w-4"/></button>
             </div>
             {initialData.length > 0 && (
               <button 
                   onClick={() => setViewMode(prev => prev === 'launch' ? 'weekly' : 'launch')}
-                  className="flex items-center gap-2 bg-yellow-500 dark:bg-blue-500 text-white font-bold py-2 px-4 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600"
+                  className="orbe-block-sm flex items-center gap-2 bg-primary text-primary-foreground font-bold py-2 px-4 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"
               >
                   {viewMode === 'launch' ? <CalendarDays size={20} /> : <ListOrdered size={20} />}
                   <span className="hidden sm:inline">{viewMode === 'launch' ? 'Ver Agenda' : 'Ver Lançamentos'}</span>
@@ -362,16 +367,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
-        <div className="flex -ml-4 md:-ml-6">
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
+        <div className="flex">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
-                <div key={`skeleton-${index}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={`skeleton-${index}`} className={SLIDE_CLASS}>
                   <MidiaCardSkeleton />
                 </div>
               ))
-            : carouselItems.map((item) => (
-                <div key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+            : carouselItems.map((item, index) => (
+                <div
+                  key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`}
+                  className={SLIDE_CLASS}
+                  style={item.type === 'media' ? getSlideStyle(index) : undefined}
+                >
                   {item.type === 'separator' 
                     ? <DaySeparatorCard dayName={item.dayName} /> 
                     : <MidiaCard midia={item.data} type="anime" />}

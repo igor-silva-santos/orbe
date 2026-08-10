@@ -242,6 +242,10 @@ export const orbeNerdApi = {
     return apiClient.get('/trending', { type, limit });
   },
 
+  getJogosEmAlta: async () => {
+    return apiClient.get('/jogos/em-alta');
+  },
+
   // Autenticação
   register: async (userData: { nome: string; email: string; password: string }) => {
     return apiClient.post('/auth/register', userData);

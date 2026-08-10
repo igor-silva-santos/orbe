@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
+import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
@@ -20,6 +21,8 @@ interface MediaCarouselProps {
   className?: string;
 }
 
+const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4';
+
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
   const [currentTitle, setCurrentTitle] = useState('');
@@ -31,10 +34,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     align: 'center', 
-    skipSnaps: true, 
+    skipSnaps: false,
     startIndex: startIndex,
-    dragFree: true,
+    dragFree: false,
+    containScroll: 'trimSnaps',
   });
+
+  const { getSlideStyle } = useFanCarouselSlides(emblaApi);
 
   useEmblaWheelScroll(emblaApi);
 
@@ -67,7 +73,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       if (selectedItem?.data_lancamento_api) {
         try {
           const date = parseISO(selectedItem.data_lancamento_api);
-          const title = format(date, "\'Lançamentos de\' MMMM \'de\' yyyy", { locale: ptBR });
+          const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
           setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
         } catch (e) { setCurrentTitle("Lançamentos"); }
       }
@@ -101,7 +107,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     return () => { emblaApi.off('settle', onSettle); };
   }, [emblaApi, mediaItems, fetchMediaByYear]);
 
-  // Efeito para definir o título inicial
   useEffect(() => {
     if (!emblaApi || !initialData[startIndex]) return;
 
@@ -109,7 +114,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (initialItem?.data_lancamento_api) {
       try {
         const date = parseISO(initialItem.data_lancamento_api);
-        const title = format(date, "\'Lançamentos de\' MMMM \'de\' yyyy", { locale: ptBR });
+        const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
         setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
       } catch (e) { 
         setCurrentTitle("Lançamentos"); 
@@ -124,7 +129,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     const newLength = emblaApi.slideNodes().length;
     const itemsAdded = newLength - prevLength;
 
-    if (itemsAdded > 0 && previousSelectedIndex.current < 15) { // Heurística para saber se foi prepend
+    if (itemsAdded > 0 && previousSelectedIndex.current < 15) {
       emblaApi.scrollTo(previousSelectedIndex.current + itemsAdded, true);
     }
   }, [emblaApi, mediaItems]);
@@ -155,17 +160,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     : mediaItems;
 
   return (
-    <div className={className}>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-4">
-        <h3 className="text-xl font-bold h-8 cursor-pointer" onClick={() => emblaApi?.scrollTo(startIndex)}>
+    <div className={`${className ?? ''} overflow-hidden max-w-full`}>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
+        <h3 className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary" onClick={() => emblaApi?.scrollTo(startIndex)}>
           {currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0">
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600">
-                  <Filter />
+                <button className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5">
+                  <Filter className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -177,21 +182,21 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <button onClick={() => navigateByMonth('prev')} className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600"><ChevronLeft/></button>
-            <button onClick={() => navigateByMonth('next')} className="bg-yellow-500 dark:bg-blue-500 text-white p-2 rounded-full transition-colors hover:bg-yellow-600 dark:hover:bg-blue-600"><ChevronRight/></button>
+            <button onClick={() => navigateByMonth('prev')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronLeft className="h-4 w-4"/></button>
+            <button onClick={() => navigateByMonth('next')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronRight className="h-4 w-4"/></button>
           </div>
         </div>
       </div>
-      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
-        <div className="flex -ml-4 md:-ml-6">
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
+        <div className="flex">
           {filteredItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => 
-                <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={index} className={SLIDE_CLASS}>
                   <MidiaCardSkeleton />
                 </div>
               )
-            : filteredItems.map(item => (
-                <div key={`${item.id}-${mediaType}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+            : filteredItems.map((item, index) => (
+                <div key={`${item.id}-${mediaType}`} className={SLIDE_CLASS} style={getSlideStyle(index)}>
                   <MidiaCard midia={item as Filme | Serie | Anime | Jogo} type={mediaType.slice(0, -1) as TipoMidia} />
                 </div>
             ))

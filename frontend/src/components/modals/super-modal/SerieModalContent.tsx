@@ -6,6 +6,7 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import { sanitizeTranslatedText } from '@/lib/media-helpers';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -52,7 +53,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       {serie.sinopse && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Sinopse</h2>
-          <p className="text-gray-300">{serie.sinopse}</p>
+          <p className="text-muted-foreground leading-relaxed">{sanitizeTranslatedText(serie.sinopse)}</p>
         </section>
       )}
 
