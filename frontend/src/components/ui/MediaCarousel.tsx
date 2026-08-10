@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -32,9 +33,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const previousSelectedIndex = useRef<number>(startIndex);
   const itemsLengthRef = useRef(initialData.length);
 
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({ startIndex });
 
+  const setViewportRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      viewportRef.current = node;
+      emblaRef(node);
+    },
+    [emblaRef]
+  );
+
   useFanCarouselSlides(emblaApi);
+  useCtrlWheelCarousel(emblaApi, viewportRef);
 
   const fetchMediaByYear = useCallback(async (year: number) => {
     if (fetchingYears.current.has(year) || loadedYears.current.has(year)) {
@@ -186,9 +197,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             <button onClick={() => navigateByMonth('prev')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronLeft className="h-4 w-4"/></button>
             <button onClick={() => navigateByMonth('next')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronRight className="h-4 w-4"/></button>
           </div>
+          <p className="text-xs text-muted-foreground hidden sm:block">Ctrl + scroll para navegar</p>
         </div>
       </div>
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
         <div className="flex">
           {filteredItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => 
