@@ -45,11 +45,11 @@ const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { st
   return getMonthDateRange(year, month);
 };
 
-/** Janela inicial: mês anterior até +4 meses à frente (ago → dez) */
+/** Janela inicial SSR: apenas o mês atual (meses adjacentes carregam no cliente ao rolar) */
 const getHomepageDateWindow = () => {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 5, 0, 23, 59, 59, 999);
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
   return { start, end };
 };
 
@@ -107,7 +107,7 @@ const parseYearMonthQuery = (query: { year?: string; month?: string }) => {
   return { year, month };
 };
 
-// Homepage — payload leve: janela de ~4 meses centrada no período atual
+// Homepage — payload leve: mês atual; carrossel carrega adjacentes sob demanda
 router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();

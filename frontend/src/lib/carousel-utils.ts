@@ -25,6 +25,40 @@ export function adjacentMonthKeys(year: number, month: number): string[] {
   return [monthKeyFromDate(prev), monthKeyFromDate(current), monthKeyFromDate(next)];
 }
 
+export function parseMonthKey(key: string): { year: number; month: number } {
+  const [year, month] = key.split('-').map(Number);
+  return { year, month };
+}
+
+export function addMonths(year: number, month: number, delta: number): { year: number; month: number } {
+  const date = new Date(year, month - 1 + delta, 1);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+}
+
+export function monthKeyFromItem(item: Midia | undefined): string | null {
+  if (!item?.data_lancamento_api) return null;
+  const date = new Date(item.data_lancamento_api);
+  if (isNaN(date.getTime())) return null;
+  return monthKeyFromDate(date);
+}
+
+/** Índices do primeiro e último item de um mês na lista ordenada */
+export function findMonthBounds(
+  items: Midia[],
+  monthKey: string
+): { start: number; end: number } | null {
+  let start = -1;
+  let end = -1;
+  for (let index = 0; index < items.length; index++) {
+    const key = monthKeyFromItem(items[index]);
+    if (key !== monthKey) continue;
+    if (start === -1) start = index;
+    end = index;
+  }
+  if (start === -1) return null;
+  return { start, end };
+}
+
 export function calculateCarouselStartIndex(data: Midia[]): number {
   if (!data || data.length === 0) return 0;
   const today = new Date();
