@@ -131,7 +131,7 @@ const SearchOverlay: React.FC = () => {
     return (
       <div key={title} className="space-y-4">
         <h3 className="font-display text-lg orbe-text-primary flex items-center gap-2">
-          <span className="orbe-block-sm w-1.5 h-5 bg-primary rounded-full" />
+          <span className="w-1.5 h-5 bg-primary rounded-full" />
           {title}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
@@ -155,10 +155,10 @@ const SearchOverlay: React.FC = () => {
   return (
     <div className="search-overlay overflow-x-hidden">
       <div className="container mx-auto px-4 py-6 md:py-8 h-full max-w-6xl">
-        <div className="orbe-block bg-card rounded-[20px] p-5 md:p-8 max-h-[92vh] overflow-hidden flex flex-col">
+        <div className="bg-card rounded-lg shadow-xl border border-border p-5 md:p-8 max-h-[92vh] overflow-hidden flex flex-col">
           <div className="flex justify-between items-center mb-6 shrink-0">
             <h2 className="font-display text-2xl orbe-text-primary">Pesquisar</h2>
-            <button onClick={handleClose} className="orbe-block-sm p-2 rounded-xl bg-muted orbe-text-primary hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform">
+            <button onClick={handleClose} className="p-2 rounded-full hover:bg-muted transition-colors orbe-text-primary">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -171,7 +171,7 @@ const SearchOverlay: React.FC = () => {
                 placeholder="Filme, série, anime ou jogo..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-12 py-3.5 bg-background border-[2.5px] border-[var(--orbe-block-border)] rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground font-medium shadow-[3px_3px_0_var(--orbe-block-border)]"
+                className="w-full pl-12 pr-12 py-3.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
                 autoFocus
               />
               {searchQuery && (
@@ -186,10 +186,10 @@ const SearchOverlay: React.FC = () => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-bold border-[2.5px] border-[var(--orbe-block-border)] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                     selectedCategory === category.id
-                      ? 'bg-primary text-primary-foreground shadow-[3px_3px_0_var(--orbe-block-border)]'
-                      : 'bg-card orbe-text-primary shadow-[2px_2px_0_var(--orbe-block-border)]'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card orbe-text-primary border-border hover:bg-muted'
                   }`}
                 >
                   {category.label}
@@ -222,7 +222,7 @@ const SearchOverlay: React.FC = () => {
                 {renderGroup('Jogos', groupedContent.jogos, groupedContent.filmes.length + groupedContent.series.length + groupedContent.animes.length)}
               </div>
             ) : searchQuery.trim() ? (
-              <div className="text-center py-16 orbe-block-sm bg-muted rounded-[16px] border-[2px] border-[var(--orbe-block-border)]">
+              <div className="text-center py-16 bg-muted rounded-lg border border-border">
                 <p className="text-muted-foreground font-medium">Nenhum resultado para <strong className="orbe-text-primary">{searchQuery}</strong></p>
                 <p className="text-sm text-muted-foreground mt-2">Tente outro termo ou categoria</p>
               </div>
