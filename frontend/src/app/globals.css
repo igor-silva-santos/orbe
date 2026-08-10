@@ -150,8 +150,8 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-image:
-    radial-gradient(circle at 100% 0%, rgba(129, 140, 248, 0.25), transparent 45%),
-    radial-gradient(circle at 0% 100%, rgba(234, 88, 12, 0.12), transparent 45%);
+    radial-gradient(circle at 100% 0%, rgba(129, 140, 248, 0.08), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgba(234, 88, 12, 0.04), transparent 45%);
 }
 
 .orbe-gradient {

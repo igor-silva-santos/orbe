@@ -345,7 +345,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5">
+                    <button className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors">
                       <Filter className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -358,14 +358,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <button onClick={() => navigateSeason('prev')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronLeft className="h-4 w-4"/></button>
-                <button onClick={() => navigateSeason('next')} className="orbe-block-sm bg-card orbe-text-primary p-2 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"><ChevronRight className="h-4 w-4"/></button>
+                <button onClick={() => navigateSeason('prev')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronLeft className="h-4 w-4"/></button>
+                <button onClick={() => navigateSeason('next')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronRight className="h-4 w-4"/></button>
                 <p className="text-xs text-muted-foreground hidden sm:block">Ctrl + scroll para navegar</p>
             </div>
             {initialData.length > 0 && (
               <button 
                   onClick={() => setViewMode(prev => prev === 'launch' ? 'weekly' : 'launch')}
-                  className="orbe-block-sm flex items-center gap-2 bg-primary text-primary-foreground font-bold py-2 px-4 rounded-xl transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"
+                  className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
               >
                   {viewMode === 'launch' ? <CalendarDays size={20} /> : <ListOrdered size={20} />}
                   <span className="hidden sm:inline">{viewMode === 'launch' ? 'Ver Agenda' : 'Ver Lançamentos'}</span>
