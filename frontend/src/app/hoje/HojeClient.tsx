@@ -78,8 +78,8 @@ export default function HojeClient() {
       ) : data ? (
         <div className="space-y-10">
           <MediaRow title="Em cartaz nos cinemas" icon={Clapperboard} items={data.cinema} type="filme" />
-          <MediaRow title="Filmes em streaming esta semana" icon={Film} items={data.streamingFilmes} type="filme" />
-          <MediaRow title="Séries populares em streaming" icon={Tv} items={data.streamingSeries} type="serie" />
+          <MediaRow title="Filmes mais populares no streaming" icon={Film} items={data.streamingFilmes} type="filme" />
+          <MediaRow title="Séries mais populares no streaming" icon={Tv} items={data.streamingSeries} type="serie" />
           <MediaRow title="Jogos em destaque" icon={Gamepad2} items={data.destaquesJogos} type="jogo" />
 
           {data.cinema.length === 0 &&

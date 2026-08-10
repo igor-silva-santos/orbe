@@ -38,6 +38,8 @@ export const normalizeProviderName = (name?: string | null): string => {
   if (lowerName.includes('crunchyroll')) return 'Crunchyroll';
   if (lowerName.includes('star+') || lowerName.includes('star plus')) return 'Star+';
   if (lowerName.includes('apple tv')) return 'Apple TV+';
+  if (lowerName.includes('globoplay') || lowerName.includes('globo play')) return 'Globoplay';
+  if (lowerName.includes('claro')) return 'Claro TV+';
   if (lowerName.includes('tmdb')) return 'TMDB';
   return name;
 };
@@ -47,17 +49,22 @@ export const normalizeProviderName = (name?: string | null): string => {
  * @param item O objeto de mídia (filme, série ou anime).
  * @returns Uma lista de objetos de provedor com nome e ícone.
  */
-export const getStreamingProviders = (item: Midia): { name: string; icon: string }[] => {
-  const providerNames = item.plataformas_api?.map(p => normalizeProviderName(p.nome)).filter(n => n !== 'Desconhecido') ?? [];
-  const uniqueProviderNames = [...new Set(providerNames)];
-  
-  const providers = uniqueProviderNames.map(name => ({
-      name: name,
-      icon: name.toLowerCase().replace('+', 'plus').replace(/ /g, '-')
-  }));
+export const getStreamingProviders = (item: Midia): { name: string; icon: string; logo_path?: string | null }[] => {
+  const seen = new Map<string, { name: string; icon: string; logo_path?: string | null }>();
 
-  // Lógica para "Nos Cinemas"
-  if (('duracao' in item) && providers.length === 0) { // 'duracao' in item é um proxy para verificar se é um filme
+  for (const provider of item.plataformas_api ?? []) {
+    const name = normalizeProviderName(provider.nome);
+    if (name === 'Desconhecido' || seen.has(name)) continue;
+    seen.set(name, {
+      name,
+      icon: name.toLowerCase().replace('+', 'plus').replace(/ /g, '-'),
+      logo_path: provider.logo_path ?? null,
+    });
+  }
+
+  const providers = Array.from(seen.values());
+
+  if ('duracao' in item && providers.length === 0) {
     return [{ name: 'Nos Cinemas', icon: 'cinema' }];
   }
 
@@ -279,17 +286,14 @@ export const formatNextEpisodeDetail = (
   }
 };
 
-/** Card — ex.: "Ep 8 em 6d 10h 10m - Domingo" */
+/** Card — ex.: "Ep 8 · 6d 10h" */
 export const formatNextEpisodeCard = (
   airingAt: string,
   episode: number,
   countdown: string,
 ): string => {
-  const weekday = formatNextEpisodeWeekday(airingAt);
   const countdownLabel = countdown || 'em breve';
-  return weekday
-    ? `Ep ${episode} em ${countdownLabel} - ${weekday}`
-    : `Ep ${episode} em ${countdownLabel}`;
+  return `Ep ${episode} · ${countdownLabel}`;
 };
 
 /** @deprecated Use formatNextEpisodeDetail */

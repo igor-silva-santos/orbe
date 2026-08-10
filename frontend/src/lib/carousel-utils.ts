@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import type { Midia } from '@/types';
 
 export function mergeMediaByDate(existing: Midia[], incoming: Midia[]): Midia[] {
@@ -35,4 +37,29 @@ export function calculateCarouselStartIndex(data: Midia[]): number {
   });
 
   return index > -1 ? index : data.length - 1;
+}
+
+export function findIndexForMonth(items: Midia[], year: number, month: number): number {
+  const targetDate = new Date(year, month - 1, 1);
+  return items.findIndex((item) => {
+    if (!item.data_lancamento_api) return false;
+    const releaseDate = new Date(item.data_lancamento_api);
+    return !isNaN(releaseDate.getTime()) && releaseDate >= targetDate;
+  });
+}
+
+export function formatCarouselMonthTitle(date: Date): string {
+  const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
+export function monthTitleFromItem(item: Midia | undefined): string | null {
+  if (!item?.data_lancamento_api) return null;
+  try {
+    const date = new Date(item.data_lancamento_api);
+    if (isNaN(date.getTime())) return null;
+    return formatCarouselMonthTitle(date);
+  } catch {
+    return null;
+  }
 }

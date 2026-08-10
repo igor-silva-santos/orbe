@@ -100,7 +100,19 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   try {
     const [filmes, series, jogos, animes] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
+        where: {
+          AND: [
+            filmeCarouselQualityFilter,
+            filmeCarouselLocalizationFilter,
+            {
+              OR: [
+                { releaseDate: { gte: windowStart, lte: windowEnd } },
+                { emCartaz: true },
+                { emBreve: true },
+              ],
+            },
+          ],
+        },
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
@@ -145,13 +157,9 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   }
 });
 
-// Hoje — cinema + streaming + destaques da semana
+// Hoje — cinema + streaming popular da semana + destaques de jogos
 router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const now = new Date();
-  const weekAgo = new Date(now);
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAhead = new Date(now);
-  weekAhead.setDate(weekAhead.getDate() + 7);
 
   try {
     const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
@@ -164,12 +172,13 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
       prisma.filme.findMany({
         where: {
           AND: [
-            filmeQualityFilter,
-            { releaseDate: { gte: weekAgo, lte: weekAhead } },
+            filmeCarouselQualityFilter,
+            filmeCarouselLocalizationFilter,
             { streamingProviders: { some: {} } },
+            { emCartaz: false },
           ],
         },
-        orderBy: { popularity: 'desc' },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
         include: { streamingProviders: { include: { provider: true } } },
       }),
@@ -180,13 +189,13 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
             { streamingProviders: { some: {} } },
           ],
         },
-        orderBy: { popularity: 'desc' },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
         include: { streamingProviders: { include: { provider: true } } },
       }),
       prisma.jogo.findMany({
         where: jogoQualityFilter,
-        orderBy: { rating: 'desc' },
+        orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
         take: 8,
         include: {
           genres: { include: { genero: true } },
