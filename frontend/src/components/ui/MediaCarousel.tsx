@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
+import { adjacentMonthKeys, mergeMediaByDate, monthKeyFromDate } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
@@ -29,9 +30,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   
   const loadedYears = useRef<Set<number>>(new Set(initialData.map(item => new Date(item.data_lancamento_api).getFullYear())));
+  const loadedMonths = useRef<Set<string>>(new Set(
+    initialData.map(item => monthKeyFromDate(new Date(item.data_lancamento_api)))
+  ));
   const fetchingYears = useRef(new Set<number>());
+  const fetchingMonths = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(startIndex);
   const itemsLengthRef = useRef(initialData.length);
+  const mediaItemsRef = useRef(mediaItems);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({ startIndex });
@@ -46,6 +52,51 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef);
+
+  useEffect(() => {
+    mediaItemsRef.current = mediaItems;
+  }, [mediaItems]);
+
+  const mergeItems = useCallback((incoming: Midia[]) => {
+    if (!incoming.length) return;
+    setMediaItems((prev) => mergeMediaByDate(prev, incoming));
+  }, []);
+
+  const fetchMediaByMonth = useCallback(async (year: number, month: number) => {
+    const key = `${year}-${String(month).padStart(2, '0')}`;
+    if (fetchingMonths.current.has(key) || loadedMonths.current.has(key)) {
+      return null;
+    }
+    fetchingMonths.current.add(key);
+    try {
+      const response = await fetch(`${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`);
+      const data: Midia[] = await response.json();
+      loadedMonths.current.add(key);
+      return data;
+    } catch (error) {
+      console.error(`Error fetching ${mediaType} for ${key}:`, error);
+      return null;
+    } finally {
+      fetchingMonths.current.delete(key);
+    }
+  }, [mediaType]);
+
+  const prefetchMonths = useCallback(async (year: number, month: number) => {
+    const keys = adjacentMonthKeys(year, month);
+    const toFetch = keys.filter((key) => !loadedMonths.current.has(key));
+    const results = await Promise.all(
+      toFetch.map((key) => {
+        const [y, m] = key.split('-').map(Number);
+        return fetchMediaByMonth(y, m);
+      })
+    );
+    mergeItems(results.flatMap((r) => r ?? []));
+  }, [fetchMediaByMonth, mergeItems]);
+
+  useEffect(() => {
+    const now = new Date();
+    void prefetchMonths(now.getFullYear(), now.getMonth() + 1);
+  }, [prefetchMonths]);
 
   const fetchMediaByYear = useCallback(async (year: number) => {
     if (fetchingYears.current.has(year) || loadedYears.current.has(year)) {
@@ -69,26 +120,30 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!emblaApi) return;
 
     const onSettle = async () => {
+      const items = mediaItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
-      const selectedItem = mediaItems[selectedIndex];
+      const selectedItem = items[selectedIndex];
 
       if (selectedItem?.data_lancamento_api) {
         try {
           const date = parseISO(selectedItem.data_lancamento_api);
           const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
           setCurrentTitle(title.charAt(0).toUpperCase() + title.slice(1));
-        } catch (e) { setCurrentTitle("Lançamentos"); }
+          void prefetchMonths(date.getFullYear(), date.getMonth() + 1);
+        } catch {
+          setCurrentTitle('Lançamentos');
+        }
       }
 
       const buffer = 15;
-      if (selectedIndex >= mediaItems.length - buffer) {
+      if (selectedIndex >= items.length - buffer) {
         const maxLoadedYear = Math.max(...Array.from(loadedYears.current));
         const isFetchingFuture = Array.from(fetchingYears.current).some(year => year > maxLoadedYear);
         if (!isFetchingFuture) {
             const nextYear = maxLoadedYear + 1;
             const newData = await fetchMediaByYear(nextYear);
-            if (newData) setMediaItems(prev => [...prev, ...newData]);
+            if (newData) mergeItems(newData);
         }
       }
 
@@ -98,9 +153,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         if (!isFetchingPast) {
             const prevYear = minLoadedYear - 1;
             const newData = await fetchMediaByYear(prevYear);
-            if (newData) {
-              setMediaItems(prev => [...newData, ...prev]);
-            }
+            if (newData) mergeItems(newData);
         }
       }
     };
@@ -108,7 +161,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     emblaApi.on('settle', onSettle);
 
     return () => { emblaApi.off('settle', onSettle); };
-  }, [emblaApi, mediaItems, fetchMediaByYear]);
+  }, [emblaApi, fetchMediaByYear, mergeItems, prefetchMonths]);
 
   useEffect(() => {
     if (!emblaApi || !initialData[startIndex]) return;
@@ -140,22 +193,23 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   }, [emblaApi, mediaItems.length]);
 
-  const navigateByMonth = (direction: 'next' | 'prev') => {
+  const navigateByMonth = async (direction: 'next' | 'prev') => {
     if (!emblaApi || mediaItems.length === 0) return;
     const selectedIndex = emblaApi.selectedScrollSnap();
     const currentItem = mediaItems[selectedIndex];
     if (!currentItem) return;
 
     const currentItemDate = parseISO(currentItem.data_lancamento_api);
-    let targetDate: Date;
+    const targetDate =
+      direction === 'next'
+        ? new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() + 1, 1)
+        : new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() - 1, 1);
 
-    if (direction === 'next') {
-      targetDate = new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() + 1, 1);
-    } else {
-      targetDate = new Date(currentItemDate.getFullYear(), currentItemDate.getMonth() - 1, 1);
-    }
+    await prefetchMonths(targetDate.getFullYear(), targetDate.getMonth() + 1);
 
-    const targetIndex = mediaItems.findIndex(item => new Date(item.data_lancamento_api) >= targetDate);
+    const targetIndex = mediaItemsRef.current.findIndex(
+      (item) => new Date(item.data_lancamento_api) >= targetDate
+    );
     if (targetIndex !== -1) emblaApi.scrollTo(targetIndex);
   };
 

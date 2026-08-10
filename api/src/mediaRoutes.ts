@@ -12,7 +12,8 @@ import {
 import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
-import redisClient from './redisClient';
+import { invalidateMediaCaches } from './cacheInvalidation';
+import { searchRateLimiter } from './securityMiddleware';
 
 
 
@@ -33,6 +34,21 @@ const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
 const carouselLiteInclude = {
   genres: { include: { genero: true } },
   streamingProviders: { include: { provider: true }, take: 3 },
+};
+
+const getMonthDateRange = (year: number, month: number) => {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  return { startDate, endDate };
+};
+
+const parseYearMonthQuery = (query: { year?: string; month?: string }) => {
+  const year = parseInt(query.year ?? '', 10);
+  const month = parseInt(query.month ?? '', 10);
+  if (!year || !month || month < 1 || month > 12) {
+    return null;
+  }
+  return { year, month };
 };
 
 // Homepage — um único request com payload leve para todos os carrosséis
@@ -175,28 +191,7 @@ router.put('/filmes/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache para esta mídia e listagens relacionadas
-    if (redisClient) {
-      try {
-        const keysToInvalidate = [
-          `cache:/api/filmes/${id}/details`,
-          'cache:/api/filmes', // Limpa a listagem geral
-          'cache:/api/trending?type=filmes', // Limpa tendências
-          'cache:/api/pesquisa' // Limpa pesquisa (opcional, mas recomendado)
-        ];
-        
-        for (const key of keysToInvalidate) {
-          // Usamos um padrão para limpar chaves que podem ter query params
-          const keys = await redisClient.keys(`${key}*`);
-          if (keys.length > 0) {
-            await redisClient.del(...keys);
-            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
-          }
-        }
-      } catch (cacheErr) {
-        logger.error(`Erro ao invalidar cache de filme: ${cacheErr}`);
-      }
-    }
+    await invalidateMediaCaches('filmes', id);
     res.json(mapFilmeToMidia(updatedFilme));
   } catch (error) {
     logger.error(`Erro ao editar o filme ID ${id}: ${error}`);
@@ -313,6 +308,30 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
+router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const filmes = await prisma.filme.findMany({
+      where: {
+        AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { releaseDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: carouselLiteInclude,
+    });
+    res.json(filmes.map(mapFilmeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar filmes por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar filmes por mês.' });
+  }
+});
+
 // Rota para Séries
 router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, status } = req.query;
@@ -382,13 +401,7 @@ router.put('/series/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      const cacheKey = `cache:/api/series/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
-    }
-
+    await invalidateMediaCaches('series', id);
     res.json(mapSerieToMidia(updatedSerie));
   } catch (error) {
     logger.error(`Erro ao editar a série ID ${id}: ${error}`);
@@ -505,6 +518,30 @@ router.get('/series/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
+router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const series = await prisma.serie.findMany({
+      where: {
+        AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { firstAirDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: carouselLiteInclude,
+    });
+    res.json(series.map(mapSerieToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar séries por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar séries por mês.' });
+  }
+});
+
 const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
 
 // Rota para Animes
@@ -597,27 +634,7 @@ router.put('/animes/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      try {
-        const keysToInvalidate = [
-          `cache:/api/animes/${id}/details`,
-          'cache:/api/animes',
-          'cache:/api/trending?type=animes',
-          'cache:/api/pesquisa'
-        ];
-        for (const key of keysToInvalidate) {
-          const keys = await redisClient.keys(`${key}*`);
-          if (keys.length > 0) {
-            await redisClient.del(...keys);
-            logger.info(`Cache invalidado para as chaves: ${keys.join(', ')}`);
-          }
-        }
-      } catch (cacheErr) {
-        logger.error(`Erro ao invalidar cache de anime: ${cacheErr}`);
-      }
-    }
-
+    await invalidateMediaCaches('animes', id);
     res.json(mapAnimeToMidia(updatedAnime));
   } catch (error) {
     logger.error(`Erro ao editar o anime ID ${id}: ${error}`);
@@ -723,13 +740,7 @@ router.put('/jogos/:id', adminMiddleware, async (req, res) => {
       data,
     });
 
-    // Invalidar o cache
-    if (redisClient) {
-      const cacheKey = `cache:/api/jogos/${id}/details`;
-      await redisClient.del(cacheKey);
-      logger.info(`Cache invalidado para a chave: ${cacheKey}`);
-    }
-
+    await invalidateMediaCaches('jogos', id);
     res.json(mapJogoToMidia(updatedJogo));
   } catch (error) {
     logger.error(`Erro ao editar o jogo ID ${id}: ${error}`);
@@ -831,6 +842,33 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
   } catch (error) {
     logger.error(`Erro ao buscar jogos por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos por ano.' });
+  }
+});
+
+router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsed = parseYearMonthQuery(req.query as { year?: string; month?: string });
+  if (!parsed) {
+    return res.status(400).json({ error: 'Ano ou mês inválido.' });
+  }
+
+  const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
+
+  try {
+    const jogos = await prisma.jogo.findMany({
+      where: {
+        AND: [jogoQualityFilter, { firstReleaseDate: { gte: startDate, lte: endDate } }],
+      },
+      orderBy: { firstReleaseDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: {
+        platforms: { include: { plataforma: true }, take: 3 },
+        genres: { include: { genero: true } },
+      },
+    });
+    res.json(jogos.map(mapJogoToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar jogos por mês: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar jogos por mês.' });
   }
 });
 
@@ -991,7 +1029,7 @@ router.get('/trending', async (req, res) => {
 });
 
 // Rota de Pesquisa Global (com suporte a acentuação)
-router.get('/pesquisa', async (req, res) => {
+router.get('/pesquisa', searchRateLimiter, async (req, res) => {
   const { q, category } = req.query;
 
   if (!q || typeof q !== 'string') {
