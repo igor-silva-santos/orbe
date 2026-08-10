@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3 mb-4">
-              <span className="orbe-logo-orb text-[var(--background)] font-display text-xs flex items-center justify-center">
+              <span className="w-8 h-8 rounded-full bg-[var(--orbe-accent)] text-[var(--background)] font-display text-xs flex items-center justify-center">
                 O
               </span>
               <h3 className="font-display text-xl orbe-text-primary">
