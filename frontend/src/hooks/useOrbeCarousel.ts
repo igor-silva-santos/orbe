@@ -2,7 +2,6 @@
 
 import useEmblaCarousel from 'embla-carousel-react';
 import type { EmblaOptionsType } from 'embla-carousel';
-import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 /** Opções padrão — scroll livre com inércia e settle suave */
 export const ORBE_CAROUSEL_OPTIONS: EmblaOptionsType = {
@@ -14,11 +13,9 @@ export const ORBE_CAROUSEL_OPTIONS: EmblaOptionsType = {
 };
 
 /**
- * Carrossel Orbe: Embla com scroll horizontal (touchpad, Ctrl+scroll) e efeito leque (GSAP).
+ * Carrossel Orbe: Embla com scroll horizontal via useCtrlWheelCarousel (touchpad / Ctrl+scroll).
+ * WheelGesturesPlugin removido — conflitava com o handler manual e fazia o carrossel pular tudo de uma vez.
  */
 export function useOrbeCarousel(options?: EmblaOptionsType) {
-  return useEmblaCarousel(
-    { ...ORBE_CAROUSEL_OPTIONS, ...options },
-    [WheelGesturesPlugin({ forceWheelAxis: 'x' })]
-  );
+  return useEmblaCarousel({ ...ORBE_CAROUSEL_OPTIONS, ...options });
 }

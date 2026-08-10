@@ -389,7 +389,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                 </DropdownMenu>
                 <button onClick={() => navigateSeason('prev')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronLeft className="h-4 w-4"/></button>
                 <button onClick={() => navigateSeason('next')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronRight className="h-4 w-4"/></button>
-                <p className="text-xs text-muted-foreground hidden sm:block">Scroll horizontal para navegar</p>
             </div>
             {initialData.length > 0 && (
               <button 

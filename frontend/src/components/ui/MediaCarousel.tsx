@@ -147,6 +147,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   useEffect(() => {
     const now = new Date();
     void prefetchMonths(now.getFullYear(), now.getMonth() + 1);
+    void prefetchMonths(now.getFullYear(), now.getMonth() + 2);
+    void prefetchMonths(now.getFullYear(), now.getMonth() + 3);
   }, [prefetchMonths]);
 
   const fetchMediaByYear = useCallback(
@@ -199,6 +201,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
       const buffer = 15;
       if (selectedIndex >= items.length - buffer) {
+        const lastItem = items[items.length - 1];
+        if (lastItem?.data_lancamento_api) {
+          try {
+            const lastDate = parseISO(lastItem.data_lancamento_api);
+            void prefetchMonths(lastDate.getFullYear(), lastDate.getMonth() + 1);
+            void prefetchMonths(lastDate.getFullYear(), lastDate.getMonth() + 2);
+          } catch {
+            /* ignore */
+          }
+        }
+
         const maxLoadedYear = Math.max(...Array.from(loadedYears.current));
         const isFetchingFuture = Array.from(fetchingYears.current).some((y) => y > maxLoadedYear);
         if (!isFetchingFuture) {
@@ -250,14 +263,18 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   }, [emblaApi, filteredItems.length]);
 
-  const scrollToToday = useCallback(() => {
+  const scrollToToday = useCallback(async () => {
     if (!emblaApi) return;
-    const items = filteredItemsRef.current;
-    const todayIndex = calculateCarouselStartIndex(items);
+    const now = new Date();
+    const merged = await prefetchMonths(now.getFullYear(), now.getMonth() + 1);
+    const list = selectedGenre
+      ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
+      : merged;
+    const todayIndex = calculateCarouselStartIndex(list);
     lastTitleMonthKey.current = '';
-    emblaApi.scrollTo(todayIndex, true);
-    updateTitleFromIndex(todayIndex, items);
-  }, [emblaApi, updateTitleFromIndex]);
+    emblaApi.scrollTo(todayIndex, false);
+    updateTitleFromIndex(todayIndex, list);
+  }, [emblaApi, prefetchMonths, selectedGenre, updateTitleFromIndex]);
 
   const navigateByMonth = async (direction: 'next' | 'prev') => {
     if (!emblaApi) return;
@@ -327,7 +344,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-xs text-muted-foreground hidden sm:block ml-2">Scroll horizontal para navegar</p>
         </div>
       </div>
       <TooltipProvider delayDuration={300}>
