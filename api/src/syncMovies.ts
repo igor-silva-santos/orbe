@@ -339,17 +339,9 @@ async function processMovieBatch(
         continue;
       }
 
-      if (hasPortugueseLocalization(movieDetails)) {
-        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" com dados PT-BR (título ou sinopse).`);
-      }
-
       const translations = (movieDetails.translations?.translations ?? []) as TmdbTranslationEntry[];
       const localizacaoPtBr = detectMovieBrLocalization(movieDetails, translations);
       const brOverview = getBrOverviewFromTranslations(translations);
-
-      if (localizacaoPtBr) {
-        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" — localização pt-BR confirmada (entrada BR ou título/sinopse).`);
-      }
 
       const scalarData = {
         tmdbId: movieDetails.id,
@@ -435,7 +427,9 @@ async function processMovieBatch(
 
       successCount++;
       const flagLabel = flags.emCartaz ? 'em cartaz' : flags.emBreve ? 'em breve' : 'período';
-      logger.info(`✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}) sincronizado.`);
+      logger.info(
+        `✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}, pt-BR: ${localizacaoPtBr ? 'sim' : 'não'}) sincronizado.`,
+      );
 
     } catch (error) {
       errorCount++;
