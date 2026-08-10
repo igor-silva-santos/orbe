@@ -8,6 +8,9 @@ import { prisma } from './clients';
 import { broadcast } from './index';
 import { isMovieRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
+import { isOpenPeriod } from './syncDateHelpers';
+import { getSyncRunProgress } from './syncProgress';
+import { updateSyncProgress } from './syncState';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -160,24 +163,33 @@ function shouldUseCinemaOnlyCurated(periodStart: Date, periodEnd: Date): boolean
 }
 
 async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
-  logger.info(`Buscando IDs de filmes lançados entre ${startDate} e ${endDate}...`);
+  const openPeriod = isOpenPeriod(endDate);
+  logger.info(
+    `Buscando IDs de filmes lançados entre ${startDate} e ${endDate}` +
+    (openPeriod ? ' (período aberto — filtros relaxados para lançamentos futuros)' : '') +
+    '...',
+  );
   const movieIds = new Set<number>();
   let page = 1;
   let totalPages = 1;
+
+  const discoverParams: Record<string, unknown> = {
+    'primary_release_date.gte': startDate,
+    'primary_release_date.lte': endDate,
+    region: 'BR',
+    sort_by: 'popularity.desc',
+  };
+
+  if (!openPeriod) {
+    discoverParams.with_release_type = '2|3';
+    discoverParams['vote_count.gte'] = 50;
+  }
 
   try {
     do {
       const response = await tmdbApiWithRetry(() =>
         tmdbApi.get('/discover/movie', {
-          params: {
-            'primary_release_date.gte': startDate,
-            'primary_release_date.lte': endDate,
-            page,
-            region: 'BR',
-            sort_by: 'popularity.desc',
-            with_release_type: '2|3',
-            'vote_count.gte': 50,
-          },
+          params: { ...discoverParams, page },
         }),
       );
 
@@ -193,6 +205,14 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
       page++;
       await delay(250);
     } while (page <= totalPages && page <= 500);
+
+    if (openPeriod && movieIds.size === 0) {
+      logger.info('Discover vazio no período aberto; complementando com /movie/upcoming...');
+      const upcomingIds = await fetchIdsFromTmdbList('/movie/upcoming', {}, 10);
+      for (const id of upcomingIds) {
+        movieIds.add(id);
+      }
+    }
 
     logger.info(`Total de ${movieIds.size} IDs de filmes encontrados para o período.`);
     return Array.from(movieIds);
@@ -366,6 +386,8 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
   const finalEndDate = new Date(endDate);
   const period = { start: new Date(startDate), end: new Date(endDate) };
   const cinemaOnlyCurated = shouldUseCinemaOnlyCurated(period.start, period.end);
+  const runProgress = getSyncRunProgress();
+  const phaseTracker = runProgress?.startPhase('FILMES');
 
   logger.info(
     `Iniciando sincronização de filmes ` +
@@ -376,8 +398,11 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
     logger.warn(`O parâmetro limit (${limit}) será aplicado para cada lote, não para o total.`);
   }
 
+  await updateSyncProgress(prisma, { phase: 'filmes' });
+
   const curatedFlags = await fetchCuratedMovieIds({ cinemaOnly: cinemaOnlyCurated });
   let curatedIds = Array.from(curatedFlags.keys());
+  phaseTracker?.setTotal(curatedIds.length);
 
   if (curatedIds.length > 0) {
     broadcast({ type: 'SYNC_START', mediaType: 'movies', total: curatedIds.length, period: 'cinema (em cartaz / em breve)' });
@@ -391,6 +416,11 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
       const batch = curatedIds.slice(i, i + batchSize);
       logger.info(`Processando lote cinema: ${i + 1}-${Math.min(i + batchSize, curatedIds.length)} de ${curatedIds.length}`);
       await processMovieBatch(batch, prisma, curatedFlags, period);
+      phaseTracker?.advance(batch.length);
+      await updateSyncProgress(prisma, {
+        processedInPhase: i + batch.length,
+        totalInPhase: curatedIds.length,
+      });
 
       broadcast({
         type: 'SYNC_PROGRESS',
@@ -401,14 +431,15 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
     }
   }
 
+  let monthlyProcessed = 0;
+
   while (currentStartDate <= finalEndDate) {
     const startStr = currentStartDate.toISOString().split('T')[0];
     const endOfMonth = new Date(currentStartDate.getFullYear(), currentStartDate.getMonth() + 1, 0);
     const endStr = (endOfMonth > finalEndDate ? finalEndDate : endOfMonth).toISOString().split('T')[0];
 
-    logger.info(`Buscando IDs de filmes lançados entre ${startStr} e ${endStr}...`);
-
     let monthlyIds = await fetchMovieIdsForPeriod(startStr, endStr);
+    phaseTracker?.addToTotal(monthlyIds.length);
 
     if (monthlyIds.length > 0) {
         broadcast({ type: 'SYNC_START', mediaType: 'movies', total: monthlyIds.length, period: `${startStr} - ${endStr}` });
@@ -423,6 +454,13 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
             await processMovieBatch(batch, prisma, curatedFlags, period);
+            phaseTracker?.advance(batch.length);
+            monthlyProcessed += batch.length;
+            const stats = phaseTracker?.getStats();
+            await updateSyncProgress(prisma, {
+              processedInPhase: stats?.processed ?? monthlyProcessed,
+              totalInPhase: stats?.total,
+            });
 
             broadcast({
                 type: 'SYNC_PROGRESS',
