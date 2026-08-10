@@ -7,6 +7,7 @@ import {
   filmeQualityFilter,
   serieQualityFilter,
   animeQualityFilter,
+  animeSeasonQualityFilter,
   jogoQualityFilter,
   getFilmeQualityFilterForYear,
 } from './qualityFilters';
@@ -1384,7 +1385,7 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
 
     const animes = await prisma.anime.findMany({
       where: {
-        ...animeQualityFilter,
+        ...animeSeasonQualityFilter,
         seasonYear: parsedYear,
         season: season as 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL',
         format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA', 'SPECIAL'] },
