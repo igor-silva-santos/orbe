@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -18,46 +18,11 @@ import {
   getStreamingProviders,
   getGamePlatforms,
   getAnimeDubStatus,
-  formatRating
+  formatRating,
+  formatNextEpisodeSchedule,
 } from '@/lib/media-helpers';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
-
-// Hook para o cronômetro
-const useCountdown = (targetDate: string | undefined) => {
-  const [timeLeft, setTimeLeft] = useState('');
-
-  useEffect(() => {
-    if (!targetDate) return;
-
-    const interval = setInterval(() => {
-      const now = new Date();
-      const target = new Date(targetDate);
-      const difference = target.getTime() - now.getTime();
-
-      if (difference <= 0) {
-        setTimeLeft('Já disponível');
-        clearInterval(interval);
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-      } else {
-        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [targetDate]);
-
-  return timeLeft;
-};
 
 const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   {
@@ -84,7 +49,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
-  const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
@@ -100,6 +64,12 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const animeReleaseDate = isAnime ? new Date((midia as Anime).data_lancamento_api) : null;
   const isFutureRelease = animeReleaseDate ? animeReleaseDate > new Date() : false;
   const hasNextEpisode = !!nextAiringEpisode;
+  const nextEpisodeNumber =
+    nextAiringEpisode?.episode ?? (midia as Anime).numero_episodio_atual ?? null;
+  const nextEpisodeSchedule =
+    nextAiringEpisode && nextEpisodeNumber
+      ? formatNextEpisodeSchedule(nextAiringEpisode.airingAt, nextEpisodeNumber)
+      : null;
 
   const userInteraction = userInteractions.find(
     interaction => interaction.midia_id === midia.id && interaction.tipo_midia === type
@@ -224,8 +194,12 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 {type === 'anime' ? (
                   isFutureRelease ? (
                     <p className="text-xs text-gray-400 mb-2">Lançamento: {formatReleaseDate()}</p>
-                  ) : hasNextEpisode ? (
-                    <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mb-2">Ep. {(midia as Anime).numero_episodio_atual} em: {countdown}</p>
+                  ) : hasNextEpisode && nextEpisodeSchedule ? (
+                    <div className="mb-2">
+                      <span className="inline-flex max-w-full flex-wrap items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-2.5 py-1 text-[10px] font-bold leading-snug text-orange-700 dark:text-orange-300 sm:text-[11px]">
+                        Próximo episódio: {nextEpisodeSchedule}
+                      </span>
+                    </div>
                   ) : (
                     <p className="text-xs text-gray-400 mb-2">Lançamento: {formatReleaseDate()}</p>
                   )
