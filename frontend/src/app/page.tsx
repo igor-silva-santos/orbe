@@ -56,38 +56,33 @@ export default function Home() {
 
   return (
     <div className="bg-background overflow-x-hidden">
-      <section className="relative overflow-hidden border-b-[3px] border-[var(--orbe-block-border)] py-14 md:py-16">
-        <div className="container mx-auto px-4 grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
-          <div>
-            <span className="orbe-block-sm inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide bg-[var(--orbe-accent-2)] text-white px-4 py-2 rounded-full mb-5">
-              ⚡ Season Pass 2026
-            </span>
+      <section className="relative overflow-hidden border-b border-border/40 py-14 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto">
+            <p className="text-sm text-muted-foreground uppercase tracking-wide mb-5">
+              Season Pass 2026
+            </p>
             <h1 className="font-display text-[clamp(2.25rem,5.5vw,3.6rem)] leading-[1.05] mb-5 orbe-text-primary">
-              Todo o universo <span className="orbe-nerd-stroke">nerd</span> num só lugar
+              Todo o universo <span className="text-primary">nerd</span> num só lugar
             </h1>
-            <p className="text-muted-foreground text-base md:text-[16px] leading-relaxed max-w-xl mb-7 font-medium">
+            <p className="text-muted-foreground text-base md:text-[16px] leading-relaxed max-w-xl mx-auto mb-7 font-medium">
               Filmes, séries, animes e jogos — descubra lançamentos, monte sua watchlist e nunca mais perca uma estreia.
             </p>
-            <div className="flex gap-3.5 flex-wrap">
+            <div className="flex gap-3.5 flex-wrap justify-center">
               <button
                 type="button"
                 onClick={() => document.getElementById('filmes')?.scrollIntoView({ behavior: 'smooth' })}
-                className="orbe-block orbe-block-hover bg-primary text-primary-foreground font-bold text-sm px-6 py-3.5 rounded-[14px]"
+                className="bg-primary text-primary-foreground rounded-lg px-6 py-3 font-medium"
               >
                 ▶ Começar agora
               </button>
               <Link
                 href="/jogos-em-alta"
-                className="orbe-block orbe-block-hover bg-card orbe-text-primary font-bold text-sm px-6 py-3.5 rounded-[14px] inline-flex items-center"
+                className="border border-border rounded-lg px-6 py-3 font-medium inline-flex items-center"
               >
                 🎮 Ver jogos em alta
               </Link>
             </div>
-          </div>
-          <div className="relative h-64 md:h-[340px] hidden sm:block" aria-hidden="true">
-            <div className="absolute rounded-[20px] bg-primary w-[180px] h-[240px] top-0 right-[60px] rotate-[6deg] border-[3px] border-[var(--orbe-block-border)] shadow-[6px_6px_0_var(--orbe-block-border)]" />
-            <div className="absolute rounded-[20px] bg-[var(--orbe-accent-2)] w-[150px] h-[200px] bottom-0 left-5 -rotate-[8deg] border-[3px] border-[var(--orbe-block-border)] shadow-[6px_6px_0_var(--orbe-block-border)]" />
-            <div className="absolute top-10 left-[100px] w-[90px] h-[90px] rounded-full border-[3px] border-[var(--orbe-block-border)] bg-[var(--orbe-hero-yellow)] shadow-[5px_5px_0_var(--orbe-block-border)]" />
           </div>
         </div>
       </section>
