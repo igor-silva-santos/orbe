@@ -27,7 +27,7 @@ const router = Router();
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
-const HOMEPAGE_ITEM_LIMIT = 80;
+const HOMEPAGE_ITEM_LIMIT = 200;
 const DEFAULT_LIST_LIMIT = 48;
 const MAX_LIST_LIMIT = 200;
 
@@ -107,8 +107,12 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
             {
               OR: [
                 { releaseDate: { gte: windowStart, lte: windowEnd } },
-                { emCartaz: true },
-                { emBreve: true },
+                {
+                  AND: [
+                    { emCartaz: true },
+                    { releaseDate: { lte: windowEnd } },
+                  ],
+                },
               ],
             },
           ],
