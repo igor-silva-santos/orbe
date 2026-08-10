@@ -43,6 +43,8 @@ model Filme {
   tem_sessoes                 Boolean?
   emCartaz                    Boolean?  @default(false)
   emBreve                     Boolean?  @default(false)
+  // Localização pt-BR detectada no sync (entrada BR do TMDB ou título/sinopse pt-BR)
+  localizacaoPtBr             Boolean?
 
   // Relacionamentos
   genres          FilmeGenero[]
@@ -57,6 +59,7 @@ model Filme {
   premiacoes         Json?
 
   @@index([releaseDate])
+  @@index([localizacaoPtBr])
 }
 
 model Serie {

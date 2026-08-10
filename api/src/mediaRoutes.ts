@@ -5,6 +5,7 @@ import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapF
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
+  filmeCarouselLocalizationFilter,
   serieQualityFilter,
   animeQualityFilter,
   animeSeasonQualityFilter,
@@ -326,6 +327,7 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
       where: {
         AND: [
           filmeQualityFilter,
+          filmeCarouselLocalizationFilter,
           {
             releaseDate: {
               gte: startDate,
@@ -365,6 +367,7 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
       where: {
         AND: [
           filmeQualityFilter,
+          filmeCarouselLocalizationFilter,
           {
             releaseDate: {
               gte: startDate,
@@ -397,7 +400,7 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   try {
     const filmes = await prisma.filme.findMany({
       where: {
-        AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }],
+        AND: [filmeQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: startDate, lte: endDate } }],
       },
       orderBy: { releaseDate: 'asc' },
       take: CAROUSEL_ITEM_LIMIT,
