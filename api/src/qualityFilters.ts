@@ -126,7 +126,10 @@ export const filmeQualityFilter: Prisma.FilmeWhereInput = {
   ],
 };
 
-/** Carrossel: alinhado ao DISPLAY — poster + pt-BR ou overview + engajamento mínimo */
+/** Blockbusters / estreias futuras ainda sem sinopse pt-BR (ex.: Vingadores em dezembro) */
+export const CAROUSEL_TENTPOLE_MIN_POPULARITY = 50;
+
+/** Carrossel: alinhado ao DISPLAY — poster + conteúdo ou blockbuster + engajamento */
 export const filmeCarouselQualityFilter: Prisma.FilmeWhereInput = {
   AND: [
     { posterPath: { not: null } },
@@ -135,6 +138,11 @@ export const filmeCarouselQualityFilter: Prisma.FilmeWhereInput = {
       OR: [
         { localizacaoPtBr: true },
         { AND: [{ overview: { not: null } }, { NOT: { overview: '' } }] },
+        { emCartaz: true },
+        { emBreve: true },
+        { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
+        { voteCount: { gte: CAROUSEL_BYPASS_MIN_VOTE_COUNT } },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
       ],
     },
     {
@@ -144,6 +152,7 @@ export const filmeCarouselQualityFilter: Prisma.FilmeWhereInput = {
         { localizacaoPtBr: true },
         { popularity: { gte: MIN_POPULARITY } },
         { voteCount: { gte: MIN_VOTE_COUNT } },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
       ],
     },
   ],
@@ -160,6 +169,7 @@ export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
     { emBreve: true },
     { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
     { voteCount: { gte: CAROUSEL_BYPASS_MIN_VOTE_COUNT } },
+    { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
   ],
 };
 

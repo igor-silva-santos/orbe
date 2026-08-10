@@ -45,11 +45,11 @@ const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { st
   return getMonthDateRange(year, month);
 };
 
-/** Janela inicial: mês anterior até +3 meses — cards do período atual sem payload gigante */
+/** Janela inicial: mês anterior até +4 meses à frente (ago → dez) */
 const getHomepageDateWindow = () => {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 4, 0, 23, 59, 59, 999);
+  const end = new Date(now.getFullYear(), now.getMonth() + 5, 0, 23, 59, 59, 999);
   return { start, end };
 };
 

@@ -122,6 +122,10 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       'cache:/api/homepage*',
       'cache:/api/filmes/by-month*',
       'cache:/api/filmes/by-year*',
+      'cache:/api/series/by-month*',
+      'cache:/api/series/by-year*',
+      'cache:/api/jogos/by-month*',
+      'cache:/api/jogos/by-year*',
       'cache:/api/premios*',
       'cache:/api/eventos*',
     ]);
