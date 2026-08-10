@@ -4,6 +4,39 @@ Após deploy da API no Render, popule o banco com estes comandos.
 
 Substitua `SUA_API` e `SYNC_SECRET` pelos valores do dashboard Render.
 
+## Windows (PowerShell)
+
+No PowerShell, `export` e `curl` com flags (`-X`, `-H`, `-d`) **não funcionam** — `curl` é alias de `Invoke-WebRequest`. Use `Invoke-RestMethod`:
+
+```powershell
+$API_URL = "https://orbe-7bu0.onrender.com"
+$SYNC_SECRET = "sua_chave_aqui"
+
+# Catálogo completo
+Invoke-RestMethod -Uri "$API_URL/api/run-sync-all" -Method POST `
+  -Headers @{
+    "Content-Type" = "application/json"
+    "x-sync-secret" = $SYNC_SECRET
+  } `
+  -Body '{"startDate":"2025-01-01","endDate":"2026-12-31","startYear":2025,"endYear":2026}'
+
+# Status (público)
+Invoke-RestMethod -Uri "$API_URL/api/sync/status"
+
+# Status detalhado
+Invoke-RestMethod -Uri "$API_URL/api/sync/status" -Headers @{ "x-sync-secret" = $SYNC_SECRET }
+
+# Premiações (depois do catálogo)
+Invoke-RestMethod -Uri "$API_URL/api/run-sync-awards" -Method POST `
+  -Headers @{ "x-sync-secret" = $SYNC_SECRET }
+
+# Retomar após cold start / falha
+Invoke-RestMethod -Uri "$API_URL/api/run-sync-resume" -Method POST `
+  -Headers @{ "x-sync-secret" = $SYNC_SECRET }
+```
+
+Alternativa: abra **Git Bash** ou **WSL** e use os comandos `bash` abaixo.
+
 ## 1. Catálogo completo (recomendado)
 
 ```bash
