@@ -17,9 +17,10 @@ interface AnimeModalContentProps {
 const stripHtml = (html: string) =>
   html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
 
-const dedupePlatforms = (platforms: { nome: string; url?: string }[]) => {
+const dedupePlatforms = (platforms: { nome?: string; url?: string }[]) => {
   const seen = new Set<string>();
   return platforms.filter((p) => {
+    if (!p.nome) return false;
     const key = p.nome.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
@@ -127,7 +128,7 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-3 mt-2">
             {platforms.map((platform) => {
-              const isCrunchyroll = platform.nome.toLowerCase().includes('crunchyroll');
+              const isCrunchyroll = (platform.nome ?? '').toLowerCase().includes('crunchyroll');
               return (
                 <a
                   key={platform.nome}
@@ -214,6 +215,41 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
               </CarouselContent>
             </Carousel>
           </TooltipProvider>
+        </section>
+      )}
+
+      {anime.relations && anime.relations.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Relacionados</h2>
+          <div className="flex flex-wrap gap-2">
+            {anime.relations.map((rel, idx) => (
+              <span
+                key={`${rel.relationType}-${rel.node?.id ?? idx}`}
+                className="bg-muted text-foreground px-3 py-1.5 rounded-lg text-sm"
+              >
+                <span className="font-semibold">{rel.relationType}:</span>{' '}
+                {rel.node?.title?.romaji ?? 'Título desconhecido'}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {anime.rankings && anime.rankings.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Rankings</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {anime.rankings.slice(0, 6).map((rank, idx) => (
+              <div key={idx} className="bg-muted rounded-lg px-3 py-2 text-sm">
+                <span className="font-semibold">#{rank.rank}</span>
+                <span className="text-muted-foreground ml-2">
+                  {rank.type}
+                  {rank.context ? ` — ${rank.context}` : ''}
+                  {rank.year ? ` (${rank.year})` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
         </section>
       )}
     </div>

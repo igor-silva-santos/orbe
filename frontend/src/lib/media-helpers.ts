@@ -5,7 +5,8 @@ export const NOT_INFORMED = '(não informado)';
 /**
  * Normaliza o nome de um provedor de streaming para um valor padrão.
  */
-export const normalizeProviderName = (name: string): string => {
+export const normalizeProviderName = (name?: string | null): string => {
+  if (!name) return 'Desconhecido';
   const lowerName = name.toLowerCase();
   if (lowerName.includes('netflix')) return 'Netflix';
   if (lowerName.includes('hbo') || lowerName === 'max') return 'Max';
@@ -24,7 +25,7 @@ export const normalizeProviderName = (name: string): string => {
  * @returns Uma lista de objetos de provedor com nome e ícone.
  */
 export const getStreamingProviders = (item: Midia): { name: string; icon: string }[] => {
-  const providerNames = item.plataformas_api?.map(p => normalizeProviderName(p.nome)) ?? [];
+  const providerNames = item.plataformas_api?.map(p => normalizeProviderName(p.nome)).filter(n => n !== 'Desconhecido') ?? [];
   const uniqueProviderNames = [...new Set(providerNames)];
   
   const providers = uniqueProviderNames.map(name => ({
@@ -50,6 +51,7 @@ export const getGamePlatforms = (item: Jogo): { name: string; icon: string }[] =
   const normalized = new Set<string>();
 
   platformNames.forEach(name => {
+    if (!name) return;
     const lowerName = name.toLowerCase();
     if (lowerName.includes('playstation')) {
       normalized.add('PlayStation');

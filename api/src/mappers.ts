@@ -123,9 +123,10 @@ const mapVoiceActors = (voiceActors: any[] | undefined) => {
   };
 };
 
-const dedupeStreamingLinks = (links: { nome: string; url?: string }[]) => {
+const dedupeStreamingLinks = (links: { nome?: string; url?: string }[]) => {
   const seen = new Set<string>();
   return links.filter((link) => {
+    if (!link.nome) return false;
     const key = link.nome.toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
@@ -294,6 +295,13 @@ export const mapAnimeToMidia = (anime: any) => {
     trailer_key: trailerFromExternal || trailerFromStreaming || null,
     generos_api: anime.genres?.map((g: any) => g.genero.name) ?? [],
     tags_api: anime.tags?.map((t: any) => t.tag.name) ?? [],
+    rankings: anime.ranks?.map((r: any) => ({
+      type: r.type,
+      rank: r.rank,
+      year: r.year,
+      context: r.context,
+      allTime: r.allTime,
+    })) ?? [],
     plataformas_api: streamingFromLinks,
     proximo_episodio: nextAiringEpisode
       ? new Date(nextAiringEpisode.airingAt).toISOString()
@@ -345,6 +353,7 @@ export const mapJogoToMidia = (jogo: any) => {
     desenvolvedores: jogo.companies?.filter((c: any) => c.role === 'developer').map((c: any) => c.company.name) ?? [],
     publicadoras: jogo.companies?.filter((c: any) => c.role === 'publisher').map((c: any) => c.company.name) ?? [],
     temas: jogo.themes?.map((t: any) => translateGameTheme(t.theme.name)) ?? [],
+    modos_jogo: jogo.gameModes?.map((m: any) => m.gameMode.name) ?? [],
     perspectivas: jogo.playerPerspectives?.map((p: any) => p.perspective.name) ?? [],
     screenshots: jogo.screenshots?.map((s: any) => resolveIgdbImageUrl(s.url)) ?? [],
     artworks: jogo.artworks?.map((a: any) => resolveIgdbImageUrl(a.url)) ?? [],

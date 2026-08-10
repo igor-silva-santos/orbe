@@ -15,6 +15,33 @@ const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const MIN_VOTE_COUNT = 50;
 const MIN_POPULARITY = 20;
+const MIN_ANIME_SCORE = 65;
+const MIN_ANIME_POPULARITY = 10000;
+const MIN_GAME_RATING = 60;
+const MIN_GAME_RATING_COUNT = 10;
+const CAROUSEL_ITEM_LIMIT = 60;
+
+const tmdbQualityFilter = {
+  OR: [
+    { voteCount: { gt: MIN_VOTE_COUNT } },
+    { popularity: { gt: MIN_POPULARITY } },
+  ],
+};
+
+const animeQualityFilter = {
+  OR: [
+    { averageScore: { gte: MIN_ANIME_SCORE } },
+    { popularity: { gte: MIN_ANIME_POPULARITY } },
+  ],
+  isAdult: false,
+};
+
+const jogoQualityFilter = {
+  OR: [
+    { rating: { gte: MIN_GAME_RATING } },
+    { ratingCount: { gte: MIN_GAME_RATING_COUNT } },
+  ],
+};
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
@@ -193,14 +220,20 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
 
     const filmes = await prisma.filme.findMany({
       where: {
-        releaseDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          tmdbQualityFilter,
+          {
+            releaseDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         releaseDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
         streamingProviders: { include: { provider: true } },
@@ -214,7 +247,7 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
 });
 
 // Rota para Filmes por Ano
-router.get('/filmes/by-year', async (req, res) => {
+router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { year } = req.query;
   if (!year || isNaN(parseInt(year as string))) {
     return res.status(400).json({ error: 'Ano inválido fornecido.' });
@@ -226,14 +259,20 @@ router.get('/filmes/by-year', async (req, res) => {
   try {
     const filmes = await prisma.filme.findMany({
       where: {
-        releaseDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          tmdbQualityFilter,
+          {
+            releaseDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         releaseDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
         streamingProviders: { include: { provider: true } },
@@ -388,14 +427,20 @@ router.get('/series/homepage-carousel', async (req, res) => {
 
     const series = await prisma.serie.findMany({
       where: {
-        firstAirDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          tmdbQualityFilter,
+          {
+            firstAirDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         firstAirDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
         streamingProviders: { include: { provider: true } },
@@ -409,7 +454,7 @@ router.get('/series/homepage-carousel', async (req, res) => {
 });
 
 // Rota para Séries por Ano
-router.get('/series/by-year', async (req, res) => {
+router.get('/series/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { year } = req.query;
   if (!year || isNaN(parseInt(year as string))) {
     return res.status(400).json({ error: 'Ano inválido fornecido.' });
@@ -421,14 +466,20 @@ router.get('/series/by-year', async (req, res) => {
   try {
     const series = await prisma.serie.findMany({
       where: {
-        firstAirDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          tmdbQualityFilter,
+          {
+            firstAirDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         firstAirDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
         streamingProviders: { include: { provider: true } },
@@ -520,6 +571,8 @@ router.get('/animes/:id/details', cacheMiddleware(TWELVE_HOURS), async (req, res
         staff: { include: { staff: true } },
         streamingLinks: true,
         externalLinks: true,
+        tags: { include: { tag: true } },
+        ranks: true,
         sourceRelations: { 
           include: { 
             relatedAnime: { select: { anilistId: true, titleRomaji: true } },
@@ -668,6 +721,7 @@ router.get('/jogos/:id/details', cacheMiddleware(TWENTY_FOUR_HOURS), async (req,
         companies: { include: { company: true } },
         themes: { include: { theme: true } },
         playerPerspectives: { include: { perspective: true } },
+        gameModes: { include: { gameMode: true } },
         screenshots: true,
         artworks: true,
         videos: true,
@@ -742,14 +796,20 @@ router.get('/jogos/homepage-carousel', async (req, res) => {
 
     const jogos = await prisma.jogo.findMany({
       where: {
-        firstReleaseDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          jogoQualityFilter,
+          {
+            firstReleaseDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         firstReleaseDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         platforms: { include: { plataforma: true } }
       }
@@ -762,7 +822,7 @@ router.get('/jogos/homepage-carousel', async (req, res) => {
 });
 
 // Rota para Jogos por Ano
-router.get('/jogos/by-year', async (req, res) => {
+router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { year } = req.query;
   if (!year || isNaN(parseInt(year as string))) {
     return res.status(400).json({ error: 'Ano inválido fornecido.' });
@@ -774,14 +834,20 @@ router.get('/jogos/by-year', async (req, res) => {
   try {
     const jogos = await prisma.jogo.findMany({
       where: {
-        firstReleaseDate: {
-          gte: startDate,
-          lte: endDate,
-        },
+        AND: [
+          jogoQualityFilter,
+          {
+            firstReleaseDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
       },
       orderBy: {
         firstReleaseDate: 'asc',
       },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
         platforms: { include: { plataforma: true } },
         genres: { include: { genero: true } },
@@ -1099,7 +1165,7 @@ const getSeasonDateRange = (year: number, season: string): { startDate: Date, en
 };
 
 // Rota para Animes por Temporada e Ano
-router.get('/animes/by-season', async (req, res) => {
+router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { year, season } = req.query;
 
   if (!year || !season || typeof year !== 'string' || typeof season !== 'string') {
@@ -1121,7 +1187,7 @@ router.get('/animes/by-season', async (req, res) => {
           lte: endDate,
         },
         anime: {
-          isAdult: false,
+          ...animeQualityFilter,
           format: {
             in: ['TV', 'MOVIE', 'ONA', 'SPECIAL'],
           },
@@ -1155,7 +1221,7 @@ router.get('/animes/by-season', async (req, res) => {
       }
     });
 
-    const uniqueAnimes = Array.from(animesMap.values());
+    const uniqueAnimes = Array.from(animesMap.values()).slice(0, CAROUSEL_ITEM_LIMIT);
 
     const animesWithNextEpisode = uniqueAnimes.map(anime => {
       const now = new Date();

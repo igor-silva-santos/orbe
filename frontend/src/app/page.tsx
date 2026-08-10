@@ -57,7 +57,7 @@ const CarouselSkeleton = () => (
   <div className="overflow-hidden">
     <div className="flex -ml-4">
       {Array.from({ length: 10 }).map((_, index) => (
-        <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4">
+        <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4">
           <MidiaCardSkeleton />
         </div>
       ))}
@@ -132,22 +132,22 @@ export default function Home() {
       <main className="container mx-auto py-12 space-y-14 px-4">
 
         <section id="filmes">
-          <SectionHeading title="Filmes" chip="HOT" />
+          <SectionHeading title="Filmes" />
           {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="filmes" initialData={initialData.filmes} startIndex={calculateStartIndex(initialData.filmes)} />}
         </section>
 
         <section id="series">
-          <SectionHeading title="Séries" chip="NEW" />
+          <SectionHeading title="Séries" />
           {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="series" initialData={initialData.series} startIndex={calculateStartIndex(initialData.series)} />}
         </section>
 
         <section id="animes">
-          <SectionHeading title="Animes" chip="S2026" />
+          <SectionHeading title="Animes" />
           {isLoading || !initialData ? <CarouselSkeleton /> : <AnimeCarousel initialData={initialData.animes} />}
         </section>
 
         <section id="jogos">
-          <SectionHeading title="Jogos" chip="PLAY" />
+          <SectionHeading title="Jogos" />
           {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="jogos" initialData={initialData.jogos} startIndex={calculateStartIndex(initialData.jogos)} />}
         </section>
 
@@ -156,14 +156,11 @@ export default function Home() {
   );
 }
 
-function SectionHeading({ title, chip }: { title: string; chip: string }) {
+function SectionHeading({ title }: { title: string }) {
   return (
     <div className="flex items-center justify-between mb-5">
-      <h2 className="font-display text-xl md:text-[22px] orbe-text-primary flex items-center gap-3">
+      <h2 className="font-display text-xl md:text-[22px] orbe-text-primary">
         {title}
-        <span className="font-sans text-[11.5px] font-bold bg-foreground text-background px-2.5 py-1 rounded-full">
-          {chip}
-        </span>
       </h2>
     </div>
   );

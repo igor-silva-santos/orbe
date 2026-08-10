@@ -1,18 +1,43 @@
-const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 const IGDB_IMAGE_BASE = 'https://images.igdb.com/igdb/image/upload';
 
 export const PLACEHOLDER_POSTER = '/placeholder.svg';
 export const PLACEHOLDER_AVATAR = '/placeholder.svg';
 
+export type TmdbImageSize = 'w92' | 'w185' | 'w342' | 'w500' | 'w780';
+
+export const TMDB_CARD_SIZE: TmdbImageSize = 'w342';
+export const TMDB_THUMB_SIZE: TmdbImageSize = 'w185';
+export const TMDB_FULL_SIZE: TmdbImageSize = 'w500';
+
+/** Tiny SVG blur placeholder for next/image */
+export const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWExYTJlIi8+PC9zdmc+';
+
+function buildTmdbUrl(path: string, size: TmdbImageSize): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${TMDB_IMAGE_BASE}/${size}${normalizedPath}`;
+}
+
+function resizeTmdbUrl(url: string, size: TmdbImageSize): string {
+  return url.replace(/\/t\/p\/w\d+/, `/t/p/${size}`);
+}
+
 /**
  * Resolve URLs de imagem vindas da API para um endereço absoluto utilizável no frontend.
  */
-export function resolveImageUrl(url: string | null | undefined): string | null {
+export function resolveImageUrl(
+  url: string | null | undefined,
+  size: TmdbImageSize = TMDB_CARD_SIZE
+): string | null {
   if (!url || url.trim() === '') return null;
 
   const trimmed = url.trim();
 
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    if (trimmed.includes('image.tmdb.org')) {
+      return resizeTmdbUrl(trimmed, size);
+    }
     return trimmed;
   }
 
@@ -26,14 +51,17 @@ export function resolveImageUrl(url: string | null | undefined): string | null {
   }
 
   if (trimmed.startsWith('/t_p/') || trimmed.startsWith('/')) {
-    return `${TMDB_IMAGE_BASE}${trimmed}`;
+    return buildTmdbUrl(trimmed, size);
   }
 
   return trimmed;
 }
 
-export function getImageSrc(url: string | null | undefined): string {
-  return resolveImageUrl(url) ?? PLACEHOLDER_POSTER;
+export function getImageSrc(
+  url: string | null | undefined,
+  size: TmdbImageSize = TMDB_CARD_SIZE
+): string {
+  return resolveImageUrl(url, size) ?? PLACEHOLDER_POSTER;
 }
 
 export function isValidImageUrl(url: string | null | undefined): boolean {

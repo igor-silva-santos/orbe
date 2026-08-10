@@ -186,12 +186,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         <div className="flex -ml-4 md:-ml-6">
           {filteredItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => 
-                <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   <MidiaCardSkeleton />
                 </div>
               )
             : filteredItems.map(item => (
-                <div key={`${item.id}-${mediaType}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={`${item.id}-${mediaType}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   <MidiaCard midia={item as Filme | Serie | Anime | Jogo} type={mediaType.slice(0, -1) as TipoMidia} />
                 </div>
             ))

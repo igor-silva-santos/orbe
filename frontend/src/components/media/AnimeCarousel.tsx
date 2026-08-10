@@ -366,12 +366,12 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         <div className="flex -ml-4 md:-ml-6">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
-                <div key={`skeleton-${index}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={`skeleton-${index}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   <MidiaCardSkeleton />
                 </div>
               ))
             : carouselItems.map((item) => (
-                <div key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`} className="relative min-w-0 flex-shrink-0 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
+                <div key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 md:pl-6">
                   {item.type === 'separator' 
                     ? <DaySeparatorCard dayName={item.dayName} /> 
                     : <MidiaCard midia={item.data} type="anime" />}

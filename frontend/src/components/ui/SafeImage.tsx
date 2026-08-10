@@ -2,11 +2,18 @@
 
 import { useState } from 'react';
 import Image, { ImageProps } from 'next/image';
-import { getImageSrc, PLACEHOLDER_POSTER } from '@/lib/image-utils';
+import {
+  getImageSrc,
+  PLACEHOLDER_POSTER,
+  BLUR_DATA_URL,
+  TmdbImageSize,
+  TMDB_CARD_SIZE,
+} from '@/lib/image-utils';
 
 interface SafeImageProps extends Omit<ImageProps, 'src' | 'onError'> {
   src: string | null | undefined;
   fallbackLabel?: string;
+  imageSize?: TmdbImageSize;
 }
 
 const SafeImage: React.FC<SafeImageProps> = ({
@@ -14,10 +21,14 @@ const SafeImage: React.FC<SafeImageProps> = ({
   alt,
   fallbackLabel = 'Sem imagem',
   className = '',
+  imageSize = TMDB_CARD_SIZE,
+  loading = 'lazy',
+  decoding = 'async',
   ...props
 }) => {
   const [hasError, setHasError] = useState(false);
-  const resolvedSrc = getImageSrc(src);
+  const resolvedSrc = getImageSrc(src, imageSize);
+  const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
 
   if (hasError || !src) {
     return (
@@ -37,8 +48,12 @@ const SafeImage: React.FC<SafeImageProps> = ({
       src={resolvedSrc}
       alt={alt}
       className={className}
+      loading={loading}
+      decoding={decoding}
+      placeholder={isPlaceholder ? undefined : 'blur'}
+      blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
       onError={() => setHasError(true)}
-      unoptimized={resolvedSrc === PLACEHOLDER_POSTER}
+      unoptimized={isPlaceholder}
     />
   );
 };

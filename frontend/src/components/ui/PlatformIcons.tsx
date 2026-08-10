@@ -5,14 +5,16 @@ import React from 'react';
 import Image from 'next/image';
 
 interface PlatformIconProps {
-  platform: string;
+  platform?: string | null;
   className?: string;
   size?: number;
   iconOnly?: boolean;
 }
 
-const normalizePlatformKey = (platform: string): string => {
+const normalizePlatformKey = (platform?: string | null): string => {
+  if (!platform || typeof platform !== 'string') return 'unknown';
   const lower = platform.toLowerCase().trim();
+  if (!lower) return 'unknown';
   if (lower.includes('netflix')) return 'netflix';
   if (lower.includes('disney')) return 'disney';
   if (lower.includes('hbo') || lower === 'max' || lower.includes('hbomax')) return 'hbo';
@@ -41,7 +43,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     width: size,
     height: size,
     className,
-    alt: iconOnly ? '' : `${platform} icon`,
+    alt: iconOnly ? '' : `${platform ?? 'plataforma'} icon`,
   };
 
   switch (normalizePlatformKey(platform)) {

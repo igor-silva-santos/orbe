@@ -13,6 +13,7 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
 
   const creators = serie.criadores?.map((creator) => creator.nome).join(', ');
   const releaseYear = serie.data_lancamento_api ? new Date(serie.data_lancamento_api).getFullYear() : 'N/A';
+  const rating = serie.avaliacao ? (serie.avaliacao / 10).toFixed(1) : null;
 
   return (
     <div className="flex flex-col">
@@ -23,6 +24,18 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
           <span className={`font-semibold ${labelColor} mr-2`}>Lançamento:</span>
           <span>{releaseYear}</span>
         </div>
+        {serie.status && (
+          <div className="flex">
+            <span className={`font-semibold ${labelColor} mr-2`}>Status:</span>
+            <span>{serie.status}</span>
+          </div>
+        )}
+        {rating && (
+          <div className="flex">
+            <span className={`font-semibold ${labelColor} mr-2`}>Nota:</span>
+            <span>{rating} / 10</span>
+          </div>
+        )}
         <div className="flex">
           <span className={`font-semibold ${labelColor} mr-2`}>Temporadas:</span>
           <span>{serie.numero_temporadas}</span>

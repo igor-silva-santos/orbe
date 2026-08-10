@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   Search, 
@@ -78,7 +79,15 @@ const Header: React.FC<HeaderProps> = ({
               className="flex items-center space-x-3"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="orbe-logo-orb" aria-hidden="true" />
+              <Image
+                src="/logo.svg"
+                alt=""
+                width={32}
+                height={32}
+                className="shrink-0"
+                aria-hidden="true"
+                priority
+              />
               <span className="font-display text-lg md:text-[21px] orbe-text-primary whitespace-nowrap tracking-wide">
                 ORBE NERD
               </span>

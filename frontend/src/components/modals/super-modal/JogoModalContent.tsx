@@ -5,6 +5,7 @@ import JogoInfoBlock from './JogoInfoBlock';
 import { getGameStores } from '@/lib/media-helpers';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import SafeImage from '@/components/ui/SafeImage';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 interface JogoModalContentProps {
   jogo: Jogo;
@@ -77,6 +78,28 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
               </a>
             ))}
           </div>
+        </section>
+      )}
+
+      {jogo.screenshots && jogo.screenshots.length > 0 && (
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Capturas de tela</h2>
+          <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
+            <CarouselContent>
+              {jogo.screenshots.map((url, idx) => (
+                <CarouselItem key={idx} className="basis-auto">
+                  <SafeImage
+                    src={url}
+                    alt={`Screenshot ${idx + 1}`}
+                    width={320}
+                    height={180}
+                    className="rounded-lg object-cover h-36 w-64"
+                    fallbackLabel="?"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </section>
       )}
     </div>

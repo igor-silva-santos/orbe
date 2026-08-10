@@ -10,9 +10,11 @@ const formatRuntime = (minutes: number | null | undefined) => {
 };
 
 const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
-  if (!filme) return null; // Retorna nada se não houver dados
+  if (!filme) return null;
 
   const director = filme.crew?.find(member => member.job === 'Director');
+  const voteAverage = (filme as any).voteAverage as number | null | undefined;
+  const tagline = (filme as any).tagline as string | null | undefined;
 
   return (
     <div className="flex flex-col space-y-4">
@@ -20,6 +22,9 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
         <h1 className="text-3xl font-bold">{filme.title}</h1>
         {filme.originalTitle && filme.title !== filme.originalTitle && (
           <h2 className="text-lg text-gray-400">{filme.originalTitle}</h2>
+        )}
+        {tagline && (
+          <p className="text-sm text-muted-foreground italic mt-1">{tagline}</p>
         )}
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -33,6 +38,12 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
           <span className="font-bold text-yellow-500 dark:text-blue-400">Duração: </span>
           {formatRuntime(filme.runtime)}
         </div>
+        {voteAverage != null && voteAverage > 0 && (
+          <div>
+            <span className="font-bold text-yellow-500 dark:text-blue-400">Nota: </span>
+            {voteAverage.toFixed(1)} / 10
+          </div>
+        )}
         {filme.status && (
           <div>
             <span className="font-bold text-yellow-500 dark:text-blue-400">Status: </span>

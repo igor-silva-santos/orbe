@@ -124,6 +124,7 @@ export interface Serie extends Midia {
   homepage?: string;
   numero_temporadas: number;
   numero_episodios: number;
+  status?: string;
   criadores: Creator[];
   elenco: CastMember[];
   videos?: Video[];
@@ -133,6 +134,7 @@ export interface Serie extends Midia {
 
 export interface Relation {
   relationType: string;
+  node?: { id: number; title: { romaji: string } };
 }
 
 export interface Anime extends Serie {
@@ -149,6 +151,7 @@ export interface Anime extends Serie {
   numero_episodio_atual?: number;
   eventos_recorrentes_calendario?: boolean;
   tags_api?: string[];
+  rankings?: { type: string; rank: number; year?: number; context?: string; allTime?: boolean }[];
   relations?: Relation[];
   airingSchedule?: any[];
   format?: string;
@@ -168,6 +171,9 @@ export interface Jogo extends Midia {
   desenvolvedores: string[];
   publicadoras: string[];
   plataformas_jogo: GamePlatform[];
+  modos_jogo?: string[];
+  perspectivas?: string[];
+  screenshots?: string[];
   evento_anuncio_id?: number;
   websites?: Website[];
   temas?: string[];

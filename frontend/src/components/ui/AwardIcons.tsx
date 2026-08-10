@@ -39,7 +39,7 @@ const AwardIcon: React.FC<AwardIconProps> = ({
       alt: `${award} icon`
     };
 
-    switch (award.toLowerCase()) {
+    switch ((award ?? '').toLowerCase()) {
       case 'oscar':
       case 'academy awards':
         return <Image src="/icons/oscar.svg" {...iconProps} />;

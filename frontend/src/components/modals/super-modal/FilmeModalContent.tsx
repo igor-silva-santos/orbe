@@ -16,7 +16,7 @@ interface FilmeModalContentProps {
   openCalendarModal: (data: CalendarModalData) => void;
 }
 
-const isTmdbProvider = (name: string) => name.toLowerCase().includes('tmdb');
+const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().includes('tmdb');
 
 const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalendarModal }) => {
   if (!filme) {

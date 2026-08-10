@@ -12,6 +12,8 @@ interface SerieModalContentProps {
   openCalendarModal: (data: CalendarModalData) => void;
 }
 
+const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().includes('tmdb');
+
 const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
   if (!serie) {
     return <div>Carregando...</div>;
@@ -20,10 +22,10 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
   const trailerKey = serie.trailer_key || serie.videos?.find(v => v.type === 'Trailer')?.key;
 
   const streamingProviders = (serie.streamingProviders || [])
-    .filter((p: any) => p.url && !p.provider.name.toLowerCase().includes('tmdb'));
+    .filter((p: any) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name));
 
   const fallbackPlatforms = (serie.plataformas_api || [])
-    .filter((p) => p.url && !p.nome.toLowerCase().includes('tmdb'));
+    .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome));
 
   const hasStreaming = streamingProviders.length > 0 || fallbackPlatforms.length > 0;
 
