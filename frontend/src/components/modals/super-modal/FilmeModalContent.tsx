@@ -9,7 +9,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
 import { buildIngressoUrl } from '@/lib/ingresso';
-import { resolveFilmeTitle, resolveFilmePoster } from '@/lib/media-helpers';
+import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
 
 interface FilmeModalContentProps {
@@ -80,10 +80,12 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
         </div>
       </div>
 
-      {filme.overview && (
+      {(filme.overview || (filme as { sinopse?: string }).sinopse) && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Sinopse</h2>
-          <p className="text-muted-foreground leading-relaxed">{filme.overview}</p>
+          <p className="text-muted-foreground leading-relaxed">
+            {sanitizeTranslatedText(filme.overview || (filme as { sinopse?: string }).sinopse)}
+          </p>
         </section>
       )}
 

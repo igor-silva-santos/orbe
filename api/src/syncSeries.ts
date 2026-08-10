@@ -5,6 +5,7 @@ import { logger } from './logger';
 import { tmdb, tmdbApi } from './clients';
 import { prisma } from './clients';
 import { isSerieRelevantForSync } from './qualityFilters';
+import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -163,7 +164,12 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
         tmdbId: serieDetails.id,
         name: serieDetails.name!,
         originalName: serieDetails.original_name,
-        overview: serieDetails.overview,
+        overview: isLikelyEnglish(serieDetails.overview)
+          ? (await translateSynopsisForStorage(serieDetails.overview, {
+              tmdbId: serieDetails.id,
+              mediaType: 'tv',
+            })) ?? serieDetails.overview
+          : serieDetails.overview,
         firstAirDate: firstAirDate,
         lastAirDate: serieDetails.last_air_date ? new Date(serieDetails.last_air_date) : null,
         numberOfEpisodes: serieDetails.number_of_episodes,

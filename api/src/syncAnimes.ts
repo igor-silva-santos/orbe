@@ -4,6 +4,7 @@ import { logger } from './logger';
 import { anilistApi } from './clients';
 import { prisma } from './clients';
 import { isAnimeRelevantForSync } from './qualityFilters';
+import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function prismaUpdateWithRetry<T>(
@@ -260,7 +261,9 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
                 titleRomaji: anime.title.romaji!,
                 titleEnglish: anime.title.english,
                 titleNative: anime.title.native,
-                description: anime.description,
+                description: isLikelyEnglish(anime.description)
+                    ? (await translateSynopsisForStorage(anime.description)) ?? anime.description
+                    : anime.description,
                 episodes: anime.episodes,
                 season: anime.season,
                 seasonYear: anime.seasonYear,

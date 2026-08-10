@@ -139,7 +139,7 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       include: { streamingProviders: { include: { provider: true } } },
       orderBy,
     });
-    res.json({ results: filmes.map(mapFilmeToMidia), total: filmes.length });
+    res.json({ results: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))), total: filmes.length });
   } catch (error) {
     logger.error(`Erro ao buscar filmes: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes.' });
@@ -349,7 +349,7 @@ router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       },
       orderBy,
     });
-    res.json({ results: series.map(mapSerieToMidia), total: series.length });
+    res.json({ results: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))), total: series.length });
   } catch (error) {
     logger.error(`Erro ao buscar séries: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries.' });
@@ -918,28 +918,28 @@ router.get('/trending', async (req, res) => {
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularFilmes.map(mapFilmeToMidia);
+      results = await Promise.all(popularFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularSeries.map(mapSerieToMidia);
+      results = await Promise.all(popularSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))));
     } else if (type === 'animes') {
       const popularAnimes = await prisma.anime.findMany({
         where: animeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = popularAnimes.map(mapAnimeToMidia);
+      results = await Promise.all(popularAnimes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))));
     } else if (type === 'jogos') {
       const popularJogos = await prisma.jogo.findMany({
         where: jogoQualityFilter,
         orderBy: { rating: 'desc' },
         take,
       });
-      results = popularJogos.map(mapJogoToMidia);
+      results = await Promise.all(popularJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))));
     } else {
       const takeForEach = Math.ceil(take / 4) + 2;
 
@@ -972,10 +972,10 @@ router.get('/trending', async (req, res) => {
       ]);
 
       const trendingResults = [
-        ...filmes.map(mapFilmeToMidia),
-        ...series.map(mapSerieToMidia),
-        ...animes.map(mapAnimeToMidia),
-        ...jogos.map(mapJogoToMidia),
+        ...(await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))))),
+        ...(await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))))),
+        ...(await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))))),
+        ...(await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))))),
       ];
 
       // Apenas pega os primeiros 10 resultados combinados, sem embaralhar
@@ -1058,10 +1058,10 @@ router.get('/pesquisa', async (req, res) => {
     const [filmes, series, animes, jogos] = await Promise.all(promises);
 
     res.json({
-      filmes: filmes.map(mapFilmeToMidia),
-      series: series.map(mapSerieToMidia),
-      animes: animes.map(mapAnimeToMidia),
-      jogos: jogos.map(mapJogoToMidia),
+      filmes: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      series: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
+      animes: await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
+      jogos: await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
     });
 
   } catch (error) {

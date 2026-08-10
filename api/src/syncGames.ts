@@ -5,6 +5,7 @@ import { prisma } from './clients';
 import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
 import { isJogoRelevantForSync } from './qualityFilters';
+import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
@@ -182,7 +183,9 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
 
                 const updateData = {
                     name: game.name,
-                    summary: game.summary,
+                    summary: isLikelyEnglish(game.summary)
+                      ? (await translateSynopsisForStorage(game.summary)) ?? game.summary
+                      : game.summary,
                     cover: coverUrl,
                     firstReleaseDate: firstReleaseDate,
                     rating: game.rating,
