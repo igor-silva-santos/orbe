@@ -171,6 +171,8 @@ export const jogoQualityFilter: Prisma.JogoWhereInput = {
 type GenreRef = { id?: number; name?: string };
 
 type MovieLike = {
+  title?: string | null;
+  original_title?: string | null;
   vote_count?: number;
   popularity?: number;
   vote_average?: number;
@@ -254,8 +256,24 @@ function hasDisplayEngagement(voteCount: number, popularity: number): boolean {
 
 // ── Validação em runtime (TMDB / AniList / IGDB) ─────────────────────────────
 
-function hasPortugueseLocalization(movie: MovieLike): boolean {
-  return isLikelyPortuguese(movie.overview) && hasValidOverview(movie.overview, 20);
+function hasLocalizedPortugueseTitle(movie: MovieLike): boolean {
+  const title = movie.title?.trim();
+  if (!title || title.length < 2) return false;
+
+  if (isLikelyPortuguese(title)) return true;
+  if (/[ãõáéíóúâêôç]/i.test(title)) return true;
+
+  const original = movie.original_title?.trim();
+  if (original && title.localeCompare(original, undefined, { sensitivity: 'accent' }) !== 0) {
+    return true;
+  }
+
+  return false;
+}
+
+export function hasPortugueseLocalization(movie: MovieLike): boolean {
+  if (hasLocalizedPortugueseTitle(movie)) return true;
+  return isLikelyPortuguese(movie.overview) && (movie.overview?.trim().length ?? 0) >= 8;
 }
 
 /** Critérios restritivos para exibição na home/timeline (estilo AdoroCinema) */
@@ -268,13 +286,13 @@ export function isMovieRelevantForDisplay(movie: MovieLike): boolean {
   const voteAverage = movie.vote_average ?? 0;
 
   if (hasPortugueseLocalization(movie)) {
-    if (!hasValidOverview(movie.overview)) return false;
+    if (isTotallyIrrelevant(voteCount, popularity)) return false;
     return passesVoteAverageGate(
       voteCount,
       voteAverage,
       DISPLAY_MIN_VOTE_AVERAGE,
       DISPLAY_VOTE_COUNT_FOR_AVERAGE,
-    ) || voteCount >= 10 || popularity >= 5;
+    ) || voteCount >= 10 || popularity >= 5 || hasLocalizedPortugueseTitle(movie);
   }
 
   if (!hasValidOverview(movie.overview)) return false;

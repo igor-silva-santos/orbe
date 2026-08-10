@@ -6,7 +6,7 @@ import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
-import { isMovieRelevantForSync } from './qualityFilters';
+import { isMovieRelevantForSync, hasPortugueseLocalization } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
@@ -54,6 +54,42 @@ async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxApiRetries = 5, maxN
             }
         }
     }
+}
+
+async function fetchIdsFromDiscover(
+  params: Record<string, unknown>,
+  maxPages = 10,
+): Promise<number[]> {
+  const movieIds = new Set<number>();
+  let page = 1;
+  let totalPages = 1;
+
+  try {
+    do {
+      const response = await tmdbApiWithRetry(() =>
+        tmdbApi.get('/discover/movie', {
+          params: { ...params, page, region: 'BR', include_adult: false },
+        }),
+      );
+
+      if (response.data.results) {
+        for (const movie of response.data.results) {
+          if (movie.id && !movie.adult) {
+            movieIds.add(movie.id);
+          }
+        }
+      }
+
+      totalPages = response.data.total_pages || 1;
+      page++;
+      await delay(250);
+    } while (page <= totalPages && page <= maxPages);
+
+    return Array.from(movieIds);
+  } catch (error) {
+    logger.error(`Erro ao buscar IDs no discover TMDB: ${error}`);
+    return [];
+  }
 }
 
 async function fetchIdsFromTmdbList(
@@ -165,61 +201,76 @@ function shouldUseCinemaOnlyCurated(periodStart: Date, periodEnd: Date): boolean
 async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
   const openPeriod = isOpenPeriod(endDate);
   logger.info(
-    `Buscando IDs de filmes lançados entre ${startDate} e ${endDate}` +
-    (openPeriod ? ' (período aberto — filtros relaxados para lançamentos futuros)' : '') +
+    `Buscando IDs de filmes com estreia BR entre ${startDate} e ${endDate}` +
+    (openPeriod ? ' (período aberto — múltiplas estratégias de discover)' : '') +
     '...',
   );
   const movieIds = new Set<number>();
-  let page = 1;
-  let totalPages = 1;
 
-  const discoverParams: Record<string, unknown> = {
-    'primary_release_date.gte': startDate,
-    'primary_release_date.lte': endDate,
+  const brDateBase: Record<string, unknown> = {
     region: 'BR',
-    sort_by: 'popularity.desc',
+    'release_date.gte': startDate,
+    'release_date.lte': endDate,
   };
 
-  if (!openPeriod) {
-    discoverParams.with_release_type = '2|3';
-    discoverParams['vote_count.gte'] = 50;
-  }
+  const discoverPasses = openPeriod
+    ? [
+        { label: 'estreia BR ascendente', params: { ...brDateBase, sort_by: 'release_date.asc' }, pages: 25 },
+        { label: 'estreia BR descendente', params: { ...brDateBase, sort_by: 'release_date.desc' }, pages: 15 },
+        { label: 'popularidade BR', params: { ...brDateBase, sort_by: 'popularity.desc' }, pages: 15 },
+        {
+          label: 'estreia primária ascendente',
+          params: {
+            region: 'BR',
+            'primary_release_date.gte': startDate,
+            'primary_release_date.lte': endDate,
+            sort_by: 'primary_release_date.asc',
+          },
+          pages: 15,
+        },
+      ]
+    : [
+        {
+          label: 'popularidade BR (cinema)',
+          params: {
+            ...brDateBase,
+            sort_by: 'popularity.desc',
+            with_release_type: '2|3',
+            'vote_count.gte': 50,
+          },
+          pages: 15,
+        },
+        {
+          label: 'estreia BR recente',
+          params: {
+            ...brDateBase,
+            sort_by: 'release_date.desc',
+            with_release_type: '2|3',
+            'vote_count.gte': 20,
+          },
+          pages: 10,
+        },
+      ];
 
-  try {
-    do {
-      const response = await tmdbApiWithRetry(() =>
-        tmdbApi.get('/discover/movie', {
-          params: { ...discoverParams, page },
-        }),
-      );
-
-      if (response.data.results) {
-        for (const movie of response.data.results) {
-          if (movie.id && !movie.adult) {
-            movieIds.add(movie.id);
-          }
-        }
-      }
-
-      totalPages = response.data.total_pages || 1;
-      page++;
-      await delay(250);
-    } while (page <= totalPages && page <= 500);
-
-    if (openPeriod && movieIds.size === 0) {
-      logger.info('Discover vazio no período aberto; complementando com /movie/upcoming...');
-      const upcomingIds = await fetchIdsFromTmdbList('/movie/upcoming', {}, 10);
-      for (const id of upcomingIds) {
-        movieIds.add(id);
-      }
+  for (const pass of discoverPasses) {
+    const ids = await fetchIdsFromDiscover(pass.params, pass.pages);
+    logger.info(`  discover ${pass.label}: +${ids.length} IDs (${movieIds.size} acumulados antes)`);
+    for (const id of ids) {
+      movieIds.add(id);
     }
-
-    logger.info(`Total de ${movieIds.size} IDs de filmes encontrados para o período.`);
-    return Array.from(movieIds);
-  } catch (error) {
-    logger.error(`Erro ao buscar IDs de filmes para o período: ${error}`);
-    return [];
   }
+
+  if (openPeriod) {
+    logger.info('Complementando período aberto com /movie/upcoming...');
+    const upcomingIds = await fetchIdsFromTmdbList('/movie/upcoming', {}, 15);
+    for (const id of upcomingIds) {
+      movieIds.add(id);
+    }
+    logger.info(`  upcoming: total acumulado ${movieIds.size} IDs`);
+  }
+
+  logger.info(`Total de ${movieIds.size} IDs de filmes encontrados para o período.`);
+  return Array.from(movieIds);
 }
 
 async function processMovieBatch(
@@ -281,9 +332,14 @@ async function processMovieBatch(
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
-          `avg=${movieDetails.vote_average ?? 0}, poster=${!!movieDetails.poster_path}).`
+          `avg=${movieDetails.vote_average ?? 0}, poster=${!!movieDetails.poster_path}, ` +
+          `pt=${hasPortugueseLocalization(movieDetails) ? 'sim' : 'não'}).`
         );
         continue;
+      }
+
+      if (hasPortugueseLocalization(movieDetails)) {
+        logger.info(`🇧🇷 Filme [${id}] "${movieDetails.title}" com dados PT-BR (título ou sinopse).`);
       }
 
       const scalarData = {
