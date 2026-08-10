@@ -6,14 +6,19 @@ import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
-import { isMovieRelevant } from './qualityFilters';
+import { isMovieRelevantForSync } from './qualityFilters';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+type MovieSourceFlags = {
+  emCartaz?: boolean;
+  emBreve?: boolean;
+};
 
 async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxApiRetries = 5, maxNetworkRetries = Infinity, initialDelay = 1000): Promise<T> {
     let apiAttempt = 0;
     let networkAttempt = 0;
-    while (true) { // Loop infinito, será interrompido em caso de sucesso ou erro não-rede
+    while (true) {
         try {
             return await fn();
         } catch (error: any) {
@@ -29,7 +34,7 @@ async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxApiRetries = 5, maxN
                 const delayTime = initialDelay * Math.pow(2, networkAttempt);
                 logger.warn(`⚠️ Erro de rede (Tentativa ${networkAttempt}). Tentando novamente em ${delayTime}ms...`);
                 await delay(delayTime);
-                continue; // Continua o loop infinito
+                continue;
             } else if (isRateLimitError) {
                 apiAttempt++;
                 if (apiAttempt > maxApiRetries) {
@@ -39,33 +44,30 @@ async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxApiRetries = 5, maxN
                 const delayTime = initialDelay * Math.pow(2, apiAttempt);
                 logger.warn(`⏳ Limite de requisições (Tentativa ${apiAttempt}). Tentando novamente em ${delayTime}ms...`);
                 await delay(delayTime);
-                continue; // Continua o loop infinito
+                continue;
             } else {
-                throw error; // Outros erros, relança imediatamente
+                throw error;
             }
         }
     }
 }
 
-
-async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
-  logger.info(`Buscando IDs de filmes lançados entre ${startDate} e ${endDate}...`);
+async function fetchIdsFromTmdbList(
+  endpoint: string,
+  params: Record<string, unknown> = {},
+  maxPages = 10,
+): Promise<number[]> {
   const movieIds = new Set<number>();
   let page = 1;
   let totalPages = 1;
 
   try {
     do {
-      const response = await tmdbApi.get('/discover/movie', {
-        params: {
-          'primary_release_date.gte': startDate,
-          'primary_release_date.lte': endDate,
-          page,
-          region: 'BR', // Filtrar por lançamentos no Brasil
-          sort_by: 'primary_release_date.asc',
-          with_release_type: '2|3|4', // 2: Theatrical (limited), 3: Theatrical (wide), 4: Digital
-        },
-      });
+      const response = await tmdbApiWithRetry(() =>
+        tmdbApi.get(endpoint, {
+          params: { ...params, page, region: 'BR' },
+        }),
+      );
 
       if (response.data.results) {
         for (const movie of response.data.results) {
@@ -77,9 +79,96 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
 
       totalPages = response.data.total_pages || 1;
       page++;
-      await delay(250); // Pausa para respeitar o rate limit
+      await delay(250);
+    } while (page <= totalPages && page <= maxPages);
+
+    return Array.from(movieIds);
+  } catch (error) {
+    logger.error(`Erro ao buscar IDs de ${endpoint}: ${error}`);
+    return [];
+  }
+}
+
+/** Listas curadas TMDB — prioridade sobre discover amplo */
+async function fetchCuratedMovieIds(): Promise<Map<number, MovieSourceFlags>> {
+  logger.info('Buscando filmes de listas curadas TMDB (now_playing, upcoming, popular, top_rated, discover)...');
+  const flags = new Map<number, MovieSourceFlags>();
+
+  const markIds = (ids: number[], patch: MovieSourceFlags) => {
+    for (const id of ids) {
+      const existing = flags.get(id) ?? {};
+      flags.set(id, { ...existing, ...patch });
+    }
+  };
+
+  const nowPlaying = await fetchIdsFromTmdbList('/movie/now_playing', {}, 5);
+  markIds(nowPlaying, { emCartaz: true });
+  logger.info(`  now_playing: ${nowPlaying.length} filmes`);
+
+  const upcoming = await fetchIdsFromTmdbList('/movie/upcoming', {}, 5);
+  markIds(upcoming, { emBreve: true });
+  logger.info(`  upcoming: ${upcoming.length} filmes`);
+
+  const popular = await fetchIdsFromTmdbList('/movie/popular', {}, 10);
+  markIds(popular, {});
+  logger.info(`  popular: ${popular.length} filmes`);
+
+  const topRated = await fetchIdsFromTmdbList('/discover/movie', {
+    sort_by: 'vote_average.desc',
+    'vote_count.gte': 500,
+    'vote_average.gte': 7,
+    with_release_type: '2|3',
+  }, 5);
+  markIds(topRated, {});
+  logger.info(`  top_rated (vote_count>=500): ${topRated.length} filmes`);
+
+  const theatrical = await fetchIdsFromTmdbList('/discover/movie', {
+    sort_by: 'popularity.desc',
+    'vote_count.gte': 50,
+    with_release_type: '2|3',
+  }, 10);
+  markIds(theatrical, {});
+  logger.info(`  discover theatrical (vote_count>=50): ${theatrical.length} filmes`);
+
+  logger.info(`Total de ${flags.size} IDs únicos de listas curadas.`);
+  return flags;
+}
+
+async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
+  logger.info(`Buscando IDs de filmes lançados entre ${startDate} e ${endDate}...`);
+  const movieIds = new Set<number>();
+  let page = 1;
+  let totalPages = 1;
+
+  try {
+    do {
+      const response = await tmdbApiWithRetry(() =>
+        tmdbApi.get('/discover/movie', {
+          params: {
+            'primary_release_date.gte': startDate,
+            'primary_release_date.lte': endDate,
+            page,
+            region: 'BR',
+            sort_by: 'popularity.desc',
+            with_release_type: '2|3',
+            'vote_count.gte': 50,
+          },
+        }),
+      );
+
+      if (response.data.results) {
+        for (const movie of response.data.results) {
+          if (movie.id && !movie.adult) {
+            movieIds.add(movie.id);
+          }
+        }
+      }
+
+      totalPages = response.data.total_pages || 1;
+      page++;
+      await delay(250);
     } while (page <= totalPages && page <= 500);
-    
+
     logger.info(`Total de ${movieIds.size} IDs de filmes encontrados para o período.`);
     return Array.from(movieIds);
   } catch (error) {
@@ -88,7 +177,11 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
   }
 }
 
-async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
+async function processMovieBatch(
+  movieIds: number[],
+  prisma: PrismaClient,
+  sourceFlags: Map<number, MovieSourceFlags> = new Map(),
+): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
 
   for (const id of movieIds) {
@@ -98,8 +191,6 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
         language: 'pt-BR',
         append_to_response: 'credits,videos,watch/providers,release_dates',
       })) as any;
-
-
 
       const brReleases = movieDetails.release_dates?.results?.find((r: any) => r.iso_3166_1 === 'BR');
       let releaseDate: Date | null = null;
@@ -113,31 +204,25 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
         releaseDate = new Date(relevantRelease.release_date);
       }
 
+      if (!releaseDate && movieDetails.release_date) {
+        releaseDate = new Date(movieDetails.release_date);
+      }
+
       if (!releaseDate) {
         skippedCount++;
         continue;
       }
 
-      if (!isMovieRelevant(movieDetails)) {
+      const flags = sourceFlags.get(id) ?? {};
+      const isCurated = flags.emCartaz || flags.emBreve;
+
+      if (!isCurated && !isMovieRelevantForSync(movieDetails)) {
         skippedCount++;
         logger.info(
-          `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: baixa relevância ` +
+          `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
-          `avg=${movieDetails.vote_average ?? 0}).`
+          `avg=${movieDetails.vote_average ?? 0}, poster=${!!movieDetails.poster_path}).`
         );
-        continue;
-      }
-
-      const genres = movieDetails.genres?.map((g: any) => g.name) || [];
-      const excludedGenres = ['Documentário', 'Música', 'Família', 'Kids'];
-      if (genres.some((genre: string) => excludedGenres.includes(genre))) {
-        skippedCount++;
-        continue;
-      }
-
-      const titleKeywordsToExclude = ['Lollapalooza', 'Concerto', 'Show', 'Festival', 'Live', 'Ao Vivo', 'Turnê', 'Tour', 'ABC', 'Alfabeto', 'Crianças', 'Infantil', 'Desenho', 'Brincadeira', 'Aprender', 'Diana', 'Roma', 'Diana e Roma', 'Música', 'Musical', 'Performance', 'Jazzopen', 'Summerjam', 'Bardentreffen', 'Euro Classic', 'Baroque', 'Orchestra', 'Symphony', 'Philharmonic'];
-      if (titleKeywordsToExclude.some(keyword => movieDetails.title?.toLowerCase().includes(keyword.toLowerCase()))) {
-        skippedCount++;
         continue;
       }
 
@@ -159,6 +244,9 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
         posterPath: movieDetails.poster_path,
         backdropPath: movieDetails.backdrop_path,
         imdbId: movieDetails.imdb_id,
+        adult: movieDetails.adult ?? false,
+        emCartaz: flags.emCartaz ?? false,
+        emBreve: flags.emBreve ?? false,
         collection: movieDetails.belongs_to_collection ? {
           connectOrCreate: {
             where: { id: movieDetails.belongs_to_collection.id },
@@ -195,19 +283,17 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
             create: movieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube').map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: movieDetails['watch/providers']?.results?.BR?.flatrate?.map((provider: any) => ({ 
-                url: movieDetails['watch/providers']?.results?.BR?.link, // Adiciona a URL da página "Onde Assistir"
-                provider: { 
-                    connectOrCreate: { 
-                        where: { tmdbId: provider.provider_id }, 
-                        create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } 
-                    } 
+            create: movieDetails['watch/providers']?.results?.BR?.flatrate?.map((provider: any) => ({
+                url: movieDetails['watch/providers']?.results?.BR?.link,
+                provider: {
+                    connectOrCreate: {
+                        where: { tmdbId: provider.provider_id },
+                        create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path }
+                    }
                 }
             }))
         }
       };
-
-
 
       await prisma.filme.upsert({
         where: { tmdbId: id },
@@ -216,7 +302,8 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
       });
 
       successCount++;
-      logger.info(`✅ Filme [${id}] "${movieDetails.title}" (Release Type: ${relevantRelease?.type}) sincronizado.`);
+      const flagLabel = flags.emCartaz ? 'em cartaz' : flags.emBreve ? 'em breve' : 'curado';
+      logger.info(`✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}) sincronizado.`);
 
     } catch (error) {
       errorCount++;
@@ -233,26 +320,49 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
   let currentStartDate = new Date(startDate);
   const finalEndDate = new Date(endDate);
 
-  logger.info(`Iniciando busca e sincronização de filmes por mês, de ${startDate} a ${endDate}.`);
+  logger.info(`Iniciando sincronização de filmes (listas curadas + período ${startDate} a ${endDate}).`);
 
   if (limit) {
-    logger.warn(`O parâmetro limit (${limit}) será aplicado para cada mês, não para o total.`);
+    logger.warn(`O parâmetro limit (${limit}) será aplicado para cada lote, não para o total.`);
+  }
+
+  const curatedFlags = await fetchCuratedMovieIds();
+  let curatedIds = Array.from(curatedFlags.keys());
+
+  if (curatedIds.length > 0) {
+    broadcast({ type: 'SYNC_START', mediaType: 'movies', total: curatedIds.length, period: 'listas curadas TMDB' });
+
+    if (limit) {
+      curatedIds = curatedIds.slice(0, limit);
+    }
+
+    const batchSize = 10;
+    for (let i = 0; i < curatedIds.length; i += batchSize) {
+      const batch = curatedIds.slice(i, i + batchSize);
+      logger.info(`Processando lote curado: ${i + 1}-${Math.min(i + batchSize, curatedIds.length)} de ${curatedIds.length}`);
+      await processMovieBatch(batch, prisma, curatedFlags);
+
+      broadcast({
+        type: 'SYNC_PROGRESS',
+        mediaType: 'movies',
+        current: Math.min(i + batchSize, curatedIds.length),
+        total: curatedIds.length,
+      });
+    }
   }
 
   while (currentStartDate <= finalEndDate) {
     const startStr = currentStartDate.toISOString().split('T')[0];
-
-    // Lógica correta para obter o último dia do mês corrente
     const endOfMonth = new Date(currentStartDate.getFullYear(), currentStartDate.getMonth() + 1, 0);
     const endStr = (endOfMonth > finalEndDate ? finalEndDate : endOfMonth).toISOString().split('T')[0];
 
     logger.info(`Buscando IDs de filmes lançados entre ${startStr} e ${endStr}...`);
-    
+
     let monthlyIds = await fetchMovieIdsForPeriod(startStr, endStr);
-    
+
     if (monthlyIds.length > 0) {
         broadcast({ type: 'SYNC_START', mediaType: 'movies', total: monthlyIds.length, period: `${startStr} - ${endStr}` });
-        
+
         if (limit) {
             monthlyIds = monthlyIds.slice(0, limit);
             logger.info(`Limitando a sincronização deste mês a ${limit} itens.`);
@@ -261,28 +371,27 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
         const batchSize = 10;
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
-            logger.info(`Processando lote de filmes do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            await processMovieBatch(batch, prisma);
-            
-            broadcast({ 
-                type: 'SYNC_PROGRESS', 
-                mediaType: 'movies', 
-                current: Math.min(i + batchSize, monthlyIds.length), 
-                total: monthlyIds.length 
+            logger.info(`Processando lote do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
+            await processMovieBatch(batch, prisma, curatedFlags);
+
+            broadcast({
+                type: 'SYNC_PROGRESS',
+                mediaType: 'movies',
+                current: Math.min(i + batchSize, monthlyIds.length),
+                total: monthlyIds.length
             });
         }
     }
 
-    // Lógica correta para avançar para o primeiro dia do próximo mês
     currentStartDate.setMonth(currentStartDate.getMonth() + 1);
     currentStartDate.setDate(1);
   }
-  
+
   logger.info(`Sincronização de filmes concluída para o período de ${startDate} a ${endDate}.`);
 }
 
 const main = async () => {
-  
+
   const startDate = process.argv[2];
   const endDate = process.argv[3];
   const limit = process.argv[4] ? parseInt(process.argv[4]) : undefined;
