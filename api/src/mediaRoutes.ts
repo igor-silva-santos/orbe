@@ -770,6 +770,27 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
+  const buildSections = (
+    jogos: ReturnType<typeof mapJogoToMidia>[],
+    getKeys: (jogo: ReturnType<typeof mapJogoToMidia>) => string[]
+  ) => {
+    const keySet = new Set<string>();
+    for (const jogo of jogos) {
+      getKeys(jogo).forEach((k) => keySet.add(k));
+    }
+
+    const sections = Array.from(keySet).map((nome) => {
+      const jogosDoGrupo = jogos
+        .filter((j) => getKeys(j).includes(nome))
+        .slice(0, perGroup);
+      return { nome, jogos: jogosDoGrupo, total: jogosDoGrupo.length };
+    });
+
+    return sections
+      .filter((s) => s.total >= 2)
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'));
+  };
+
   try {
     const recentJogos = await prisma.jogo.findMany({
       where: {
@@ -778,13 +799,14 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
           {
             OR: [
               { firstReleaseDate: { gte: weekAgo } },
-              { rating: { gte: 70 } },
+              { hypes: { gte: 5 } },
+              { rating: { gte: 75 } },
             ],
           },
         ],
       },
       orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
-      take: 120,
+      take: 150,
       include: {
         platforms: { include: { plataforma: true } },
         genres: { include: { genero: true } },
@@ -794,32 +816,17 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
 
     const mapped = recentJogos.map(mapJogoToMidia);
 
-    const porGenero: Record<string, typeof mapped> = {};
-    const porPlataforma: Record<string, typeof mapped> = {};
-    const porModo: Record<string, typeof mapped> = {};
-
-    for (const jogo of mapped) {
-      for (const genero of jogo.generos_api || []) {
-        if (!porGenero[genero]) porGenero[genero] = [];
-        if (porGenero[genero].length < perGroup) porGenero[genero].push(jogo);
-      }
-      for (const plataforma of jogo.plataformas_api || []) {
-        const nome = plataforma.nome;
-        if (!nome) continue;
-        if (!porPlataforma[nome]) porPlataforma[nome] = [];
-        if (porPlataforma[nome].length < perGroup) porPlataforma[nome].push(jogo);
-      }
-      for (const modo of jogo.modos_jogo || []) {
-        if (!porModo[modo]) porModo[modo] = [];
-        if (porModo[modo].length < perGroup) porModo[modo].push(jogo);
-      }
-    }
+    const now = new Date();
+    const weekLabel = `Semana ${Math.ceil(now.getDate() / 7)} · ${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
 
     res.json({
+      semana: weekLabel,
       destaques: mapped.slice(0, 12),
-      porGenero,
-      porPlataforma,
-      porModo,
+      categorias: buildSections(mapped, (j) => j.generos_api || []),
+      modos: buildSections(mapped, (j) => j.modos_jogo || []),
+      plataformas: buildSections(mapped, (j) =>
+        (j.plataformas_api || []).map((p) => p.nome).filter(Boolean) as string[]
+      ),
     });
   } catch (error) {
     logger.error(`Erro ao buscar jogos em alta: ${error}`);

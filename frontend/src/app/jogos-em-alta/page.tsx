@@ -2,49 +2,69 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Gamepad2, Layers, Monitor, Users } from 'lucide-react';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import type { Jogo } from '@/types';
 
-type GroupedGames = Record<string, Jogo[]>;
-
-interface JogosEmAltaData {
-  destaques: Jogo[];
-  porGenero: GroupedGames;
-  porPlataforma: GroupedGames;
-  porModo: GroupedGames;
+interface GameSection {
+  nome: string;
+  jogos: Jogo[];
+  total: number;
 }
 
-const GameSection = ({ title, games }: { title: string; games: Jogo[] }) => {
-  if (!games || games.length === 0) return null;
-  return (
-    <section className="space-y-4">
-      <h2 className="font-display text-lg md:text-xl orbe-text-primary flex items-center gap-2">
-        <span className="orbe-block-sm inline-block w-2 h-6 bg-[var(--orbe-accent-2)] rounded-full" />
-        {title}
-      </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center">
-        {games.map((jogo) => (
-          <MidiaCard key={`${title}-${jogo.id}`} midia={jogo} type="jogo" />
-        ))}
+interface JogosEmAltaData {
+  semana: string;
+  destaques: Jogo[];
+  categorias: GameSection[];
+  modos: GameSection[];
+  plataformas: GameSection[];
+}
+
+type TabId = 'destaques' | 'categorias' | 'modos' | 'plataformas';
+
+const TABS: { id: TabId; label: string; icon: typeof Gamepad2 }[] = [
+  { id: 'destaques', label: 'Destaques', icon: Gamepad2 },
+  { id: 'categorias', label: 'Categoria', icon: Layers },
+  { id: 'modos', label: 'Modo de Jogo', icon: Users },
+  { id: 'plataformas', label: 'Plataforma', icon: Monitor },
+];
+
+const HorizontalRow = ({ section }: { section: GameSection }) => (
+  <section className="orbe-block bg-card rounded-[20px] p-4 md:p-5 space-y-4">
+    <div className="flex items-center justify-between gap-3">
+      <h3 className="font-display text-base md:text-lg orbe-text-primary flex items-center gap-2">
+        <span className="orbe-block-sm w-2 h-5 bg-[var(--orbe-accent-2)] rounded-full shrink-0" />
+        {section.nome}
+      </h3>
+      <span className="text-xs font-bold orbe-text-primary bg-muted px-3 py-1 rounded-full border-2 border-[var(--orbe-block-border)]">
+        {section.total} jogos
+      </span>
+    </div>
+    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      {section.jogos.map((jogo) => (
+        <div key={`${section.nome}-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
+          <MidiaCard midia={jogo} type="jogo" />
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+const GroupedTab = ({ sections, emptyMessage }: { sections: GameSection[]; emptyMessage: string }) => {
+  if (sections.length === 0) {
+    return (
+      <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+        <p className="text-muted-foreground font-medium">{emptyMessage}</p>
       </div>
-    </section>
-  );
-};
-
-const GroupedSection = ({ title, groups }: { title: string; groups: GroupedGames }) => {
-  const entries = Object.entries(groups).filter(([, items]) => items.length > 0);
-  if (entries.length === 0) return null;
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <h2 className="font-display text-xl md:text-2xl orbe-text-primary border-b-[3px] border-[var(--orbe-block-border)] pb-3">
-        {title}
-      </h2>
-      {entries.map(([groupName, games]) => (
-        <GameSection key={groupName} title={groupName} games={games} />
+    <div className="space-y-5">
+      {sections.map((section) => (
+        <HorizontalRow key={section.nome} section={section} />
       ))}
     </div>
   );
@@ -53,6 +73,7 @@ const GroupedSection = ({ title, groups }: { title: string; groups: GroupedGames
 export default function JogosEmAltaPage() {
   const [data, setData] = useState<JogosEmAltaData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabId>('destaques');
 
   useEffect(() => {
     realApi.getJogosEmAlta().then((result) => {
@@ -62,22 +83,75 @@ export default function JogosEmAltaPage() {
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
-      <div className="border-b-[3px] border-[var(--orbe-block-border)] bg-background/90 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6 flex items-center gap-4">
-          <Link href="/" className="orbe-block-sm p-2 rounded-xl bg-card orbe-text-primary hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform">
-            <ArrowLeft className="h-5 w-5" />
+      {/* Hero — padrão Orbe anime-pop */}
+      <section className="relative overflow-hidden border-b-[3px] border-[var(--orbe-block-border)] py-10 md:py-12">
+        <div className="container mx-auto px-4">
+          <Link
+            href="/"
+            className="orbe-block-sm inline-flex items-center gap-2 bg-card orbe-text-primary font-bold text-sm px-4 py-2 rounded-[12px] mb-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
           </Link>
-          <div>
-            <h1 className="font-display text-2xl md:text-3xl orbe-text-primary flex items-center gap-2">
-              <Gamepad2 className="h-7 w-7 text-[var(--orbe-accent-2)]" />
-              Jogos em Alta
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">Os mais jogados da semana, por categoria, modo e plataforma</p>
+
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <span className="orbe-block-sm inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide bg-[var(--orbe-accent-2)] text-white px-4 py-2 rounded-full mb-4">
+                🔥 {data?.semana || 'Esta semana'}
+              </span>
+              <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] leading-tight orbe-text-primary flex items-center gap-3">
+                <Gamepad2 className="h-8 w-8 text-[var(--orbe-accent-2)] shrink-0" />
+                Jogos em Alta
+              </h1>
+              <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-xl font-medium">
+                Os mais jogados da semana, organizados por categoria, modo de jogo e plataforma.
+              </p>
+            </div>
+
+            {!isLoading && data && (
+              <div className="flex gap-3">
+                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                  <p className="font-display text-2xl orbe-text-primary">{data.destaques.length}</p>
+                  <p className="text-xs text-muted-foreground font-semibold">Destaques</p>
+                </div>
+                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                  <p className="font-display text-2xl orbe-text-primary">{data.categorias.length}</p>
+                  <p className="text-xs text-muted-foreground font-semibold">Categorias</p>
+                </div>
+                <div className="orbe-block-sm bg-card rounded-[14px] px-4 py-3 text-center min-w-[90px]">
+                  <p className="font-display text-2xl orbe-text-primary">{data.plataformas.length}</p>
+                  <p className="text-xs text-muted-foreground font-semibold">Plataformas</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </section>
 
-      <main className="container mx-auto px-4 py-10 space-y-12">
+      <main className="container mx-auto px-4 py-8 md:py-10 space-y-8">
+        {/* Abas de navegação */}
+        <div className="flex flex-wrap gap-2">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border-[2.5px] border-[var(--orbe-block-border)] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-[3px_3px_0_var(--orbe-block-border)]'
+                    : 'bg-card orbe-text-primary shadow-[2px_2px_0_var(--orbe-block-border)]'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-items-center">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -86,22 +160,55 @@ export default function JogosEmAltaPage() {
           </div>
         ) : data ? (
           <>
-            {data.destaques.length > 0 && (
+            {activeTab === 'destaques' && (
               <section className="space-y-4">
-                <h2 className="font-display text-xl md:text-2xl orbe-text-primary">Destaques da Semana</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
-                  {data.destaques.map((jogo) => (
-                    <MidiaCard key={jogo.id} midia={jogo} type="jogo" />
-                  ))}
-                </div>
+                <h2 className="font-display text-xl orbe-text-primary border-b-[3px] border-[var(--orbe-block-border)] pb-2">
+                  Top da Semana
+                </h2>
+                {data.destaques.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
+                    {data.destaques.map((jogo, index) => (
+                      <div key={jogo.id} className="relative w-full max-w-[210px]">
+                        {index < 3 && (
+                          <span className="absolute -top-2 -left-1 z-10 orbe-block-sm bg-[var(--orbe-hero-yellow)] orbe-text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+                            #{index + 1}
+                          </span>
+                        )}
+                        <MidiaCard midia={jogo} type="jogo" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+                    <p className="text-muted-foreground">Nenhum destaque disponível esta semana.</p>
+                  </div>
+                )}
               </section>
             )}
-            <GroupedSection title="Por Categoria" groups={data.porGenero} />
-            <GroupedSection title="Por Modo de Jogo" groups={data.porModo} />
-            <GroupedSection title="Por Plataforma" groups={data.porPlataforma} />
+
+            {activeTab === 'categorias' && (
+              <GroupedTab sections={data.categorias} emptyMessage="Nenhuma categoria com jogos em alta esta semana." />
+            )}
+
+            {activeTab === 'modos' && (
+              <GroupedTab sections={data.modos} emptyMessage="Nenhum modo de jogo com destaques esta semana." />
+            )}
+
+            {activeTab === 'plataformas' && (
+              <GroupedTab sections={data.plataformas} emptyMessage="Nenhuma plataforma com jogos em alta esta semana." />
+            )}
           </>
         ) : (
-          <p className="text-center text-muted-foreground py-12">Não foi possível carregar os jogos em alta.</p>
+          <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+            <p className="text-muted-foreground font-medium">Não foi possível carregar os jogos em alta.</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="orbe-block orbe-block-hover mt-4 bg-primary text-primary-foreground font-bold text-sm px-6 py-3 rounded-[14px]"
+            >
+              Tentar novamente
+            </button>
+          </div>
         )}
       </main>
     </div>

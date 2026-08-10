@@ -169,7 +169,7 @@ export const realApi = {
       return await orbeNerdApi.getJogosEmAlta();
     } catch (error) {
       console.error('Erro ao buscar jogos em alta:', error);
-      return { destaques: [], porGenero: {}, porPlataforma: {}, porModo: {} };
+      return { destaques: [], categorias: [], modos: [], plataformas: [], semana: '' };
     }
   },
   getNotifications: orbeNerdApi.getNotifications,

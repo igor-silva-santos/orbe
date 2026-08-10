@@ -40,6 +40,19 @@ const gameGenreTranslations: Record<string, string> = {
   "Tactical": "Tático",
 };
 
+const gameModeTranslations: Record<string, string> = {
+  "Single player": "Um jogador",
+  "Multiplayer": "Multijogador",
+  "Co-operative": "Cooperativo",
+  "Split screen": "Tela dividida",
+  "Massively Multiplayer Online (MMO)": "MMO",
+  "Battle Royale": "Battle Royale",
+  "Local co-op": "Cooperativo local",
+  "Online co-op": "Cooperativo online",
+};
+
+const translateGameMode = (mode: string) => gameModeTranslations[mode] || mode;
+
 const gameThemeTranslations: Record<string, string> = {
   "Action": "Ação",
   "Adventure": "Aventura",
@@ -374,7 +387,7 @@ export const mapJogoToMidia = (jogo: any) => {
     desenvolvedores: jogo.companies?.filter((c: any) => c.role === 'developer').map((c: any) => c.company.name) ?? [],
     publicadoras: jogo.companies?.filter((c: any) => c.role === 'publisher').map((c: any) => c.company.name) ?? [],
     temas: jogo.themes?.map((t: any) => translateGameTheme(t.theme.name)) ?? [],
-    modos_jogo: jogo.gameModes?.map((m: any) => m.gameMode.name) ?? [],
+    modos_jogo: jogo.gameModes?.map((m: any) => translateGameMode(m.gameMode.name)) ?? [],
     perspectivas: jogo.playerPerspectives?.map((p: any) => p.perspective.name) ?? [],
     screenshots: jogo.screenshots?.map((s: any) => resolveIgdbImageUrl(s.url)) ?? [],
     artworks: jogo.artworks?.map((a: any) => resolveIgdbImageUrl(a.url)) ?? [],
