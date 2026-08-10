@@ -83,11 +83,15 @@ app.get('/api/health', async (req, res) => {
 
   try {
     await prisma.$queryRaw`SELECT 1`;
+    const syncStatus = await getSyncStatus(prisma);
+    const body: Record<string, unknown> = { ok: true };
     if (showDetails) {
-      res.json({ ok: true, db: true });
-    } else {
-      res.json({ ok: true });
+      body.db = true;
+      body.sync = syncStatus;
+    } else if (syncStatus.syncActive || syncStatus.resumeAvailable) {
+      body.syncHint = syncStatus.message ?? 'Ver GET /api/sync/status';
     }
+    res.json(body);
   } catch {
     res.status(503).json(showDetails ? { ok: false, db: false } : { ok: false });
   }
@@ -232,7 +236,7 @@ app.get('/profile', meHandler);
 
 import { runDetetive } from './detetive';
 import cron from 'node-cron';
-import { checkInterruptedSyncOnStartup } from './syncState';
+import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00)
 cron.schedule('0 3 * * *', () => {
