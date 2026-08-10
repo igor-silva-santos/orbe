@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
@@ -403,7 +404,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       </div>
       
       <TooltipProvider delayDuration={300}>
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}>
         <div className="flex">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
