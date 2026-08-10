@@ -1,22 +1,64 @@
 import Redis from 'ioredis';
 import { logger } from './logger';
 
-// A URL de conexão deve ser armazenada em variáveis de ambiente em um ambiente de produção
-const redisUrl = process.env.REDIS_URL;
+function parseRedisUrl(raw: string | undefined): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    logger.error(
+      'REDIS_URL parece ser REST URL (https://). Use a Redis URL do Upstash (rediss://...).'
+    );
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (!parsed.hostname || parsed.hostname === '/') {
+      logger.error('REDIS_URL inválida: hostname ausente.');
+      return null;
+    }
+    if (!['redis:', 'rediss:'].includes(parsed.protocol)) {
+      logger.error(`REDIS_URL deve usar redis:// ou rediss:// (recebido: ${parsed.protocol}).`);
+      return null;
+    }
+    return value;
+  } catch {
+    logger.error('REDIS_URL inválida. Formato: rediss://default:TOKEN@host.upstash.io:6379');
+    return null;
+  }
+}
+
+const redisUrl = parseRedisUrl(process.env.REDIS_URL);
 
 let redisClient: Redis | null = null;
 
 if (redisUrl) {
-  redisClient = new Redis(redisUrl);
-
-  redisClient.on('connect', () => {
-    logger.info('Conectado ao Redis com sucesso.');
+  redisClient = new Redis(redisUrl, {
+    maxRetriesPerRequest: 2,
+    lazyConnect: true,
+    enableOfflineQueue: false,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 500, 2000);
+    },
+    ...(redisUrl.startsWith('rediss://') ? { tls: {} } : {}),
   });
+
+  redisClient
+    .connect()
+    .then(() => logger.info('Conectado ao Redis com sucesso.'))
+    .catch((err) => {
+      logger.error('Falha ao conectar ao Redis:', err);
+      redisClient?.disconnect();
+      redisClient = null;
+    });
 
   redisClient.on('error', (err) => {
-    logger.error('Não foi possível conectar ao Redis:', err);
-    redisClient = null; // Definir como null em caso de erro de conexão
+    if (redisClient) logger.warn(`Redis: ${err.message}`);
   });
+} else if (process.env.REDIS_URL?.trim()) {
+  logger.warn('REDIS_URL definida mas inválida — cache desabilitado.');
 } else {
   logger.warn('REDIS_URL não está definido. O cache Redis será desabilitado.');
 }

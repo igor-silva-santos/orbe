@@ -29,14 +29,26 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
     }
 };
 
+const VALID_MEDIA_TYPES = ['filme', 'serie', 'anime', 'jogo'];
+
 // Listar comentários de uma mídia
 router.get('/comments/:tipo/:id', async (req: Request, res: Response) => {
     const { tipo, id } = req.params;
+
+    if (!VALID_MEDIA_TYPES.includes(tipo)) {
+        return res.status(400).json({ error: 'Tipo de mídia inválido.' });
+    }
+
+    const midiaId = Number(id);
+    if (!Number.isInteger(midiaId) || midiaId <= 0) {
+        return res.status(400).json({ error: 'ID de mídia inválido.' });
+    }
+
     try {
         const comments = await prisma.comment.findMany({
             where: {
                 tipo_midia: tipo,
-                midia_id: Number(id)
+                midia_id: midiaId
             },
             include: {
                 usuario: {

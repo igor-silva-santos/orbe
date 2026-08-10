@@ -1038,8 +1038,8 @@ router.get('/trending', async (req, res) => {
   }
 });
 
-// Rota de Pesquisa Global (com suporte a acentuação)
-router.get('/pesquisa', searchRateLimiter, async (req, res) => {
+// Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
+const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
   const { q, category } = req.query;
 
   if (!q || typeof q !== 'string') {
@@ -1116,7 +1116,10 @@ router.get('/pesquisa', searchRateLimiter, async (req, res) => {
     logger.error(`Erro ao realizar pesquisa: ${error}`);
     res.status(500).json({ error: 'Erro interno ao realizar pesquisa.' });
   }
-});
+};
+
+router.get('/pesquisa', searchRateLimiter, searchHandler);
+router.get('/search', searchRateLimiter, searchHandler);
 
 // Rota para Filtros de Premiações
 router.get('/premios/filtros', async (req, res) => {
@@ -1258,6 +1261,40 @@ const getSeasonDateRange = (year: number, season: string): { startDate: Date, en
   }
   return { startDate, endDate };
 };
+
+// Rota para Animes por Ano (paridade com filmes/séries/jogos)
+router.get('/animes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const { year } = req.query;
+  if (!year || isNaN(parseInt(year as string))) {
+    return res.status(400).json({ error: 'Ano inválido fornecido.' });
+  }
+  const parsedYear = parseInt(year as string);
+  const startDate = new Date(parsedYear, 0, 1);
+  const endDate = new Date(parsedYear, 11, 31, 23, 59, 59);
+
+  try {
+    const animes = await prisma.anime.findMany({
+      where: {
+        AND: [
+          animeQualityFilter,
+          {
+            startDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
+      },
+      orderBy: { startDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: animeCarouselInclude,
+    });
+    res.json(animes.map(mapAnimeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar animes por ano: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar animes por ano.' });
+  }
+});
 
 // Rota para Animes por Temporada e Ano
 router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
