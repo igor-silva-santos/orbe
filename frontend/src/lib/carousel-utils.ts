@@ -12,6 +12,17 @@ export function mergeMediaByDate(existing: Midia[], incoming: Midia[]): Midia[] 
   );
 }
 
+export function monthKeyFromDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function adjacentMonthKeys(year: number, month: number): string[] {
+  const prev = new Date(year, month - 2, 1);
+  const current = new Date(year, month - 1, 1);
+  const next = new Date(year, month, 1);
+  return [monthKeyFromDate(prev), monthKeyFromDate(current), monthKeyFromDate(next)];
+}
+
 export function calculateCarouselStartIndex(data: Midia[]): number {
   if (!data || data.length === 0) return 0;
   const today = new Date();

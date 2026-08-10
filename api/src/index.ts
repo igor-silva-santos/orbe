@@ -15,6 +15,13 @@ import syncRoutes from './syncRoutes';
 import watchlistRoutes from './watchlistRoutes';
 import profileRoutes from './profileRoutes';
 import commentRoutes from './commentRoutes';
+import {
+  applySecurityMiddleware,
+  authRateLimiter,
+  assertJwtSecretConfigured,
+} from './securityMiddleware';
+
+assertJwtSecretConfigured();
 
 const app = express();
 const server = http.createServer(app);
@@ -57,6 +64,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+applySecurityMiddleware(app);
 
 // Usar as rotas de mídia e webhooks
 app.use('/api', mediaRoutes);
@@ -205,13 +213,13 @@ const meHandler = async (req: express.Request, res: express.Response) => {
 };
 
 // Rotas canônicas alinhadas ao frontend (/api/auth/*)
-app.post('/api/auth/register', registerHandler);
-app.post('/api/auth/login', loginHandler);
+app.post('/api/auth/register', authRateLimiter, registerHandler);
+app.post('/api/auth/login', authRateLimiter, loginHandler);
 app.get('/api/auth/me', meHandler);
 
 // Aliases legados
-app.post('/register', registerHandler);
-app.post('/login', loginHandler);
+app.post('/register', authRateLimiter, registerHandler);
+app.post('/login', authRateLimiter, loginHandler);
 app.get('/profile', meHandler);
 
 import { runDetetive } from './detetive';
