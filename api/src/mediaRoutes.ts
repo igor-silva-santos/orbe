@@ -20,7 +20,7 @@ const router = Router();
 
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
-const CAROUSEL_ITEM_LIMIT = 60;
+const CAROUSEL_ITEM_LIMIT = 500;
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
@@ -761,6 +761,69 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
   } catch (error) {
     logger.error(`Erro ao buscar jogos por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos por ano.' });
+  }
+});
+
+// Jogos em alta da semana — agrupados por categoria, modo e plataforma
+router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const perGroup = 8;
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  try {
+    const recentJogos = await prisma.jogo.findMany({
+      where: {
+        AND: [
+          jogoQualityFilter,
+          {
+            OR: [
+              { firstReleaseDate: { gte: weekAgo } },
+              { rating: { gte: 70 } },
+            ],
+          },
+        ],
+      },
+      orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
+      take: 120,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+        gameModes: { include: { gameMode: true } },
+      },
+    });
+
+    const mapped = recentJogos.map(mapJogoToMidia);
+
+    const porGenero: Record<string, typeof mapped> = {};
+    const porPlataforma: Record<string, typeof mapped> = {};
+    const porModo: Record<string, typeof mapped> = {};
+
+    for (const jogo of mapped) {
+      for (const genero of jogo.generos_api || []) {
+        if (!porGenero[genero]) porGenero[genero] = [];
+        if (porGenero[genero].length < perGroup) porGenero[genero].push(jogo);
+      }
+      for (const plataforma of jogo.plataformas_api || []) {
+        const nome = plataforma.nome;
+        if (!nome) continue;
+        if (!porPlataforma[nome]) porPlataforma[nome] = [];
+        if (porPlataforma[nome].length < perGroup) porPlataforma[nome].push(jogo);
+      }
+      for (const modo of jogo.modos_jogo || []) {
+        if (!porModo[modo]) porModo[modo] = [];
+        if (porModo[modo].length < perGroup) porModo[modo].push(jogo);
+      }
+    }
+
+    res.json({
+      destaques: mapped.slice(0, 12),
+      porGenero,
+      porPlataforma,
+      porModo,
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar jogos em alta: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar jogos em alta.' });
   }
 });
 

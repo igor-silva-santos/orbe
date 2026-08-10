@@ -5,7 +5,7 @@ import { Anime, Character, StaffMember, CalendarModalData } from '@/types';
 import AnimeInfoBlock from './AnimeInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { translateRole } from '@/lib/media-helpers';
+import { translateRole, sanitizeTranslatedText } from '@/lib/media-helpers';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 
@@ -97,7 +97,9 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
   }
 
   const trailerKey = anime.trailer_key || anime.videos?.find((v) => v.type === 'Trailer')?.key;
-  const synopsis = anime.sinopse ? stripHtml(anime.sinopse) : '(não informado)';
+  const synopsis = anime.sinopse
+    ? sanitizeTranslatedText(stripHtml(anime.sinopse)) || '(não informado)'
+    : '(não informado)';
   const platforms = dedupePlatforms(anime.plataformas_api || []);
 
   return (

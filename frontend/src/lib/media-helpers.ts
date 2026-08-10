@@ -186,8 +186,40 @@ export const translateRole = (role: string): string => {
     'Producer': 'Produtor(a)',
     'Original Story': 'História Original',
     'Voice Actor': 'Dublador(a)',
-    // Adicione outras traduções comuns aqui
   };
 
   return roleDictionary[role] || role;
+};
+
+const animeGenreDictionary: Record<string, string> = {
+  Action: 'Ação',
+  Adventure: 'Aventura',
+  Comedy: 'Comédia',
+  Drama: 'Drama',
+  Ecchi: 'Ecchi',
+  Fantasy: 'Fantasia',
+  Horror: 'Terror',
+  'Mahou Shoujo': 'Garota Mágica',
+  Mecha: 'Mecha',
+  Music: 'Música',
+  Mystery: 'Mistério',
+  Psychological: 'Psicológico',
+  Romance: 'Romance',
+  'Sci-Fi': 'Ficção Científica',
+  'Slice of Life': 'Cotidiano',
+  Sports: 'Esportes',
+  Supernatural: 'Sobrenatural',
+  Thriller: 'Suspense',
+  Suspense: 'Suspense',
+};
+
+export const translateAnimeGenre = (genre: string): string =>
+  animeGenreDictionary[genre] || genre;
+
+const translationErrorPattern = /MYMEMORY\s+WARNING|YOU\s+USED\s+ALL\s+AVAILABLE\s+FREE|TRANSLATED\.NET/i;
+
+export const sanitizeTranslatedText = (text: string | null | undefined): string => {
+  if (!text) return '';
+  if (translationErrorPattern.test(text)) return '';
+  return text;
 };

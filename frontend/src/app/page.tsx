@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
@@ -54,10 +55,10 @@ const calculateStartIndex = (data: Midia[]) => {
 }
 
 const CarouselSkeleton = () => (
-  <div className="overflow-hidden">
-    <div className="flex -ml-4">
-      {Array.from({ length: 10 }).map((_, index) => (
-        <div key={index} className="relative min-w-0 flex-shrink-0 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4">
+  <div className="overflow-hidden max-w-full">
+    <div className="flex gap-3 px-2">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="flex-[0_0_170px] min-w-0">
           <MidiaCardSkeleton />
         </div>
       ))}
@@ -66,32 +67,20 @@ const CarouselSkeleton = () => (
 );
 
 export default function Home() {
-  const [initialData, setInitialData] = useState<{ filmes: Midia[], series: Midia[], jogos: Midia[], animes: Anime[] } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [filmes, setFilmes] = useState<Midia[] | null>(null);
+  const [series, setSeries] = useState<Midia[] | null>(null);
+  const [jogos, setJogos] = useState<Midia[] | null>(null);
+  const [animes, setAnimes] = useState<Anime[] | null>(null);
 
   useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        const [filmes, series, jogos, animes] = await Promise.all([
-          fetchInitialMediaData('filmes'),
-          fetchInitialMediaData('series'),
-          fetchInitialMediaData('jogos'),
-          fetchInitialAnimeData(),
-        ]);
-        setInitialData({ filmes, series, jogos, animes });
-      } catch (error) {
-        console.error("Failed to load initial carousel data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAllData();
+    fetchInitialMediaData('filmes').then(setFilmes).catch(console.error);
+    fetchInitialMediaData('series').then(setSeries).catch(console.error);
+    fetchInitialMediaData('jogos').then(setJogos).catch(console.error);
+    fetchInitialAnimeData().then(setAnimes).catch(console.error);
   }, []);
 
   return (
-    <div className="bg-background">
-      {/* Hero — Anime-Pop (preview 03) */}
+    <div className="bg-background overflow-x-hidden">
       <section className="relative overflow-hidden border-b-[3px] border-[var(--orbe-block-border)] py-14 md:py-16">
         <div className="container mx-auto px-4 grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
           <div>
@@ -112,13 +101,12 @@ export default function Home() {
               >
                 ▶ Começar agora
               </button>
-              <button
-                type="button"
-                onClick={() => document.getElementById('jogos')?.scrollIntoView({ behavior: 'smooth' })}
-                className="orbe-block orbe-block-hover bg-card orbe-text-primary font-bold text-sm px-6 py-3.5 rounded-[14px]"
+              <Link
+                href="/jogos-em-alta"
+                className="orbe-block orbe-block-hover bg-card orbe-text-primary font-bold text-sm px-6 py-3.5 rounded-[14px] inline-flex items-center"
               >
                 🎮 Ver jogos em alta
-              </button>
+              </Link>
             </div>
           </div>
           <div className="relative h-64 md:h-[340px] hidden sm:block" aria-hidden="true">
@@ -129,26 +117,26 @@ export default function Home() {
         </div>
       </section>
 
-      <main className="container mx-auto py-12 space-y-14 px-4">
+      <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4 overflow-x-hidden">
 
-        <section id="filmes">
+        <section id="filmes" className="overflow-hidden">
           <SectionHeading title="Filmes" />
-          {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="filmes" initialData={initialData.filmes} startIndex={calculateStartIndex(initialData.filmes)} />}
+          {!filmes ? <CarouselSkeleton /> : <MediaCarousel mediaType="filmes" initialData={filmes} startIndex={calculateStartIndex(filmes)} />}
         </section>
 
-        <section id="series">
+        <section id="series" className="overflow-hidden">
           <SectionHeading title="Séries" />
-          {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="series" initialData={initialData.series} startIndex={calculateStartIndex(initialData.series)} />}
+          {!series ? <CarouselSkeleton /> : <MediaCarousel mediaType="series" initialData={series} startIndex={calculateStartIndex(series)} />}
         </section>
 
-        <section id="animes">
+        <section id="animes" className="overflow-hidden">
           <SectionHeading title="Animes" />
-          {isLoading || !initialData ? <CarouselSkeleton /> : <AnimeCarousel initialData={initialData.animes} />}
+          {!animes ? <CarouselSkeleton /> : <AnimeCarousel initialData={animes} />}
         </section>
 
-        <section id="jogos">
+        <section id="jogos" className="overflow-hidden">
           <SectionHeading title="Jogos" />
-          {isLoading || !initialData ? <CarouselSkeleton /> : <MediaCarousel mediaType="jogos" initialData={initialData.jogos} startIndex={calculateStartIndex(initialData.jogos)} />}
+          {!jogos ? <CarouselSkeleton /> : <MediaCarousel mediaType="jogos" initialData={jogos} startIndex={calculateStartIndex(jogos)} />}
         </section>
 
       </main>
@@ -158,7 +146,7 @@ export default function Home() {
 
 function SectionHeading({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center justify-between mb-5 px-2">
       <h2 className="font-display text-xl md:text-[22px] orbe-text-primary">
         {title}
       </h2>

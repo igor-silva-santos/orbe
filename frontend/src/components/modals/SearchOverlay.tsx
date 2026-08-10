@@ -7,7 +7,6 @@ import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { SearchResultItem } from '@/types';
 
-
 const SearchOverlay: React.FC = () => {
   const { isSearchOpen, closeSearch } = useAppStore();
 
@@ -21,13 +20,14 @@ const SearchOverlay: React.FC = () => {
     { id: 'jogos', label: 'Jogos' },
   ];
 
-
-
   const handleClose = useCallback(() => {
     setSearchQuery('');
     setSelectedCategory('todos');
     setSearchResults([]);
     closeSearch();
+    if (window.history.state?.modal === 'search') {
+      window.history.back();
+    }
   }, [closeSearch]);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,12 +43,14 @@ const SearchOverlay: React.FC = () => {
       if (event.key === 'Escape') handleClose();
     };
     const handlePopState = () => {
-      handleClose();
+      closeSearch();
     };
 
     if (isSearchOpen) {
       document.body.style.overflow = 'hidden';
-      window.history.pushState({ modal: 'search' }, '');
+      if (!window.history.state?.modal) {
+        window.history.pushState({ modal: 'search' }, '');
+      }
       window.addEventListener('popstate', handlePopState);
       document.addEventListener('keydown', handleKeyDown);
     } else {
@@ -60,22 +62,20 @@ const SearchOverlay: React.FC = () => {
       window.removeEventListener('popstate', handlePopState);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isSearchOpen, handleClose]);
+  }, [isSearchOpen, handleClose, closeSearch]);
 
-  // Fetch trending content on mount
   useEffect(() => {
     const fetchTrending = async () => {
       if (isSearchOpen && trendingContent.length === 0) {
         setIsLoading(true);
-        const trending = await realApi.getTrending();
-        setTrendingContent(trending);
+        const trending = await realApi.getTrending(undefined, 20);
+        setTrendingContent(trending as SearchResultItem[]);
         setIsLoading(false);
       }
     };
     fetchTrending();
-  }, [isSearchOpen]);
+  }, [isSearchOpen, trendingContent.length]);
 
-  // Debounced search
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setSearchResults([]);
@@ -93,7 +93,7 @@ const SearchOverlay: React.FC = () => {
       ];
       setSearchResults(allResults);
       setIsLoading(false);
-    }, 500); // 500ms debounce
+    }, 350);
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
@@ -122,8 +122,6 @@ const SearchOverlay: React.FC = () => {
 
   }, [displayContent, selectedCategory]);
 
-
-
   const totalResults = Object.values(groupedContent).reduce((acc, group) => acc + group.length, 0);
 
   if (!isSearchOpen) return null;
@@ -131,9 +129,12 @@ const SearchOverlay: React.FC = () => {
   const renderGroup = (title: string, items: SearchResultItem[], baseIndex: number) => {
     if (items.length === 0) return null;
     return (
-      <div key={title} className="space-y-3">
-        <h3 className="text-xl font-semibold orbe-text-primary border-b border-border pb-2">{title}</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div key={title} className="space-y-4">
+        <h3 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+          <span className="orbe-block-sm w-1.5 h-5 bg-primary rounded-full" />
+          {title}
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
           {items.map((item, index) => {
             const itemIndex = baseIndex + index;
             return (
@@ -152,58 +153,81 @@ const SearchOverlay: React.FC = () => {
   };
 
   return (
-    <div className="search-overlay">
-      <div className="container mx-auto px-4 py-8 h-full">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold orbe-text-primary">Pesquisar</h2>
-          <button onClick={handleClose} className="p-2 orbe-text-primary hover:orbe-text-secondary transition-colors">
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <div className="search-layout">
-          <div className="space-y-6">
+    <div className="search-overlay overflow-x-hidden">
+      <div className="container mx-auto px-4 py-6 md:py-8 h-full max-w-6xl">
+        <div className="orbe-block bg-card rounded-[20px] p-5 md:p-8 max-h-[92vh] overflow-hidden flex flex-col">
+          <div className="flex justify-between items-center mb-6 shrink-0">
+            <h2 className="font-display text-2xl orbe-text-primary">Pesquisar</h2>
+            <button onClick={handleClose} className="orbe-block-sm p-2 rounded-xl bg-muted orbe-text-primary hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="space-y-5 shrink-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input type="text" placeholder="Digite o nome do filme, série, anime ou jogo..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-10 py-3 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground" autoFocus />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Filme, série, anime ou jogo..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-12 py-3.5 bg-background border-[2.5px] border-[var(--orbe-block-border)] rounded-[14px] focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground font-medium shadow-[3px_3px_0_var(--orbe-block-border)]"
+                autoFocus
+              />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-muted-foreground hover:text-primary">
+                <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-primary">
                   <X className="h-5 w-5" />
                 </button>
               )}
             </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium orbe-text-secondary">Categorias</h3>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button key={category.id} onClick={() => setSelectedCategory(category.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === category.id ? 'bg-primary text-primary-foreground' : 'bg-muted orbe-text-primary hover:bg-muted/80'}`}>
-                    {category.label}
-                  </button>
-                ))}
-              </div>
+
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold border-[2.5px] border-[var(--orbe-block-border)] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 ${
+                    selectedCategory === category.id
+                      ? 'bg-primary text-primary-foreground shadow-[3px_3px_0_var(--orbe-block-border)]'
+                      : 'bg-card orbe-text-primary shadow-[2px_2px_0_var(--orbe-block-border)]'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-hide">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-display text-lg orbe-text-primary">
+                {searchQuery.trim() ? 'Resultados' : 'Em Alta'}
+              </h3>
+              {!isLoading && totalResults > 0 && (
+                <span className="text-sm text-muted-foreground font-semibold">
+                  {totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}
+                </span>
+              )}
             </div>
 
-          </div>
-          <div className="space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide pr-4 -mr-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold orbe-text-primary">{searchQuery.trim() ? 'Resultados da Pesquisa' : 'Em Alta'}</h3>
-              {!isLoading && totalResults > 0 && (<span className="text-sm text-muted-foreground">{totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}</span>)}
-            </div>
             {isLoading ? (
-              <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </div>
             ) : totalResults > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-8 pb-4">
                 {renderGroup('Filmes', groupedContent.filmes, 0)}
                 {renderGroup('Séries', groupedContent.series, groupedContent.filmes.length)}
                 {renderGroup('Animes', groupedContent.animes, groupedContent.filmes.length + groupedContent.series.length)}
                 {renderGroup('Jogos', groupedContent.jogos, groupedContent.filmes.length + groupedContent.series.length + groupedContent.animes.length)}
               </div>
             ) : searchQuery.trim() ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Nenhum resultado encontrado para <strong>{searchQuery}</strong></p>
-                <p className="text-sm text-muted-foreground mt-2">Tente pesquisar por outro termo ou categoria</p>
+              <div className="text-center py-16 orbe-block-sm bg-muted rounded-[16px] border-[2px] border-[var(--orbe-block-border)]">
+                <p className="text-muted-foreground font-medium">Nenhum resultado para <strong className="orbe-text-primary">{searchQuery}</strong></p>
+                <p className="text-sm text-muted-foreground mt-2">Tente outro termo ou categoria</p>
               </div>
             ) : (
-              <div className="text-center py-12"><p className="text-muted-foreground">Nenhum conteúdo em alta disponível no momento.</p></div>
+              <div className="text-center py-16 text-muted-foreground">Nenhum conteúdo em alta no momento.</div>
             )}
           </div>
         </div>

@@ -5,6 +5,19 @@ const MAX_CACHE = 5000;
 
 const englishIndicators = /\b(the|and|with|from|their|this|that|when|after|before|world|story|young|finds|must|against)\b/i;
 
+const MYMEMORY_ERROR_PATTERNS = [
+  /MYMEMORY\s+WARNING/i,
+  /YOU\s+USED\s+ALL\s+AVAILABLE\s+FREE/i,
+  /NEXT\s+AVAILABLE\s+IN/i,
+  /TRANSLATED\.NET\/DOC\/USAGELIMITS/i,
+  /VISIT\s+HTTPS?:\/\//i,
+  /QUOTA\s+FINISHED/i,
+  /INVALID\s+TARGET\s+LANGUAGE/i,
+];
+
+export const isTranslationError = (text: string): boolean =>
+  MYMEMORY_ERROR_PATTERNS.some((pattern) => pattern.test(text));
+
 export const isLikelyEnglish = (text: string | null | undefined): boolean => {
   if (!text || text.length < 8) return false;
   const cleaned = text.replace(/<[^>]+>/g, '').trim();
@@ -30,7 +43,7 @@ export async function translateToPortuguese(text: string | null | undefined): Pr
     const data = await response.json();
     const translated = data?.responseData?.translatedText as string | undefined;
 
-    if (translated && translated !== cleaned) {
+    if (translated && translated !== cleaned && !isTranslationError(translated)) {
       if (cache.size >= MAX_CACHE) {
         const firstKey = cache.keys().next().value;
         if (firstKey) cache.delete(firstKey);
@@ -55,12 +68,18 @@ export async function translateFields<T extends Record<string, unknown>>(
     const value = item[field];
     if (typeof value === 'string') {
       const translated = await translateToPortuguese(value);
-      if (translated) (result as Record<string, unknown>)[field as string] = translated;
+      if (translated && !isTranslationError(translated)) {
+        (result as Record<string, unknown>)[field as string] = translated;
+      }
     }
     if (Array.isArray(value)) {
       (result as Record<string, unknown>)[field as string] = await Promise.all(
         value.map(async (entry) => {
-          if (typeof entry === 'string') return (await translateToPortuguese(entry)) ?? entry;
+          if (typeof entry === 'string') {
+            const translated = await translateToPortuguese(entry);
+            if (translated && !isTranslationError(translated)) return translated;
+            return entry;
+          }
           return entry;
         })
       );

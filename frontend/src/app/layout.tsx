@@ -76,7 +76,7 @@ export default function RootLayout({
         className={`${chakraPetch.variable} ${russoOne.variable} font-sans antialiased`}
       >
         <AppProvider>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-500">
+          <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
             <ClientOnly>
               <Header />
               <main className="pt-16 min-h-screen">

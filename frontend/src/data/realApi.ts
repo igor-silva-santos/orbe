@@ -156,16 +156,20 @@ export const realApi = {
   getTrending: async (type?: string, limit: number = 10) => {
     try {
       const response = await orbeNerdApi.getTrending(type, limit);
-      if (!response || !response.results) {
-        return [];
-      }
-      // Mapear resultados para o formato esperado (mesmo que seja um mapeamento 1:1 por enquanto)
-      return response.results.map((item: ApiResponseItem) => {
-        return item;
-      });
+      if (!response) return [];
+      const items = Array.isArray(response) ? response : (response.results || []);
+      return items.map((item: ApiResponseItem) => item);
     } catch (error) {
       console.error('Erro ao buscar conteúdo em alta:', error);
       return [];
+    }
+  },
+  getJogosEmAlta: async () => {
+    try {
+      return await orbeNerdApi.getJogosEmAlta();
+    } catch (error) {
+      console.error('Erro ao buscar jogos em alta:', error);
+      return { destaques: [], porGenero: {}, porPlataforma: {}, porModo: {} };
     }
   },
   getNotifications: orbeNerdApi.getNotifications,

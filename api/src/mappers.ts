@@ -1,5 +1,3 @@
-import { translateToPortuguese } from './translation';
-
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
@@ -73,6 +71,29 @@ const animeStatusTranslations: Record<string, string> = {
   HIATUS: 'Em hiato',
 };
 
+const animeGenreTranslations: Record<string, string> = {
+  Action: 'Ação',
+  Adventure: 'Aventura',
+  Comedy: 'Comédia',
+  Drama: 'Drama',
+  Ecchi: 'Ecchi',
+  Fantasy: 'Fantasia',
+  Horror: 'Terror',
+  'Mahou Shoujo': 'Garota Mágica',
+  Mecha: 'Mecha',
+  Music: 'Música',
+  Mystery: 'Mistério',
+  Psychological: 'Psicológico',
+  Romance: 'Romance',
+  'Sci-Fi': 'Ficção Científica',
+  'Slice of Life': 'Cotidiano',
+  Sports: 'Esportes',
+  Supernatural: 'Sobrenatural',
+  Thriller: 'Suspense',
+  Suspense: 'Suspense',
+};
+
+const translateAnimeGenre = (genre: string) => animeGenreTranslations[genre] || genre;
 const translateGameGenre = (genre: string) => gameGenreTranslations[genre] || genre;
 const translateGameTheme = (theme: string) => gameThemeTranslations[theme] || translateGameGenre(theme);
 const translateAnimeStatus = (status: string | null | undefined) =>
@@ -293,7 +314,7 @@ export const mapAnimeToMidia = (anime: any) => {
     mal_link: anime.malId ? `https://myanimelist.net/anime/${anime.malId}` : null,
     anilist_link: anime.siteUrl || `https://anilist.co/anime/${anime.anilistId}`,
     trailer_key: trailerFromExternal || trailerFromStreaming || null,
-    generos_api: anime.genres?.map((g: any) => g.genero.name) ?? [],
+    generos_api: anime.genres?.map((g: any) => translateAnimeGenre(g.genero.name)) ?? [],
     tags_api: anime.tags?.map((t: any) => t.tag.name) ?? [],
     rankings: anime.ranks?.map((r: any) => ({
       type: r.type,
@@ -367,22 +388,28 @@ export const normalizeSearchText = (text: string): string =>
   text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 export async function withPortugueseTranslation(mapped: Record<string, any>) {
+  const { translateToPortuguese, isTranslationError } = await import('./translation');
   const result = { ...mapped };
 
   if (typeof result.sinopse === 'string') {
-    result.sinopse = (await translateToPortuguese(result.sinopse)) ?? result.sinopse;
+    const translated = await translateToPortuguese(result.sinopse);
+    if (translated && !isTranslationError(translated)) {
+      result.sinopse = translated;
+    }
   }
   if (typeof result.overview === 'string') {
-    result.overview = (await translateToPortuguese(result.overview)) ?? result.overview;
-  }
-  if (Array.isArray(result.tags_api)) {
-    result.tags_api = await Promise.all(
-      result.tags_api.map(async (tag: string) => (await translateToPortuguese(tag)) ?? tag)
-    );
+    const translated = await translateToPortuguese(result.overview);
+    if (translated && !isTranslationError(translated)) {
+      result.overview = translated;
+    }
   }
   if (Array.isArray(result.temas)) {
     result.temas = await Promise.all(
-      result.temas.map(async (theme: string) => (await translateToPortuguese(theme)) ?? theme)
+      result.temas.map(async (theme: string) => {
+        const translated = await translateToPortuguese(theme);
+        if (translated && !isTranslationError(translated)) return translated;
+        return theme;
+      })
     );
   }
 
