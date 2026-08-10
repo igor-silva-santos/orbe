@@ -212,6 +212,8 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
     region: 'BR',
     'release_date.gte': startDate,
     'release_date.lte': endDate,
+    with_release_type: '2|3',
+    without_genres: '104',
   };
 
   const discoverPasses = openPeriod
@@ -226,6 +228,8 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
             'primary_release_date.gte': startDate,
             'primary_release_date.lte': endDate,
             sort_by: 'primary_release_date.asc',
+            with_release_type: '2|3',
+            without_genres: '104',
           },
           pages: 15,
         },
@@ -340,7 +344,8 @@ async function processMovieBatch(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
           `avg=${movieDetails.vote_average ?? 0}, poster=${!!movieDetails.poster_path}, ` +
-          `pt=${hasPortugueseLocalization(movieDetails) ? 'sim' : 'não'}).`
+          `pt=${hasPortugueseLocalization(movieDetails) ? 'sim' : 'não'}, ` +
+          `estreia=${releaseDate.toISOString().split('T')[0]}).`
         );
         continue;
       }

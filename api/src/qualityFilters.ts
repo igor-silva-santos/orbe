@@ -379,7 +379,7 @@ export function isMovieRelevantForSync(movie: MovieLike): boolean {
   const voteAverage = movie.vote_average ?? 0;
 
   if (hasPortugueseLocalization(movie)) {
-    if (isTotallyIrrelevant(voteCount, popularity)) return false;
+    // Estreias futuras costumam ter votos zero e popularidade baixa — isso é normal com pt-BR.
     return true;
   }
 
