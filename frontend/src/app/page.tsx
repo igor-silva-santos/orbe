@@ -105,12 +105,20 @@ export default function Home() {
               Filmes, séries, animes e jogos — descubra lançamentos, monte sua watchlist e nunca mais perca uma estreia.
             </p>
             <div className="flex gap-3.5 flex-wrap">
-              <a href="#filmes" className="orbe-block orbe-block-hover bg-primary text-primary-foreground font-bold text-sm px-6 py-3.5 rounded-[14px]">
+              <button
+                type="button"
+                onClick={() => document.getElementById('filmes')?.scrollIntoView({ behavior: 'smooth' })}
+                className="orbe-block orbe-block-hover bg-primary text-primary-foreground font-bold text-sm px-6 py-3.5 rounded-[14px]"
+              >
                 ▶ Começar agora
-              </a>
-              <a href="#jogos" className="orbe-block orbe-block-hover bg-card orbe-text-primary font-bold text-sm px-6 py-3.5 rounded-[14px]">
+              </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('jogos')?.scrollIntoView({ behavior: 'smooth' })}
+                className="orbe-block orbe-block-hover bg-card orbe-text-primary font-bold text-sm px-6 py-3.5 rounded-[14px]"
+              >
                 🎮 Ver jogos em alta
-              </a>
+              </button>
             </div>
           </div>
           <div className="relative h-64 md:h-[340px] hidden sm:block" aria-hidden="true">

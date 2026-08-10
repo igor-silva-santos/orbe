@@ -1,9 +1,9 @@
 'use client';
-import { FilmeDetalhes } from '@/types'; // Adapte o tipo se necessário
+import { FilmeDetalhes } from '@/types';
+import { NOT_INFORMED } from '@/lib/media-helpers';
 
-// Função para formatar a duração
 const formatRuntime = (minutes: number | null | undefined) => {
-  if (!minutes) return 'N/A';
+  if (!minutes) return NOT_INFORMED;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours}h ${mins}m`;
@@ -25,7 +25,9 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span className="font-bold text-yellow-500 dark:text-blue-400">Lançamento: </span>
-          {new Date(filme.releaseDate!).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+          {filme.releaseDate
+            ? new Date(filme.releaseDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+            : NOT_INFORMED}
         </div>
         <div>
           <span className="font-bold text-yellow-500 dark:text-blue-400">Duração: </span>
@@ -38,12 +40,10 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
           </div>
         )}
       </div>
-      {director && (
-        <div>
-          <span className="font-bold text-yellow-500 dark:text-blue-400">Direção: </span>
-          {director.pessoa.name}
-        </div>
-      )}
+      <div>
+        <span className="font-bold text-yellow-500 dark:text-blue-400">Direção: </span>
+        {director ? director.pessoa.name : NOT_INFORMED}
+      </div>
       {filme.genres && filme.genres.length > 0 && (
         <div>
           <span className="font-bold text-yellow-500 dark:text-blue-400">Gêneros:</span>

@@ -4,7 +4,7 @@ import { Serie, CalendarModalData } from '@/types';
 import SerieInfoBlock from './SerieInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Image from 'next/image';
+import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 
 interface SerieModalContentProps {
@@ -19,17 +19,26 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
 
   const trailerKey = serie.trailer_key || serie.videos?.find(v => v.type === 'Trailer')?.key;
 
+  const streamingProviders = (serie.streamingProviders || [])
+    .filter((p: any) => p.url && !p.provider.name.toLowerCase().includes('tmdb'));
+
+  const fallbackPlatforms = (serie.plataformas_api || [])
+    .filter((p) => p.url && !p.nome.toLowerCase().includes('tmdb'));
+
+  const hasStreaming = streamingProviders.length > 0 || fallbackPlatforms.length > 0;
+
   return (
     <div className="p-4 md:p-8 space-y-6">
       {/* Bloco Superior: Pôster e Informações Principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1">
-          <Image
-            src={serie.poster_curado || serie.poster_url_api || '/placeholder.png'}
+          <SafeImage
+            src={serie.poster_curado || serie.poster_url_api}
             alt={`Pôster de ${serie.titulo_curado || serie.titulo_api}`}
             width={500}
             height={750}
-            className="rounded-lg shadow-lg"
+            className="rounded-lg shadow-lg w-full"
+            fallbackLabel="Sem imagem"
           />
         </div>
         <div className="md:col-span-2">
@@ -46,23 +55,33 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       )}
 
       {/* Disponível Em */}
-      {serie.streamingProviders && serie.streamingProviders.length > 0 && (
+      {hasStreaming && (
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-4 mt-2">
-            {serie.streamingProviders.map((p: any) => (
-              p.url && (
-                <a 
-                  key={p.provider.name} 
-                  href={p.url}
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
-                >
-                  <PlatformIcon platform={p.provider.name} className="h-5 w-5" />
-                  <span>{p.provider.name}</span>
-                </a>
-              )
+            {streamingProviders.map((p: any) => (
+              <a
+                key={p.provider.name}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <PlatformIcon platform={p.provider.name} className="h-5 w-5" />
+                <span>{p.provider.name}</span>
+              </a>
+            ))}
+            {fallbackPlatforms.map((p) => (
+              <a
+                key={p.nome}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <PlatformIcon platform={p.nome} className="h-5 w-5" />
+                <span>{p.nome}</span>
+              </a>
             ))}
           </div>
         </section>
@@ -98,12 +117,13 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                     <Tooltip>
                       <TooltipTrigger>
                         <div className="flex flex-col items-center text-center w-24">
-                          <Image
-                            src={ator.foto_url || '/placeholder-person.png'}
+                          <SafeImage
+                            src={ator.foto_url}
                             alt={ator.nome}
                             width={96}
                             height={144}
                             className="rounded-full object-cover h-24 w-24 mb-2"
+                            fallbackLabel="?"
                           />
                           <p className="font-semibold text-sm truncate w-full">{ator.nome}</p>
                           <p className="text-xs text-gray-400 truncate w-full">{ator.personagem}</p>

@@ -135,15 +135,18 @@ export const realApi = {
   updateJogo: orbeNerdApi.updateJogo,
   search: async (query: string, category?: string, page: number = 1) => {
     try {
-      // A API agora retorna um objeto com chaves para cada tipo de mídia.
       const response = await orbeNerdApi.search(query, category, page);
       
       if (!response) {
         return { filmes: [], series: [], animes: [], jogos: [], total: 0 };
       }
 
-      // A resposta já está no formato { filmes: [...], series: [...], ... }, então apenas a retornamos.
-      return response;
+      return {
+        filmes: (response.filmes || []).map((item: Filme) => ({ ...item, type: 'filme' as const })),
+        series: (response.series || []).map((item: Serie) => ({ ...item, type: 'serie' as const })),
+        animes: (response.animes || []).map((item: Anime) => ({ ...item, type: 'anime' as const })),
+        jogos: (response.jogos || []).map((item: Jogo) => ({ ...item, type: 'jogo' as const })),
+      };
 
     } catch (error) {
       console.error('Erro na pesquisa:', error);

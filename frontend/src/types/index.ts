@@ -171,6 +171,7 @@ export interface Jogo extends Midia {
   evento_anuncio_id?: number;
   websites?: Website[];
   temas?: string[];
+  videos?: Video[];
 }
 
 export interface Preferencias {
@@ -505,6 +506,8 @@ export interface FilmeDetalhes {
   em_prevenda: boolean;
 
   ingresso_link: string | null;
+
+  tem_sessoes?: boolean | null;
 
   genres: FilmeGenre[];
 

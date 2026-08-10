@@ -6,6 +6,8 @@ import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Serie } from '@/types';
 
+import PageHeader from '@/components/layout/PageHeader';
+
 export default function SeriesPage() {
   const [series, setSeries] = useState<Serie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,21 +63,18 @@ export default function SeriesPage() {
   }, [selectedGenre, selectedYear, selectedStatus]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold orbe-text-primary mb-4">Séries</h1>
-        <p className="text-muted-foreground text-lg">Explore um universo de séries, das mais populares aos clássicos.</p>
-      </div>
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
+      <PageHeader title="Séries" description="Explore um universo de séries, das mais populares aos clássicos." />
 
-      <div className="mb-8 space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+      <div className="mb-6 md:mb-8 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="flex items-center gap-2 w-full">
+            <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
               disabled={isLoadingFilters}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             >
               <option value="todos">Todos os Gêneros</option>
               {availableGenres.map((genre) => (
@@ -86,13 +85,13 @@ export default function SeriesPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               disabled={isLoadingFilters}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             >
               <option value="todos">Todos os Anos</option>
               {availableYears.map((year) => (
@@ -103,13 +102,13 @@ export default function SeriesPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 w-full">
+            <Star className="h-4 w-4 text-muted-foreground shrink-0" />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               disabled={isLoadingFilters}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             >
               <option value="todos">Todos os Status</option>
               {availableStatuses.map((status) => (
@@ -131,7 +130,7 @@ export default function SeriesPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-12"><div className="loading-spinner h-8 w-8"></div></div>
       ) : series.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {series.map((serie) => (
             <MidiaCard key={serie.id} midia={serie} type="serie" />
           ))}

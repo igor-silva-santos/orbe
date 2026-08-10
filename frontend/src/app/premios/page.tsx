@@ -10,6 +10,8 @@ interface AwardItem extends Filme, Serie, Anime, Jogo {
   type: 'filme' | 'serie' | 'anime' | 'jogo';
 }
 
+import PageHeader from '@/components/layout/PageHeader';
+
 export default function PremiosPage() {
   const [awards, setAwards] = useState<AwardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,18 +54,15 @@ export default function PremiosPage() {
   }, [selectedAwardName, selectedYear]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold orbe-text-primary mb-4">Premiações</h1>
-        <p className="text-muted-foreground text-lg">Explore os vencedores e indicados dos maiores prêmios da indústria.</p>
-      </div>
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
+      <PageHeader title="Premiações" description="Explore os vencedores e indicados dos maiores prêmios da indústria." />
 
-      <div className="mb-8 space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="mb-6 md:mb-8 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Filtro por Nome do Prêmio */}
-          <div className="flex items-center gap-2">
-            <Award className="h-4 w-4 text-muted-foreground" />
-            <select value={selectedAwardName} onChange={(e) => setSelectedAwardName(e.target.value)} className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
+          <div className="flex items-center gap-2 w-full">
+            <Award className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select value={selectedAwardName} onChange={(e) => setSelectedAwardName(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="todos">Todos os Prêmios</option>
               {availableAwards.map(name => (
                 <option key={name} value={name}>{name}</option>
@@ -71,9 +70,9 @@ export default function PremiosPage() {
             </select>
           </div>
           {/* Filtro por Ano */}
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
+          <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="todos">Todos os Anos</option>
               {availableYears.map(year => (
                 <option key={year} value={year.toString()}>{year}</option>
@@ -92,7 +91,7 @@ export default function PremiosPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-12"><div className="loading-spinner h-8 w-8"></div></div>
       ) : awards.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {awards.map((awardItem) => (
             <MidiaCard key={`${awardItem.type}-${awardItem.id}`} midia={awardItem} type={awardItem.type} />
           ))}

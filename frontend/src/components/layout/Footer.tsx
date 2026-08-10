@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Github, Twitter, Instagram, Mail } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -30,13 +30,6 @@ const Footer: React.FC = () => {
     ]
   };
 
-  const socialLinks = [
-    { icon: Twitter, href: 'https://twitter.com/orbenerd', label: 'Twitter' },
-    { icon: Instagram, href: 'https://instagram.com/orbenerd', label: 'Instagram' },
-    { icon: Github, href: 'https://github.com/orbenerd', label: 'GitHub' },
-    { icon: Mail, href: 'mailto:contato@orbenerd.com', label: 'Email' }
-  ];
-
   return (
     <footer className="bg-background border-t-[3px] border-[var(--orbe-block-border)] mt-16">
       <div className="container mx-auto px-4 py-12">
@@ -52,25 +45,9 @@ const Footer: React.FC = () => {
               </h3>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-              Seu hub completo de entretenimento. Descubra, acompanhe e organize 
+              Seu hub de estreias nerd. Descubra, acompanhe e organize 
               seus filmes, séries, animes e jogos favoritos em um só lugar.
             </p>
-            
-            {/* Redes Sociais */}
-            <div className="flex space-x-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="orbe-block-sm orbe-block-sm-hover p-2 bg-card rounded-full"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-4 w-4 orbe-text-primary" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Links de Navegação */}

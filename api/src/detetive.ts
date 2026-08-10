@@ -86,12 +86,14 @@ export async function runDetetive(fullScan = false) {
       ]
     };
 
-    // Focar em filmes lançados nos últimos 6 meses (janela crítica de cinema -> digital)
+    // Focar em filmes lançados nos últimos 6 meses e próximos 3 meses
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const threeMonthsAhead = new Date();
+    threeMonthsAhead.setMonth(threeMonthsAhead.getMonth() + 3);
     whereClause.releaseDate = {
       gte: sixMonthsAgo,
-      lte: now
+      lte: threeMonthsAhead
     };
 
     const targetMovies = await prisma.filme.findMany({ 
@@ -117,8 +119,10 @@ export async function runDetetive(fullScan = false) {
         
         const response = await page.goto(directUrl, { waitUntil: 'networkidle2', timeout: 15000 });
         let hasCinemaSessions = false;
+        let pageExists = false;
 
         if (response && response.ok()) {
+          pageExists = true;
           const pageContent = await page.content();
           hasCinemaSessions = !pageContent.includes('Não há sessões disponíveis no momento.');
         }
@@ -134,7 +138,7 @@ export async function runDetetive(fullScan = false) {
         await prisma.filme.update({
           where: { id: filme.id },
           data: {
-            ingresso_link: hasCinemaSessions ? directUrl : null,
+            ingresso_link: pageExists ? directUrl : filme.ingresso_link,
             tem_sessoes: hasCinemaSessions,
             ultima_verificacao_ingresso: new Date(),
             // Se o filme saiu do cinema e entrou no digital agora, notificamos

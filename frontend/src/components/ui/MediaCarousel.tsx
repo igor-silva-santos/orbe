@@ -5,6 +5,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
 
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
@@ -31,8 +32,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     align: 'center', 
     skipSnaps: true, 
-    startIndex: startIndex 
+    startIndex: startIndex,
+    dragFree: true,
   });
+
+  useEmblaWheelScroll(emblaApi);
 
   const fetchMediaByYear = useCallback(async (year: number) => {
     if (fetchingYears.current.has(year) || loadedYears.current.has(year)) {
@@ -178,7 +182,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           </div>
         </div>
       </div>
-      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef}>
+      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
         <div className="flex -ml-4 md:-ml-6">
           {filteredItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => 

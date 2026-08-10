@@ -23,12 +23,16 @@ const russoOne = Russo_One({
 });
 
 export const metadata: Metadata = {
-  title: "Orbe Nerd - Hub de Entretenimento",
-  description: "O seu hub completo para lançamentos de filmes, séries, animes e jogos. Descubra, acompanhe e organize seu entretenimento favorito.",
-  keywords: "filmes, séries, animes, jogos, lançamentos, entretenimento, streaming",
+  title: "Orbe Nerd - Hub de Estreias",
+  description: "O seu hub de estreias nerd. Acompanhe lançamentos de filmes, séries, animes e jogos em um só lugar.",
+  keywords: "filmes, séries, animes, jogos, lançamentos, estreias, hub nerd",
   authors: [{ name: "Orbe Nerd" }],
   creator: "Orbe Nerd",
   publisher: "Orbe Nerd",
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   formatDetection: {
     email: false,
     address: false,
@@ -36,8 +40,8 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://orbenerd.com'),
   openGraph: {
-    title: "Orbe Nerd - Hub de Entretenimento",
-    description: "O seu hub completo para lançamentos de filmes, séries, animes e jogos.",
+    title: "Orbe Nerd - Hub de Estreias",
+    description: "O seu hub de estreias nerd para filmes, séries, animes e jogos.",
     url: "https://orbenerd.com",
     siteName: "Orbe Nerd",
     locale: "pt_BR",
@@ -45,8 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Orbe Nerd - Hub de Entretenimento",
-    description: "O seu hub completo para lançamentos de filmes, séries, animes e jogos.",
+    title: "Orbe Nerd - Hub de Estreias",
+    description: "O seu hub de estreias nerd para filmes, séries, animes e jogos.",
   },
   robots: {
     index: true,

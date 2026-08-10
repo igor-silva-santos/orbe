@@ -12,7 +12,6 @@ import {
   Sun, 
   Moon,
   LogOut,
-  Heart
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppStore } from '@/stores/appStore';
@@ -41,7 +40,6 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/jogos', label: 'Jogos' },
     { href: '/premios', label: 'Premiações' },
     { href: '/hoje', label: 'Hoje' },
-    { href: '/apoie', label: 'Apoie o Projeto', icon: Heart },
   ];
 
   const isActiveLink = (href: string) => {
@@ -96,11 +94,9 @@ const Header: React.FC<HeaderProps> = ({
                     isActiveLink(link.href)
                       ? 'orbe-pill-active'
                       : 'orbe-text-primary hover:border-[var(--orbe-block-border)]'
-                  } ${link.href === '/apoie' ? 'text-[var(--orbe-accent)]' : ''}`}
+                  }`}
                 >
-                  {link.icon && <link.icon className="mr-1 h-4 w-4" />}
                   {link.label}
-                  {link.href === '/apoie' && <Heart className="ml-1 h-4 w-4 text-rose-500" />}
                 </Link>
               ))}
             </nav>
@@ -216,10 +212,9 @@ const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-base font-medium transition-colors px-3 py-2 rounded-md flex items-center ${isActiveLink(link.href) ? 'orbe-text-secondary bg-muted' : 'orbe-text-primary hover:orbe-text-secondary hover:bg-muted'} ${link.href === '/apoie' ? 'text-rose-500 hover:text-rose-600' : ''}`}
+                  className={`text-base font-medium transition-colors px-3 py-2 rounded-md flex items-center ${isActiveLink(link.href) ? 'orbe-text-secondary bg-muted' : 'orbe-text-primary hover:orbe-text-secondary hover:bg-muted'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {link.icon && <link.icon className="mr-2 h-5 w-5" />}
                   {link.label}
                 </Link>
               ))}

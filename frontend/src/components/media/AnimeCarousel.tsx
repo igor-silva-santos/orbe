@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
+import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -70,7 +71,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center', skipSnaps: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center', skipSnaps: true, dragFree: true });
+
+  useEmblaWheelScroll(emblaApi);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;
@@ -359,7 +362,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef}>
+      <div className="overflow-hidden px-4 md:px-0" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
         <div className="flex -ml-4 md:-ml-6">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (

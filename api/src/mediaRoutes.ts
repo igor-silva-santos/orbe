@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from './clients';
 import { Prisma } from '@prisma/client';
-import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia } from './mappers';
+import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, normalizeSearchText, withPortugueseTranslation } from './mappers';
 import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
@@ -94,6 +94,9 @@ router.get('/filmes/:id/details', cacheMiddleware(TWENTY_FOUR_HOURS), async (req
       ...filme,
       budget: filme.budget ? filme.budget.toString() : null,
       revenue: filme.revenue ? filme.revenue.toString() : null,
+      overview: filme.overview
+        ? (await withPortugueseTranslation({ overview: filme.overview })).overview
+        : filme.overview,
     };
 
     res.json(serializableFilme);
@@ -188,24 +191,12 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
     const startDate = new Date(startYear, 0, 1);
     const endDate = new Date(endYear, 11, 31, 23, 59, 59);
 
-    const relevanceFilter: Prisma.FilmeWhereInput = {
-      OR: [
-        { voteCount: { gt: 12 } },
-        { popularity: { gt: 5 } },
-      ],
-    };
-
     const filmes = await prisma.filme.findMany({
       where: {
-        AND: [
-          {
-            releaseDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-          relevanceFilter,
-        ],
+        releaseDate: {
+          gte: startDate,
+          lte: endDate,
+        },
       },
       orderBy: {
         releaseDate: 'asc',
@@ -233,31 +224,12 @@ router.get('/filmes/by-year', async (req, res) => {
   const endDate = new Date(parsedYear, 11, 31, 23, 59, 59);
 
   try {
-    const currentYear = new Date().getFullYear();
-    let relevanceFilter: Prisma.FilmeWhereInput = {};
-
-    if (parsedYear > currentYear) {
-      relevanceFilter = { popularity: { gt: 2 } };
-    } else {
-      relevanceFilter = {
-        OR: [
-          { voteCount: { gt: 12 } },
-          { popularity: { gt: 5 } },
-        ],
-      };
-    }
-
     const filmes = await prisma.filme.findMany({
       where: {
-        AND: [
-          {
-            releaseDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-          relevanceFilter,
-        ],
+        releaseDate: {
+          gte: startDate,
+          lte: endDate,
+        },
       },
       orderBy: {
         releaseDate: 'asc',
@@ -337,7 +309,7 @@ router.get('/series/:id/details', cacheMiddleware(TWENTY_FOUR_HOURS), async (req
     if (!serie) {
       return res.status(404).json({ error: 'Série não encontrada.' });
     }
-    res.json(mapSerieToMidia(serie));
+    res.json(await withPortugueseTranslation(mapSerieToMidia(serie)));
   } catch (error) {
     logger.error(`Erro ao buscar detalhes da série: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes da série.' });
@@ -414,24 +386,12 @@ router.get('/series/homepage-carousel', async (req, res) => {
     const startDate = new Date(startYear, 0, 1);
     const endDate = new Date(endYear, 11, 31, 23, 59, 59);
 
-    const relevanceFilter: Prisma.SerieWhereInput = {
-      OR: [
-        { voteCount: { gt: 25 } },
-        { popularity: { gt: 10 } },
-      ],
-    };
-
     const series = await prisma.serie.findMany({
       where: {
-        AND: [
-          {
-            firstAirDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-          relevanceFilter,
-        ],
+        firstAirDate: {
+          gte: startDate,
+          lte: endDate,
+        },
       },
       orderBy: {
         firstAirDate: 'asc',
@@ -459,31 +419,12 @@ router.get('/series/by-year', async (req, res) => {
   const endDate = new Date(parsedYear, 11, 31, 23, 59, 59);
 
   try {
-    const currentYear = new Date().getFullYear();
-    let relevanceFilter: Prisma.SerieWhereInput = {};
-
-    if (parsedYear > currentYear) {
-      relevanceFilter = { popularity: { gt: 2 } };
-    } else {
-      relevanceFilter = {
-        OR: [
-          { voteCount: { gt: 25 } },
-          { popularity: { gt: 10 } },
-        ],
-      };
-    }
-
     const series = await prisma.serie.findMany({
       where: {
-        AND: [
-          {
-            firstAirDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-          relevanceFilter,
-        ],
+        firstAirDate: {
+          gte: startDate,
+          lte: endDate,
+        },
       },
       orderBy: {
         firstAirDate: 'asc',
@@ -559,7 +500,7 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       },
       orderBy,
     });
-    res.json({ results: animes.map(mapAnimeToMidia), total: animes.length });
+    res.json({ results: await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))), total: animes.length });
   } catch (error) {
     logger.error(`Erro ao buscar animes: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar animes.' });
@@ -578,6 +519,7 @@ router.get('/animes/:id/details', cacheMiddleware(TWELVE_HOURS), async (req, res
         characters: { include: { character: true, voiceActors: { include: { dublador: true } } } },
         staff: { include: { staff: true } },
         streamingLinks: true,
+        externalLinks: true,
         sourceRelations: { 
           include: { 
             relatedAnime: { select: { anilistId: true, titleRomaji: true } },
@@ -596,7 +538,7 @@ router.get('/animes/:id/details', cacheMiddleware(TWELVE_HOURS), async (req, res
     if (!anime) {
       return res.status(404).json({ error: 'Anime não encontrado.' });
     }
-    res.json(mapAnimeToMidia(anime));
+    res.json(await withPortugueseTranslation(mapAnimeToMidia(anime)));
   } catch (error) {
     logger.error(`Erro ao buscar detalhes do anime: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes do anime.' });
@@ -707,7 +649,7 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       where,
       orderBy,
     });
-    res.json({ results: jogos.map(mapJogoToMidia), total: jogos.length });
+    res.json({ results: await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))), total: jogos.length });
   } catch (error) {
     logger.error(`Erro ao buscar jogos: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos.' });
@@ -735,7 +677,7 @@ router.get('/jogos/:id/details', cacheMiddleware(TWENTY_FOUR_HOURS), async (req,
     if (!jogo) {
       return res.status(404).json({ error: 'Jogo não encontrado.' });
     }
-    res.json(mapJogoToMidia(jogo));
+    res.json(await withPortugueseTranslation(mapJogoToMidia(jogo)));
   } catch (error) {
     logger.error(`Erro ao buscar detalhes do jogo: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes do jogo.' });
@@ -935,7 +877,7 @@ router.get('/trending', async (req, res) => {
   }
 });
 
-// Rota de Pesquisa Global (Reconstruída)
+// Rota de Pesquisa Global (com suporte a acentuação)
 router.get('/pesquisa', async (req, res) => {
   const { q, category } = req.query;
 
@@ -944,33 +886,60 @@ router.get('/pesquisa', async (req, res) => {
   }
 
   try {
-    const searchFilter = { contains: q, mode: 'insensitive' as const };
+    const normalizedQ = normalizeSearchText(q);
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
+
+    const matchesQuery = (text: string | null | undefined) =>
+      !!text && normalizeSearchText(text).includes(normalizedQ);
 
     const promises = [];
 
     if (!categoryFilter || categoryFilter === 'filmes') {
-      promises.push(prisma.filme.findMany({ where: { OR: [{ title: searchFilter }, { originalTitle: searchFilter }] } }));
+      promises.push(
+        prisma.filme.findMany({
+          take: 1500,
+          orderBy: { popularity: 'desc' },
+          include: { streamingProviders: { include: { provider: true } } },
+        }).then((items) => items.filter((f) => matchesQuery(f.title) || matchesQuery(f.originalTitle)))
+      );
     } else {
-      promises.push(Promise.resolve([])); // Placeholder
+      promises.push(Promise.resolve([]));
     }
 
     if (!categoryFilter || categoryFilter === 'series') {
-      promises.push(prisma.serie.findMany({ where: { OR: [{ name: searchFilter }, { originalName: searchFilter }] } }));
+      promises.push(
+        prisma.serie.findMany({
+          take: 1500,
+          orderBy: { popularity: 'desc' },
+          include: { streamingProviders: { include: { provider: true } } },
+        }).then((items) => items.filter((s) => matchesQuery(s.name) || matchesQuery(s.originalName)))
+      );
     } else {
-      promises.push(Promise.resolve([])); // Placeholder
+      promises.push(Promise.resolve([]));
     }
 
     if (!categoryFilter || categoryFilter === 'animes') {
-      promises.push(prisma.anime.findMany({ where: { OR: [{ titleRomaji: searchFilter }, { titleEnglish: searchFilter }, { titleNative: searchFilter }] } }));
+      promises.push(
+        prisma.anime.findMany({
+          take: 1500,
+          orderBy: { popularity: 'desc' },
+        }).then((items) => items.filter((a) =>
+          matchesQuery(a.titleRomaji) || matchesQuery(a.titleEnglish) || matchesQuery(a.titleNative)
+        ))
+      );
     } else {
-      promises.push(Promise.resolve([])); // Placeholder
+      promises.push(Promise.resolve([]));
     }
 
     if (!categoryFilter || categoryFilter === 'jogos') {
-      promises.push(prisma.jogo.findMany({ where: { name: searchFilter } }));
+      promises.push(
+        prisma.jogo.findMany({
+          take: 1500,
+          orderBy: { rating: 'desc' },
+        }).then((items) => items.filter((j) => matchesQuery(j.name)))
+      );
     } else {
-      promises.push(Promise.resolve([])); // Placeholder
+      promises.push(Promise.resolve([]));
     }
 
     const [filmes, series, animes, jogos] = await Promise.all(promises);

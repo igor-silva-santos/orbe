@@ -10,8 +10,8 @@ import {
   EyeOff,
 } from 'lucide-react';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import SafeImage from '@/components/ui/SafeImage';
 import { format, parseISO } from 'date-fns';
-import Image from 'next/image';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -171,14 +171,15 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
               onClick={onClick || handleCardClick}
             >
               <div className="relative w-[206px] h-[290px] overflow-hidden rounded-[20px] border-[3px] border-[var(--orbe-block-border)] shadow-[5px_5px_0_var(--orbe-block-border)] transition-transform duration-250 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:-rotate-2 group-hover:shadow-[9px_9px_0_var(--orbe-block-border)]">
-                <Image
-                  src={midia.poster_url_api || '/placeholder.svg'}
+                <SafeImage
+                  src={midia.poster_url_api}
                   alt={midia.titulo_api || 'Imagem da Mídia'}
                   width={206}
                   height={290}
                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 17vw"
                   loading="lazy"
                   className={`object-cover object-center transition-all duration-300 group-hover:scale-105 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
+                  fallbackLabel="Sem imagem"
                 />
                 {type === 'filme' && (midia as any).em_prevenda && (
                   <div className="absolute top-2 right-2 z-10 rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">

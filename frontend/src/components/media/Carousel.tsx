@@ -127,18 +127,12 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
     if (!el) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // If Shift key is pressed, or if it's a horizontal scroll (e.g., trackpad horizontal gesture)
-      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        e.preventDefault(); // Prevent default only if we are handling it
-        // Perform horizontal scroll on the carousel
-        el.scrollLeft += e.deltaX + e.deltaY;
-      } else {
-        // If it's a pure vertical scroll (e.deltaY is dominant) and Shift is NOT pressed,
-        // manually scroll the window/document vertically.
-        window.scrollBy({
-          top: e.deltaY,
-          behavior: 'auto' // Use 'auto' for immediate response
-        });
+      const isHorizontalGesture = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const shouldScrollHorizontally = e.ctrlKey || e.metaKey || isHorizontalGesture;
+
+      if (shouldScrollHorizontally) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaX + ((e.ctrlKey || e.metaKey) ? e.deltaY : 0);
       }
     };
 
@@ -193,7 +187,7 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
 
       <div
         ref={setRefs}
-        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}
         className={`flex overflow-x-auto scrollbar-hide gap-4 px-4 py-2 ${className} ${
           dragging ? "cursor-grabbing select-none" : "cursor-grab"
         }`}

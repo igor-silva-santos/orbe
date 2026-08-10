@@ -1,9 +1,9 @@
-import { logger } from './logger';
+import { translateToPortuguese } from './translation';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
-// Dicionário para tradução de gêneros de jogos
-const gameGenreTranslations: { [key: string]: string } = {
+const gameGenreTranslations: Record<string, string> = {
   "Action": "Ação",
   "Adventure": "Aventura",
   "RPG": "RPG",
@@ -42,7 +42,96 @@ const gameGenreTranslations: { [key: string]: string } = {
   "Tactical": "Tático",
 };
 
+const gameThemeTranslations: Record<string, string> = {
+  "Action": "Ação",
+  "Adventure": "Aventura",
+  "Fantasy": "Fantasia",
+  "Science fiction": "Ficção Científica",
+  "Horror": "Terror",
+  "Mystery": "Mistério",
+  "Thriller": "Suspense",
+  "Comedy": "Comédia",
+  "Drama": "Drama",
+  "Romance": "Romance",
+  "Stealth": "Furtividade",
+  "Survival": "Sobrevivência",
+  "Warfare": "Guerra",
+  "Historical": "Histórico",
+  "Open world": "Mundo Aberto",
+  "Non-fiction": "Não-ficção",
+  "Sandbox": "Sandbox",
+  "Kids": "Infantil",
+  "Party": "Festa",
+  "4X (explore, expand, exploit, and exterminate)": "4X",
+};
+
+const animeStatusTranslations: Record<string, string> = {
+  FINISHED: 'Finalizado',
+  RELEASING: 'Em exibição',
+  NOT_YET_RELEASED: 'Não lançado',
+  CANCELLED: 'Cancelado',
+  HIATUS: 'Em hiato',
+};
+
 const translateGameGenre = (genre: string) => gameGenreTranslations[genre] || genre;
+const translateGameTheme = (theme: string) => gameThemeTranslations[theme] || translateGameGenre(theme);
+const translateAnimeStatus = (status: string | null | undefined) =>
+  status ? (animeStatusTranslations[status] || status.replace(/_/g, ' ')) : null;
+
+const resolveIgdbImageUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/api/images/igdb')) {
+    return `${IGDB_IMAGE_BASE_URL}${url.replace('/api/images/igdb', '')}`;
+  }
+  if (url.startsWith('//')) return `https:${url}`;
+  return url;
+};
+
+const extractYoutubeKey = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+};
+
+const findTrailerKey = (videos: any[] | undefined): string | null => {
+  if (!videos?.length) return null;
+  const trailer = videos.find((v) =>
+    v.site === 'YouTube' && (v.type === 'Trailer' || v.name?.toLowerCase().includes('trailer'))
+  ) || videos.find((v) => v.site === 'YouTube');
+  return trailer?.key || null;
+};
+
+const mapVoiceActors = (voiceActors: any[] | undefined) => {
+  const jp = voiceActors?.find((va) =>
+    va.dublador?.language?.toUpperCase().includes('JAPANESE')
+  )?.dublador;
+  const pt = voiceActors?.find((va) =>
+    va.dublador?.language?.toUpperCase().includes('PORTUGUESE')
+  )?.dublador;
+
+  return {
+    jp: jp ? { id: jp.anilistId, nome: jp.name, foto_url: jp.image } : null,
+    pt: pt ? { id: pt.anilistId, nome: pt.name, foto_url: pt.image } : null,
+  };
+};
+
+const dedupeStreamingLinks = (links: { nome: string; url?: string }[]) => {
+  const seen = new Set<string>();
+  return links.filter((link) => {
+    const key = link.nome.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
 
 const getCrewMember = (crew: any[], job: string) => {
   const member = crew?.find((c: any) => c.job === job);
@@ -56,11 +145,17 @@ const formatDuration = (minutes: number | null) => {
   return `${hours}h ${mins}m`;
 };
 
+const mapStreamingProviders = (providers: any[] | undefined) =>
+  providers?.map((p: any) => ({
+    provider: { name: p.provider.name, logoPath: p.provider.logoPath },
+    url: p.url,
+  })) ?? [];
+
 export const mapFilmeToMidia = (filme: any) => {
-  const mappedFilme = {
-    type: 'filme', // Adiciona o tipo da mídia
+  return {
+    type: 'filme',
     id: filme.tmdbId,
-    avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null, // Normalizado para 0-100
+    avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
     titulo_api: filme.title,
     titulo_original: filme.originalTitle,
     sinopse: filme.overview,
@@ -70,23 +165,35 @@ export const mapFilmeToMidia = (filme: any) => {
     diretor: getCrewMember(filme.crew, 'Director'),
     escritor: getCrewMember(filme.crew, 'Writer'),
     generos_api: filme.genres?.map((g: any) => g.genero.name) ?? [],
-    plataformas_api: filme.streamingProviders?.map((p: any) => ({ nome: p.provider.name, url: p.url, logo_path: p.provider.logoPath })) ?? [],
-    elenco: filme.cast?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, personagem: c.character, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
-    videos: filme.videos?.map((v: any) => ({ key: v.key, site: v.site, nome: v.name })) ?? [],
+    plataformas_api: filme.streamingProviders?.map((p: any) => ({
+      nome: p.provider.name,
+      url: p.url,
+      logo_path: p.provider.logoPath,
+    })) ?? [],
+    streamingProviders: mapStreamingProviders(filme.streamingProviders),
+    elenco: filme.cast?.map((c: any) => ({
+      id: c.pessoa.tmdbId,
+      nome: c.pessoa.name,
+      personagem: c.character,
+      foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
+    })) ?? [],
+    videos: filme.videos?.map((v: any) => ({ key: v.key, site: v.site, type: v.type, nome: v.name, official: v.official })) ?? [],
     homepage: filme.homepage,
-    trailer_key: filme.videos?.find((v: any) => v.site === 'YouTube' && v.type === 'Trailer')?.key || filme.videos?.[0]?.key || null,
+    trailer_key: findTrailerKey(filme.videos),
     em_prevenda: filme.em_prevenda,
+    ingresso_link: filme.ingresso_link,
+    tem_sessoes: filme.tem_sessoes ?? false,
+    status: filme.status,
     budget: filme.budget ? filme.budget.toString() : null,
     revenue: filme.revenue ? filme.revenue.toString() : null,
   };
-  return mappedFilme;
 };
 
 export const mapSerieToMidia = (serie: any) => {
-  const mappedSerie = {
-    type: 'serie', // Adiciona o tipo da mídia
+  return {
+    type: 'serie',
     id: serie.tmdbId,
-    avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null, // Normalizado para 0-100
+    avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
     titulo_api: serie.name,
     titulo_original: serie.originalName,
     sinopse: serie.overview,
@@ -94,91 +201,181 @@ export const mapSerieToMidia = (serie: any) => {
     data_lancamento_api: serie.firstAirDate,
     numero_temporadas: serie.numberOfSeasons,
     numero_episodios: serie.numberOfEpisodes,
+    status: serie.status,
     generos_api: serie.genres?.map((g: any) => g.genero.name) ?? [],
-    plataformas_api: serie.streamingProviders?.map((p: any) => ({ nome: p.provider.name, url: p.url, logo_path: p.provider.logoPath })) ?? [],
-    criadores: serie.createdBy?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
-    elenco: serie.cast?.map((c: any) => ({ id: c.pessoa.tmdbId, nome: c.pessoa.name, personagem: c.character, foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null })) ?? [],
-    videos: serie.videos?.map((v: any) => ({ key: v.key, site: v.site, nome: v.name })) ?? [],
-    temporadas: serie.seasons?.map((s: any) => ({ numero: s.seasonNumber, episodios: s.episodeCount, nome: s.name, poster_url: s.posterPath ? `${TMDB_IMAGE_BASE_URL}${s.posterPath}` : null })) ?? [],
+    plataformas_api: serie.streamingProviders?.map((p: any) => ({
+      nome: p.provider.name,
+      url: p.url,
+      logo_path: p.provider.logoPath,
+    })) ?? [],
+    streamingProviders: mapStreamingProviders(serie.streamingProviders),
+    criadores: serie.createdBy?.map((c: any) => ({
+      id: c.pessoa.tmdbId,
+      nome: c.pessoa.name,
+      foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
+    })) ?? [],
+    elenco: serie.cast?.map((c: any) => ({
+      id: c.pessoa.tmdbId,
+      nome: c.pessoa.name,
+      personagem: c.character,
+      foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
+    })) ?? [],
+    videos: serie.videos?.map((v: any) => ({ key: v.key, site: v.site, type: v.type, nome: v.name, official: v.official })) ?? [],
+    trailer_key: findTrailerKey(serie.videos),
+    temporadas: serie.seasons?.map((s: any) => ({
+      numero: s.seasonNumber,
+      episodios: s.episodeCount,
+      nome: s.name,
+      poster_url: s.posterPath ? `${TMDB_IMAGE_BASE_URL}${s.posterPath}` : null,
+    })) ?? [],
   };
-  return mappedSerie;
 };
 
 export const mapAnimeToMidia = (anime: any) => {
-  const hasPtBrDub = anime.characters?.some((c: any) => c.dublador?.language === 'Portuguese (Brazil)');
+  const hasPtBrDub = anime.characters?.some((c: any) =>
+    c.voiceActors?.some((va: any) =>
+      va.dublador?.language?.toUpperCase().includes('PORTUGUESE')
+    )
+  );
 
   const nextAiringEpisode = anime.airingSchedule
-    ?.filter((schedule: any) => schedule.airingAt > new Date())
+    ?.filter((schedule: any) => new Date(schedule.airingAt) > new Date())
     .sort((a: any, b: any) => a.episode - b.episode)[0];
 
-  const mappedAnime = {
-    type: 'anime', // Adiciona o tipo da mídia
+  const director = anime.staff?.find((s: any) =>
+    s.role?.toLowerCase().includes('director')
+  );
+
+  const streamingFromLinks = dedupeStreamingLinks(
+    anime.streamingLinks?.map((l: any) => ({ nome: l.site, url: l.url })) ?? []
+  );
+
+  const trailerFromTrailerField = anime.externalLinks
+    ?.find((l: any) => l.site === 'YouTube' && l.url?.includes('youtube'))
+    ?.url;
+
+  const trailerFromExternal = trailerFromTrailerField
+    ? extractYoutubeKey(trailerFromTrailerField)
+    : anime.externalLinks?.map((l: any) => extractYoutubeKey(l.url)).find(Boolean);
+
+  const trailerFromStreaming = anime.streamingLinks
+    ?.map((l: any) => extractYoutubeKey(l.url))
+    .find(Boolean);
+
+  return {
+    type: 'anime',
     id: anime.anilistId,
-    avaliacao: anime.averageScore, // Adicionado para a nota de avaliação (0-100)
+    avaliacao: anime.averageScore,
     titulo_api: anime.titleRomaji,
     titulo_ingles: anime.titleEnglish,
+    titleRomaji: anime.titleRomaji,
+    titleEnglish: anime.titleEnglish,
+    titleNative: anime.titleNative,
     sinopse: anime.description,
     poster_url_api: anime.coverImage,
     data_lancamento_api: anime.startDate,
+    startDate: anime.startDate ? {
+      year: new Date(anime.startDate).getFullYear(),
+      month: new Date(anime.startDate).getMonth() + 1,
+      day: new Date(anime.startDate).getDate(),
+    } : null,
     numero_episodios: anime.episodes,
-    estudio: anime.studios?.[0]?.studio.name,
+    numero_temporadas: anime.seasonYear ? 1 : null,
+    season: anime.season,
+    seasonYear: anime.seasonYear,
+    status: translateAnimeStatus(anime.status),
+    status_raw: anime.status,
+    estudio: anime.studios?.map((s: any) => s.studio.name).join(', ') || null,
     fonte: anime.source,
-    dublagem_info: hasPtBrDub ? 'Sim' : 'Não',
+    dublagem_info: hasPtBrDub,
+    diretor: director?.staff?.name || null,
     mal_link: anime.malId ? `https://myanimelist.net/anime/${anime.malId}` : null,
-    trailer_key: anime.videos?.find((v: any) => v.site === 'YouTube')?.key,
+    anilist_link: anime.siteUrl || `https://anilist.co/anime/${anime.anilistId}`,
+    trailer_key: trailerFromExternal || trailerFromStreaming || null,
     generos_api: anime.genres?.map((g: any) => g.genero.name) ?? [],
     tags_api: anime.tags?.map((t: any) => t.tag.name) ?? [],
-    plataformas_api: anime.streamingLinks?.map((l: any) => ({ nome: l.site })) ?? [],
-    proximo_episodio: nextAiringEpisode ? new Date(nextAiringEpisode.airingAt * 1000).toISOString() : null,
+    plataformas_api: streamingFromLinks,
+    proximo_episodio: nextAiringEpisode
+      ? new Date(nextAiringEpisode.airingAt).toISOString()
+      : null,
     numero_episodio_atual: nextAiringEpisode ? nextAiringEpisode.episode : null,
-    nextAiringEpisode: nextAiringEpisode, // Adicionado para a lógica de countdown
+    nextAiringEpisode: nextAiringEpisode
+      ? { airingAt: new Date(nextAiringEpisode.airingAt).toISOString(), episode: nextAiringEpisode.episode }
+      : null,
     personagens: anime.characters?.map((c: any) => ({
       id: c.character.anilistId,
       nome: c.character.name,
       foto_url: c.character.image,
-      dubladores: {
-        jp: c.dublador?.language === 'JAPANESE' ? { id: c.dublador.anilistId, nome: c.dublador.name, foto_url: c.dublador.image } : null,
-        pt: c.dublador?.language === 'Portuguese (Brazil)' ? { id: c.dublador.anilistId, nome: c.dublador.name, foto_url: c.dublador.image } : null,
-      }
+      dubladores: mapVoiceActors(c.voiceActors),
     })) ?? [],
-    staff: anime.staff?.map((s: any) => ({ id: s.staff.anilistId, nome: s.staff.name, funcao: s.role, foto_url: s.staff.image })) ?? [],
+    staff: anime.staff?.map((s: any) => ({
+      id: s.staff.anilistId,
+      nome: s.staff.name,
+      funcao: s.role,
+      foto_url: s.staff.image,
+    })) ?? [],
     relations: [
       ...(anime.sourceRelations?.map((rel: any) => ({
-        relationType: rel.type,
-        node: { id: rel.relatedAnime.anilistId, title: { romaji: rel.relatedAnime.titleRomaji } }
+        relationType: rel.relationType || rel.type,
+        node: { id: rel.relatedAnime.anilistId, title: { romaji: rel.relatedAnime.titleRomaji } },
       })) ?? []),
       ...(anime.relatedRelations?.map((rel: any) => ({
-        relationType: rel.type,
-        node: { id: rel.sourceAnime.anilistId, title: { romaji: rel.sourceAnime.titleRomaji } }
+        relationType: rel.relationType || rel.type,
+        node: { id: rel.sourceAnime.anilistId, title: { romaji: rel.sourceAnime.titleRomaji } },
       })) ?? []),
     ],
     airingSchedule: anime.airingSchedule,
     format: anime.format,
     isAdult: anime.isAdult,
   };
-  return mappedAnime;
 };
 
 export const mapJogoToMidia = (jogo: any) => {
-    const mappedJogo = {
-      type: 'jogo', // Adiciona o tipo da mídia
-      id: jogo.igdbId,
-      titulo_api: jogo.name,
-      sinopse: jogo.summary,
-      poster_url_api: jogo.cover,
-      data_lancamento_api: jogo.firstReleaseDate,
-      avaliacao: jogo.rating,
-      trailer_key: jogo.videos?.find((v: any) => v.name?.toLowerCase().includes('trailer'))?.key || null,
-      generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)) ?? [],
-      plataformas_api: jogo.platforms?.map((p: any) => ({ nome: p.plataforma.name })) ?? [],
-      desenvolvedores: jogo.companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) ?? [],
-      publicadoras: jogo.companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) ?? [],
-      temas: jogo.themes?.map((t: any) => t.theme.name) ?? [],
-      perspectivas: jogo.playerPerspectives?.map((p: any) => p.perspective.name) ?? [],
-      screenshots: jogo.screenshots?.map((s: any) => s.url) ?? [],
-      artworks: jogo.artworks?.map((a: any) => a.url) ?? [],
-      videos: jogo.videos?.map((v: any) => ({ key: v.key, site: v.site, nome: v.name })) ?? [],
-      websites: jogo.websites?.map((w: any) => ({ category: w.category, url: w.url })) ?? [],
-    };
-    return mappedJogo;
+  return {
+    type: 'jogo',
+    id: jogo.igdbId,
+    titulo_api: jogo.name,
+    sinopse: jogo.summary,
+    poster_url_api: resolveIgdbImageUrl(jogo.cover),
+    data_lancamento_api: jogo.firstReleaseDate,
+    avaliacao: jogo.rating,
+    trailer_key: findTrailerKey(jogo.videos),
+    generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)) ?? [],
+    plataformas_api: jogo.platforms?.map((p: any) => ({ nome: p.plataforma.name })) ?? [],
+    desenvolvedores: jogo.companies?.filter((c: any) => c.role === 'developer').map((c: any) => c.company.name) ?? [],
+    publicadoras: jogo.companies?.filter((c: any) => c.role === 'publisher').map((c: any) => c.company.name) ?? [],
+    temas: jogo.themes?.map((t: any) => translateGameTheme(t.theme.name)) ?? [],
+    perspectivas: jogo.playerPerspectives?.map((p: any) => p.perspective.name) ?? [],
+    screenshots: jogo.screenshots?.map((s: any) => resolveIgdbImageUrl(s.url)) ?? [],
+    artworks: jogo.artworks?.map((a: any) => resolveIgdbImageUrl(a.url)) ?? [],
+    videos: jogo.videos?.map((v: any) => ({ key: v.key, site: v.site, type: v.type, nome: v.name, official: v.official })) ?? [],
+    websites: jogo.websites?.map((w: any) => ({ category: w.category, url: w.url })) ?? [],
+  };
 };
+
+/** Remove acentos para busca insensível a diacríticos */
+export const normalizeSearchText = (text: string): string =>
+  text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+export async function withPortugueseTranslation(mapped: Record<string, any>) {
+  const result = { ...mapped };
+
+  if (typeof result.sinopse === 'string') {
+    result.sinopse = (await translateToPortuguese(result.sinopse)) ?? result.sinopse;
+  }
+  if (typeof result.overview === 'string') {
+    result.overview = (await translateToPortuguese(result.overview)) ?? result.overview;
+  }
+  if (Array.isArray(result.tags_api)) {
+    result.tags_api = await Promise.all(
+      result.tags_api.map(async (tag: string) => (await translateToPortuguese(tag)) ?? tag)
+    );
+  }
+  if (Array.isArray(result.temas)) {
+    result.temas = await Promise.all(
+      result.temas.map(async (theme: string) => (await translateToPortuguese(theme)) ?? theme)
+    );
+  }
+
+  return result;
+}

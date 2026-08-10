@@ -171,6 +171,7 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
             }
           }
           streamingEpisodes { title thumbnail url site }
+          trailer { id site }
           externalLinks { id url site }
           rankings { id rank type context year allTime }
           airingSchedule(notYetAired: true, perPage: 5) { nodes { airingAt episode } }
@@ -269,12 +270,19 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
                     }
                 })) || [];
 
+            const externalLinksData = [
+              ...(anime.externalLinks?.map((link: any) => ({ url: link.url, site: link.site })) ?? []),
+              ...(anime.trailer?.site === 'youtube' && anime.trailer?.id
+                ? [{ url: `https://www.youtube.com/watch?v=${anime.trailer.id}`, site: 'YouTube' }]
+                : []),
+            ];
+
             const relationalData = {
                 genres: { create: anime.genres?.map((name: string) => ({ genero: { connectOrCreate: { where: { name }, create: { name } } } })) },
                 tags: { create: anime.tags?.map((tag: any) => ({ tag: { connectOrCreate: { where: { id: tag.id }, create: { id: tag.id, name: tag.name, description: tag.description, category: tag.category, isAdult: tag.isAdult } } } })) },
                 studios: { create: anime.studios?.nodes?.map((studio: any) => ({ studio: { connectOrCreate: { where: { anilistId: studio.id }, create: { anilistId: studio.id, name: studio.name } } } })) },
                 streamingLinks: { create: anime.streamingEpisodes?.map((link: any) => ({ url: link.url, site: link.site, thumbnail: link.thumbnail })) },
-                externalLinks: { create: anime.externalLinks?.map((link: any) => ({ url: link.url, site: link.site })) },
+                externalLinks: { create: externalLinksData },
                 ranks: { create: anime.rankings?.map((rank: any) => ({ rank: rank.rank, type: rank.type, context: rank.context, year: rank.year, allTime: rank.allTime })) },
                 airingSchedule: { create: anime.airingSchedule?.nodes?.map((schedule: any) => ({ airingAt: new Date(schedule.airingAt * 1000), episode: schedule.episode })) },
                 staff: { create: uniqueStaffToCreate },

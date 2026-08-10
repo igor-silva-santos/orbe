@@ -1,19 +1,20 @@
 import { Midia, Filme, Serie, Anime, Jogo, Character } from '@/types';
 
+export const NOT_INFORMED = '(não informado)';
+
 /**
  * Normaliza o nome de um provedor de streaming para um valor padrão.
- * @param name O nome original do provedor.
- * @returns O nome padronizado.
  */
 export const normalizeProviderName = (name: string): string => {
   const lowerName = name.toLowerCase();
   if (lowerName.includes('netflix')) return 'Netflix';
-  if (lowerName.includes('max')) return 'Max';
-  if (lowerName.includes('prime video')) return 'Prime Video';
+  if (lowerName.includes('hbo') || lowerName === 'max') return 'Max';
+  if (lowerName.includes('prime video') || lowerName.includes('amazon')) return 'Prime Video';
   if (lowerName.includes('disney')) return 'Disney+';
   if (lowerName.includes('crunchyroll')) return 'Crunchyroll';
-  if (lowerName.includes('star+')) return 'Star+';
+  if (lowerName.includes('star+') || lowerName.includes('star plus')) return 'Star+';
   if (lowerName.includes('apple tv')) return 'Apple TV+';
+  if (lowerName.includes('tmdb')) return 'TMDB';
   return name;
 };
 
@@ -115,18 +116,29 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
   // Mapeamento de IDs de categoria de website da IGDB para informações da loja
   const storeCategoryMapping: { [key: number]: { name: string; icon: string; } } = {
     13: { name: 'Steam', icon: 'steam' },
-    16: { name: 'Epic Games', icon: 'epic-games' },
+    16: { name: 'Epic Games', icon: 'epic' },
     17: { name: 'GOG', icon: 'gog' },
     10: { name: 'App Store', icon: 'apple' },
     11: { name: 'App Store', icon: 'apple' },
     12: { name: 'Google Play', icon: 'google-play' },
+    1: { name: 'Steam', icon: 'steam' },
+    2: { name: 'Xbox', icon: 'xbox' },
+    3: { name: 'PlayStation Store', icon: 'playstation' },
+    4: { name: 'App Store', icon: 'apple' },
+    5: { name: 'GOG', icon: 'gog' },
+    6: { name: 'Nintendo eShop', icon: 'nintendo switch' },
+    14: { name: 'Epic Games', icon: 'epic' },
   };
 
   // Mapeamento de substrings de URL para informações da loja
   const storeUrlMapping = [
+    { contains: 'store.steampowered.com', name: 'Steam', icon: 'steam' },
+    { contains: 'steampowered.com', name: 'Steam', icon: 'steam' },
+    { contains: 'epicgames.com', name: 'Epic Games', icon: 'epic' },
     { contains: 'store.playstation.com', name: 'PlayStation Store', icon: 'playstation' },
     { contains: 'xbox.com', name: 'Xbox Store', icon: 'xbox' },
     { contains: 'nintendo.com', name: 'Nintendo eShop', icon: 'nintendo switch' },
+    { contains: 'gog.com', name: 'GOG', icon: 'gog' },
   ];
 
   const foundStores = new Map<string, { name: string; icon: string; url: string }>();

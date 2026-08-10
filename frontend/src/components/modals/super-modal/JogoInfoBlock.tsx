@@ -2,8 +2,7 @@
 
 import { Jogo } from '@/types'; // Assuming this type
 import { useTheme } from '@/hooks/useTheme';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { NOT_INFORMED } from '@/lib/media-helpers';
 
 interface JogoInfoBlockProps {
   jogo: Jogo;
@@ -13,7 +12,9 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
   const { isDark } = useTheme();
   const labelColor = isDark ? 'text-blue-400' : 'text-yellow-500';
 
-  const releaseDate = jogo.data_lancamento_api ? format(new Date(jogo.data_lancamento_api), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A';
+  const releaseDate = jogo.data_lancamento_api
+    ? new Date(jogo.data_lancamento_api).toLocaleDateString('pt-BR')
+    : NOT_INFORMED;
 
   return (
     <div className="flex-1 space-y-4">
@@ -24,10 +25,15 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
           <span className={`font-semibold ${labelColor} mr-2`}>Lançamento:</span>
           <span className="text-muted-foreground">{releaseDate}</span>
         </div>
-        {jogo.desenvolvedores && jogo.desenvolvedores.length > 0 && (
+        {jogo.desenvolvedores && jogo.desenvolvedores.length > 0 ? (
           <div>
             <span className={`font-semibold ${labelColor} mr-2`}>Desenvolvedores:</span>
             <span className="text-muted-foreground">{jogo.desenvolvedores.join(', ')}</span>
+          </div>
+        ) : (
+          <div>
+            <span className={`font-semibold ${labelColor} mr-2`}>Desenvolvedores:</span>
+            <span className="text-muted-foreground">{NOT_INFORMED}</span>
           </div>
         )}
         {jogo.publicadoras && jogo.publicadoras.length > 0 && (

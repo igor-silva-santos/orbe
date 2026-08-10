@@ -8,79 +8,93 @@ interface PlatformIconProps {
   platform: string;
   className?: string;
   size?: number;
+  iconOnly?: boolean;
 }
 
-const PlatformIcon: React.FC<PlatformIconProps> = ({ 
-  platform, 
-  className = "h-4 w-4", 
-  size = 16 
+const normalizePlatformKey = (platform: string): string => {
+  const lower = platform.toLowerCase().trim();
+  if (lower.includes('netflix')) return 'netflix';
+  if (lower.includes('disney')) return 'disney';
+  if (lower.includes('hbo') || lower === 'max' || lower.includes('hbomax')) return 'hbo';
+  if (lower.includes('prime') || lower.includes('amazon')) return 'prime';
+  if (lower.includes('apple')) return 'apple';
+  if (lower.includes('crunchyroll')) return 'crunchyroll';
+  if (lower.includes('star+') || lower.includes('star plus') || lower.includes('starplus')) return 'star';
+  if (lower.includes('playstation') || lower === 'ps4' || lower === 'ps5') return 'playstation';
+  if (lower.includes('xbox')) return 'xbox';
+  if (lower.includes('nintendo') || lower.includes('switch')) return 'nintendo';
+  if (lower.includes('steam')) return 'steam';
+  if (lower.includes('epic')) return 'epic';
+  if (lower.includes('gog')) return 'gog';
+  if (lower === 'pc' || lower.includes('windows')) return 'pc';
+  if (lower.includes('cinema')) return 'cinema';
+  return 'unknown';
+};
+
+const PlatformIcon: React.FC<PlatformIconProps> = ({
+  platform,
+  className = 'h-4 w-4',
+  size = 16,
+  iconOnly = false,
 }) => {
   const iconProps = {
     width: size,
     height: size,
     className,
-    alt: `${platform} icon`
+    alt: iconOnly ? '' : `${platform} icon`,
   };
 
-  switch (platform.toLowerCase()) {
+  switch (normalizePlatformKey(platform)) {
     case 'netflix':
       return <Image src="/icons/netflix.svg" {...iconProps} />;
-    
-    case 'disney+':
-    case 'disney plus':
-    case 'disneyplus':
+    case 'disney':
       return <Image src="/icons/disney_plus.svg" {...iconProps} />;
-    
-    case 'hbo max':
-    case 'max':
-    case 'hbomax':
+    case 'hbo':
       return <Image src="/icons/HBO_Max.svg" {...iconProps} />;
-    
-    case 'prime video':
-    case 'amazon prime':
-    case 'amazon':
+    case 'prime':
       return <Image src="/icons/prime_video.svg" {...iconProps} />;
-    
-    case 'apple tv+':
-    case 'apple tv':
-    case 'appletv':
+    case 'apple':
       return <Image src="/icons/apple-tv-plus.svg" {...iconProps} />;
-    
     case 'crunchyroll':
-      return <Image src="/icons/crunchyroll.svg" {...iconProps} />;
-    
-    case 'star+':
-    case 'star plus':
-    case 'starplus':
+      return <Image src="/icons/crunchyroll.svg" {...iconProps} aria-hidden="true" />;
+    case 'star':
       return <Image src="/icons/star-plus.svg" {...iconProps} />;
-    
-    // Ícones de Jogos
     case 'playstation':
-    case 'ps4':
-    case 'ps5':
       return <Image src="/icons/playstation.svg" {...iconProps} />;
-    
     case 'xbox':
-    case 'xbox one':
-    case 'xbox series':
       return <Image src="/icons/xbox.svg" {...iconProps} />;
-    
-    case 'nintendo switch':
     case 'nintendo':
-    case 'switch':
       return <Image src="/icons/nintendo_switch.svg" {...iconProps} />;
-    
     case 'steam':
       return <Image src="/icons/steam.svg" {...iconProps} />;
-    
+    case 'epic':
+      return (
+        <div
+          className={`${className} bg-[#2a2a2a] rounded flex items-center justify-center text-white font-bold`}
+          style={{ width: size, height: size, fontSize: size * 0.55 }}
+          aria-hidden="true"
+        >
+          E
+        </div>
+      );
+    case 'gog':
+      return (
+        <div
+          className={`${className} bg-purple-700 rounded flex items-center justify-center text-white font-bold`}
+          style={{ width: size, height: size, fontSize: size * 0.45 }}
+          aria-hidden="true"
+        >
+          GOG
+        </div>
+      );
     case 'pc':
-    case 'windows':
       return <Image src="/icons/pc.svg" {...iconProps} />;
-    
+    case 'cinema':
+      return <Image src="/icons/cinema.svg" {...iconProps} />;
     default:
       return (
-        <div className={`${className} bg-gray-300 rounded flex items-center justify-center`}>
-          <span className="text-xs font-medium text-gray-600">?</span>
+        <div className={`${className} bg-muted rounded flex items-center justify-center`} style={{ width: size, height: size }}>
+          <span className="text-xs font-medium text-muted-foreground">?</span>
         </div>
       );
   }
