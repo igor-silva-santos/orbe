@@ -80,7 +80,7 @@ export const realApi = {
   getSerieFilters: orbeNerdApi.getSerieFilters,
 
   // Animes
-  getAnimes: async (params: { filtro?: string; genero?: string; page?: number; ano?: string; formato?: string; fonte?: string; status?: string }): Promise<{ results: Anime[]; total_pages: number; total_results: number }> => {
+  getAnimes: async (params: { filtro?: string; genero?: string; page?: number; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }): Promise<{ results: Anime[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getAnimes(params);
       
@@ -170,6 +170,14 @@ export const realApi = {
     } catch (error) {
       console.error('Erro ao buscar jogos em alta:', error);
       return { destaques: [], categorias: [], modos: [], plataformas: [], semana: '' };
+    }
+  },
+  getHoje: async () => {
+    try {
+      return await orbeNerdApi.getHoje();
+    } catch (error) {
+      console.error('Erro ao buscar conteúdo de hoje:', error);
+      return { data: '', cinema: [], streamingFilmes: [], streamingSeries: [], destaquesJogos: [] };
     }
   },
   getNotifications: orbeNerdApi.getNotifications,

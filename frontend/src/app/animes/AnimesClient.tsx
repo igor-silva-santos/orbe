@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Filter, Calendar, Star, BookOpen, Layers } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
+import AdultContentModal from '@/components/modals/AdultContentModal';
+import { getAdultConsent, setAdultConsent, type AdultConsent } from '@/lib/adultConsent';
 import type { Anime } from '@/types';
 import type { AnimesPageData } from '@/lib/apiServer';
 
@@ -17,6 +19,9 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
   const [animes, setAnimes] = useState<Anime[]>(initialData.results);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
+  const [adultConsent, setAdultConsentState] = useState<AdultConsent | null>(null);
+  const [showAdultModal, setShowAdultModal] = useState(false);
+  const [consentReady, setConsentReady] = useState(false);
 
   const [availableGenres, setAvailableGenres] = useState<string[]>(initialData.filters.genres);
   const [availableYears, setAvailableYears] = useState<number[]>(initialData.filters.years);
@@ -31,37 +36,57 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
   const [selectedSource, setSelectedSource] = useState<string>('todos');
   const [selectedStatus, setSelectedStatus] = useState<string>('todos');
 
-  const skipInitialFetch = useRef(true);
+  useEffect(() => {
+    const storedConsent = getAdultConsent();
+    setAdultConsentState(storedConsent);
+    setShowAdultModal(storedConsent === null);
+    setConsentReady(storedConsent !== null);
+  }, []);
+
+  const handleAdultConsent = (consent: AdultConsent) => {
+    setAdultConsent(consent);
+    setAdultConsentState(consent);
+    setShowAdultModal(false);
+    setConsentReady(true);
+  };
+
+  const loadAnimes = useCallback(async () => {
+    if (!consentReady) return;
+
+    setIsLoading(true);
+    try {
+      const response = await realApi.getAnimes({
+        genero: selectedGenre === 'todos' ? undefined : selectedGenre,
+        ano: selectedYear === 'todos' ? undefined : selectedYear,
+        formato: selectedFormat === 'todos' ? undefined : selectedFormat,
+        fonte: selectedSource === 'todos' ? undefined : selectedSource,
+        status: selectedStatus === 'todos' ? undefined : selectedStatus,
+        includeAdult: adultConsent === 'accepted',
+      });
+      setAnimes(response.results);
+    } catch (error) {
+      console.error('Erro ao carregar animes:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    adultConsent,
+    consentReady,
+    selectedFormat,
+    selectedGenre,
+    selectedSource,
+    selectedStatus,
+    selectedYear,
+  ]);
 
   useEffect(() => {
-    if (skipInitialFetch.current) {
-      skipInitialFetch.current = false;
-      return;
-    }
-
-    const loadAnimes = async () => {
-      setIsLoading(true);
-      try {
-        const response = await realApi.getAnimes({
-          genero: selectedGenre === 'todos' ? undefined : selectedGenre,
-          ano: selectedYear === 'todos' ? undefined : selectedYear,
-          formato: selectedFormat === 'todos' ? undefined : selectedFormat,
-          fonte: selectedSource === 'todos' ? undefined : selectedSource,
-          status: selectedStatus === 'todos' ? undefined : selectedStatus,
-        });
-        setAnimes(response.results);
-      } catch (error) {
-        console.error('Erro ao carregar animes:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadAnimes();
-  }, [selectedGenre, selectedYear, selectedFormat, selectedSource, selectedStatus]);
+  }, [loadAnimes]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
+      {showAdultModal && <AdultContentModal onConfirm={handleAdultConsent} />}
+
       <PageHeader title="Animes" description="Navegue pelo universo dos animes, das últimas temporadas aos clássicos." />
 
       <div className="mb-6 md:mb-8 space-y-4">
@@ -115,12 +140,14 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
         </p>
       </div>
 
-      {isLoading ? (
+      {isLoading || !consentReady ? (
         <div className="flex items-center justify-center py-12"><div className="loading-spinner h-8 w-8"></div></div>
       ) : animes.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 items-stretch">
           {animes.map((anime) => (
-            <MidiaCard key={anime.id} midia={anime} type="anime" />
+            <div key={anime.id} className="h-full w-full max-w-[210px] mx-auto">
+              <MidiaCard midia={anime} type="anime" />
+            </div>
           ))}
         </div>
       ) : (

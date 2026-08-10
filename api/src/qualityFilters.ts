@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { isLikelyPortuguese } from './translation';
 
 // =============================================================================
 // FILTROS DE RELEVÂNCIA — curadoria estilo AdoroCinema
@@ -61,6 +62,31 @@ export const OBSCURE_GENRE_IDS = [99, 104];
 export const OBSCURE_GENRE_NAMES = ['Documentary', 'Documentário', 'Music', 'Música'];
 
 // ── Prisma filters para exibição ─────────────────────────────────────────────
+
+export const filmeQualityFilterRelaxed: Prisma.FilmeWhereInput = {
+  AND: [
+    { posterPath: { not: null } },
+    { overview: { not: null } },
+    { NOT: { overview: '' } },
+    { OR: [{ adult: false }, { adult: null }] },
+    {
+      OR: [
+        { popularity: { gte: 5 } },
+        { voteCount: { gte: 10 } },
+        { emCartaz: true },
+        { emBreve: true },
+      ],
+    },
+  ],
+};
+
+export const getFilmeQualityFilterForYear = (year?: number): Prisma.FilmeWhereInput => {
+  const currentYear = new Date().getFullYear();
+  if (year && year >= currentYear) {
+    return filmeQualityFilterRelaxed;
+  }
+  return filmeQualityFilter;
+};
 
 export const filmeQualityFilter: Prisma.FilmeWhereInput = {
   AND: [
@@ -210,15 +236,30 @@ function hasDisplayEngagement(voteCount: number, popularity: number): boolean {
 
 // ── Validação em runtime (TMDB / AniList / IGDB) ─────────────────────────────
 
+function hasPortugueseLocalization(movie: MovieLike): boolean {
+  return isLikelyPortuguese(movie.overview) && hasValidOverview(movie.overview, 20);
+}
+
 /** Critérios restritivos para exibição na home/timeline (estilo AdoroCinema) */
 export function isMovieRelevantForDisplay(movie: MovieLike): boolean {
   if (movie.adult) return false;
   if (!hasValidPoster(movie.poster_path)) return false;
-  if (!hasValidOverview(movie.overview)) return false;
 
   const voteCount = movie.vote_count ?? 0;
   const popularity = movie.popularity ?? 0;
   const voteAverage = movie.vote_average ?? 0;
+
+  if (hasPortugueseLocalization(movie)) {
+    if (!hasValidOverview(movie.overview)) return false;
+    return passesVoteAverageGate(
+      voteCount,
+      voteAverage,
+      DISPLAY_MIN_VOTE_AVERAGE,
+      DISPLAY_VOTE_COUNT_FOR_AVERAGE,
+    ) || voteCount >= 10 || popularity >= 5;
+  }
+
+  if (!hasValidOverview(movie.overview)) return false;
 
   const isCurated = movie.emCartaz === true || movie.emBreve === true;
   if (!hasDisplayEngagement(voteCount, popularity) && !isCurated) return false;
@@ -239,6 +280,11 @@ export function isMovieRelevantForSync(movie: MovieLike): boolean {
   const voteCount = movie.vote_count ?? 0;
   const popularity = movie.popularity ?? 0;
   const voteAverage = movie.vote_average ?? 0;
+
+  if (hasPortugueseLocalization(movie)) {
+    if (isTotallyIrrelevant(voteCount, popularity)) return false;
+    return true;
+  }
 
   if (isTotallyIrrelevant(voteCount, popularity)) return false;
   if (isObscureDocOrMusic(voteCount, popularity, movie)) return false;

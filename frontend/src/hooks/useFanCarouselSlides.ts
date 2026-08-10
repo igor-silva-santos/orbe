@@ -5,7 +5,8 @@ import gsap from 'gsap';
 import type { EmblaCarouselType } from 'embla-carousel';
 
 type SlideTweens = {
-  scale: gsap.QuickToFunc;
+  scaleX: gsap.QuickToFunc;
+  scaleY: gsap.QuickToFunc;
   opacity: gsap.QuickToFunc;
 };
 
@@ -28,9 +29,10 @@ export function useFanCarouselSlides(emblaApi: EmblaCarouselType | undefined) {
     const getTweens = (slide: HTMLElement): SlideTweens => {
       let entry = tweensRef.current.get(slide);
       if (!entry) {
-        gsap.set(slide, { transformOrigin: 'center center', scale: 1, opacity: 1 });
+        gsap.set(slide, { transformOrigin: 'center center', scaleX: 1, scaleY: 1, opacity: 1 });
         entry = {
-          scale: gsap.quickTo(slide, 'scale', { duration: 0.45, ease: 'power3.out' }),
+          scaleX: gsap.quickTo(slide, 'scaleX', { duration: 0.45, ease: 'power3.out' }),
+          scaleY: gsap.quickTo(slide, 'scaleY', { duration: 0.45, ease: 'power3.out' }),
           opacity: gsap.quickTo(slide, 'opacity', { duration: 0.45, ease: 'power3.out' }),
         };
         tweensRef.current.set(slide, entry);
@@ -53,8 +55,9 @@ export function useFanCarouselSlides(emblaApi: EmblaCarouselType | undefined) {
         const scale = 1 - t * 0.14;
         const opacity = 1 - Math.min(t * 0.5, 0.35);
 
-        const { scale: toScale, opacity: toOpacity } = getTweens(slide);
-        toScale(scale);
+        const { scaleX: toScaleX, scaleY: toScaleY, opacity: toOpacity } = getTweens(slide);
+        toScaleX(scale);
+        toScaleY(scale);
         toOpacity(opacity);
         slide.style.zIndex = String(Math.round(100 - t * 90));
       });

@@ -134,17 +134,18 @@ const SearchOverlay: React.FC = () => {
           <span className="w-1.5 h-5 bg-primary rounded-full" />
           {title}
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center items-stretch">
           {items.map((item, index) => {
             const itemIndex = baseIndex + index;
             return (
-              <MidiaCard 
-                key={`${item.type}-${item.id}`} 
-                ref={el => { cardRefs.current[itemIndex] = el; }}
-                midia={item} 
-                type={item.type} 
-                isFocused={itemIndex === focusedIndex}
-              />
+              <div key={`${item.type}-${item.id}`} className="h-full w-full max-w-[210px]">
+                <MidiaCard 
+                  ref={el => { cardRefs.current[itemIndex] = el; }}
+                  midia={item} 
+                  type={item.type} 
+                  isFocused={itemIndex === focusedIndex}
+                />
+              </div>
             );
           })}
         </div>

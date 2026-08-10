@@ -8,6 +8,7 @@ import {
   serieQualityFilter,
   animeQualityFilter,
   jogoQualityFilter,
+  getFilmeQualityFilterForYear,
 } from './qualityFilters';
 import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
@@ -124,11 +125,84 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   }
 });
 
+// Hoje — cinema + streaming + destaques da semana
+router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAhead = new Date(now);
+  weekAhead.setDate(weekAhead.getDate() + 7);
+
+  try {
+    const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
+      prisma.filme.findMany({
+        where: { AND: [filmeQualityFilter, { emCartaz: true }] },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.filme.findMany({
+        where: {
+          AND: [
+            filmeQualityFilter,
+            { releaseDate: { gte: weekAgo, lte: weekAhead } },
+            { streamingProviders: { some: {} } },
+          ],
+        },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [
+            serieQualityFilter,
+            { streamingProviders: { some: {} } },
+          ],
+        },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.jogo.findMany({
+        where: jogoQualityFilter,
+        orderBy: { rating: 'desc' },
+        take: 8,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 3 },
+        },
+      }),
+    ]);
+
+    res.json({
+      data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      cinema: await Promise.all(cinema.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      streamingFilmes: await Promise.all(streamingFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+      streamingSeries: await Promise.all(streamingSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
+      destaquesJogos: await Promise.all(destaquesJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar conteúdo de hoje: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar conteúdo de hoje.' });
+  }
+});
+
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, status } = req.query;
   try {
-    const allConditions: Prisma.FilmeWhereInput[] = [filmeQualityFilter];
+    const allConditions: Prisma.FilmeWhereInput[] = [];
+
+    if (ano && ano !== 'todos') {
+      const year = parseInt(ano as string);
+      allConditions.push(getFilmeQualityFilterForYear(year));
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31, 23, 59, 59);
+      allConditions.push({ releaseDate: { gte: startDate, lte: endDate } });
+    } else {
+      allConditions.push(filmeQualityFilter);
+    }
 
     if (genero && genero !== 'todos') {
       allConditions.push({ genres: { some: { genero: { name: genero as string } } } });
@@ -136,13 +210,6 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     if (status && status !== 'todos') {
       allConditions.push({ status: status as string });
-    }
-
-    if (ano && ano !== 'todos') {
-      const year = parseInt(ano as string);
-      const startDate = new Date(year, 0, 1);
-      const endDate = new Date(year, 11, 31, 23, 59, 59);
-      allConditions.push({ releaseDate: { gte: startDate, lte: endDate } });
     }
 
     const now = new Date();
@@ -556,9 +623,14 @@ const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
 
 // Rota para Animes
 router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, formato, fonte, status, safeSearch } = req.query;
+  const { filtro, genero, ano, formato, fonte, status, safeSearch, includeAdult } = req.query;
   try {
     const where: Prisma.AnimeWhereInput = {};
+    const showAdultContent = includeAdult === 'true';
+
+    if (!showAdultContent) {
+      where.isAdult = false;
+    }
 
     if (genero && genero !== 'todos') {
       where.genres = {
@@ -578,7 +650,7 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       where.seasonYear = parseInt(ano as string);
     }
 
-    if (safeSearch === 'true') {
+    if (safeSearch === 'true' || !showAdultContent) {
       where.tags = {
         none: {
           tag: {

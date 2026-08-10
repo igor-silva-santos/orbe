@@ -96,9 +96,11 @@ export default function JogosClient({ initialData }: JogosClientProps) {
       {isLoading ? (
         <div className="flex items-center justify-center py-12"><div className="loading-spinner h-8 w-8"></div></div>
       ) : jogos.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 items-stretch">
           {jogos.map((jogo) => (
-            <MidiaCard key={jogo.id} midia={jogo} type="jogo" />
+            <div key={jogo.id} className="h-full w-full max-w-[210px] mx-auto">
+              <MidiaCard midia={jogo} type="jogo" />
+            </div>
           ))}
         </div>
       ) : (
