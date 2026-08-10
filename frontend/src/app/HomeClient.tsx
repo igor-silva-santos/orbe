@@ -26,9 +26,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
       <section className="relative overflow-hidden border-b border-border/40 py-14 md:py-16">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto">
-            <p className="text-sm text-muted-foreground uppercase tracking-wide mb-5">
-              Season Pass 2026
-            </p>
             <h1 className="font-display text-[clamp(2.25rem,5.5vw,3.6rem)] leading-[1.05] mb-5 orbe-text-primary">
               Todo o universo <span className="text-primary">nerd</span> num só lugar
             </h1>

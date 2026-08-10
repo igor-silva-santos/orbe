@@ -3,7 +3,7 @@ import './loadEnv';
 import { logger } from './logger';
 import { anilistApi } from './clients';
 import { prisma } from './clients';
-import { isAnimeRelevantForSync } from './qualityFilters';
+import { isAnimeRelevantForSeasonalSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -78,63 +78,33 @@ async function anilistApiWithRetry(query: string, variables: any, maxRetries = 5
     throw new Error("Número máximo de tentativas atingido");
 }
 
-async function fetchCuratedAnimeIds(): Promise<number[]> {
-    logger.info('Buscando animes de listas curadas AniList (trending, popular)...');
-    const ids = new Set<number>();
-
-    const query = `
-      query ($page: Int, $perPage: Int, $sort: [MediaSort]) {
-        Page(page: $page, perPage: $perPage) {
-          pageInfo { hasNextPage }
-          media(type: ANIME, sort: $sort, isAdult: false) { id averageScore popularity }
-        }
-      }
-    `;
-
-    for (const sort of ['TRENDING_DESC', 'POPULARITY_DESC'] as const) {
-        let page = 1;
-        let hasNextPage = true;
-        while (hasNextPage && page <= 5) {
-            try {
-                const response = await anilistApiWithRetry(query, { page, perPage: 50, sort: [sort] });
-                const pageData = response.data.data.Page;
-                if (pageData.media) {
-                    for (const anime of pageData.media) {
-                        if (isAnimeRelevantForSync(anime)) {
-                            ids.add(anime.id);
-                        }
-                    }
-                }
-                hasNextPage = pageData.pageInfo.hasNextPage;
-                page++;
-                await delay(500);
-            } catch (error) {
-                logger.error(`Erro ao buscar animes (${sort}): ${error}`);
-                hasNextPage = false;
-            }
-        }
-        logger.info(`  ${sort}: ${ids.size} IDs acumulados`);
-    }
-
-    logger.info(`Total de ${ids.size} IDs únicos de listas curadas AniList.`);
-    return Array.from(ids);
-}
-
-async function fetchAllAnimeIdsForSeasons(year: number, seasons: string[]): Promise<Map<string, number[]>> {
-    logger.info(`Buscando IDs de animes para o ano ${year} e estações ${seasons.join(', ')}...`);
+async function fetchSeasonAnimeIds(year: number, seasons: string[]): Promise<Map<string, number[]>> {
+    logger.info(`Buscando animes da temporada ${year} (${seasons.join(', ')}) ordenados por estreia...`);
     const seasonAnimeIds = new Map<string, number[]>();
 
     const query = `
       query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int, $type: MediaType) {
         Page(page: $page, perPage: $perPage) {
           pageInfo { hasNextPage }
-          media(season: $season, seasonYear: $seasonYear, type: $type, sort: START_DATE) { id }
+          media(
+            season: $season,
+            seasonYear: $seasonYear,
+            type: $type,
+            sort: START_DATE_DESC,
+            isAdult: false
+          ) {
+            id
+            format
+            status
+            startDate { year month day }
+          }
         }
       }
     `;
 
     for (const season of seasons) {
-        const idsForSeason = new Set<number>();
+        const idsForSeason: number[] = [];
+        const seenIds = new Set<number>();
         let page = 1;
         let hasNextPage = true;
         while (hasNextPage) {
@@ -145,7 +115,12 @@ async function fetchAllAnimeIdsForSeasons(year: number, seasons: string[]): Prom
                 const pageData = response.data.data.Page;
 
                 if (pageData.media) {
-                    pageData.media.forEach((anime: { id: number; }) => idsForSeason.add(anime.id));
+                    for (const anime of pageData.media) {
+                        if (!seenIds.has(anime.id) && isAnimeRelevantForSeasonalSync(anime)) {
+                            seenIds.add(anime.id);
+                            idsForSeason.push(anime.id);
+                        }
+                    }
                 }
 
                 hasNextPage = pageData.pageInfo.hasNextPage;
@@ -157,9 +132,10 @@ async function fetchAllAnimeIdsForSeasons(year: number, seasons: string[]): Prom
                 hasNextPage = false;
             }
         }
-        seasonAnimeIds.set(season, Array.from(idsForSeason));
+        seasonAnimeIds.set(season, idsForSeason);
+        logger.info(`  ${season} ${year}: ${idsForSeason.length} animes de temporada encontrados`);
     }
-    logger.info(`Busca de IDs de animes concluída.`);
+    logger.info(`Busca de animes por temporada concluída.`);
     return seasonAnimeIds;
 }
 
@@ -239,11 +215,11 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
                 continue;
             }
 
-            if (!isAnimeRelevantForSync(anime)) {
+            if (!isAnimeRelevantForSeasonalSync(anime)) {
                 skippedCount++;
                 logger.info(
                   `⏭️ Anime [${id}] "${anime.title?.romaji}" ignorado: critérios de sync ` +
-                  `(score=${anime.averageScore ?? 0}, pop=${anime.popularity ?? 0}).`
+                  `(score=${anime.averageScore ?? 0}, pop=${anime.popularity ?? 0}, status=${anime.status ?? '—'}).`
                 );
                 continue;
             }
@@ -443,23 +419,7 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
 }
 
 export async function syncAnimes(year: number, seasons: string[], limit?: number) {
-  const curatedIds = await fetchCuratedAnimeIds();
-  if (curatedIds.length > 0) {
-    let idsToSync = curatedIds;
-    if (limit) {
-      idsToSync = idsToSync.slice(0, limit);
-      logger.info(`Limitando sincronização curada de animes a ${limit} itens.`);
-    }
-
-    const batchSize = 10;
-    for (let i = 0; i < idsToSync.length; i += batchSize) {
-      const batch = idsToSync.slice(i, i + batchSize);
-      logger.info(`Processando lote curado de animes: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
-      await processAnimeBatch(batch);
-    }
-  }
-
-  const seasonAnimeIds = await fetchAllAnimeIdsForSeasons(year, seasons);
+  const seasonAnimeIds = await fetchSeasonAnimeIds(year, seasons);
 
   const seasonTranslations: { [key: string]: string } = {
       WINTER: 'Inverno',

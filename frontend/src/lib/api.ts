@@ -214,8 +214,12 @@ export const orbeNerdApi = {
   },
 
   // Animes
-  getAnimes: async (params?: { page?: number; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string }) => {
-    return apiClient.get('/animes', params);
+  getAnimes: async (params?: { page?: number; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }) => {
+    return apiClient.get('/animes', {
+      ...params,
+      includeAdult: params?.includeAdult ? 'true' : undefined,
+      safeSearch: params?.includeAdult ? undefined : 'true',
+    });
   },
 
   getAnimeDetails: async (id: number) => {
@@ -278,6 +282,10 @@ export const orbeNerdApi = {
 
   getJogosEmAlta: async () => {
     return apiClient.get('/jogos/em-alta');
+  },
+
+  getHoje: async () => {
+    return apiClient.get('/hoje');
   },
 
   // Autenticação

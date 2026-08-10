@@ -6,6 +6,7 @@ import { AppProvider } from "@/components/providers/AppProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { ClientOnly } from "@/components/layout/ClientOnly";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { getSiteUrl } from "@/lib/siteUrl";
 
 const SearchOverlay = dynamic(() => import("@/components/modals/SearchOverlay"), { ssr: false });
@@ -81,19 +82,21 @@ export default function RootLayout({
         className={`${chakraPetch.variable} ${russoOne.variable} font-sans antialiased`}
       >
         <AppProvider>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
-            <ClientOnly>
-              <Header />
-              <main className="pt-16 min-h-screen">
-                {children}
-              </main>
-              <Footer />
-              <SearchOverlay />
-              <SuperModal />
-              <NotificationModal />
-              <RatingModal />
-            </ClientOnly>
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
+              <ClientOnly>
+                <Header />
+                <main className="pt-16 min-h-screen">
+                  {children}
+                </main>
+                <Footer />
+                <SearchOverlay />
+                <SuperModal />
+                <NotificationModal />
+                <RatingModal />
+              </ClientOnly>
+            </div>
+          </TooltipProvider>
         </AppProvider>
       </body>
     </html>

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { isLikelyPortuguese } from './translation';
 
 // =============================================================================
 // FILTROS DE RELEVÂNCIA — curadoria estilo AdoroCinema
@@ -51,6 +52,11 @@ export const SYNC_OBSCURE_DOC_POPULARITY = 15;
 export const SYNC_MIN_ANIME_SCORE = 60;
 export const SYNC_MIN_ANIME_POPULARITY = 1000;
 
+/** Popularidade mínima para lançamentos de temporada (bem menor que o filtro global) */
+export const MIN_ANIME_SEASON_POPULARITY = 300;
+
+export const RELEVANT_ANIME_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] as const;
+
 export const SYNC_MIN_GAME_RATING = 50;
 export const SYNC_MIN_GAME_RATING_COUNT = 3;
 
@@ -61,6 +67,31 @@ export const OBSCURE_GENRE_IDS = [99, 104];
 export const OBSCURE_GENRE_NAMES = ['Documentary', 'Documentário', 'Music', 'Música'];
 
 // ── Prisma filters para exibição ─────────────────────────────────────────────
+
+export const filmeQualityFilterRelaxed: Prisma.FilmeWhereInput = {
+  AND: [
+    { posterPath: { not: null } },
+    { overview: { not: null } },
+    { NOT: { overview: '' } },
+    { OR: [{ adult: false }, { adult: null }] },
+    {
+      OR: [
+        { popularity: { gte: 5 } },
+        { voteCount: { gte: 10 } },
+        { emCartaz: true },
+        { emBreve: true },
+      ],
+    },
+  ],
+};
+
+export const getFilmeQualityFilterForYear = (year?: number): Prisma.FilmeWhereInput => {
+  const currentYear = new Date().getFullYear();
+  if (year && year >= currentYear) {
+    return filmeQualityFilterRelaxed;
+  }
+  return filmeQualityFilter;
+};
 
 export const filmeQualityFilter: Prisma.FilmeWhereInput = {
   AND: [
@@ -117,6 +148,17 @@ export const animeQualityFilter: Prisma.AnimeWhereInput = {
   isAdult: false,
 };
 
+/** Exibição por temporada — inclui estreias recentes ainda sem nota/popularidade altas */
+export const animeSeasonQualityFilter: Prisma.AnimeWhereInput = {
+  isAdult: false,
+  OR: [
+    { averageScore: { gte: MIN_ANIME_SCORE } },
+    { popularity: { gte: MIN_ANIME_POPULARITY } },
+    { popularity: { gte: MIN_ANIME_SEASON_POPULARITY } },
+    { status: { in: ['RELEASING', 'NOT_YET_RELEASED'] } },
+  ],
+};
+
 export const jogoQualityFilter: Prisma.JogoWhereInput = {
   OR: [
     { rating: { gte: MIN_GAME_RATING } },
@@ -129,6 +171,8 @@ export const jogoQualityFilter: Prisma.JogoWhereInput = {
 type GenreRef = { id?: number; name?: string };
 
 type MovieLike = {
+  title?: string | null;
+  original_title?: string | null;
   vote_count?: number;
   popularity?: number;
   vote_average?: number;
@@ -155,6 +199,8 @@ type AnimeLike = {
   averageScore?: number | null;
   popularity?: number | null;
   isAdult?: boolean;
+  format?: string | null;
+  status?: string | null;
 };
 
 type JogoLike = {
@@ -210,15 +256,46 @@ function hasDisplayEngagement(voteCount: number, popularity: number): boolean {
 
 // ── Validação em runtime (TMDB / AniList / IGDB) ─────────────────────────────
 
+function hasLocalizedPortugueseTitle(movie: MovieLike): boolean {
+  const title = movie.title?.trim();
+  if (!title || title.length < 2) return false;
+
+  if (isLikelyPortuguese(title)) return true;
+  if (/[ãõáéíóúâêôç]/i.test(title)) return true;
+
+  const original = movie.original_title?.trim();
+  if (original && title.localeCompare(original, undefined, { sensitivity: 'accent' }) !== 0) {
+    return true;
+  }
+
+  return false;
+}
+
+export function hasPortugueseLocalization(movie: MovieLike): boolean {
+  if (hasLocalizedPortugueseTitle(movie)) return true;
+  return isLikelyPortuguese(movie.overview) && (movie.overview?.trim().length ?? 0) >= 8;
+}
+
 /** Critérios restritivos para exibição na home/timeline (estilo AdoroCinema) */
 export function isMovieRelevantForDisplay(movie: MovieLike): boolean {
   if (movie.adult) return false;
   if (!hasValidPoster(movie.poster_path)) return false;
-  if (!hasValidOverview(movie.overview)) return false;
 
   const voteCount = movie.vote_count ?? 0;
   const popularity = movie.popularity ?? 0;
   const voteAverage = movie.vote_average ?? 0;
+
+  if (hasPortugueseLocalization(movie)) {
+    if (isTotallyIrrelevant(voteCount, popularity)) return false;
+    return passesVoteAverageGate(
+      voteCount,
+      voteAverage,
+      DISPLAY_MIN_VOTE_AVERAGE,
+      DISPLAY_VOTE_COUNT_FOR_AVERAGE,
+    ) || voteCount >= 10 || popularity >= 5 || hasLocalizedPortugueseTitle(movie);
+  }
+
+  if (!hasValidOverview(movie.overview)) return false;
 
   const isCurated = movie.emCartaz === true || movie.emBreve === true;
   if (!hasDisplayEngagement(voteCount, popularity) && !isCurated) return false;
@@ -239,6 +316,11 @@ export function isMovieRelevantForSync(movie: MovieLike): boolean {
   const voteCount = movie.vote_count ?? 0;
   const popularity = movie.popularity ?? 0;
   const voteAverage = movie.vote_average ?? 0;
+
+  if (hasPortugueseLocalization(movie)) {
+    if (isTotallyIrrelevant(voteCount, popularity)) return false;
+    return true;
+  }
 
   if (isTotallyIrrelevant(voteCount, popularity)) return false;
   if (isObscureDocOrMusic(voteCount, popularity, movie)) return false;
@@ -307,6 +389,21 @@ export function isAnimeRelevantForSync(anime: AnimeLike): boolean {
     (anime.averageScore ?? 0) >= SYNC_MIN_ANIME_SCORE ||
     (anime.popularity ?? 0) >= SYNC_MIN_ANIME_POPULARITY
   );
+}
+
+/** Critérios para animes de temporada — prioriza lançamentos, não clássicos populares */
+export function isAnimeRelevantForSeasonalSync(anime: AnimeLike): boolean {
+  if (anime.isAdult) return false;
+
+  if (anime.format && !RELEVANT_ANIME_FORMATS.includes(anime.format as typeof RELEVANT_ANIME_FORMATS[number])) {
+    return false;
+  }
+
+  if ((anime.averageScore ?? 0) >= SYNC_MIN_ANIME_SCORE) return true;
+  if ((anime.popularity ?? 0) >= MIN_ANIME_SEASON_POPULARITY) return true;
+  if (anime.status === 'RELEASING' || anime.status === 'NOT_YET_RELEASED') return true;
+
+  return false;
 }
 
 export function isJogoRelevantForDisplay(jogo: JogoLike): boolean {
