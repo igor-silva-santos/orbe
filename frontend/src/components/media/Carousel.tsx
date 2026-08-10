@@ -33,6 +33,7 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
   const localRef = useRef<HTMLDivElement | null>(null);
   const isDownRef = useRef(false);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const hasDraggedRef = useRef(false); // Added hasDraggedRef
   const [dragging, setDragging] = useState(false);
@@ -56,6 +57,7 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
     hasDraggedRef.current = false; // Reset hasDragged on pointer down
     const rect = el.getBoundingClientRect();
     startXRef.current = e.clientX - rect.left;
+    startYRef.current = e.clientY - rect.top;
     scrollLeftRef.current = el.scrollLeft;
 
     try {
@@ -69,16 +71,29 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
     if (!el) return;
 
     const currentX = e.clientX - el.getBoundingClientRect().left;
-    const distance = Math.abs(currentX - startXRef.current);
+    const currentY = e.clientY - el.getBoundingClientRect().top;
+    const deltaX = currentX - startXRef.current;
+    const deltaY = currentY - startYRef.current;
 
-    // If moved beyond a threshold, it's a drag
-    if (distance > 20) { // Increased threshold to 20 pixels
+    // Scroll vertical da página: não capturar o gesto no carrossel
+    if (!hasDraggedRef.current && Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12) {
+      isDownRef.current = false;
+      setDragging(false);
+      try {
+        el.releasePointerCapture(e.pointerId);
+      } catch {}
+      return;
+    }
+
+    const distance = Math.abs(deltaX);
+
+    if (distance > 20) {
       hasDraggedRef.current = true;
     }
 
     if (hasDraggedRef.current) {
-      e.preventDefault(); // Only prevent default if it's a drag
-      const walk = (currentX - startXRef.current) * DRAG_SENSITIVITY;
+      e.preventDefault();
+      const walk = deltaX * DRAG_SENSITIVITY;
       el.scrollLeft = scrollLeftRef.current - walk;
     }
   };
@@ -187,7 +202,7 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
 
       <div
         ref={setRefs}
-        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x pan-y" }}
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
         className={`flex overflow-x-auto scrollbar-hide gap-4 px-4 py-2 ${className} ${
           dragging ? "cursor-grabbing select-none" : "cursor-grab"
         }`}

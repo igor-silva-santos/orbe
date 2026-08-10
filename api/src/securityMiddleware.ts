@@ -37,6 +37,15 @@ export const searchRateLimiter: RequestHandler = rateLimit({
   message: { error: 'Muitas buscas em sequência. Aguarde um momento.' },
 });
 
+/** Limite na homepage — payload grande, alvo comum de scraping */
+export const homepageRateLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 1000,
+  max: isProduction ? 40 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas requisições à homepage. Aguarde um momento.' },
+});
+
 export function assertJwtSecretConfigured(): void {
   const secret = process.env.JWT_SECRET;
   const isDefault = !secret || secret === 'seu_segredo_jwt_super_secreto';

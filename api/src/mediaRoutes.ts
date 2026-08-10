@@ -13,7 +13,7 @@ import { logger } from './logger';
 import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
 import { invalidateMediaCaches } from './cacheInvalidation';
-import { searchRateLimiter } from './securityMiddleware';
+import { searchRateLimiter, homepageRateLimiter } from './securityMiddleware';
 
 
 
@@ -71,7 +71,7 @@ const parseYearMonthQuery = (query: { year?: string; month?: string }) => {
 };
 
 // Homepage — payload leve: janela de ~4 meses centrada no período atual
-router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
   const { start: windowStart, end: windowEnd } = getHomepageDateWindow();

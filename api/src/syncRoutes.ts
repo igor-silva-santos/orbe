@@ -5,6 +5,7 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import { runAwardScraper } from './scrapeAwards';
 import {
   acquireSyncLock,
   releaseSyncLock,
@@ -32,6 +33,7 @@ const protectSync = (req: any, res: any, next: any) => {
 
 router.use('/run-sync', protectSync);
 router.use('/run-sync-all', protectSync);
+router.use('/run-sync-awards', protectSync);
 
 router.post('/run-sync', async (req, res) => {
   const { mediaType, startDate, endDate, startYear, endYear } = req.body;
@@ -133,6 +135,18 @@ router.post('/run-sync-all', async (req, res) => {
   } finally {
     endSyncRunProgress();
     await releaseSyncLock(prisma);
+  }
+});
+
+router.post('/run-sync-awards', async (_req, res) => {
+  logger.info('Scrape de premiações iniciado (manual).');
+  res.status(202).json({ message: 'Scrape de premiações iniciado. Verifique os logs.' });
+
+  try {
+    await runAwardScraper();
+    logger.info('Scrape de premiações concluído.');
+  } catch (error) {
+    logger.error('Erro no scrape de premiações:', error);
   }
 });
 

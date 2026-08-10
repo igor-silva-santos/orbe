@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
@@ -281,7 +282,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         <div
           className="overflow-hidden max-w-full py-2 px-1 sm:px-2"
           ref={setViewportRef}
-          style={{ touchAction: 'pan-x pinch-zoom' }}
+          style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >
           <div className="flex">
             {filteredItems.length === 0
