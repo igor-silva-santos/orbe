@@ -9,6 +9,7 @@ interface PlatformIconProps {
   className?: string;
   size?: number;
   iconOnly?: boolean;
+  title?: string;
 }
 
 const normalizePlatformKey = (platform?: string | null): string => {
@@ -22,6 +23,8 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('apple')) return 'apple';
   if (lower.includes('crunchyroll')) return 'crunchyroll';
   if (lower.includes('star+') || lower.includes('star plus') || lower.includes('starplus')) return 'star';
+  if (lower.includes('globoplay') || lower.includes('globo-play') || lower.includes('globo play') || lower === 'globo') return 'globoplay';
+  if (lower.includes('claro') || lower.includes('claro-tv')) return 'claro';
   if (lower.includes('playstation') || lower === 'ps4' || lower === 'ps5') return 'playstation';
   if (lower.includes('xbox')) return 'xbox';
   if (lower.includes('nintendo') || lower.includes('switch')) return 'nintendo';
@@ -38,12 +41,16 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
   className = 'h-4 w-4',
   size = 16,
   iconOnly = false,
+  title,
 }) => {
+  const label = title || (iconOnly ? '' : `${platform ?? 'plataforma'} icon`);
+
   const iconProps = {
     width: size,
     height: size,
-    className,
-    alt: iconOnly ? '' : `${platform ?? 'plataforma'} icon`,
+    className: `${className} object-contain shrink-0`,
+    alt: label,
+    title: label || undefined,
   };
 
   switch (normalizePlatformKey(platform)) {
@@ -61,6 +68,10 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
       return <Image src="/icons/crunchyroll.svg" {...iconProps} aria-hidden="true" />;
     case 'star':
       return <Image src="/icons/star-plus.svg" {...iconProps} />;
+    case 'globoplay':
+      return <Image src="/icons/globoplay.svg" {...iconProps} />;
+    case 'claro':
+      return <Image src="/icons/claro-tv-plus.svg" {...iconProps} />;
     case 'playstation':
       return <Image src="/icons/playstation.svg" {...iconProps} />;
     case 'xbox':
@@ -72,9 +83,10 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'epic':
       return (
         <div
-          className={`${className} bg-[#2a2a2a] rounded flex items-center justify-center text-white font-bold`}
+          className={`${className} bg-[#2a2a2a] rounded flex items-center justify-center text-white font-bold shrink-0`}
           style={{ width: size, height: size, fontSize: size * 0.55 }}
           aria-hidden="true"
+          title={label || undefined}
         >
           E
         </div>
@@ -82,9 +94,10 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'gog':
       return (
         <div
-          className={`${className} bg-purple-700 rounded flex items-center justify-center text-white font-bold`}
+          className={`${className} bg-purple-700 rounded flex items-center justify-center text-white font-bold shrink-0`}
           style={{ width: size, height: size, fontSize: size * 0.45 }}
           aria-hidden="true"
+          title={label || undefined}
         >
           GOG
         </div>
@@ -95,8 +108,12 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
       return <Image src="/icons/cinema.svg" {...iconProps} />;
     default:
       return (
-        <div className={`${className} bg-muted rounded flex items-center justify-center`} style={{ width: size, height: size }}>
-          <span className="text-xs font-medium text-muted-foreground">?</span>
+        <div
+          className={`${className} bg-muted rounded flex items-center justify-center shrink-0`}
+          style={{ width: size, height: size }}
+          title={label || undefined}
+        >
+          <span className="text-[10px] font-medium text-muted-foreground">?</span>
         </div>
       );
   }

@@ -196,7 +196,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
           else if (ref) ref.current = node;
         }}>
             <div
-              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col h-full ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
+              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
             >
               <div className="relative w-full aspect-[206/290] rounded-lg overflow-hidden shrink-0">
@@ -252,8 +252,8 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   )}
                 </div>
               </div>
-              <div className="p-3 flex flex-col flex-1 min-h-[148px]">
-                <div className="flex justify-between items-start mb-1 min-h-[40px]">
+              <div className="p-3 flex flex-col shrink-0">
+                <div className="flex justify-between items-start mb-1 min-h-[40px] max-h-[40px]">
                   <h3 className="font-bold text-sm sm:text-base line-clamp-2 pr-2 flex-grow orbe-text-primary leading-tight">{midia.titulo_curado || midia.titulo_api}</h3>
                   {rating && (
                     <div className="flex items-center gap-1 text-sm shrink-0">
@@ -262,46 +262,52 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </div>
                   )}
                 </div>
-                <div className="h-[28px] mb-2 flex items-start">
+                <div className="h-[22px] mb-1.5 flex items-center overflow-hidden">
                 {type === 'anime' ? (
                   isFutureRelease ? (
-                    <p className="text-xs text-gray-400 line-clamp-1">Lançamento: {formatReleaseDate()}</p>
+                    <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode && nextEpisodeCardLabel ? (
-                    <span className="inline-flex max-w-full items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-2.5 py-1 text-[10px] font-bold leading-snug text-orange-700 dark:text-orange-300 sm:text-[11px] line-clamp-1">
+                    <span className="inline-flex max-w-full items-center rounded-full border border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-orange-700 dark:text-orange-300 sm:text-[10px] whitespace-nowrap truncate">
                       {nextEpisodeCardLabel}
                     </span>
                   ) : (
-                    <p className="text-xs text-gray-400 line-clamp-1">Lançamento: {formatReleaseDate()}</p>
+                    <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   )
                 ) : (
-                  <p className="text-xs text-gray-400 line-clamp-1">
+                  <p className="text-xs text-gray-400 truncate">
                     Lançamento: {formatReleaseDate()}
                   </p>
                 )}
                 </div>
-                <div className="flex flex-wrap items-center gap-1 mb-1 min-h-[24px] max-h-[24px] overflow-hidden">
+                <div className="flex flex-wrap items-center gap-1 mb-1 min-h-[22px] max-h-[22px] overflow-hidden">
                   {genres.slice(0, 2).map(genre => (
-                    <span key={genre} className="bg-[var(--orbe-accent)]/15 text-[var(--orbe-accent)] border border-[var(--orbe-accent)]/30 px-2 py-0.5 rounded-full text-xs font-semibold truncate transition-colors">
+                    <span key={genre} className="bg-[var(--orbe-accent)]/15 text-[var(--orbe-accent)] border border-[var(--orbe-accent)]/30 px-2 py-0.5 rounded-full text-[10px] font-semibold truncate transition-colors">
                       {genre}
                     </span>
                   ))}
                 </div>
-                <div className="h-[22px] mb-1">
+                <div className="h-[20px] mb-1 flex items-center">
                 {dubStatus && (
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
                 )}
                 </div>
-                <div className="flex-grow" />
-                <div className="flex flex-col gap-1 pt-1 h-[32px] overflow-hidden">
-                  {(type === 'jogo' ? platforms : providers).slice(0, 2).map(p => (
-                    <div key={p.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <PlatformIcon platform={p.icon} size={14} />
-                      <span>{p.name}</span>
-                    </div>
-                  ))}
-                </div>
+                {(type === 'jogo' ? platforms : providers).length > 0 && (
+                  <div className="h-[22px] flex items-center gap-1.5 overflow-hidden">
+                    {(type === 'jogo' ? platforms : providers).slice(0, 4).map((p) => (
+                      <span key={p.name} title={p.name} className="inline-flex shrink-0">
+                        <PlatformIcon
+                          platform={p.icon}
+                          size={18}
+                          iconOnly
+                          className="h-[18px] w-[18px] rounded-sm"
+                          title={p.name}
+                        />
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             {isMenuOpen && (

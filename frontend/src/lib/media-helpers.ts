@@ -38,6 +38,8 @@ export const normalizeProviderName = (name?: string | null): string => {
   if (lowerName.includes('crunchyroll')) return 'Crunchyroll';
   if (lowerName.includes('star+') || lowerName.includes('star plus')) return 'Star+';
   if (lowerName.includes('apple tv')) return 'Apple TV+';
+  if (lowerName.includes('globoplay') || lowerName.includes('globo play')) return 'Globoplay';
+  if (lowerName.includes('claro')) return 'Claro TV+';
   if (lowerName.includes('tmdb')) return 'TMDB';
   return name;
 };
@@ -279,17 +281,14 @@ export const formatNextEpisodeDetail = (
   }
 };
 
-/** Card — ex.: "Ep 8 em 6d 10h 10m - Domingo" */
+/** Card — ex.: "Ep 8 · 6d 10h" */
 export const formatNextEpisodeCard = (
   airingAt: string,
   episode: number,
   countdown: string,
 ): string => {
-  const weekday = formatNextEpisodeWeekday(airingAt);
   const countdownLabel = countdown || 'em breve';
-  return weekday
-    ? `Ep ${episode} em ${countdownLabel} - ${weekday}`
-    : `Ep ${episode} em ${countdownLabel}`;
+  return `Ep ${episode} · ${countdownLabel}`;
 };
 
 /** @deprecated Use formatNextEpisodeDetail */
