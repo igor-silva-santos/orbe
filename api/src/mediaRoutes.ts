@@ -21,6 +21,30 @@ const router = Router();
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
+const HOMEPAGE_ITEM_LIMIT = 80;
+
+/** Janela inicial: mês anterior até +3 meses — cards do período atual sem payload gigante */
+const getHomepageDateWindow = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 4, 0, 23, 59, 59, 999);
+  return { start, end };
+};
+
+const carouselLiteInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 3 },
+};
+
+const animeCarouselInclude = {
+  genres: { include: { genero: true } },
+  streamingLinks: { take: 3 },
+  airingSchedule: {
+    where: { airingAt: { gte: new Date() } },
+    orderBy: { airingAt: 'asc' as const },
+    take: 1,
+  },
+};
 
 const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   const month = new Date().getMonth();
@@ -30,36 +54,30 @@ const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   return 'FALL';
 };
 
-const carouselLiteInclude = {
-  genres: { include: { genero: true } },
-  streamingProviders: { include: { provider: true }, take: 3 },
-};
-
-// Homepage — um único request com payload leve para todos os carrosséis
+// Homepage — payload leve: janela de ~4 meses centrada no período atual
 router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
-  const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 31, 23, 59, 59);
+  const { start: windowStart, end: windowEnd } = getHomepageDateWindow();
 
   try {
     const [filmes, series, jogos, animes] = await Promise.all([
       prisma.filme.findMany({
-        where: { AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [filmeQualityFilter, { releaseDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { releaseDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
       }),
       prisma.serie.findMany({
-        where: { AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [serieQualityFilter, { firstAirDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { firstAirDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
       }),
       prisma.jogo.findMany({
-        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: startDate, lte: endDate } }] },
+        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { firstReleaseDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
+        take: HOMEPAGE_ITEM_LIMIT,
         include: {
           genres: { include: { genero: true } },
           platforms: { include: { plataforma: true }, take: 3 },
@@ -73,16 +91,8 @@ router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
           format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] },
         },
         orderBy: { startDate: 'asc' },
-        take: CAROUSEL_ITEM_LIMIT,
-        include: {
-          genres: { include: { genero: true } },
-          streamingLinks: true,
-          airingSchedule: {
-            where: { airingAt: { gte: new Date() } },
-            orderBy: { airingAt: 'asc' },
-            take: 1,
-          },
-        },
+        take: HOMEPAGE_ITEM_LIMIT,
+        include: animeCarouselInclude,
       }),
     ]);
 
@@ -1236,7 +1246,7 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
       take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
-        streamingLinks: true,
+        streamingLinks: { take: 3 },
         airingSchedule: {
           where: { airingAt: { gte: new Date() } },
           orderBy: { airingAt: 'asc' },

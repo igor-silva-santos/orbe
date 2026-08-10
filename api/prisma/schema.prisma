@@ -55,6 +55,8 @@ model Filme {
   videos          Video[]
   streamingProviders FilmeOnStreamingProvider[]
   premiacoes         Json?
+
+  @@index([releaseDate])
 }
 
 model Serie {
@@ -93,9 +95,9 @@ model Serie {
   videos           Video[]
   streamingProviders SerieOnStreamingProvider[]
   premiacoes         Json?
-}
 
-model Anime {
+  @@index([firstAirDate])
+}
   id             Int       @id @default(autoincrement())
   anilistId      Int       @unique
   malId          Int?      @unique
@@ -140,6 +142,9 @@ model Anime {
   relatedRelations AnimeRelation[] @relation("RelatedRelations")
   airingSchedule      AiringSchedule[] @relation("AnimeToAiringSchedule")
   premiacoes          Json?
+
+  @@index([seasonYear, season])
+  @@index([startDate])
 }
 
 model Jogo {
@@ -180,6 +185,8 @@ model Jogo {
   eventId               Int?
   event                 Event?         @relation(fields: [eventId], references: [id])
   premiacoes            Json?
+
+  @@index([firstReleaseDate])
 }
 
 // =================================================================================
