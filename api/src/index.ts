@@ -216,6 +216,7 @@ app.get('/profile', meHandler);
 
 import { runDetetive } from './detetive';
 import cron from 'node-cron';
+import { checkInterruptedSyncOnStartup } from './syncState';
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00)
 cron.schedule('0 3 * * *', () => {
@@ -225,8 +226,9 @@ cron.schedule('0 3 * * *', () => {
 
 const PORT = process.env.PORT || 3001;
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   logger.info(`Servidor rodando na porta ${PORT}`);
+  await checkInterruptedSyncOnStartup(prisma);
 });
 
 

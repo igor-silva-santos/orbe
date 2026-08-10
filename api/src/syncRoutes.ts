@@ -5,6 +5,12 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import {
+  acquireSyncLock,
+  releaseSyncLock,
+  updateSyncProgress,
+} from './syncState';
+import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 
 const router = Router();
 
@@ -29,8 +35,20 @@ router.post('/run-sync', async (req, res) => {
     return res.status(400).json({ error: 'Parâmetros inválidos. Forneça mediaType e (startDate/endDate ou startYear/endYear).' });
   }
 
+  const lock = await acquireSyncLock(prisma, {
+    startDate: startDate || `${startYear}-01-01`,
+    endDate: endDate || `${endYear}-12-31`,
+    startYear: startYear ? parseInt(startYear, 10) : undefined,
+    endYear: endYear ? parseInt(endYear, 10) : undefined,
+  });
+
+  if (!lock.ok) {
+    return res.status(lock.status).json({ error: lock.message });
+  }
+
   logger.info(`Sincronização manual iniciada para ${mediaType} de ${startDate || startYear} a ${endDate || endYear}`);
-  
+  const runProgress = startSyncRunProgress();
+
   res.status(202).json({ message: `Sincronização para ${mediaType} iniciada. Verifique os logs para o progresso.` });
 
   try {
@@ -44,12 +62,17 @@ router.post('/run-sync', async (req, res) => {
       case 'animes': {
         const start = parseInt(startYear);
         const end = parseInt(endYear);
+        await updateSyncProgress(prisma, { phase: 'animes' });
+        const phase = runProgress.startPhase('ANIMES');
+        phase.setTotal((end - start + 1) * 4);
         for (let year = start; year <= end; year++) {
           await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL']);
+          phase.advance(4);
         }
         break;
       }
       case 'games':
+        await updateSyncProgress(prisma, { phase: 'games' });
         await syncGames(prisma, startDate, endDate);
         break;
       default:
@@ -58,33 +81,53 @@ router.post('/run-sync', async (req, res) => {
     logger.info(`Sincronização manual para ${mediaType} concluída.`);
   } catch (error) {
     logger.error(`Erro durante a sincronização manual de ${mediaType}:`, error);
+  } finally {
+    endSyncRunProgress();
+    await releaseSyncLock(prisma);
   }
 });
 
-/** Sincroniza filmes, séries, animes e jogos de 2026 em sequência */
+/** Sincroniza filmes, séries, animes e jogos em sequência */
 router.post('/run-sync-all', async (req, res) => {
   const startDate = req.body?.startDate || '2026-01-01';
   const endDate = req.body?.endDate || '2026-12-31';
   const startYear = parseInt(req.body?.startYear || '2026', 10);
   const endYear = parseInt(req.body?.endYear || '2026', 10);
 
+  const lock = await acquireSyncLock(prisma, { startDate, endDate, startYear, endYear });
+  if (!lock.ok) {
+    return res.status(lock.status).json({ error: lock.message });
+  }
+
   logger.info(`Sincronização completa iniciada: ${startDate} → ${endDate}`);
-  res.status(202).json({ message: `Sincronização completa de ${startYear} iniciada. Verifique os logs.` });
+  const runProgress = startSyncRunProgress();
+
+  res.status(202).json({
+    message: `Sincronização completa de ${startYear} iniciada. Verifique os logs para ETA a cada ~2min.`,
+  });
 
   try {
-    logger.info('--- FILMES ---');
     await syncMovies(prisma, startDate, endDate);
-    logger.info('--- SÉRIES ---');
     await syncSeries(prisma, startDate, endDate);
-    logger.info('--- ANIMES ---');
+
+    await updateSyncProgress(prisma, { phase: 'animes' });
+    const animePhase = runProgress.startPhase('ANIMES');
+    animePhase.setTotal((endYear - startYear + 1) * 4);
     for (let year = startYear; year <= endYear; year++) {
       await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL']);
+      animePhase.advance(4);
     }
-    logger.info('--- JOGOS ---');
+
+    await updateSyncProgress(prisma, { phase: 'games' });
+    runProgress.startPhase('JOGOS');
     await syncGames(prisma, startDate, endDate);
+
     logger.info('✅ Sincronização completa concluída.');
   } catch (error) {
     logger.error('Erro na sincronização completa:', error);
+  } finally {
+    endSyncRunProgress();
+    await releaseSyncLock(prisma);
   }
 });
 

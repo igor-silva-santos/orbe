@@ -854,3 +854,10 @@ model preferencias_usuario_midia {
 
   @@unique([usuario_id, midia_id, tipo_midia], name: "usuario_midia_unique")
 }
+
+// Estado persistente da aplicação (ex.: sync em andamento)
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
