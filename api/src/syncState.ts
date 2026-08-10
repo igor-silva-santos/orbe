@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 
 const SYNC_STATE_KEY = 'sync_run';
-const STALE_PROGRESS_MS = 10 * 60 * 1000; // 10 min sem progresso = provável crash/cold start
+const STALE_PROGRESS_MS = 30 * 60 * 1000; // 30 min — fase de animes é lenta (AniList + tradução)
 
 export type SyncPhase = 'filmes' | 'series' | 'animes' | 'jogos' | 'premios';
 
@@ -89,7 +89,10 @@ export async function getSyncStatus(prisma: PrismaClient): Promise<SyncStatusPub
   } else if (state.resumeAvailable || state.interrupted) {
     message = 'Há checkpoint para retomar. Use POST /api/run-sync-resume.';
   } else if (state.running) {
-    message = 'Sincronização em andamento.';
+    message =
+      state.phase === 'animes'
+        ? 'Sincronização em andamento (fase animes — pode levar horas; verifique os logs).'
+        : 'Sincronização em andamento.';
   }
 
   return {

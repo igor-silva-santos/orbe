@@ -126,17 +126,24 @@ export const filmeQualityFilter: Prisma.FilmeWhereInput = {
   ],
 };
 
-/** Carrossel: critérios relaxados (poster + engajamento mínimo ou curadoria) */
+/** Carrossel: alinhado ao DISPLAY — poster + pt-BR ou overview + engajamento mínimo */
 export const filmeCarouselQualityFilter: Prisma.FilmeWhereInput = {
   AND: [
     { posterPath: { not: null } },
+    { OR: [{ adult: false }, { adult: null }] },
+    {
+      OR: [
+        { localizacaoPtBr: true },
+        { AND: [{ overview: { not: null } }, { NOT: { overview: '' } }] },
+      ],
+    },
     {
       OR: [
         { emCartaz: true },
         { emBreve: true },
         { localizacaoPtBr: true },
-        { popularity: { gte: 5 } },
-        { voteCount: { gte: 10 } },
+        { popularity: { gte: MIN_POPULARITY } },
+        { voteCount: { gte: MIN_VOTE_COUNT } },
       ],
     },
   ],
@@ -155,6 +162,74 @@ export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
     { voteCount: { gte: CAROUSEL_BYPASS_MIN_VOTE_COUNT } },
   ],
 };
+
+function concertTitleMatch(substring: string): Prisma.FilmeWhereInput[] {
+  return [
+    { title: { contains: substring, mode: 'insensitive' } },
+    { originalTitle: { contains: substring, mode: 'insensitive' } },
+  ];
+}
+
+/** Exclui concertos/shows ao vivo — mesma regra do sync (`isConcertOrLiveRecording`) */
+export const filmeCarouselConcertExclusionFilter: Prisma.FilmeWhereInput = {
+  NOT: {
+    OR: [
+      ...concertTitleMatch('live from'),
+      ...concertTitleMatch('live in'),
+      ...concertTitleMatch('live at'),
+      ...concertTitleMatch(': live'),
+      ...concertTitleMatch('world tour'),
+      ...concertTitleMatch(' tour'),
+      ...concertTitleMatch('concert'),
+      ...concertTitleMatch('stand-up'),
+      ...concertTitleMatch('stand up'),
+      ...concertTitleMatch('unplugged'),
+      ...concertTitleMatch('comedy special'),
+      ...concertTitleMatch('live performance'),
+      {
+        AND: [
+          { genres: { some: { genero: { tmdbId: 104 } } } },
+          { NOT: { genres: { some: { genero: { tmdbId: { in: NARRATIVE_FILM_GENRE_IDS } } } } } },
+          {
+            genres: {
+              every: {
+                genero: {
+                  OR: [{ tmdbId: 99 }, { tmdbId: 104 }],
+                },
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+};
+
+/** Filtro combinado para carrossel/homepage de filmes */
+export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
+  AND: [
+    filmeCarouselQualityFilter,
+    filmeCarouselLocalizationFilter,
+    filmeCarouselConcertExclusionFilter,
+  ],
+};
+
+type FilmeCarouselCandidate = {
+  title: string;
+  originalTitle?: string | null;
+  genres?: { genero: { tmdbId: number } }[];
+};
+
+/** Pós-filtro em runtime — cobre casos que o Prisma não pega (títulos atípicos) */
+export function filterFilmesForCarousel<T extends FilmeCarouselCandidate>(filmes: T[]): T[] {
+  return filmes.filter((filme) =>
+    !isConcertOrLiveRecording({
+      title: filme.title,
+      original_title: filme.originalTitle ?? undefined,
+      genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
+    }),
+  );
+}
 
 export const serieQualityFilter: Prisma.SerieWhereInput = {
   AND: [

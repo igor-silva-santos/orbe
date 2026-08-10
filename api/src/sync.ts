@@ -46,7 +46,7 @@ const main = async () => {
     const endYear = new Date(endDate).getFullYear();
     for (let year = startYear; year <= endYear; year++) {
         logger.info(`Sincronizando animes para o ano ${year} (Estações: ${seasonsToSync.join(', ')})...`);
-        await syncAnimes(year, seasonsToSync, limit);
+        await syncAnimes(year, seasonsToSync, limit !== undefined ? { limit } : undefined);
     }
     logger.info(`--- Sincronização de ANIMES concluída ---\n\n`);
 
