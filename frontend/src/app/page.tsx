@@ -8,38 +8,6 @@ import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import type { Midia, Anime } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 
-const fetchInitialMediaData = async (mediaType: 'filmes' | 'series' | 'jogos') => {
-  const year = new Date().getFullYear();
-  const response = await fetch(`${API_BASE}/${mediaType}/by-year?year=${year}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch initial data for ${mediaType}`);
-  }
-  const data = await response.json();
-  return data.sort((a: Midia, b: Midia) => {
-    const dateA = a.data_lancamento_api ? new Date(a.data_lancamento_api).getTime() : 0;
-    const dateB = b.data_lancamento_api ? new Date(b.data_lancamento_api).getTime() : 0;
-    return dateA - dateB;
-  });
-};
-
-const fetchInitialAnimeData = async () => {
-    const getSeason = (date: Date) => {
-        const month = date.getMonth();
-        if (month >= 0 && month <= 2) return 'WINTER';
-        if (month >= 3 && month <= 5) return 'SPRING';
-        if (month >= 6 && month <= 8) return 'SUMMER';
-        return 'FALL';
-    };
-    const year = new Date().getFullYear();
-    const season = getSeason(new Date());
-
-    const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch animes`);
-    }
-    return response.json();
-}
-
 const calculateStartIndex = (data: Midia[]) => {
     if (!data || data.length === 0) return 0;
     const today = new Date();
@@ -66,17 +34,24 @@ const CarouselSkeleton = () => (
   </div>
 );
 
+interface HomepageData {
+  filmes: Midia[];
+  series: Midia[];
+  jogos: Midia[];
+  animes: Anime[];
+}
+
 export default function Home() {
-  const [filmes, setFilmes] = useState<Midia[] | null>(null);
-  const [series, setSeries] = useState<Midia[] | null>(null);
-  const [jogos, setJogos] = useState<Midia[] | null>(null);
-  const [animes, setAnimes] = useState<Anime[] | null>(null);
+  const [data, setData] = useState<HomepageData | null>(null);
 
   useEffect(() => {
-    fetchInitialMediaData('filmes').then(setFilmes).catch(console.error);
-    fetchInitialMediaData('series').then(setSeries).catch(console.error);
-    fetchInitialMediaData('jogos').then(setJogos).catch(console.error);
-    fetchInitialAnimeData().then(setAnimes).catch(console.error);
+    fetch(`${API_BASE}/homepage`)
+      .then((res) => {
+        if (!res.ok) throw new Error('homepage fetch failed');
+        return res.json();
+      })
+      .then(setData)
+      .catch(console.error);
   }, []);
 
   return (
@@ -121,22 +96,22 @@ export default function Home() {
 
         <section id="filmes" className="overflow-hidden">
           <SectionHeading title="Filmes" />
-          {!filmes ? <CarouselSkeleton /> : <MediaCarousel mediaType="filmes" initialData={filmes} startIndex={calculateStartIndex(filmes)} />}
+          {!data?.filmes ? <CarouselSkeleton /> : <MediaCarousel mediaType="filmes" initialData={data.filmes} startIndex={calculateStartIndex(data.filmes)} />}
         </section>
 
         <section id="series" className="overflow-hidden">
           <SectionHeading title="Séries" />
-          {!series ? <CarouselSkeleton /> : <MediaCarousel mediaType="series" initialData={series} startIndex={calculateStartIndex(series)} />}
+          {!data?.series ? <CarouselSkeleton /> : <MediaCarousel mediaType="series" initialData={data.series} startIndex={calculateStartIndex(data.series)} />}
         </section>
 
         <section id="animes" className="overflow-hidden">
           <SectionHeading title="Animes" />
-          {!animes ? <CarouselSkeleton /> : <AnimeCarousel initialData={animes} />}
+          {!data?.animes ? <CarouselSkeleton /> : <AnimeCarousel initialData={data.animes} />}
         </section>
 
         <section id="jogos" className="overflow-hidden">
           <SectionHeading title="Jogos" />
-          {!jogos ? <CarouselSkeleton /> : <MediaCarousel mediaType="jogos" initialData={jogos} startIndex={calculateStartIndex(jogos)} />}
+          {!data?.jogos ? <CarouselSkeleton /> : <MediaCarousel mediaType="jogos" initialData={data.jogos} startIndex={calculateStartIndex(data.jogos)} />}
         </section>
 
       </main>

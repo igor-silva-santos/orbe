@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from './clients';
 import { Prisma } from '@prisma/client';
-import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, normalizeSearchText, withPortugueseTranslation } from './mappers';
+import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, normalizeSearchText, withPortugueseTranslation } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
@@ -21,6 +21,82 @@ const router = Router();
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
+
+const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
+  const month = new Date().getMonth();
+  if (month <= 2) return 'WINTER';
+  if (month <= 5) return 'SPRING';
+  if (month <= 8) return 'SUMMER';
+  return 'FALL';
+};
+
+const carouselLiteInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 3 },
+};
+
+// Homepage — um único request com payload leve para todos os carrosséis
+router.get('/homepage', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  const year = new Date().getFullYear();
+  const season = getCurrentSeason();
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+  try {
+    const [filmes, series, jogos, animes] = await Promise.all([
+      prisma.filme.findMany({
+        where: { AND: [filmeQualityFilter, { releaseDate: { gte: startDate, lte: endDate } }] },
+        orderBy: { releaseDate: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: carouselLiteInclude,
+      }),
+      prisma.serie.findMany({
+        where: { AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }] },
+        orderBy: { firstAirDate: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: carouselLiteInclude,
+      }),
+      prisma.jogo.findMany({
+        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: startDate, lte: endDate } }] },
+        orderBy: { firstReleaseDate: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 3 },
+        },
+      }),
+      prisma.anime.findMany({
+        where: {
+          ...animeQualityFilter,
+          seasonYear: year,
+          season,
+          format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] },
+        },
+        orderBy: { startDate: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: {
+          genres: { include: { genero: true } },
+          streamingLinks: true,
+          airingSchedule: {
+            where: { airingAt: { gte: new Date() } },
+            orderBy: { airingAt: 'asc' },
+            take: 1,
+          },
+        },
+      }),
+    ]);
+
+    res.json({
+      filmes: filmes.map(mapFilmeToCarouselCard),
+      series: series.map(mapSerieToCarouselCard),
+      jogos: jogos.map(mapJogoToCarouselCard),
+      animes: animes.map(mapAnimeToCarouselCard),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar dados da homepage: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar dados da homepage.' });
+  }
+});
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
@@ -228,12 +304,9 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
         releaseDate: 'asc',
       },
       take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
+      include: carouselLiteInclude,
     });
-    res.json(filmes.map(mapFilmeToMidia));
+    res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar filmes por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes por ano.' });
@@ -423,12 +496,9 @@ router.get('/series/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
         firstAirDate: 'asc',
       },
       take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
+      include: carouselLiteInclude,
     });
-    res.json(series.map(mapSerieToMidia));
+    res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar séries por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries por ano.' });
@@ -753,11 +823,11 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
       },
       take: CAROUSEL_ITEM_LIMIT,
       include: {
-        platforms: { include: { plataforma: true } },
+        platforms: { include: { plataforma: true }, take: 3 },
         genres: { include: { genero: true } },
       }
     });
-    res.json(jogos.map(mapJogoToMidia));
+    res.json(jogos.map(mapJogoToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar jogos por ano: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos por ano.' });
@@ -825,7 +895,7 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
       categorias: buildSections(mapped, (j) => j.generos_api || []),
       modos: buildSections(mapped, (j) => j.modos_jogo || []),
       plataformas: buildSections(mapped, (j) =>
-        (j.plataformas_api || []).map((p) => p.nome).filter(Boolean) as string[]
+        (j.plataformas_api || []).map((p: { nome?: string }) => p.nome).filter(Boolean) as string[]
       ),
     });
   } catch (error) {
@@ -1155,64 +1225,27 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
       return res.status(400).json({ error: "O parâmetro 'year' deve ser um número." });
     }
 
-    const { startDate, endDate } = getSeasonDateRange(parsedYear, season);
-
-    const airingSchedules = await prisma.airingSchedule.findMany({
+    const animes = await prisma.anime.findMany({
       where: {
-        airingAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-        anime: {
-          ...animeQualityFilter,
-          format: {
-            in: ['TV', 'MOVIE', 'ONA', 'SPECIAL'],
-          },
-        },
+        ...animeQualityFilter,
+        seasonYear: parsedYear,
+        season: season as 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL',
+        format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA', 'SPECIAL'] },
       },
+      orderBy: { startDate: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
       include: {
-        anime: {
-          include: {
-            airingSchedule: true,
-            genres: { include: { genero: true } },
-            studios: { include: { studio: true } },
-            streamingLinks: true, // Adicionado para buscar as plataformas de streaming
-            characters: { 
-              include: { 
-                character: true, 
-                voiceActors: { include: { dublador: true } } 
-              } 
-            }
-          }
-        }
-      },
-      orderBy: {
-        airingAt: 'asc',
+        genres: { include: { genero: true } },
+        streamingLinks: true,
+        airingSchedule: {
+          where: { airingAt: { gte: new Date() } },
+          orderBy: { airingAt: 'asc' },
+          take: 1,
+        },
       },
     });
 
-    const animesMap = new Map<number, any>();
-    airingSchedules.forEach(schedule => {
-      if (schedule.anime && !animesMap.has(schedule.anime.anilistId)) {
-        animesMap.set(schedule.anime.anilistId, schedule.anime);
-      }
-    });
-
-    const uniqueAnimes = Array.from(animesMap.values()).slice(0, CAROUSEL_ITEM_LIMIT);
-
-    const animesWithNextEpisode = uniqueAnimes.map(anime => {
-      const now = new Date();
-      const nextAiring = anime.airingSchedule
-        .filter((s: any) => s.airingAt > now)
-        .sort((a: any, b: any) => a.airingAt.getTime() - b.airingAt.getTime())[0];
-
-      return {
-        ...mapAnimeToMidia(anime),
-        nextAiringEpisode: nextAiring ? { airingAt: nextAiring.airingAt, episode: nextAiring.episode } : null,
-      };
-    });
-
-    res.status(200).json(animesWithNextEpisode);
+    res.status(200).json(animes.map(mapAnimeToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar animes por temporada: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar animes por temporada.' });

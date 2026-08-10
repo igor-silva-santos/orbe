@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -21,7 +21,7 @@ interface MediaCarouselProps {
   className?: string;
 }
 
-const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4';
+const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
@@ -31,17 +31,18 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const loadedYears = useRef<Set<number>>(new Set(initialData.map(item => new Date(item.data_lancamento_api).getFullYear())));
   const fetchingYears = useRef(new Set<number>());
   const previousSelectedIndex = useRef<number>(startIndex);
+  const itemsLengthRef = useRef(initialData.length);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     align: 'center', 
-    skipSnaps: false,
+    skipSnaps: true,
     startIndex: startIndex,
-    dragFree: false,
+    dragFree: true,
     containScroll: 'trimSnaps',
+    duration: 20,
   });
 
-  const { getSlideStyle } = useFanCarouselSlides(emblaApi);
-
+  useFanCarouselSlides(emblaApi);
   useEmblaWheelScroll(emblaApi);
 
   const fetchMediaByYear = useCallback(async (year: number) => {
@@ -123,16 +124,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   }, [emblaApi, initialData, startIndex]);
 
   useEffect(() => {
-    if (!emblaApi) return;
-    const prevLength = emblaApi.slideNodes().length;
-    emblaApi.reInit();
-    const newLength = emblaApi.slideNodes().length;
-    const itemsAdded = newLength - prevLength;
+    if (!emblaApi || itemsLengthRef.current === mediaItems.length) return;
 
-    if (itemsAdded > 0 && previousSelectedIndex.current < 15) {
-      emblaApi.scrollTo(previousSelectedIndex.current + itemsAdded, true);
+    const prevLength = itemsLengthRef.current;
+    const added = mediaItems.length - prevLength;
+    const wasPrepend = added > 0 && previousSelectedIndex.current < 15;
+
+    itemsLengthRef.current = mediaItems.length;
+    emblaApi.reInit();
+
+    if (wasPrepend) {
+      emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
-  }, [emblaApi, mediaItems]);
+  }, [emblaApi, mediaItems.length]);
 
   const navigateByMonth = (direction: 'next' | 'prev') => {
     if (!emblaApi || mediaItems.length === 0) return;
@@ -153,11 +157,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (targetIndex !== -1) emblaApi.scrollTo(targetIndex);
   };
 
-  const genres = Array.from(new Set(mediaItems.flatMap(item => item.generos_api || []))).filter(Boolean);
+  const genres = useMemo(
+    () => Array.from(new Set(mediaItems.flatMap(item => item.generos_api || []))).filter(Boolean),
+    [mediaItems]
+  );
 
-  const filteredItems = selectedGenre
-    ? mediaItems.filter(item => item.generos_api?.includes(selectedGenre))
-    : mediaItems;
+  const filteredItems = useMemo(
+    () => selectedGenre
+      ? mediaItems.filter(item => item.generos_api?.includes(selectedGenre))
+      : mediaItems,
+    [mediaItems, selectedGenre]
+  );
 
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
@@ -187,7 +197,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           </div>
         </div>
       </div>
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
         <div className="flex">
           {filteredItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => 
@@ -195,8 +205,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                   <MidiaCardSkeleton />
                 </div>
               )
-            : filteredItems.map((item, index) => (
-                <div key={`${item.id}-${mediaType}`} className={SLIDE_CLASS} style={getSlideStyle(index)}>
+            : filteredItems.map((item) => (
+                <div key={`${item.id}-${mediaType}`} className={SLIDE_CLASS}>
                   <MidiaCard midia={item as Filme | Serie | Anime | Jogo} type={mediaType.slice(0, -1) as TipoMidia} />
                 </div>
             ))

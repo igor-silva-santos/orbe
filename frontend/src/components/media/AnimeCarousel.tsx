@@ -33,7 +33,7 @@ const SEASON_NAMES: Record<Season, string> = {
 };
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4';
+const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
 
 const getSeason = (date: Date): Season => {
   const month = date.getMonth();
@@ -72,15 +72,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const loadedSeasons = useRef<Set<string>>(new Set([`${initialYear}-${initialSeason}`]));
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
+  const itemsLengthRef = useRef(initialData.length);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'center',
-    skipSnaps: false,
-    dragFree: false,
+    skipSnaps: true,
+    dragFree: true,
     containScroll: 'trimSnaps',
+    duration: 20,
   });
 
-  const { getSlideStyle } = useFanCarouselSlides(emblaApi);
+  useFanCarouselSlides(emblaApi);
 
   useEmblaWheelScroll(emblaApi);
 
@@ -284,19 +286,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason]);
 
   useEffect(() => {
-    if (emblaApi) {
-        const prevLength = emblaApi.slideNodes().length;
-        emblaApi.reInit();
-        const newLength = emblaApi.slideNodes().length;
-        const itemsAdded = newLength - prevLength;
+    if (!emblaApi || itemsLengthRef.current === carouselItems.length) return;
 
-        if (itemsAdded > 0 && previousSelectedIndex.current < 15) {
-            emblaApi.scrollTo(previousSelectedIndex.current + itemsAdded, true);
-        } else if (startIndex !== previousSelectedIndex.current) {
-            emblaApi.scrollTo(startIndex, true);
-        }
+    const prevLength = itemsLengthRef.current;
+    const added = carouselItems.length - prevLength;
+    const wasPrepend = added > 0 && previousSelectedIndex.current < 15;
+
+    itemsLengthRef.current = carouselItems.length;
+    emblaApi.reInit();
+
+    if (wasPrepend) {
+      emblaApi.scrollTo(previousSelectedIndex.current + added, true);
+    } else if (startIndex !== previousSelectedIndex.current) {
+      emblaApi.scrollTo(startIndex, true);
     }
-  }, [carouselItems, startIndex, emblaApi]);
+  }, [carouselItems.length, startIndex, emblaApi]);
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
     const seasonIndex = SEASONS.indexOf(currentSeason);
@@ -367,7 +371,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-y pinch-zoom' }}>
+      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={emblaRef} style={{ touchAction: 'pan-x pinch-zoom' }}>
         <div className="flex">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
@@ -375,11 +379,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   <MidiaCardSkeleton />
                 </div>
               ))
-            : carouselItems.map((item, index) => (
+            : carouselItems.map((item) => (
                 <div
                   key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`}
                   className={SLIDE_CLASS}
-                  style={item.type === 'media' ? getSlideStyle(index) : undefined}
                 >
                   {item.type === 'separator' 
                     ? <DaySeparatorCard dayName={item.dayName} /> 
