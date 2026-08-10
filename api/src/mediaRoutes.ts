@@ -1277,6 +1277,151 @@ router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   }
 });
 
+const eventInclude = {
+  games: {
+    include: {
+      genres: { include: { genero: true } },
+      platforms: { include: { plataforma: true }, take: 3 },
+    },
+    orderBy: { rating: 'desc' as const },
+    take: 40,
+  },
+  _count: { select: { games: true } },
+};
+
+const getProximosWindow = () => {
+  const now = new Date();
+  const threeMonthsAhead = new Date(now);
+  threeMonthsAhead.setMonth(threeMonthsAhead.getMonth() + 3);
+  return { now, threeMonthsAhead };
+};
+
+// Resumo agregado para a página de Eventos (relatório)
+router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  const now = new Date();
+  const { threeMonthsAhead } = getProximosWindow();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const year = now.getFullYear();
+  const season = getCurrentSeason();
+
+  try {
+    const [
+      eventosGames,
+      filmesProximos,
+      seriesProximas,
+      animesProximos,
+      jogosProximos,
+      filmesEmCartaz,
+      eventosRecentes,
+    ] = await Promise.all([
+      prisma.event.findMany({
+        where: {
+          OR: [
+            { start_time: { gte: now } },
+            {
+              start_time: { lte: now },
+              OR: [{ end_time: { gte: now } }, { end_time: null }],
+            },
+          ],
+        },
+        include: eventInclude,
+        orderBy: { start_time: 'asc' },
+      }),
+      prisma.filme.findMany({
+        where: {
+          AND: [
+            filmeQualityFilter,
+            { emBreve: true },
+            { releaseDate: { gte: now, lte: threeMonthsAhead } },
+          ],
+        },
+        orderBy: { releaseDate: 'asc' },
+        take: 20,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [
+            serieQualityFilter,
+            { firstAirDate: { gte: now, lte: threeMonthsAhead } },
+          ],
+        },
+        orderBy: { firstAirDate: 'asc' },
+        take: 20,
+        include: {
+          genres: { include: { genero: true } },
+          streamingProviders: { include: { provider: true } },
+        },
+      }),
+      prisma.anime.findMany({
+        where: {
+          AND: [
+            animeSeasonQualityFilter,
+            { seasonYear: year, season },
+            { status: { in: ['NOT_YET_RELEASED', 'RELEASING'] } },
+            { format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] } },
+          ],
+        },
+        orderBy: { startDate: 'asc' },
+        take: 20,
+        include: animeCarouselInclude,
+      }),
+      prisma.jogo.findMany({
+        where: {
+          AND: [
+            jogoQualityFilter,
+            { firstReleaseDate: { gte: now, lte: threeMonthsAhead } },
+          ],
+        },
+        orderBy: { firstReleaseDate: 'asc' },
+        take: 20,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 3 },
+        },
+      }),
+      prisma.filme.findMany({
+        where: { AND: [filmeQualityFilter, { emCartaz: true }] },
+        orderBy: { popularity: 'desc' },
+        take: 20,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.event.findMany({
+        where: {
+          OR: [
+            { end_time: { gte: thirtyDaysAgo, lt: now } },
+            {
+              start_time: { gte: thirtyDaysAgo, lt: now },
+              OR: [{ end_time: null }, { end_time: { lt: now } }],
+            },
+          ],
+        },
+        include: eventInclude,
+        orderBy: { start_time: 'desc' },
+        take: 10,
+      }),
+    ]);
+
+    res.json({
+      eventos_games: eventosGames.map(mapEventToResponse),
+      proximos: {
+        filmes: await Promise.all(filmesProximos.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+        series: await Promise.all(seriesProximas.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
+        animes: await Promise.all(animesProximos.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
+        jogos: await Promise.all(jogosProximos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+      },
+      destaques_recentes: {
+        filmes: await Promise.all(filmesEmCartaz.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+        eventos: eventosRecentes.map(mapEventToResponse),
+      },
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar resumo de eventos: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar resumo de eventos.' });
+  }
+});
+
 // Rota para Eventos de games (IGDB — E3, Gamescom, State of Play, etc.)
 router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const status = typeof req.query.status === 'string' ? req.query.status : 'all';
@@ -1297,17 +1442,7 @@ router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const events = await prisma.event.findMany({
       where,
-      include: {
-        games: {
-          include: {
-            genres: { include: { genero: true } },
-            platforms: { include: { plataforma: true }, take: 3 },
-          },
-          orderBy: { rating: 'desc' },
-          take: 40,
-        },
-        _count: { select: { games: true } },
-      },
+      include: eventInclude,
       orderBy: { start_time: 'asc' },
     });
 

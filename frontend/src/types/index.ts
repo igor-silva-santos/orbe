@@ -259,6 +259,24 @@ export interface Evento {
   jogos: Jogo[];
 }
 
+export interface EventoProximos {
+  filmes: Filme[];
+  series: Serie[];
+  animes: Anime[];
+  jogos: Jogo[];
+}
+
+export interface EventoDestaquesRecentes {
+  filmes: Filme[];
+  eventos: Evento[];
+}
+
+export interface EventoResumo {
+  eventos_games: Evento[];
+  proximos: EventoProximos;
+  destaques_recentes: EventoDestaquesRecentes;
+}
+
 // Interface para eventos de anúncio (legado)
 export interface EventoAnuncio {
   id: number;

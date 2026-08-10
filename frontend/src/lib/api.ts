@@ -1,4 +1,4 @@
-import type { Filme, Serie, Anime, Jogo } from '@/types';
+import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
 
@@ -272,6 +272,10 @@ export const orbeNerdApi = {
 
   getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
     return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
+  },
+
+  getEventosResumo: async (): Promise<EventoResumo> => {
+    return apiClient.get('/eventos/resumo');
   },
 
   // Pesquisa
