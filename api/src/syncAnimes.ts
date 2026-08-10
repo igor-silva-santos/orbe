@@ -3,6 +3,7 @@ import './loadEnv';
 import { logger } from './logger';
 import { anilistApi } from './clients';
 import { prisma } from './clients';
+import { isAnimeRelevantForSync } from './qualityFilters';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function prismaUpdateWithRetry<T>(
@@ -74,6 +75,48 @@ async function anilistApiWithRetry(query: string, variables: any, maxRetries = 5
         }
     }
     throw new Error("Número máximo de tentativas atingido");
+}
+
+async function fetchCuratedAnimeIds(): Promise<number[]> {
+    logger.info('Buscando animes de listas curadas AniList (trending, popular)...');
+    const ids = new Set<number>();
+
+    const query = `
+      query ($page: Int, $perPage: Int, $sort: [MediaSort]) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo { hasNextPage }
+          media(type: ANIME, sort: $sort, isAdult: false) { id averageScore popularity }
+        }
+      }
+    `;
+
+    for (const sort of ['TRENDING_DESC', 'POPULARITY_DESC'] as const) {
+        let page = 1;
+        let hasNextPage = true;
+        while (hasNextPage && page <= 5) {
+            try {
+                const response = await anilistApiWithRetry(query, { page, perPage: 50, sort: [sort] });
+                const pageData = response.data.data.Page;
+                if (pageData.media) {
+                    for (const anime of pageData.media) {
+                        if (isAnimeRelevantForSync(anime)) {
+                            ids.add(anime.id);
+                        }
+                    }
+                }
+                hasNextPage = pageData.pageInfo.hasNextPage;
+                page++;
+                await delay(500);
+            } catch (error) {
+                logger.error(`Erro ao buscar animes (${sort}): ${error}`);
+                hasNextPage = false;
+            }
+        }
+        logger.info(`  ${sort}: ${ids.size} IDs acumulados`);
+    }
+
+    logger.info(`Total de ${ids.size} IDs únicos de listas curadas AniList.`);
+    return Array.from(ids);
 }
 
 async function fetchAllAnimeIdsForSeasons(year: number, seasons: string[]): Promise<Map<string, number[]>> {
@@ -195,7 +238,14 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
                 continue;
             }
 
-
+            if (!isAnimeRelevantForSync(anime)) {
+                skippedCount++;
+                logger.info(
+                  `⏭️ Anime [${id}] "${anime.title?.romaji}" ignorado: critérios de sync ` +
+                  `(score=${anime.averageScore ?? 0}, pop=${anime.popularity ?? 0}).`
+                );
+                continue;
+            }
 
             const startDate = (anime.startDate && anime.startDate.year)
                 ? new Date(anime.startDate.year, (anime.startDate.month || 1) - 1, anime.startDate.day || 1)
@@ -390,6 +440,22 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
 }
 
 export async function syncAnimes(year: number, seasons: string[], limit?: number) {
+  const curatedIds = await fetchCuratedAnimeIds();
+  if (curatedIds.length > 0) {
+    let idsToSync = curatedIds;
+    if (limit) {
+      idsToSync = idsToSync.slice(0, limit);
+      logger.info(`Limitando sincronização curada de animes a ${limit} itens.`);
+    }
+
+    const batchSize = 10;
+    for (let i = 0; i < idsToSync.length; i += batchSize) {
+      const batch = idsToSync.slice(i, i + batchSize);
+      logger.info(`Processando lote curado de animes: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
+      await processAnimeBatch(batch);
+    }
+  }
+
   const seasonAnimeIds = await fetchAllAnimeIdsForSeasons(year, seasons);
 
   const seasonTranslations: { [key: string]: string } = {

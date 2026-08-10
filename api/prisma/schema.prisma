@@ -41,6 +41,8 @@ model Filme {
   ultima_verificacao_ingresso DateTime?
   releaseType                 String?
   tem_sessoes                 Boolean?
+  emCartaz                    Boolean?  @default(false)
+  emBreve                     Boolean?  @default(false)
 
   // Relacionamentos
   genres          FilmeGenero[]

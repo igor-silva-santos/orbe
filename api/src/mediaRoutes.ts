@@ -45,8 +45,12 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const now = new Date();
     if (filtro === 'em_cartaz') {
-      allConditions.push({ releaseDate: { lte: now } });
+      allConditions.push({ emCartaz: true });
     } else if (filtro === 'em_breve') {
+      allConditions.push({ emBreve: true });
+    } else if (filtro === 'lancados') {
+      allConditions.push({ releaseDate: { lte: now } });
+    } else if (filtro === 'futuros') {
       allConditions.push({ releaseDate: { gte: now } });
     }
 

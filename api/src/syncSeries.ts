@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 import { tmdb, tmdbApi } from './clients';
 import { prisma } from './clients';
+import { isSerieRelevantForSync } from './qualityFilters';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -30,6 +31,57 @@ async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initial
     throw new Error("Número máximo de tentativas atingido");
 }
 
+async function fetchIdsFromTmdbList(
+  endpoint: string,
+  params: Record<string, unknown> = {},
+  maxPages = 10,
+): Promise<number[]> {
+  const seriesIds = new Set<number>();
+  let page = 1;
+  let totalPages = 1;
+
+  try {
+    do {
+      const response = await tmdbApi.get(endpoint, {
+        params: { ...params, page, region: 'BR' },
+      });
+
+      if (response.data.results) {
+        for (const serie of response.data.results) {
+          if (serie.id && !serie.adult) {
+            seriesIds.add(serie.id);
+          }
+        }
+      }
+
+      totalPages = response.data.total_pages || 1;
+      page++;
+      await delay(250);
+    } while (page <= totalPages && page <= maxPages);
+
+    return Array.from(seriesIds);
+  } catch (error) {
+    logger.error(`Erro ao buscar IDs de ${endpoint}: ${error}`);
+    return [];
+  }
+}
+
+async function fetchCuratedSeriesIds(): Promise<Set<number>> {
+  logger.info('Buscando séries de listas curadas TMDB (popular, on_the_air)...');
+  const ids = new Set<number>();
+
+  const popular = await fetchIdsFromTmdbList('/tv/popular', {}, 10);
+  popular.forEach((id) => ids.add(id));
+  logger.info(`  popular: ${popular.length} séries`);
+
+  const onTheAir = await fetchIdsFromTmdbList('/tv/on_the_air', {}, 5);
+  onTheAir.forEach((id) => ids.add(id));
+  logger.info(`  on_the_air: ${onTheAir.length} séries`);
+
+  logger.info(`Total de ${ids.size} IDs únicos de listas curadas.`);
+  return ids;
+}
+
 async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
   logger.info(`Buscando IDs de séries com primeira exibição entre ${startDate} e ${endDate}...`);
   const seriesIds = new Set<number>();
@@ -44,7 +96,8 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
           'first_air_date.lte': endDate,
           page,
           region: 'BR',
-          sort_by: 'first_air_date.asc',
+          sort_by: 'popularity.desc',
+          'vote_count.gte': 50,
         },
       });
 
@@ -71,7 +124,7 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
   }
 }
 
-async function processSerieBatch(serieIds: number[], prisma: PrismaClient): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
+async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curatedIds: Set<number> = new Set()): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
 
   for (const id of serieIds) {
@@ -93,6 +146,16 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient): Prom
       const firstAirDate: Date | null = serieDetails.first_air_date ? new Date(serieDetails.first_air_date) : null;
       if (!firstAirDate) {
         skippedCount++;
+        continue;
+      }
+
+      const isCurated = curatedIds.has(id);
+      if (!isCurated && !isSerieRelevantForSync(serieDetails)) {
+        skippedCount++;
+        logger.info(
+          `⏭️ Série [${id}] "${serieDetails.name}" ignorada: critérios de sync ` +
+          `(votes=${serieDetails.vote_count ?? 0}, pop=${(serieDetails.popularity ?? 0).toFixed(1)}).`
+        );
         continue;
       }
 
@@ -184,10 +247,26 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
   let currentStartDate = new Date(startDate);
   const finalEndDate = new Date(endDate);
 
-  logger.info(`Iniciando busca e sincronização de séries por mês, de ${startDate} a ${endDate}.`);
+  logger.info(`Iniciando sincronização de séries (listas curadas + período ${startDate} a ${endDate}).`);
 
   if (limit) {
     logger.warn(`O parâmetro limit (${limit}) será aplicado para cada mês, não para o total.`);
+  }
+
+  const curatedIds = await fetchCuratedSeriesIds();
+  let curatedIdList = Array.from(curatedIds);
+
+  if (curatedIdList.length > 0) {
+    if (limit) {
+      curatedIdList = curatedIdList.slice(0, limit);
+    }
+
+    const batchSize = 10;
+    for (let i = 0; i < curatedIdList.length; i += batchSize) {
+      const batch = curatedIdList.slice(i, i + batchSize);
+      logger.info(`Processando lote curado de séries: ${i + 1}-${Math.min(i + batchSize, curatedIdList.length)} de ${curatedIdList.length}`);
+      await processSerieBatch(batch, prisma, curatedIds);
+    }
   }
 
   while (currentStartDate <= finalEndDate) {
@@ -210,7 +289,7 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote de séries do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            await processSerieBatch(batch, prisma);
+            await processSerieBatch(batch, prisma, curatedIds);
         }
     }
 

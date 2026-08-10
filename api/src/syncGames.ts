@@ -4,9 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
-
-
-
+import { isJogoRelevantForSync } from './qualityFilters';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
@@ -74,11 +72,47 @@ async function fetchAndSyncEvents(prisma: PrismaClient, startDateStr: string, en
     }
 }
 
+async function fetchPopularGameIds(): Promise<number[]> {
+    logger.info('Buscando jogos populares da IGDB...');
+    const gameIds = new Set<number>();
+    const limit = 500;
+    let offset = 0;
+    let hasMore = true;
+
+    try {
+        while (hasMore && offset < 2000) {
+            const response = await igdbApiWithRetry(() => igdbApi.post(
+                '/games',
+                `fields id, rating, rating_count; where rating >= 50 & category = 0; limit ${limit}; offset ${offset}; sort rating desc;`
+            ));
+
+            const games = response.data;
+            if (games && games.length > 0) {
+                for (const game of games) {
+                    if (game.id && isJogoRelevantForSync({ rating: game.rating, ratingCount: game.rating_count })) {
+                        gameIds.add(game.id);
+                    }
+                }
+                offset += games.length;
+                hasMore = games.length === limit;
+            } else {
+                hasMore = false;
+            }
+            await delay(250);
+        }
+        logger.info(`Total de ${gameIds.size} IDs de jogos populares IGDB.`);
+        return Array.from(gameIds);
+    } catch (error: any) {
+        logger.error(`Erro ao buscar jogos populares: ${error.message || error}`);
+        return [];
+    }
+}
+
 async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId: number | null = null): Promise<void> {
     if (gameIds.length === 0) return;
 
     const query = `
-        fields name, summary, cover.url, first_release_date, rating, 
+        fields name, summary, cover.url, first_release_date, rating, rating_count,
                genres.name, genres.id, 
                involved_companies.company.name, involved_companies.company.id, involved_companies.developer, involved_companies.publisher, 
                platforms.name, platforms.id, 
@@ -106,6 +140,14 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
         for (const game of games) {
 
             try {
+                if (!isJogoRelevantForSync({ rating: game.rating, ratingCount: game.rating_count })) {
+                    logger.info(
+                      `⏭️ Jogo [${game.id}] "${game.name}" ignorado: critérios de sync ` +
+                      `(rating=${game.rating ?? 0}).`
+                    );
+                    continue;
+                }
+
                 const brReleaseDate = game.release_dates?.find((rd: any) => rd.region === 2)?.date;
                 const firstReleaseDate = brReleaseDate ? new Date(brReleaseDate * 1000) : (game.first_release_date ? new Date(game.first_release_date * 1000) : null);
                 const coverUrl = game.cover?.url ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') : null;
@@ -234,6 +276,22 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
 
     try {
         await getIgdbAccessToken();
+
+        const popularIds = await fetchPopularGameIds();
+        if (popularIds.length > 0) {
+            let idsToSync = popularIds;
+            if (limit) {
+                idsToSync = idsToSync.slice(0, limit);
+            }
+            const batchSize = 100;
+            for (let i = 0; i < idsToSync.length; i += batchSize) {
+                const batch = idsToSync.slice(i, i + batchSize);
+                logger.info(`Processando lote curado de jogos: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
+                await processGameBatch(batch, prisma);
+                await delay(250);
+            }
+        }
+
         const events = await fetchAndSyncEvents(prisma, startDateArg, endDateArg);
 
         const processedEventGameIds = new Set<number>();
