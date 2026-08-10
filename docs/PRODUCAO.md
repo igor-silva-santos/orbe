@@ -73,8 +73,18 @@ Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 | `IGDB_CLIENT_ID` | sim | Client ID IGDB |
 | `IGDB_CLIENT_SECRET` | sim | Client secret IGDB |
 | `CORS_ORIGIN` | sim | `https://orbe-seven.vercel.app,http://localhost:3000` |
-| `REDIS_URL` | não | Deixe vazio se não usar cache Redis |
+| `REDIS_URL` | recomendado | **Redis URL** do Upstash (`rediss://...`) — **não** a REST URL (`https://`) |
 | `IGDB_WEBHOOK_SECRET` | não | Só se webhooks IGDB estiverem ativos |
+
+#### Redis (Upstash) — REDIS_URL
+
+No dashboard Upstash → seu database → aba **Details**:
+
+1. Copie **Redis URL** (formato `rediss://default:TOKEN@xxxx.upstash.io:6379`).
+2. **Não** use REST URL (`https://xxxx.upstash.io`) — isso gera `ECONNREFUSED` e `address: "/"` nos logs.
+3. Render → Environment → `REDIS_URL` = valor completo, **sem aspas**.
+4. Redeploy. Log esperado: `Conectado ao Redis com sucesso.`
+5. Teste: duas requests a `/api/homepage` — a segunda deve retornar header `X-Cache: HIT`.
 
 Health check: `GET /api/health` → `{ "ok": true, "db": true }`
 
