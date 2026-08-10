@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -21,7 +21,7 @@ import {
   formatRating,
   formatNextEpisodeCard,
 } from '@/lib/media-helpers';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
 
 const useCountdown = (targetDate: string | undefined) => {
@@ -70,6 +70,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     onInteraction,
     onClick,
     isFocused,
+    priority = false,
   }, ref) => {
 
   if (!midia) {
@@ -78,6 +79,19 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const visibilityRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const node = visibilityRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { rootMargin: '120px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
@@ -87,7 +101,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
-  const countdown = useCountdown(nextAiringEpisode?.airingAt);
+  const countdown = useCountdown(isVisible ? nextAiringEpisode?.airingAt : undefined);
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
@@ -171,10 +185,13 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="relative group" ref={ref}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="relative group" ref={(node) => {
+          visibilityRef.current = node;
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}>
             <div
               className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
               onClick={onClick || handleCardClick}
@@ -187,7 +204,8 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   height={290}
                   sizes="33vw"
                   imageSize="w342"
-                  loading="lazy"
+                  loading={priority ? 'eager' : 'lazy'}
+                  priority={priority}
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
@@ -283,8 +301,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
         <TooltipContent side="bottom">
           <p>{midia.titulo_curado || midia.titulo_api}</p>
         </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    </Tooltip>
   );
 });
 

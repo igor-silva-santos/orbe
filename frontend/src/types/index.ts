@@ -263,6 +263,7 @@ export interface MidiaCardProps {
   onInteraction?: (action: UserAction, midia: Filme | Serie | Anime | Jogo) => void;
   onClick?: () => void;
   isFocused?: boolean;
+  priority?: boolean;
 }
 
 export interface HeaderProps {
