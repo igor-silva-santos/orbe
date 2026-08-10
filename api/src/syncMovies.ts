@@ -6,6 +6,7 @@ import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
+import { isMovieRelevant } from './qualityFilters';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -114,6 +115,16 @@ async function processMovieBatch(movieIds: number[], prisma: PrismaClient): Prom
 
       if (!releaseDate) {
         skippedCount++;
+        continue;
+      }
+
+      if (!isMovieRelevant(movieDetails)) {
+        skippedCount++;
+        logger.info(
+          `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: baixa relevância ` +
+          `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
+          `avg=${movieDetails.vote_average ?? 0}).`
+        );
         continue;
       }
 

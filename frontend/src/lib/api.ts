@@ -159,7 +159,7 @@ export const orbeNerdApi = {
   },
 
   getFilmeDetails: async (id: number) => {
-    return apiClient.get(`/filmes/${id}`);
+    return apiClient.get(`/filmes/${id}/details`);
   },
 
   getFilmeFilters: async () => {
@@ -172,7 +172,7 @@ export const orbeNerdApi = {
   },
 
   getSerieDetails: async (id: number) => {
-    return apiClient.get(`/series/${id}`);
+    return apiClient.get(`/series/${id}/details`);
   },
 
   getSerieFilters: async () => {
@@ -185,7 +185,7 @@ export const orbeNerdApi = {
   },
 
   getAnimeDetails: async (id: number) => {
-    return apiClient.get(`/animes/${id}`);
+    return apiClient.get(`/animes/${id}/details`);
   },
 
   getAnimeFilters: async () => {
@@ -202,7 +202,7 @@ export const orbeNerdApi = {
   },
 
   getJogoDetails: async (id: number) => {
-    return apiClient.get(`/jogos/${id}`);
+    return apiClient.get(`/jogos/${id}/details`);
   },
 
   getJogoFilters: async () => {
