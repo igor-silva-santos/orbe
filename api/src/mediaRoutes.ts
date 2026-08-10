@@ -160,9 +160,19 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
 // Hoje — cinema + streaming popular da semana + destaques de jogos
 router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const streamingFilmeFilters = [
+    filmeCarouselQualityFilter,
+    filmeCarouselLocalizationFilter,
+    { streamingProviders: { some: {} } },
+    { emCartaz: false },
+  ];
 
   try {
-    const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
+    const [cinema, streamingFilmesWeek, streamingFilmesFallback, streamingSeriesWeek, streamingSeriesFallback, destaquesJogos] =
+      await Promise.all([
       prisma.filme.findMany({
         where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
         orderBy: { popularity: 'desc' },
@@ -171,13 +181,14 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
       }),
       prisma.filme.findMany({
         where: {
-          AND: [
-            filmeCarouselQualityFilter,
-            filmeCarouselLocalizationFilter,
-            { streamingProviders: { some: {} } },
-            { emCartaz: false },
-          ],
+          AND: [...streamingFilmeFilters, { releaseDate: { gte: weekAgo, lte: now } }],
         },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.filme.findMany({
+        where: { AND: streamingFilmeFilters },
         orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
         include: { streamingProviders: { include: { provider: true } } },
@@ -187,7 +198,21 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
           AND: [
             serieQualityFilter,
             { streamingProviders: { some: {} } },
+            {
+              OR: [
+                { lastAirDate: { gte: weekAgo, lte: now } },
+                { firstAirDate: { gte: weekAgo, lte: now } },
+              ],
+            },
           ],
+        },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [serieQualityFilter, { streamingProviders: { some: {} } }],
         },
         orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
@@ -203,6 +228,18 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         },
       }),
     ]);
+
+    const dedupeFilmes = <T extends { tmdbId: number }>(items: T[]) => {
+      const seen = new Set<number>();
+      return items.filter((item) => {
+        if (seen.has(item.tmdbId)) return false;
+        seen.add(item.tmdbId);
+        return true;
+      });
+    };
+
+    const streamingFilmes = dedupeFilmes([...streamingFilmesWeek, ...streamingFilmesFallback]).slice(0, 12);
+    const streamingSeries = dedupeFilmes([...streamingSeriesWeek, ...streamingSeriesFallback]).slice(0, 12);
 
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
@@ -1056,32 +1093,31 @@ router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
-// Jogos em alta da semana — agrupados por categoria, modo e plataforma
-router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+// Jogos em alta da semana — blocos por plataforma e modo de jogo
+router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const perGroup = 8;
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  const buildSections = (
-    jogos: ReturnType<typeof mapJogoToMidia>[],
-    getKeys: (jogo: ReturnType<typeof mapJogoToMidia>) => string[]
-  ) => {
-    const keySet = new Set<string>();
-    for (const jogo of jogos) {
-      getKeys(jogo).forEach((k) => keySet.add(k));
-    }
+  type MappedJogo = ReturnType<typeof mapJogoToMidia>;
 
-    const sections = Array.from(keySet).map((nome) => {
-      const jogosDoGrupo = jogos
-        .filter((j) => getKeys(j).includes(nome))
-        .slice(0, perGroup);
-      return { nome, jogos: jogosDoGrupo, total: jogosDoGrupo.length };
-    });
+  const PLATFORM_BLOCKS: { id: string; nome: string; match: (name: string) => boolean }[] = [
+    { id: 'xbox', nome: 'Xbox', match: (n) => /xbox/i.test(n) },
+    { id: 'playstation', nome: 'PlayStation', match: (n) => /playstation|ps4|ps5|ps vita/i.test(n) },
+    { id: 'nintendo', nome: 'Nintendo', match: (n) => /nintendo|switch|wii|3ds/i.test(n) },
+    { id: 'pc', nome: 'PC', match: (n) => /\b(pc|windows|steam|mac)\b/i.test(n) },
+  ];
 
-    return sections
-      .filter((s) => s.total >= 2)
-      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'));
-  };
+  const MODE_BLOCKS: { id: string; nome: string; match: (mode: string) => boolean }[] = [
+    { id: 'multiplayer', nome: 'Multijogador', match: (m) => /multijogador|multiplayer|mmo|battle royale/i.test(m) },
+    { id: 'coop', nome: 'Cooperativo', match: (m) => /cooperativo|co-op|cooperative/i.test(m) },
+    { id: 'single', nome: 'Um jogador', match: (m) => /um jogador|single player/i.test(m) },
+  ];
+
+  const pickForBlock = (
+    jogos: MappedJogo[],
+    matches: (jogo: MappedJogo) => boolean
+  ): MappedJogo[] => jogos.filter(matches).slice(0, perGroup);
 
   try {
     const recentJogos = await prisma.jogo.findMany({
@@ -1108,17 +1144,48 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
 
     const mapped = recentJogos.map(mapJogoToMidia);
 
+    const plataformas = PLATFORM_BLOCKS.map((block) => {
+      const jogos = pickForBlock(mapped, (j) =>
+        (j.plataformas_api || []).some((p: { nome?: string }) => block.match(p.nome || ''))
+      );
+      return { id: block.id, nome: block.nome, jogos, total: jogos.length };
+    }).filter((s) => s.total > 0);
+
+    const modos = MODE_BLOCKS.map((block) => {
+      const jogos = pickForBlock(mapped, (j) =>
+        (j.modos_jogo || []).some((m: string) => block.match(m))
+      );
+      return { id: block.id, nome: block.nome, jogos, total: jogos.length };
+    }).filter((s) => s.total > 0);
+
+    const genreMap = new Map<string, MappedJogo[]>();
+    for (const jogo of mapped) {
+      for (const genero of jogo.generos_api || []) {
+        if (!genreMap.has(genero)) genreMap.set(genero, []);
+        const list = genreMap.get(genero)!;
+        if (list.length < perGroup && !list.some((j) => j.id === jogo.id)) {
+          list.push(jogo);
+        }
+      }
+    }
+
+    const categorias = Array.from(genreMap.entries())
+      .map(([nome, jogos]) => ({ nome, jogos, total: jogos.length }))
+      .filter((s) => s.total >= 2)
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'))
+      .slice(0, 6);
+
     const now = new Date();
     const weekLabel = `Semana ${Math.ceil(now.getDate() / 7)} · ${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
 
     res.json({
       semana: weekLabel,
+      metrica:
+        'Ranking por hype da IGDB (interesse da comunidade) e nota dos jogadores. Não reflete dados oficiais de "mais jogados" por plataforma.',
       destaques: mapped.slice(0, 12),
-      categorias: buildSections(mapped, (j) => j.generos_api || []),
-      modos: buildSections(mapped, (j) => j.modos_jogo || []),
-      plataformas: buildSections(mapped, (j) =>
-        (j.plataformas_api || []).map((p: { nome?: string }) => p.nome).filter(Boolean) as string[]
-      ),
+      plataformas,
+      modos,
+      categorias,
     });
   } catch (error) {
     logger.error(`Erro ao buscar jogos em alta: ${error}`);
