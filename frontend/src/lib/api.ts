@@ -262,7 +262,7 @@ export const orbeNerdApi = {
   },
 
   // Premiações
-  getAwards: async (params?: { awardName?: string; year?: number }) => {
+  getAwards: async (params?: { awardName?: string; year?: number; page?: number; limit?: number }) => {
     return apiClient.get('/premios', params);
   },
 

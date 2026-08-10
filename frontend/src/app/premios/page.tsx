@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Award, Calendar } from 'lucide-react';
+import { Award, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Filme, Serie, Anime, Jogo, TipoMidia } from '@/types';
@@ -10,14 +10,20 @@ type AwardItem = (Filme | Serie | Anime | Jogo) & { type: TipoMidia };
 
 import PageHeader from '@/components/layout/PageHeader';
 
+const PAGE_SIZE = 48;
+
 export default function PremiosPage() {
   const [awards, setAwards] = useState<AwardItem[]>([]);
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAwardName, setSelectedAwardName] = useState<string>('todos');
   const [selectedYear, setSelectedYear] = useState<string>('todos');
 
   const [availableAwards, setAvailableAwards] = useState<string[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
+
+  const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
 
   useEffect(() => {
     const loadFilters = async () => {
@@ -33,14 +39,21 @@ export default function PremiosPage() {
   }, []);
 
   useEffect(() => {
+    setPage(1);
+  }, [selectedAwardName, selectedYear]);
+
+  useEffect(() => {
     const loadAwards = async () => {
       setIsLoading(true);
       try {
         const response = await orbeNerdApi.getAwards({
           awardName: selectedAwardName === 'todos' ? undefined : selectedAwardName,
           year: selectedYear === 'todos' ? undefined : parseInt(selectedYear),
+          page,
+          limit: PAGE_SIZE,
         });
-        setAwards(response);
+        setAwards(response.results ?? []);
+        setTotalResults(response.total ?? 0);
       } catch (error) {
         console.error('Erro ao carregar premiações:', error);
       } finally {
@@ -49,7 +62,7 @@ export default function PremiosPage() {
     };
 
     loadAwards();
-  }, [selectedAwardName, selectedYear]);
+  }, [selectedAwardName, selectedYear, page]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
@@ -57,7 +70,6 @@ export default function PremiosPage() {
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Filtro por Nome do Prêmio */}
           <div className="flex items-center gap-2 w-full">
             <Award className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedAwardName} onChange={(e) => setSelectedAwardName(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
@@ -67,7 +79,6 @@ export default function PremiosPage() {
               ))}
             </select>
           </div>
-          {/* Filtro por Ano */}
           <div className="flex items-center gap-2 w-full">
             <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary">
@@ -80,10 +91,35 @@ export default function PremiosPage() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-muted-foreground">
-          {isLoading ? 'Carregando...' : `${awards.length} ${awards.length === 1 ? 'premiação encontrada' : 'premiações encontradas'}`}
+          {isLoading ? 'Carregando...' : `${totalResults} ${totalResults === 1 ? 'premiação encontrada' : 'premiações encontradas'}`}
         </p>
+        {!isLoading && totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              disabled={page <= 1}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-border disabled:opacity-40"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Página {page} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              disabled={page >= totalPages}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-border disabled:opacity-40"
+            >
+              Próxima
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
