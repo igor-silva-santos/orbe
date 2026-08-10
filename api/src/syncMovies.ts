@@ -6,7 +6,7 @@ import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
-import { isMovieRelevantForSync, hasPortugueseLocalization } from './qualityFilters';
+import { isMovieRelevantForSync, hasPortugueseLocalization, isConcertOrLiveRecording } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
 import { isOpenPeriod } from './syncDateHelpers';
@@ -313,6 +313,12 @@ async function processMovieBatch(
 
       const flags = sourceFlags.get(id) ?? {};
       const isCinemaCurated = flags.emCartaz || flags.emBreve;
+
+      if (isConcertOrLiveRecording(movieDetails)) {
+        skippedCount++;
+        logger.info(`⏭️ Filme [${id}] "${movieDetails.title}" ignorado: show/concerto ao vivo (não é filme).`);
+        continue;
+      }
 
       if (
         period &&
