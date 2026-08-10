@@ -2,7 +2,7 @@
 
 import { Jogo, CalendarModalData } from '@/types';
 import JogoInfoBlock from './JogoInfoBlock';
-import { getGameStores } from '@/lib/media-helpers';
+import { getGameStores, sanitizeTranslatedText } from '@/lib/media-helpers';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import SafeImage from '@/components/ui/SafeImage';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -19,7 +19,9 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
 
   const trailerKey = jogo.trailer_key || jogo.videos?.find((v) => v.key)?.key;
   const gameStores = getGameStores(jogo);
-  const synopsis = jogo.sinopse || '(não informado)';
+  const synopsis = jogo.sinopse
+    ? sanitizeTranslatedText(jogo.sinopse) || '(não informado)'
+    : '(não informado)';
 
   return (
     <div className="p-4 md:p-6 space-y-6">

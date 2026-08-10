@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useEmblaWheelScroll } from '@/hooks/useEmblaWheelScroll';
+import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from '../media/MidiaCard';
@@ -33,17 +32,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const previousSelectedIndex = useRef<number>(startIndex);
   const itemsLengthRef = useRef(initialData.length);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    align: 'center', 
-    skipSnaps: true,
-    startIndex: startIndex,
-    dragFree: true,
-    containScroll: 'trimSnaps',
-    duration: 20,
-  });
+  const [emblaRef, emblaApi] = useOrbeCarousel({ startIndex });
 
   useFanCarouselSlides(emblaApi);
-  useEmblaWheelScroll(emblaApi);
 
   const fetchMediaByYear = useCallback(async (year: number) => {
     if (fetchingYears.current.has(year) || loadedYears.current.has(year)) {

@@ -481,22 +481,31 @@ export const normalizeSearchText = (text: string): string =>
   text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 export async function withPortugueseTranslation(mapped: Record<string, any>) {
-  const { translateToPortuguese, isTranslationError } = await import('./translation');
+  const { resolvePortugueseSynopsis } = await import('./translation');
+  const { fetchTmdbPtOverview } = await import('./tmdbOverview');
   const result = { ...mapped };
 
+  let tmdbPt: string | null = null;
+  if (mapped.type === 'filme' && mapped.id) {
+    tmdbPt = await fetchTmdbPtOverview('movie', mapped.id);
+  } else if (mapped.type === 'serie' && mapped.id) {
+    tmdbPt = await fetchTmdbPtOverview('tv', mapped.id);
+  }
+
   if (typeof result.sinopse === 'string') {
-    const translated = await translateToPortuguese(result.sinopse);
-    if (translated && !isTranslationError(translated)) {
+    const translated = await resolvePortugueseSynopsis(result.sinopse, tmdbPt);
+    if (translated && !translated.match(/MYMEMORY\s+WARNING/i)) {
       result.sinopse = translated;
     }
   }
   if (typeof result.overview === 'string') {
-    const translated = await translateToPortuguese(result.overview);
-    if (translated && !isTranslationError(translated)) {
+    const translated = await resolvePortugueseSynopsis(result.overview, tmdbPt);
+    if (translated && !translated.match(/MYMEMORY\s+WARNING/i)) {
       result.overview = translated;
     }
   }
   if (Array.isArray(result.temas)) {
+    const { translateToPortuguese, isTranslationError } = await import('./translation');
     result.temas = await Promise.all(
       result.temas.map(async (theme: string) => {
         const translated = await translateToPortuguese(theme);

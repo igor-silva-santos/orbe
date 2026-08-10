@@ -2,6 +2,27 @@ import { Midia, Filme, Serie, Anime, Jogo, Character } from '@/types';
 
 export const NOT_INFORMED = '(não informado)';
 
+/** Título de filme unificado — API TMDB (`title`) ou card/listagem (`titulo_api`) */
+export const resolveFilmeTitle = (filme: {
+  title?: string | null;
+  titulo_api?: string | null;
+  titulo_curado?: string | null;
+}): string =>
+  filme.title?.trim() ||
+  filme.titulo_curado?.trim() ||
+  filme.titulo_api?.trim() ||
+  'Filme';
+
+/** Poster de filme — detalhes TMDB ou card da API Orbe */
+export const resolveFilmePoster = (filme: {
+  posterPath?: string | null;
+  poster_url_api?: string | null;
+  poster_curado?: string | null;
+}): string | null => {
+  if (filme.posterPath) return `https://image.tmdb.org/t/p/w500${filme.posterPath}`;
+  return filme.poster_curado || filme.poster_url_api || null;
+};
+
 /**
  * Normaliza o nome de um provedor de streaming para um valor padrão.
  */
@@ -177,7 +198,8 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
  * @param role A função em inglês.
  * @returns A função traduzida ou a original se não houver tradução.
  */
-export const translateRole = (role: string): string => {
+export const translateRole = (role?: string | null): string => {
+  if (!role) return NOT_INFORMED;
   const roleDictionary: { [key: string]: string } = {
     'Director': 'Diretor(a)',
     'Screenplay': 'Roteiro',

@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { broadcast } from './index';
 import { isMovieRelevantForSync } from './qualityFilters';
+import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -230,7 +231,12 @@ async function processMovieBatch(
         tmdbId: movieDetails.id,
         title: movieDetails.title!,
         originalTitle: movieDetails.original_title,
-        overview: movieDetails.overview,
+        overview: isLikelyEnglish(movieDetails.overview)
+          ? (await translateSynopsisForStorage(movieDetails.overview, {
+              tmdbId: movieDetails.id,
+              mediaType: 'movie',
+            })) ?? movieDetails.overview
+          : movieDetails.overview,
         releaseDate: releaseDate,
         runtime: movieDetails.runtime,
         budget: BigInt(movieDetails.budget || 0),
