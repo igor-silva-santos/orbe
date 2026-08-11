@@ -9,6 +9,12 @@ import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
+function isAuthError(error: any): boolean {
+  const status = error?.response?.status;
+  return status === 401 || status === 403;
+}
+
 async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
     let attempt = 0;
     while (attempt < maxRetries) {
@@ -110,6 +116,10 @@ async function fetchPopularGameIds(): Promise<number[]> {
         logger.info(`Total de ${gameIds.size} IDs de jogos populares IGDB.`);
         return Array.from(gameIds);
     } catch (error: any) {
+        if (isAuthError(error)) {
+          logger.error(`❌ Erro de autenticação IGDB — abortando sync (client/token inválido): ${error.message || error}`);
+          throw error;
+        }
         logger.error(`Erro ao buscar jogos populares (retornando ${gameIds.size} IDs parciais já coletados): ${error.message || error}`);
         return Array.from(gameIds);
     }
@@ -221,11 +231,27 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
 
                 const existingGame = await prisma.jogo.findUnique({ where: { igdbId: game.id } });
 
-                await prisma.jogo.upsert({
-                    where: { igdbId: game.id },
-                    update: updateData,
-                    create: createData,
-                });
+                if (existingGame) {
+                    await prisma.jogo.update({
+                        where: { igdbId: game.id },
+                        data: {
+                            ...updateData,
+                            genres: { deleteMany: {}, create: createData.genres.create },
+                            companies: { deleteMany: {}, create: createData.companies.create },
+                            platforms: { deleteMany: {}, create: createData.platforms.create },
+                            themes: { deleteMany: {}, create: createData.themes.create },
+                            playerPerspectives: { deleteMany: {}, create: createData.playerPerspectives.create },
+                            screenshots: { deleteMany: {}, create: createData.screenshots.create },
+                            artworks: { deleteMany: {}, create: createData.artworks.create },
+                            websites: { deleteMany: {}, create: createData.websites.create },
+                            videos: { deleteMany: {}, create: createData.videos.create },
+                            gameModes: { deleteMany: {}, create: createData.gameModes.create },
+                            gameEngines: { deleteMany: {}, create: createData.gameEngines.create },
+                        },
+                    });
+                } else {
+                    await prisma.jogo.create({ data: createData });
+                }
 
                 logger.info(`${existingGame ? '🔄' : '✅'} Jogo [${game.id}] "${game.name}" sincronizado.`);
 
@@ -275,6 +301,10 @@ async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string
         logger.info(`Total de ${gameIds.size} IDs de jogos únicos encontrados para o período.`);
         return Array.from(gameIds);
     } catch (error: any) {
+        if (isAuthError(error)) {
+          logger.error(`❌ Erro de autenticação IGDB — abortando sync (client/token inválido): ${error.message || error}`);
+          throw error;
+        }
         logger.error(`Erro ao buscar IDs de jogos (retornando ${gameIds.size} IDs parciais já coletados): ${error.message || error}`);
         return Array.from(gameIds);
     }

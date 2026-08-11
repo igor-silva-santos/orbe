@@ -18,6 +18,12 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 /** Teto real da TMDB para /discover e listas paginadas — page > 500 retorna erro na API. */
 const TMDB_MAX_PAGE = 500;
 
+/** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
+function isAuthError(error: any): boolean {
+  const status = error?.response?.status;
+  return status === 401 || status === 403;
+}
+
 type MovieSourceFlags = {
   emCartaz?: boolean;
   emBreve?: boolean;
@@ -92,6 +98,10 @@ async function fetchIdsFromDiscover(
 
     return Array.from(movieIds);
   } catch (error) {
+    if (isAuthError(error)) {
+      logger.error(`❌ Erro de autenticação TMDB no discover — abortando sync (chave de API inválida/sem permissão): ${error}`);
+      throw error;
+    }
     logger.error(`Erro ao buscar IDs no discover TMDB (retornando ${movieIds.size} IDs parciais já coletados): ${error}`);
     return Array.from(movieIds);
   }
@@ -130,6 +140,10 @@ async function fetchIdsFromTmdbList(
 
     return Array.from(movieIds);
   } catch (error) {
+    if (isAuthError(error)) {
+      logger.error(`❌ Erro de autenticação TMDB em ${endpoint} — abortando sync (chave de API inválida/sem permissão): ${error}`);
+      throw error;
+    }
     logger.error(`Erro ao buscar IDs de ${endpoint} (retornando ${movieIds.size} IDs parciais já coletados): ${error}`);
     return Array.from(movieIds);
   }
@@ -440,11 +454,28 @@ async function processMovieBatch(
         }
       };
 
-      await prisma.filme.upsert({
-        where: { tmdbId: id },
-        update: scalarData,
-        create: { ...scalarData, ...relationalData },
-      });
+      const existingFilme = await prisma.filme.findUnique({ where: { tmdbId: id }, select: { id: true } });
+
+      if (existingFilme) {
+        await prisma.filme.update({
+          where: { tmdbId: id },
+          data: {
+            ...scalarData,
+            genres: { deleteMany: {}, create: relationalData.genres.create },
+            companies: { deleteMany: {}, create: relationalData.companies.create },
+            countries: { deleteMany: {}, create: relationalData.countries.create },
+            languages: { deleteMany: {}, create: relationalData.languages.create },
+            cast: { deleteMany: {}, create: relationalData.cast.create },
+            crew: { deleteMany: {}, create: relationalData.crew.create },
+            videos: { deleteMany: {}, create: relationalData.videos.create },
+            streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
+          },
+        });
+      } else {
+        await prisma.filme.create({
+          data: { ...scalarData, ...relationalData },
+        });
+      }
 
       successCount++;
       const flagLabel = flags.emCartaz ? 'em cartaz' : flags.emBreve ? 'em breve' : 'período';
