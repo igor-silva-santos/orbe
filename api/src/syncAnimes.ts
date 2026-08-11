@@ -420,7 +420,8 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
 
 export type SyncAnimesOptions = {
   limit?: number;
-  onBatchComplete?: () => void | Promise<void>;
+  /** Heartbeat para evitar stale lock durante lotes longos */
+  onBatchComplete?: (info: { year: number; season: string; processed: number; total: number }) => void | Promise<void>;
 };
 
 export async function syncAnimes(year: number, seasons: string[], options?: SyncAnimesOptions) {
@@ -453,9 +454,14 @@ export async function syncAnimes(year: number, seasons: string[], options?: Sync
         logger.info(`Processando lote de animes: ${i + 1}-${Math.min(i + batchSize, animeIds.length)} de ${animeIds.length} da temporada ${translatedSeason} de ${year}`);
         await processAnimeBatch(batch);
         if (options?.onBatchComplete) {
-          await options.onBatchComplete();
+          await options.onBatchComplete({
+            year,
+            season,
+            processed: Math.min(i + batchSize, animeIds.length),
+            total: animeIds.length,
+          });
         }
-      }
+    }
   }
 }
 

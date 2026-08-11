@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale';
 
 
 import { apiClient } from '@/lib/api';
+import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import AwardsBlock from '@/components/ui/AwardsBlock';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import CalendarModal from './CalendarModal';
@@ -35,12 +36,17 @@ const SuperModal: React.FC = () => {
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
   const historyPushedRef = useRef(false);
   const isClosingRef = useRef(false);
+  const loadInFlightRef = useRef<string | null>(null);
 
   const { midia, type } = superModalData;
 
   const loadAdditionalData = useCallback(async () => {
     if (!midia || !type) return;
 
+    const requestKey = `${type}-${midia.id}`;
+    if (loadInFlightRef.current === requestKey) return;
+
+    loadInFlightRef.current = requestKey;
     setIsLoadingDetails(true);
     try {
       const data = await apiClient.get(`/${type}s/${midia.id}/details`);
@@ -49,6 +55,9 @@ const SuperModal: React.FC = () => {
       console.error('Erro ao carregar dados adicionais:', error);
       setDetails(midia);
     } finally {
+      if (loadInFlightRef.current === requestKey) {
+        loadInFlightRef.current = null;
+      }
       setIsLoadingDetails(false);
     }
   }, [midia, type]);
@@ -222,26 +231,23 @@ const SuperModal: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (isLoadingDetails) {
+      return (
+        <div className="flex items-center justify-center min-h-[min(60vh,480px)] p-12">
+          <LoadingIndicator message="Carregando detalhes..." size="lg" />
+        </div>
+      );
+    }
+
     const displayData = details || midia;
     if (!displayData) return null;
 
-    if (isLoadingDetails && !details) {
-      switch (type) {
-        case 'anime':
-          return <AnimeModalContent anime={displayData as Anime} openCalendarModal={openCalendarModal} />;
-        case 'filme':
-          return <FilmeModalContent filme={displayData as unknown as FilmeDetalhes} openCalendarModal={openCalendarModal} />;
-        case 'serie':
-          return <SerieModalContent serie={displayData as Serie} openCalendarModal={openCalendarModal} />;
-        case 'jogo':
-          return <JogoModalContent jogo={displayData as Jogo} openCalendarModal={openCalendarModal} />;
-        default:
-          return null;
-      }
-    }
-
-    if (!details && !isLoadingDetails) {
-      return <div className="text-center p-8 text-destructive">Erro ao carregar detalhes.</div>;
+    if (!details) {
+      return (
+        <div className="text-center p-8 text-destructive">
+          Erro ao carregar detalhes.
+        </div>
+      );
     }
 
     if (isEditMode) {

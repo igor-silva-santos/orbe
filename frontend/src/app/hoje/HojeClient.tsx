@@ -59,7 +59,7 @@ export default function HojeClient() {
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8 space-y-10">
       <PageHeader
         title="Hoje"
-        description="O que está bombando hoje nos cinemas, streamings e jogos"
+        description="O que está nos cinemas e o que está bombando no streaming esta semana"
       />
 
       {data?.data && (
@@ -78,8 +78,8 @@ export default function HojeClient() {
       ) : data ? (
         <div className="space-y-10">
           <MediaRow title="Em cartaz nos cinemas" icon={Clapperboard} items={data.cinema} type="filme" />
-          <MediaRow title="Filmes mais populares no streaming" icon={Film} items={data.streamingFilmes} type="filme" />
-          <MediaRow title="Séries mais populares no streaming" icon={Tv} items={data.streamingSeries} type="serie" />
+          <MediaRow title="Filmes populares no streaming esta semana" icon={Film} items={data.streamingFilmes} type="filme" />
+          <MediaRow title="Séries populares no streaming esta semana" icon={Tv} items={data.streamingSeries} type="serie" />
           <MediaRow title="Jogos em destaque" icon={Gamepad2} items={data.destaquesJogos} type="jogo" />
 
           {data.cinema.length === 0 &&

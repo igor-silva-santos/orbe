@@ -5,6 +5,8 @@ import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapF
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
+  filmeCarouselQualityFilter,
+  filmeCarouselLocalizationFilter,
   filmeCarouselWhereInput,
   filterFilmesForCarousel,
   serieQualityFilter,
@@ -172,25 +174,59 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
 // Hoje — cinema + streaming popular da semana + destaques de jogos
 router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const streamingFilmeFilters = [
+    filmeCarouselQualityFilter,
+    filmeCarouselLocalizationFilter,
+    { streamingProviders: { some: {} } },
+    { emCartaz: false },
+  ];
 
   try {
-    const [cinema, streamingFilmes, streamingSeries, destaquesJogos] = await Promise.all([
-      fetchFilmesForCarousel({ emCartaz: true }, { orderBy: { popularity: 'desc' }, take: 12 }),
-      fetchFilmesForCarousel(
-        {
-          AND: [
-            { streamingProviders: { some: {} } },
-            { emCartaz: false },
-          ],
+    const [cinema, streamingFilmesWeek, streamingFilmesFallback, streamingSeriesWeek, streamingSeriesFallback, destaquesJogos] =
+      await Promise.all([
+      prisma.filme.findMany({
+        where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
+        orderBy: { popularity: 'desc' },
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.filme.findMany({
+        where: {
+          AND: [...streamingFilmeFilters, { releaseDate: { gte: weekAgo, lte: now } }],
         },
-        { orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }], take: 12 },
-      ),
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.filme.findMany({
+        where: { AND: streamingFilmeFilters },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
       prisma.serie.findMany({
         where: {
           AND: [
             serieQualityFilter,
             { streamingProviders: { some: {} } },
+            {
+              OR: [
+                { lastAirDate: { gte: weekAgo, lte: now } },
+                { firstAirDate: { gte: weekAgo, lte: now } },
+              ],
+            },
           ],
+        },
+        orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
+        take: 12,
+        include: { streamingProviders: { include: { provider: true } } },
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [serieQualityFilter, { streamingProviders: { some: {} } }],
         },
         orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
@@ -206,6 +242,18 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         },
       }),
     ]);
+
+    const dedupeFilmes = <T extends { tmdbId: number }>(items: T[]) => {
+      const seen = new Set<number>();
+      return items.filter((item) => {
+        if (seen.has(item.tmdbId)) return false;
+        seen.add(item.tmdbId);
+        return true;
+      });
+    };
+
+    const streamingFilmes = dedupeFilmes([...streamingFilmesWeek, ...streamingFilmesFallback]).slice(0, 12);
+    const streamingSeries = dedupeFilmes([...streamingSeriesWeek, ...streamingSeriesFallback]).slice(0, 12);
 
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
@@ -1022,32 +1070,78 @@ router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   }
 });
 
-// Jogos em alta da semana — agrupados por categoria, modo e plataforma
-router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+// Steam — mais jogados e promoções (dados sincronizados)
+router.get('/jogos/steam/trending', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  try {
+    const jogos = await prisma.jogo.findMany({
+      where: {
+        AND: [jogoQualityFilter, { steamPlayerCount: { not: null } }],
+      },
+      orderBy: { steamPlayerCount: 'desc' },
+      take: 25,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+      },
+    });
+    res.json({
+      fonte: 'steam',
+      jogos: jogos.map(mapJogoToMidia),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar Steam trending: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar jogos mais jogados na Steam.' });
+  }
+});
+
+router.get('/jogos/steam/sales', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+  try {
+    const jogos = await prisma.jogo.findMany({
+      where: {
+        AND: [jogoQualityFilter, { steamDiscountPercent: { gte: 5 } }],
+      },
+      orderBy: [{ steamDiscountPercent: 'desc' }, { rating: 'desc' }],
+      take: 25,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+      },
+    });
+    res.json({
+      fonte: 'steam',
+      jogos: jogos.map(mapJogoToMidia),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar Steam sales: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar promoções Steam.' });
+  }
+});
+
+// Jogos em alta da semana — blocos por plataforma, modo de jogo e Steam
+router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const perGroup = 8;
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  const buildSections = (
-    jogos: ReturnType<typeof mapJogoToMidia>[],
-    getKeys: (jogo: ReturnType<typeof mapJogoToMidia>) => string[]
-  ) => {
-    const keySet = new Set<string>();
-    for (const jogo of jogos) {
-      getKeys(jogo).forEach((k) => keySet.add(k));
-    }
+  type MappedJogo = ReturnType<typeof mapJogoToMidia>;
 
-    const sections = Array.from(keySet).map((nome) => {
-      const jogosDoGrupo = jogos
-        .filter((j) => getKeys(j).includes(nome))
-        .slice(0, perGroup);
-      return { nome, jogos: jogosDoGrupo, total: jogosDoGrupo.length };
-    });
+  const PLATFORM_BLOCKS: { id: string; nome: string; match: (name: string) => boolean }[] = [
+    { id: 'xbox', nome: 'Xbox', match: (n) => /xbox/i.test(n) },
+    { id: 'playstation', nome: 'PlayStation', match: (n) => /playstation|ps4|ps5|ps vita/i.test(n) },
+    { id: 'nintendo', nome: 'Nintendo', match: (n) => /nintendo|switch|wii|3ds/i.test(n) },
+    { id: 'pc', nome: 'PC', match: (n) => /\b(pc|windows|steam|mac)\b/i.test(n) },
+  ];
 
-    return sections
-      .filter((s) => s.total >= 2)
-      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'));
-  };
+  const MODE_BLOCKS: { id: string; nome: string; match: (mode: string) => boolean }[] = [
+    { id: 'multiplayer', nome: 'Multijogador', match: (m) => /multijogador|multiplayer|mmo|battle royale/i.test(m) },
+    { id: 'coop', nome: 'Cooperativo', match: (m) => /cooperativo|co-op|cooperative/i.test(m) },
+    { id: 'single', nome: 'Um jogador', match: (m) => /um jogador|single player/i.test(m) },
+  ];
+
+  const pickForBlock = (
+    jogos: MappedJogo[],
+    matches: (jogo: MappedJogo) => boolean
+  ): MappedJogo[] => jogos.filter(matches).slice(0, perGroup);
 
   try {
     const recentJogos = await prisma.jogo.findMany({
@@ -1074,17 +1168,85 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
 
     const mapped = recentJogos.map(mapJogoToMidia);
 
+    const steamTrending = await prisma.jogo.findMany({
+      where: {
+        AND: [
+          jogoQualityFilter,
+          { steamPlayerCount: { not: null } },
+        ],
+      },
+      orderBy: { steamPlayerCount: 'desc' },
+      take: 12,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+        gameModes: { include: { gameMode: true } },
+      },
+    });
+
+    const steamSales = await prisma.jogo.findMany({
+      where: {
+        AND: [
+          jogoQualityFilter,
+          { steamDiscountPercent: { gte: 10 } },
+        ],
+      },
+      orderBy: [{ steamDiscountPercent: 'desc' }, { rating: 'desc' }],
+      take: 12,
+      include: {
+        platforms: { include: { plataforma: true } },
+        genres: { include: { genero: true } },
+        gameModes: { include: { gameMode: true } },
+      },
+    });
+
+    const hasSteamData = steamTrending.length > 0 || steamSales.length > 0;
+
+    const plataformas = PLATFORM_BLOCKS.map((block) => {
+      const jogos = pickForBlock(mapped, (j) =>
+        (j.plataformas_api || []).some((p: { nome?: string }) => block.match(p.nome || ''))
+      );
+      return { id: block.id, nome: block.nome, jogos, total: jogos.length };
+    }).filter((s) => s.total > 0);
+
+    const modos = MODE_BLOCKS.map((block) => {
+      const jogos = pickForBlock(mapped, (j) =>
+        (j.modos_jogo || []).some((m: string) => block.match(m))
+      );
+      return { id: block.id, nome: block.nome, jogos, total: jogos.length };
+    }).filter((s) => s.total > 0);
+
+    const genreMap = new Map<string, MappedJogo[]>();
+    for (const jogo of mapped) {
+      for (const genero of jogo.generos_api || []) {
+        if (!genreMap.has(genero)) genreMap.set(genero, []);
+        const list = genreMap.get(genero)!;
+        if (list.length < perGroup && !list.some((j) => j.id === jogo.id)) {
+          list.push(jogo);
+        }
+      }
+    }
+
+    const categorias = Array.from(genreMap.entries())
+      .map(([nome, jogos]) => ({ nome, jogos, total: jogos.length }))
+      .filter((s) => s.total >= 2)
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome, 'pt-BR'))
+      .slice(0, 6);
+
     const now = new Date();
     const weekLabel = `Semana ${Math.ceil(now.getDate() / 7)} · ${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
 
     res.json({
       semana: weekLabel,
+      metrica: hasSteamData
+        ? 'Ranking combinado: dados Steam (jogadores ativos e promoções) + hype IGDB e nota dos jogadores.'
+        : 'Ranking por hype da IGDB (interesse da comunidade) e nota dos jogadores. Configure STEAM_API_KEY para dados de mais jogados na Steam.',
       destaques: mapped.slice(0, 12),
-      categorias: buildSections(mapped, (j) => j.generos_api || []),
-      modos: buildSections(mapped, (j) => j.modos_jogo || []),
-      plataformas: buildSections(mapped, (j) =>
-        (j.plataformas_api || []).map((p: { nome?: string }) => p.nome).filter(Boolean) as string[]
-      ),
+      steam_mais_jogados: steamTrending.map(mapJogoToMidia),
+      steam_promocoes: steamSales.map(mapJogoToMidia),
+      plataformas,
+      modos,
+      categorias,
     });
   } catch (error) {
     logger.error(`Erro ao buscar jogos em alta: ${error}`);
@@ -1093,7 +1255,7 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
 });
 
 // Rota para Conteúdo em Alta (Trending)
-router.get('/trending', async (req, res) => {
+router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { type, limit = 10 } = req.query;
   const take = parseInt(limit as string, 10);
 
@@ -1179,6 +1341,8 @@ router.get('/trending', async (req, res) => {
 });
 
 // Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
+const SEARCH_RESULT_LIMIT = 50;
+
 const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
   const { q, category } = req.query;
 
@@ -1189,19 +1353,31 @@ const searchHandler = async (req: import('express').Request, res: import('expres
   try {
     const normalizedQ = normalizeSearchText(q);
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
+    const qTrim = q.trim();
 
     const matchesQuery = (text: string | null | undefined) =>
       !!text && normalizeSearchText(text).includes(normalizedQ);
+
+    const accentFilter = <T>(
+      items: T[],
+      fields: ((item: T) => string | null | undefined)[],
+    ): T[] => items.filter((item) => fields.some((f) => matchesQuery(f(item))));
 
     const promises = [];
 
     if (!categoryFilter || categoryFilter === 'filmes') {
       promises.push(
         prisma.filme.findMany({
-          take: 1500,
+          take: SEARCH_RESULT_LIMIT,
+          where: {
+            OR: [
+              { title: { contains: qTrim, mode: 'insensitive' } },
+              { originalTitle: { contains: qTrim, mode: 'insensitive' } },
+            ],
+          },
           orderBy: { popularity: 'desc' },
           include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => items.filter((f) => matchesQuery(f.title) || matchesQuery(f.originalTitle)))
+        }).then((items) => accentFilter(items, [(f) => f.title, (f) => f.originalTitle]))
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -1210,10 +1386,16 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     if (!categoryFilter || categoryFilter === 'series') {
       promises.push(
         prisma.serie.findMany({
-          take: 1500,
+          take: SEARCH_RESULT_LIMIT,
+          where: {
+            OR: [
+              { name: { contains: qTrim, mode: 'insensitive' } },
+              { originalName: { contains: qTrim, mode: 'insensitive' } },
+            ],
+          },
           orderBy: { popularity: 'desc' },
           include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => items.filter((s) => matchesQuery(s.name) || matchesQuery(s.originalName)))
+        }).then((items) => accentFilter(items, [(s) => s.name, (s) => s.originalName]))
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -1222,11 +1404,18 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     if (!categoryFilter || categoryFilter === 'animes') {
       promises.push(
         prisma.anime.findMany({
-          take: 1500,
+          take: SEARCH_RESULT_LIMIT,
+          where: {
+            OR: [
+              { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
+              { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
+              { titleNative: { contains: qTrim, mode: 'insensitive' } },
+            ],
+          },
           orderBy: { popularity: 'desc' },
-        }).then((items) => items.filter((a) =>
-          matchesQuery(a.titleRomaji) || matchesQuery(a.titleEnglish) || matchesQuery(a.titleNative)
-        ))
+        }).then((items) =>
+          accentFilter(items, [(a) => a.titleRomaji, (a) => a.titleEnglish, (a) => a.titleNative])
+        )
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -1235,9 +1424,10 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     if (!categoryFilter || categoryFilter === 'jogos') {
       promises.push(
         prisma.jogo.findMany({
-          take: 1500,
+          take: SEARCH_RESULT_LIMIT,
+          where: { name: { contains: qTrim, mode: 'insensitive' } },
           orderBy: { rating: 'desc' },
-        }).then((items) => items.filter((j) => matchesQuery(j.name)))
+        }).then((items) => accentFilter(items, [(j) => j.name]))
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -1246,10 +1436,10 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     const [filmes, series, animes, jogos] = await Promise.all(promises);
 
     res.json({
-      filmes: await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-      series: await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
-      animes: await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
-      jogos: await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+      filmes: filmes.map((f) => mapFilmeToMidia(f)),
+      series: series.map((s) => mapSerieToMidia(s)),
+      animes: animes.map((a) => mapAnimeToMidia(a)),
+      jogos: jogos.map((j) => mapJogoToMidia(j)),
     });
 
   } catch (error) {

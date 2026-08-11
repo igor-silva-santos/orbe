@@ -26,8 +26,8 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('apple')) return 'apple';
   if (lower.includes('crunchyroll')) return 'crunchyroll';
   if (lower.includes('star+') || lower.includes('star plus') || lower.includes('starplus')) return 'star';
-  if (lower.includes('globoplay') || lower.includes('globo-play') || lower.includes('globo play')) return 'globoplay';
-  if (lower.includes('claro')) return 'claro';
+  if (lower.includes('globoplay') || lower.includes('globo-play') || lower.includes('globo play') || lower === 'globo') return 'globoplay';
+  if (lower.includes('claro') || lower.includes('claro-tv')) return 'claro';
   if (lower.includes('playstation') || lower === 'ps4' || lower === 'ps5') return 'playstation';
   if (lower.includes('xbox')) return 'xbox';
   if (lower.includes('nintendo') || lower.includes('switch')) return 'nintendo';
@@ -52,7 +52,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
   const iconProps = {
     width: size,
     height: size,
-    className: `${className} object-contain`,
+    className: `${className} object-contain shrink-0`,
     alt: label,
     title: label || undefined,
   };

@@ -180,6 +180,11 @@ export interface Jogo extends Midia {
   websites?: Website[];
   temas?: string[];
   videos?: Video[];
+  steam_app_id?: number | null;
+  steam_player_count?: number | null;
+  steam_price_cents?: number | null;
+  steam_discount_percent?: number | null;
+  pc_requirements?: { minimum?: string; recommended?: string } | null;
 }
 
 export interface Preferencias {
