@@ -31,6 +31,7 @@ router.get('/comments/:tipo/:id', async (req: Request, res: Response) => {
             include: {
                 usuario: {
                     select: {
+                        id: true,
                         nome: true,
                         avatar: true
                     }
@@ -75,6 +76,7 @@ router.post('/comments', commentRateLimiter, authMiddleware, async (req: AuthReq
             include: {
                 usuario: {
                     select: {
+                        id: true,
                         nome: true,
                         avatar: true
                     }

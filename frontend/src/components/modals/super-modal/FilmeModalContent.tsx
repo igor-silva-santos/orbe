@@ -11,6 +11,7 @@ import IngressoButton from '@/components/ui/IngressoButton';
 import { buildIngressoUrl } from '@/lib/ingresso';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
+import CommentSection from './CommentSection';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -162,6 +163,8 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
           </TooltipProvider>
         </section>
       )}
+
+      <CommentSection midiaId={filme.id} tipoMidia="filme" />
     </div>
   );
 };

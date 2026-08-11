@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
+import CommentSection from './CommentSection';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -158,6 +159,8 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           </div>
         </section>
       )}
+
+      <CommentSection midiaId={serie.id} tipoMidia="serie" />
     </div>
   );
 };

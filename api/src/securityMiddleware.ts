@@ -90,6 +90,15 @@ export const interactionRateLimiter: RequestHandler = rateLimit({
   message: { error: 'Muitas interações em sequência. Aguarde um momento.' },
 });
 
+/** Formulário de contato — público, sem autenticação, alvo comum de spam */
+export const contactRateLimiter: RequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 5 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas mensagens enviadas. Aguarde alguns minutos antes de tentar novamente.' },
+});
+
 export function assertJwtSecretConfigured(): void {
   const secret = process.env.JWT_SECRET;
   const isDefault = !secret || secret === 'seu_segredo_jwt_super_secreto';

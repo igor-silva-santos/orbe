@@ -8,7 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 
-import { apiClient } from '@/lib/api';
+import orbeNerdApi, { apiClient } from '@/lib/api';
 import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import AwardsBlock from '@/components/ui/AwardsBlock';
 import PlatformIcon from '@/components/ui/PlatformIcons';
@@ -144,8 +144,14 @@ const SuperModal: React.FC = () => {
     setUserInteraction((prev) => ({ ...prev, [action]: !prev[action] }));
   };
 
-  const handleCalendarAction = (eventType: 'release' | 'ticket', eventDetails?: any) => {
+  const handleCalendarAction = async (eventType: 'release' | 'ticket', eventDetails?: any) => {
     if (!details || !midia) return;
+
+    if (!isAuthenticated) {
+      alert('Você precisa estar logado para adicionar eventos ao calendário.');
+      closeCalendarModal();
+      return;
+    }
 
     const eventsToAdd: any[] = [];
     const baseDate = (details as any).releaseDate || (details as any).firstAirDate || (details as any).startDate;
@@ -201,13 +207,20 @@ const SuperModal: React.FC = () => {
       });
     }
 
-    // TODO: Persistir no banco de dados via API
-    console.log('Eventos a serem adicionados:', eventsToAdd);
-    
-    // Feedback visual (pode ser um toast no futuro)
-    alert(`${eventsToAdd.length} evento(s) adicionado(s) ao seu calendário local.`);
-    
-    closeCalendarModal();
+    if (eventsToAdd.length === 0) {
+      closeCalendarModal();
+      return;
+    }
+
+    try {
+      await orbeNerdApi.addCalendarEvents(eventsToAdd);
+      alert(`${eventsToAdd.length} evento(s) adicionado(s) ao seu calendário.`);
+    } catch (error) {
+      console.error('Erro ao salvar eventos de calendário:', error);
+      alert('Não foi possível salvar os eventos no calendário. Tente novamente.');
+    } finally {
+      closeCalendarModal();
+    }
   };
 
   const renderPlatformIcons = (platforms: Plataforma[]) => (
