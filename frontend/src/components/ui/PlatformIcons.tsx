@@ -44,7 +44,40 @@ const normalizePlatformKey = (platform?: string | null): string => {
 };
 
 const TILE_CLASS =
-  'inline-flex items-center justify-center shrink-0 rounded-[6px] bg-white p-[3px] shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+  'inline-flex items-center justify-center shrink-0 rounded-md bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+
+const getTileClass = (iconSize: number) =>
+  `${TILE_CLASS} ${iconSize >= 26 ? 'p-1' : 'p-[3px]'}`;
+
+/** Ícones compactos para tiles pequenos (cards); wordmarks ficam ilegíveis abaixo de ~32px. */
+const GAME_TILE_ICON_SRC: Partial<Record<string, string>> = {
+  playstation: '/icons/playstation_icone_azul.svg',
+  xbox: '/icons/xbox_icone.svg',
+  nintendo: '/icons/nintendo_switch.svg',
+  steam: '/icons/steam-logo.svg',
+};
+
+const renderPcIcon = (
+  iconProps: { width: number; height: number; className: string; alt: string; title?: string },
+  useTile: boolean,
+  showTooltip: boolean,
+  label: string,
+) => {
+  if (useTile) {
+    const { width, height } = iconProps;
+    return (
+      <div
+        className={`${iconProps.className} rounded bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
+        style={{ width, height, fontSize: width * 0.38 }}
+        aria-hidden="true"
+        title={showTooltip ? label : undefined}
+      >
+        PC
+      </div>
+    );
+  }
+  return <Image src="/icons/pc.svg" {...iconProps} />;
+};
 
 const PlatformIcon: React.FC<PlatformIconProps> = ({
   platform,
@@ -70,11 +103,14 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
   const wrapWithTile = (icon: React.ReactNode) => {
     if (!useTile) return icon;
     return (
-      <span className={TILE_CLASS} title={showTooltip ? label : undefined}>
+      <span className={getTileClass(size)} title={showTooltip ? label : undefined}>
         {icon}
       </span>
     );
   };
+
+  const gameIconSrc = (key: string, defaultSrc: string) =>
+    useTile && GAME_TILE_ICON_SRC[key] ? GAME_TILE_ICON_SRC[key]! : defaultSrc;
 
   if (logoPath) {
     const src = logoPath.startsWith('http') ? logoPath : `${TMDB_LOGO_BASE}${logoPath}`;
@@ -101,13 +137,13 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'claro':
       return wrapWithTile(<Image src="/icons/claro-tv-plus.svg" {...iconProps} />);
     case 'playstation':
-      return wrapWithTile(<Image src="/icons/playstation.svg" {...iconProps} />);
+      return wrapWithTile(<Image src={gameIconSrc('playstation', '/icons/playstation.svg')} {...iconProps} />);
     case 'xbox':
-      return wrapWithTile(<Image src="/icons/xbox.svg" {...iconProps} />);
+      return wrapWithTile(<Image src={gameIconSrc('xbox', '/icons/xbox.svg')} {...iconProps} />);
     case 'nintendo':
-      return wrapWithTile(<Image src="/icons/nintendo_switch.svg" {...iconProps} />);
+      return wrapWithTile(<Image src={gameIconSrc('nintendo', '/icons/nintendo_switch.svg')} {...iconProps} />);
     case 'steam':
-      return wrapWithTile(<Image src="/icons/steam.svg" {...iconProps} />);
+      return wrapWithTile(<Image src={gameIconSrc('steam', '/icons/steam.svg')} {...iconProps} />);
     case 'epic':
       return wrapWithTile(
         <div
@@ -131,7 +167,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
         </div>
       );
     case 'pc':
-      return wrapWithTile(<Image src="/icons/pc.svg" {...iconProps} />);
+      return wrapWithTile(renderPcIcon(iconProps, useTile, showTooltip, label));
     case 'cinema':
       return wrapWithTile(<Image src="/icons/cinema.svg" {...iconProps} />);
     default:

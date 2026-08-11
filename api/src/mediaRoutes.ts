@@ -204,7 +204,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         take: HOMEPAGE_ITEM_LIMIT,
         include: {
           genres: { include: { genero: true } },
-          platforms: { include: { plataforma: true }, take: 3 },
+          platforms: { include: { plataforma: true }, take: 4 },
         },
       }),
       prisma.anime.findMany({
@@ -299,7 +299,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         take: 8,
         include: {
           genres: { include: { genero: true } },
-          platforms: { include: { plataforma: true }, take: 3 },
+          platforms: { include: { plataforma: true }, take: 4 },
         },
       }),
     ]);
@@ -1133,7 +1133,7 @@ router.get('/jogos/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) => 
       },
       take: CAROUSEL_ITEM_LIMIT,
       include: {
-        platforms: { include: { plataforma: true }, take: 3 },
+        platforms: { include: { plataforma: true }, take: 4 },
         genres: { include: { genero: true } },
       }
     });
@@ -1160,7 +1160,7 @@ router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
       orderBy: { firstReleaseDate: 'asc' },
       take: CAROUSEL_ITEM_LIMIT,
       include: {
-        platforms: { include: { plataforma: true }, take: 3 },
+        platforms: { include: { plataforma: true }, take: 4 },
         genres: { include: { genero: true } },
       },
     });
@@ -1599,7 +1599,7 @@ router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
 
   const jogoPremioInclude = {
     genres: { include: { genero: true } },
-    platforms: { include: { plataforma: true }, take: 3 },
+    platforms: { include: { plataforma: true }, take: 4 },
   };
 
   try {
@@ -1639,7 +1639,7 @@ const eventInclude = {
   games: {
     include: {
       genres: { include: { genero: true } },
-      platforms: { include: { plataforma: true }, take: 3 },
+      platforms: { include: { plataforma: true }, take: 4 },
     },
     orderBy: { rating: 'desc' as const },
     take: 40,
@@ -1736,7 +1736,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
         take: 20,
         include: {
           genres: { include: { genero: true } },
-          platforms: { include: { plataforma: true }, take: 3 },
+          platforms: { include: { plataforma: true }, take: 4 },
         },
       }),
       prisma.filme.findMany({

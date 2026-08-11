@@ -584,7 +584,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   data_lancamento_api: jogo.firstReleaseDate,
   avaliacao: jogo.rating,
   generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)).slice(0, 3) ?? [],
-  plataformas_api: (jogo.platforms ?? []).slice(0, 2).map((p: any) => ({ nome: p.plataforma.name })),
+  plataformas_api: (jogo.platforms ?? []).slice(0, 4).map((p: any) => ({ nome: p.plataforma.name })),
   steam_app_id: jogo.steamAppId ?? null,
   steam_price_cents: jogo.steamPriceCents ?? null,
   steam_discount_percent: jogo.steamDiscountPercent ?? null,

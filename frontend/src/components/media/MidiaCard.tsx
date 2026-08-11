@@ -286,8 +286,8 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 )}
                 {(type === 'jogo' ? platforms : providers).length > 0 && (
                   <div
-                    className={`flex items-center gap-1.5 overflow-x-auto overflow-y-hidden shrink-0 min-h-[28px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-                      type === 'jogo' ? 'h-[32px]' : 'h-[28px]'
+                    className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden shrink-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                      type === 'jogo' ? 'h-[40px] min-h-[40px]' : 'h-[28px] min-h-[28px]'
                     }`}
                   >
                     {(type === 'jogo' ? platforms : providers).map((p) => (
@@ -295,10 +295,10 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                         key={p.name}
                         platform={p.icon}
                         logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                        size={type === 'jogo' ? 22 : 18}
+                        size={type === 'jogo' ? 28 : 18}
                         iconOnly
                         variant="tile"
-                        className={type === 'jogo' ? 'h-[22px] w-[22px]' : 'h-[18px] w-[18px]'}
+                        className={type === 'jogo' ? 'h-7 w-7' : 'h-[18px] w-[18px]'}
                         title={p.name}
                       />
                     ))}
