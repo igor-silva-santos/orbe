@@ -33,8 +33,9 @@ const CharacterCard = ({ character }: { character: Character }) => {
   const voiceActor = character.dubladores?.[selectedDubbing];
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
         <div className="text-center w-32 cursor-pointer space-y-2">
           <div className="w-24 h-24 bg-muted rounded-full mb-1 overflow-hidden mx-auto">
             <SafeImage
@@ -87,7 +88,8 @@ const CharacterCard = ({ character }: { character: Character }) => {
       <TooltipContent>
         <p>{character.nome} ({voiceActor ? `Dub: ${voiceActor.nome}` : 'Dublador não informado'})</p>
       </TooltipContent>
-    </Tooltip>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

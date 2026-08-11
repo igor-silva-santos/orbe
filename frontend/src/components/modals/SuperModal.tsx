@@ -34,6 +34,8 @@ const SuperModal: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [details, setDetails] = useState<Filme | Serie | Anime | Jogo | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
+  const historyPushedRef = useRef(false);
+  const isClosingRef = useRef(false);
   const loadInFlightRef = useRef<string | null>(null);
 
   const { midia, type } = superModalData;
@@ -72,24 +74,42 @@ const SuperModal: React.FC = () => {
   
 
   const handleClose = useCallback(() => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
+
+    const shouldGoBack = historyPushedRef.current;
+    historyPushedRef.current = false;
     closeSuperModal();
-    if (window.history.state?.modal) {
+
+    if (shouldGoBack) {
       window.history.back();
     }
+
+    queueMicrotask(() => {
+      isClosingRef.current = false;
+    });
   }, [closeSuperModal]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') handleClose();
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      handleClose();
     };
     const handlePopState = () => {
+      historyPushedRef.current = false;
+      isClosingRef.current = true;
       closeSuperModal();
+      queueMicrotask(() => {
+        isClosingRef.current = false;
+      });
     };
 
     if (isSuperModalOpen) {
       document.body.style.overflow = 'hidden';
-      if (!window.history.state?.modal) {
-        window.history.pushState({ modal: true }, '');
+      if (window.history.state?.modal !== 'super') {
+        window.history.pushState({ modal: 'super' }, '');
+        historyPushedRef.current = true;
       }
       window.addEventListener('popstate', handlePopState);
       document.addEventListener('keydown', handleKeyDown);
@@ -266,7 +286,7 @@ const SuperModal: React.FC = () => {
     ?? midia.premiacoes;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }} onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
       <div className="container mx-auto px-4 py-8 max-w-full">
         <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden">
           <>

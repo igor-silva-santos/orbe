@@ -95,7 +95,10 @@ export async function getSyncStatus(prisma: PrismaClient): Promise<SyncStatusPub
   } else if (state.resumeAvailable || state.interrupted) {
     message = 'Há checkpoint para retomar. Use POST /api/run-sync-resume.';
   } else if (state.running) {
-    message = 'Sincronização em andamento.';
+    message =
+      state.phase === 'animes'
+        ? 'Sincronização em andamento (fase animes — pode levar horas; verifique os logs).'
+        : 'Sincronização em andamento.';
   }
 
   return {

@@ -20,16 +20,6 @@ const SearchOverlay: React.FC = () => {
     { id: 'jogos', label: 'Jogos' },
   ];
 
-  const handleClose = useCallback(() => {
-    setSearchQuery('');
-    setSelectedCategory('todos');
-    setSearchResults([]);
-    closeSearch();
-    if (window.history.state?.modal === 'search') {
-      window.history.back();
-    }
-  }, [closeSearch]);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'todos' | 'filmes' | 'series' | 'animes' | 'jogos'>('todos');
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
@@ -37,19 +27,50 @@ const SearchOverlay: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const historyPushedRef = useRef(false);
+  const isClosingRef = useRef(false);
+
+  const handleClose = useCallback(() => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
+
+    const shouldGoBack = historyPushedRef.current;
+    historyPushedRef.current = false;
+
+    setSearchQuery('');
+    setSelectedCategory('todos');
+    setSearchResults([]);
+    closeSearch();
+
+    if (shouldGoBack) {
+      window.history.back();
+    }
+
+    queueMicrotask(() => {
+      isClosingRef.current = false;
+    });
+  }, [closeSearch]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') handleClose();
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      handleClose();
     };
     const handlePopState = () => {
+      historyPushedRef.current = false;
+      isClosingRef.current = true;
       closeSearch();
+      queueMicrotask(() => {
+        isClosingRef.current = false;
+      });
     };
 
     if (isSearchOpen) {
       document.body.style.overflow = 'hidden';
-      if (!window.history.state?.modal) {
+      if (window.history.state?.modal !== 'search') {
         window.history.pushState({ modal: 'search' }, '');
+        historyPushedRef.current = true;
       }
       window.addEventListener('popstate', handlePopState);
       document.addEventListener('keydown', handleKeyDown);

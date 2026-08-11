@@ -96,16 +96,31 @@ router.post('/run-sync', protectSync, async (req, res) => {
       case 'animes': {
         const start = parseInt(startYear, 10);
         const end = parseInt(endYear, 10);
-        await updateSyncProgress(prisma, { phase: 'animes' });
+        const seasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL'] as const;
+        const totalSeasons = (end - start + 1) * seasons.length;
+        let completedSeasons = 0;
+        await updateSyncProgress(prisma, { phase: 'animes', processedInPhase: 0, totalInPhase: totalSeasons });
         const phase = runProgress.startPhase('ANIMES');
-        phase.setTotal((end - start + 1) * 4);
+        phase.setTotal(totalSeasons);
         for (let year = start; year <= end; year++) {
-          await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL'], undefined, {
-            onBatchComplete: async () => {
-              await updateSyncProgress(prisma, { phase: 'animes' });
-            },
-          });
-          phase.advance(4);
+          for (const season of seasons) {
+            await syncAnimes(year, [season], {
+              onBatchComplete: async () => {
+                await updateSyncProgress(prisma, {
+                  phase: 'animes',
+                  processedInPhase: completedSeasons,
+                  totalInPhase: totalSeasons,
+                });
+              },
+            });
+            completedSeasons++;
+            phase.advance(1);
+            await updateSyncProgress(prisma, {
+              phase: 'animes',
+              processedInPhase: completedSeasons,
+              totalInPhase: totalSeasons,
+            });
+          }
         }
         await markPhaseComplete(prisma, 'animes');
         break;

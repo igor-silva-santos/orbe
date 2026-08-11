@@ -6,6 +6,7 @@ import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
 import { isJogoRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
+import { updateSyncProgress } from './syncState';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
@@ -284,27 +285,77 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
         return;
     }
 
+    let totalBatches = 0;
+    let completedBatches = 0;
+
+    const reportProgress = async () => {
+        if (totalBatches <= 0) return;
+        await updateSyncProgress(prisma, {
+            phase: 'jogos',
+            processedInPhase: completedBatches,
+            totalInPhase: totalBatches,
+        });
+    };
+
     try {
         await getIgdbAccessToken();
+        await updateSyncProgress(prisma, { phase: 'jogos', processedInPhase: 0, totalInPhase: 0 });
 
         const popularIds = await fetchPopularGameIds();
+        const batchSize = 100;
+        const countBatches = (ids: number[]) => Math.ceil(ids.length / batchSize) || 0;
+
+        const events = await fetchAndSyncEvents(prisma, startDateArg, endDateArg);
+        const processedEventGameIds = new Set<number>();
+        const plannedEventGameIds = new Set<number>();
+
+        let allGameIds = await fetchAllGameIdsForPeriod(startDateArg, endDateArg);
+        for (const event of events) {
+            if (!event.games?.length) continue;
+            const gameIds = limit ? event.games.slice(0, limit) : event.games;
+            gameIds.forEach((id: number) => plannedEventGameIds.add(id));
+        }
+
+        const generalGameIds = allGameIds.filter((id) => !plannedEventGameIds.has(id));
+        let finalGeneralIds = generalGameIds;
+        if (limit) {
+            finalGeneralIds = generalGameIds.slice(0, limit);
+        }
+        logger.info(
+            `Sincronização geral: ${finalGeneralIds.length} jogos a processar (excluindo ${plannedEventGameIds.size} jogos de eventos).`,
+        );
+
+        let popularBatchCount = 0;
+        if (popularIds.length > 0) {
+            let idsToSync = limit ? popularIds.slice(0, limit) : popularIds;
+            popularBatchCount = countBatches(idsToSync);
+        }
+
+        let eventBatchCount = 0;
+        for (const event of events) {
+            if (event.games?.length) {
+                const gameIds = limit ? event.games.slice(0, limit) : event.games;
+                eventBatchCount += countBatches(gameIds);
+            }
+        }
+
+        totalBatches = popularBatchCount + eventBatchCount + countBatches(finalGeneralIds);
+        await reportProgress();
+
         if (popularIds.length > 0) {
             let idsToSync = popularIds;
             if (limit) {
                 idsToSync = idsToSync.slice(0, limit);
             }
-            const batchSize = 100;
             for (let i = 0; i < idsToSync.length; i += batchSize) {
                 const batch = idsToSync.slice(i, i + batchSize);
                 logger.info(`Processando lote curado de jogos: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
                 await processGameBatch(batch, prisma);
+                completedBatches++;
+                await reportProgress();
                 await delay(250);
             }
         }
-
-        const events = await fetchAndSyncEvents(prisma, startDateArg, endDateArg);
-
-        const processedEventGameIds = new Set<number>();
 
         for (const event of events) {
             if (event.games && event.games.length > 0) {
@@ -316,37 +367,17 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
                     logger.info(`Limitando a sincronização de jogos do evento a ${limit} itens.`);
                 }
 
-                const batchSize = 100;
                 for (let i = 0; i < gameIds.length; i += batchSize) {
                     const batch = gameIds.slice(i, i + batchSize);
                     logger.info(`Processando lote de jogos do evento ${event.id}: ${i + 1}-${Math.min(i + batchSize, gameIds.length)} de ${gameIds.length}`);
                     await processGameBatch(batch, prisma, event.id);
                     batch.forEach((id: number) => processedEventGameIds.add(id));
+                    completedBatches++;
+                    await reportProgress();
                     await delay(250);
                 }
             }
         }
-
-        const startDateGeneral = startDateArg;
-        const endDateGeneral = endDateArg;
-
-        if (!startDateGeneral || !endDateGeneral) {
-            logger.error('Uso: ts-node src/syncGames.ts <startDate> <endDate> [limit]');
-            process.exit(1);
-        }
-
-        let allGameIds = await fetchAllGameIdsForPeriod(startDateGeneral, endDateGeneral);
-        
-        const generalGameIds = allGameIds.filter(id => !processedEventGameIds.has(id));
-        logger.info(`Sincronização geral: ${generalGameIds.length} jogos a processar (excluindo ${processedEventGameIds.size} jogos de eventos).`);
-
-        let finalGeneralIds = generalGameIds;
-        if (limit) {
-            finalGeneralIds = generalGameIds.slice(0, limit);
-            logger.info(`Limitando a sincronização geral de jogos a ${limit} itens (de ${generalGameIds.length}).`);
-        }
-
-        const batchSize = 100;
 
         if (finalGeneralIds.length === 0) {
             logger.info('Nenhum jogo geral para atualizar.');
@@ -357,15 +388,16 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
             const batch = finalGeneralIds.slice(i, i + batchSize);
             logger.info(`Processando lote de jogos gerais: ${i + 1}-${Math.min(i + batchSize, finalGeneralIds.length)} de ${finalGeneralIds.length}`);
             await processGameBatch(batch, prisma);
+            completedBatches++;
+            await reportProgress();
             await delay(250);
         }
         
     } catch (error: any) {
         logger.error(`Erro ao sincronizar jogos: ${error.message || error}`);
-    } finally {
-        await prisma.$disconnect();
+        throw error;
     }
-};
+}
 
 const main = async () => {
     

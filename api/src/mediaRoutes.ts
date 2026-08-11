@@ -7,6 +7,8 @@ import {
   filmeQualityFilter,
   filmeCarouselQualityFilter,
   filmeCarouselLocalizationFilter,
+  filmeCarouselWhereInput,
+  filterFilmesForCarousel,
   serieQualityFilter,
   animeQualityFilter,
   animeSeasonQualityFilter,
@@ -45,11 +47,11 @@ const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { st
   return getMonthDateRange(year, month);
 };
 
-/** Janela inicial: mês anterior até +3 meses — cards do período atual sem payload gigante */
+/** Janela inicial SSR: apenas o mês atual (meses adjacentes carregam no cliente ao rolar) */
 const getHomepageDateWindow = () => {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 4, 0, 23, 59, 59, 999);
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
   return { start, end };
 };
 
@@ -57,6 +59,22 @@ const carouselLiteInclude = {
   genres: { include: { genero: true } },
   streamingProviders: { include: { provider: true }, take: 3 },
 };
+
+async function fetchFilmesForCarousel(
+  extraWhere: Prisma.FilmeWhereInput,
+  options: {
+    orderBy?: Prisma.FilmeOrderByWithRelationInput | Prisma.FilmeOrderByWithRelationInput[];
+    take?: number;
+  } = {},
+) {
+  const filmes = await prisma.filme.findMany({
+    where: { AND: [filmeCarouselWhereInput, extraWhere] },
+    orderBy: options.orderBy ?? { releaseDate: 'asc' },
+    take: options.take,
+    include: carouselLiteInclude,
+  });
+  return filterFilmesForCarousel(filmes);
+}
 
 const animeCarouselInclude = {
   genres: { include: { genero: true } },
@@ -91,36 +109,28 @@ const parseYearMonthQuery = (query: { year?: string; month?: string }) => {
   return { year, month };
 };
 
-// Homepage — payload leve: janela de ~4 meses centrada no período atual
+// Homepage — payload leve: mês atual; carrossel carrega adjacentes sob demanda
 router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
   const { start: windowStart, end: windowEnd } = getHomepageDateWindow();
 
   try {
-    const [filmes, series, jogos, animes] = await Promise.all([
-      prisma.filme.findMany({
-        where: {
-          AND: [
-            filmeCarouselQualityFilter,
-            filmeCarouselLocalizationFilter,
+    const [filmesRaw, series, jogos, animes] = await Promise.all([
+      fetchFilmesForCarousel(
+        {
+          OR: [
+            { releaseDate: { gte: windowStart, lte: windowEnd } },
             {
-              OR: [
-                { releaseDate: { gte: windowStart, lte: windowEnd } },
-                {
-                  AND: [
-                    { emCartaz: true },
-                    { releaseDate: { lte: windowEnd } },
-                  ],
-                },
+              AND: [
+                { emCartaz: true },
+                { releaseDate: { lte: windowEnd } },
               ],
             },
           ],
         },
-        orderBy: { releaseDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
-        include: carouselLiteInclude,
-      }),
+        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_ITEM_LIMIT },
+      ),
       prisma.serie.findMany({
         where: { AND: [serieQualityFilter, { firstAirDate: { gte: windowStart, lte: windowEnd } }] },
         orderBy: { firstAirDate: 'asc' },
@@ -150,7 +160,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
     ]);
 
     res.json({
-      filmes: filmes.map(mapFilmeToCarouselCard),
+      filmes: filmesRaw.map(mapFilmeToCarouselCard),
       series: series.map(mapSerieToCarouselCard),
       jogos: jogos.map(mapJogoToCarouselCard),
       animes: animes.map(mapAnimeToCarouselCard),
@@ -422,28 +432,10 @@ router.get('/filmes/homepage-carousel', async (req, res) => {
     const startDate = new Date(startYear, 0, 1);
     const endDate = new Date(endYear, 11, 31, 23, 59, 59);
 
-    const filmes = await prisma.filme.findMany({
-      where: {
-        AND: [
-          filmeCarouselQualityFilter,
-          filmeCarouselLocalizationFilter,
-          {
-            releaseDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-        ],
-      },
-      orderBy: {
-        releaseDate: 'asc',
-      },
-      take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
-    });
+    const filmes = await fetchFilmesForCarousel(
+      { releaseDate: { gte: startDate, lte: endDate } },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT },
+    );
     res.json(filmes.map(mapFilmeToMidia));
   } catch (error) {
     logger.error(`Erro ao buscar filmes para o carrossel da homepage: ${error}`);
@@ -462,25 +454,10 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   const endDate = new Date(parsedYear, 11, 31, 23, 59, 59);
 
   try {
-    const filmes = await prisma.filme.findMany({
-      where: {
-        AND: [
-          filmeCarouselQualityFilter,
-          filmeCarouselLocalizationFilter,
-          {
-            releaseDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-        ],
-      },
-      orderBy: {
-        releaseDate: 'asc',
-      },
-      take: CAROUSEL_ITEM_LIMIT,
-      include: carouselLiteInclude,
-    });
+    const filmes = await fetchFilmesForCarousel(
+      { releaseDate: { gte: startDate, lte: endDate } },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT },
+    );
     res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar filmes por ano: ${error}`);
@@ -497,14 +474,10 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
 
   try {
-    const filmes = await prisma.filme.findMany({
-      where: {
-        AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { releaseDate: { gte: startDate, lte: endDate } }],
-      },
-      orderBy: { releaseDate: 'asc' },
-      take: CAROUSEL_ITEM_LIMIT,
-      include: carouselLiteInclude,
-    });
+    const filmes = await fetchFilmesForCarousel(
+      { releaseDate: { gte: startDate, lte: endDate } },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT },
+    );
     res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar filmes por mês: ${error}`);

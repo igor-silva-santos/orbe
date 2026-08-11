@@ -419,16 +419,12 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
 }
 
 export type SyncAnimesOptions = {
+  limit?: number;
   /** Heartbeat para evitar stale lock durante lotes longos */
   onBatchComplete?: (info: { year: number; season: string; processed: number; total: number }) => void | Promise<void>;
 };
 
-export async function syncAnimes(
-  year: number,
-  seasons: string[],
-  limit?: number,
-  options?: SyncAnimesOptions,
-) {
+export async function syncAnimes(year: number, seasons: string[], options?: SyncAnimesOptions) {
   const seasonAnimeIds = await fetchSeasonAnimeIds(year, seasons);
 
   const seasonTranslations: { [key: string]: string } = {
@@ -440,9 +436,9 @@ export async function syncAnimes(
 
   for (const [season, ids] of seasonAnimeIds.entries()) {
     let animeIds = ids;
-    if (limit) {
-        animeIds = animeIds.slice(0, limit);
-        logger.info(`Limitando a sincronização de animes para a estação ${season} a ${limit} itens.`);
+    if (options?.limit) {
+        animeIds = animeIds.slice(0, options.limit);
+        logger.info(`Limitando a sincronização de animes para a estação ${season} a ${options.limit} itens.`);
     }
 
     const batchSize = 10;
@@ -486,7 +482,7 @@ const main = async () => {
   for (let year = startYear; year <= endYear; year++) {
     try {
       logger.info(`--- Iniciando sincronização para o ano ${year} ---`);
-      await syncAnimes(year, seasons, limit);
+      await syncAnimes(year, seasons, limit !== undefined ? { limit } : undefined);
       logger.info(`--- Sincronização para o ano ${year} concluída com sucesso ---`);
     } catch (error) {
       logger.error(`--- Erro fatal na sincronização de animes para o ano ${year}: ${error} ---`);

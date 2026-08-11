@@ -60,19 +60,38 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
 
     if (!phaseDone(completed, 'animes')) {
       const animeStartYear = existing?.animesResumeYear ?? startYear;
-      await updateSyncProgress(prisma, { phase: 'animes' });
+      const seasons = ['WINTER', 'SPRING', 'SUMMER', 'FALL'] as const;
+      const totalSeasons = (endYear - startYear + 1) * seasons.length;
+      let completedSeasons = (animeStartYear - startYear) * seasons.length;
+
+      await updateSyncProgress(prisma, {
+        phase: 'animes',
+        processedInPhase: completedSeasons,
+        totalInPhase: totalSeasons,
+      });
       const animePhase = runProgress.startPhase('ANIMES');
-      const yearsTotal = (endYear - animeStartYear + 1) * 4;
-      animePhase.setTotal(Math.max(0, yearsTotal));
+      animePhase.setTotal(totalSeasons);
 
       for (let year = animeStartYear; year <= endYear; year++) {
-        logger.info(`--- Animes: ano ${year} ---`);
-        await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL'], undefined, {
-          onBatchComplete: async () => {
-            await updateSyncProgress(prisma, { phase: 'animes' });
-          },
-        });
-        animePhase.advance(4);
+        for (const season of seasons) {
+          logger.info(`--- Animes: ${season} ${year} ---`);
+          await syncAnimes(year, [season], {
+            onBatchComplete: async () => {
+              await updateSyncProgress(prisma, {
+                phase: 'animes',
+                processedInPhase: completedSeasons,
+                totalInPhase: totalSeasons,
+              });
+            },
+          });
+          completedSeasons++;
+          animePhase.advance(1);
+          await updateSyncProgress(prisma, {
+            phase: 'animes',
+            processedInPhase: completedSeasons,
+            totalInPhase: totalSeasons,
+          });
+        }
         await setAnimesResumeYear(prisma, year + 1);
       }
       await markPhaseComplete(prisma, 'animes');
