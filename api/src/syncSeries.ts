@@ -46,9 +46,9 @@ async function fetchIdsFromTmdbList(
 
   try {
     do {
-      const response = await tmdbApi.get(endpoint, {
+      const response = await tmdbApiWithRetry(() => tmdbApi.get(endpoint, {
         params: { ...params, page, region: 'BR' },
-      });
+      }));
 
       if (response.data.results) {
         for (const serie of response.data.results) {
@@ -65,8 +65,8 @@ async function fetchIdsFromTmdbList(
 
     return Array.from(seriesIds);
   } catch (error) {
-    logger.error(`Erro ao buscar IDs de ${endpoint}: ${error}`);
-    return [];
+    logger.error(`Erro ao buscar IDs de ${endpoint} (retornando ${seriesIds.size} IDs parciais já coletados): ${error}`);
+    return Array.from(seriesIds);
   }
 }
 
@@ -110,9 +110,9 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
 
   try {
     do {
-      const response = await tmdbApi.get('/discover/tv', {
+      const response = await tmdbApiWithRetry(() => tmdbApi.get('/discover/tv', {
         params: { ...discoverParams, page },
-      });
+      }));
 
       if (response.data.results) {
         for (const serie of response.data.results) {
@@ -128,12 +128,12 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
       page++;
       await delay(250);
     } while (page <= totalPages);
-    
+
     logger.info(`Total de ${seriesIds.size} IDs de séries encontrados para o período.`);
     return Array.from(seriesIds);
   } catch (error) {
-    logger.error(`Erro ao buscar IDs de séries para o período: ${error}`);
-    return [];
+    logger.error(`Erro ao buscar IDs de séries para o período (retornando ${seriesIds.size} IDs parciais já coletados): ${error}`);
+    return Array.from(seriesIds);
   }
 }
 
