@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Mail, Calendar, Edit2, Shield, Settings } from 'lucide-react';
+import { User, Mail, Calendar, Edit2, Shield, Settings, Download } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
+import { API_BASE } from '@/lib/apiBase';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingLogs, setDownloadingLogs] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +28,35 @@ export default function ProfilePage() {
 
     fetchProfile();
   }, [router]);
+
+  // TEMPORÁRIO — remover após investigação de sync jun–dez
+  const handleDownloadSyncLogs = async () => {
+    setDownloadingLogs(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const response = await fetch(`${API_BASE}/sync/logs?filter=sync`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar logs (${response.status})`);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      anchor.href = url;
+      anchor.download = `orbe-sync-${stamp}.log`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao baixar log de sync:', error);
+      alert('Não foi possível baixar o log de sync. Verifique se há uma sync em andamento ou recente.');
+    } finally {
+      setDownloadingLogs(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -81,6 +112,18 @@ export default function ProfilePage() {
               <Shield className="mr-2 h-4 w-4" />
               Minha Lista
             </button>
+            {user.role === 'admin' && (
+              <button
+                type="button"
+                onClick={handleDownloadSyncLogs}
+                disabled={downloadingLogs}
+                className="flex items-center w-full px-4 py-2 bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-500/20 transition-colors text-sm font-medium disabled:opacity-50"
+                title="Temporário — investigação de sync jun–dez"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {downloadingLogs ? 'Baixando log...' : 'Baixar log de sync'}
+              </button>
+            )}
           </div>
         </div>
 
