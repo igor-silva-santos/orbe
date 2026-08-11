@@ -101,7 +101,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-3 py-2 rounded-lg transition-colors text-sm"
               >
-                <PlatformIcon platform={p.provider.name} className="h-5 w-5" />
+                <PlatformIcon platform={p.provider.name} className="h-5 w-5" variant="tile" />
                 <span>{p.provider.name}</span>
               </a>
             ))}

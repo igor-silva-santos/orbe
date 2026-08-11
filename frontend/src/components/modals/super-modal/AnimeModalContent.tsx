@@ -142,7 +142,7 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
                   className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
                   title={platform.nome}
                 >
-                  <PlatformIcon platform={platform.nome} className="h-6 w-6" iconOnly />
+                  <PlatformIcon platform={platform.nome} className="h-6 w-6" iconOnly variant="tile" />
                   {!isCrunchyroll && <span>{platform.nome}</span>}
                 </a>
               );

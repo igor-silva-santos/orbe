@@ -21,7 +21,7 @@ const JogoPlatformLinks: React.FC<JogoPlatformLinksProps> = ({
   if (platformItems.length === 0) return null;
 
   const tileClass =
-    'flex items-center justify-center rounded-lg border border-border bg-muted p-2 transition-colors hover:bg-muted/70 hover:border-primary/40';
+    'flex items-center justify-center rounded-lg border border-border bg-white p-2 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white/90 hover:border-primary/40 dark:bg-white dark:ring-white/20';
 
   return (
     <TooltipProvider delayDuration={200}>
