@@ -137,6 +137,32 @@ export const formatRating = (item: Midia, type: 'filme' | 'serie' | 'anime' | 'j
   return null;
 };
 
+/** Jogo PC/Steam com possibilidade de preço na loja Steam */
+export const isPcOrSteamGame = (jogo: Jogo | Midia): boolean => {
+  const platforms = jogo.plataformas_api || [];
+  const hasPcPlatform = platforms.some((p) => /\b(pc|windows|steam|mac)\b/i.test(p.nome || ''));
+  const steamAppId = 'steam_app_id' in jogo ? jogo.steam_app_id : undefined;
+  return hasPcPlatform || Boolean(steamAppId);
+};
+
+export const formatSteamPriceBRL = (cents: number | null | undefined): string | null => {
+  if (cents == null || cents < 0) return null;
+  if (cents === 0) return 'Grátis';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
+};
+
+export const getSteamStoreUrl = (steamAppId: number | null | undefined): string | null => {
+  if (!steamAppId) return null;
+  return `https://store.steampowered.com/app/${steamAppId}`;
+};
+
+export const hasSteamPriceDisplay = (item: Jogo | Midia): boolean => {
+  if (!isPcOrSteamGame(item)) return false;
+  const appId = 'steam_app_id' in item ? item.steam_app_id : null;
+  const cents = 'steam_price_cents' in item ? item.steam_price_cents : null;
+  return Boolean(appId) && cents != null;
+};
+
 /**
  * Extrai e formata os links de lojas digitais de um objeto de jogo.
  * @param item O objeto de jogo.

@@ -2,7 +2,8 @@
 
 import { Jogo } from '@/types'; // Assuming this type
 import { useTheme } from '@/hooks/useTheme';
-import { NOT_INFORMED } from '@/lib/media-helpers';
+import { NOT_INFORMED, hasSteamPriceDisplay } from '@/lib/media-helpers';
+import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 
 interface JogoInfoBlockProps {
   jogo: Jogo;
@@ -22,6 +23,12 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
   return (
     <div className="flex-1 space-y-4">
       <h1 className="text-3xl md:text-4xl font-bold text-foreground">{jogo.titulo_curado || jogo.titulo_api}</h1>
+
+      {hasSteamPriceDisplay(jogo) && (
+        <div className="pt-1">
+          <SteamPriceLabel item={jogo} variant="modal" />
+        </div>
+      )}
       
       <div className="space-y-2 text-sm">
         <div>

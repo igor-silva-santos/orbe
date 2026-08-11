@@ -12,6 +12,10 @@ import {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const STEAM_PRICE_STALE_MS = 24 * 60 * 60 * 1000;
+const STEAM_PRICE_BATCH_SIZE = 150;
+const STEAM_PRICE_DELAY_MS = 350;
+
 async function findJogoBySteamAppId(prisma: PrismaClient, appId: number) {
   return prisma.jogo.findFirst({
     where: {
@@ -177,4 +181,35 @@ export async function syncSteamData(prisma: PrismaClient): Promise<{
   );
 
   return { salesUpdated, trendingUpdated, specsUpdated };
+}
+
+/** Atualiza preços Steam de jogos com steamAppId e sync antigo (>24h) */
+export async function refreshStaleSteamPrices(prisma: PrismaClient): Promise<number> {
+  const staleBefore = new Date(Date.now() - STEAM_PRICE_STALE_MS);
+
+  const jogos = await prisma.jogo.findMany({
+    where: {
+      steamAppId: { not: null },
+      OR: [
+        { steamSyncedAt: null },
+        { steamSyncedAt: { lt: staleBefore } },
+      ],
+    },
+    orderBy: [
+      { steamSyncedAt: { sort: 'asc', nulls: 'first' } },
+      { rating: 'desc' },
+    ],
+    take: STEAM_PRICE_BATCH_SIZE,
+  });
+
+  let updated = 0;
+  for (const jogo of jogos) {
+    if (!jogo.steamAppId) continue;
+    await enrichJogoWithSteam(prisma, jogo.id, jogo.steamAppId);
+    updated++;
+    await delay(STEAM_PRICE_DELAY_MS);
+  }
+
+  logger.info(`Steam price refresh: ${updated} jogos atualizados.`);
+  return updated;
 }
