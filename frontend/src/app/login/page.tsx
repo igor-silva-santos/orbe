@@ -2,10 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, Github } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { realApi } from '@/data/realApi';
 import { establishBrowserSession } from '@/lib/session';
+
+/**
+ * Só aceita um path relativo de verdade — bloqueia `//evil.com` e `/\evil.com`
+ * (URLs protocol-relative que `startsWith('/')` sozinho não pega).
+ */
+function safeRedirectPath(value: string | null): string {
+  if (!value) return '/';
+  if (!value.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return '/';
+  return value;
+}
 
 export default function LoginPage() {
   const { login } = useAppStore();
@@ -27,8 +37,7 @@ export default function LoginPage() {
         await establishBrowserSession(response.token);
         login(response.user);
         const params = new URLSearchParams(window.location.search);
-        const redirect = params.get('redirect');
-        window.location.href = redirect && redirect.startsWith('/') ? redirect : '/';
+        window.location.href = safeRedirectPath(params.get('redirect'));
       } else {
         console.error('Login failed: Invalid credentials or API error');
         alert('Email ou senha inválidos.');
@@ -113,23 +122,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Lembrar de mim e Esqueci a senha */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-border text-primary focus:ring-primary"
-                />
-                <span className="ml-2 text-sm text-muted-foreground">Lembrar de mim</span>
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary hover:text-primary/80"
-              >
-                Esqueci a senha
-              </Link>
-            </div>
-
             {/* Botão de Login */}
             <button
               type="submit"
@@ -146,25 +138,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Divisor */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-muted/50 text-muted-foreground">ou continue com</span>
-            </div>
-          </div>
-
-          {/* Login Social */}
-          <div className="grid grid-cols-2 gap-3">
-            
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted/80 transition-colors">
-              <Github className="h-4 w-4" />
-              <span className="text-sm">GitHub</span>
-            </button>
-          </div>
 
           {/* Link para Cadastro */}
           <div className="text-center">

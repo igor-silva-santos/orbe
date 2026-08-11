@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { User, Mail, Calendar, Edit2, Shield, Settings, Download } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
+import { isAllowedRemoteImageHost } from '@/lib/image-utils';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -76,7 +77,7 @@ export default function ProfilePage() {
           <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
               <div className="relative w-32 h-32 mx-auto mb-4 group">
                 <div className="w-full h-full rounded-full overflow-hidden border-4 border-primary/20">
-                  {user.avatar ? (
+                  {user.avatar && isAllowedRemoteImageHost(user.avatar) ? (
                     <Image
                       src={user.avatar}
                       alt={user.nome || 'Avatar'}
@@ -104,13 +105,6 @@ export default function ProfilePage() {
             >
               <Settings className="mr-2 h-4 w-4" />
               Configurações
-            </button>
-            <button 
-              onClick={() => router.push('/minha-lista')} 
-              className="flex items-center w-full px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors text-sm font-medium"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Minha Lista
             </button>
             {user.role === 'admin' && (
               <button

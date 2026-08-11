@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getWsUrl } from '@/lib/apiBase';
 
 export interface SyncMessage {
@@ -10,6 +10,9 @@ export interface SyncMessage {
   period?: string;
 }
 
+const INITIAL_RECONNECT_DELAY_MS = 1000;
+const MAX_RECONNECT_DELAY_MS = 30000;
+
 export function useSyncSocket() {
   const [lastMessage, setLastMessage] = useState<SyncMessage | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -17,29 +20,57 @@ export function useSyncSocket() {
   useEffect(() => {
     const wsUrl = getWsUrl();
     if (!wsUrl) return;
-    const socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => {
-      console.log('Conectado ao WebSocket de Sincronização');
-      setIsConnected(true);
+    let socket: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let reconnectAttempts = 0;
+    let unmounted = false;
+
+    const connect = () => {
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        console.log('Conectado ao WebSocket de Sincronização');
+        reconnectAttempts = 0;
+        setIsConnected(true);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setLastMessage(data);
+        } catch (err) {
+          console.error('Erro ao processar mensagem WS:', err);
+        }
+      };
+
+      socket.onclose = () => {
+        setIsConnected(false);
+        if (unmounted) return;
+        console.log('Desconectado do WebSocket, tentando reconectar...');
+        const delay = Math.min(
+          INITIAL_RECONNECT_DELAY_MS * 2 ** reconnectAttempts,
+          MAX_RECONNECT_DELAY_MS
+        );
+        reconnectAttempts += 1;
+        reconnectTimer = setTimeout(connect, delay);
+      };
+
+      socket.onerror = () => {
+        socket?.close();
+      };
     };
 
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        setLastMessage(data);
-      } catch (err) {
-        console.error('Erro ao processar mensagem WS:', err);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log('Desconectado do WebSocket');
-      setIsConnected(false);
-    };
+    connect();
 
     return () => {
-      socket.close();
+      unmounted = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (socket) {
+        socket.onclose = null;
+        socket.onerror = null;
+        socket.close();
+      }
     };
   }, []);
 

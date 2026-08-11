@@ -31,6 +31,7 @@ const SearchOverlay: React.FC = () => {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const historyPushedRef = useRef(false);
   const isClosingRef = useRef(false);
+  const searchRequestIdRef = useRef(0);
 
   const handleClose = useCallback(() => {
     if (isClosingRef.current) return;
@@ -101,21 +102,34 @@ const SearchOverlay: React.FC = () => {
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
+      searchRequestIdRef.current += 1;
       setSearchResults([]);
+      setIsLoading(false);
       return;
     }
 
+    const requestId = ++searchRequestIdRef.current;
     setIsLoading(true);
     const debounceTimer = setTimeout(async () => {
-      const results = await realApi.search(searchQuery);
-      const allResults = [
-        ...results.filmes, 
-        ...results.series, 
-        ...results.animes, 
-        ...results.jogos
-      ];
-      setSearchResults(allResults);
-      setIsLoading(false);
+      try {
+        const results = await realApi.search(searchQuery);
+        if (searchRequestIdRef.current !== requestId) return; // resposta obsoleta, ignora
+        const allResults = [
+          ...results.filmes,
+          ...results.series,
+          ...results.animes,
+          ...results.jogos
+        ];
+        setSearchResults(allResults);
+      } catch (error) {
+        if (searchRequestIdRef.current !== requestId) return;
+        console.error('Erro ao buscar:', error);
+        setSearchResults([]);
+      } finally {
+        if (searchRequestIdRef.current === requestId) {
+          setIsLoading(false);
+        }
+      }
     }, 350);
 
     return () => clearTimeout(debounceTimer);
