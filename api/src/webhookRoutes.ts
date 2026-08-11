@@ -2,7 +2,9 @@ import { Router, Request, Response, NextFunction, json } from 'express';
 import { prisma } from './clients';
 import crypto from 'crypto';
 import { logger } from './logger';
+import { assertIgdbWebhookSecretConfigured } from './securityMiddleware';
 
+assertIgdbWebhookSecretConfigured();
 
 const router = Router();
 

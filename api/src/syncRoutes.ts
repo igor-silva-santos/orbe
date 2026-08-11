@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { logger } from './logger';
 import { prisma } from './clients';
 import { syncMovies } from './syncMovies';
@@ -20,6 +21,7 @@ import {
   updateSyncProgress,
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
+import { syncRateLimiter } from './securityMiddleware';
 
 const router = Router();
 
@@ -30,9 +32,16 @@ if (isProduction && (!process.env.SYNC_SECRET || SYNC_SECRET === 'super-secret-s
   throw new Error('SYNC_SECRET não configurado ou inseguro em produção.');
 }
 
+function verifySyncSecret(provided: string | undefined): boolean {
+  if (!provided) return false;
+  const expected = SYNC_SECRET;
+  if (provided.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+}
+
 const protectSync = (req: any, res: any, next: any) => {
-  const secret = req.headers['x-sync-secret'] || (req.body && req.body.secret);
-  if (secret !== SYNC_SECRET) {
+  const secret = req.headers['x-sync-secret'] as string | undefined;
+  if (!verifySyncSecret(secret)) {
     logger.warn('Tentativa de sincronização não autorizada.');
     return res.status(403).json({ error: 'Não autorizado.' });
   }
@@ -42,15 +51,15 @@ const protectSync = (req: any, res: any, next: any) => {
 /** Status público — detecta cold start / sync travado */
 router.get('/sync/status', async (req, res) => {
   const status = await getSyncStatus(prisma);
-  const secret = req.headers['x-sync-secret'];
-  if (secret === SYNC_SECRET) {
+  const secret = req.headers['x-sync-secret'] as string | undefined;
+  if (verifySyncSecret(secret)) {
     const detailed = await getSyncStatusDetailed(prisma);
     return res.json({ ...status, detailed });
   }
   res.json(status);
 });
 
-router.post('/sync/reset-stale', protectSync, async (_req, res) => {
+router.post('/sync/reset-stale', syncRateLimiter, protectSync, async (_req, res) => {
   const status = await resetStaleSyncLock(prisma);
   res.json({
     message: 'Lock stale liberado. Use POST /api/run-sync-resume para continuar.',
@@ -58,7 +67,7 @@ router.post('/sync/reset-stale', protectSync, async (_req, res) => {
   });
 });
 
-router.post('/run-sync', protectSync, async (req, res) => {
+router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
   const { mediaType, startDate, endDate, startYear, endYear } = req.body;
 
   if (!mediaType || !((startDate && endDate) || (startYear && endYear))) {
@@ -149,7 +158,7 @@ router.post('/run-sync', protectSync, async (req, res) => {
   }
 });
 
-router.post('/run-sync-all', protectSync, async (req, res) => {
+router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
   const startDate = req.body?.startDate || '2026-01-01';
   const endDate = req.body?.endDate || '2026-12-31';
   const startYear = parseInt(req.body?.startYear || '2026', 10);
@@ -174,7 +183,7 @@ router.post('/run-sync-all', protectSync, async (req, res) => {
 });
 
 /** Retoma do último checkpoint — pula fases já concluídas */
-router.post('/run-sync-resume', protectSync, async (_req, res) => {
+router.post('/run-sync-resume', syncRateLimiter, protectSync, async (_req, res) => {
   const existing = await getSyncStatusDetailed(prisma);
   if (!existing?.resumeAvailable && !existing?.interrupted) {
     return res.status(400).json({
@@ -221,7 +230,7 @@ router.post('/run-sync-resume', protectSync, async (_req, res) => {
   }
 });
 
-router.post('/run-sync-awards', protectSync, async (_req, res) => {
+router.post('/run-sync-awards', syncRateLimiter, protectSync, async (_req, res) => {
   logger.info('Scrape de premiações iniciado (manual).');
   res.status(202).json({ message: 'Scrape de premiações iniciado. Verifique os logs.' });
 

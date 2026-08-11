@@ -402,6 +402,10 @@ export async function fetchAnimeDetailsLive(anilistId: number) {
 }
 
 export async function fetchJogoDetailsLive(igdbId: number) {
+  if (!Number.isInteger(igdbId) || igdbId <= 0) {
+    return null;
+  }
+
   try {
     await getIgdbAccessToken();
 
@@ -457,13 +461,6 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       }
 
       if (!dbJogo.pcRequirements && steamDetails?.pcRequirements) {
-        await prisma.jogo.update({
-          where: { igdbId },
-          data: {
-            pcRequirements: steamDetails.pcRequirements,
-            steamSyncedAt: new Date(),
-          },
-        });
         dbJogo.pcRequirements = steamDetails.pcRequirements;
       }
     }

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from './clients';
 import { logger } from './logger';
 import jwt from 'jsonwebtoken';
+import { commentRateLimiter } from './securityMiddleware';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
@@ -68,7 +69,7 @@ router.get('/comments/:tipo/:id', async (req: Request, res: Response) => {
 });
 
 // Criar um novo comentário
-router.post('/comments', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/comments', commentRateLimiter, authMiddleware, async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId;
     const { midia_id, tipo_midia, texto, spoiler } = req.body;
 

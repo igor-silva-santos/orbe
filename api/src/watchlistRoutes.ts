@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
+const WATCHLIST_SYNC_MAX_ITEMS = 500;
 
 // Middleware de Autenticação
 const authenticate = (req: any, res: any, next: any) => {
@@ -28,6 +29,12 @@ router.post('/watchlist/sync', authenticate, async (req: any, res: any) => {
 
   if (!Array.isArray(items)) {
     return res.status(400).json({ error: 'Items deve ser um array' });
+  }
+
+  if (items.length > WATCHLIST_SYNC_MAX_ITEMS) {
+    return res.status(400).json({
+      error: `Limite de ${WATCHLIST_SYNC_MAX_ITEMS} itens por sincronização.`,
+    });
   }
 
   try {
