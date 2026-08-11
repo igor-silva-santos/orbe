@@ -162,13 +162,100 @@ const mapVoiceActors = (voiceActors: any[] | undefined) => {
 
 const dedupeStreamingLinks = (links: { nome?: string; url?: string }[]) => {
   const seen = new Set<string>();
-  return links.filter((link) => {
-    if (!link.nome) return false;
-    const key = link.nome.toLowerCase();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return links
+    .filter((link) => {
+      const displayName = inferStreamingNameFromLink(link.nome, link.url) ?? link.nome?.trim();
+      if (!displayName) return false;
+      const key = displayName.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((link) => ({
+      nome: inferStreamingNameFromLink(link.nome, link.url) ?? link.nome!.trim(),
+      url: link.url,
+    }));
+};
+
+const STREAMING_SITE_HINTS = [
+  'crunchyroll',
+  'netflix',
+  'disney',
+  'prime',
+  'amazon',
+  'hbo',
+  'max.com',
+  'apple tv',
+  'globoplay',
+  'globo play',
+  'claro',
+  'star+',
+  'star plus',
+  'hidive',
+  'funimation',
+  'paramount',
+  'peacock',
+];
+
+const NON_STREAMING_SITE_HINTS = [
+  'youtube',
+  'twitter',
+  'x.com',
+  'facebook',
+  'instagram',
+  'tiktok',
+  'wikipedia',
+  'myanimelist',
+  'anilist.co',
+  '/anime/',
+  'bangumi',
+  'official',
+  'syoboi',
+  'livechart',
+  'anidb',
+  'wiki',
+];
+
+const inferStreamingNameFromLink = (site?: string | null, url?: string | null): string | null => {
+  const text = `${site ?? ''} ${url ?? ''}`.toLowerCase();
+  if (!text.trim()) return null;
+
+  if (text.includes('crunchyroll')) return 'Crunchyroll';
+  if (text.includes('netflix')) return 'Netflix';
+  if (text.includes('disneyplus') || text.includes('disney.com')) return 'Disney+';
+  if (text.includes('primevideo') || text.includes('amazon.')) return 'Prime Video';
+  if (text.includes('hbomax') || text.includes('max.com')) return 'Max';
+  if (text.includes('tv.apple') || text.includes('apple.com/tv')) return 'Apple TV+';
+  if (text.includes('globoplay')) return 'Globoplay';
+  if (text.includes('claro')) return 'Claro TV+';
+  if (text.includes('starplus') || text.includes('star-plus')) return 'Star+';
+  if (text.includes('hidive')) return 'HIDIVE';
+  if (text.includes('funimation')) return 'Funimation';
+
+  return null;
+};
+
+const isLikelyStreamingLink = (site?: string | null, url?: string | null): boolean => {
+  const text = `${site ?? ''} ${url ?? ''}`.toLowerCase();
+  if (!text.trim()) return false;
+  if (NON_STREAMING_SITE_HINTS.some((hint) => text.includes(hint))) return false;
+  if (inferStreamingNameFromLink(site, url)) return true;
+  return STREAMING_SITE_HINTS.some((hint) => text.includes(hint));
+};
+
+const collectAnimeStreamingPlatforms = (anime: {
+  streamingLinks?: { site?: string; url?: string }[];
+  externalLinks?: { site?: string; url?: string }[];
+}) => {
+  const fromStreaming = (anime.streamingLinks ?? []).map((link) => ({
+    nome: link.site,
+    url: link.url,
+  }));
+  const fromExternal = (anime.externalLinks ?? [])
+    .filter((link) => isLikelyStreamingLink(link.site, link.url))
+    .map((link) => ({ nome: link.site, url: link.url }));
+
+  return dedupeStreamingLinks([...fromStreaming, ...fromExternal]);
 };
 
 const getCrewMember = (crew: any[], job: string) => {
@@ -322,9 +409,7 @@ export const mapAnimeToMidia = (anime: any) => {
     s.role?.toLowerCase().includes('director')
   );
 
-  const streamingFromLinks = dedupeStreamingLinks(
-    anime.streamingLinks?.map((l: any) => ({ nome: l.site, url: l.url })) ?? []
-  );
+  const streamingFromLinks = collectAnimeStreamingPlatforms(anime);
 
   const trailerFromTrailerField = anime.externalLinks
     ?.find((l: any) => l.site === 'YouTube' && l.url?.includes('youtube'))
@@ -466,9 +551,10 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   data_lancamento_api: filme.releaseDate,
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (filme.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+  plataformas_api: (filme.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
     nome: p.provider.name,
     url: p.url,
+    logo_path: p.provider.logoPath ?? null,
   })),
   em_prevenda: filme.em_prevenda ?? false,
 });
@@ -482,9 +568,10 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   data_lancamento_api: serie.firstAirDate,
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (serie.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+  plataformas_api: (serie.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
     nome: p.provider.name,
     url: p.url,
+    logo_path: p.provider.logoPath ?? null,
   })),
 });
 
@@ -497,7 +584,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   data_lancamento_api: jogo.firstReleaseDate,
   avaliacao: jogo.rating,
   generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)).slice(0, 3) ?? [],
-  plataformas_api: (jogo.platforms ?? []).slice(0, 2).map((p: any) => ({ nome: p.plataforma.name })),
+  plataformas_api: (jogo.platforms ?? []).slice(0, 4).map((p: any) => ({ nome: p.plataforma.name })),
   steam_app_id: jogo.steamAppId ?? null,
   steam_price_cents: jogo.steamPriceCents ?? null,
   steam_discount_percent: jogo.steamDiscountPercent ?? null,
@@ -508,9 +595,7 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     ?.filter((s: any) => new Date(s.airingAt) > new Date())
     .sort((a: any, b: any) => new Date(a.airingAt).getTime() - new Date(b.airingAt).getTime())[0];
 
-  const streamingFromLinks = dedupeStreamingLinks(
-    anime.streamingLinks?.map((l: any) => ({ nome: l.site, url: l.url })) ?? []
-  );
+  const streamingFromLinks = collectAnimeStreamingPlatforms(anime);
 
   return {
     type: 'anime' as const,
@@ -528,7 +613,7 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     } : null,
     avaliacao: anime.averageScore,
     generos_api: anime.genres?.map((g: any) => translateAnimeGenre(g.genero.name)).slice(0, 3) ?? [],
-    plataformas_api: streamingFromLinks.slice(0, 2),
+    plataformas_api: streamingFromLinks.slice(0, 4),
     format: anime.format,
     isAdult: anime.isAdult,
     dublagem_info: false,

@@ -33,15 +33,35 @@ export const normalizeProviderName = (name?: string | null): string => {
   const lowerName = name.toLowerCase();
   if (lowerName.includes('netflix')) return 'Netflix';
   if (lowerName.includes('hbo') || lowerName === 'max') return 'Max';
-  if (lowerName.includes('prime video') || lowerName.includes('amazon')) return 'Prime Video';
+  if (lowerName.includes('prime video') || lowerName.includes('amazon prime')) return 'Prime Video';
+  if (lowerName === 'amazon' || lowerName.includes('amazon.')) return 'Prime Video';
   if (lowerName.includes('disney')) return 'Disney+';
   if (lowerName.includes('crunchyroll')) return 'Crunchyroll';
   if (lowerName.includes('star+') || lowerName.includes('star plus')) return 'Star+';
   if (lowerName.includes('apple tv')) return 'Apple TV+';
   if (lowerName.includes('globoplay') || lowerName.includes('globo play')) return 'Globoplay';
   if (lowerName.includes('claro')) return 'Claro TV+';
+  if (lowerName.includes('hidive')) return 'HIDIVE';
+  if (lowerName.includes('funimation')) return 'Funimation';
   if (lowerName.includes('tmdb')) return 'TMDB';
   return name;
+};
+
+export const inferProviderFromUrl = (url?: string | null): string | null => {
+  if (!url) return null;
+  const lower = url.toLowerCase();
+  if (lower.includes('crunchyroll')) return 'Crunchyroll';
+  if (lower.includes('netflix')) return 'Netflix';
+  if (lower.includes('disneyplus') || lower.includes('disney.com')) return 'Disney+';
+  if (lower.includes('primevideo') || lower.includes('amazon.')) return 'Prime Video';
+  if (lower.includes('hbomax') || lower.includes('max.com')) return 'Max';
+  if (lower.includes('tv.apple') || lower.includes('apple.com/tv')) return 'Apple TV+';
+  if (lower.includes('globoplay')) return 'Globoplay';
+  if (lower.includes('claro')) return 'Claro TV+';
+  if (lower.includes('starplus') || lower.includes('star-plus')) return 'Star+';
+  if (lower.includes('hidive')) return 'HIDIVE';
+  if (lower.includes('funimation')) return 'Funimation';
+  return null;
 };
 
 /**
@@ -53,7 +73,13 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
   const seen = new Map<string, { name: string; icon: string; logo_path?: string | null }>();
 
   for (const provider of item.plataformas_api ?? []) {
-    const name = normalizeProviderName(provider.nome);
+    const inferredFromUrl = inferProviderFromUrl(provider.url);
+    let name = normalizeProviderName(provider.nome);
+    if (name === 'Desconhecido' || !provider.nome?.trim()) {
+      if (inferredFromUrl) name = inferredFromUrl;
+    } else if (inferredFromUrl && name === provider.nome) {
+      name = inferredFromUrl;
+    }
     if (name === 'Desconhecido' || seen.has(name)) continue;
     seen.set(name, {
       name,
@@ -64,8 +90,19 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
 
   const providers = Array.from(seen.values());
 
-  if ('duracao' in item && providers.length === 0) {
-    return [{ name: 'Nos Cinemas', icon: 'cinema' }];
+  if (providers.length === 0) {
+    const isFilmeCard =
+      'duracao' in item || (item as { type?: string }).type === 'filme';
+    const emPrevenda = 'em_prevenda' in item && Boolean((item as Filme).em_prevenda);
+    const releaseRaw = item.data_lancamento_api;
+    const isFutureRelease =
+      releaseRaw &&
+      !Number.isNaN(new Date(releaseRaw as string).getTime()) &&
+      new Date(releaseRaw as string) > new Date();
+
+    if (isFilmeCard && (emPrevenda || isFutureRelease)) {
+      return [{ name: 'Nos Cinemas', icon: 'cinema' }];
+    }
   }
 
   return providers;
@@ -194,23 +231,30 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
     { contains: 'steampowered.com', name: 'Steam', icon: 'steam' },
     { contains: 'epicgames.com', name: 'Epic Games', icon: 'epic' },
     { contains: 'store.playstation.com', name: 'PlayStation Store', icon: 'playstation' },
+    { contains: 'playstation.com', name: 'PlayStation Store', icon: 'playstation' },
     { contains: 'xbox.com', name: 'Xbox Store', icon: 'xbox' },
     { contains: 'nintendo.com', name: 'Nintendo eShop', icon: 'nintendo switch' },
     { contains: 'gog.com', name: 'GOG', icon: 'gog' },
+    { contains: 'itch.io', name: 'itch.io', icon: 'itch' },
+    { contains: 'humblebundle.com', name: 'Humble', icon: 'humble' },
+    { contains: 'ubisoft.com', name: 'Ubisoft', icon: 'ubisoft' },
+    { contains: 'ea.com', name: 'EA App', icon: 'ea' },
+    { contains: 'battle.net', name: 'Battle.net', icon: 'battlenet' },
   ];
 
   const foundStores = new Map<string, { name: string; icon: string; url: string }>();
 
   for (const website of item.websites) {
+    if (!website?.url) continue;
     let storeInfo: { name: string; icon: string; } | null = null;
 
     // 1. Tenta encontrar pela categoria
-    if (storeCategoryMapping[website.category]) {
+    if (website.category != null && storeCategoryMapping[website.category]) {
       storeInfo = storeCategoryMapping[website.category];
-    } 
+    }
     // 2. Se não encontrou, tenta encontrar por substring da URL
     else {
-      const urlMatch = storeUrlMapping.find(mapping => website.url.includes(mapping.contains));
+      const urlMatch = storeUrlMapping.find((mapping) => website.url.includes(mapping.contains));
       if (urlMatch) {
         storeInfo = urlMatch;
       }
@@ -226,6 +270,65 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
   }
 
   return Array.from(foundStores.values());
+};
+
+/** Links clicáveis de lojas/plataformas para o modal de jogos */
+export const getGamePlatformLinks = (item: Jogo): { name: string; icon: string; url: string }[] => {
+  const links = new Map<string, { name: string; icon: string; url: string }>();
+
+  for (const store of getGameStores(item)) {
+    links.set(store.name, store);
+  }
+
+  const steamUrl = getSteamStoreUrl(item.steam_app_id);
+  if (steamUrl && !links.has('Steam')) {
+    links.set('Steam', { name: 'Steam', icon: 'steam', url: steamUrl });
+  }
+
+  return Array.from(links.values());
+};
+
+function platformIconKey(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('playstation') || lower === 'ps4' || lower === 'ps5') return 'playstation';
+  if (lower.includes('xbox')) return 'xbox';
+  if (lower.includes('nintendo') || lower.includes('switch')) return 'nintendo';
+  if (lower.includes('steam')) return 'steam';
+  if (lower.includes('epic')) return 'epic';
+  if (lower.includes('gog')) return 'gog';
+  if (lower === 'pc' || lower.includes('windows') || lower.includes('mac')) return 'pc';
+  return lower;
+}
+
+export type GamePlatformDisplayItem = {
+  name: string;
+  icon: string;
+  url?: string;
+};
+
+/** Lojas com link + ícones de plataforma (hardware) sem duplicar */
+export const getGamePlatformDisplayItems = (jogo: Jogo): GamePlatformDisplayItem[] => {
+  const result: GamePlatformDisplayItem[] = [];
+  const seen = new Set<string>();
+
+  const add = (item: GamePlatformDisplayItem) => {
+    const key = platformIconKey(item.icon);
+    if (seen.has(key)) return;
+    seen.add(key);
+    result.push(item);
+  };
+
+  for (const store of getGamePlatformLinks(jogo)) {
+    add({ name: store.name, icon: store.icon, url: store.url });
+  }
+
+  for (const platform of getGamePlatforms(jogo)) {
+    const key = platformIconKey(platform.icon);
+    if (seen.has(key)) continue;
+    add({ name: platform.name, icon: platform.icon });
+  }
+
+  return result;
 };
 
 /**

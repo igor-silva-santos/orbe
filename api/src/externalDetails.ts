@@ -304,9 +304,31 @@ function mapIgdbToPrismaLike(game: any) {
       official: true,
     })),
     websites: (game.websites ?? [])
-      .filter((w: any) => w.category != null)
-      .map((w: any) => ({ url: w.url, category: w.category })),
+      .filter((w: any) => w?.url)
+      .map((w: any) => ({ url: w.url, category: w.category ?? 0 })),
   };
+}
+
+function mergeJogoWebsites(
+  live: { url: string; category: number }[] | undefined,
+  db: { url: string; category: number }[] | undefined,
+  steamAppId?: number | null,
+): { url: string; category: number }[] {
+  const byUrl = new Map<string, { url: string; category: number }>();
+
+  for (const site of [...(live ?? []), ...(db ?? [])]) {
+    if (!site?.url) continue;
+    byUrl.set(site.url, { url: site.url, category: site.category ?? 0 });
+  }
+
+  if (steamAppId) {
+    const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
+    if (![...byUrl.keys()].some((url) => url.includes('steampowered.com'))) {
+      byUrl.set(steamUrl, { url: steamUrl, category: 13 });
+    }
+  }
+
+  return Array.from(byUrl.values());
 }
 
 export async function fetchFilmeDetailsLive(tmdbId: number) {
@@ -440,6 +462,7 @@ export async function fetchJogoDetailsLive(igdbId: number) {
           steamDiscountPercent: true,
           pcRequirements: true,
           steamSyncedAt: true,
+          websites: { select: { url: true, category: true } },
         },
       }),
     ]);
@@ -482,6 +505,11 @@ export async function fetchJogoDetailsLive(igdbId: number) {
 
     return {
       ...translated,
+      websites: mergeJogoWebsites(
+        translated.websites as { url: string; category: number }[] | undefined,
+        dbJogo?.websites,
+        dbJogo?.steamAppId,
+      ),
       pc_requirements: dbJogo?.pcRequirements ?? translated.pc_requirements ?? null,
       steam_app_id: dbJogo?.steamAppId ?? translated.steam_app_id ?? null,
       steam_player_count: dbJogo?.steamPlayerCount ?? translated.steam_player_count ?? null,

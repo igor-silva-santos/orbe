@@ -13,6 +13,8 @@ interface PlatformIconProps {
   size?: number;
   iconOnly?: boolean;
   title?: string;
+  /** Tile claro para ícones escuros em fundos escuros (ex.: cards no dark mode). */
+  variant?: 'default' | 'tile';
 }
 
 const normalizePlatformKey = (platform?: string | null): string => {
@@ -25,6 +27,8 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('prime') || lower.includes('amazon')) return 'prime';
   if (lower.includes('apple')) return 'apple';
   if (lower.includes('crunchyroll')) return 'crunchyroll';
+  if (lower.includes('hidive')) return 'crunchyroll';
+  if (lower.includes('funimation')) return 'crunchyroll';
   if (lower.includes('star+') || lower.includes('star plus') || lower.includes('starplus')) return 'star';
   if (lower.includes('globoplay') || lower.includes('globo-play') || lower.includes('globo play') || lower === 'globo') return 'globoplay';
   if (lower.includes('claro') || lower.includes('claro-tv')) return 'claro';
@@ -39,6 +43,42 @@ const normalizePlatformKey = (platform?: string | null): string => {
   return 'unknown';
 };
 
+const TILE_CLASS =
+  'inline-flex items-center justify-center shrink-0 rounded-md bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+
+const getTileClass = (iconSize: number) =>
+  `${TILE_CLASS} ${iconSize >= 26 ? 'p-1' : 'p-[3px]'}`;
+
+/** Ícones compactos para tiles pequenos (cards); wordmarks ficam ilegíveis abaixo de ~32px. */
+const GAME_TILE_ICON_SRC: Partial<Record<string, string>> = {
+  playstation: '/icons/playstation_icone_azul.svg',
+  xbox: '/icons/xbox_icone.svg',
+  nintendo: '/icons/nintendo_switch.svg',
+  steam: '/icons/steam-logo.svg',
+};
+
+const renderPcIcon = (
+  iconProps: { width: number; height: number; className: string; alt: string; title?: string },
+  useTile: boolean,
+  showTooltip: boolean,
+  label: string,
+) => {
+  if (useTile) {
+    const { width, height } = iconProps;
+    return (
+      <div
+        className={`${iconProps.className} rounded bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
+        style={{ width, height, fontSize: width * 0.38 }}
+        aria-hidden="true"
+        title={showTooltip ? label : undefined}
+      >
+        PC
+      </div>
+    );
+  }
+  return <Image src="/icons/pc.svg" {...iconProps} />;
+};
+
 const PlatformIcon: React.FC<PlatformIconProps> = ({
   platform,
   logoPath,
@@ -46,81 +86,96 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
   size = 16,
   iconOnly = false,
   title,
+  variant = 'default',
 }) => {
   const label = title || (iconOnly ? '' : `${platform ?? 'plataforma'} icon`);
+  const showTooltip = Boolean(label);
+  const useTile = variant === 'tile';
 
   const iconProps = {
     width: size,
     height: size,
     className: `${className} object-contain shrink-0`,
     alt: label,
-    title: label || undefined,
+    title: useTile || !showTooltip ? undefined : label,
   };
+
+  const wrapWithTile = (icon: React.ReactNode) => {
+    if (!useTile) return icon;
+    return (
+      <span className={getTileClass(size)} title={showTooltip ? label : undefined}>
+        {icon}
+      </span>
+    );
+  };
+
+  const gameIconSrc = (key: string, defaultSrc: string) =>
+    useTile && GAME_TILE_ICON_SRC[key] ? GAME_TILE_ICON_SRC[key]! : defaultSrc;
 
   if (logoPath) {
     const src = logoPath.startsWith('http') ? logoPath : `${TMDB_LOGO_BASE}${logoPath}`;
-    return <Image src={src} unoptimized {...iconProps} />;
+    return wrapWithTile(<Image src={src} unoptimized {...iconProps} />);
   }
 
   switch (normalizePlatformKey(platform)) {
     case 'netflix':
-      return <Image src="/icons/netflix.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/netflix.svg" {...iconProps} />);
     case 'disney':
-      return <Image src="/icons/disney_plus.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/disney_plus.svg" {...iconProps} />);
     case 'hbo':
-      return <Image src="/icons/HBO_Max.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/HBO_Max.svg" {...iconProps} />);
     case 'prime':
-      return <Image src="/icons/prime_video.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/prime_video.svg" {...iconProps} />);
     case 'apple':
-      return <Image src="/icons/apple-tv-plus.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/apple-tv-plus.svg" {...iconProps} />);
     case 'crunchyroll':
-      return <Image src="/icons/crunchyroll.svg" {...iconProps} aria-hidden="true" />;
+      return wrapWithTile(<Image src="/icons/crunchyroll.svg" {...iconProps} aria-hidden="true" />);
     case 'star':
-      return <Image src="/icons/star-plus.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/star-plus.svg" {...iconProps} />);
     case 'globoplay':
-      return <Image src="/icons/globoplay.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/globoplay.svg" {...iconProps} />);
     case 'claro':
-      return <Image src="/icons/claro-tv-plus.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/claro-tv-plus.svg" {...iconProps} />);
     case 'playstation':
-      return <Image src="/icons/playstation.svg" {...iconProps} />;
+      return wrapWithTile(<Image src={gameIconSrc('playstation', '/icons/playstation.svg')} {...iconProps} />);
     case 'xbox':
-      return <Image src="/icons/xbox.svg" {...iconProps} />;
+      return wrapWithTile(<Image src={gameIconSrc('xbox', '/icons/xbox.svg')} {...iconProps} />);
     case 'nintendo':
-      return <Image src="/icons/nintendo_switch.svg" {...iconProps} />;
+      return wrapWithTile(<Image src={gameIconSrc('nintendo', '/icons/nintendo_switch.svg')} {...iconProps} />);
     case 'steam':
-      return <Image src="/icons/steam.svg" {...iconProps} />;
+      return wrapWithTile(<Image src={gameIconSrc('steam', '/icons/steam.svg')} {...iconProps} />);
     case 'epic':
-      return (
+      return wrapWithTile(
         <div
           className={`${className} bg-[#2a2a2a] rounded flex items-center justify-center text-white font-bold shrink-0`}
           style={{ width: size, height: size, fontSize: size * 0.55 }}
           aria-hidden="true"
-          title={label || undefined}
+          title={useTile || !showTooltip ? undefined : label}
         >
           E
         </div>
       );
     case 'gog':
-      return (
+      return wrapWithTile(
         <div
           className={`${className} bg-purple-700 rounded flex items-center justify-center text-white font-bold shrink-0`}
           style={{ width: size, height: size, fontSize: size * 0.45 }}
           aria-hidden="true"
-          title={label || undefined}
+          title={useTile || !showTooltip ? undefined : label}
         >
           GOG
         </div>
       );
     case 'pc':
-      return <Image src="/icons/pc.svg" {...iconProps} />;
+      return wrapWithTile(renderPcIcon(iconProps, useTile, showTooltip, label));
     case 'cinema':
-      return <Image src="/icons/cinema.svg" {...iconProps} />;
+      return wrapWithTile(<Image src="/icons/cinema.svg" {...iconProps} />);
     default:
-      return (
+      return wrapWithTile(
         <div
           className={`${className} bg-muted rounded flex items-center justify-center shrink-0`}
           style={{ width: size, height: size }}
-          title={label || undefined}
+          title={useTile || !showTooltip ? undefined : label}
         >
           <span className="text-[10px] font-medium text-muted-foreground">?</span>
         </div>

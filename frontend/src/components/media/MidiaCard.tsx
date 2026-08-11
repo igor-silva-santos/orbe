@@ -277,26 +277,30 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
-                <div className="h-[20px] mb-1 flex items-center">
-                  {dubStatus && (
+                {type === 'anime' && dubStatus && (
+                  <div className="h-[20px] mb-1 flex items-center">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
                 {(type === 'jogo' ? platforms : providers).length > 0 && (
-                  <div className="h-[22px] flex items-center gap-1.5 overflow-hidden">
-                    {(type === 'jogo' ? platforms : providers).slice(0, 4).map((p) => (
-                      <span key={p.name} title={p.name} className="inline-flex shrink-0">
-                        <PlatformIcon
-                          platform={p.icon}
-                          logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                          size={18}
-                          iconOnly
-                          className="h-[18px] w-[18px] rounded-sm"
-                          title={p.name}
-                        />
-                      </span>
+                  <div
+                    className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden shrink-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                      type === 'jogo' ? 'h-[40px] min-h-[40px]' : 'h-[28px] min-h-[28px]'
+                    }`}
+                  >
+                    {(type === 'jogo' ? platforms : providers).map((p) => (
+                      <PlatformIcon
+                        key={p.name}
+                        platform={p.icon}
+                        logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
+                        size={type === 'jogo' ? 28 : 18}
+                        iconOnly
+                        variant="tile"
+                        className={type === 'jogo' ? 'h-7 w-7' : 'h-[18px] w-[18px]'}
+                        title={p.name}
+                      />
                     ))}
                   </div>
                 )}

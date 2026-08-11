@@ -70,7 +70,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.provider.name} className="h-5 w-5" />
+                <PlatformIcon platform={p.provider.name} className="h-5 w-5" variant="tile" />
                 <span>{p.provider.name}</span>
               </a>
             ))}
@@ -82,7 +82,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.nome} className="h-5 w-5" />
+                <PlatformIcon platform={p.nome} className="h-5 w-5" variant="tile" />
                 <span>{p.nome}</span>
               </a>
             ))}

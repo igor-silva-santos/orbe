@@ -18,7 +18,6 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
     : NOT_INFORMED;
 
   const rating = jogo.avaliacao ? (jogo.avaliacao / 10).toFixed(1) : null;
-  const platforms = jogo.plataformas_api?.map((p) => p.nome).filter(Boolean) ?? [];
 
   return (
     <div className="flex-1 space-y-4">
@@ -93,19 +92,6 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
             {jogo.modos_jogo.map((mode) => (
               <span key={mode} className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
                 {mode}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {platforms.length > 0 && (
-        <div>
-          <h4 className={`font-semibold ${labelColor} mb-2`}>Plataformas</h4>
-          <div className="flex flex-wrap gap-2">
-            {platforms.map((platform) => (
-              <span key={platform} className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                {platform}
               </span>
             ))}
           </div>

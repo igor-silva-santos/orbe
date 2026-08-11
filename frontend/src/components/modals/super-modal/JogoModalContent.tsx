@@ -3,8 +3,8 @@
 import { Jogo, CalendarModalData } from '@/types';
 import JogoInfoBlock from './JogoInfoBlock';
 import PcRequirementsDrawer from './PcRequirementsDrawer';
-import { getGameStores, sanitizeTranslatedText } from '@/lib/media-helpers';
-import PlatformIcon from '@/components/ui/PlatformIcons';
+import { sanitizeTranslatedText } from '@/lib/media-helpers';
+import JogoPlatformLinks from './JogoPlatformLinks';
 import SafeImage from '@/components/ui/SafeImage';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
@@ -19,7 +19,6 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
   }
 
   const trailerKey = jogo.trailer_key || jogo.videos?.find((v) => v.key)?.key;
-  const gameStores = getGameStores(jogo);
   const synopsis = jogo.sinopse
     ? sanitizeTranslatedText(jogo.sinopse) || '(não informado)'
     : '(não informado)';
@@ -50,6 +49,8 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
         <p className="text-muted-foreground leading-relaxed">{synopsis}</p>
       </section>
 
+      <JogoPlatformLinks jogo={jogo} />
+
       {isPcGame && jogo.pc_requirements && (
         <PcRequirementsDrawer requirements={jogo.pc_requirements} />
       )}
@@ -67,26 +68,6 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
               allowFullScreen
               className="absolute top-0 left-0 w-full h-full"
             />
-          </div>
-        </section>
-      )}
-
-      {gameStores.length > 0 && (
-        <section>
-          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Onde comprar / jogar</h2>
-          <div className="flex flex-wrap gap-4 mt-2">
-            {gameStores.map((store) => (
-              <a
-                key={store.name}
-                href={store.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
-              >
-                <PlatformIcon platform={store.icon} className="h-5 w-5" />
-                <span>{store.name}</span>
-              </a>
-            ))}
           </div>
         </section>
       )}
