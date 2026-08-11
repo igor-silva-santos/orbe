@@ -1,42 +1,19 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { prisma } from './clients';
 import { logger } from './logger';
-import jwt from 'jsonwebtoken';
 import { commentRateLimiter } from './securityMiddleware';
+import { authMiddleware, type AuthRequest } from './authMiddleware';
+import { isPositiveInt, isStringWithMaxLength, isValidMediaType } from './validation';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
-interface AuthRequest extends Request {
-  user?: { 
-    userId: number;
-    role: string;
-  };
-}
-
-// Middleware de Autenticação
-const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Não autorizado.' });
-    }
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number, role: string };
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ error: 'Token inválido.' });
-    }
-};
-
-const VALID_MEDIA_TYPES = ['filme', 'serie', 'anime', 'jogo'];
+const MAX_TEXTO_LENGTH = 3000;
 
 // Listar comentários de uma mídia
 router.get('/comments/:tipo/:id', async (req: Request, res: Response) => {
     const { tipo, id } = req.params;
 
-    if (!VALID_MEDIA_TYPES.includes(tipo)) {
+    if (!isValidMediaType(tipo)) {
         return res.status(400).json({ error: 'Tipo de mídia inválido.' });
     }
 
@@ -76,6 +53,15 @@ router.post('/comments', commentRateLimiter, authMiddleware, async (req: AuthReq
     if (!midia_id || !tipo_midia || !texto) {
         return res.status(400).json({ error: 'Dados incompletos para o comentário.' });
     }
+    if (!isPositiveInt(midia_id)) {
+        return res.status(400).json({ error: 'midia_id inválido.' });
+    }
+    if (!isValidMediaType(tipo_midia)) {
+        return res.status(400).json({ error: 'tipo_midia inválido.' });
+    }
+    if (!isStringWithMaxLength(texto, MAX_TEXTO_LENGTH) || texto.trim().length === 0) {
+        return res.status(400).json({ error: `texto inválido ou excede o limite de ${MAX_TEXTO_LENGTH} caracteres.` });
+    }
 
     try {
         const comment = await prisma.comment.create({
@@ -99,6 +85,34 @@ router.post('/comments', commentRateLimiter, authMiddleware, async (req: AuthReq
     } catch (error) {
         logger.error(`Erro ao criar comentário para o usuário ID ${userId}:`, error);
         res.status(500).json({ error: 'Erro ao criar comentário.' });
+    }
+});
+
+// Excluir um comentário — autor do comentário ou admin
+router.delete('/comments/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const role = req.user?.role;
+    const commentId = Number(req.params.id);
+
+    if (!Number.isInteger(commentId) || commentId <= 0) {
+        return res.status(400).json({ error: 'ID de comentário inválido.' });
+    }
+
+    try {
+        const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+        if (!comment) {
+            return res.status(404).json({ error: 'Comentário não encontrado.' });
+        }
+
+        if (comment.usuario_id !== userId && role !== 'admin') {
+            return res.status(403).json({ error: 'Você não tem permissão para excluir este comentário.' });
+        }
+
+        await prisma.comment.delete({ where: { id: commentId } });
+        res.status(204).send();
+    } catch (error) {
+        logger.error(`Erro ao excluir comentário ID ${commentId}:`, error);
+        res.status(500).json({ error: 'Erro ao excluir comentário.' });
     }
 });
 

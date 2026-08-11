@@ -29,11 +29,14 @@ import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer } from './logger';
 
 const router = Router();
 
-const isProduction = process.env.NODE_ENV === 'production';
 const SYNC_SECRET = process.env.SYNC_SECRET || 'super-secret-sync-key';
+const allowInsecureDevSecrets = process.env.ALLOW_INSECURE_DEV_SECRETS === 'true';
 
-if (isProduction && (!process.env.SYNC_SECRET || SYNC_SECRET === 'super-secret-sync-key')) {
-  throw new Error('SYNC_SECRET não configurado ou inseguro em produção.');
+if ((!process.env.SYNC_SECRET || SYNC_SECRET === 'super-secret-sync-key') && !allowInsecureDevSecrets) {
+  throw new Error(
+    'SYNC_SECRET não configurado ou inseguro. Defina uma chave forte, ' +
+    'ou ALLOW_INSECURE_DEV_SECRETS=true só em desenvolvimento local.'
+  );
 }
 
 function verifySyncSecret(provided: string | undefined): boolean {

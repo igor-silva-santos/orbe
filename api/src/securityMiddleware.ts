@@ -4,6 +4,14 @@ import type { Express, RequestHandler } from 'express';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+/**
+ * Só existe pra dev local sem .env configurado. Qualquer ambiente alcançável pela rede deve
+ * configurar os secrets de verdade — não confiamos só em NODE_ENV==='production' bater
+ * exatamente, porque um typo ou um staging exposto à internet com NODE_ENV diferente
+ * herdaria os defaults hardcoded deste arquivo sem nenhum erro, só um warning no log.
+ */
+const allowInsecureDevSecrets = process.env.ALLOW_INSECURE_DEV_SECRETS === 'true';
+
 /** Headers de segurança padrão */
 export const securityHeaders = helmet({
   contentSecurityPolicy: false,
@@ -86,9 +94,10 @@ export function assertJwtSecretConfigured(): void {
   const secret = process.env.JWT_SECRET;
   const isDefault = !secret || secret === 'seu_segredo_jwt_super_secreto';
 
-  if (isProduction && isDefault) {
+  if (isDefault && !allowInsecureDevSecrets) {
     throw new Error(
-      'JWT_SECRET não configurado ou inseguro. Defina uma chave forte em produção.'
+      'JWT_SECRET não configurado ou inseguro. Defina uma chave forte, ' +
+      'ou ALLOW_INSECURE_DEV_SECRETS=true só em desenvolvimento local.'
     );
   }
 
@@ -110,9 +119,10 @@ export function assertIgdbWebhookSecretConfigured(): void {
   const secret = process.env.IGDB_WEBHOOK_SECRET;
   const isDefault = !secret || secret === DEFAULT_IGDB_WEBHOOK_SECRET;
 
-  if (isProduction && isDefault) {
+  if (isDefault && !allowInsecureDevSecrets) {
     throw new Error(
-      'IGDB_WEBHOOK_SECRET não configurado ou inseguro. Defina uma chave forte em produção.'
+      'IGDB_WEBHOOK_SECRET não configurado ou inseguro. Defina uma chave forte, ' +
+      'ou ALLOW_INSECURE_DEV_SECRETS=true só em desenvolvimento local.'
     );
   }
 
