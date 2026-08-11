@@ -1,0 +1,40 @@
+name: Sync Backfill Noturno
+
+# Avança o backfill histórico do catálogo (ano a ano, a partir de 2000) chamando
+# POST /api/run-sync-backfill-step repetidamente numa janela noturna.
+#
+# Por que um agendador externo em vez de cron nativo do Render:
+# - O plano free do Render não tem cron job nativo (só a partir do plano pago).
+# - O web service free hiberna após 15min sem tráfego de entrada, mesmo com
+#   trabalho rodando em background — então uma única chamada de madrugada
+#   corre risco real de ser interrompida no meio.
+# - Chamando o endpoint a cada ~12min durante a janela, mantemos o serviço
+#   acordado E avançamos o checkpoint aos poucos (o endpoint é idempotente:
+#   se já tem sync rodando, só mantém o serviço acordado sem duplicar trabalho;
+#   se tem checkpoint travado, retoma; senão inicia o próximo ano pendente).
+#
+# Configuração necessária (Settings → Secrets and variables → Actions):
+#   ORBE_API_URL  — ex.: https://orbe-7bu0.onrender.com (sem barra no final)
+#   SYNC_SECRET   — mesmo valor da env SYNC_SECRET configurada no Render
+#
+# Ajuste o horário/frequência do cron conforme a duração real de um ano de
+# sync observada nos logs — o valor abaixo (03:00–04:59 UTC, a cada 12min) é
+# um ponto de partida, não um número medido.
+
+on:
+  schedule:
+    - cron: '*/12 3-4 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  advance-backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar próximo passo do backfill
+        run: |
+          curl -sf -X POST "${ORBE_API_URL}/api/run-sync-backfill-step" \
+            -H "x-sync-secret: ${SYNC_SECRET}" \
+            -H "Content-Type: application/json"
+        env:
+          ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}

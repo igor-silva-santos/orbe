@@ -13,6 +13,7 @@ import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync } from './cach
 import {
   acquireSyncLock,
   failSyncRun,
+  getBackfillNextYear,
   getSyncStatus,
   getSyncStatusDetailed,
   markPhaseComplete,
@@ -52,12 +53,32 @@ const protectSync = (req: any, res: any, next: any) => {
 /** Status público — detecta cold start / sync travado */
 router.get('/sync/status', async (req, res) => {
   const status = await getSyncStatus(prisma);
+  const backfillNextYear = await getBackfillNextYear(prisma);
   const secret = req.headers['x-sync-secret'] as string | undefined;
   if (verifySyncSecret(secret)) {
     const detailed = await getSyncStatusDetailed(prisma);
-    return res.json({ ...status, detailed });
+    return res.json({ ...status, backfillNextYear, detailed });
   }
-  res.json(status);
+  res.json({ ...status, backfillNextYear });
+});
+
+/** Tamanho atual do banco — útil pra acompanhar o limite de 500MB do Supabase free */
+router.get('/sync/db-size', protectSync, async (_req, res) => {
+  try {
+    const result = await prisma.$queryRaw<{ bytes: bigint }[]>`SELECT pg_database_size(current_database()) AS bytes`;
+    const bytes = Number(result[0]?.bytes ?? 0);
+    const megabytes = Math.round((bytes / (1024 * 1024)) * 100) / 100;
+    const supabaseFreeLimitMb = 500;
+    res.json({
+      bytes,
+      megabytes,
+      supabaseFreeLimitMb,
+      percentOfFreeLimit: Math.round((megabytes / supabaseFreeLimitMb) * 1000) / 10,
+    });
+  } catch (error) {
+    logger.error('Erro ao consultar tamanho do banco:', error);
+    res.status(500).json({ error: 'Erro ao consultar tamanho do banco.' });
+  }
 });
 
 router.post('/sync/reset-stale', syncRateLimiter, protectSync, async (_req, res) => {
@@ -234,6 +255,102 @@ router.post('/run-sync-resume', syncRateLimiter, protectSync, async (_req, res) 
     });
   } catch (error) {
     logger.error('Erro na retomada de sync (checkpoint atualizado):', error);
+  }
+});
+
+/**
+ * Avança um passo do backfill histórico (ano a ano, a partir de 2000).
+ * Idempotente e seguro pra chamar com frequência (ex.: cron externo a cada ~10-14min):
+ * - se já tem sync rodando e não travado, não faz nada (só serve pra manter o serviço acordado);
+ * - se tem checkpoint travado/interrompido, retoma o ano em andamento;
+ * - senão, inicia o próximo ano pendente do ponteiro de backfill.
+ */
+router.post('/run-sync-backfill-step', syncRateLimiter, protectSync, async (_req, res) => {
+  const status = await getSyncStatus(prisma);
+
+  if (status.syncActive && !status.stale) {
+    return res.status(202).json({
+      message: 'Sync já em andamento — nenhuma ação necessária agora.',
+      statusUrl: '/api/sync/status',
+    });
+  }
+
+  if (status.resumeAvailable || status.interrupted) {
+    const existing = await getSyncStatusDetailed(prisma);
+    const lock = await acquireSyncLock(prisma, {
+      startDate: existing!.startDate,
+      endDate: existing!.endDate,
+      startYear: existing!.startYear,
+      endYear: existing!.endYear,
+      backfill: existing!.backfill,
+    }, { resume: true });
+
+    if (!lock.ok) {
+      return res.status(lock.status).json({ error: lock.message });
+    }
+
+    res.status(202).json({
+      message: `Retomando backfill do ano ${existing!.startYear} (checkpoint anterior).`,
+      statusUrl: '/api/sync/status',
+    });
+
+    try {
+      await executeFullSync(prisma, {
+        startDate: existing!.startDate,
+        endDate: existing!.endDate,
+        startYear: existing!.startYear!,
+        endYear: existing!.endYear!,
+        resume: true,
+        backfill: existing!.backfill ?? false,
+      });
+    } catch (error) {
+      logger.error('Erro ao retomar passo do backfill (checkpoint salvo):', error);
+    }
+    return;
+  }
+
+  const currentYear = new Date().getFullYear();
+  const nextYear = await getBackfillNextYear(prisma);
+
+  if (nextYear > currentYear) {
+    return res.status(200).json({
+      message: `Backfill concluído — já alcançou o ano corrente (${currentYear}).`,
+      backfillNextYear: nextYear,
+    });
+  }
+
+  const startDate = `${nextYear}-01-01`;
+  const endDate = `${nextYear}-12-31`;
+
+  const lock = await acquireSyncLock(prisma, {
+    startDate,
+    endDate,
+    startYear: nextYear,
+    endYear: nextYear,
+    backfill: true,
+  });
+
+  if (!lock.ok) {
+    return res.status(lock.status).json({ error: lock.message });
+  }
+
+  logger.info(`📅 Backfill: iniciando ano ${nextYear}.`);
+  res.status(202).json({
+    message: `Backfill iniciado para o ano ${nextYear}.`,
+    statusUrl: '/api/sync/status',
+  });
+
+  try {
+    await executeFullSync(prisma, {
+      startDate,
+      endDate,
+      startYear: nextYear,
+      endYear: nextYear,
+      resume: false,
+      backfill: true,
+    });
+  } catch (error) {
+    logger.error(`Erro no backfill do ano ${nextYear} (checkpoint salvo):`, error);
   }
 });
 
