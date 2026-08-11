@@ -580,8 +580,3 @@ export function isJogoRelevantForSync(jogo: JogoLike): boolean {
     (jogo.ratingCount ?? 0) >= SYNC_MIN_GAME_RATING_COUNT
   );
 }
-
-/** @deprecated Use isMovieRelevantForDisplay ou isMovieRelevantForSync */
-export function isMovieRelevant(movie: MovieLike): boolean {
-  return isMovieRelevantForDisplay(movie);
-}

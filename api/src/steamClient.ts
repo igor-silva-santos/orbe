@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { logger } from './logger';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const steamStoreApi = axios.create({
   baseURL: 'https://store.steampowered.com/api',
   timeout: 20000,
@@ -154,15 +152,3 @@ export async function fetchSteamCurrentPlayers(appId: number): Promise<number | 
   }
 }
 
-export async function fetchSteamAppDetailsBatch(
-  appIds: number[],
-  delayMs = 300,
-): Promise<Map<number, SteamAppDetails>> {
-  const results = new Map<number, SteamAppDetails>();
-  for (const appId of appIds) {
-    const details = await fetchSteamAppDetails(appId);
-    if (details) results.set(appId, details);
-    await delay(delayMs);
-  }
-  return results;
-}
