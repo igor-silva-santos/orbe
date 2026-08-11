@@ -74,11 +74,11 @@ async function fetchCuratedSeriesIds(): Promise<Set<number>> {
   logger.info('Buscando séries de listas curadas TMDB (popular, on_the_air)...');
   const ids = new Set<number>();
 
-  const popular = await fetchIdsFromTmdbList('/tv/popular', {}, 10);
+  const popular = await fetchIdsFromTmdbList('/tv/popular', {}, 15);
   popular.forEach((id) => ids.add(id));
   logger.info(`  popular: ${popular.length} séries`);
 
-  const onTheAir = await fetchIdsFromTmdbList('/tv/on_the_air', {}, 5);
+  const onTheAir = await fetchIdsFromTmdbList('/tv/on_the_air', {}, 10);
   onTheAir.forEach((id) => ids.add(id));
   logger.info(`  on_the_air: ${onTheAir.length} séries`);
 
