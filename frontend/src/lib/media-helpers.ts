@@ -194,9 +194,15 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
     { contains: 'steampowered.com', name: 'Steam', icon: 'steam' },
     { contains: 'epicgames.com', name: 'Epic Games', icon: 'epic' },
     { contains: 'store.playstation.com', name: 'PlayStation Store', icon: 'playstation' },
+    { contains: 'playstation.com', name: 'PlayStation Store', icon: 'playstation' },
     { contains: 'xbox.com', name: 'Xbox Store', icon: 'xbox' },
     { contains: 'nintendo.com', name: 'Nintendo eShop', icon: 'nintendo switch' },
     { contains: 'gog.com', name: 'GOG', icon: 'gog' },
+    { contains: 'itch.io', name: 'itch.io', icon: 'itch' },
+    { contains: 'humblebundle.com', name: 'Humble', icon: 'humble' },
+    { contains: 'ubisoft.com', name: 'Ubisoft', icon: 'ubisoft' },
+    { contains: 'ea.com', name: 'EA App', icon: 'ea' },
+    { contains: 'battle.net', name: 'Battle.net', icon: 'battlenet' },
   ];
 
   const foundStores = new Map<string, { name: string; icon: string; url: string }>();
@@ -243,6 +249,49 @@ export const getGamePlatformLinks = (item: Jogo): { name: string; icon: string; 
   }
 
   return Array.from(links.values());
+};
+
+function platformIconKey(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('playstation') || lower === 'ps4' || lower === 'ps5') return 'playstation';
+  if (lower.includes('xbox')) return 'xbox';
+  if (lower.includes('nintendo') || lower.includes('switch')) return 'nintendo';
+  if (lower.includes('steam')) return 'steam';
+  if (lower.includes('epic')) return 'epic';
+  if (lower.includes('gog')) return 'gog';
+  if (lower === 'pc' || lower.includes('windows') || lower.includes('mac')) return 'pc';
+  return lower;
+}
+
+export type GamePlatformDisplayItem = {
+  name: string;
+  icon: string;
+  url?: string;
+};
+
+/** Lojas com link + ícones de plataforma (hardware) sem duplicar */
+export const getGamePlatformDisplayItems = (jogo: Jogo): GamePlatformDisplayItem[] => {
+  const result: GamePlatformDisplayItem[] = [];
+  const seen = new Set<string>();
+
+  const add = (item: GamePlatformDisplayItem) => {
+    const key = platformIconKey(item.icon);
+    if (seen.has(key)) return;
+    seen.add(key);
+    result.push(item);
+  };
+
+  for (const store of getGamePlatformLinks(jogo)) {
+    add({ name: store.name, icon: store.icon, url: store.url });
+  }
+
+  for (const platform of getGamePlatforms(jogo)) {
+    const key = platformIconKey(platform.icon);
+    if (seen.has(key)) continue;
+    add({ name: platform.name, icon: platform.icon });
+  }
+
+  return result;
 };
 
 /**

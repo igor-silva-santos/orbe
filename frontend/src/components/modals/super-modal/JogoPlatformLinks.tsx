@@ -2,7 +2,7 @@
 
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { getGamePlatformLinks } from '@/lib/media-helpers';
+import { getGamePlatformDisplayItems } from '@/lib/media-helpers';
 import type { Jogo } from '@/types';
 
 interface JogoPlatformLinksProps {
@@ -10,40 +10,66 @@ interface JogoPlatformLinksProps {
   title?: string;
 }
 
+const ICON_SIZE = 44;
+
 const JogoPlatformLinks: React.FC<JogoPlatformLinksProps> = ({
   jogo,
   title = 'Onde jogar',
 }) => {
-  const platformLinks = getGamePlatformLinks(jogo);
+  const platformItems = getGamePlatformDisplayItems(jogo);
 
-  if (platformLinks.length === 0) return null;
+  if (platformItems.length === 0) return null;
+
+  const tileClass =
+    'flex items-center justify-center rounded-lg border border-border bg-muted p-2 transition-colors hover:bg-muted/70 hover:border-primary/40';
 
   return (
     <TooltipProvider delayDuration={200}>
       <section>
         <h2 className="text-xl font-bold mb-3 text-yellow-500 dark:text-blue-400">{title}</h2>
-        <div className="flex flex-wrap gap-3">
-          {platformLinks.map((store) => (
-            <Tooltip key={store.name}>
-              <TooltipTrigger asChild>
-                <a
-                  href={store.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center rounded-xl border border-border bg-muted p-3 transition-colors hover:bg-muted/70 hover:border-primary/40"
-                  aria-label={`Abrir ${store.name}`}
-                >
-                  <PlatformIcon platform={store.icon} size={32} title={store.name} />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{store.name}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          {platformItems.map((item) => {
+            const content = (
+              <PlatformIcon platform={item.icon} size={ICON_SIZE} title={item.name} />
+            );
+
+            if (item.url) {
+              return (
+                <Tooltip key={item.name}>
+                  <TooltipTrigger asChild>
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={tileClass}
+                      aria-label={`Abrir ${item.name}`}
+                    >
+                      {content}
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>{item.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return (
+              <Tooltip key={item.name}>
+                <TooltipTrigger asChild>
+                  <span className={`${tileClass} cursor-default opacity-90`} aria-label={item.name}>
+                    {content}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{item.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Ícones abrem a página do jogo na loja ou plataforma correspondente.
+          Ícones com link abrem a página do jogo na loja. Outros indicam plataformas do título.
         </p>
       </section>
     </TooltipProvider>
