@@ -249,6 +249,15 @@ export const translateAnimeGenre = (genre: string): string =>
 
 const translationErrorPattern = /MYMEMORY\s+WARNING|YOU\s+USED\s+ALL\s+AVAILABLE\s+FREE|TRANSLATED\.NET/i;
 
+/** Remove tags HTML e normaliza quebras de linha */
+export const stripHtml = (html: string): string =>
+  html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
 export const sanitizeTranslatedText = (text: string | null | undefined): string => {
   if (!text) return '';
   if (translationErrorPattern.test(text)) return '';
