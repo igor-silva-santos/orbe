@@ -181,6 +181,10 @@ export const apiClient = {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    if (response.status === 204) {
+      return null;
+    }
+
     return response.json();
   },
 };
@@ -347,6 +351,45 @@ export const orbeNerdApi = {
 
   markNotificationAsRead: async (id: number) => {
     return apiClient.put(`/notifications/${id}/read`, {});
+  },
+
+  markAllNotificationsAsRead: async () => {
+    return apiClient.put('/notifications/read-all', {});
+  },
+
+  deleteNotification: async (id: number) => {
+    return apiClient.delete(`/notifications/${id}`);
+  },
+
+  // Comentários
+  deleteComment: async (id: number) => {
+    return apiClient.delete(`/comments/${id}`);
+  },
+
+  // Calendário
+  getCalendarEvents: async () => {
+    return apiClient.get('/calendar-events');
+  },
+
+  addCalendarEvents: async (events: Array<{
+    title: string;
+    date: string;
+    type: 'release' | 'episode' | 'cinema';
+    midiaId: number;
+    mediaType: string;
+    time?: string;
+    location?: string;
+  }>) => {
+    return apiClient.post('/calendar-events', { events });
+  },
+
+  deleteCalendarEvent: async (id: number) => {
+    return apiClient.delete(`/calendar-events/${id}`);
+  },
+
+  // Contato
+  sendContactMessage: async (data: { nome: string; email: string; assunto: string; mensagem: string }) => {
+    return apiClient.post('/contato', data);
   },
 };
 

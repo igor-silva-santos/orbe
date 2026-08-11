@@ -240,22 +240,12 @@ export interface Comentario {
 // Interface para notificações
 export interface Notification {
   id: number;
-  usuario_id?: number;
-  midia_id?: number;
-  tipo_midia?: TipoMidia;
-  titulo: string;
-  message?: string;
-  type: 
-    | 'NOVO_ITEM' 
-    | 'ATUALIZACAO_DATA' 
-    | 'DUBLAGEM' 
-    | 'INDICADOS_PREMIO' 
-    | 'VENCEDOR_PREMIO' 
-    | 'FALHA_LINK_INGRESSO' 
-    | 'LANCAMENTO_FAVORITO';
+  midia_id?: number | null;
+  tipo_midia?: TipoMidia | null;
+  message: string;
+  type: string;
   foi_visualizada: boolean;
   createdAt: string;
-  importante?: boolean;
 }
 
 // Interface para eventos de games (IGDB)

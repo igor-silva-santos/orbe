@@ -807,6 +807,7 @@ model User {
   notifications   Notification[]
   watchlistItems  WatchlistItem[]
   comments        Comment[]
+  calendarEvents  UserCalendarEvent[]
 }
 
 model Comment {
@@ -855,6 +856,31 @@ model Notification {
   relatedMediaId   Int?
   relatedMediaType String?
   createdAt        DateTime @default(now())
+}
+
+model UserCalendarEvent {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  midiaId   Int
+  tipoMidia String   // 'filme', 'serie', 'anime', 'jogo'
+  title     String
+  eventType String   // 'release', 'episode', 'cinema'
+  date      DateTime
+  time      String?
+  location  String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String
+  assunto   String
+  mensagem  String   @db.Text
+  createdAt DateTime @default(now())
 }
 
 model preferencias_usuario_midia {

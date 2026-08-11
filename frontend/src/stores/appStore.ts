@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Notification, Theme, Filme, Serie, Anime, Jogo, UserInteraction } from '@/types';
+import orbeNerdApi from '@/lib/api';
 
 interface AppState {
   // Estado do usuário
@@ -163,35 +164,56 @@ export const useAppStore = create<AppState>()(
       
       markNotificationAsRead: (id) => {
         const { notifications } = get();
-        const updatedNotifications = notifications.map(n => 
+        const previous = notifications;
+        const updatedNotifications = notifications.map(n =>
           n.id === id ? { ...n, foi_visualizada: true } : n
         );
         const unreadCount = updatedNotifications.filter(n => !n.foi_visualizada).length;
-        set({ 
-          notifications: updatedNotifications, 
-          unreadCount 
+        set({
+          notifications: updatedNotifications,
+          unreadCount
+        });
+
+        orbeNerdApi.markNotificationAsRead(id).catch((error) => {
+          console.error('Erro ao marcar notificação como lida:', error);
+          const revertedUnreadCount = previous.filter(n => !n.foi_visualizada).length;
+          set({ notifications: previous, unreadCount: revertedUnreadCount });
         });
       },
-      
+
       markAllNotificationsAsRead: () => {
         const { notifications } = get();
-        const updatedNotifications = notifications.map(n => ({ 
-          ...n, 
-          foi_visualizada: true 
+        const previous = notifications;
+        const updatedNotifications = notifications.map(n => ({
+          ...n,
+          foi_visualizada: true
         }));
-        set({ 
-          notifications: updatedNotifications, 
-          unreadCount: 0 
+        set({
+          notifications: updatedNotifications,
+          unreadCount: 0
+        });
+
+        orbeNerdApi.markAllNotificationsAsRead().catch((error) => {
+          console.error('Erro ao marcar todas notificações como lidas:', error);
+          const revertedUnreadCount = previous.filter(n => !n.foi_visualizada).length;
+          set({ notifications: previous, unreadCount: revertedUnreadCount });
         });
       },
 
       deleteNotification: (id) => {
         const { notifications } = get();
+        const previous = notifications;
         const updatedNotifications = notifications.filter(n => n.id !== id);
         const unreadCount = updatedNotifications.filter(n => !n.foi_visualizada).length;
         set({
           notifications: updatedNotifications,
           unreadCount
+        });
+
+        orbeNerdApi.deleteNotification(id).catch((error) => {
+          console.error('Erro ao excluir notificação:', error);
+          const revertedUnreadCount = previous.filter(n => !n.foi_visualizada).length;
+          set({ notifications: previous, unreadCount: revertedUnreadCount });
         });
       },
 

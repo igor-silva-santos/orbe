@@ -21,21 +21,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initializeApp = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (token) {
-          const userData = await orbeNerdApi.getCurrentUser();
-          setUser(userData);
-          
-          const notifications = await realApi.getNotifications();
-          setNotifications(notifications);
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
-          const interactions = await realApi.getInteractions();
-          setInteractions(interactions);
-        }
+      try {
+        const userData = await orbeNerdApi.getCurrentUser();
+        setUser(userData);
       } catch (error) {
-        console.error('Erro ao inicializar app:', error);
+        console.error('Erro ao carregar usuário atual:', error);
+        return;
+      }
+
+      try {
+        const notifications = await realApi.getNotifications();
+        setNotifications(notifications);
+      } catch (error) {
+        console.error('Erro ao carregar notificações:', error);
+      }
+
+      try {
+        const interactions = await realApi.getInteractions();
+        setInteractions(interactions);
+      } catch (error) {
+        console.error('Erro ao carregar interações do usuário:', error);
       }
     };
 
