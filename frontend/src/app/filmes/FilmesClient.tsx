@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Filter, Grid, Calendar, Star, TrendingUp, Monitor } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
@@ -8,6 +8,7 @@ import type { Filme } from '@/types';
 import type { FilmesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
 const MONTHS = [
   { value: '1', label: 'Janeiro' },
@@ -55,34 +56,36 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
 
   const skipInitialFetch = useRef(true);
 
+  const loadFilmes = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await realApi.getFilmes({
+        filtro: selectedFilter === 'todos' ? undefined : selectedFilter,
+        genero: selectedGenre === 'todos' ? undefined : selectedGenre,
+        ano: selectedYear === 'todos' ? undefined : selectedYear,
+        mes: selectedMonth === 'todos' ? undefined : selectedMonth,
+        status: selectedStatus === 'todos' ? undefined : selectedStatus,
+        plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
+      });
+      setFilmes(response.results);
+      setTotalResults(response.total_results);
+    } catch (error) {
+      console.error('Erro ao carregar filmes:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedFilter, selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
+
+  useOrbeDataRefresh(loadFilmes);
+
   useEffect(() => {
     if (skipInitialFetch.current) {
       skipInitialFetch.current = false;
       return;
     }
 
-    const loadFilmes = async () => {
-      setIsLoading(true);
-      try {
-        const response = await realApi.getFilmes({
-          filtro: selectedFilter === 'todos' ? undefined : selectedFilter,
-          genero: selectedGenre === 'todos' ? undefined : selectedGenre,
-          ano: selectedYear === 'todos' ? undefined : selectedYear,
-          mes: selectedMonth === 'todos' ? undefined : selectedMonth,
-          status: selectedStatus === 'todos' ? undefined : selectedStatus,
-          plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
-        });
-        setFilmes(response.results);
-        setTotalResults(response.total_results);
-      } catch (error) {
-        console.error('Erro ao carregar filmes:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadFilmes();
-  }, [selectedFilter, selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
+  }, [loadFilmes]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">

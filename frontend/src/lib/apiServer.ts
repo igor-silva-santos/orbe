@@ -46,6 +46,7 @@ export interface JogoFilters {
   platforms: string[];
   gameModes: string[];
   gameEngines: string[];
+  years: number[];
 }
 
 export interface FilmesPageData {
@@ -173,6 +174,7 @@ export async function fetchJogosPageData(): Promise<JogosPageData> {
       platforms: filters.platforms ?? [],
       gameModes: filters.gameModes ?? [],
       gameEngines: filters.gameEngines ?? [],
+      years: filters.years ?? [],
     },
   };
 }

@@ -105,7 +105,7 @@ export const realApi = {
   getAnimeFilters: orbeNerdApi.getAnimeFilters,
 
   // Jogos
-  getJogos: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; plataforma?: string; modo?: string; ano?: string }): Promise<{ results: Jogo[]; total_pages: number; total_results: number }> => {
+  getJogos: async (params: { filtro?: string; genero?: string; page?: number; limit?: number; plataforma?: string; modo?: string; ano?: string; mes?: string }): Promise<{ results: Jogo[]; total_pages: number; total_results: number }> => {
     try {
       const response = await orbeNerdApi.getJogos(params);
       

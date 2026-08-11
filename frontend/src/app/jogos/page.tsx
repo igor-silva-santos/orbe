@@ -4,7 +4,7 @@ import { fetchJogosPageData, type JogosPageData } from '@/lib/apiServer';
 const emptyData: JogosPageData = {
   results: [],
   total: 0,
-  filters: { genres: [], platforms: [], gameModes: [], gameEngines: [] },
+  filters: { genres: [], platforms: [], gameModes: [], gameEngines: [], years: [] },
 };
 
 export const revalidate = 300;

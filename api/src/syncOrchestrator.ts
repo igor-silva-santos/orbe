@@ -17,6 +17,7 @@ import {
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { invalidateCacheByPatterns } from './cacheInvalidation';
+import { broadcast } from './index';
 
 export type FullSyncParams = {
   startDate: string;
@@ -143,6 +144,11 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       'cache:/api/eventos*',
     ]);
     await releaseSyncLock(prisma);
+    broadcast({
+      type: 'SYNC_COMPLETE',
+      mediaType: 'all',
+      message: 'Sincronização completa concluída.',
+    });
   } catch (error) {
     await failSyncRun(prisma, error);
     throw error;

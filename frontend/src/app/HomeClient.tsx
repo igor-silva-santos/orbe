@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
 import type { Midia, Anime } from '@/types';
 import { calculateCarouselStartIndex } from '@/lib/carousel-utils';
+import orbeNerdApi from '@/lib/api';
+import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
 export interface HomepageData {
   filmes: Midia[];
@@ -19,7 +21,29 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialData }: HomeClientProps) {
-  const [data] = useState(initialData);
+  const [data, setData] = useState(initialData);
+  const [carouselKey, setCarouselKey] = useState(0);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
+  const refreshHomepage = useCallback(async () => {
+    try {
+      const fresh = await orbeNerdApi.getHomepage();
+      setData({
+        filmes: (fresh.filmes ?? []) as Midia[],
+        series: (fresh.series ?? []) as Midia[],
+        jogos: (fresh.jogos ?? []) as Midia[],
+        animes: (fresh.animes ?? []) as Anime[],
+      });
+      setCarouselKey((k) => k + 1);
+    } catch (error) {
+      console.error('Erro ao atualizar homepage após sync:', error);
+    }
+  }, []);
+
+  useOrbeDataRefresh(refreshHomepage);
 
   return (
     <div className="bg-background overflow-x-hidden">
@@ -55,6 +79,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section id="filmes" className="overflow-hidden">
           <SectionHeading title="Filmes" />
           <MediaCarousel
+            key={`filmes-${carouselKey}`}
             mediaType="filmes"
             initialData={data.filmes}
             startIndex={calculateCarouselStartIndex(data.filmes)}
@@ -64,6 +89,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section id="series" className="overflow-hidden">
           <SectionHeading title="Séries" />
           <MediaCarousel
+            key={`series-${carouselKey}`}
             mediaType="series"
             initialData={data.series}
             startIndex={calculateCarouselStartIndex(data.series)}
@@ -72,12 +98,13 @@ export default function HomeClient({ initialData }: HomeClientProps) {
 
         <section id="animes" className="overflow-hidden">
           <SectionHeading title="Animes" />
-          <AnimeCarousel initialData={data.animes} />
+          <AnimeCarousel key={`animes-${carouselKey}`} initialData={data.animes} />
         </section>
 
         <section id="jogos" className="overflow-hidden">
           <SectionHeading title="Jogos" />
           <MediaCarousel
+            key={`jogos-${carouselKey}`}
             mediaType="jogos"
             initialData={data.jogos}
             startIndex={calculateCarouselStartIndex(data.jogos)}
@@ -90,8 +117,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
 
 function SectionHeading({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-between mb-5 px-2">
-      <h2 className="font-display text-xl md:text-[22px] orbe-text-primary">{title}</h2>
-    </div>
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 orbe-text-primary px-2 sm:px-0">{title}</h2>
   );
 }

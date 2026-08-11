@@ -1,13 +1,29 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Filter, Gamepad2, Star } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Filter, Gamepad2, Star, Calendar } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Jogo } from '@/types';
 import type { JogosPageData } from '@/lib/apiServer';
+import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
 import PageHeader from '@/components/layout/PageHeader';
+
+const MONTHS = [
+  { value: '1', label: 'Janeiro' },
+  { value: '2', label: 'Fevereiro' },
+  { value: '3', label: 'Março' },
+  { value: '4', label: 'Abril' },
+  { value: '5', label: 'Maio' },
+  { value: '6', label: 'Junho' },
+  { value: '7', label: 'Julho' },
+  { value: '8', label: 'Agosto' },
+  { value: '9', label: 'Setembro' },
+  { value: '10', label: 'Outubro' },
+  { value: '11', label: 'Novembro' },
+  { value: '12', label: 'Dezembro' },
+];
 
 interface JogosClientProps {
   initialData: JogosPageData;
@@ -21,38 +37,43 @@ export default function JogosClient({ initialData }: JogosClientProps) {
   const [availableGenres, setAvailableGenres] = useState<string[]>(initialData.filters.genres);
   const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(initialData.filters.platforms);
   const [availableGameModes, setAvailableGameModes] = useState<string[]>(initialData.filters.gameModes);
+  const [availableYears, setAvailableYears] = useState<number[]>(initialData.filters.years ?? []);
 
-  // Estados para os filtros selecionados
   const [selectedGenre, setSelectedGenre] = useState<string>('todos');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('todos');
   const [selectedGameMode, setSelectedGameMode] = useState<string>('todos');
+  const [selectedYear, setSelectedYear] = useState<string>('todos');
+  const [selectedMonth, setSelectedMonth] = useState<string>('todos');
 
   const skipInitialFetch = useRef(true);
+
+  const loadJogos = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await realApi.getJogos({
+        genero: selectedGenre === 'todos' ? undefined : selectedGenre,
+        plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
+        modo: selectedGameMode === 'todos' ? undefined : selectedGameMode,
+        ano: selectedYear === 'todos' ? undefined : selectedYear,
+        mes: selectedMonth === 'todos' ? undefined : selectedMonth,
+      });
+      setJogos(response.results);
+    } catch (error) {
+      console.error('Erro ao carregar jogos:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedGenre, selectedPlatform, selectedGameMode, selectedYear, selectedMonth]);
+
+  useOrbeDataRefresh(loadJogos);
 
   useEffect(() => {
     if (skipInitialFetch.current) {
       skipInitialFetch.current = false;
       return;
     }
-
-    const loadJogos = async () => {
-      setIsLoading(true);
-      try {
-        const response = await realApi.getJogos({
-          genero: selectedGenre === 'todos' ? undefined : selectedGenre,
-          plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
-          modo: selectedGameMode === 'todos' ? undefined : selectedGameMode,
-        });
-        setJogos(response.results);
-      } catch (error) {
-        console.error('Erro ao carregar jogos:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadJogos();
-  }, [selectedGenre, selectedPlatform, selectedGameMode]);
+  }, [loadJogos]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
@@ -60,7 +81,6 @@ export default function JogosClient({ initialData }: JogosClientProps) {
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* Gênero */}
           <div className="flex items-center gap-2 w-full">
             <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
@@ -68,7 +88,27 @@ export default function JogosClient({ initialData }: JogosClientProps) {
               {availableGenres.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
-          {/* Plataforma */}
+
+          <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
+              <option value="todos">Todos os Anos</option>
+              {availableYears.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
+              <option value="todos">Todos os Meses</option>
+              {MONTHS.map((month) => (
+                <option key={month.value} value={month.value}>{month.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex items-center gap-2 w-full">
             <Gamepad2 className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
@@ -76,7 +116,7 @@ export default function JogosClient({ initialData }: JogosClientProps) {
               {availablePlatforms.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
-          {/* Modo de Jogo */}
+
           <div className="flex items-center gap-2 w-full">
             <Star className="h-4 w-4 text-muted-foreground shrink-0" />
             <select value={selectedGameMode} onChange={(e) => setSelectedGameMode(e.target.value)} disabled={isLoadingFilters} className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">

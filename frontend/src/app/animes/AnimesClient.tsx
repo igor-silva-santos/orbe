@@ -10,6 +10,7 @@ import type { Anime } from '@/types';
 import type { AnimesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
 interface AnimesClientProps {
   initialData: AnimesPageData;
@@ -78,6 +79,8 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
     selectedStatus,
     selectedYear,
   ]);
+
+  useOrbeDataRefresh(loadAnimes);
 
   useEffect(() => {
     loadAnimes();

@@ -970,20 +970,38 @@ router.get('/animes/:id/next-episode', async (req, res) => {
 
 // Rota para Jogos
 router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, plataforma, modo } = req.query;
+  const { filtro, genero, plataforma, modo, ano, mes } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const where: Prisma.JogoWhereInput = {};
+    const allConditions: Prisma.JogoWhereInput[] = [];
+
+    const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
+
+    if (monthRange) {
+      allConditions.push({ firstReleaseDate: { gte: monthRange.startDate, lte: monthRange.endDate } });
+    } else if (ano && ano !== 'todos') {
+      const year = parseInt(ano as string, 10);
+      if (!Number.isNaN(year)) {
+        allConditions.push({
+          firstReleaseDate: {
+            gte: new Date(year, 0, 1),
+            lte: new Date(year, 11, 31, 23, 59, 59, 999),
+          },
+        });
+      }
+    }
 
     if (genero && genero !== 'todos') {
-      where.genres = { some: { genero: { name: genero as string } } };
+      allConditions.push({ genres: { some: { genero: { name: genero as string } } } });
     }
     if (plataforma && plataforma !== 'todos') {
-      where.platforms = { some: { plataforma: { name: plataforma as string } } };
+      allConditions.push({ platforms: { some: { plataforma: { name: plataforma as string } } } });
     }
     if (modo && modo !== 'todos') {
-      where.gameModes = { some: { gameMode: { name: modo as string } } };
+      allConditions.push({ gameModes: { some: { gameMode: { name: modo as string } } } });
     }
+
+    const where: Prisma.JogoWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
 
     const orderBy: Prisma.JogoOrderByWithRelationInput = filtro === 'populares' ? { rating: 'desc' } : { name: 'asc' };
 
@@ -993,6 +1011,10 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
         orderBy,
         skip,
         take: limit,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 4 },
+        },
       }),
       prisma.jogo.count({ where }),
     ]);
@@ -1054,12 +1076,20 @@ router.get('/jogos/filtros', async (req, res) => {
     const platforms = await prisma.jogoPlataforma.findMany({ orderBy: { name: 'asc' } });
     const gameModes = await prisma.gameMode.findMany({ orderBy: { name: 'asc' } });
     const gameEngines = await prisma.gameEngine.findMany({ orderBy: { name: 'asc' } });
+    const years = await prisma.jogo.findMany({
+      where: { firstReleaseDate: { not: null } },
+      distinct: ['firstReleaseDate'],
+      select: { firstReleaseDate: true },
+      orderBy: { firstReleaseDate: 'desc' },
+    });
+    const distinctYears = [...new Set(years.map((y) => y.firstReleaseDate!.getFullYear()))];
 
     res.json({
       genres: genres.map(g => g.name),
       platforms: platforms.map(p => p.name),
       gameModes: gameModes.map(gm => gm.name),
       gameEngines: gameEngines.map(ge => ge.name),
+      years: distinctYears,
     });
 
   } catch (error) {

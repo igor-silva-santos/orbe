@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/hooks/useTheme';
 import { realApi } from '@/data/realApi';
 import orbeNerdApi from '@/lib/api';
+import SyncRefreshListener from '@/components/providers/SyncRefreshListener';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -41,5 +42,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     initializeApp();
   }, [setUser, setNotifications, setInteractions]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <SyncRefreshListener />
+      {children}
+    </>
+  );
 }

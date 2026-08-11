@@ -235,7 +235,7 @@ export const orbeNerdApi = {
   },
 
   // Jogos
-  getJogos: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; plataforma?: string; modo?: string; ano?: string }) => {
+  getJogos: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; plataforma?: string; modo?: string; ano?: string; mes?: string }) => {
     return apiClient.get('/jogos', params);
   },
 
@@ -294,6 +294,10 @@ export const orbeNerdApi = {
 
   getHoje: async () => {
     return apiClient.get('/hoje');
+  },
+
+  getHomepage: async () => {
+    return apiClient.get('/homepage');
   },
 
   // Autenticação
