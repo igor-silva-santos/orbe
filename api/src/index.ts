@@ -18,7 +18,9 @@ import commentRoutes from './commentRoutes';
 import {
   applySecurityMiddleware,
   authRateLimiter,
+  assertIgdbWebhookSecretConfigured,
   assertJwtSecretConfigured,
+  isIgdbWebhooksEnabled,
   resolveCorsOptions,
 } from './securityMiddleware';
 
@@ -63,9 +65,15 @@ app.use(cors(resolveCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
 applySecurityMiddleware(app);
 
-// Usar as rotas de mídia e webhooks
+// Usar as rotas de mídia e webhooks (IGDB opcional)
 app.use('/api', mediaRoutes);
-app.use('/api', webhookRoutes);
+if (isIgdbWebhooksEnabled()) {
+  assertIgdbWebhookSecretConfigured();
+  app.use('/api', webhookRoutes);
+  logger.info('Webhooks IGDB habilitados.');
+} else {
+  logger.info('Webhooks IGDB desabilitados (defina IGDB_WEBHOOKS_ENABLED=true para ativar).');
+}
 app.use('/api', userRoutes);
 app.use('/api', syncRoutes);
 app.use('/api', watchlistRoutes);

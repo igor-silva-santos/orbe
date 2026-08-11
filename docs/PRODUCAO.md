@@ -74,7 +74,11 @@ Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 | `IGDB_CLIENT_SECRET` | sim | Client secret IGDB |
 | `CORS_ORIGIN` | sim | `https://orbe-seven.vercel.app,http://localhost:3000` |
 | `REDIS_URL` | não | Deixe vazio se não usar cache Redis |
-| `IGDB_WEBHOOK_SECRET` | não | Só se webhooks IGDB estiverem ativos |
+| `IGDB_WEBHOOKS_ENABLED` | não | `false` — só `true` se webhooks IGDB estiverem configurados |
+| `IGDB_WEBHOOK_SECRET` | não | Obrigatório apenas com `IGDB_WEBHOOKS_ENABLED=true` |
+| `SYNC_LOG_TO_FILE` | não | `true` grava `logs/sync.log` no servidor (além do buffer em memória) |
+
+**Logs de sync (investigação):** `GET /api/sync/logs?filter=sync` — admin (Bearer) ou `x-sync-secret`. Botão temporário em `/perfil` (admin).
 
 Health check: `GET /api/health` → `{ "ok": true, "db": true }`
 

@@ -23,6 +23,8 @@ import {
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
 import { broadcast } from './index';
+import adminMiddleware from './adminMiddleware';
+import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer } from './logger';
 
 const router = Router();
 
@@ -59,6 +61,37 @@ router.get('/sync/status', async (req, res) => {
   }
   res.json(status);
 });
+
+/** Download de logs em memória — admin ou x-sync-secret (investigação temporária) */
+router.get(
+  '/sync/logs',
+  (req, res, next) => {
+    const secret = req.headers['x-sync-secret'] as string | undefined;
+    if (verifySyncSecret(secret)) {
+      return next();
+    }
+    return adminMiddleware(req, res, next);
+  },
+  (req, res) => {
+    const filter = String(req.query.filter || 'sync');
+    const content = filter === 'all' ? getLogBuffer() : getSyncLogBuffer();
+    const meta = getLogBufferMeta();
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `orbe-${filter === 'all' ? 'app' : 'sync'}-${stamp}.log`;
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('X-Log-Lines', String(filter === 'all' ? meta.totalLines : meta.syncLines));
+
+    if (!content) {
+      return res.send(
+        '(nenhum log de sync em memória ainda — inicie uma sincronização e tente novamente)\n'
+      );
+    }
+
+    res.send(content);
+  }
+);
 
 router.post('/sync/reset-stale', syncRateLimiter, protectSync, async (_req, res) => {
   const status = await resetStaleSyncLock(prisma);

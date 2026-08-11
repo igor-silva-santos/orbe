@@ -97,10 +97,18 @@ export function assertJwtSecretConfigured(): void {
   }
 }
 
+const DEFAULT_IGDB_WEBHOOK_SECRET = 'um-segredo-muito-dificil-de-adivinhar';
+
+/** Webhooks IGDB são opcionais — só ative com IGDB_WEBHOOKS_ENABLED=true */
+export function isIgdbWebhooksEnabled(): boolean {
+  return process.env.IGDB_WEBHOOKS_ENABLED === 'true';
+}
+
 export function assertIgdbWebhookSecretConfigured(): void {
+  if (!isIgdbWebhooksEnabled()) return;
+
   const secret = process.env.IGDB_WEBHOOK_SECRET;
-  const isDefault =
-    !secret || secret === 'um-segredo-muito-dificil-de-adivinhar';
+  const isDefault = !secret || secret === DEFAULT_IGDB_WEBHOOK_SECRET;
 
   if (isProduction && isDefault) {
     throw new Error(

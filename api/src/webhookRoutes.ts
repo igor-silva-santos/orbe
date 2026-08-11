@@ -2,10 +2,6 @@ import { Router, Request, Response, NextFunction, json } from 'express';
 import { prisma } from './clients';
 import crypto from 'crypto';
 import { logger } from './logger';
-import { assertIgdbWebhookSecretConfigured } from './securityMiddleware';
-
-assertIgdbWebhookSecretConfigured();
-
 const router = Router();
 
 const WEBHOOK_SECRET = process.env.IGDB_WEBHOOK_SECRET || 'um-segredo-muito-dificil-de-adivinhar';
