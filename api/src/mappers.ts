@@ -466,9 +466,10 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   data_lancamento_api: filme.releaseDate,
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (filme.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+  plataformas_api: (filme.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
     nome: p.provider.name,
     url: p.url,
+    logo_path: p.provider.logoPath ?? null,
   })),
   em_prevenda: filme.em_prevenda ?? false,
 });
@@ -482,9 +483,10 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   data_lancamento_api: serie.firstAirDate,
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (serie.streamingProviders ?? []).slice(0, 2).map((p: any) => ({
+  plataformas_api: (serie.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
     nome: p.provider.name,
     url: p.url,
+    logo_path: p.provider.logoPath ?? null,
   })),
 });
 

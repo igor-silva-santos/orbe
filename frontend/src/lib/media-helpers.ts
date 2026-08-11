@@ -64,8 +64,19 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
 
   const providers = Array.from(seen.values());
 
-  if ('duracao' in item && providers.length === 0) {
-    return [{ name: 'Nos Cinemas', icon: 'cinema' }];
+  if (providers.length === 0) {
+    const isFilmeCard =
+      'duracao' in item || (item as { type?: string }).type === 'filme';
+    const emPrevenda = 'em_prevenda' in item && Boolean((item as Filme).em_prevenda);
+    const releaseRaw = item.data_lancamento_api;
+    const isFutureRelease =
+      releaseRaw &&
+      !Number.isNaN(new Date(releaseRaw as string).getTime()) &&
+      new Date(releaseRaw as string) > new Date();
+
+    if (isFilmeCard && (emPrevenda || isFutureRelease)) {
+      return [{ name: 'Nos Cinemas', icon: 'cinema' }];
+    }
   }
 
   return providers;

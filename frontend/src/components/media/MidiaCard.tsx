@@ -277,16 +277,16 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
-                <div className="h-[20px] mb-1 flex items-center">
-                  {dubStatus && (
+                {type === 'anime' && dubStatus && (
+                  <div className="h-[20px] mb-1 flex items-center">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
                 {(type === 'jogo' ? platforms : providers).length > 0 && (
                   <div
-                    className={`flex items-center gap-1.5 overflow-x-auto overflow-y-hidden shrink-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                    className={`flex items-center gap-1.5 overflow-x-auto overflow-y-hidden shrink-0 min-h-[22px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
                       type === 'jogo' ? 'h-[26px]' : 'h-[22px]'
                     }`}
                   >
@@ -295,9 +295,9 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                         <PlatformIcon
                           platform={p.icon}
                           logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                          size={type === 'jogo' ? 24 : 18}
+                          size={type === 'jogo' ? 24 : 20}
                           iconOnly
-                          className={type === 'jogo' ? 'h-6 w-6' : 'h-[18px] w-[18px] rounded-sm'}
+                          className={type === 'jogo' ? 'h-6 w-6' : 'h-5 w-5 rounded-sm'}
                           title={p.name}
                         />
                       </span>
