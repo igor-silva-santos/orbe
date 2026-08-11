@@ -19,6 +19,8 @@ interface JogosEmAltaData {
   semana: string;
   metrica?: string;
   destaques: Jogo[];
+  steam_mais_jogados?: Jogo[];
+  steam_promocoes?: Jogo[];
   categorias: GameSection[];
   modos: GameSection[];
   plataformas: GameSection[];
@@ -161,6 +163,38 @@ export default function JogosEmAltaPage() {
                 </div>
               )}
             </section>
+
+            {data.steam_mais_jogados && data.steam_mais_jogados.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
+                  <Monitor className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                  Mais jogados na Steam
+                </h2>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+                  {data.steam_mais_jogados.map((jogo) => (
+                    <div key={`steam-trend-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
+                      <MidiaCard midia={jogo} type="jogo" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {data.steam_promocoes && data.steam_promocoes.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
+                  <Gamepad2 className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                  Promoções na Steam
+                </h2>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+                  {data.steam_promocoes.map((jogo) => (
+                    <div key={`steam-sale-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
+                      <MidiaCard midia={jogo} type="jogo" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <BlockSection
               title="Mais jogados por plataforma"

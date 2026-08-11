@@ -5,9 +5,10 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import { syncSteamData } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
 import { executeFullSync } from './syncOrchestrator';
-import { invalidateCacheByPatterns } from './cacheInvalidation';
+import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync } from './cacheInvalidation';
 import {
   acquireSyncLock,
   failSyncRun,
@@ -99,21 +100,31 @@ router.post('/run-sync', protectSync, async (req, res) => {
         const phase = runProgress.startPhase('ANIMES');
         phase.setTotal((end - start + 1) * 4);
         for (let year = start; year <= end; year++) {
-          await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL']);
+          await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL'], undefined, {
+            onBatchComplete: async () => {
+              await updateSyncProgress(prisma, { phase: 'animes' });
+            },
+          });
           phase.advance(4);
         }
         await markPhaseComplete(prisma, 'animes');
         break;
       }
       case 'games':
-        await updateSyncProgress(prisma, { phase: 'games' });
+        await updateSyncProgress(prisma, { phase: 'jogos' });
         await syncGames(prisma, startDate, endDate);
+        await syncSteamData(prisma);
         await markPhaseComplete(prisma, 'jogos');
+        break;
+      case 'steam':
+        await updateSyncProgress(prisma, { phase: 'jogos' });
+        await syncSteamData(prisma);
         break;
       default:
         logger.warn(`Tipo de mídia desconhecido para sincronização: ${mediaType}`);
     }
     logger.info(`Sincronização manual para ${mediaType} concluída.`);
+    await invalidateCacheAfterMediaSync(mediaType);
     await releaseSyncLock(prisma);
   } catch (error) {
     await failSyncRun(prisma, error);

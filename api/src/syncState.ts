@@ -3,6 +3,7 @@ import { logger } from './logger';
 
 const SYNC_STATE_KEY = 'sync_run';
 const STALE_PROGRESS_MS = 10 * 60 * 1000; // 10 min sem progresso = provável crash/cold start
+const STALE_ANIMES_PROGRESS_MS = 30 * 60 * 1000; // animes: lotes lentos (700ms/anime + tradução)
 
 export type SyncPhase = 'filmes' | 'series' | 'animes' | 'jogos' | 'premios';
 
@@ -59,9 +60,14 @@ async function writeState(prisma: PrismaClient, state: SyncRunState | null): Pro
   });
 }
 
+function staleThresholdMs(state: SyncRunState): number {
+  if (state.phase === 'animes') return STALE_ANIMES_PROGRESS_MS;
+  return STALE_PROGRESS_MS;
+}
+
 function isStale(state: SyncRunState): boolean {
   if (!state.running || !state.lastProgressAt) return false;
-  return Date.now() - new Date(state.lastProgressAt).getTime() > STALE_PROGRESS_MS;
+  return Date.now() - new Date(state.lastProgressAt).getTime() > staleThresholdMs(state);
 }
 
 export async function getSyncStatus(prisma: PrismaClient): Promise<SyncStatusPublic> {
