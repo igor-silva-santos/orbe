@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Filter, Calendar, Star, Monitor } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
@@ -8,6 +8,7 @@ import type { Serie } from '@/types';
 import type { SeriesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
 const MONTHS = [
   { value: '1', label: 'Janeiro' },
@@ -47,33 +48,35 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
 
   const skipInitialFetch = useRef(true);
 
+  const loadSeries = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await realApi.getSeries({
+        genero: selectedGenre === 'todos' ? undefined : selectedGenre,
+        ano: selectedYear === 'todos' ? undefined : selectedYear,
+        mes: selectedMonth === 'todos' ? undefined : selectedMonth,
+        status: selectedStatus === 'todos' ? undefined : selectedStatus,
+        plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
+      });
+      setSeries(response.results);
+      setTotalResults(response.total_results);
+    } catch (error) {
+      console.error('Erro ao carregar séries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
+
+  useOrbeDataRefresh(loadSeries);
+
   useEffect(() => {
     if (skipInitialFetch.current) {
       skipInitialFetch.current = false;
       return;
     }
 
-    const loadSeries = async () => {
-      setIsLoading(true);
-      try {
-        const response = await realApi.getSeries({
-          genero: selectedGenre === 'todos' ? undefined : selectedGenre,
-          ano: selectedYear === 'todos' ? undefined : selectedYear,
-          mes: selectedMonth === 'todos' ? undefined : selectedMonth,
-          status: selectedStatus === 'todos' ? undefined : selectedStatus,
-          plataforma: selectedPlatform === 'todos' ? undefined : selectedPlatform,
-        });
-        setSeries(response.results);
-        setTotalResults(response.total_results);
-      } catch (error) {
-        console.error('Erro ao carregar séries:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadSeries();
-  }, [selectedGenre, selectedYear, selectedMonth, selectedStatus, selectedPlatform]);
+  }, [loadSeries]);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">

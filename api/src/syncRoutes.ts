@@ -22,6 +22,7 @@ import {
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
+import { broadcast } from './index';
 
 const router = Router();
 
@@ -150,6 +151,11 @@ router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
     logger.info(`Sincronização manual para ${mediaType} concluída.`);
     await invalidateCacheAfterMediaSync(mediaType);
     await releaseSyncLock(prisma);
+    broadcast({
+      type: 'SYNC_COMPLETE',
+      mediaType,
+      message: `Sincronização de ${mediaType} concluída.`,
+    });
   } catch (error) {
     await failSyncRun(prisma, error);
     logger.error(`Erro durante a sincronização manual de ${mediaType}:`, error);
