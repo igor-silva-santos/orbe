@@ -6,7 +6,7 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
-import { syncSteamData } from './syncSteam';
+import { syncSteamData, refreshStaleSteamPrices } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
 import { executeFullSync } from './syncOrchestrator';
 import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync } from './cacheInvalidation';
@@ -227,6 +227,18 @@ router.post('/run-sync-resume', syncRateLimiter, protectSync, async (_req, res) 
     });
   } catch (error) {
     logger.error('Erro na retomada de sync (checkpoint atualizado):', error);
+  }
+});
+
+router.post('/run-sync-steam-prices', syncRateLimiter, protectSync, async (_req, res) => {
+  logger.info('Refresh manual de preços Steam iniciado.');
+  res.status(202).json({ message: 'Refresh de preços Steam iniciado. Verifique os logs.' });
+
+  try {
+    const updated = await refreshStaleSteamPrices(prisma);
+    logger.info(`Refresh manual de preços Steam concluído: ${updated} jogos.`);
+  } catch (error) {
+    logger.error('Erro no refresh de preços Steam:', error);
   }
 });
 

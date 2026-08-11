@@ -21,7 +21,9 @@ import {
   getAnimeDubStatus,
   formatRating,
   formatNextEpisodeCard,
+  hasSteamPriceDisplay,
 } from '@/lib/media-helpers';
+import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
 
@@ -119,6 +121,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const isAdultContent = (midia as any).isAdult === true;
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
+  const showSteamPrice = type === 'jogo' && hasSteamPriceDisplay(midia);
 
   const formatReleaseDate = () => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
@@ -209,6 +212,11 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       size={12}
                       className="h-3 w-3"
                     />
+                  </div>
+                )}
+                {showSteamPrice && (
+                  <div className="absolute bottom-2 left-2 right-2 z-10">
+                    <SteamPriceLabel item={midia} variant="card" />
                   </div>
                 )}
                 <div className="absolute top-2 right-2">

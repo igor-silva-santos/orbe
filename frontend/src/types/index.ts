@@ -92,6 +92,10 @@ export interface Midia {
   trailer_url_api?: string;
   avaliacao?: number; // Propriedade adicionada
   siteUrl?: string;
+  /** Preço Steam (centavos BRL) — presente em cards de jogo do carrossel */
+  steam_app_id?: number | null;
+  steam_price_cents?: number | null;
+  steam_discount_percent?: number | null;
 }
 
 // Interfaces específicas por tipo de mídia

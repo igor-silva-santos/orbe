@@ -234,11 +234,23 @@ app.get('/profile', meHandler);
 import { runDetetive } from './detetive';
 import cron from 'node-cron';
 import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
+import { refreshStaleSteamPrices } from './syncSteam';
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00)
 cron.schedule('0 3 * * *', () => {
   logger.info('Executando o Detetive Digital agendado...');
   runDetetive();
+});
+
+// Refresh diário de preços Steam (jogos com steamAppId e sync >24h)
+cron.schedule('0 4 * * *', async () => {
+  logger.info('Executando refresh diário de preços Steam...');
+  try {
+    const updated = await refreshStaleSteamPrices(prisma);
+    logger.info(`Refresh diário Steam: ${updated} jogos atualizados.`);
+  } catch (error) {
+    logger.error('Erro no refresh diário de preços Steam:', error);
+  }
 });
 
 const PORT = process.env.PORT || 3001;
