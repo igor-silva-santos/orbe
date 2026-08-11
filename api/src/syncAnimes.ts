@@ -5,6 +5,7 @@ import { anilistApi } from './clients';
 import { prisma } from './clients';
 import { isAnimeRelevantForSeasonalSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
+import { addSkipReasons } from './syncState';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function prismaUpdateWithRetry<T>(
@@ -139,8 +140,13 @@ async function fetchSeasonAnimeIds(year: number, seasons: string[]): Promise<Map
     return seasonAnimeIds;
 }
 
-async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
+async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number> }> {
     let successCount = 0, errorCount = 0, skippedCount = 0;
+    const skipReasons: Record<string, number> = {};
+    const bumpSkip = (reason: string) => {
+        skippedCount++;
+        skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+    };
 
     const detailQuery = `
       query ($id: Int) {
@@ -211,12 +217,12 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
             const anime = response.data.data.Media;
 
             if (!anime) {
-                skippedCount++;
+                bumpSkip('not_found');
                 continue;
             }
 
             if (!isAnimeRelevantForSeasonalSync(anime)) {
-                skippedCount++;
+                bumpSkip('quality_filter');
                 logger.info(
                   `⏭️ Anime [${id}] "${anime.title?.romaji}" ignorado: critérios de sync ` +
                   `(score=${anime.averageScore ?? 0}, pop=${anime.popularity ?? 0}, status=${anime.status ?? '—'}).`
@@ -415,7 +421,7 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
     }
 
     logger.info(`--- Resumo do Lote (Animes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
-    return { successCount, errorCount, skippedCount };
+    return { successCount, errorCount, skippedCount, skipReasons };
 }
 
 export type SyncAnimesOptions = {
@@ -452,7 +458,8 @@ export async function syncAnimes(year: number, seasons: string[], options?: Sync
         const batch = animeIds.slice(i, i + batchSize);
         const translatedSeason = seasonTranslations[season] || season;
         logger.info(`Processando lote de animes: ${i + 1}-${Math.min(i + batchSize, animeIds.length)} de ${animeIds.length} da temporada ${translatedSeason} de ${year}`);
-        await processAnimeBatch(batch);
+        const batchResult = await processAnimeBatch(batch);
+        await addSkipReasons(prisma, 'animes', batchResult.skipReasons);
         if (options?.onBatchComplete) {
           await options.onBatchComplete({
             year,

@@ -8,7 +8,7 @@ import { isSerieRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
-import { updateSyncProgress } from './syncState';
+import { addSkipReasons, updateSyncProgress } from './syncState';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -137,8 +137,14 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
   }
 }
 
-async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curatedIds: Set<number> = new Set()): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
+async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curatedIds: Set<number> = new Set()): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number>, noBrProviderIds: number[] }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
+  const skipReasons: Record<string, number> = {};
+  const noBrProviderIds: number[] = [];
+  const bumpSkip = (reason: string) => {
+    skippedCount++;
+    skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+  };
 
   for (const id of serieIds) {
     try {
@@ -152,19 +158,20 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
 
       const brProviders = serieDetails['watch/providers']?.results?.BR;
       if (!brProviders) {
-        skippedCount++;
+        bumpSkip('no_br_provider');
+        noBrProviderIds.push(id);
         continue;
       }
 
       const firstAirDate: Date | null = serieDetails.first_air_date ? new Date(serieDetails.first_air_date) : null;
       if (!firstAirDate) {
-        skippedCount++;
+        bumpSkip('no_first_air_date');
         continue;
       }
 
       const isCurated = curatedIds.has(id);
       if (!isCurated && !isSerieRelevantForSync(serieDetails)) {
-        skippedCount++;
+        bumpSkip('quality_filter');
         logger.info(
           `⏭️ Série [${id}] "${serieDetails.name}" ignorada: critérios de sync ` +
           `(votes=${serieDetails.vote_count ?? 0}, pop=${(serieDetails.popularity ?? 0).toFixed(1)}).`
@@ -257,7 +264,79 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
   }
 
   logger.info(`--- Resumo do Lote (Séries) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
-  return { successCount, errorCount, skippedCount };
+  return { successCount, errorCount, skippedCount, skipReasons, noBrProviderIds };
+}
+
+const PENDING_BR_CHECK_KEY = 'series_pending_br_check';
+const PENDING_BR_CHECK_MAX_STORED = 5000;
+
+async function readPendingBrCheckIds(prisma: PrismaClient): Promise<number[]> {
+  const row = await prisma.appSetting.findUnique({ where: { key: PENDING_BR_CHECK_KEY } });
+  return Array.isArray(row?.value) ? (row!.value as number[]) : [];
+}
+
+async function writePendingBrCheckIds(prisma: PrismaClient, ids: number[]): Promise<void> {
+  const deduped = Array.from(new Set(ids)).slice(0, PENDING_BR_CHECK_MAX_STORED);
+  await prisma.appSetting.upsert({
+    where: { key: PENDING_BR_CHECK_KEY },
+    create: { key: PENDING_BR_CHECK_KEY, value: deduped },
+    update: { value: deduped },
+  });
+}
+
+/**
+ * Rechecha séries que foram puladas por falta de streaming BR em syncs anteriores.
+ * Dados de watch/providers da TMDB (via JustWatch) podem chegar atrasados em relação à estreia,
+ * então uma série sem provider hoje pode ganhar um mês depois — sem isso, ela nunca mais seria
+ * revisitada a não ser que um sync futuro cobrisse o mesmo período de novo.
+ */
+export async function recheckPendingBrSeries(prisma: PrismaClient, batchLimit = 200): Promise<{ resolved: number; stillPending: number }> {
+  const pendingIds = await readPendingBrCheckIds(prisma);
+  if (pendingIds.length === 0) {
+    return { resolved: 0, stillPending: 0 };
+  }
+
+  const idsToCheck = pendingIds.slice(0, batchLimit);
+  const remaining = pendingIds.slice(batchLimit);
+
+  logger.info(`Rechecando streaming BR de ${idsToCheck.length} séries pendentes (${pendingIds.length} no total)...`);
+
+  const stillNoProvider: number[] = [];
+  const idsWithNewProvider: number[] = [];
+
+  for (const id of idsToCheck) {
+    try {
+      const serieDetails = await tmdbApiWithRetry(() => tmdb.tvInfo({
+        id,
+        language: 'pt-BR',
+        append_to_response: 'watch/providers',
+      })) as any;
+
+      if (serieDetails['watch/providers']?.results?.BR) {
+        idsWithNewProvider.push(id);
+      } else {
+        stillNoProvider.push(id);
+      }
+    } catch (error) {
+      logger.error(`❌ Erro ao rechecar streaming BR da série ID ${id}: ${error}`);
+      stillNoProvider.push(id);
+    }
+    await delay(250);
+  }
+
+  if (idsWithNewProvider.length > 0) {
+    logger.info(`  ${idsWithNewProvider.length} séries ganharam streaming BR — reprocessando.`);
+    const result = await processSerieBatch(idsWithNewProvider, prisma);
+    await addSkipReasons(prisma, 'series', result.skipReasons);
+    // Séries que ainda não passam no filtro de qualidade (mas já têm provider BR) saem da fila —
+    // o motivo de skip agora é qualidade, não mais falta de streaming.
+  }
+
+  await writePendingBrCheckIds(prisma, [...stillNoProvider, ...remaining]);
+  const resolved = idsWithNewProvider.length;
+  const stillPending = stillNoProvider.length + remaining.length;
+  logger.info(`Recheck de streaming BR concluído: ${resolved} resolvidas, ${stillPending} ainda pendentes.`);
+  return { resolved, stillPending };
 }
 
 
@@ -275,6 +354,8 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
 
   await updateSyncProgress(prisma, { phase: 'series' });
 
+  const allNoBrProviderIds: number[] = [];
+
   const curatedIds = await fetchCuratedSeriesIds();
   let curatedIdList = Array.from(curatedIds);
   phaseTracker?.setTotal(curatedIdList.length);
@@ -288,7 +369,9 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
     for (let i = 0; i < curatedIdList.length; i += batchSize) {
       const batch = curatedIdList.slice(i, i + batchSize);
       logger.info(`Processando lote curado de séries: ${i + 1}-${Math.min(i + batchSize, curatedIdList.length)} de ${curatedIdList.length}`);
-      await processSerieBatch(batch, prisma, curatedIds);
+      const batchResult = await processSerieBatch(batch, prisma, curatedIds);
+      await addSkipReasons(prisma, 'series', batchResult.skipReasons);
+      allNoBrProviderIds.push(...batchResult.noBrProviderIds);
       phaseTracker?.advance(batch.length);
       const stats = phaseTracker?.getStats();
       await updateSyncProgress(prisma, {
@@ -319,7 +402,9 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote de séries do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            await processSerieBatch(batch, prisma, curatedIds);
+            const batchResult = await processSerieBatch(batch, prisma, curatedIds);
+            await addSkipReasons(prisma, 'series', batchResult.skipReasons);
+            allNoBrProviderIds.push(...batchResult.noBrProviderIds);
             phaseTracker?.advance(batch.length);
             const stats = phaseTracker?.getStats();
             await updateSyncProgress(prisma, {
@@ -331,6 +416,12 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
 
     currentStartDate.setMonth(currentStartDate.getMonth() + 1);
     currentStartDate.setDate(1);
+  }
+
+  if (allNoBrProviderIds.length > 0) {
+    const existingPending = await readPendingBrCheckIds(prisma);
+    await writePendingBrCheckIds(prisma, [...existingPending, ...allNoBrProviderIds]);
+    logger.info(`${allNoBrProviderIds.length} séries sem streaming BR guardadas para recheck futuro.`);
   }
 
   logger.info(`Sincronização de séries concluída para o período de ${startDate} a ${endDate}.`);

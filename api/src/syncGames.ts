@@ -6,7 +6,7 @@ import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
 import { isJogoRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
-import { updateSyncProgress } from './syncState';
+import { addSkipReasons, updateSyncProgress } from './syncState';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function igdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
@@ -115,8 +115,12 @@ async function fetchPopularGameIds(): Promise<number[]> {
     }
 }
 
-async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId: number | null = null): Promise<void> {
-    if (gameIds.length === 0) return;
+async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId: number | null = null): Promise<{ skipReasons: Record<string, number> }> {
+    const skipReasons: Record<string, number> = {};
+    const bumpSkip = (reason: string) => {
+        skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+    };
+    if (gameIds.length === 0) return { skipReasons };
 
     const query = `
         fields name, summary, cover.url, first_release_date, rating, rating_count, hypes,
@@ -147,6 +151,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
 
             try {
                 if (!isJogoRelevantForSync({ rating: game.rating, ratingCount: game.rating_count })) {
+                    bumpSkip('quality_filter');
                     logger.info(
                       `⏭️ Jogo [${game.id}] "${game.name}" ignorado: critérios de sync ` +
                       `(rating=${game.rating ?? 0}).`
@@ -231,6 +236,8 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
     } catch (error: any) {
         logger.error(`❌ Erro ao processar o lote de jogos IDs ${gameIds.join(',')}. Pulando: ${error.message || error}`);
     }
+
+    return { skipReasons };
 }
 
 async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string): Promise<number[]> {
@@ -348,7 +355,8 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
             for (let i = 0; i < idsToSync.length; i += batchSize) {
                 const batch = idsToSync.slice(i, i + batchSize);
                 logger.info(`Processando lote curado de jogos: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
-                await processGameBatch(batch, prisma);
+                const batchResult = await processGameBatch(batch, prisma);
+                await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
                 completedBatches++;
                 await reportProgress();
                 await delay(250);
@@ -368,7 +376,8 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
                 for (let i = 0; i < gameIds.length; i += batchSize) {
                     const batch = gameIds.slice(i, i + batchSize);
                     logger.info(`Processando lote de jogos do evento ${event.id}: ${i + 1}-${Math.min(i + batchSize, gameIds.length)} de ${gameIds.length}`);
-                    await processGameBatch(batch, prisma, event.id);
+                    const batchResult = await processGameBatch(batch, prisma, event.id);
+                    await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
                     batch.forEach((id: number) => processedEventGameIds.add(id));
                     completedBatches++;
                     await reportProgress();
@@ -385,7 +394,8 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
         for (let i = 0; i < finalGeneralIds.length; i += batchSize) {
             const batch = finalGeneralIds.slice(i, i + batchSize);
             logger.info(`Processando lote de jogos gerais: ${i + 1}-${Math.min(i + batchSize, finalGeneralIds.length)} de ${finalGeneralIds.length}`);
-            await processGameBatch(batch, prisma);
+            const batchResult = await processGameBatch(batch, prisma);
+            await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
             completedBatches++;
             await reportProgress();
             await delay(250);
