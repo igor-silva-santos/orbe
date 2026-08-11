@@ -25,7 +25,12 @@ const verifyWebhookSignature = (req: Request, res: Response, next: NextFunction)
     .update(messageId + timestamp + rawBody)
     .digest('hex');
 
-  if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
+  const signatureBuf = Buffer.from(signature);
+  const computedBuf = Buffer.from(computedSignature);
+  const signatureValid =
+    signatureBuf.length === computedBuf.length && crypto.timingSafeEqual(signatureBuf, computedBuf);
+
+  if (signatureValid) {
     next();
   } else {
     logger.warn('Assinatura de webhook da IGDB inválida.');

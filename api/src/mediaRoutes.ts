@@ -1586,8 +1586,8 @@ router.get('/search', searchRateLimiter, searchHandler);
 router.get('/premios/filtros', async (req, res) => {
   try {
     // Busca nomes e anos únicos dos campos JSON de todas as tabelas de mídia
-    const query = `
-      SELECT DISTINCT 
+    const results: any[] = await prisma.$queryRaw`
+      SELECT DISTINCT
         award->>'nome' as nome,
         (award->>'ano')::int as ano
       FROM (
@@ -1602,8 +1602,6 @@ router.get('/premios/filtros', async (req, res) => {
       WHERE award->>'nome' IS NOT NULL
       ORDER BY ano DESC, nome ASC
     `;
-
-    const results: any[] = await prisma.$queryRawUnsafe(query);
     
     const names = [...new Set(results.map(r => r.nome))].sort();
     const years = [...new Set(results.map(r => r.ano))].sort((a, b) => b - a);

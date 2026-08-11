@@ -1,6 +1,7 @@
 import './loadEnv';
 import express from 'express';
 import http from 'http';
+import crypto from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
 import { prisma } from './clients';
 import { logger } from './logger';
@@ -80,11 +81,20 @@ app.use('/api', watchlistRoutes);
 app.use('/api/users', profileRoutes);
 app.use('/api', commentRoutes);
 
+function timingSafeEqualStrings(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 // Healthcheck — público retorna mínimo; detalhes só com token interno
 app.get('/api/health', async (req, res) => {
   const healthToken = process.env.HEALTH_CHECK_TOKEN;
   const provided = req.headers['x-health-token'];
-  const showDetails = healthToken && provided === healthToken;
+  const showDetails = Boolean(
+    healthToken && typeof provided === 'string' && timingSafeEqualStrings(provided, healthToken),
+  );
 
   try {
     await prisma.$queryRaw`SELECT 1`;
