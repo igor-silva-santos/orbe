@@ -20,6 +20,7 @@ import {
 
 import MidiaCard from '../media/MidiaCard';
 import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
+import { LoadingOverlay } from '@/components/ui/LoadingIndicator';
 import type { Midia, TipoMidia, Filme, Serie, Anime, Jogo } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -39,6 +40,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const activeFetchesRef = useRef(0);
+
+  const beginFetch = () => {
+    activeFetchesRef.current += 1;
+    setIsFetching(true);
+  };
+
+  const endFetch = () => {
+    activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
+    if (activeFetchesRef.current === 0) {
+      setIsFetching(false);
+    }
+  };
 
   const loadedYears = useRef<Set<number>>(
     new Set(initialData.map((item) => new Date(item.data_lancamento_api).getFullYear()).filter(Boolean))
@@ -114,6 +129,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         return null;
       }
       fetchingMonths.current.add(key);
+      beginFetch();
       try {
         const response = await fetch(`${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`);
         const data: Midia[] = await response.json();
@@ -124,6 +140,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         return null;
       } finally {
         fetchingMonths.current.delete(key);
+        endFetch();
       }
     },
     [mediaType]
@@ -157,6 +174,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         return null;
       }
       fetchingYears.current.add(year);
+      beginFetch();
       try {
         const response = await fetch(`${API_BASE}/${mediaType}/by-year?year=${year}`);
         const data: Midia[] = await response.json();
@@ -169,6 +187,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         return null;
       } finally {
         fetchingYears.current.delete(year);
+        endFetch();
       }
     },
     [mediaType]
@@ -264,7 +283,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   }, [emblaApi, filteredItems.length]);
 
   const scrollToToday = useCallback(async () => {
-    if (!emblaApi) return;
+    if (!emblaApi || isFetching) return;
     const now = new Date();
     const merged = await prefetchMonths(now.getFullYear(), now.getMonth() + 1);
     const list = selectedGenre
@@ -274,10 +293,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     lastTitleMonthKey.current = '';
     emblaApi.scrollTo(todayIndex, false);
     updateTitleFromIndex(todayIndex, list);
-  }, [emblaApi, prefetchMonths, selectedGenre, updateTitleFromIndex]);
+  }, [emblaApi, isFetching, prefetchMonths, selectedGenre, updateTitleFromIndex]);
 
   const navigateByMonth = async (direction: 'next' | 'prev') => {
-    if (!emblaApi) return;
+    if (!emblaApi || isFetching) return;
 
     const items = filteredItemsRef.current;
     if (items.length === 0) return;
@@ -318,13 +337,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           onClick={scrollToToday}
           title="Ir para o mês atual"
         >
-          {currentTitle || 'Carregando...'}
+          {isFetching ? 'Carregando conteúdo...' : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className={CONTROL_BTN}>
+                <button className={CONTROL_BTN} disabled={isFetching} aria-disabled={isFetching}>
                   <Filter className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -337,18 +356,32 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <button onClick={() => navigateByMonth('prev')} className={CONTROL_BTN}>
+            <button
+              onClick={() => navigateByMonth('prev')}
+              className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
+              disabled={isFetching}
+              aria-busy={isFetching}
+            >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => navigateByMonth('next')} className={CONTROL_BTN}>
+            <button
+              onClick={() => navigateByMonth('next')}
+              className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
+              disabled={isFetching}
+              aria-busy={isFetching}
+            >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </div>
       </div>
       <TooltipProvider delayDuration={300}>
+        <div className="relative">
+          {isFetching && (
+            <LoadingOverlay message="Carregando novos títulos..." className="rounded-lg" />
+          )}
         <div
-          className="overflow-hidden max-w-full py-2 px-1 sm:px-2"
+          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isFetching ? 'pointer-events-none' : ''}`}
           ref={setViewportRef}
           style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >
@@ -377,6 +410,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                   );
                 })}
           </div>
+        </div>
         </div>
       </TooltipProvider>
     </div>

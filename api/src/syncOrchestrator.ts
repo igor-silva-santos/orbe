@@ -4,6 +4,7 @@ import { syncMovies } from './syncMovies';
 import { syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
+import { syncSteamData } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
 import {
   markPhaseComplete,
@@ -66,7 +67,11 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
 
       for (let year = animeStartYear; year <= endYear; year++) {
         logger.info(`--- Animes: ano ${year} ---`);
-        await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL']);
+        await syncAnimes(year, ['WINTER', 'SPRING', 'SUMMER', 'FALL'], undefined, {
+          onBatchComplete: async () => {
+            await updateSyncProgress(prisma, { phase: 'animes' });
+          },
+        });
         animePhase.advance(4);
         await setAnimesResumeYear(prisma, year + 1);
       }
@@ -80,6 +85,7 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       await updateSyncProgress(prisma, { phase: 'jogos' });
       runProgress.startPhase('JOGOS');
       await syncGames(prisma, startDate, endDate);
+      await syncSteamData(prisma);
       await markPhaseComplete(prisma, 'jogos');
     } else {
       logger.info('⏭️ Fase jogos já concluída (checkpoint). Pulando.');
@@ -97,8 +103,23 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
     logger.info('✅ Sincronização completa concluída.');
     await invalidateCacheByPatterns([
       'cache:/api/homepage*',
+      'cache:/api/filmes*',
+      'cache:/api/series*',
+      'cache:/api/animes*',
+      'cache:/api/jogos*',
       'cache:/api/filmes/by-month*',
       'cache:/api/filmes/by-year*',
+      'cache:/api/series/by-month*',
+      'cache:/api/series/by-year*',
+      'cache:/api/animes/by-season*',
+      'cache:/api/jogos/by-month*',
+      'cache:/api/jogos/by-year*',
+      'cache:/api/jogos/em-alta*',
+      'cache:/api/jogos/steam*',
+      'cache:/api/pesquisa*',
+      'cache:/api/search*',
+      'cache:/api/trending*',
+      'cache:/api/hoje*',
       'cache:/api/premios*',
       'cache:/api/eventos*',
     ]);

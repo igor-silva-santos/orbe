@@ -169,6 +169,12 @@ model Jogo {
   category              String?
   status                String?
   hypes                 Int?
+  steamAppId            Int?      @unique
+  steamPlayerCount      Int?
+  steamPriceCents       Int?
+  steamDiscountPercent  Int?
+  pcRequirements        Json?
+  steamSyncedAt         DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

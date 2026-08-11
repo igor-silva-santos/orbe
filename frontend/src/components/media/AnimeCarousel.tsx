@@ -10,6 +10,7 @@ import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
+import { LoadingOverlay } from '@/components/ui/LoadingIndicator';
 import DaySeparatorCard from './DaySeparatorCard';
 import { Anime } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
@@ -71,6 +72,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const [startIndex, setStartIndex] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('launch');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const activeFetchesRef = useRef(0);
+
+  const beginFetch = () => {
+    activeFetchesRef.current += 1;
+    setIsFetching(true);
+  };
+
+  const endFetch = () => {
+    activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
+    if (activeFetchesRef.current === 0) {
+      setIsFetching(false);
+    }
+  };
 
   const loadedSeasons = useRef<Set<string>>(new Set([`${initialYear}-${initialSeason}`]));
   const fetchingSeasons = useRef(new Set<string>());
@@ -107,6 +122,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       return null;
     }
     fetchingSeasons.current.add(seasonId);
+    beginFetch();
 
     try {
       const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
@@ -130,6 +146,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       return null;
     } finally {
       fetchingSeasons.current.delete(seasonId);
+      endFetch();
     }
   }, []);
 
@@ -331,6 +348,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   }, [carouselItems.length, startIndex, emblaApi]);
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
+    if (isFetching) return;
     const seasonIndex = SEASONS.indexOf(currentSeason);
     let newSeason: Season;
     let newYear = currentYear;
@@ -368,13 +386,16 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
           className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
           onClick={() => emblaApi?.scrollTo(startIndex)}
         >
-          {currentTitle || 'Carregando...'}
+          {isFetching ? 'Carregando animes...' : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors">
+                    <button
+                      className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                      disabled={isFetching}
+                    >
                       <Filter className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -387,8 +408,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <button onClick={() => navigateSeason('prev')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronLeft className="h-4 w-4"/></button>
-                <button onClick={() => navigateSeason('next')} className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors"><ChevronRight className="h-4 w-4"/></button>
+                <button
+                  onClick={() => navigateSeason('prev')}
+                  className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                  disabled={isFetching}
+                >
+                  <ChevronLeft className="h-4 w-4"/>
+                </button>
+                <button
+                  onClick={() => navigateSeason('next')}
+                  className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                  disabled={isFetching}
+                >
+                  <ChevronRight className="h-4 w-4"/>
+                </button>
             </div>
             {initialData.length > 0 && (
               <button 
@@ -403,7 +436,15 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       </div>
       
       <TooltipProvider delayDuration={300}>
-      <div className="overflow-hidden max-w-full py-2 px-1 sm:px-2" ref={setViewportRef} style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}>
+      <div className="relative">
+        {isFetching && (
+          <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
+        )}
+      <div
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isFetching ? 'pointer-events-none' : ''}`}
+        ref={setViewportRef}
+        style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
+      >
         <div className="flex">
           {carouselItems.length === 0
             ? Array.from({ length: 10 }).map((_, index) => (
@@ -429,6 +470,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                 </div>
               );})}
         </div>
+      </div>
       </div>
       </TooltipProvider>
     </div>

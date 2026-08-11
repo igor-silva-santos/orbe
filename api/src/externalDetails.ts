@@ -1,8 +1,9 @@
 import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
 import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
-import { resolvePortugueseSynopsis } from './translation';
+import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
+import { fetchSteamAppDetails } from './steamClient';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -426,16 +427,69 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       }),
       prisma.jogo.findUnique({
         where: { igdbId },
-        select: { premiacoes: true },
+        select: {
+          summary: true,
+          premiacoes: true,
+          steamAppId: true,
+          steamPlayerCount: true,
+          steamPriceCents: true,
+          steamDiscountPercent: true,
+          pcRequirements: true,
+          steamSyncedAt: true,
+        },
       }),
     ]);
 
     const game = response.data?.[0];
     if (!game) return null;
 
-    const mapped = await withPortugueseTranslation(mapJogoToMidia(mapIgdbToPrismaLike(game)));
+    const baseMapped = mapJogoToMidia(mapIgdbToPrismaLike(game));
+    let synopsisText = dbJogo?.summary?.trim() || baseMapped.sinopse;
+
+    if (dbJogo?.steamAppId) {
+      const steamDetails = await fetchSteamAppDetails(dbJogo.steamAppId);
+      if (steamDetails?.shortDescription?.trim()) {
+        if (!isLikelyEnglish(steamDetails.shortDescription)) {
+          synopsisText = steamDetails.shortDescription;
+        } else if (!synopsisText?.trim() || isLikelyEnglish(synopsisText)) {
+          synopsisText = steamDetails.shortDescription;
+        }
+      }
+
+      if (!dbJogo.pcRequirements && steamDetails?.pcRequirements) {
+        await prisma.jogo.update({
+          where: { igdbId },
+          data: {
+            pcRequirements: steamDetails.pcRequirements,
+            steamSyncedAt: new Date(),
+          },
+        });
+        dbJogo.pcRequirements = steamDetails.pcRequirements;
+      }
+    }
+
+    const mappedForTranslation = { ...baseMapped, sinopse: synopsisText };
+    const translated = await withPortugueseTranslation(mappedForTranslation);
+
+    if (translated.sinopse && isLikelyEnglish(translated.sinopse)) {
+      const forced = await translateSynopsisForStorage(translated.sinopse);
+      if (forced?.trim() && !isLikelyEnglish(forced)) {
+        translated.sinopse = forced;
+      } else {
+        const resolved = await resolvePortugueseSynopsis(translated.sinopse);
+        if (resolved?.trim() && !isLikelyEnglish(resolved)) {
+          translated.sinopse = resolved;
+        }
+      }
+    }
+
     return {
-      ...mapped,
+      ...translated,
+      pc_requirements: dbJogo?.pcRequirements ?? translated.pc_requirements ?? null,
+      steam_app_id: dbJogo?.steamAppId ?? translated.steam_app_id ?? null,
+      steam_player_count: dbJogo?.steamPlayerCount ?? translated.steam_player_count ?? null,
+      steam_price_cents: dbJogo?.steamPriceCents ?? translated.steam_price_cents ?? null,
+      steam_discount_percent: dbJogo?.steamDiscountPercent ?? translated.steam_discount_percent ?? null,
       premiacoes: parsePremiacoes(dbJogo?.premiacoes),
     };
   } catch (error) {

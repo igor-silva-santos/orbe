@@ -154,7 +154,7 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Trailer</h2>
           <div className="relative aspect-video w-full rounded-lg overflow-hidden">
             <iframe
-              src={`https://www.youtube.com/embed/${trailerKey}`}
+              src={`https://www.youtube-nocookie.com/embed/${trailerKey}`}
               title="YouTube video player"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

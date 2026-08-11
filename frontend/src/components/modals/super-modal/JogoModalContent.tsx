@@ -2,6 +2,7 @@
 
 import { Jogo, CalendarModalData } from '@/types';
 import JogoInfoBlock from './JogoInfoBlock';
+import PcRequirementsDrawer from './PcRequirementsDrawer';
 import { getGameStores, sanitizeTranslatedText } from '@/lib/media-helpers';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import SafeImage from '@/components/ui/SafeImage';
@@ -22,6 +23,9 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
   const synopsis = jogo.sinopse
     ? sanitizeTranslatedText(jogo.sinopse) || '(não informado)'
     : '(não informado)';
+  const isPcGame =
+    (jogo.plataformas_api || []).some((p) => /\b(pc|windows|steam|mac)\b/i.test(p.nome || '')) ||
+    Boolean(jogo.steam_app_id);
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -46,12 +50,16 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
         <p className="text-muted-foreground leading-relaxed">{synopsis}</p>
       </section>
 
+      {isPcGame && jogo.pc_requirements && (
+        <PcRequirementsDrawer requirements={jogo.pc_requirements} />
+      )}
+
       {trailerKey && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Trailer</h2>
           <div className="relative aspect-video w-full rounded-lg overflow-hidden">
             <iframe
-              src={`https://www.youtube.com/embed/${trailerKey}`}
+              src={`https://www.youtube-nocookie.com/embed/${trailerKey}`}
               title="YouTube video player"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

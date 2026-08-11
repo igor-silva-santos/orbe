@@ -435,6 +435,11 @@ export const mapJogoToMidia = (jogo: any) => {
     artworks: jogo.artworks?.map((a: any) => resolveIgdbImageUrl(a.url)) ?? [],
     videos: jogo.videos?.map((v: any) => ({ key: v.key, site: v.site, type: v.type, nome: v.name, official: v.official })) ?? [],
     websites: jogo.websites?.map((w: any) => ({ category: w.category, url: w.url })) ?? [],
+    steam_app_id: jogo.steamAppId ?? null,
+    steam_player_count: jogo.steamPlayerCount ?? null,
+    steam_price_cents: jogo.steamPriceCents ?? null,
+    steam_discount_percent: jogo.steamDiscountPercent ?? null,
+    pc_requirements: jogo.pcRequirements ?? null,
     premiacoes: parsePremiacoes(jogo.premiacoes),
   };
 };

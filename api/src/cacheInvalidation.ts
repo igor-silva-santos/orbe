@@ -28,8 +28,45 @@ export async function invalidateCacheByPatterns(patterns: string[]): Promise<voi
 const SHARED_LIST_PATTERNS = [
   'cache:/api/homepage*',
   'cache:/api/pesquisa*',
+  'cache:/api/search*',
   'cache:/api/trending*',
 ];
+
+const MEDIA_SYNC_PATTERNS: Record<'filmes' | 'series' | 'animes' | 'jogos', string[]> = {
+  filmes: [
+    'cache:/api/filmes*',
+    'cache:/api/hoje*',
+    ...SHARED_LIST_PATTERNS,
+  ],
+  series: [
+    'cache:/api/series*',
+    'cache:/api/hoje*',
+    ...SHARED_LIST_PATTERNS,
+  ],
+  animes: [
+    'cache:/api/animes*',
+    'cache:/api/hoje*',
+    ...SHARED_LIST_PATTERNS,
+  ],
+  jogos: [
+    'cache:/api/jogos*',
+    'cache:/api/eventos*',
+    'cache:/api/hoje*',
+    ...SHARED_LIST_PATTERNS,
+  ],
+};
+
+export async function invalidateCacheAfterMediaSync(
+  mediaType: 'movies' | 'series' | 'animes' | 'games' | 'steam',
+): Promise<void> {
+  const key =
+    mediaType === 'movies'
+      ? 'filmes'
+      : mediaType === 'games' || mediaType === 'steam'
+        ? 'jogos'
+        : mediaType;
+  await invalidateCacheByPatterns(MEDIA_SYNC_PATTERNS[key]);
+}
 
 export function invalidationPatternsForMedia(
   type: 'filmes' | 'series' | 'jogos' | 'animes',
