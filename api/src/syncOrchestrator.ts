@@ -12,6 +12,7 @@ import {
   failSyncRun,
   readSyncRunState,
   setAnimesResumeYear,
+  setBackfillNextYear,
   updateSyncProgress,
   type SyncPhase,
 } from './syncState';
@@ -25,6 +26,8 @@ export type FullSyncParams = {
   startYear: number;
   endYear: number;
   resume?: boolean;
+  /** Quando true, ao concluir avança o ponteiro do backfill histórico pra endYear + 1. */
+  backfill?: boolean;
 };
 
 function phaseDone(completed: SyncPhase[] | undefined, phase: SyncPhase): boolean {
@@ -36,7 +39,7 @@ function phaseDone(completed: SyncPhase[] | undefined, phase: SyncPhase): boolea
  * Em resume, pula fases já em completedPhases e retoma animes do animesResumeYear.
  */
 export async function executeFullSync(prisma: PrismaClient, params: FullSyncParams): Promise<void> {
-  const { startDate, endDate, startYear, endYear, resume } = params;
+  const { startDate, endDate, startYear, endYear, resume, backfill } = params;
   const existing = resume ? await readSyncRunState(prisma) : null;
   const completed = existing?.completedPhases ?? [];
 
@@ -122,6 +125,10 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
     }
 
     logger.info('✅ Sincronização completa concluída.');
+    if (backfill) {
+      await setBackfillNextYear(prisma, endYear + 1);
+      logger.info(`📅 Backfill: ano ${endYear} concluído, próximo passo sincronizará ${endYear + 1}.`);
+    }
     await invalidateCacheByPatterns([
       'cache:/api/homepage*',
       'cache:/api/filmes*',

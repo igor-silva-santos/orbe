@@ -15,6 +15,9 @@ import { addSkipReasons, updateSyncProgress } from './syncState';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/** Teto real da TMDB para /discover e listas paginadas — page > 500 retorna erro na API. */
+const TMDB_MAX_PAGE = 500;
+
 type MovieSourceFlags = {
   emCartaz?: boolean;
   emBreve?: boolean;
@@ -82,6 +85,7 @@ async function fetchIdsFromDiscover(
       }
 
       totalPages = response.data.total_pages || 1;
+      if (totalPages > TMDB_MAX_PAGE) totalPages = TMDB_MAX_PAGE;
       page++;
       await delay(250);
     } while (page <= totalPages && page <= maxPages);
@@ -119,6 +123,7 @@ async function fetchIdsFromTmdbList(
       }
 
       totalPages = response.data.total_pages || 1;
+      if (totalPages > TMDB_MAX_PAGE) totalPages = TMDB_MAX_PAGE;
       page++;
       await delay(250);
     } while (page <= totalPages && page <= maxPages);
@@ -151,16 +156,16 @@ async function fetchCuratedMovieIds(options: CuratedFetchOptions = {}): Promise<
     }
   };
 
-  const nowPlaying = await fetchIdsFromTmdbList('/movie/now_playing', {}, 5);
+  const nowPlaying = await fetchIdsFromTmdbList('/movie/now_playing', {}, 10);
   markIds(nowPlaying, { emCartaz: true });
   logger.info(`  now_playing: ${nowPlaying.length} filmes`);
 
-  const upcoming = await fetchIdsFromTmdbList('/movie/upcoming', {}, 5);
+  const upcoming = await fetchIdsFromTmdbList('/movie/upcoming', {}, 10);
   markIds(upcoming, { emBreve: true });
   logger.info(`  upcoming: ${upcoming.length} filmes`);
 
   if (!cinemaOnly) {
-    const popular = await fetchIdsFromTmdbList('/movie/popular', {}, 10);
+    const popular = await fetchIdsFromTmdbList('/movie/popular', {}, 15);
     markIds(popular, {});
     logger.info(`  popular: ${popular.length} filmes`);
 
@@ -169,7 +174,7 @@ async function fetchCuratedMovieIds(options: CuratedFetchOptions = {}): Promise<
       'vote_count.gte': 500,
       'vote_average.gte': 7,
       with_release_type: '2|3',
-    }, 5);
+    }, 10);
     markIds(topRated, {});
     logger.info(`  top_rated (vote_count>=500): ${topRated.length} filmes`);
 
@@ -177,7 +182,7 @@ async function fetchCuratedMovieIds(options: CuratedFetchOptions = {}): Promise<
       sort_by: 'popularity.desc',
       'vote_count.gte': 50,
       with_release_type: '2|3',
-    }, 10);
+    }, 20);
     markIds(theatrical, {});
     logger.info(`  discover theatrical (vote_count>=50): ${theatrical.length} filmes`);
   } else {
@@ -218,9 +223,9 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
 
   const discoverPasses = openPeriod
     ? [
-        { label: 'estreia BR ascendente', params: { ...brDateBase, sort_by: 'release_date.asc' }, pages: 25 },
-        { label: 'estreia BR descendente', params: { ...brDateBase, sort_by: 'release_date.desc' }, pages: 15 },
-        { label: 'popularidade BR', params: { ...brDateBase, sort_by: 'popularity.desc' }, pages: 15 },
+        { label: 'estreia BR ascendente', params: { ...brDateBase, sort_by: 'release_date.asc' }, pages: 40 },
+        { label: 'estreia BR descendente', params: { ...brDateBase, sort_by: 'release_date.desc' }, pages: 25 },
+        { label: 'popularidade BR', params: { ...brDateBase, sort_by: 'popularity.desc' }, pages: 25 },
         {
           label: 'estreia primária ascendente',
           params: {
@@ -231,7 +236,7 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
             with_release_type: '2|3',
             without_genres: '104',
           },
-          pages: 15,
+          pages: 25,
         },
       ]
     : [
@@ -243,7 +248,7 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
             with_release_type: '2|3',
             'vote_count.gte': 50,
           },
-          pages: 15,
+          pages: 25,
         },
         {
           label: 'estreia BR recente',
@@ -253,7 +258,7 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
             with_release_type: '2|3',
             'vote_count.gte': 20,
           },
-          pages: 10,
+          pages: 15,
         },
       ];
 
@@ -267,7 +272,7 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
 
   if (openPeriod) {
     logger.info('Complementando período aberto com /movie/upcoming...');
-    const upcomingIds = await fetchIdsFromTmdbList('/movie/upcoming', {}, 15);
+    const upcomingIds = await fetchIdsFromTmdbList('/movie/upcoming', {}, 20);
     for (const id of upcomingIds) {
       movieIds.add(id);
     }
