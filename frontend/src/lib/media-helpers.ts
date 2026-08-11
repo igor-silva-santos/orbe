@@ -33,15 +33,35 @@ export const normalizeProviderName = (name?: string | null): string => {
   const lowerName = name.toLowerCase();
   if (lowerName.includes('netflix')) return 'Netflix';
   if (lowerName.includes('hbo') || lowerName === 'max') return 'Max';
-  if (lowerName.includes('prime video') || lowerName.includes('amazon')) return 'Prime Video';
+  if (lowerName.includes('prime video') || lowerName.includes('amazon prime')) return 'Prime Video';
+  if (lowerName === 'amazon' || lowerName.includes('amazon.')) return 'Prime Video';
   if (lowerName.includes('disney')) return 'Disney+';
   if (lowerName.includes('crunchyroll')) return 'Crunchyroll';
   if (lowerName.includes('star+') || lowerName.includes('star plus')) return 'Star+';
   if (lowerName.includes('apple tv')) return 'Apple TV+';
   if (lowerName.includes('globoplay') || lowerName.includes('globo play')) return 'Globoplay';
   if (lowerName.includes('claro')) return 'Claro TV+';
+  if (lowerName.includes('hidive')) return 'HIDIVE';
+  if (lowerName.includes('funimation')) return 'Funimation';
   if (lowerName.includes('tmdb')) return 'TMDB';
   return name;
+};
+
+export const inferProviderFromUrl = (url?: string | null): string | null => {
+  if (!url) return null;
+  const lower = url.toLowerCase();
+  if (lower.includes('crunchyroll')) return 'Crunchyroll';
+  if (lower.includes('netflix')) return 'Netflix';
+  if (lower.includes('disneyplus') || lower.includes('disney.com')) return 'Disney+';
+  if (lower.includes('primevideo') || lower.includes('amazon.')) return 'Prime Video';
+  if (lower.includes('hbomax') || lower.includes('max.com')) return 'Max';
+  if (lower.includes('tv.apple') || lower.includes('apple.com/tv')) return 'Apple TV+';
+  if (lower.includes('globoplay')) return 'Globoplay';
+  if (lower.includes('claro')) return 'Claro TV+';
+  if (lower.includes('starplus') || lower.includes('star-plus')) return 'Star+';
+  if (lower.includes('hidive')) return 'HIDIVE';
+  if (lower.includes('funimation')) return 'Funimation';
+  return null;
 };
 
 /**
@@ -53,7 +73,13 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
   const seen = new Map<string, { name: string; icon: string; logo_path?: string | null }>();
 
   for (const provider of item.plataformas_api ?? []) {
-    const name = normalizeProviderName(provider.nome);
+    const inferredFromUrl = inferProviderFromUrl(provider.url);
+    let name = normalizeProviderName(provider.nome);
+    if (name === 'Desconhecido' || !provider.nome?.trim()) {
+      if (inferredFromUrl) name = inferredFromUrl;
+    } else if (inferredFromUrl && name === provider.nome) {
+      name = inferredFromUrl;
+    }
     if (name === 'Desconhecido' || seen.has(name)) continue;
     seen.set(name, {
       name,

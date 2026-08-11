@@ -27,6 +27,8 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('prime') || lower.includes('amazon')) return 'prime';
   if (lower.includes('apple')) return 'apple';
   if (lower.includes('crunchyroll')) return 'crunchyroll';
+  if (lower.includes('hidive')) return 'crunchyroll';
+  if (lower.includes('funimation')) return 'crunchyroll';
   if (lower.includes('star+') || lower.includes('star plus') || lower.includes('starplus')) return 'star';
   if (lower.includes('globoplay') || lower.includes('globo-play') || lower.includes('globo play') || lower === 'globo') return 'globoplay';
   if (lower.includes('claro') || lower.includes('claro-tv')) return 'claro';

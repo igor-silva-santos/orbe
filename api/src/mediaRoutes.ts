@@ -127,7 +127,8 @@ async function fetchFilmesForCarousel(
 
 const animeCarouselInclude = {
   genres: { include: { genero: true } },
-  streamingLinks: { take: 3 },
+  streamingLinks: { take: 5 },
+  externalLinks: { take: 12 },
   airingSchedule: {
     where: { airingAt: { gte: new Date() } },
     orderBy: { airingAt: 'asc' as const },
@@ -1944,7 +1945,8 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
       take: CAROUSEL_ITEM_LIMIT,
       include: {
         genres: { include: { genero: true } },
-        streamingLinks: { take: 3 },
+        streamingLinks: { take: 5 },
+        externalLinks: { take: 12 },
         airingSchedule: {
           where: { airingAt: { gte: new Date() } },
           orderBy: { airingAt: 'asc' },
