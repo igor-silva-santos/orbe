@@ -12,6 +12,12 @@ import { addSkipReasons, updateSyncProgress } from './syncState';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
+function isAuthError(error: any): boolean {
+  const status = error?.response?.status;
+  return status === 401 || status === 403;
+}
+
 async function tmdbApiWithRetry<T>(fn: () => Promise<T>, maxRetries = 5, initialDelay = 1000): Promise<T> {
     let attempt = 0;
     while (attempt < maxRetries) {
@@ -65,6 +71,10 @@ async function fetchIdsFromTmdbList(
 
     return Array.from(seriesIds);
   } catch (error) {
+    if (isAuthError(error)) {
+      logger.error(`❌ Erro de autenticação TMDB em ${endpoint} — abortando sync (chave de API inválida/sem permissão): ${error}`);
+      throw error;
+    }
     logger.error(`Erro ao buscar IDs de ${endpoint} (retornando ${seriesIds.size} IDs parciais já coletados): ${error}`);
     return Array.from(seriesIds);
   }
@@ -132,6 +142,10 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
     logger.info(`Total de ${seriesIds.size} IDs de séries encontrados para o período.`);
     return Array.from(seriesIds);
   } catch (error) {
+    if (isAuthError(error)) {
+      logger.error(`❌ Erro de autenticação TMDB na descoberta por período — abortando sync (chave de API inválida/sem permissão): ${error}`);
+      throw error;
+    }
     logger.error(`Erro ao buscar IDs de séries para o período (retornando ${seriesIds.size} IDs parciais já coletados): ${error}`);
     return Array.from(seriesIds);
   }
@@ -248,11 +262,29 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
 
 
 
-      await prisma.serie.upsert({
-        where: { tmdbId: id },
-        update: scalarData,
-        create: { ...scalarData, ...relationalData },
-      });
+      const existingSerie = await prisma.serie.findUnique({ where: { tmdbId: id }, select: { id: true } });
+
+      if (existingSerie) {
+        await prisma.serie.update({
+          where: { tmdbId: id },
+          data: {
+            ...scalarData,
+            genres: { deleteMany: {}, create: relationalData.genres.create },
+            networks: { deleteMany: {}, create: relationalData.networks.create },
+            languages: { deleteMany: {}, create: relationalData.languages.create },
+            seasons: { deleteMany: {}, create: relationalData.seasons.create },
+            createdBy: { deleteMany: {}, create: relationalData.createdBy.create },
+            cast: { deleteMany: {}, create: relationalData.cast.create },
+            crew: { deleteMany: {}, create: relationalData.crew.create },
+            videos: { deleteMany: {}, create: relationalData.videos.create },
+            streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
+          },
+        });
+      } else {
+        await prisma.serie.create({
+          data: { ...scalarData, ...relationalData },
+        });
+      }
 
       successCount++;
       logger.info(`✅ Série [${id}] "${serieDetails.name}" sincronizada.`);
