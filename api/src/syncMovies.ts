@@ -88,8 +88,8 @@ async function fetchIdsFromDiscover(
 
     return Array.from(movieIds);
   } catch (error) {
-    logger.error(`Erro ao buscar IDs no discover TMDB: ${error}`);
-    return [];
+    logger.error(`Erro ao buscar IDs no discover TMDB (retornando ${movieIds.size} IDs parciais já coletados): ${error}`);
+    return Array.from(movieIds);
   }
 }
 
@@ -125,8 +125,8 @@ async function fetchIdsFromTmdbList(
 
     return Array.from(movieIds);
   } catch (error) {
-    logger.error(`Erro ao buscar IDs de ${endpoint}: ${error}`);
-    return [];
+    logger.error(`Erro ao buscar IDs de ${endpoint} (retornando ${movieIds.size} IDs parciais já coletados): ${error}`);
+    return Array.from(movieIds);
   }
 }
 

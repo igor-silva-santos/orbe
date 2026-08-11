@@ -110,8 +110,8 @@ async function fetchPopularGameIds(): Promise<number[]> {
         logger.info(`Total de ${gameIds.size} IDs de jogos populares IGDB.`);
         return Array.from(gameIds);
     } catch (error: any) {
-        logger.error(`Erro ao buscar jogos populares: ${error.message || error}`);
-        return [];
+        logger.error(`Erro ao buscar jogos populares (retornando ${gameIds.size} IDs parciais já coletados): ${error.message || error}`);
+        return Array.from(gameIds);
     }
 }
 
@@ -130,8 +130,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                websites.url, websites.category, websites.id,
                videos.name, videos.video_id,
                game_modes.name, game_modes.slug, game_modes.id,
-               game_engines.name, game_engines.slug, game_engines.id,
-               release_dates.date, release_dates.region;
+               game_engines.name, game_engines.slug, game_engines.id;
         where id = (${gameIds.join(',')});
         limit ${gameIds.length};
     `;
@@ -155,8 +154,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                     continue;
                 }
 
-                const brReleaseDate = game.release_dates?.find((rd: any) => rd.region === 2)?.date;
-                const firstReleaseDate = brReleaseDate ? new Date(brReleaseDate * 1000) : (game.first_release_date ? new Date(game.first_release_date * 1000) : null);
+                const firstReleaseDate = game.first_release_date ? new Date(game.first_release_date * 1000) : null;
                 const coverUrl = game.cover?.url ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') : null;
 
                 // De-duplicate company roles
@@ -249,7 +247,7 @@ async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string
         while (hasMore) {
             const response = await igdbApiWithRetry(() => igdbApi.post(
                 '/games',
-                `fields id; where first_release_date >= ${startDate} & first_release_date <= ${endDate} & release_dates.region = 2; limit ${limit}; offset ${offset}; sort id asc;`
+                `fields id; where first_release_date >= ${startDate} & first_release_date <= ${endDate}; limit ${limit}; offset ${offset}; sort id asc;`
             ));
 
             const games = response.data;
@@ -270,8 +268,8 @@ async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string
         logger.info(`Total de ${gameIds.size} IDs de jogos únicos encontrados para o período.`);
         return Array.from(gameIds);
     } catch (error: any) {
-        logger.error(`Erro ao buscar IDs de jogos: ${error.message || error}`);
-        return [];
+        logger.error(`Erro ao buscar IDs de jogos (retornando ${gameIds.size} IDs parciais já coletados): ${error.message || error}`);
+        return Array.from(gameIds);
     }
 }
 
