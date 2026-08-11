@@ -31,10 +31,15 @@ function parseRedisUrl(raw: string | undefined): string | null {
 
 const redisUrl = parseRedisUrl(process.env.REDIS_URL);
 
-let redisClient: Redis | null = null;
+// Estado privado do módulo — nunca exportado diretamente. Consumidores devem chamar
+// getRedisClient() a cada uso em vez de importar o binding, porque uma falha de conexão
+// pode zerar essa variável depois que o módulo já carregou (ver connect().catch abaixo);
+// um `import redisClient from './redisClient'` guarda só o snapshot do valor no momento
+// do import (CommonJS), então nunca veria essa reatribuição.
+let redisClientInstance: Redis | null = null;
 
 if (redisUrl) {
-  redisClient = new Redis(redisUrl, {
+  redisClientInstance = new Redis(redisUrl, {
     maxRetriesPerRequest: 2,
     lazyConnect: true,
     enableOfflineQueue: false,
@@ -45,17 +50,17 @@ if (redisUrl) {
     ...(redisUrl.startsWith('rediss://') ? { tls: {} } : {}),
   });
 
-  redisClient
+  redisClientInstance
     .connect()
     .then(() => logger.info('Conectado ao Redis com sucesso.'))
     .catch((err) => {
       logger.error('Falha ao conectar ao Redis:', err);
-      redisClient?.disconnect();
-      redisClient = null;
+      redisClientInstance?.disconnect();
+      redisClientInstance = null;
     });
 
-  redisClient.on('error', (err) => {
-    if (redisClient) logger.warn(`Redis: ${err.message}`);
+  redisClientInstance.on('error', (err) => {
+    if (redisClientInstance) logger.warn(`Redis: ${err.message}`);
   });
 } else if (process.env.REDIS_URL?.trim()) {
   logger.warn('REDIS_URL definida mas inválida — cache desabilitado.');
@@ -63,4 +68,7 @@ if (redisUrl) {
   logger.warn('REDIS_URL não está definido. O cache Redis será desabilitado.');
 }
 
-export default redisClient;
+/** Sempre chamar isto no ponto de uso — nunca guardar o retorno num binding de módulo. */
+export function getRedisClient(): Redis | null {
+  return redisClientInstance;
+}

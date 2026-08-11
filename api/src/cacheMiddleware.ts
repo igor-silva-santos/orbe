@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import redisClient from './redisClient';
+import { getRedisClient } from './redisClient';
 import { logger } from './logger';
 
 const cacheMiddleware = (duration: number) => async (req: Request, res: Response, next: NextFunction) => {
@@ -7,6 +7,7 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
   const key = `cache:${req.originalUrl}`;
 
   try {
+    const redisClient = getRedisClient();
     if (!redisClient) {
       logger.warn('Redis client não está disponível. Pulando cache.');
       return next();
@@ -28,12 +29,16 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
     const originalSend = res.send.bind(res);
     res.send = (body: any): Response<any> => {
       try {
-        if (redisClient) {
-          // Salvar a resposta no Redis com o tempo de expiração (TTL)
-          redisClient.set(key, body, 'EX', duration);
-          logger.info(`Resposta para a chave ${key} armazenada no cache por ${duration} segundos.`);
-        } else {
-          logger.warn('Redis client não está disponível. Não foi possível salvar no cache.');
+        // Só cachear respostas de sucesso — um 5xx transitório não deve ficar
+        // "congelado" e ser servido como HIT pra todo mundo até o TTL expirar.
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const client = getRedisClient();
+          if (client) {
+            client.set(key, body, 'EX', duration);
+            logger.info(`Resposta para a chave ${key} armazenada no cache por ${duration} segundos.`);
+          } else {
+            logger.warn('Redis client não está disponível. Não foi possível salvar no cache.');
+          }
         }
       } catch (err) {
         logger.error(`Erro ao salvar no cache: ${err}`);

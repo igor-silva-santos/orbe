@@ -1,10 +1,25 @@
-import redisClient from './redisClient';
+import type Redis from 'ioredis';
+import { getRedisClient } from './redisClient';
 import { logger } from './logger';
+
+/** SCAN em vez de KEYS — KEYS bloqueia o Redis inteiro durante a varredura do keyspace. */
+function scanKeys(client: Redis, pattern: string): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const found: string[] = [];
+    const stream = client.scanStream({ match: pattern, count: 100 });
+    stream.on('data', (keys: string[]) => {
+      found.push(...keys);
+    });
+    stream.on('end', () => resolve(found));
+    stream.on('error', (err) => reject(err));
+  });
+}
 
 /**
  * Invalida chaves Redis por padrão glob (ex: `cache:/api/homepage*`).
  */
 export async function invalidateCacheByPatterns(patterns: string[]): Promise<void> {
+  const redisClient = getRedisClient();
   if (!redisClient || patterns.length === 0) return;
 
   try {
@@ -12,7 +27,7 @@ export async function invalidateCacheByPatterns(patterns: string[]): Promise<voi
 
     for (const pattern of patterns) {
       const normalized = pattern.includes('*') ? pattern : `${pattern}*`;
-      const keys = await redisClient.keys(normalized);
+      const keys = await scanKeys(redisClient, normalized);
       keys.forEach((key) => keysToDelete.add(key));
     }
 
