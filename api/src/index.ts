@@ -19,6 +19,7 @@ import {
   applySecurityMiddleware,
   authRateLimiter,
   assertJwtSecretConfigured,
+  resolveCorsOptions,
 } from './securityMiddleware';
 
 assertJwtSecretConfigured();
@@ -58,12 +59,8 @@ export const broadcast = (message: object) => {
   });
 };
 
-const corsOrigin = process.env.CORS_ORIGIN || '*';
-app.use(cors({
-  origin: corsOrigin === '*' ? true : corsOrigin.split(',').map((o) => o.trim()),
-  credentials: true,
-}));
-app.use(express.json());
+app.use(cors(resolveCorsOptions()));
+app.use(express.json({ limit: '256kb' }));
 applySecurityMiddleware(app);
 
 // Usar as rotas de mídia e webhooks

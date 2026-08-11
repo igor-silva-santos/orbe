@@ -20,11 +20,22 @@ import cacheMiddleware from './cacheMiddleware';
 import adminMiddleware from './adminMiddleware';
 import { invalidateMediaCaches } from './cacheInvalidation';
 import { translateTmdbStatus, translateAnimeStatusLabel } from './statusLabels';
-import { searchRateLimiter, homepageRateLimiter } from './securityMiddleware';
+import {
+  searchRateLimiter,
+  homepageRateLimiter,
+  detailsRateLimiter,
+} from './securityMiddleware';
+import {
+  mapFilmeAdminUpdate,
+  mapSerieAdminUpdate,
+  mapAnimeAdminUpdate,
+  mapJogoAdminUpdate,
+} from './adminUpdateMappers';
 
 
 
 const router = Router();
+const isProduction = process.env.NODE_ENV === 'production';
 
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
@@ -38,6 +49,14 @@ const parsePagination = (query: { page?: string; limit?: string }) => {
   const limit = Math.min(MAX_LIST_LIMIT, Math.max(1, parseInt(query.limit ?? String(DEFAULT_LIST_LIMIT), 10) || DEFAULT_LIST_LIMIT));
   return { page, limit, skip: (page - 1) * limit };
 };
+
+const parsePositiveIntId = (raw: string): number | null => {
+  const id = parseInt(raw, 10);
+  if (!Number.isInteger(id) || id <= 0) return null;
+  return id;
+};
+
+const DETAILS_CACHE_SECONDS = 300;
 
 const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { startDate: Date; endDate: Date } | null => {
   const month = parseInt(mes ?? '', 10);
@@ -341,11 +360,14 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Rota de Detalhes do Filme (dados ao vivo do TMDB)
-router.get('/filmes/:id/details', async (req, res) => {
-  const { id } = req.params;
-  logger.info(`Buscando detalhes ao vivo para o filme TMDB ID: ${id}`);
+router.get('/filmes/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {
+  const tmdbId = parsePositiveIntId(req.params.id);
+  if (!tmdbId) {
+    return res.status(400).json({ error: 'ID de filme inválido.' });
+  }
+  logger.info(`Buscando detalhes ao vivo para o filme TMDB ID: ${tmdbId}`);
   try {
-    const filme = await fetchFilmeDetailsLive(Number(id));
+    const filme = await fetchFilmeDetailsLive(tmdbId);
 
     if (!filme) {
       return res.status(404).json({ error: 'Filme não encontrado.' });
@@ -360,19 +382,26 @@ router.get('/filmes/:id/details', async (req, res) => {
 
 // Rota de Edição do Filme (Admin)
 router.put('/filmes/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+  const tmdbId = parsePositiveIntId(req.params.id);
+  if (!tmdbId) {
+    return res.status(400).json({ error: 'ID de filme inválido.' });
+  }
+
+  const data = mapFilmeAdminUpdate(req.body as Record<string, unknown>);
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'Nenhum campo editável fornecido.' });
+  }
 
   try {
     const updatedFilme = await prisma.filme.update({
-      where: { tmdbId: Number(id) },
+      where: { tmdbId },
       data,
     });
 
-    await invalidateMediaCaches('filmes', id);
+    await invalidateMediaCaches('filmes', String(tmdbId));
     res.json(mapFilmeToMidia(updatedFilme));
   } catch (error) {
-    logger.error(`Erro ao editar o filme ID ${id}: ${error}`);
+    logger.error(`Erro ao editar o filme ID ${tmdbId}: ${error}`);
     res.status(500).json({ error: 'Erro ao editar o filme.' });
   }
 });
@@ -544,10 +573,13 @@ router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Rota de Detalhes da Série (dados ao vivo do TMDB)
-router.get('/series/:id/details', async (req, res) => {
-  const { id } = req.params;
+router.get('/series/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {
+  const tmdbId = parsePositiveIntId(req.params.id);
+  if (!tmdbId) {
+    return res.status(400).json({ error: 'ID de série inválido.' });
+  }
   try {
-    const serie = await fetchSerieDetailsLive(Number(id));
+    const serie = await fetchSerieDetailsLive(tmdbId);
     if (!serie) {
       return res.status(404).json({ error: 'Série não encontrada.' });
     }
@@ -560,19 +592,26 @@ router.get('/series/:id/details', async (req, res) => {
 
 // Rota de Edição da Série (Admin)
 router.put('/series/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+  const tmdbId = parsePositiveIntId(req.params.id);
+  if (!tmdbId) {
+    return res.status(400).json({ error: 'ID de série inválido.' });
+  }
+
+  const data = mapSerieAdminUpdate(req.body as Record<string, unknown>);
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'Nenhum campo editável fornecido.' });
+  }
 
   try {
     const updatedSerie = await prisma.serie.update({
-      where: { tmdbId: Number(id) },
+      where: { tmdbId },
       data,
     });
 
-    await invalidateMediaCaches('series', id);
+    await invalidateMediaCaches('series', String(tmdbId));
     res.json(mapSerieToMidia(updatedSerie));
   } catch (error) {
-    logger.error(`Erro ao editar a série ID ${id}: ${error}`);
+    logger.error(`Erro ao editar a série ID ${tmdbId}: ${error}`);
     res.status(500).json({ error: 'Erro ao editar a série.' });
   }
 });
@@ -798,10 +837,13 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Rota de Detalhes do Anime (dados ao vivo do AniList)
-router.get('/animes/:id/details', async (req, res) => {
-  const { id } = req.params;
+router.get('/animes/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {
+  const anilistId = parsePositiveIntId(req.params.id);
+  if (!anilistId) {
+    return res.status(400).json({ error: 'ID de anime inválido.' });
+  }
   try {
-    const anime = await fetchAnimeDetailsLive(Number(id));
+    const anime = await fetchAnimeDetailsLive(anilistId);
     if (!anime) {
       return res.status(404).json({ error: 'Anime não encontrado.' });
     }
@@ -814,19 +856,26 @@ router.get('/animes/:id/details', async (req, res) => {
 
 // Rota de Edição do Anime (Admin)
 router.put('/animes/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+  const anilistId = parsePositiveIntId(req.params.id);
+  if (!anilistId) {
+    return res.status(400).json({ error: 'ID de anime inválido.' });
+  }
+
+  const data = mapAnimeAdminUpdate(req.body as Record<string, unknown>);
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'Nenhum campo editável fornecido.' });
+  }
 
   try {
     const updatedAnime = await prisma.anime.update({
-      where: { anilistId: Number(id) },
+      where: { anilistId },
       data,
     });
 
-    await invalidateMediaCaches('animes', id);
+    await invalidateMediaCaches('animes', String(anilistId));
     res.json(mapAnimeToMidia(updatedAnime));
   } catch (error) {
-    logger.error(`Erro ao editar o anime ID ${id}: ${error}`);
+    logger.error(`Erro ao editar o anime ID ${anilistId}: ${error}`);
     res.status(500).json({ error: 'Erro ao editar o anime.' });
   }
 });
@@ -913,10 +962,13 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Rota de Detalhes do Jogo (dados ao vivo do IGDB)
-router.get('/jogos/:id/details', async (req, res) => {
-  const { id } = req.params;
+router.get('/jogos/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {
+  const igdbId = parsePositiveIntId(req.params.id);
+  if (!igdbId) {
+    return res.status(400).json({ error: 'ID de jogo inválido.' });
+  }
   try {
-    const jogo = await fetchJogoDetailsLive(Number(id));
+    const jogo = await fetchJogoDetailsLive(igdbId);
     if (!jogo) {
       return res.status(404).json({ error: 'Jogo não encontrado.' });
     }
@@ -929,19 +981,26 @@ router.get('/jogos/:id/details', async (req, res) => {
 
 // Rota de Edição do Jogo (Admin)
 router.put('/jogos/:id', adminMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+  const igdbId = parsePositiveIntId(req.params.id);
+  if (!igdbId) {
+    return res.status(400).json({ error: 'ID de jogo inválido.' });
+  }
+
+  const data = mapJogoAdminUpdate(req.body as Record<string, unknown>);
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'Nenhum campo editável fornecido.' });
+  }
 
   try {
     const updatedJogo = await prisma.jogo.update({
-      where: { igdbId: Number(id) },
+      where: { igdbId },
       data,
     });
 
-    await invalidateMediaCaches('jogos', id);
+    await invalidateMediaCaches('jogos', String(igdbId));
     res.json(mapJogoToMidia(updatedJogo));
   } catch (error) {
-    logger.error(`Erro ao editar o jogo ID ${id}: ${error}`);
+    logger.error(`Erro ao editar o jogo ID ${igdbId}: ${error}`);
     res.status(500).json({ error: 'Erro ao editar o jogo.' });
   }
 });
@@ -1862,33 +1921,34 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
 
 
 
-router.get('/debug-search', async (req, res) => {
-  try {
-    const searchFilter = { contains: 'tron', mode: 'insensitive' as const };
-    const filmes = await prisma.filme.findMany({
-      where: { title: searchFilter },
-      select: { title: true, popularity: true },
-    });
-    res.json(filmes);
-  } catch (error) {
-    logger.error(`Erro no endpoint de debug-search: ${error}`);
-    res.status(500).json({ error: 'Erro ao buscar dados de debug-search.' });
-  }
-});
+if (!isProduction) {
+  router.get('/debug-search', async (req, res) => {
+    try {
+      const searchFilter = { contains: 'tron', mode: 'insensitive' as const };
+      const filmes = await prisma.filme.findMany({
+        where: { title: searchFilter },
+        select: { title: true, popularity: true },
+      });
+      res.json(filmes);
+    } catch (error) {
+      logger.error(`Erro no endpoint de debug-search: ${error}`);
+      res.status(500).json({ error: 'Erro ao buscar dados de debug-search.' });
+    }
+  });
 
-// Rota de Depuração para Trending
-router.get('/debug-trending', async (req, res) => {
-  try {
-    const filmes = await prisma.filme.findMany({
-      take: 20,
-      orderBy: { popularity: 'desc' },
-      select: { title: true, popularity: true, voteCount: true, releaseDate: true },
-    });
-    res.json(filmes);
-  } catch (error) {
-    logger.error(`Erro no endpoint de debug: ${error}`);
-    res.status(500).json({ error: 'Erro ao buscar dados de debug.' });
-  }
-});
+  router.get('/debug-trending', async (req, res) => {
+    try {
+      const filmes = await prisma.filme.findMany({
+        take: 20,
+        orderBy: { popularity: 'desc' },
+        select: { title: true, popularity: true, voteCount: true, releaseDate: true },
+      });
+      res.json(filmes);
+    } catch (error) {
+      logger.error(`Erro no endpoint de debug: ${error}`);
+      res.status(500).json({ error: 'Erro ao buscar dados de debug.' });
+    }
+  });
+}
 
 export default router;

@@ -46,6 +46,42 @@ export const homepageRateLimiter: RequestHandler = rateLimit({
   message: { error: 'Muitas requisições à homepage. Aguarde um momento.' },
 });
 
+/** Detalhes ao vivo — dispara TMDB/IGDB/AniList/Steam/MyMemory */
+export const detailsRateLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 1000,
+  max: isProduction ? 30 : 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas requisições de detalhes. Aguarde um momento.' },
+});
+
+/** Sync manual — operações pesadas no servidor */
+export const syncRateLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 6 : 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Limite de sincronizações atingido. Tente mais tarde.' },
+});
+
+/** Criação de comentários */
+export const commentRateLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 1000,
+  max: isProduction ? 10 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitos comentários em sequência. Aguarde um momento.' },
+});
+
+/** Interações do usuário (status, avaliação) */
+export const interactionRateLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 1000,
+  max: isProduction ? 30 : 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas interações em sequência. Aguarde um momento.' },
+});
+
 export function assertJwtSecretConfigured(): void {
   const secret = process.env.JWT_SECRET;
   const isDefault = !secret || secret === 'seu_segredo_jwt_super_secreto';
@@ -59,6 +95,52 @@ export function assertJwtSecretConfigured(): void {
   if (isDefault) {
     console.warn('[segurança] JWT_SECRET padrão em uso — configure antes de produção.');
   }
+}
+
+export function assertIgdbWebhookSecretConfigured(): void {
+  const secret = process.env.IGDB_WEBHOOK_SECRET;
+  const isDefault =
+    !secret || secret === 'um-segredo-muito-dificil-de-adivinhar';
+
+  if (isProduction && isDefault) {
+    throw new Error(
+      'IGDB_WEBHOOK_SECRET não configurado ou inseguro. Defina uma chave forte em produção.'
+    );
+  }
+
+  if (isDefault) {
+    console.warn(
+      '[segurança] IGDB_WEBHOOK_SECRET padrão em uso — configure antes de produção.'
+    );
+  }
+}
+
+export function resolveCorsOptions(): {
+  origin: string | string[] | boolean;
+  credentials: boolean;
+} {
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
+
+  if (isProduction) {
+    if (!corsOrigin || corsOrigin === '*') {
+      throw new Error(
+        'CORS_ORIGIN deve ser uma lista explícita de origens em produção (não use *).'
+      );
+    }
+    return {
+      origin: corsOrigin.split(',').map((o) => o.trim()).filter(Boolean),
+      credentials: true,
+    };
+  }
+
+  if (!corsOrigin || corsOrigin === '*') {
+    return { origin: true, credentials: true };
+  }
+
+  return {
+    origin: corsOrigin.split(',').map((o) => o.trim()).filter(Boolean),
+    credentials: true,
+  };
 }
 
 export function applySecurityMiddleware(app: Express): void {
