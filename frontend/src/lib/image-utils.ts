@@ -67,3 +67,28 @@ export function getImageSrc(
 export function isValidImageUrl(url: string | null | undefined): boolean {
   return resolveImageUrl(url) !== null;
 }
+
+/** Hosts liberados em next.config.mjs `images.remotePatterns`. */
+const ALLOWED_REMOTE_IMAGE_HOSTS = new Set([
+  'image.tmdb.org',
+  's4.anilist.co',
+  'images.igdb.com',
+  'logos-world.net',
+  'store.steampowered.com',
+  'www.playstation.com',
+]);
+
+/**
+ * next/image lança erro em runtime se o host não estiver em `remotePatterns`
+ * (ex: avatar com URL arbitrária cadastrada pelo usuário). Usar antes de
+ * renderizar <Image src={...}> com URLs vindas de input livre do usuário.
+ */
+export function isAllowedRemoteImageHost(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && ALLOWED_REMOTE_IMAGE_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
