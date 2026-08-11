@@ -1,5 +1,5 @@
 import { logger } from './logger';
-import redisClient from './redisClient';
+import { getRedisClient } from './redisClient';
 
 const memoryCache = new Map<string, string>();
 const MAX_MEMORY_CACHE = 5000;
@@ -48,6 +48,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const cacheGet = async (key: string): Promise<string | null> => {
   if (memoryCache.has(key)) return memoryCache.get(key)!;
+  const redisClient = getRedisClient();
   if (redisClient) {
     try {
       const cached = await redisClient.get(`tr:pt:${key}`);
@@ -68,6 +69,7 @@ const cacheSet = async (key: string, value: string) => {
     if (firstKey) memoryCache.delete(firstKey);
   }
   memoryCache.set(key, value);
+  const redisClient = getRedisClient();
   if (redisClient) {
     try {
       await redisClient.set(`tr:pt:${key}`, value, 'EX', 60 * 60 * 24 * 30);

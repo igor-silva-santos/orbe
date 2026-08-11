@@ -72,8 +72,36 @@ function staleThresholdMs(state: SyncRunState): number {
 }
 
 function isStale(state: SyncRunState): boolean {
-  if (!state.running || !state.lastProgressAt) return false;
-  return Date.now() - new Date(state.lastProgressAt).getTime() > staleThresholdMs(state);
+  if (!state.running) return false;
+  // Fallback pro startedAt: se o processo cair antes do 1º updateSyncProgress,
+  // lastProgressAt nunca é gravado — sem isso o lock ficava preso pra sempre.
+  const referenceTime = state.lastProgressAt ?? state.startedAt;
+  if (!referenceTime) return false;
+  return Date.now() - new Date(referenceTime).getTime() > staleThresholdMs(state);
+}
+
+/**
+ * Tenta reivindicar o lock de sync de forma atômica no Postgres: um único INSERT ... ON
+ * CONFLICT ... DO UPDATE ... WHERE, que só aplica a escrita se a linha não existir ainda,
+ * não estiver "running", ou estiver stale — tudo avaliado atomicamente pelo banco. Isso evita
+ * a corrida de "check-then-act" que existia antes (ler o estado em JS, decidir, escrever depois),
+ * que permitia duas instâncias simultâneas lerem running=false antes de qualquer uma escrever.
+ */
+async function claimLockRow(prisma: PrismaClient, newState: SyncRunState): Promise<boolean> {
+  const affected = await prisma.$executeRaw`
+    INSERT INTO "AppSetting" (key, value, "updatedAt")
+    VALUES (${SYNC_STATE_KEY}, ${JSON.stringify(newState)}::jsonb, now())
+    ON CONFLICT (key) DO UPDATE
+    SET value = EXCLUDED.value, "updatedAt" = now()
+    WHERE (("AppSetting".value->>'running')::boolean IS NOT TRUE)
+       OR (
+         COALESCE(
+           ("AppSetting".value->>'lastProgressAt')::timestamptz,
+           ("AppSetting".value->>'startedAt')::timestamptz
+         ) < now() - (CASE WHEN "AppSetting".value->>'phase' = 'animes' THEN interval '30 minutes' ELSE interval '10 minutes' END)
+       )
+  `;
+  return affected > 0;
 }
 
 export async function getSyncStatus(prisma: PrismaClient): Promise<SyncStatusPublic> {
@@ -164,8 +192,6 @@ export async function acquireSyncLock(
   meta: Pick<SyncRunState, 'startDate' | 'endDate' | 'startYear' | 'endYear' | 'backfill'>,
   options?: { resume?: boolean },
 ): Promise<AcquireSyncResult> {
-  const existing = await readState(prisma);
-
   if (memoryLocked) {
     return {
       ok: false,
@@ -174,18 +200,10 @@ export async function acquireSyncLock(
     };
   }
 
-  if (existing?.running && !isStale(existing)) {
-    return {
-      ok: false,
-      status: 409,
-      message:
-        `Sincronização já em andamento desde ${existing.startedAt}` +
-        (existing.phase ? ` (fase: ${existing.phase})` : '') +
-        '. Consulte GET /api/sync/status.',
-    };
-  }
+  const now = new Date().toISOString();
 
   if (options?.resume) {
+    const existing = await readState(prisma);
     if (!existing?.resumeAvailable && !existing?.interrupted) {
       return {
         ok: false,
@@ -193,23 +211,33 @@ export async function acquireSyncLock(
         message: 'Não há checkpoint para retomar. Inicie com POST /api/run-sync-all.',
       };
     }
-    memoryLocked = true;
-    await writeState(prisma, {
+
+    const newState: SyncRunState = {
       ...existing!,
       running: true,
       interrupted: false,
       lastError: undefined,
       failedAt: undefined,
-      startedAt: new Date().toISOString(),
-      lastProgressAt: new Date().toISOString(),
-    });
+      startedAt: now,
+      lastProgressAt: now,
+    };
+
+    const claimed = await claimLockRow(prisma, newState);
+    if (!claimed) {
+      return {
+        ok: false,
+        status: 409,
+        message: 'Já existe uma sincronização em andamento (outra instância/processo). Consulte GET /api/sync/status.',
+      };
+    }
+    memoryLocked = true;
     return { ok: true };
   }
 
-  memoryLocked = true;
-  await writeState(prisma, {
+  const newState: SyncRunState = {
     running: true,
-    startedAt: new Date().toISOString(),
+    startedAt: now,
+    lastProgressAt: now,
     startDate: meta.startDate,
     endDate: meta.endDate,
     startYear: meta.startYear,
@@ -222,8 +250,18 @@ export async function acquireSyncLock(
     interrupted: false,
     resumeAvailable: false,
     backfill: meta.backfill ?? false,
-  });
+  };
 
+  const claimed = await claimLockRow(prisma, newState);
+  if (!claimed) {
+    return {
+      ok: false,
+      status: 409,
+      message: 'Já existe uma sincronização em andamento (outra instância/processo). Consulte GET /api/sync/status.',
+    };
+  }
+
+  memoryLocked = true;
   return { ok: true };
 }
 
