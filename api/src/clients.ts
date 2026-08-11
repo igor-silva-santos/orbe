@@ -11,7 +11,7 @@ const insecureAgent = new https.Agent({
 });
 
 const tmdbApiKey = process.env.TMDB_API_KEY;
-logger.info(`TMDB_API_KEY carregada: ${tmdbApiKey ? tmdbApiKey.substring(0, 5) + '...' + tmdbApiKey.substring(tmdbApiKey.length - 5) : 'Não definida'}`);
+logger.info(`TMDB_API_KEY carregada: ${tmdbApiKey ? 'sim' : 'não definida'}`);
 const igdbClientId = process.env.IGDB_CLIENT_ID;
 const igdbClientSecret = process.env.IGDB_CLIENT_SECRET;
 
@@ -42,7 +42,9 @@ let igdbAccessToken: string | null = null;
 let tmdbMovieGenres: Map<number, string> | null = null;
 
 const getIgdbAccessToken = async () => {
-  logger.info(`Tentando obter token IGDB com Client ID: ${igdbClientId ? igdbClientId.substring(0, 5) + '...' + igdbClientId.substring(igdbClientId.length - 5) : 'Não definido'} e Client Secret: ${igdbClientSecret ? igdbClientSecret.substring(0, 5) + '...' + igdbClientSecret.substring(igdbClientSecret.length - 5) : 'Não definido'}`);
+  logger.info(
+    `Tentando obter token IGDB (client configurado: ${igdbClientId && igdbClientSecret ? 'sim' : 'não'})`
+  );
   try {
     const response = await axios.post(
       `https://id.twitch.tv/oauth2/token?client_id=${igdbClientId}&client_secret=${igdbClientSecret}&grant_type=client_credentials`,

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from './clients';
 import { logger } from './logger';
 import jwt from 'jsonwebtoken';
+import { interactionRateLimiter } from './securityMiddleware';
 
 
 const router = Router();
@@ -49,7 +50,7 @@ router.get('/me/interactions', authMiddleware, async (req: AuthRequest, res: Res
 });
 
 // Rota para criar/atualizar uma interação
-router.post('/me/interactions', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/me/interactions', interactionRateLimiter, authMiddleware, async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId;
     if (!userId) {
         return res.status(403).json({ error: 'Usuário não autenticado.' });
