@@ -141,7 +141,29 @@ curl -X POST "$API_URL/api/run-sync-resume" \
 
 O checkpoint é salvo no Postgres (`AppSetting` / `sync_run`). Fases concluídas: `filmes` → `series` → `animes` (por ano) → `jogos`.
 
-## 6. Validar dados
+## 6. Backfill histórico (ano a ano, 2000 → hoje)
+
+Endpoint idempotente, pensado pra ser chamado repetidamente por um agendador externo (ver `.github/workflows/sync-backfill.yml`) — cada chamada avança um passo:
+
+```bash
+curl -X POST "$API_URL/api/run-sync-backfill-step" \
+  -H "x-sync-secret: $SYNC_SECRET"
+```
+
+Comportamento por chamada:
+- sync já rodando (não travado) → não faz nada, só serve pra manter o serviço acordado (útil no Render free, que hiberna sem tráfego);
+- checkpoint travado/interrompido → retoma o ano em andamento;
+- nenhum dos dois → inicia o próximo ano pendente (ponteiro salvo em `AppSetting` / `backfill_state`, visível em `GET /api/sync/status` como `backfillNextYear`).
+
+O ponteiro só avança quando o ano termina com sucesso (todas as fases + prêmios).
+
+Tamanho atual do banco (útil pra acompanhar o limite de 500MB do Supabase free):
+
+```bash
+curl -s "$API_URL/api/sync/db-size" -H "x-sync-secret: $SYNC_SECRET"
+```
+
+## 7. Validar dados
 
 ```bash
 curl -s "$API_URL/api/health"
