@@ -39,6 +39,9 @@ const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_
 const CONTROL_BTN = 'p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors';
 /** Quantos slides antes da borda do mês disparam o carregamento do mês adjacente */
 const MONTH_EDGE_BUFFER = 4;
+/** Meses extras pré-carregados ao encostar na borda (carrossel “infinito” sem buscar tudo) */
+const MONTH_PREFETCH_DEPTH = 2;
+const EMPTY_MONTH_NAV_LIMIT = 8;
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
@@ -157,6 +160,16 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     [fetchMediaByMonth, mergeItems]
   );
 
+  const loadMonthsInDirection = useCallback(
+    async (year: number, month: number, direction: 1 | -1, depth = MONTH_PREFETCH_DEPTH) => {
+      for (let step = 1; step <= depth; step++) {
+        const target = addMonths(year, month, step * direction);
+        await loadMonth(target.year, target.month);
+      }
+    },
+    [loadMonth]
+  );
+
   const prefetchAdjacentMonthsForIndex = useCallback(
     async (selectedIndex: number, items: Midia[]) => {
       const selectedItem = items[selectedIndex];
@@ -173,22 +186,26 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       );
 
       if (selectedIndex >= bounds.end - MONTH_EDGE_BUFFER) {
-        const next = addMonths(year, month, 1);
-        await loadMonth(next.year, next.month);
+        await loadMonthsInDirection(year, month, 1);
       }
 
       if (selectedIndex <= bounds.start + MONTH_EDGE_BUFFER) {
-        const prev = addMonths(year, month, -1);
-        await loadMonth(prev.year, prev.month);
+        await loadMonthsInDirection(year, month, -1);
       }
     },
-    [loadMonth]
+    [loadMonthsInDirection]
   );
 
   useEffect(() => {
     const now = new Date();
-    void loadMonth(now.getFullYear(), now.getMonth() + 1);
-  }, [loadMonth]);
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    void (async () => {
+      await loadMonth(year, month);
+      await loadMonthsInDirection(year, month, -1);
+      await loadMonthsInDirection(year, month, 1);
+    })();
+  }, [loadMonth, loadMonthsInDirection]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -273,21 +290,27 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!monthKey) return;
 
     const [year, month] = monthKey.split('-').map(Number);
-    const target = addMonths(year, month, direction === 'next' ? 1 : -1);
+    let target = addMonths(year, month, direction === 'next' ? 1 : -1);
 
-    const merged = await loadMonth(target.year, target.month);
-    const list = selectedGenre
-      ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
-      : merged;
+    for (let attempt = 0; attempt < EMPTY_MONTH_NAV_LIMIT; attempt++) {
+      const merged = await loadMonth(target.year, target.month);
+      const list = selectedGenre
+        ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
+        : merged;
 
-    const targetIndex = findIndexForMonth(list, target.year, target.month);
-    if (targetIndex !== -1) {
-      lastTitleMonthKey.current = '';
-      emblaApi.scrollTo(targetIndex, true);
-      updateTitleFromIndex(targetIndex, list);
-    } else {
-      setCurrentTitle(formatCarouselMonthTitle(new Date(target.year, target.month - 1, 1)));
+      const targetIndex = findIndexForMonth(list, target.year, target.month);
+      if (targetIndex !== -1) {
+        lastTitleMonthKey.current = '';
+        emblaApi.scrollTo(targetIndex, true);
+        updateTitleFromIndex(targetIndex, list);
+        await loadMonthsInDirection(target.year, target.month, direction === 'next' ? 1 : -1);
+        return;
+      }
+
+      target = addMonths(target.year, target.month, direction === 'next' ? 1 : -1);
     }
+
+    setCurrentTitle(formatCarouselMonthTitle(new Date(target.year, target.month - 1, 1)));
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, filteredItems.length);

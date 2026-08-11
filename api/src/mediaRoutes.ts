@@ -66,13 +66,43 @@ const parseMonthQuery = (mes: string | undefined, ano: string | undefined): { st
   return getMonthDateRange(year, month);
 };
 
-/** Janela inicial SSR: apenas o mês atual (meses adjacentes carregam no cliente ao rolar) */
+/** Janela inicial SSR: mês atual (meses adjacentes carregam no cliente ao rolar) */
 const getHomepageDateWindow = () => {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
   return { start, end };
 };
+
+/** Lançamentos recentes no bootstrap do carrossel (análogo a em cartaz nos filmes) */
+const getRecentCarouselPastStart = (days = 90): Date => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const carouselDateOrRecentPast = (
+  windowStart: Date,
+  windowEnd: Date,
+  recentPastStart: Date,
+): Prisma.JogoWhereInput => ({
+  OR: [
+    { firstReleaseDate: { gte: windowStart, lte: windowEnd } },
+    { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
+  ],
+});
+
+const carouselFirstAirOrRecentPast = (
+  windowStart: Date,
+  windowEnd: Date,
+  recentPastStart: Date,
+): Prisma.SerieWhereInput => ({
+  OR: [
+    { firstAirDate: { gte: windowStart, lte: windowEnd } },
+    { firstAirDate: { gte: recentPastStart, lt: windowStart } },
+  ],
+});
 
 const carouselLiteInclude = {
   genres: { include: { genero: true } },
@@ -133,6 +163,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
   const { start: windowStart, end: windowEnd } = getHomepageDateWindow();
+  const recentPastStart = getRecentCarouselPastStart();
 
   try {
     const [filmesRaw, series, jogos, animes] = await Promise.all([
@@ -151,13 +182,23 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_ITEM_LIMIT },
       ),
       prisma.serie.findMany({
-        where: { AND: [serieQualityFilter, { firstAirDate: { gte: windowStart, lte: windowEnd } }] },
+        where: {
+          AND: [
+            serieQualityFilter,
+            carouselFirstAirOrRecentPast(windowStart, windowEnd, recentPastStart),
+          ],
+        },
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: carouselLiteInclude,
       }),
       prisma.jogo.findMany({
-        where: { AND: [jogoQualityFilter, { firstReleaseDate: { gte: windowStart, lte: windowEnd } }] },
+        where: {
+          AND: [
+            jogoQualityFilter,
+            carouselDateOrRecentPast(windowStart, windowEnd, recentPastStart),
+          ],
+        },
         orderBy: { firstReleaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: {
