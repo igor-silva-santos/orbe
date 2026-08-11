@@ -11,7 +11,7 @@ import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
-import { updateSyncProgress } from './syncState';
+import { addSkipReasons, updateSyncProgress } from './syncState';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -283,8 +283,13 @@ async function processMovieBatch(
   prisma: PrismaClient,
   sourceFlags: Map<number, MovieSourceFlags> = new Map(),
   period?: { start: Date; end: Date },
-): Promise<{ successCount: number, errorCount: number, skippedCount: number }> {
+): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number> }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
+  const skipReasons: Record<string, number> = {};
+  const bumpSkip = (reason: string) => {
+    skippedCount++;
+    skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+  };
 
   for (const id of movieIds) {
     try {
@@ -311,7 +316,7 @@ async function processMovieBatch(
       }
 
       if (!releaseDate) {
-        skippedCount++;
+        bumpSkip('no_release_date');
         continue;
       }
 
@@ -319,7 +324,7 @@ async function processMovieBatch(
       const isCinemaCurated = flags.emCartaz || flags.emBreve;
 
       if (isConcertOrLiveRecording(movieDetails)) {
-        skippedCount++;
+        bumpSkip('concert_or_live');
         logger.info(`⏭️ Filme [${id}] "${movieDetails.title}" ignorado: show/concerto ao vivo (não é filme).`);
         continue;
       }
@@ -329,7 +334,7 @@ async function processMovieBatch(
         !isCinemaCurated &&
         !isReleaseWithinPeriod(releaseDate, period.start, period.end)
       ) {
-        skippedCount++;
+        bumpSkip('out_of_period');
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: lançamento ` +
           `${releaseDate.toISOString().split('T')[0]} fora do período ` +
@@ -339,7 +344,7 @@ async function processMovieBatch(
       }
 
       if (!isCinemaCurated && !isMovieRelevantForSync(movieDetails)) {
-        skippedCount++;
+        bumpSkip('quality_filter');
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
@@ -449,7 +454,7 @@ async function processMovieBatch(
   }
 
   logger.info(`--- Resumo do Lote (Filmes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
-  return { successCount, errorCount, skippedCount };
+  return { successCount, errorCount, skippedCount, skipReasons };
 }
 
 
@@ -487,7 +492,8 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
     for (let i = 0; i < curatedIds.length; i += batchSize) {
       const batch = curatedIds.slice(i, i + batchSize);
       logger.info(`Processando lote cinema: ${i + 1}-${Math.min(i + batchSize, curatedIds.length)} de ${curatedIds.length}`);
-      await processMovieBatch(batch, prisma, curatedFlags, period);
+      const batchResult = await processMovieBatch(batch, prisma, curatedFlags, period);
+      await addSkipReasons(prisma, 'filmes', batchResult.skipReasons);
       phaseTracker?.advance(batch.length);
       await updateSyncProgress(prisma, {
         processedInPhase: i + batch.length,
@@ -525,7 +531,8 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            await processMovieBatch(batch, prisma, curatedFlags, period);
+            const batchResult = await processMovieBatch(batch, prisma, curatedFlags, period);
+            await addSkipReasons(prisma, 'filmes', batchResult.skipReasons);
             phaseTracker?.advance(batch.length);
             monthlyProcessed += batch.length;
             const stats = phaseTracker?.getStats();

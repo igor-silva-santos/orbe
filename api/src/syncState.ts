@@ -25,6 +25,8 @@ export type SyncRunState = {
   resumeAvailable?: boolean;
   lastError?: string;
   failedAt?: string;
+  /** Contagem de itens pulados por motivo, por fase (observabilidade dos filtros de sync) */
+  skipReasons?: Partial<Record<SyncPhase, Record<string, number>>>;
 };
 
 export type SyncStatusPublic = {
@@ -278,6 +280,32 @@ export async function setAnimesResumeYear(prisma: PrismaClient, nextYear: number
     });
   } catch {
     /* noop */
+  }
+}
+
+/** Acumula contagem de itens pulados por motivo numa fase (não bloqueia o sync em caso de falha) */
+export async function addSkipReasons(
+  prisma: PrismaClient,
+  phase: SyncPhase,
+  reasons: Record<string, number>,
+): Promise<void> {
+  if (Object.keys(reasons).length === 0) return;
+  try {
+    const state = await readState(prisma);
+    if (!state?.running) return;
+
+    const currentByPhase = state.skipReasons ?? {};
+    const currentForPhase = { ...(currentByPhase[phase] ?? {}) };
+    for (const [reason, count] of Object.entries(reasons)) {
+      currentForPhase[reason] = (currentForPhase[reason] ?? 0) + count;
+    }
+
+    await writeState(prisma, {
+      ...state,
+      skipReasons: { ...currentByPhase, [phase]: currentForPhase },
+    });
+  } catch {
+    /* não bloquear sync por falha ao registrar estatística */
   }
 }
 

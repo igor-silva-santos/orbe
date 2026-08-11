@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { logger } from './logger';
 import { prisma } from './clients';
 import { syncMovies } from './syncMovies';
-import { syncSeries } from './syncSeries';
+import { recheckPendingBrSeries, syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
 import { syncSteamData, refreshStaleSteamPrices } from './syncSteam';
@@ -101,6 +101,7 @@ router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
         break;
       case 'series':
         await syncSeries(prisma, startDate, endDate);
+        await recheckPendingBrSeries(prisma);
         await markPhaseComplete(prisma, 'series');
         break;
       case 'animes': {

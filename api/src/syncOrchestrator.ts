@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 import { syncMovies } from './syncMovies';
-import { syncSeries } from './syncSeries';
+import { recheckPendingBrSeries, syncSeries } from './syncSeries';
 import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
 import { syncSteamData } from './syncSteam';
@@ -54,6 +54,7 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
     if (!phaseDone(completed, 'series')) {
       logger.info('--- Fase SÉRIES ---');
       await syncSeries(prisma, startDate, endDate);
+      await recheckPendingBrSeries(prisma);
       await markPhaseComplete(prisma, 'series');
     } else {
       logger.info('⏭️ Fase séries já concluída (checkpoint). Pulando.');
