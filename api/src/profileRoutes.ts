@@ -1,33 +1,14 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response } from 'express';
 import { prisma } from './clients';
 import { logger } from './logger';
-import jwt from 'jsonwebtoken';
+import { authMiddleware, type AuthRequest } from './authMiddleware';
+import { isStringWithMaxLength, isValidHttpUrl } from './validation';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
-interface AuthRequest extends Request {
-  user?: { 
-    userId: number;
-    role: string;
-  };
-}
-
-// Middleware de Autenticação
-const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Não autorizado.' });
-    }
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number, role: string };
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ error: 'Token inválido.' });
-    }
-};
+const MAX_NOME_LENGTH = 100;
+const MAX_BIO_LENGTH = 1000;
+const MAX_AVATAR_LENGTH = 2000;
 
 // Buscar perfil do usuário logado
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -59,6 +40,19 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 router.patch('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId;
     const { nome, bio, avatar, preferencias, perfil_publico } = req.body;
+
+    if (nome != null && !isStringWithMaxLength(nome, MAX_NOME_LENGTH)) {
+        return res.status(400).json({ error: `nome excede o limite de ${MAX_NOME_LENGTH} caracteres.` });
+    }
+    if (bio != null && !isStringWithMaxLength(bio, MAX_BIO_LENGTH)) {
+        return res.status(400).json({ error: `bio excede o limite de ${MAX_BIO_LENGTH} caracteres.` });
+    }
+    if (avatar != null && avatar !== '' && (!isStringWithMaxLength(avatar, MAX_AVATAR_LENGTH) || !isValidHttpUrl(avatar))) {
+        return res.status(400).json({ error: 'avatar deve ser uma URL http(s) válida.' });
+    }
+    if (perfil_publico != null && typeof perfil_publico !== 'boolean') {
+        return res.status(400).json({ error: 'perfil_publico deve ser um booleano.' });
+    }
 
     try {
         const updatedUser = await prisma.user.update({

@@ -16,6 +16,7 @@ import syncRoutes from './syncRoutes';
 import watchlistRoutes from './watchlistRoutes';
 import profileRoutes from './profileRoutes';
 import commentRoutes from './commentRoutes';
+import { verifyBearerToken, MissingTokenError } from './authMiddleware';
 import {
   applySecurityMiddleware,
   authRateLimiter,
@@ -207,16 +208,8 @@ const loginHandler = async (req: express.Request, res: express.Response) => {
 };
 
 const meHandler = async (req: express.Request, res: express.Response) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Token não fornecido.' });
-  }
-
-  const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const decoded = verifyBearerToken(req.headers.authorization);
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -235,6 +228,9 @@ const meHandler = async (req: express.Request, res: express.Response) => {
 
     res.json(user);
   } catch (error) {
+    if (error instanceof MissingTokenError) {
+      return res.status(401).json({ error: 'Token não fornecido.' });
+    }
     res.status(401).json({ error: 'Token inválido.' });
   }
 };

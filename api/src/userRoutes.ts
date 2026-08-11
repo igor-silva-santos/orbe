@@ -1,35 +1,13 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Response } from 'express';
 import { prisma } from './clients';
 import { logger } from './logger';
-import jwt from 'jsonwebtoken';
 import { interactionRateLimiter } from './securityMiddleware';
-
+import { authMiddleware, type AuthRequest } from './authMiddleware';
+import { isPositiveInt, isValidInteractionStatus, isValidMediaType, isValidRating, isStringWithMaxLength } from './validation';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
 
-interface AuthRequest extends Request {
-  user?: { 
-    userId: number;
-    role: string;
-  };
-}
-
-// Middleware simples para verificar o token em rotas de usuário
-const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Token não fornecido.' });
-    }
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number, role: string };
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ error: 'Token inválido.' });
-    }
-};
+const MAX_COMENTARIO_LENGTH = 2000;
 
 // Rota para buscar as interações do usuário logado
 router.get('/me/interactions', authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -61,24 +39,39 @@ router.post('/me/interactions', interactionRateLimiter, authMiddleware, async (r
     if (!midia_id || !tipo_midia || !status) {
         return res.status(400).json({ error: 'Dados da interação incompletos.' });
     }
+    if (!isPositiveInt(midia_id)) {
+        return res.status(400).json({ error: 'midia_id inválido.' });
+    }
+    if (!isValidMediaType(tipo_midia)) {
+        return res.status(400).json({ error: 'tipo_midia inválido.' });
+    }
+    if (!isValidInteractionStatus(status)) {
+        return res.status(400).json({ error: 'status inválido.' });
+    }
+    if (avaliacao != null && !isValidRating(avaliacao)) {
+        return res.status(400).json({ error: 'avaliacao inválida.' });
+    }
+    if (comentario != null && !isStringWithMaxLength(comentario, MAX_COMENTARIO_LENGTH)) {
+        return res.status(400).json({ error: `comentario excede o limite de ${MAX_COMENTARIO_LENGTH} caracteres.` });
+    }
 
     try {
         const interaction = await prisma.preferencias_usuario_midia.upsert({
             where: {
-                usuario_midia_unique: { 
+                usuario_midia_unique: {
                     usuario_id: userId,
-                    midia_id: midia_id,
+                    midia_id: Number(midia_id),
                     tipo_midia: tipo_midia,
                 }
             },
-            update: { 
+            update: {
                 status,
                 avaliacao: avaliacao || undefined,
                 comentario: comentario || undefined
             },
-            create: { 
+            create: {
                 usuario_id: userId,
-                midia_id: midia_id,
+                midia_id: Number(midia_id),
                 tipo_midia: tipo_midia,
                 status: status,
                 avaliacao: avaliacao || null,
