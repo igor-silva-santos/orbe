@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 
 const SYNC_STATE_KEY = 'sync_run';
+const BACKFILL_STATE_KEY = 'backfill_state';
+const BACKFILL_DEFAULT_START_YEAR = 2000;
 const STALE_PROGRESS_MS = 10 * 60 * 1000; // 10 min sem progresso = provável crash/cold start
 const STALE_ANIMES_PROGRESS_MS = 30 * 60 * 1000; // animes: lotes lentos (700ms/anime + tradução)
 
@@ -27,6 +29,8 @@ export type SyncRunState = {
   failedAt?: string;
   /** Contagem de itens pulados por motivo, por fase (observabilidade dos filtros de sync) */
   skipReasons?: Partial<Record<SyncPhase, Record<string, number>>>;
+  /** Marca se este run faz parte do backfill histórico ano a ano — controla se o ponteiro avança ao concluir */
+  backfill?: boolean;
 };
 
 export type SyncStatusPublic = {
@@ -157,7 +161,7 @@ export type AcquireSyncResult =
 
 export async function acquireSyncLock(
   prisma: PrismaClient,
-  meta: Pick<SyncRunState, 'startDate' | 'endDate' | 'startYear' | 'endYear'>,
+  meta: Pick<SyncRunState, 'startDate' | 'endDate' | 'startYear' | 'endYear' | 'backfill'>,
   options?: { resume?: boolean },
 ): Promise<AcquireSyncResult> {
   const existing = await readState(prisma);
@@ -217,6 +221,7 @@ export async function acquireSyncLock(
     animesResumeYear: meta.startYear,
     interrupted: false,
     resumeAvailable: false,
+    backfill: meta.backfill ?? false,
   });
 
   return { ok: true };
@@ -351,4 +356,22 @@ export function isSyncMemoryLocked(): boolean {
 
 export async function readSyncRunState(prisma: PrismaClient): Promise<SyncRunState | null> {
   return readState(prisma);
+}
+
+/**
+ * Ponteiro do backfill histórico (ano a ano, 2000 → hoje). Guardado à parte do sync_run
+ * porque sobrevive a runs individuais — cada passo do backfill sincroniza só um ano.
+ */
+export async function getBackfillNextYear(prisma: PrismaClient): Promise<number> {
+  const row = await prisma.appSetting.findUnique({ where: { key: BACKFILL_STATE_KEY } });
+  const value = row?.value as { nextYear?: number } | undefined;
+  return value?.nextYear ?? BACKFILL_DEFAULT_START_YEAR;
+}
+
+export async function setBackfillNextYear(prisma: PrismaClient, year: number): Promise<void> {
+  await prisma.appSetting.upsert({
+    where: { key: BACKFILL_STATE_KEY },
+    create: { key: BACKFILL_STATE_KEY, value: { nextYear: year } },
+    update: { value: { nextYear: year } },
+  });
 }
