@@ -27,6 +27,8 @@ import type { Midia, TipoMidia, Filme, Serie, Anime, Jogo } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 interface MediaCarouselProps {
   mediaType: 'filmes' | 'series' | 'jogos';
@@ -44,6 +46,8 @@ const MONTH_PREFETCH_DEPTH = 2;
 const EMPTY_MONTH_NAV_LIMIT = 8;
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -389,6 +393,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                           midia={item as Filme | Serie | Anime | Jogo}
                           type={mediaType.slice(0, -1) as TipoMidia}
                           priority={isPriority}
+                          userInteractions={userInteractions}
+                          onInteraction={handleInteraction}
                         />
                       ) : (
                         <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-muted" aria-hidden />

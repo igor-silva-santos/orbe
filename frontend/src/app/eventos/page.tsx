@@ -18,7 +18,9 @@ import orbeNerdApi from '@/lib/api';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import PageHeader from '@/components/layout/PageHeader';
-import type { Anime, Evento, EventoResumo, Filme, Jogo, Serie, TipoMidia } from '@/types';
+import type { Anime, Evento, EventoResumo, Filme, Jogo, Serie, TipoMidia, UserAction, UserInteraction } from '@/types';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 type TabId = 'eventos' | 'proximos' | 'destaques';
 
@@ -67,27 +69,40 @@ const scrollToSection = (anchor: string, setActiveTab: (tab: TabId) => void, tab
   }
 };
 
+type InteractionProps = {
+  userInteractions: UserInteraction[];
+  onInteraction: (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => void;
+};
+
 const MediaCarousel = ({
   items,
   type,
+  userInteractions,
+  onInteraction,
 }: {
   items: Array<Filme | Serie | Anime | Jogo>;
   type: TipoMidia;
-}) => {
+} & InteractionProps) => {
   if (items.length === 0) return null;
 
   return (
     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
       {items.map((item) => (
         <div key={`${type}-${item.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-          <MidiaCard midia={item} type={type} showCountdown />
+          <MidiaCard
+            midia={item}
+            type={type}
+            showCountdown
+            userInteractions={userInteractions}
+            onInteraction={onInteraction}
+          />
         </div>
       ))}
     </div>
   );
 };
 
-const GameEventCard = ({ evento }: { evento: Evento }) => (
+const GameEventCard = ({ evento, userInteractions, onInteraction }: { evento: Evento } & InteractionProps) => (
   <section className="orbe-block bg-card rounded-[20px] p-4 md:p-6 space-y-4">
     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
       <div className="space-y-2 min-w-0">
@@ -124,7 +139,7 @@ const GameEventCard = ({ evento }: { evento: Evento }) => (
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
         {evento.jogos.map((jogo) => (
           <div key={jogo.id} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-            <MidiaCard midia={jogo} type="jogo" />
+            <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={onInteraction} />
           </div>
         ))}
       </div>
@@ -133,6 +148,8 @@ const GameEventCard = ({ evento }: { evento: Evento }) => (
 );
 
 export default function EventosPage() {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [resumo, setResumo] = useState<EventoResumo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>('eventos');
@@ -236,7 +253,7 @@ export default function EventosPage() {
             ) : (
               <div className="space-y-6">
                 {resumo.eventos_games.map((evento) => (
-                  <GameEventCard key={evento.id} evento={evento} />
+                  <GameEventCard key={evento.id} evento={evento} userInteractions={userInteractions} onInteraction={handleInteraction} />
                 ))}
               </div>
             )}
@@ -270,7 +287,7 @@ export default function EventosPage() {
                           {items.length}
                         </span>
                       </h3>
-                      <MediaCarousel items={items} type={type} />
+                      <MediaCarousel items={items} type={type} userInteractions={userInteractions} onInteraction={handleInteraction} />
                     </div>
                   );
                 })}
@@ -293,7 +310,7 @@ export default function EventosPage() {
                   <Film className="h-5 w-5 text-[var(--orbe-accent-2)]" />
                   Em cartaz
                 </h3>
-                <MediaCarousel items={resumo.destaques_recentes.filmes} type="filme" />
+                <MediaCarousel items={resumo.destaques_recentes.filmes} type="filme" userInteractions={userInteractions} onInteraction={handleInteraction} />
               </div>
             )}
 
@@ -304,7 +321,7 @@ export default function EventosPage() {
                   Eventos recentes
                 </h3>
                 {resumo.destaques_recentes.eventos.map((evento) => (
-                  <GameEventCard key={`recent-${evento.id}`} evento={evento} />
+                  <GameEventCard key={`recent-${evento.id}`} evento={evento} userInteractions={userInteractions} onInteraction={handleInteraction} />
                 ))}
               </div>
             )}

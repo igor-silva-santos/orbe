@@ -167,7 +167,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     if (action === 'ja_assisti' || action === 'ja_joguei') {
       openRatingModal(midia, type, action);
     } else {
-      onInteraction?.(action, midia);
+      onInteraction?.(action, midia, type);
     }
     setIsMenuOpen(false);
   };

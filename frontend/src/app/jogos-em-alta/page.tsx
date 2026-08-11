@@ -6,7 +6,9 @@ import { ArrowLeft, Gamepad2, Layers, Monitor, Users } from 'lucide-react';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
-import type { Jogo } from '@/types';
+import type { Anime, Filme, Jogo, Serie, TipoMidia, UserAction, UserInteraction } from '@/types';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 interface GameSection {
   id?: string;
@@ -26,7 +28,12 @@ interface JogosEmAltaData {
   plataformas: GameSection[];
 }
 
-const HorizontalRow = ({ section }: { section: GameSection }) => (
+type InteractionProps = {
+  userInteractions: UserInteraction[];
+  onInteraction: (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => void;
+};
+
+const HorizontalRow = ({ section, userInteractions, onInteraction }: { section: GameSection } & InteractionProps) => (
   <section className="bg-card rounded-lg border border-border p-4 md:p-5 space-y-4">
     <div className="flex items-center justify-between gap-3">
       <h3 className="font-display text-base md:text-lg orbe-text-primary flex items-center gap-2">
@@ -40,7 +47,7 @@ const HorizontalRow = ({ section }: { section: GameSection }) => (
     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
       {section.jogos.map((jogo) => (
         <div key={`${section.nome}-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-          <MidiaCard midia={jogo} type="jogo" />
+          <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={onInteraction} />
         </div>
       ))}
     </div>
@@ -52,12 +59,14 @@ const BlockSection = ({
   icon: Icon,
   sections,
   emptyMessage,
+  userInteractions,
+  onInteraction,
 }: {
   title: string;
   icon: typeof Monitor;
   sections: GameSection[];
   emptyMessage: string;
-}) => {
+} & InteractionProps) => {
   if (sections.length === 0) {
     return (
       <section className="space-y-4">
@@ -80,7 +89,7 @@ const BlockSection = ({
       </h2>
       <div className="space-y-5">
         {sections.map((section) => (
-          <HorizontalRow key={section.id ?? section.nome} section={section} />
+          <HorizontalRow key={section.id ?? section.nome} section={section} userInteractions={userInteractions} onInteraction={onInteraction} />
         ))}
       </div>
     </section>
@@ -88,6 +97,8 @@ const BlockSection = ({
 };
 
 export default function JogosEmAltaPage() {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [data, setData] = useState<JogosEmAltaData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -153,7 +164,7 @@ export default function JogosEmAltaPage() {
                           #{index + 1}
                         </span>
                       )}
-                      <MidiaCard midia={jogo} type="jogo" />
+                      <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
                     </div>
                   ))}
                 </div>
@@ -173,7 +184,7 @@ export default function JogosEmAltaPage() {
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                   {data.steam_mais_jogados.map((jogo) => (
                     <div key={`steam-trend-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-                      <MidiaCard midia={jogo} type="jogo" />
+                      <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
                     </div>
                   ))}
                 </div>
@@ -189,7 +200,7 @@ export default function JogosEmAltaPage() {
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                   {data.steam_promocoes.map((jogo) => (
                     <div key={`steam-sale-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-                      <MidiaCard midia={jogo} type="jogo" />
+                      <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
                     </div>
                   ))}
                 </div>
@@ -201,6 +212,8 @@ export default function JogosEmAltaPage() {
               icon={Monitor}
               sections={data.plataformas}
               emptyMessage="Nenhum jogo em destaque por plataforma esta semana."
+              userInteractions={userInteractions}
+              onInteraction={handleInteraction}
             />
 
             <BlockSection
@@ -208,6 +221,8 @@ export default function JogosEmAltaPage() {
               icon={Users}
               sections={data.modos}
               emptyMessage="Nenhum modo de jogo com destaques esta semana."
+              userInteractions={userInteractions}
+              onInteraction={handleInteraction}
             />
 
             {data.categorias.length > 0 && (
@@ -216,6 +231,8 @@ export default function JogosEmAltaPage() {
                 icon={Layers}
                 sections={data.categorias}
                 emptyMessage=""
+                userInteractions={userInteractions}
+                onInteraction={handleInteraction}
               />
             )}
           </>
