@@ -9,6 +9,8 @@ import type { FilmesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 const MONTHS = [
   { value: '1', label: 'Janeiro' },
@@ -30,6 +32,8 @@ interface FilmesClientProps {
 }
 
 export default function FilmesClient({ initialData }: FilmesClientProps) {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [filmes, setFilmes] = useState<Filme[]>(initialData.results);
   const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
@@ -217,6 +221,8 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
               <MidiaCard
                 midia={filme}
                 type="filme"
+                userInteractions={userInteractions}
+                onInteraction={handleInteraction}
               />
             </div>
           ))}

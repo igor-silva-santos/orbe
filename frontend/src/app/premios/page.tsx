@@ -9,10 +9,14 @@ import type { Filme, Serie, Anime, Jogo, TipoMidia } from '@/types';
 type AwardItem = (Filme | Serie | Anime | Jogo) & { type: TipoMidia };
 
 import PageHeader from '@/components/layout/PageHeader';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 const PAGE_SIZE = 48;
 
 export default function PremiosPage() {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [awards, setAwards] = useState<AwardItem[]>([]);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
@@ -127,7 +131,13 @@ export default function PremiosPage() {
       ) : awards.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {awards.map((awardItem) => (
-            <MidiaCard key={`${awardItem.type}-${awardItem.id}`} midia={awardItem} type={awardItem.type as TipoMidia} />
+            <MidiaCard
+              key={`${awardItem.type}-${awardItem.id}`}
+              midia={awardItem}
+              type={awardItem.type as TipoMidia}
+              userInteractions={userInteractions}
+              onInteraction={handleInteraction}
+            />
           ))}
         </div>
       ) : (

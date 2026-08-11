@@ -6,7 +6,9 @@ import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import PageHeader from '@/components/layout/PageHeader';
-import type { Filme, Serie, Jogo } from '@/types';
+import type { Filme, Serie, Jogo, UserAction, UserInteraction, TipoMidia } from '@/types';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 interface HojeData {
   data: string;
@@ -21,11 +23,15 @@ const MediaRow = ({
   icon: Icon,
   items,
   type,
+  userInteractions,
+  onInteraction,
 }: {
   title: string;
   icon: typeof Film;
   items: Array<Filme | Serie | Jogo>;
   type: 'filme' | 'serie' | 'jogo';
+  userInteractions: UserInteraction[];
+  onInteraction: (action: UserAction, midia: Filme | Serie | Jogo, type: TipoMidia) => void;
 }) => {
   if (items.length === 0) return null;
 
@@ -37,7 +43,13 @@ const MediaRow = ({
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
         {items.map((item) => (
-          <MidiaCard key={`${type}-${item.id}`} midia={item} type={type} />
+          <MidiaCard
+            key={`${type}-${item.id}`}
+            midia={item}
+            type={type}
+            userInteractions={userInteractions}
+            onInteraction={onInteraction}
+          />
         ))}
       </div>
     </section>
@@ -45,6 +57,8 @@ const MediaRow = ({
 };
 
 export default function HojeClient() {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [data, setData] = useState<HojeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,10 +91,10 @@ export default function HojeClient() {
         </div>
       ) : data ? (
         <div className="space-y-10">
-          <MediaRow title="Em cartaz nos cinemas" icon={Clapperboard} items={data.cinema} type="filme" />
-          <MediaRow title="Filmes populares no streaming esta semana" icon={Film} items={data.streamingFilmes} type="filme" />
-          <MediaRow title="Séries populares no streaming esta semana" icon={Tv} items={data.streamingSeries} type="serie" />
-          <MediaRow title="Jogos em destaque" icon={Gamepad2} items={data.destaquesJogos} type="jogo" />
+          <MediaRow title="Em cartaz nos cinemas" icon={Clapperboard} items={data.cinema} type="filme" userInteractions={userInteractions} onInteraction={handleInteraction} />
+          <MediaRow title="Filmes populares no streaming esta semana" icon={Film} items={data.streamingFilmes} type="filme" userInteractions={userInteractions} onInteraction={handleInteraction} />
+          <MediaRow title="Séries populares no streaming esta semana" icon={Tv} items={data.streamingSeries} type="serie" userInteractions={userInteractions} onInteraction={handleInteraction} />
+          <MediaRow title="Jogos em destaque" icon={Gamepad2} items={data.destaquesJogos} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
 
           {data.cinema.length === 0 &&
             data.streamingFilmes.length === 0 &&

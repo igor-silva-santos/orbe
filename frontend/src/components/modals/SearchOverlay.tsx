@@ -6,9 +6,11 @@ import { useAppStore } from '@/stores/appStore';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { SearchResultItem } from '@/types';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 
 const SearchOverlay: React.FC = () => {
-  const { isSearchOpen, closeSearch } = useAppStore();
+  const { isSearchOpen, closeSearch, userInteractions } = useAppStore();
+  const handleInteraction = useMidiaInteraction();
 
   type CategoryID = 'todos' | 'filmes' | 'series' | 'animes' | 'jogos';
 
@@ -160,11 +162,13 @@ const SearchOverlay: React.FC = () => {
             const itemIndex = baseIndex + index;
             return (
               <div key={`${item.type}-${item.id}`} className="h-full w-full max-w-[210px]">
-                <MidiaCard 
+                <MidiaCard
                   ref={el => { cardRefs.current[itemIndex] = el; }}
-                  midia={item} 
-                  type={item.type} 
+                  midia={item}
+                  type={item.type}
                   isFocused={itemIndex === focusedIndex}
+                  userInteractions={userInteractions}
+                  onInteraction={handleInteraction}
                 />
               </div>
             );

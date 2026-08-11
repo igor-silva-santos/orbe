@@ -302,7 +302,7 @@ export interface MidiaCardProps {
   type: TipoMidia;
   showCountdown?: boolean;
   userInteractions?: UserInteraction[];
-  onInteraction?: (action: UserAction, midia: Filme | Serie | Anime | Jogo) => void;
+  onInteraction?: (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => void;
   onClick?: () => void;
   isFocused?: boolean;
   priority?: boolean;

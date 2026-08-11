@@ -7,6 +7,8 @@ import MidiaCard from '@/components/media/MidiaCard';
 import type { Jogo } from '@/types';
 import type { JogosPageData } from '@/lib/apiServer';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 import PageHeader from '@/components/layout/PageHeader';
 
@@ -30,6 +32,8 @@ interface JogosClientProps {
 }
 
 export default function JogosClient({ initialData }: JogosClientProps) {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [jogos, setJogos] = useState<Jogo[]>(initialData.results);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
@@ -139,7 +143,7 @@ export default function JogosClient({ initialData }: JogosClientProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 items-stretch">
           {jogos.map((jogo) => (
             <div key={jogo.id} className="h-full w-full max-w-[210px] mx-auto">
-              <MidiaCard midia={jogo} type="jogo" />
+              <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
             </div>
           ))}
         </div>

@@ -11,12 +11,16 @@ import type { AnimesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 interface AnimesClientProps {
   initialData: AnimesPageData;
 }
 
 export default function AnimesClient({ initialData }: AnimesClientProps) {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [animes, setAnimes] = useState<Anime[]>(initialData.results);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
@@ -149,7 +153,7 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 items-stretch">
           {animes.map((anime) => (
             <div key={anime.id} className="h-full w-full max-w-[210px] mx-auto">
-              <MidiaCard midia={anime} type="anime" />
+              <MidiaCard midia={anime} type="anime" userInteractions={userInteractions} onInteraction={handleInteraction} />
             </div>
           ))}
         </div>

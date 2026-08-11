@@ -9,6 +9,8 @@ import type { SeriesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 const MONTHS = [
   { value: '1', label: 'Janeiro' },
@@ -30,6 +32,8 @@ interface SeriesClientProps {
 }
 
 export default function SeriesClient({ initialData }: SeriesClientProps) {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [series, setSeries] = useState<Serie[]>(initialData.results);
   const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,7 +187,7 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 items-stretch">
           {series.map((serie) => (
             <div key={serie.id} className="h-full w-full max-w-[210px] mx-auto">
-              <MidiaCard midia={serie} type="serie" />
+              <MidiaCard midia={serie} type="serie" userInteractions={userInteractions} onInteraction={handleInteraction} />
             </div>
           ))}
         </div>

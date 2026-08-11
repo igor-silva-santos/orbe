@@ -16,6 +16,8 @@ import { Anime } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 type CarouselItem = 
   | { type: 'media'; data: Anime }
@@ -59,6 +61,8 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
 };
 
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
+    const handleInteraction = useMidiaInteraction();
+    const userInteractions = useAppStore((s) => s.userInteractions);
   const [fetchedAnimes, setFetchedAnimes] = useState<Anime[]>(initialData);
   const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([]);
   
@@ -465,7 +469,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   ) : item.type === 'separator' ? (
                     <DaySeparatorCard dayName={item.dayName} />
                   ) : (
-                    <MidiaCard midia={item.data} type="anime" priority={isPriority} />
+                    <MidiaCard
+                      midia={item.data}
+                      type="anime"
+                      priority={isPriority}
+                      userInteractions={userInteractions}
+                      onInteraction={handleInteraction}
+                    />
                   )}
                 </div>
               );})}
