@@ -202,15 +202,16 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
   const foundStores = new Map<string, { name: string; icon: string; url: string }>();
 
   for (const website of item.websites) {
+    if (!website?.url) continue;
     let storeInfo: { name: string; icon: string; } | null = null;
 
     // 1. Tenta encontrar pela categoria
-    if (storeCategoryMapping[website.category]) {
+    if (website.category != null && storeCategoryMapping[website.category]) {
       storeInfo = storeCategoryMapping[website.category];
-    } 
+    }
     // 2. Se não encontrou, tenta encontrar por substring da URL
     else {
-      const urlMatch = storeUrlMapping.find(mapping => website.url.includes(mapping.contains));
+      const urlMatch = storeUrlMapping.find((mapping) => website.url.includes(mapping.contains));
       if (urlMatch) {
         storeInfo = urlMatch;
       }
@@ -226,6 +227,22 @@ export const getGameStores = (item: Jogo): { name: string; icon: string; url: st
   }
 
   return Array.from(foundStores.values());
+};
+
+/** Links clicáveis de lojas/plataformas para o modal de jogos */
+export const getGamePlatformLinks = (item: Jogo): { name: string; icon: string; url: string }[] => {
+  const links = new Map<string, { name: string; icon: string; url: string }>();
+
+  for (const store of getGameStores(item)) {
+    links.set(store.name, store);
+  }
+
+  const steamUrl = getSteamStoreUrl(item.steam_app_id);
+  if (steamUrl && !links.has('Steam')) {
+    links.set('Steam', { name: 'Steam', icon: 'steam', url: steamUrl });
+  }
+
+  return Array.from(links.values());
 };
 
 /**
