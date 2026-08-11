@@ -1,11 +1,73 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useAppStore } from '@/stores/appStore';
+import orbeNerdApi from '@/lib/api';
+import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export default function RegisterPage() {
+  const { login } = useAppStore();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.password.length < MIN_PASSWORD_LENGTH) {
+      alert(`A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      alert('As senhas não coincidem.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await orbeNerdApi.register({
+        nome: formData.nome,
+        email: formData.email,
+        password: formData.password,
+      });
+      if (response?.token && response?.user) {
+        localStorage.setItem('token', response.token);
+        await establishBrowserSession(response.token);
+        login(response.user);
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = safeRedirectPath(params.get('redirect'));
+      } else {
+        alert('Não foi possível criar sua conta. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Register API call failed:', error);
+      alert(error instanceof Error ? error.message : 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
+        {/* Logo */}
         <div className="text-center">
           <Link href="/" className="inline-block">
             <h1 className="text-3xl font-bold orbe-gradient-text mb-2">
@@ -17,24 +79,125 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="bg-muted/50 rounded-lg p-6">
-          <div className="text-center py-8">
-            <h2 className="text-xl font-semibold orbe-text-primary mb-4">
-              Página em Desenvolvimento
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              A funcionalidade de cadastro estará disponível em breve.
-            </p>
-            <Link
-              href="/login"
-              className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+        {/* Formulário */}
+        <div className="bg-muted/50 rounded-lg p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nome */}
+            <div>
+              <label htmlFor="nome" className="block text-sm font-medium orbe-text-primary mb-2">
+                Nome
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  id="nome"
+                  name="nome"
+                  type="text"
+                  required
+                  value={formData.nome}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
+                  placeholder="Seu nome"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium orbe-text-primary mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
+                  placeholder="seu@email.com"
+                />
+              </div>
+            </div>
+
+            {/* Senha */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium orbe-text-primary mb-2">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={MIN_PASSWORD_LENGTH}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-12 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
+                  placeholder="Mínimo 8 caracteres"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:orbe-text-primary"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirmar Senha */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium orbe-text-primary mb-2">
+                Confirmar Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
+                  placeholder="Repita sua senha"
+                />
+              </div>
+            </div>
+
+            {/* Botão de Cadastro */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Voltar ao Login
-            </Link>
+              {isLoading ? (
+                <>
+                  <div className="loading-spinner h-4 w-4"></div>
+                  Criando conta...
+                </>
+              ) : (
+                'Criar conta'
+              )}
+            </button>
+          </form>
+
+          {/* Link para Login */}
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Já tem uma conta?{' '}
+              <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                Entrar
+              </Link>
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

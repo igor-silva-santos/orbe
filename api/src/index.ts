@@ -133,6 +133,9 @@ const registerHandler = async (req: express.Request, res: express.Response) => {
   if (!email || !password) {
     return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
   }
+  if (typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'A senha precisa ter pelo menos 8 caracteres.' });
+  }
 
   try {
     const existingUser = await prisma.user.findUnique({

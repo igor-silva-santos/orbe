@@ -5,17 +5,7 @@ import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { realApi } from '@/data/realApi';
-import { establishBrowserSession } from '@/lib/session';
-
-/**
- * Só aceita um path relativo de verdade — bloqueia `//evil.com` e `/\evil.com`
- * (URLs protocol-relative que `startsWith('/')` sozinho não pega).
- */
-function safeRedirectPath(value: string | null): string {
-  if (!value) return '/';
-  if (!value.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return '/';
-  return value;
-}
+import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
 
 export default function LoginPage() {
   const { login } = useAppStore();

@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { translateRole, sanitizeTranslatedText } from '@/lib/media-helpers';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import CommentSection from './CommentSection';
 
 interface AnimeModalContentProps {
   anime: Anime;
@@ -256,6 +257,8 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
           </div>
         </section>
       )}
+
+      <CommentSection midiaId={anime.id} tipoMidia="anime" />
     </div>
   );
 };

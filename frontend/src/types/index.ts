@@ -227,14 +227,18 @@ export interface UserInteraction {
 // Interface para comentários
 export interface Comentario {
   id: number;
+  usuario_id: number;
+  midia_id: number;
+  tipo_midia: TipoMidia;
   usuario: {
     id: number;
-    nome: string;
-    avatar_url?: string;
+    nome: string | null;
+    avatar: string | null;
   };
   texto: string;
+  spoiler: boolean;
   data_criacao: string;
-  respostas?: Comentario[];
+  data_atualizacao: string;
 }
 
 // Interface para notificações

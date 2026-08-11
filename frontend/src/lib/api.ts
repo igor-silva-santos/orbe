@@ -28,6 +28,12 @@ export const removeToken = (): void => {
   }
 };
 
+// Extrai a mensagem de erro do corpo da resposta (`{ error: '...' }`), com fallback genérico
+const throwHttpError = async (response: Response): Promise<never> => {
+  const body = await response.json().catch(() => null);
+  throw new Error(body?.error || `HTTP error! status: ${response.status}`);
+};
+
 // Cliente HTTP centralizado
 export const apiClient = {
   get: async (endpoint: string, params?: Record<string, string | number | boolean | undefined | null>) => {
@@ -69,7 +75,7 @@ export const apiClient = {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      await throwHttpError(response);
     }
 
     return response.json();
@@ -100,7 +106,7 @@ export const apiClient = {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      await throwHttpError(response);
     }
 
     return response.json();
@@ -132,7 +138,7 @@ export const apiClient = {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      await throwHttpError(response);
     }
 
     return response.json();
@@ -156,7 +162,7 @@ export const apiClient = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      await throwHttpError(response);
     }
 
     return response.json();
@@ -178,7 +184,7 @@ export const apiClient = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      await throwHttpError(response);
     }
 
     if (response.status === 204) {
