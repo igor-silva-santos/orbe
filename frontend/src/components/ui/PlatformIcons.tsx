@@ -199,7 +199,10 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
 
   if (logoPath) {
     const src = logoPath.startsWith('http') ? logoPath : `${TMDB_LOGO_BASE}${logoPath}`;
-    return wrapWithTile(<Image src={src} {...iconProps} />);
+    const logoClass = isCircle
+      ? `${className} object-cover rounded-full shrink-0`
+      : `${className} object-contain shrink-0`;
+    return wrapWithTile(<Image src={src} {...iconProps} className={logoClass} />);
   }
 
   switch (normalizePlatformKey(platform)) {

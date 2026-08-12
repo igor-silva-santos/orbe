@@ -13,8 +13,9 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
   if (!filme) return null;
 
   const director = filme.crew?.find(member => member.job === 'Director');
-  const voteAverage = (filme as any).voteAverage as number | null | undefined;
-  const tagline = (filme as any).tagline as string | null | undefined;
+  const voteAverage = filme.voteAverage ?? (filme as { voteAverage?: number }).voteAverage;
+  const popularity = filme.popularity;
+  const tagline = (filme as { tagline?: string | null }).tagline;
   const filmeTitle = resolveFilmeTitle(filme);
 
   return (
@@ -45,6 +46,12 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
           <div>
             <span className="font-bold text-yellow-500 dark:text-blue-400">Nota: </span>
             {voteAverage.toFixed(1)} / 10
+          </div>
+        )}
+        {popularity != null && popularity > 0 && (
+          <div>
+            <span className="font-bold text-yellow-500 dark:text-blue-400">Popularidade: </span>
+            {popularity.toFixed(1)}
           </div>
         )}
         {filme.status && (

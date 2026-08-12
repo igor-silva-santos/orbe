@@ -18,6 +18,9 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
     : NOT_INFORMED;
 
   const rating = jogo.avaliacao ? (jogo.avaliacao / 10).toFixed(1) : null;
+  const hypes = jogo.hypes;
+  const follows = jogo.follows;
+  const steamPlayers = jogo.steam_player_count;
 
   return (
     <div className="flex-1 space-y-4">
@@ -38,6 +41,24 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
           <div>
             <span className={`font-semibold ${labelColor} mr-2`}>Nota:</span>
             <span className="text-muted-foreground">{rating} / 10</span>
+          </div>
+        )}
+        {hypes != null && hypes > 0 && (
+          <div>
+            <span className={`font-semibold ${labelColor} mr-2`}>Hypes (IGDB):</span>
+            <span className="text-muted-foreground">{hypes.toLocaleString('pt-BR')}</span>
+          </div>
+        )}
+        {follows != null && follows > 0 && (
+          <div>
+            <span className={`font-semibold ${labelColor} mr-2`}>Seguidores (IGDB):</span>
+            <span className="text-muted-foreground">{follows.toLocaleString('pt-BR')}</span>
+          </div>
+        )}
+        {steamPlayers != null && steamPlayers > 0 && (
+          <div>
+            <span className={`font-semibold ${labelColor} mr-2`}>Jogadores na Steam:</span>
+            <span className="text-muted-foreground">{steamPlayers.toLocaleString('pt-BR')}</span>
           </div>
         )}
         {jogo.desenvolvedores && jogo.desenvolvedores.length > 0 ? (

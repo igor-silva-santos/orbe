@@ -38,6 +38,10 @@ model Filme {
   collectionId    Int?
   ingresso_link   String?
   em_prevenda     Boolean?  @default(false)
+  /** Página no ingresso.com não existe — não tentar mais link nem pré-venda */
+  ingresso_sem_pagina Boolean @default(false)
+  /** Pré-venda confirmada — não reconsultar status de pré-venda */
+  prevenda_confirmada Boolean @default(false)
   ultima_verificacao_ingresso DateTime?
   releaseType                 String?
   tem_sessoes                 Boolean?

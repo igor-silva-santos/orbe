@@ -82,6 +82,9 @@ function mapTmdbMovieToDetails(
     posterPath: movie.poster_path ?? null,
     backdropPath: movie.backdrop_path ?? null,
     status: movie.status ?? 'Unknown',
+    popularity: movie.popularity ?? null,
+    voteAverage: movie.vote_average ?? null,
+    voteCount: movie.vote_count ?? null,
     em_prevenda: dbExtras?.em_prevenda ?? false,
     ingresso_link: dbExtras?.ingresso_link ?? null,
     tem_sessoes: dbExtras?.tem_sessoes ?? false,
@@ -341,7 +344,7 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
       }),
       prisma.filme.findUnique({
         where: { tmdbId },
-        select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true, premiacoes: true },
+        select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true, premiacoes: true, popularity: true },
       }),
       fetchTmdbPtOverview('movie', tmdbId),
     ]);
@@ -354,6 +357,7 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
     }
     return {
       ...details,
+      popularity: dbFilme?.popularity ?? details.popularity ?? null,
       premiacoes: parsePremiacoes(dbFilme?.premiacoes),
     };
   } catch (error: any) {
@@ -430,7 +434,7 @@ export async function fetchJogoDetailsLive(igdbId: number) {
 
   try {
     const query = `
-      fields name, summary, cover.url, first_release_date, rating,
+      fields name, summary, cover.url, first_release_date, rating, hypes, follows,
              genres.name, genres.id,
              involved_companies.company.name, involved_companies.company.id, involved_companies.developer, involved_companies.publisher,
              platforms.name, platforms.id,
@@ -458,6 +462,8 @@ export async function fetchJogoDetailsLive(igdbId: number) {
           steamDiscountPercent: true,
           pcRequirements: true,
           steamSyncedAt: true,
+          hypes: true,
+          follows: true,
           websites: { select: { url: true, category: true } },
         },
       }),
@@ -515,6 +521,8 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       steam_player_count: dbJogo?.steamPlayerCount ?? translated.steam_player_count ?? null,
       steam_price_cents: dbJogo?.steamPriceCents ?? translated.steam_price_cents ?? null,
       steam_discount_percent: dbJogo?.steamDiscountPercent ?? translated.steam_discount_percent ?? null,
+      hypes: dbJogo?.hypes ?? game.hypes ?? null,
+      follows: dbJogo?.follows ?? game.follows ?? null,
       premiacoes: parsePremiacoes(dbJogo?.premiacoes),
     };
   } catch (error) {
