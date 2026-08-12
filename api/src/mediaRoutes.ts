@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from './clients';
+import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
 import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText, withPortugueseTranslation, matchesPremiacaoFilters } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
@@ -419,6 +419,63 @@ router.get('/filmes/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CA
   } catch (error) {
     logger.error(`Erro ao buscar detalhes do filme: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes do filme.' });
+  }
+});
+
+// Filmografia de uma pessoa (elenco/equipe) — usada pela página /pessoa/[id]
+router.get('/pessoas/:id/creditos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const personId = parsePositiveIntId(req.params.id);
+  if (!personId) {
+    return res.status(400).json({ error: 'ID de pessoa inválido.' });
+  }
+
+  try {
+    const [person, credits] = await Promise.all([
+      tmdb.personInfo({ id: personId, language: 'pt-BR' }),
+      tmdb.personCombinedCredits({ id: personId, language: 'pt-BR' }),
+    ]);
+
+    if (!person?.id) {
+      return res.status(404).json({ error: 'Pessoa não encontrada.' });
+    }
+
+    const seen = new Set<string>();
+    const filmography = (credits?.cast ?? [])
+      .filter((c: any) => c.media_type === 'movie' || c.media_type === 'tv')
+      .filter((c: any) => {
+        const key = `${c.media_type}-${c.id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((c: any) => ({
+        id: c.id,
+        mediaType: c.media_type === 'movie' ? 'filme' : 'serie',
+        title: c.title || c.name || 'Sem título',
+        character: c.character || null,
+        posterPath: c.poster_path || null,
+        releaseDate: c.release_date || c.first_air_date || null,
+      }))
+      .sort((a, b) => {
+        const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+        const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 60);
+
+    res.json({
+      id: person.id,
+      name: person.name,
+      profilePath: person.profile_path ?? null,
+      biography: person.biography || null,
+      filmography,
+    });
+  } catch (error: any) {
+    if (error?.status === 404 || error?.response?.status === 404) {
+      return res.status(404).json({ error: 'Pessoa não encontrada.' });
+    }
+    logger.error(`Erro ao buscar créditos da pessoa ${personId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar créditos da pessoa.' });
   }
 });
 

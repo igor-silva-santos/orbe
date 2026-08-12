@@ -285,20 +285,16 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   </div>
                 )}
                 {(type === 'jogo' ? platforms : providers).length > 0 && (
-                  <div
-                    className={`flex items-center gap-2 overflow-x-auto overflow-y-hidden shrink-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-                      type === 'jogo' ? 'h-[40px] min-h-[40px]' : 'h-[28px] min-h-[28px]'
-                    }`}
-                  >
+                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                     {(type === 'jogo' ? platforms : providers).map((p) => (
                       <PlatformIcon
                         key={p.name}
                         platform={p.icon}
                         logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                        size={type === 'jogo' ? 28 : 18}
+                        size={type === 'jogo' ? 24 : 18}
                         iconOnly
-                        variant="tile"
-                        className={type === 'jogo' ? 'h-7 w-7' : 'h-[18px] w-[18px]'}
+                        variant={type === 'jogo' ? 'circle' : 'tile'}
+                        className={type === 'jogo' ? 'h-6 w-6' : 'h-[18px] w-[18px]'}
                         title={p.name}
                       />
                     ))}

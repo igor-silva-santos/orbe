@@ -43,7 +43,11 @@ interface AppState {
   
   // Estado de carregamento
   isLoading: boolean;
-  
+
+  // Rolagem rápida dos carrosséis
+  fastScrollEnabled: boolean;
+  toggleFastScroll: () => void;
+
   // Ações do usuário
   setUser: (user: User | null) => void;
   login: (user: User) => void;
@@ -109,6 +113,8 @@ export const useAppStore = create<AppState>()(
       },
       currentDetailModal: null,
       isLoading: false,
+      fastScrollEnabled: false,
+      toggleFastScroll: () => set((state) => ({ fastScrollEnabled: !state.fastScrollEnabled })),
 
       // Ações do usuário
       setUser: (user) => set({ 
@@ -282,6 +288,7 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: state.isAuthenticated,
         theme: state.theme,
         userInteractions: state.userInteractions,
+        fastScrollEnabled: state.fastScrollEnabled,
       }),
     }
   )

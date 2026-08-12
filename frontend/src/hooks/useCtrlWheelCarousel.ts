@@ -4,6 +4,8 @@ import { useEffect, type RefObject } from 'react';
 import type { EmblaCarouselType } from 'embla-carousel';
 
 const HORIZONTAL_THRESHOLD = 48;
+/** Limiar reduzido com a rolagem rápida ativada — menos delta acumulado necessário por slide, gesto mais fluido. */
+const HORIZONTAL_THRESHOLD_FAST = 16;
 
 /**
  * Scroll horizontal no carrossel: touchpad (deltaX acumulado) ou Ctrl/Cmd + scroll vertical.
@@ -11,13 +13,15 @@ const HORIZONTAL_THRESHOLD = 48;
  */
 export function useCtrlWheelCarousel(
   emblaApi: EmblaCarouselType | undefined,
-  viewportRef: RefObject<HTMLElement | null>
+  viewportRef: RefObject<HTMLElement | null>,
+  fast = false
 ) {
   useEffect(() => {
     const node = viewportRef.current;
     if (!node || !emblaApi) return;
 
     let accumulatedX = 0;
+    const threshold = fast ? HORIZONTAL_THRESHOLD_FAST : HORIZONTAL_THRESHOLD;
 
     const onWheel = (e: WheelEvent) => {
       const absX = Math.abs(e.deltaX);
@@ -37,7 +41,7 @@ export function useCtrlWheelCarousel(
       e.preventDefault();
       accumulatedX += e.deltaX;
 
-      if (Math.abs(accumulatedX) < HORIZONTAL_THRESHOLD) return;
+      if (Math.abs(accumulatedX) < threshold) return;
 
       if (accumulatedX > 0) emblaApi.scrollNext();
       else emblaApi.scrollPrev();
@@ -46,5 +50,5 @@ export function useCtrlWheelCarousel(
 
     node.addEventListener('wheel', onWheel, { passive: false });
     return () => node.removeEventListener('wheel', onWheel);
-  }, [emblaApi, viewportRef]);
+  }, [emblaApi, viewportRef, fast]);
 }

@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
-import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter } from 'lucide-react';
-import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
+import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap } from 'lucide-react';
+import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
@@ -63,6 +63,8 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
+    const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
+    const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [fetchedAnimes, setFetchedAnimes] = useState<Anime[]>(initialData);
   const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([]);
   
@@ -99,7 +101,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const fetchedAnimesRef = useRef<Anime[]>(initialData);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const [emblaRef, emblaApi] = useOrbeCarousel();
+  const [emblaRef, emblaApi] = useOrbeCarousel({
+    duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
+  });
 
   const setViewportRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -110,7 +114,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   );
 
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
 
   useEffect(() => {
     carouselItemsRef.current = carouselItems;
@@ -213,7 +217,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
           setCurrentTitle(`Temporada de ${SEASON_NAMES[season]} ${year}`);
       }
 
-      const buffer = 15;
+      // Com rolagem rápida, o buffer precisa ser maior — o 'settle' de um arraste rápido
+      // pode chegar perto da borda antes da temporada seguinte ter tido tempo de carregar.
+      const buffer = fastScrollEnabled ? 25 : 15;
       if (items.length > 0 && selectedIndex >= items.length - buffer) {
         const lastAnime = animes[animes.length - 1];
         if (!lastAnime || !lastAnime.startDate) return;
@@ -246,6 +252,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     };
 
     emblaApi.on('settle', onSettle);
+    // Também dispara no 'select' (durante o arraste, antes de soltar) — em rolagens
+    // rápidas o 'settle' sozinho chega tarde demais para a temporada seguinte carregar a tempo.
+    emblaApi.on('select', onSettle);
 
     const selectedIndex = emblaApi.selectedScrollSnap();
     const selectedItem = carouselItems[selectedIndex];
@@ -256,8 +265,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         setCurrentTitle(`Temporada de ${SEASON_NAMES[season]} ${year}`);
     }
 
-    return () => { emblaApi.off('settle', onSettle); };
-  }, [emblaApi, fetchSeasonData]);
+    return () => {
+      emblaApi.off('settle', onSettle);
+      emblaApi.off('select', onSettle);
+    };
+  }, [emblaApi, fetchSeasonData, fastScrollEnabled]);
 
   useEffect(() => {
     setCurrentTitle(`Temporada de ${SEASON_NAMES[initialSeason]} ${initialYear}`);
@@ -394,6 +406,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         </h3>
         <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleFastScroll}
+                  className={`p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors ${fastScrollEnabled ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+                  title={fastScrollEnabled ? 'Desativar rolagem rápida' : 'Ativar rolagem rápida'}
+                  aria-pressed={fastScrollEnabled}
+                >
+                  <Zap className="h-4 w-4" />
+                </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button

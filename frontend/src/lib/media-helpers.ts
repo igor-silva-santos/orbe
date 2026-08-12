@@ -376,6 +376,50 @@ const animeGenreDictionary: Record<string, string> = {
 export const translateAnimeGenre = (genre: string): string =>
   animeGenreDictionary[genre] || genre;
 
+/** Tipos de relação da AniList (seção "Relacionados" do modal de anime) */
+const animeRelationTypeDictionary: Record<string, string> = {
+  ADAPTATION: 'Adaptação',
+  PREQUEL: 'Prequela',
+  SEQUEL: 'Sequência',
+  PARENT: 'Obra Principal',
+  SIDE_STORY: 'História Paralela',
+  CHARACTER: 'Personagem',
+  SUMMARY: 'Resumo',
+  ALTERNATIVE: 'Versão Alternativa',
+  SPIN_OFF: 'Spin-off',
+  OTHER: 'Outro',
+  SOURCE: 'Obra Original',
+  COMPILATION: 'Compilação',
+  CONTAINS: 'Contém',
+};
+
+export const translateAnimeRelationType = (relationType?: string | null): string =>
+  (relationType && animeRelationTypeDictionary[relationType]) || relationType || 'Relacionado';
+
+/** Tipos de ranking da AniList (seção "Rankings" do modal de anime) */
+const animeRankingTypeDictionary: Record<string, string> = {
+  RATED: 'Avaliação',
+  POPULAR: 'Popularidade',
+};
+
+export const translateAnimeRankingType = (rankingType?: string | null): string =>
+  (rankingType && animeRankingTypeDictionary[rankingType]) || rankingType || '';
+
+/** Frases livres da AniList em `rankings[].context` (ex.: "highest rated all time") */
+const animeRankingContextDictionary: [RegExp, string][] = [
+  [/highest rated/gi, 'mais bem avaliado'],
+  [/most popular/gi, 'mais popular'],
+  [/all time/gi, 'de todos os tempos'],
+];
+
+export const translateAnimeRankingContext = (context?: string | null): string => {
+  if (!context) return '';
+  return animeRankingContextDictionary.reduce(
+    (text, [pattern, replacement]) => text.replace(pattern, replacement),
+    context,
+  );
+};
+
 const translationErrorPattern = /MYMEMORY\s+WARNING|YOU\s+USED\s+ALL\s+AVAILABLE\s+FREE|TRANSLATED\.NET/i;
 
 /** Remove tags HTML e normaliza quebras de linha */

@@ -4,9 +4,9 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Zap } from 'lucide-react';
 import { parseISO } from 'date-fns';
-import { useOrbeCarousel } from '@/hooks/useOrbeCarousel';
+import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import {
   addMonths,
@@ -48,6 +48,8 @@ const EMPTY_MONTH_NAV_LIMIT = 8;
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
+  const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -78,7 +80,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const initialPrefetchDone = useRef(false);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const [emblaRef, emblaApi] = useOrbeCarousel({ startIndex });
+  const [emblaRef, emblaApi] = useOrbeCarousel({
+    startIndex,
+    duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
+  });
+  /** Com rolagem rápida, pré-carrega mais meses e com mais antecedência para o carrossel não "estourar" o buffer */
+  const monthEdgeBuffer = fastScrollEnabled ? MONTH_EDGE_BUFFER * 2 : MONTH_EDGE_BUFFER;
+  const monthPrefetchDepth = fastScrollEnabled ? MONTH_PREFETCH_DEPTH + 1 : MONTH_PREFETCH_DEPTH;
 
   const setViewportRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -116,7 +124,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   }, [mediaItems]);
 
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
 
   const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
     const item = items[index];
@@ -165,13 +173,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   );
 
   const loadMonthsInDirection = useCallback(
-    async (year: number, month: number, direction: 1 | -1, depth = MONTH_PREFETCH_DEPTH) => {
+    async (year: number, month: number, direction: 1 | -1, depth = monthPrefetchDepth) => {
       for (let step = 1; step <= depth; step++) {
         const target = addMonths(year, month, step * direction);
         await loadMonth(target.year, target.month);
       }
     },
-    [loadMonth]
+    [loadMonth, monthPrefetchDepth]
   );
 
   const prefetchAdjacentMonthsForIndex = useCallback(
@@ -189,15 +197,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         0
       );
 
-      if (selectedIndex >= bounds.end - MONTH_EDGE_BUFFER) {
+      if (selectedIndex >= bounds.end - monthEdgeBuffer) {
         await loadMonthsInDirection(year, month, 1);
       }
 
-      if (selectedIndex <= bounds.start + MONTH_EDGE_BUFFER) {
+      if (selectedIndex <= bounds.start + monthEdgeBuffer) {
         await loadMonthsInDirection(year, month, -1);
       }
     },
-    [loadMonthsInDirection]
+    [loadMonthsInDirection, monthEdgeBuffer]
   );
 
   useEffect(() => {
@@ -219,6 +227,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
       updateTitleFromIndex(selectedIndex, items);
+      // Dispara o prefetch já durante o arraste (não só ao soltar) — em rolagens rápidas
+      // o 'settle' chega tarde demais e o mês seguinte ainda não teve tempo de carregar.
+      void prefetchAdjacentMonthsForIndex(selectedIndex, items);
     };
 
     const onSettle = () => {
@@ -332,6 +343,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleFastScroll}
+              className={`${CONTROL_BTN} ${fastScrollEnabled ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+              title={fastScrollEnabled ? 'Desativar rolagem rápida' : 'Ativar rolagem rápida'}
+              aria-pressed={fastScrollEnabled}
+            >
+              <Zap className="h-4 w-4" />
+            </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={CONTROL_BTN} disabled={isFetching} aria-disabled={isFetching}>
