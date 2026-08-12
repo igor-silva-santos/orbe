@@ -40,7 +40,15 @@ const isProduction = process.env.NODE_ENV === 'production';
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
-const HOMEPAGE_ITEM_LIMIT = 200;
+/**
+ * Cap por tipo na homepage. O carrossel do cliente já pré-carrega os meses
+ * adjacentes automaticamente no mount (MediaCarousel/AnimeCarousel, via
+ * rotas by-month) e só precisa de um punhado de itens antes disso terminar —
+ * um valor bem menor que o antigo (200) já cobre isso sem inflar o payload
+ * inicial do /homepage à toa (filmes é o único tipo que de fato batia no
+ * limite antigo; séries/animes/jogos já retornavam bem menos que isso).
+ */
+const HOMEPAGE_ITEM_LIMIT = 80;
 const DEFAULT_LIST_LIMIT = 48;
 const MAX_LIST_LIMIT = 200;
 

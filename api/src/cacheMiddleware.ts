@@ -6,6 +6,18 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
   // Usar a URL original como chave de cache
   const key = `cache:${req.originalUrl}`;
 
+  /**
+   * Sem isso, o cache do lado do servidor (Redis) existe mas nunca chega como sinal HTTP
+   * pro navegador nem pra CDN da Vercel — toda requisição, mesmo idêntica e recém-servida,
+   * ainda baixa o payload inteiro de novo. `s-maxage` habilita cache na CDN/edge;
+   * `max-age` menor no navegador evita ficar `duration` inteiro sem ver uma atualização
+   * manual; `stale-while-revalidate` deixa servir uma resposta ligeiramente velha mesmo
+   * assim, revalidando em segundo plano. Todas as rotas que usam este middleware são
+   * GETs públicos e não-personalizados (catálogo de mídia), então `public` é seguro mesmo
+   * quando o cliente manda `Authorization` (usuário logado vê o mesmo conteúdo).
+   */
+  const cacheControlHeader = `public, max-age=60, s-maxage=${duration}, stale-while-revalidate=${duration}`;
+
   try {
     const redisClient = getRedisClient();
     if (!redisClient) {
@@ -19,6 +31,7 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
       logger.info(`Cache HIT para a chave: ${key}`);
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('X-Cache', 'HIT');
+      res.setHeader('Cache-Control', cacheControlHeader);
       return res.send(cachedResponse);
     }
 
@@ -32,6 +45,7 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
         // Só cachear respostas de sucesso — um 5xx transitório não deve ficar
         // "congelado" e ser servido como HIT pra todo mundo até o TTL expirar.
         if (res.statusCode >= 200 && res.statusCode < 300) {
+          res.setHeader('Cache-Control', cacheControlHeader);
           const client = getRedisClient();
           if (client) {
             client.set(key, body, 'EX', duration);
