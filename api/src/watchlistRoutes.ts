@@ -48,7 +48,6 @@ router.post('/watchlist/sync', authMiddleware, async (req: AuthRequest, res: Res
   try {
     logger.info(`Sincronizando ${items.length} itens para o usuário ${userId}`);
 
-    // Usamos uma transação para garantir consistência
     const operations = items.map((item: any) => {
       const data = {
         userId,
@@ -77,7 +76,13 @@ router.post('/watchlist/sync', authMiddleware, async (req: AuthRequest, res: Res
       });
     });
 
-    await Promise.all(operations);
+    // Transação de verdade (Promise.all só disparava tudo em paralelo, sem atomicidade
+    // nem controle de concorrência) -- em lotes de 50 pra não segurar uma transação
+    // gigante contra o pool do Supabase free quando o sync chega perto do limite de 500.
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < operations.length; i += BATCH_SIZE) {
+      await prisma.$transaction(operations.slice(i, i + BATCH_SIZE));
+    }
 
     res.json({ success: true, count: items.length });
   } catch (error) {
