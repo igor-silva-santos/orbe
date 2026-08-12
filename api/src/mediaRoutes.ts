@@ -3,6 +3,7 @@ import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
 import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
+import { fetchSteamAppDetails } from './steamClient';
 import {
   filmeQualityFilter,
   filmeCarouselQualityFilter,
@@ -1124,6 +1125,67 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   } catch (error) {
     logger.error(`Erro ao buscar jogos: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos.' });
+  }
+});
+
+// Preço Steam ao vivo (cards/modal quando o banco ainda não tem o valor)
+router.get('/jogos/:id/steam-price', cacheMiddleware(60 * 15), async (req, res) => {
+  const igdbId = parsePositiveIntId(req.params.id);
+  if (!igdbId) {
+    return res.status(400).json({ error: 'ID de jogo inválido.' });
+  }
+
+  try {
+    const jogo = await prisma.jogo.findUnique({
+      where: { igdbId },
+      select: {
+        id: true,
+        steamAppId: true,
+        steamPriceCents: true,
+        steamDiscountPercent: true,
+        steamSyncedAt: true,
+      },
+    });
+
+    if (!jogo?.steamAppId) {
+      return res.json({ steam_price_cents: null, steam_discount_percent: null });
+    }
+
+    const stale =
+      !jogo.steamSyncedAt ||
+      Date.now() - jogo.steamSyncedAt.getTime() > 6 * 60 * 60 * 1000;
+
+    if (jogo.steamPriceCents != null && !stale) {
+      return res.json({
+        steam_price_cents: jogo.steamPriceCents,
+        steam_discount_percent: jogo.steamDiscountPercent,
+      });
+    }
+
+    const steamDetails = await fetchSteamAppDetails(jogo.steamAppId);
+    if (!steamDetails || steamDetails.priceCents == null) {
+      return res.json({
+        steam_price_cents: jogo.steamPriceCents,
+        steam_discount_percent: jogo.steamDiscountPercent,
+      });
+    }
+
+    await prisma.jogo.update({
+      where: { id: jogo.id },
+      data: {
+        steamPriceCents: steamDetails.priceCents,
+        steamDiscountPercent: steamDetails.discountPercent ?? null,
+        steamSyncedAt: new Date(),
+      },
+    });
+
+    res.json({
+      steam_price_cents: steamDetails.priceCents,
+      steam_discount_percent: steamDetails.discountPercent ?? null,
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar preço Steam do jogo ${igdbId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar preço na Steam.' });
   }
 });
 

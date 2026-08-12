@@ -572,6 +572,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   em_prevenda: filme.em_prevenda ?? false,
   em_cartaz: filme.emCartaz ?? false,
   tem_sessoes: filme.tem_sessoes ?? false,
+  ingresso_link: filme.ingresso_link ?? null,
   estreia_cinema: filme.estreia_cinema ?? false,
   estreia_streaming: filme.estreia_streaming ?? false,
 });
