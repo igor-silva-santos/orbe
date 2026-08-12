@@ -339,7 +339,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, mes, status, plataforma } = req.query;
+  const { filtro, genero, ano, mes, status, plataforma, disponibilidade } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
     const allConditions: Prisma.FilmeWhereInput[] = [];
@@ -386,6 +386,15 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       allConditions.push({ releaseDate: { lte: now } });
     } else if (filtro === 'futuros') {
       allConditions.push({ releaseDate: { gte: now } });
+    }
+
+    // Sub-filtro de disponibilidade — usado pelo modo "Em Alta" de filmes
+    // (cinema / streaming / ambos). "ambos" ou ausente não restringe nada,
+    // mantendo o comportamento padrão já existente de "populares".
+    if (disponibilidade === 'cinema') {
+      allConditions.push({ emCartaz: true });
+    } else if (disponibilidade === 'streaming') {
+      allConditions.push({ streamingProviders: { some: {} } });
     }
 
     const where: Prisma.FilmeWhereInput = { AND: allConditions };
