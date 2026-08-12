@@ -109,6 +109,8 @@ export interface Filme extends Midia {
   em_prevenda: boolean;
   em_cartaz?: boolean;
   tem_sessoes?: boolean;
+  estreia_cinema?: boolean;
+  estreia_streaming?: boolean;
   popularity?: number | null;
   ultima_verificacao_ingresso?: string;
   videos?: Video[];
@@ -542,6 +544,8 @@ export interface FilmeDetalhes {
   ingresso_link: string | null;
 
   tem_sessoes?: boolean | null;
+  estreia_cinema?: boolean;
+  estreia_streaming?: boolean;
 
   genres: FilmeGenre[];
 

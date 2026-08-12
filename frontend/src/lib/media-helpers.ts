@@ -95,9 +95,10 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
   if (isFilmeCard) {
     const filme = item as Filme;
     const emCinema =
-      Boolean(filme.em_cartaz) ||
-      Boolean(filme.tem_sessoes) ||
-      Boolean(filme.em_prevenda);
+      Boolean(filme.estreia_cinema) &&
+      (Boolean(filme.em_cartaz) ||
+        Boolean(filme.tem_sessoes) ||
+        Boolean(filme.em_prevenda));
     if (emCinema && !seen.has('Nos Cinemas')) {
       providers.unshift({ name: 'Nos Cinemas', icon: 'cinema' });
     }

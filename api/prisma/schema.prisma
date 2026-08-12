@@ -44,6 +44,10 @@ model Filme {
   prevenda_confirmada Boolean @default(false)
   ultima_verificacao_ingresso DateTime?
   releaseType                 String?
+  /** TMDB indica estreia teatral no BR (release_dates type 2|3) */
+  estreia_cinema              Boolean   @default(false)
+  /** TMDB indica disponibilidade digital/streaming no BR */
+  estreia_streaming           Boolean   @default(false)
   tem_sessoes                 Boolean?
   emCartaz                    Boolean?  @default(false)
   emBreve                     Boolean?  @default(false)

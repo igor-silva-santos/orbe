@@ -13,6 +13,7 @@ import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy } from './syncUtils';
+import { buildStreamingProvidersCreate, parseFilmeTmdbDisponibilidade, refreshFilmesWithIncompleteAvailability } from './filmeAvailability';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -341,7 +342,8 @@ async function processMovieBatch(
       }
 
       const flags = sourceFlags.get(id) ?? {};
-      const isCinemaCurated = flags.emCartaz || flags.emBreve;
+      const disponibilidade = parseFilmeTmdbDisponibilidade(movieDetails);
+      const isCinemaCurated = (flags.emCartaz || flags.emBreve) && disponibilidade.estreiaCinema;
 
       if (isConcertOrLiveRecording(movieDetails)) {
         bumpSkip('concert_or_live');
@@ -404,8 +406,11 @@ async function processMovieBatch(
         backdropPath: movieDetails.backdrop_path,
         imdbId: movieDetails.imdb_id,
         adult: movieDetails.adult ?? false,
-        emCartaz: flags.emCartaz ?? false,
-        emBreve: flags.emBreve ?? false,
+        emCartaz: (flags.emCartaz ?? false) && disponibilidade.estreiaCinema,
+        emBreve: (flags.emBreve ?? false) && disponibilidade.estreiaCinema,
+        estreia_cinema: disponibilidade.estreiaCinema,
+        estreia_streaming: disponibilidade.estreiaStreaming,
+        releaseType: disponibilidade.releaseType,
         localizacaoPtBr,
         collection: movieDetails.belongs_to_collection ? {
           connectOrCreate: {
@@ -443,15 +448,7 @@ async function processMovieBatch(
             create: dedupeBy(movieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube'), (video: any) => video.id).map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: dedupeBy(movieDetails['watch/providers']?.results?.BR?.flatrate, (provider: any) => provider.provider_id).map((provider: any) => ({
-                url: movieDetails['watch/providers']?.results?.BR?.link,
-                provider: {
-                    connectOrCreate: {
-                        where: { tmdbId: provider.provider_id },
-                        create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path }
-                    }
-                }
-            }))
+            create: buildStreamingProvidersCreate(movieDetails),
         }
       };
 
@@ -592,6 +589,22 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
   }
 
   logger.info(`Sincronização de filmes concluída para o período de ${startDate} a ${endDate}.`);
+
+  const refreshResult = await refreshFilmesWithIncompleteAvailability(
+    prisma,
+    (tmdbId) =>
+      tmdbApiWithRetry(() =>
+        tmdb.movieInfo({
+          id: tmdbId,
+          language: 'pt-BR',
+          append_to_response: 'watch/providers,release_dates',
+        }),
+      ),
+    { limit: 200 },
+  );
+  logger.info(
+    `Atualização de disponibilidade incompleta: ${refreshResult.updated}/${refreshResult.checked} filmes corrigidos.`,
+  );
 }
 
 const main = async () => {
