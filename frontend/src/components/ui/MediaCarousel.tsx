@@ -54,6 +54,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(initialData.length > 0);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const activeFetchesRef = useRef(0);
@@ -258,6 +259,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       await loadMonth(year, month);
       await loadMonthsInDirection(year, month, -1);
       await loadMonthsInDirection(year, month, 1);
+      setHasCompletedInitialLoad(true);
     })();
   }, [loadMonth, loadMonthsInDirection]);
 
@@ -402,7 +404,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             ? 'Em Alta'
             : isFetching
               ? 'Carregando conteúdo...'
-              : currentTitle || 'Carregando...'}
+              : filteredItems.length === 0
+                ? hasCompletedInitialLoad
+                  ? 'Nenhum conteúdo encontrado'
+                  : 'Carregando...'
+                : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
@@ -472,11 +478,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         >
           <div className="flex">
             {filteredItems.length === 0
-              ? Array.from({ length: 10 }).map((_, index) => (
-                  <div key={index} className={SLIDE_CLASS}>
-                    <MidiaCardSkeleton />
-                  </div>
-                ))
+              ? hasCompletedInitialLoad
+                ? (
+                    <div className="w-full py-10 text-center text-muted-foreground">
+                      Nenhum conteúdo encontrado{selectedGenre ? ` para o gênero "${selectedGenre}"` : ''}.
+                    </div>
+                  )
+                : Array.from({ length: 10 }).map((_, index) => (
+                    <div key={index} className={SLIDE_CLASS}>
+                      <MidiaCardSkeleton />
+                    </div>
+                  ))
               : filteredItems.map((item, index) => {
                   const isRendered = index >= virtualRange.start && index <= virtualRange.end;
                   const isPriority = Math.abs(index - selectedSnap) <= 4;
@@ -491,7 +503,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                           onInteraction={handleInteraction}
                         />
                       ) : (
-                        <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-muted" aria-hidden />
+                        <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
                       )}
                     </div>
                   );
