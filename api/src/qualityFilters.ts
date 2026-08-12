@@ -59,6 +59,9 @@ export const RELEVANT_ANIME_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] as cons
 
 export const SYNC_MIN_GAME_RATING = 50;
 export const SYNC_MIN_GAME_RATING_COUNT = 3;
+/** Antecipação no IGDB — jogos futuros costumam ter rating 0 mas hypes > 0 */
+export const SYNC_MIN_GAME_HYPES = 3;
+export const SYNC_MIN_GAME_FOLLOWS = 10;
 
 // ── Gêneros obscuros (TMDB) ──────────────────────────────────────────────────
 
@@ -342,6 +345,8 @@ type AnimeLike = {
 type JogoLike = {
   rating?: number | null;
   ratingCount?: number | null;
+  hypes?: number | null;
+  follows?: number | null;
 };
 
 function hasValidPoster(posterPath?: string | null): boolean {
@@ -587,8 +592,10 @@ export function isJogoRelevantForDisplay(jogo: JogoLike): boolean {
 }
 
 export function isJogoRelevantForSync(jogo: JogoLike): boolean {
-  return (
-    (jogo.rating ?? 0) >= SYNC_MIN_GAME_RATING ||
-    (jogo.ratingCount ?? 0) >= SYNC_MIN_GAME_RATING_COUNT
-  );
+  if ((jogo.rating ?? 0) >= SYNC_MIN_GAME_RATING) return true;
+  if ((jogo.ratingCount ?? 0) >= SYNC_MIN_GAME_RATING_COUNT) return true;
+  // Lançamentos futuros raramente têm rating; hypes/follows indicam relevância.
+  if ((jogo.hypes ?? 0) >= SYNC_MIN_GAME_HYPES) return true;
+  if ((jogo.follows ?? 0) >= SYNC_MIN_GAME_FOLLOWS) return true;
+  return false;
 }
