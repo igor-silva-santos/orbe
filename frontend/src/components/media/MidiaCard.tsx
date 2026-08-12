@@ -16,13 +16,14 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
 import { useSharedTick } from '@/hooks/useSharedTick';
-import {
-  getStreamingProviders,
+import { getStreamingProviders,
   getGamePlatforms,
   formatRating,
   formatNextEpisodeCard,
   hasSteamPriceDisplay,
+  hasSteamAppId,
 } from '@/lib/media-helpers';
+import { PLATFORM_ICON_SIZE_CARD } from '@/lib/platform-icon-sizes';
 import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
@@ -150,7 +151,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const isAdultContent = (midia as any).isAdult === true;
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
-  const showSteamPrice = type === 'jogo' && hasSteamPriceDisplay(midia);
+  const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
 
   const formatReleaseDate = () => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
@@ -325,7 +326,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       key={p.name}
                       platform={p.icon}
                       logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                      size={24}
+                      size={PLATFORM_ICON_SIZE_CARD}
                       iconOnly
                       variant="circle"
                       className="h-6 w-6"

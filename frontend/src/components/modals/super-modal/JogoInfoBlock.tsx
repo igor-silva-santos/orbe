@@ -2,7 +2,8 @@
 
 import { Jogo } from '@/types'; // Assuming this type
 import { useTheme } from '@/hooks/useTheme';
-import { NOT_INFORMED, hasSteamPriceDisplay } from '@/lib/media-helpers';
+import { NOT_INFORMED, hasSteamAppId, hasSteamPriceDisplay } from '@/lib/media-helpers';
+import { formatIgdbHypesHint, formatIgdbHypesLabel } from '@/lib/engagement-labels';
 import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 
 interface JogoInfoBlockProps {
@@ -26,7 +27,7 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
     <div className="flex-1 space-y-4">
       <h1 className="text-3xl md:text-4xl font-bold text-foreground">{jogo.titulo_curado || jogo.titulo_api}</h1>
 
-      {hasSteamPriceDisplay(jogo) && (
+      {(hasSteamPriceDisplay(jogo) || hasSteamAppId(jogo)) && (
         <div className="pt-1">
           <SteamPriceLabel item={jogo} variant="modal" />
         </div>
@@ -44,9 +45,9 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
           </div>
         )}
         {hypes != null && hypes > 0 && (
-          <div>
-            <span className={`font-semibold ${labelColor} mr-2`}>Hypes (IGDB):</span>
-            <span className="text-muted-foreground">{hypes.toLocaleString('pt-BR')}</span>
+          <div title={formatIgdbHypesHint()}>
+            <span className={`font-semibold ${labelColor} mr-2`}>Interesse (IGDB):</span>
+            <span className="text-muted-foreground">{formatIgdbHypesLabel(hypes)}</span>
           </div>
         )}
         {follows != null && follows > 0 && (

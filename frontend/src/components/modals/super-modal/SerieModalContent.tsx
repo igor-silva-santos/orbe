@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
+import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -70,7 +71,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.provider.name} size={32} className="h-8 w-8" variant="circle" />
+                <PlatformIcon platform={p.provider.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
                 <span>{p.provider.name}</span>
               </a>
             ))}
@@ -82,7 +83,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.nome} size={32} className="h-8 w-8" variant="circle" />
+                <PlatformIcon platform={p.nome} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
                 <span>{p.nome}</span>
               </a>
             ))}

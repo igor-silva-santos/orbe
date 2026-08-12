@@ -1,6 +1,7 @@
 'use client';
 import { FilmeDetalhes } from '@/types';
 import { NOT_INFORMED, resolveFilmeTitle } from '@/lib/media-helpers';
+import { formatTmdbPopularityHint, formatTmdbPopularityLabel } from '@/lib/engagement-labels';
 
 const formatRuntime = (minutes: number | null | undefined) => {
   if (!minutes) return NOT_INFORMED;
@@ -49,9 +50,9 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
           </div>
         )}
         {popularity != null && popularity > 0 && (
-          <div>
-            <span className="font-bold text-yellow-500 dark:text-blue-400">Popularidade: </span>
-            {popularity.toFixed(1)}
+          <div title={formatTmdbPopularityHint()}>
+            <span className="font-bold text-yellow-500 dark:text-blue-400">Interesse: </span>
+            {formatTmdbPopularityLabel(popularity)}
           </div>
         )}
         {filme.status && (

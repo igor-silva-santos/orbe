@@ -95,12 +95,19 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
   if (isFilmeCard) {
     const filme = item as Filme;
     const emCinema =
-      Boolean(filme.estreia_cinema) &&
-      (Boolean(filme.em_cartaz) ||
-        Boolean(filme.tem_sessoes) ||
-        Boolean(filme.em_prevenda));
+      Boolean(filme.estreia_cinema) ||
+      Boolean(filme.em_cartaz) ||
+      Boolean(filme.tem_sessoes) ||
+      Boolean(filme.em_prevenda) ||
+      Boolean(filme.ingresso_link);
     if (emCinema && !seen.has('Nos Cinemas')) {
       providers.unshift({ name: 'Nos Cinemas', icon: 'cinema' });
+    }
+
+    const temStreaming =
+      Boolean(filme.estreia_streaming) || providers.length > 0;
+    if (temStreaming && providers.length === 0 && !seen.has('Streaming')) {
+      providers.push({ name: 'Streaming', icon: 'streaming' });
     }
   }
 
@@ -113,18 +120,22 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
  * @returns Uma lista de objetos de plataforma com nome e ícone.
  */
 export const getGamePlatforms = (item: Jogo): { name: string; icon: string }[] => {
-  const platformNames = item.plataformas_api?.map(p => p.nome) ?? [];
+  const steamAppId = item.steam_app_id;
+  const platformNames = item.plataformas_api?.map((p) => p.nome) ?? [];
   const normalized = new Set<string>();
+  let hasSteam = Boolean(steamAppId);
 
-  platformNames.forEach(name => {
+  platformNames.forEach((name) => {
     if (!name) return;
     const lowerName = name.toLowerCase();
+    if (lowerName.includes('steam')) hasSteam = true;
+
     if (lowerName.includes('playstation')) {
       normalized.add('PlayStation');
     } else if (lowerName.includes('xbox')) {
       normalized.add('Xbox');
     } else if (lowerName.includes('pc') || lowerName.includes('windows')) {
-      normalized.add('PC');
+      if (!hasSteam) normalized.add('PC');
     } else if (lowerName.includes('switch')) {
       normalized.add('Nintendo Switch');
     } else {
@@ -132,9 +143,14 @@ export const getGamePlatforms = (item: Jogo): { name: string; icon: string }[] =
     }
   });
 
-  return Array.from(normalized).map(name => ({
-    name: name,
-    icon: name.toLowerCase().replace(/ /g, '-')
+  if (hasSteam) {
+    normalized.delete('PC');
+    normalized.add('Steam');
+  }
+
+  return Array.from(normalized).map((name) => ({
+    name,
+    icon: name === 'Steam' ? 'steam' : name.toLowerCase().replace(/ /g, '-'),
   }));
 };
 
@@ -177,6 +193,9 @@ export const hasSteamPriceDisplay = (item: Jogo | Midia): boolean => {
   const cents = 'steam_price_cents' in item ? item.steam_price_cents : null;
   return Boolean(appId) && cents != null;
 };
+
+export const hasSteamAppId = (item: Jogo | Midia): boolean =>
+  Boolean('steam_app_id' in item && item.steam_app_id);
 
 /**
  * Extrai e formata os links de lojas digitais de um objeto de jogo.
@@ -302,6 +321,7 @@ export const getGamePlatformDisplayItems = (jogo: Jogo): GamePlatformDisplayItem
 
   for (const platform of getGamePlatforms(jogo)) {
     const key = platformIconKey(platform.icon);
+    if (key === 'pc' && (jogo.steam_app_id || seen.has('steam'))) continue;
     if (seen.has(key)) continue;
     add({ name: platform.name, icon: platform.icon });
   }
