@@ -12,6 +12,7 @@ import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTran
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
+import { dedupeBy } from './syncUtils';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -421,28 +422,28 @@ async function processMovieBatch(
 
       const relationalData = {
         genres: {
-          create: movieDetails.genres?.map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
+          create: dedupeBy(movieDetails.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
         },
         companies: {
-          create: movieDetails.production_companies?.map((company: any) => ({ company: { connectOrCreate: { where: { tmdbId: company.id }, create: { tmdbId: company.id, name: company.name } } } }))
+          create: dedupeBy(movieDetails.production_companies, (company: any) => company.id).map((company: any) => ({ company: { connectOrCreate: { where: { tmdbId: company.id }, create: { tmdbId: company.id, name: company.name } } } }))
         },
         countries: {
-            create: movieDetails.production_countries?.map((country: any) => ({ country: { connectOrCreate: { where: { iso: country.iso_3166_1 }, create: { iso: country.iso_3166_1, name: country.name } } } }))
+            create: dedupeBy(movieDetails.production_countries, (country: any) => country.iso_3166_1).map((country: any) => ({ country: { connectOrCreate: { where: { iso: country.iso_3166_1 }, create: { iso: country.iso_3166_1, name: country.name } } } }))
         },
         languages: {
-            create: movieDetails.spoken_languages?.map((lang: any) => ({ language: { connectOrCreate: { where: { iso: lang.iso_639_1 }, create: { iso: lang.iso_639_1, name: lang.english_name } } } }))
+            create: dedupeBy(movieDetails.spoken_languages, (lang: any) => lang.iso_639_1).map((lang: any) => ({ language: { connectOrCreate: { where: { iso: lang.iso_639_1 }, create: { iso: lang.iso_639_1, name: lang.english_name } } } }))
         },
         cast: {
-          create: movieDetails.credits?.cast?.slice(0, 20).map((person: Cast) => ({ character: person.character, order: person.order, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
+          create: dedupeBy(movieDetails.credits?.cast?.slice(0, 20), (person: any) => `${person.id}-${person.order}`).map((person: Cast) => ({ character: person.character, order: person.order, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } })) as any
         },
         crew: {
-          create: movieDetails.credits?.crew?.filter((p: Crew) => ['Director', 'Screenplay', 'Writer'].includes(p.job || '')).map((person: Crew) => ({ job: person.job, department: person.department, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
+          create: dedupeBy(movieDetails.credits?.crew?.filter((p: Crew) => ['Director', 'Screenplay', 'Writer'].includes(p.job || '')), (person: any) => `${person.id}-${person.job}`).map((person: Crew) => ({ job: person.job, department: person.department, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } })) as any
         },
         videos: {
-            create: movieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube').map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
+            create: dedupeBy(movieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube'), (video: any) => video.id).map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: movieDetails['watch/providers']?.results?.BR?.flatrate?.map((provider: any) => ({
+            create: dedupeBy(movieDetails['watch/providers']?.results?.BR?.flatrate, (provider: any) => provider.provider_id).map((provider: any) => ({
                 url: movieDetails['watch/providers']?.results?.BR?.link,
                 provider: {
                     connectOrCreate: {

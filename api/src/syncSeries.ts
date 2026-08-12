@@ -9,6 +9,7 @@ import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
+import { dedupeBy } from './syncUtils';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -221,16 +222,16 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
 
       const relationalData = {
         genres: {
-          create: serieDetails.genres?.map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
+          create: dedupeBy(serieDetails.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
         },
         networks: {
-          create: serieDetails.networks?.map((network: any) => ({ network: { connectOrCreate: { where: { tmdbId: network.id }, create: { tmdbId: network.id, name: network.name, logoPath: network.logo_path } } } }))
+          create: dedupeBy(serieDetails.networks, (network: any) => network.id).map((network: any) => ({ network: { connectOrCreate: { where: { tmdbId: network.id }, create: { tmdbId: network.id, name: network.name, logoPath: network.logo_path } } } }))
         },
         languages: {
-            create: serieDetails.spoken_languages?.map((lang: any) => ({ language: { connectOrCreate: { where: { iso: lang.iso_639_1 }, create: { iso: lang.iso_639_1, name: lang.english_name } } } }))
+            create: dedupeBy(serieDetails.spoken_languages, (lang: any) => lang.iso_639_1).map((lang: any) => ({ language: { connectOrCreate: { where: { iso: lang.iso_639_1 }, create: { iso: lang.iso_639_1, name: lang.english_name } } } }))
         },
         seasons: {
-          create: serieDetails.seasons?.map((season: any) => ({
+          create: dedupeBy(serieDetails.seasons, (season: any) => season.id).map((season: any) => ({
             tmdbId: season.id,
             name: season.name,
             overview: season.overview,
@@ -241,19 +242,19 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
           }))
         },
         createdBy: {
-            create: serieDetails.created_by?.map((creator: any) => ({ pessoa: { connectOrCreate: { where: { tmdbId: creator.id }, create: { tmdbId: creator.id, name: creator.name, profilePath: creator.profile_path } } } }))
+            create: dedupeBy(serieDetails.created_by, (creator: any) => creator.id).map((creator: any) => ({ pessoa: { connectOrCreate: { where: { tmdbId: creator.id }, create: { tmdbId: creator.id, name: creator.name, profilePath: creator.profile_path } } } }))
         },
         cast: {
-          create: serieDetails.credits?.cast?.slice(0, 20).map((person: any) => ({ character: person.character, order: person.order, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
+          create: dedupeBy(serieDetails.credits?.cast?.slice(0, 20), (person: any) => `${person.id}-${person.order}`).map((person: any) => ({ character: person.character, order: person.order, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
         },
         crew: {
-          create: serieDetails.credits?.crew?.filter((p: any) => ['Creator', 'Director', 'Screenplay', 'Writer'].includes(p.job || '')).map((person: any) => ({ job: person.job, department: person.department, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
+          create: dedupeBy(serieDetails.credits?.crew?.filter((p: any) => ['Creator', 'Director', 'Screenplay', 'Writer'].includes(p.job || '')), (person: any) => `${person.id}-${person.job}`).map((person: any) => ({ job: person.job, department: person.department, pessoa: { connectOrCreate: { where: { tmdbId: person.id }, create: { tmdbId: person.id, name: person.name, profilePath: person.profile_path } } } }))
         },
         videos: {
-            create: serieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube').map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
+            create: dedupeBy(serieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube'), (video: any) => video.id).map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: brProviders.flatrate?.map((provider: any) => ({
+            create: dedupeBy(brProviders.flatrate, (provider: any) => provider.provider_id).map((provider: any) => ({
                 url: brProviders.link, // Adiciona a URL da página "Onde Assistir"
                 provider: { connectOrCreate: { where: { tmdbId: provider.provider_id }, create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } } }
             }))

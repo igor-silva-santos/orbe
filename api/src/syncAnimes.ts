@@ -6,6 +6,7 @@ import { prisma } from './clients';
 import { isAnimeRelevantForSeasonalSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons } from './syncState';
+import { dedupeBy } from './syncUtils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function prismaUpdateWithRetry<T>(
@@ -318,9 +319,9 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
             ];
 
             const relationalData = {
-                genres: { create: anime.genres?.map((name: string) => ({ genero: { connectOrCreate: { where: { name }, create: { name } } } })) },
-                tags: { create: anime.tags?.map((tag: any) => ({ tag: { connectOrCreate: { where: { id: tag.id }, create: { id: tag.id, name: tag.name, description: tag.description, category: tag.category, isAdult: tag.isAdult } } } })) },
-                studios: { create: anime.studios?.nodes?.map((studio: any) => ({ studio: { connectOrCreate: { where: { anilistId: studio.id }, create: { anilistId: studio.id, name: studio.name } } } })) },
+                genres: { create: dedupeBy(anime.genres, (name: string) => name).map((name: string) => ({ genero: { connectOrCreate: { where: { name }, create: { name } } } })) },
+                tags: { create: dedupeBy(anime.tags, (tag: any) => tag.id).map((tag: any) => ({ tag: { connectOrCreate: { where: { id: tag.id }, create: { id: tag.id, name: tag.name, description: tag.description, category: tag.category, isAdult: tag.isAdult } } } })) },
+                studios: { create: dedupeBy(anime.studios?.nodes, (studio: any) => studio.id).map((studio: any) => ({ studio: { connectOrCreate: { where: { anilistId: studio.id }, create: { anilistId: studio.id, name: studio.name } } } })) },
                 streamingLinks: { create: anime.streamingEpisodes?.map((link: any) => ({ url: link.url, site: link.site, thumbnail: link.thumbnail })) },
                 externalLinks: { create: externalLinksData },
                 ranks: { create: anime.rankings?.map((rank: any) => ({ rank: rank.rank, type: rank.type, context: rank.context, year: rank.year, allTime: rank.allTime })) },
