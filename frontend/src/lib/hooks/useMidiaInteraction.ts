@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { orbeNerdApi } from '@/lib/api';
@@ -25,25 +26,32 @@ export function useMidiaInteraction() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const upsertInteraction = useAppStore((s) => s.upsertInteraction);
 
-  return async (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => {
-    if (!isAuthenticated) {
-      toast.error('Você precisa estar logado para fazer isso.');
-      return;
-    }
+  // useCallback com identidade estável entre renders — sem isso, toda renderização de
+  // MediaCarousel criava uma nova função aqui, que descia como prop `onInteraction` pra
+  // cada MidiaCard montado e invalidava o React.memo deles (nova identidade de prop a
+  // cada vez, mesmo sem nenhuma mudança real).
+  return useCallback(
+    async (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => {
+      if (!isAuthenticated) {
+        toast.error('Você precisa estar logado para fazer isso.');
+        return;
+      }
 
-    const status = ACTION_TO_STATUS[action];
-    if (!status) return;
+      const status = ACTION_TO_STATUS[action];
+      if (!status) return;
 
-    try {
-      const interaction: UserInteraction = await orbeNerdApi.upsertInteraction({
-        midia_id: midia.id,
-        tipo_midia: type,
-        status,
-      });
-      upsertInteraction(interaction);
-    } catch (error) {
-      console.error('Erro ao salvar interação:', error);
-      toast.error('Não foi possível salvar. Tente novamente.');
-    }
-  };
+      try {
+        const interaction: UserInteraction = await orbeNerdApi.upsertInteraction({
+          midia_id: midia.id,
+          tipo_midia: type,
+          status,
+        });
+        upsertInteraction(interaction);
+      } catch (error) {
+        console.error('Erro ao salvar interação:', error);
+        toast.error('Não foi possível salvar. Tente novamente.');
+      }
+    },
+    [isAuthenticated, upsertInteraction]
+  );
 }
