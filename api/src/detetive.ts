@@ -79,7 +79,33 @@ function slugify(text: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9 -]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function buildIngressoSlugCandidates(filme: {
+  title: string;
+  originalTitle?: string | null;
+  releaseDate?: Date | null;
+}): string[] {
+  const slugs = new Set<string>();
+  const titles = [filme.title, filme.originalTitle].filter((title): title is string => Boolean(title?.trim()));
+
+  for (const title of titles) {
+    const base = slugify(title);
+    if (base) slugs.add(base);
+
+    if (filme.releaseDate) {
+      const year = new Date(filme.releaseDate).getFullYear();
+      if (base && year > 1900) slugs.add(`${base}-${year}`);
+    }
+  }
+
+  return Array.from(slugs);
+}
+
+function buildIngressoUrl(slug: string): string {
+  return `https://www.ingresso.com/filme/${slug}`;
 }
 
 function startOfDay(date: Date): Date {
@@ -115,6 +141,30 @@ function needsIngressoMonitoring(
   // Antes da estreia: link + pré-venda até confirmar ou estrear.
   if (hasLink && filme.prevenda_confirmada) return 'none';
   return 'full';
+}
+
+async function discoverIngressoLink(
+  browser: Browser,
+  filme: { title: string; originalTitle?: string | null; releaseDate?: Date | null },
+  existingLink?: string | null,
+): Promise<{ link: string | null; pageExists: boolean; hasCinemaSessions: boolean; isPreSale: boolean }> {
+  const urlsToTry = new Set<string>();
+  if (existingLink) urlsToTry.add(existingLink);
+  for (const slug of buildIngressoSlugCandidates(filme)) {
+    urlsToTry.add(buildIngressoUrl(slug));
+  }
+
+  let lastResult = { pageExists: false, hasCinemaSessions: false, isPreSale: false };
+
+  for (const url of urlsToTry) {
+    const result = await scrapeIngressoPage(browser, url);
+    lastResult = result;
+    if (result.pageExists) {
+      return { link: url, ...result };
+    }
+  }
+
+  return { link: null, ...lastResult };
 }
 
 async function scrapeIngressoPage(
@@ -154,9 +204,18 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
 
     const targetMovies = await prisma.filme.findMany({
       where: {
-        estreia_cinema: true,
-        OR: [{ voteCount: { gt: 25 } }, { popularity: { gt: 10 } }],
-        releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead },
+        AND: [
+          {
+            OR: [
+              { estreia_cinema: true },
+              { emCartaz: true },
+              { emBreve: true },
+              { em_prevenda: true },
+            ],
+          },
+          { OR: [{ voteCount: { gt: 25 } }, { popularity: { gt: 10 } }] },
+          { releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead } },
+        ],
       },
       include: { streamingProviders: true },
     });
@@ -194,20 +253,25 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
           logger.info(
             `🕵️ Verificando ingresso.com (${ingressoMode === 'link_only' ? 'só link' : 'link + pré-venda'}): "${filme.title}"...`,
           );
-          const slug = slugify(filme.title);
-          const directUrl = `https://www.ingresso.com/filme/${slug}`;
-          const targetUrl = ingressoLink ?? directUrl;
-          const ingresso = await scrapeIngressoPage(browser, targetUrl);
+          const hadExistingLink = Boolean(filme.ingresso_link);
+          const ingresso = await discoverIngressoLink(browser, filme, ingressoLink);
 
           if (!ingresso.pageExists) {
-            ingressoSemPagina = true;
-            ingressoLink = null;
-            if (ingressoMode === 'full') {
-              temSessoes = false;
+            if (hadExistingLink && ingressoLink) {
+              logger.warn(
+                `⚠️ "${filme.title}" — não foi possível revalidar o link existente; mantendo ${ingressoLink}.`,
+              );
+            } else {
+              ingressoSemPagina = true;
+              ingressoLink = null;
+              if (ingressoMode === 'full') {
+                temSessoes = false;
+              }
+              logger.info(`🚫 "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
             }
-            logger.info(`🚫 "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
           } else {
-            ingressoLink = targetUrl;
+            ingressoLink = ingresso.link;
+            ingressoSemPagina = false;
 
             if (ingressoMode === 'link_only') {
               logger.info(`🔗 "${filme.title}" — link do ingresso.com salvo (pós-estreia).`);
