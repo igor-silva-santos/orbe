@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
-import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText, withPortugueseTranslation, matchesPremiacaoFilters } from './mappers';
+import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText, matchesPremiacaoFilters } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
@@ -326,10 +326,12 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
 
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-      cinema: await Promise.all(cinema.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-      streamingFilmes: await Promise.all(streamingFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-      streamingSeries: await Promise.all(streamingSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
-      destaquesJogos: await Promise.all(destaquesJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+      // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+      // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
+      cinema: cinema.map((f) => mapFilmeToMidia(f)),
+      streamingFilmes: streamingFilmes.map((f) => mapFilmeToMidia(f)),
+      streamingSeries: streamingSeries.map((s) => mapSerieToMidia(s)),
+      destaquesJogos: destaquesJogos.map((j) => mapJogoToMidia(j)),
     });
   } catch (error) {
     logger.error(`Erro ao buscar conteúdo de hoje: ${error}`);
@@ -1472,34 +1474,36 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
     let results: any[] = [];
 
+    // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+    // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     if (type === 'filmes') {
       const popularFilmes = await prisma.filme.findMany({
         where: filmeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))));
+      results = popularFilmes.map((f) => mapFilmeToMidia(f));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))));
+      results = popularSeries.map((s) => mapSerieToMidia(s));
     } else if (type === 'animes') {
       const popularAnimes = await prisma.anime.findMany({
         where: animeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularAnimes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))));
+      results = popularAnimes.map((a) => mapAnimeToMidia(a));
     } else if (type === 'jogos') {
       const popularJogos = await prisma.jogo.findMany({
         where: jogoQualityFilter,
         orderBy: { rating: 'desc' },
         take,
       });
-      results = await Promise.all(popularJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))));
+      results = popularJogos.map((j) => mapJogoToMidia(j));
     } else {
       const takeForEach = Math.ceil(take / 4) + 2;
 
@@ -1532,10 +1536,10 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       ]);
 
       const trendingResults = [
-        ...(await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))))),
-        ...(await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))))),
-        ...(await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))))),
-        ...(await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))))),
+        ...filmes.map((f) => mapFilmeToMidia(f)),
+        ...series.map((s) => mapSerieToMidia(s)),
+        ...animes.map((a) => mapAnimeToMidia(a)),
+        ...jogos.map((j) => mapJogoToMidia(j)),
       ];
 
       // Apenas pega os primeiros 10 resultados combinados, sem embaralhar
@@ -1868,16 +1872,18 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
       }),
     ]);
 
+    // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+    // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     res.json({
       eventos_games: eventosGames.map(mapEventToResponse),
       proximos: {
-        filmes: await Promise.all(filmesProximos.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-        series: await Promise.all(seriesProximas.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
-        animes: await Promise.all(animesProximos.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
-        jogos: await Promise.all(jogosProximos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+        filmes: filmesProximos.map((f) => mapFilmeToMidia(f)),
+        series: seriesProximas.map((s) => mapSerieToMidia(s)),
+        animes: animesProximos.map((a) => mapAnimeToMidia(a)),
+        jogos: jogosProximos.map((j) => mapJogoToMidia(j)),
       },
       destaques_recentes: {
-        filmes: await Promise.all(filmesEmCartaz.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+        filmes: filmesEmCartaz.map((f) => mapFilmeToMidia(f)),
         eventos: eventosRecentes.map(mapEventToResponse),
       },
     });
