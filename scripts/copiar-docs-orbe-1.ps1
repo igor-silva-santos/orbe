@@ -1,10 +1,11 @@
-# Copia a documentação do repositório orbe para a pasta local orbe-1.
-# Uso (PowerShell):
+# Copia a documentação do repositório orbe para a pasta local:
+#   C:\Users\igor.ssantos\repos\projetos\orbe-1
+#
+# Uso (PowerShell, dentro do clone do orbe):
 #   .\scripts\copiar-docs-orbe-1.ps1
-#   .\scripts\copiar-docs-orbe-1.ps1 -Destino "D:\outro\caminho\orbe-1"
 
 param(
-    [string]$Destino = "$env:USERPROFILE\repos\projetos\orbe-1"
+    [string]$Destino = "C:\Users\igor.ssantos\repos\projetos\orbe-1"
 )
 
 $RaizRepo = Split-Path $PSScriptRoot -Parent
