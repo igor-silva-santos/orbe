@@ -333,7 +333,7 @@ function mergeJogoWebsites(
 
 export async function fetchFilmeDetailsLive(tmdbId: number) {
   try {
-    const [movie, dbFilme] = await Promise.all([
+    const [movie, dbFilme, ptOverview] = await Promise.all([
       tmdb.movieInfo({
         id: tmdbId,
         language: 'pt-BR',
@@ -343,12 +343,12 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
         where: { tmdbId },
         select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true, premiacoes: true },
       }),
+      fetchTmdbPtOverview('movie', tmdbId),
     ]);
 
     if (!movie?.id) return null;
 
     const details = mapTmdbMovieToDetails(movie, dbFilme ?? undefined);
-    const ptOverview = await fetchTmdbPtOverview('movie', tmdbId);
     if (details.overview) {
       details.overview = (await resolvePortugueseSynopsis(details.overview, ptOverview)) ?? details.overview;
     }
@@ -429,8 +429,6 @@ export async function fetchJogoDetailsLive(igdbId: number) {
   }
 
   try {
-    await getIgdbAccessToken();
-
     const query = `
       fields name, summary, cover.url, first_release_date, rating,
              genres.name, genres.id,
@@ -447,10 +445,8 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       limit 1;
     `;
 
-    const [response, dbJogo] = await Promise.all([
-      igdbApi.post('/games', query, {
-        headers: { 'Accept-Language': 'pt-BR' },
-      }),
+    const [, dbJogo] = await Promise.all([
+      getIgdbAccessToken(),
       prisma.jogo.findUnique({
         where: { igdbId },
         select: {
@@ -466,6 +462,10 @@ export async function fetchJogoDetailsLive(igdbId: number) {
         },
       }),
     ]);
+
+    const response = await igdbApi.post('/games', query, {
+      headers: { 'Accept-Language': 'pt-BR' },
+    });
 
     const game = response.data?.[0];
     if (!game) return null;

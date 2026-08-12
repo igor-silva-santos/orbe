@@ -13,8 +13,8 @@ interface PlatformIconProps {
   size?: number;
   iconOnly?: boolean;
   title?: string;
-  /** Tile claro para ícones escuros em fundos escuros (ex.: cards no dark mode). */
-  variant?: 'default' | 'tile';
+  /** 'tile': quadrado claro para ícones escuros em fundos escuros. 'circle': bolha redonda (ex.: "onde jogar"). */
+  variant?: 'default' | 'tile' | 'circle';
 }
 
 const normalizePlatformKey = (platform?: string | null): string => {
@@ -45,9 +45,11 @@ const normalizePlatformKey = (platform?: string | null): string => {
 
 const TILE_CLASS =
   'inline-flex items-center justify-center shrink-0 rounded-md bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+const CIRCLE_TILE_CLASS =
+  'inline-flex items-center justify-center shrink-0 rounded-full bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
 
-const getTileClass = (iconSize: number) =>
-  `${TILE_CLASS} ${iconSize >= 26 ? 'p-1' : 'p-[3px]'}`;
+const getTileClass = (iconSize: number, circle: boolean) =>
+  `${circle ? CIRCLE_TILE_CLASS : TILE_CLASS} ${iconSize >= 26 ? 'p-1' : 'p-[3px]'}`;
 
 /** Ícones compactos para tiles pequenos (cards); wordmarks ficam ilegíveis abaixo de ~32px. */
 const GAME_TILE_ICON_SRC: Partial<Record<string, string>> = {
@@ -67,7 +69,7 @@ const renderPcIcon = (
     const { width, height } = iconProps;
     return (
       <div
-        className={`${iconProps.className} rounded bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
+        className={`${iconProps.className} rounded-full bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
         style={{ width, height, fontSize: width * 0.38 }}
         aria-hidden="true"
         title={showTooltip ? label : undefined}
@@ -90,7 +92,8 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
 }) => {
   const label = title || (iconOnly ? '' : `${platform ?? 'plataforma'} icon`);
   const showTooltip = Boolean(label);
-  const useTile = variant === 'tile';
+  const isCircle = variant === 'circle';
+  const useTile = variant === 'tile' || isCircle;
 
   const iconProps = {
     width: size,
@@ -103,7 +106,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
   const wrapWithTile = (icon: React.ReactNode) => {
     if (!useTile) return icon;
     return (
-      <span className={getTileClass(size)} title={showTooltip ? label : undefined}>
+      <span className={getTileClass(size, isCircle)} title={showTooltip ? label : undefined}>
         {icon}
       </span>
     );
@@ -147,7 +150,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'epic':
       return wrapWithTile(
         <div
-          className={`${className} bg-[#2a2a2a] rounded flex items-center justify-center text-white font-bold shrink-0`}
+          className={`${className} bg-[#2a2a2a] rounded-full flex items-center justify-center text-white font-bold shrink-0`}
           style={{ width: size, height: size, fontSize: size * 0.55 }}
           aria-hidden="true"
           title={useTile || !showTooltip ? undefined : label}
@@ -158,8 +161,8 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'gog':
       return wrapWithTile(
         <div
-          className={`${className} bg-purple-700 rounded flex items-center justify-center text-white font-bold shrink-0`}
-          style={{ width: size, height: size, fontSize: size * 0.45 }}
+          className={`${className} bg-purple-700 rounded-full flex items-center justify-center text-white font-bold shrink-0`}
+          style={{ width: size, height: size, fontSize: size * 0.4 }}
           aria-hidden="true"
           title={useTile || !showTooltip ? undefined : label}
         >
@@ -173,7 +176,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     default:
       return wrapWithTile(
         <div
-          className={`${className} bg-muted rounded flex items-center justify-center shrink-0`}
+          className={`${className} bg-muted rounded-full flex items-center justify-center shrink-0`}
           style={{ width: size, height: size }}
           title={useTile || !showTooltip ? undefined : label}
         >

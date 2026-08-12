@@ -119,12 +119,15 @@ export async function runDetetive(fullScan = false) {
         
         const response = await page.goto(directUrl, { waitUntil: 'networkidle2', timeout: 15000 });
         let hasCinemaSessions = false;
+        let isPreSale = false;
         let pageExists = false;
 
         if (response && response.ok()) {
           pageExists = true;
           const pageContent = await page.content();
           hasCinemaSessions = !pageContent.includes('Não há sessões disponíveis no momento.');
+          // Página do ingresso.com sinaliza pré-venda com o rótulo "Pré-venda" perto do CTA de compra.
+          isPreSale = /pré-?venda/i.test(pageContent);
         }
         await page.close();
 
@@ -140,6 +143,7 @@ export async function runDetetive(fullScan = false) {
           data: {
             ingresso_link: pageExists ? directUrl : filme.ingresso_link,
             tem_sessoes: hasCinemaSessions,
+            em_prevenda: pageExists ? isPreSale : filme.em_prevenda,
             ultima_verificacao_ingresso: new Date(),
             // Se o filme saiu do cinema e entrou no digital agora, notificamos
             status: streaming.available ? 'Released' : filme.status

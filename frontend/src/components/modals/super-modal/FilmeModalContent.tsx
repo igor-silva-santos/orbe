@@ -2,6 +2,7 @@
 
 import { FilmeDetalhes, CalendarModalData } from '@/types';
 import FilmeInfoBlock from './FilmeInfoBlock';
+import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,6 +13,7 @@ import { buildIngressoUrl } from '@/lib/ingresso';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
 import CommentSection from './CommentSection';
+import { useAppStore } from '@/stores/appStore';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -21,6 +23,8 @@ interface FilmeModalContentProps {
 const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().includes('tmdb');
 
 const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalendarModal }) => {
+  const closeSuperModal = useAppStore((s) => s.closeSuperModal);
+
   if (!filme) {
     return <div>Carregando...</div>;
   }
@@ -65,7 +69,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
               </Button>
             )}
 
-            <IngressoButton url={ingressoUrl} canBuy={canBuyTickets} />
+            <IngressoButton url={ingressoUrl} canBuy={canBuyTickets} emPrevenda={Boolean(filme.em_prevenda)} />
 
             <Button variant="outline" asChild>
               <a
@@ -137,23 +141,28 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                   <CarouselItem key={ator.pessoa.id} className="basis-auto">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="text-center w-20 sm:w-24 cursor-pointer">
+                        <Link
+                          href={`/pessoa/${ator.pessoa.id}`}
+                          onClick={closeSuperModal}
+                          className="block text-center w-20 sm:w-24 cursor-pointer"
+                        >
                           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-full mb-2 overflow-hidden mx-auto">
                             <SafeImage
-                              src={ator.pessoa.profilePath ? `https://image.tmdb.org/t/p/w185${ator.pessoa.profilePath}` : null}
+                              src={ator.pessoa.profilePath}
                               alt={ator.pessoa.name}
                               width={80}
                               height={80}
+                              imageSize="w185"
                               className="w-full h-full object-cover"
                               fallbackLabel="?"
                             />
                           </div>
-                          <p className="font-semibold text-xs truncate w-full">{ator.pessoa.name}</p>
+                          <p className="font-semibold text-xs truncate w-full hover:text-primary transition-colors">{ator.pessoa.name}</p>
                           <p className="text-xs text-muted-foreground truncate w-full">{ator.character}</p>
-                        </div>
+                        </Link>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{ator.pessoa.name} como {ator.character}</p>
+                        <p>{ator.pessoa.name} como {ator.character} — ver filmografia</p>
                       </TooltipContent>
                     </Tooltip>
                   </CarouselItem>

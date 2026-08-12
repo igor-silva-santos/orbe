@@ -5,7 +5,13 @@ import { Anime, Character, StaffMember, CalendarModalData } from '@/types';
 import AnimeInfoBlock from './AnimeInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { translateRole, sanitizeTranslatedText } from '@/lib/media-helpers';
+import {
+  translateRole,
+  sanitizeTranslatedText,
+  translateAnimeRelationType,
+  translateAnimeRankingType,
+  translateAnimeRankingContext,
+} from '@/lib/media-helpers';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import CommentSection from './CommentSection';
@@ -232,7 +238,7 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
                 key={`${rel.relationType}-${rel.node?.id ?? idx}`}
                 className="bg-muted text-foreground px-3 py-1.5 rounded-lg text-sm"
               >
-                <span className="font-semibold">{rel.relationType}:</span>{' '}
+                <span className="font-semibold">{translateAnimeRelationType(rel.relationType)}:</span>{' '}
                 {rel.node?.title?.romaji ?? 'Título desconhecido'}
               </span>
             ))}
@@ -248,8 +254,8 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
               <div key={idx} className="bg-muted rounded-lg px-3 py-2 text-sm">
                 <span className="font-semibold">#{rank.rank}</span>
                 <span className="text-muted-foreground ml-2">
-                  {rank.type}
-                  {rank.context ? ` — ${rank.context}` : ''}
+                  {translateAnimeRankingType(rank.type)}
+                  {rank.context ? ` — ${translateAnimeRankingContext(rank.context)}` : ''}
                   {rank.year ? ` (${rank.year})` : ''}
                 </span>
               </div>

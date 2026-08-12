@@ -33,8 +33,13 @@ const anilistApi = axios.create({
 });
 
 let igdbAccessToken: string | null = null;
+let igdbAccessTokenExpiresAt = 0;
+let igdbAccessTokenPromise: Promise<string | null> | null = null;
 
-const getIgdbAccessToken = async () => {
+/** Margem de segurança antes de considerar o token expirado, evita usar um token que vence no meio de uma requisição */
+const IGDB_TOKEN_SAFETY_MARGIN_MS = 60_000;
+
+const requestIgdbAccessToken = async (): Promise<string | null> => {
   logger.info(
     `Tentando obter token IGDB (client configurado: ${igdbClientId && igdbClientSecret ? 'sim' : 'não'})`
   );
@@ -44,6 +49,8 @@ const getIgdbAccessToken = async () => {
       null, // No data in the body
     );
     igdbAccessToken = response.data.access_token;
+    const expiresInMs = (response.data.expires_in ?? 0) * 1000;
+    igdbAccessTokenExpiresAt = expiresInMs > 0 ? Date.now() + expiresInMs : 0;
     igdbApi.defaults.headers['Authorization'] = `Bearer ${igdbAccessToken}`;
     logger.info('Token IGDB obtido com sucesso.');
     return igdbAccessToken;
@@ -51,6 +58,19 @@ const getIgdbAccessToken = async () => {
     logger.error('Erro ao obter token de acesso do IGDB:', error instanceof Error ? error.message : error);
     return null;
   }
+};
+
+/** Reaproveita o token IGDB (válido por ~60 dias) em vez de buscar um novo a cada requisição. */
+const getIgdbAccessToken = async (): Promise<string | null> => {
+  const isValid = igdbAccessToken && Date.now() < igdbAccessTokenExpiresAt - IGDB_TOKEN_SAFETY_MARGIN_MS;
+  if (isValid) return igdbAccessToken;
+
+  if (!igdbAccessTokenPromise) {
+    igdbAccessTokenPromise = requestIgdbAccessToken().finally(() => {
+      igdbAccessTokenPromise = null;
+    });
+  }
+  return igdbAccessTokenPromise;
 };
 
 export { tmdb, tmdbApi, igdbApi, anilistApi, getIgdbAccessToken };
