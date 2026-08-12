@@ -71,6 +71,29 @@ const MEDIA_SYNC_PATTERNS: Record<'filmes' | 'series' | 'animes' | 'jogos', stri
   ],
 };
 
+export type CacheInvalidationScope = 'all' | 'homepage' | 'filmes' | 'series' | 'animes' | 'jogos' | 'eventos' | 'premios';
+
+const CACHE_SCOPE_PATTERNS: Record<CacheInvalidationScope, string[]> = {
+  all: [
+    ...new Set([
+      ...Object.values(MEDIA_SYNC_PATTERNS).flat(),
+      'cache:/api/premios*',
+      'cache:/api/eventos*',
+    ]),
+  ],
+  homepage: ['cache:/api/homepage*', 'cache:/api/hoje*'],
+  filmes: MEDIA_SYNC_PATTERNS.filmes,
+  series: MEDIA_SYNC_PATTERNS.series,
+  animes: MEDIA_SYNC_PATTERNS.animes,
+  jogos: MEDIA_SYNC_PATTERNS.jogos,
+  eventos: ['cache:/api/eventos*'],
+  premios: ['cache:/api/premios*'],
+};
+
+export function getCacheInvalidationPatterns(scope: CacheInvalidationScope = 'all'): string[] {
+  return CACHE_SCOPE_PATTERNS[scope] ?? CACHE_SCOPE_PATTERNS.all;
+}
+
 export async function invalidateCacheAfterMediaSync(
   mediaType: 'movies' | 'series' | 'animes' | 'games' | 'steam',
 ): Promise<void> {

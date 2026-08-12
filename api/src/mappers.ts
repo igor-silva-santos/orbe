@@ -1,4 +1,5 @@
 import { translateTmdbStatus } from './statusLabels';
+import { filterGamesForEvent } from './eventGameFilters';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
@@ -532,17 +533,20 @@ export const mapJogoToMidia = (jogo: any) => {
   };
 };
 
-export const mapEventToResponse = (event: any) => ({
-  id: event.igdbId,
-  igdbId: event.igdbId,
-  nome: event.name,
-  descricao: event.description ?? null,
-  data_inicio: event.start_time?.toISOString?.() ?? event.start_time ?? null,
-  data_fim: event.end_time?.toISOString?.() ?? event.end_time ?? null,
-  url: event.url ?? null,
-  total_jogos: event.games?.length ?? event._count?.games ?? 0,
-  jogos: (event.games ?? []).map(mapJogoToMidia),
-});
+export const mapEventToResponse = (event: any) => {
+  const jogos = filterGamesForEvent(event.games ?? [], event);
+  return {
+    id: event.igdbId,
+    igdbId: event.igdbId,
+    nome: event.name,
+    descricao: event.description ?? null,
+    data_inicio: event.start_time?.toISOString?.() ?? event.start_time ?? null,
+    data_fim: event.end_time?.toISOString?.() ?? event.end_time ?? null,
+    url: event.url ?? null,
+    total_jogos: jogos.length,
+    jogos: jogos.map(mapJogoToMidia),
+  };
+};
 
 /** Payload mínimo para cards de carrossel — sem elenco, vídeos ou sinopse */
 export const mapFilmeToCarouselCard = (filme: any) => ({
