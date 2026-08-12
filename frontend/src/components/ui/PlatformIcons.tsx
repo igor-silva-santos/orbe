@@ -40,14 +40,19 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('gog')) return 'gog';
   if (lower === 'mac' || lower.includes('macos') || lower.includes('mac os')) return 'mac';
   if (lower === 'pc' || lower.includes('windows')) return 'pc';
+  if (lower.includes('linux')) return 'linux';
   if (lower.includes('cinema')) return 'cinema';
   return 'unknown';
 };
 
+// `overflow-hidden` é essencial aqui: alguns ícones locais (ex.: globoplay.svg, claro-tv-plus.svg)
+// são "app icons" com fundo quadrado opaco (viewBox quadrado preenchido de ponta a ponta). Sem
+// recortar, os cantos desse quadrado ficam maiores que o círculo inscrito na tile e vazam para
+// fora da bolha branca — é isso que faz esses ícones parecerem "quadrados dentro de um círculo".
 const TILE_CLASS =
-  'inline-flex items-center justify-center shrink-0 rounded-md bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+  'inline-flex items-center justify-center shrink-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
 const CIRCLE_TILE_CLASS =
-  'inline-flex items-center justify-center shrink-0 rounded-full bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
+  'inline-flex items-center justify-center shrink-0 overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20';
 
 const getTileClass = (iconSize: number, circle: boolean) =>
   `${circle ? CIRCLE_TILE_CLASS : TILE_CLASS} ${iconSize >= 26 ? 'p-1' : 'p-[3px]'}`;
@@ -55,9 +60,45 @@ const getTileClass = (iconSize: number, circle: boolean) =>
 /** Ícones compactos para tiles pequenos (cards); wordmarks ficam ilegíveis abaixo de ~32px. */
 const GAME_TILE_ICON_SRC: Partial<Record<string, string>> = {
   playstation: '/icons/playstation_icone_azul.svg',
-  xbox: '/icons/xbox_icone.svg',
   nintendo: '/icons/nintendo_switch.svg',
   steam: '/icons/steam-logo.svg',
+};
+
+type BadgeIconProps = { width: number; height: number; className: string; title?: string };
+
+/**
+ * Selos coloridos (PC, Mac, Linux, Epic, GOG, Xbox) são desenhados por nós, ao contrário dos
+ * ícones-imagem (Netflix, PlayStation etc.), que naturalmente "respiram" dentro da própria caixa
+ * porque o desenho não ocupa 100% do viewBox. Um selo colorido que preenche a caixa inteira lado
+ * a lado com esses ícones-imagem parece bem maior/mais pesado — daí o selo ficar circunscrito a
+ * ~78% da caixa, com a mesma folga que os ícones-imagem já têm.
+ */
+const BADGE_SCALE = 0.78;
+
+const renderBadgeIcon = (
+  iconProps: BadgeIconProps,
+  showTooltip: boolean,
+  label: string,
+  bgClass: string,
+  renderContent: (badgeSize: number) => React.ReactNode,
+) => {
+  const { width, height, className } = iconProps;
+  const badgeSize = Math.max(1, Math.round(Math.min(width, height) * BADGE_SCALE));
+  return (
+    <div
+      className={`${className} flex items-center justify-center shrink-0`}
+      style={{ width, height }}
+      aria-hidden="true"
+      title={showTooltip ? label : undefined}
+    >
+      <div
+        className={`${bgClass} rounded-full flex items-center justify-center text-white shrink-0`}
+        style={{ width: badgeSize, height: badgeSize }}
+      >
+        {renderContent(badgeSize)}
+      </div>
+    </div>
+  );
 };
 
 const renderPcIcon = (
@@ -67,17 +108,9 @@ const renderPcIcon = (
   label: string,
 ) => {
   if (useTile) {
-    const { width, height } = iconProps;
-    return (
-      <div
-        className={`${iconProps.className} rounded-full bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
-        style={{ width, height, fontSize: width * 0.38 }}
-        aria-hidden="true"
-        title={showTooltip ? label : undefined}
-      >
-        PC
-      </div>
-    );
+    return renderBadgeIcon(iconProps, showTooltip, label, 'bg-[#1a1a1a] font-extrabold', (badgeSize) => (
+      <span style={{ fontSize: badgeSize * 0.42 }}>PC</span>
+    ));
   }
   return <Image src="/icons/pc.svg" {...iconProps} />;
 };
@@ -86,19 +119,43 @@ const renderMacIcon = (
   iconProps: { width: number; height: number; className: string; alt: string; title?: string },
   showTooltip: boolean,
   label: string,
-) => {
-  const { width, height } = iconProps;
-  return (
-    <div
-      className={`${iconProps.className} rounded-full bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
-      style={{ width, height, fontSize: width * 0.34 }}
-      aria-hidden="true"
-      title={showTooltip ? label : undefined}
-    >
-      Mac
-    </div>
-  );
-};
+) =>
+  renderBadgeIcon(iconProps, showTooltip, label, 'bg-[#1a1a1a] font-extrabold', (badgeSize) => (
+    <span style={{ fontSize: badgeSize * 0.38 }}>Mac</span>
+  ));
+
+const renderLinuxIcon = (
+  iconProps: { width: number; height: number; className: string; alt: string; title?: string },
+  showTooltip: boolean,
+  label: string,
+) =>
+  renderBadgeIcon(iconProps, showTooltip, label, 'bg-[#1a1a1a] font-mono font-bold', (badgeSize) => (
+    <span style={{ fontSize: badgeSize * 0.4 }}>{'>_'}</span>
+  ));
+
+/**
+ * xbox_icone.svg já é o glifo circular ("orb") da Xbox, sem cor de preenchimento definida
+ * (preto por padrão). Recolorimos para branco (xbox_icone_white.svg) e desenhamos sobre um
+ * selo verde (#107C10, mesma cor usada no wordmark xbox.svg) — pedido do usuário: "ícone
+ * redondo e verde", em qualquer contexto (tile ou default).
+ */
+const renderXboxIcon = (
+  iconProps: { width: number; height: number; className: string; alt: string; title?: string },
+  showTooltip: boolean,
+  label: string,
+) =>
+  renderBadgeIcon(iconProps, showTooltip, label, 'bg-[#107C10]', (badgeSize) => {
+    const glyphSize = Math.max(1, Math.round(badgeSize * 0.62));
+    return (
+      <Image
+        src="/icons/xbox_icone_white.svg"
+        width={glyphSize}
+        height={glyphSize}
+        alt={label}
+        unoptimized
+      />
+    );
+  });
 
 const PlatformIcon: React.FC<PlatformIconProps> = ({
   platform,
@@ -120,6 +177,12 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     className: `${className} object-contain shrink-0`,
     alt: label,
     title: useTile || !showTooltip ? undefined : label,
+    // Ícones locais em /icons são SVGs estáticos já otimizados; o otimizador de imagem do
+    // Next exige `dangerouslyAllowSVG` + prólogo `<?xml` no arquivo para servi-los via
+    // `/_next/image`, o que vários desses SVGs não têm — sem isso o pipeline retorna 400 e
+    // o ícone simplesmente não aparece. `unoptimized` faz o navegador carregar o arquivo
+    // direto, sem depender desse pipeline.
+    unoptimized: true,
   };
 
   const wrapWithTile = (icon: React.ReactNode) => {
@@ -136,7 +199,7 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
 
   if (logoPath) {
     const src = logoPath.startsWith('http') ? logoPath : `${TMDB_LOGO_BASE}${logoPath}`;
-    return wrapWithTile(<Image src={src} unoptimized {...iconProps} />);
+    return wrapWithTile(<Image src={src} {...iconProps} />);
   }
 
   switch (normalizePlatformKey(platform)) {
@@ -161,37 +224,29 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
     case 'playstation':
       return wrapWithTile(<Image src={gameIconSrc('playstation', '/icons/playstation.svg')} {...iconProps} />);
     case 'xbox':
-      return wrapWithTile(<Image src={gameIconSrc('xbox', '/icons/xbox.svg')} {...iconProps} />);
+      return wrapWithTile(renderXboxIcon(iconProps, showTooltip, label));
     case 'nintendo':
       return wrapWithTile(<Image src={gameIconSrc('nintendo', '/icons/nintendo_switch.svg')} {...iconProps} />);
     case 'steam':
       return wrapWithTile(<Image src={gameIconSrc('steam', '/icons/steam.svg')} {...iconProps} />);
     case 'epic':
       return wrapWithTile(
-        <div
-          className={`${className} bg-[#2a2a2a] rounded-full flex items-center justify-center text-white font-bold shrink-0`}
-          style={{ width: size, height: size, fontSize: size * 0.55 }}
-          aria-hidden="true"
-          title={useTile || !showTooltip ? undefined : label}
-        >
-          E
-        </div>
+        renderBadgeIcon(iconProps, showTooltip, label, 'bg-[#2a2a2a] font-bold', (badgeSize) => (
+          <span style={{ fontSize: badgeSize * 0.55 }}>E</span>
+        ))
       );
     case 'gog':
       return wrapWithTile(
-        <div
-          className={`${className} bg-purple-700 rounded-full flex items-center justify-center text-white font-bold shrink-0`}
-          style={{ width: size, height: size, fontSize: size * 0.4 }}
-          aria-hidden="true"
-          title={useTile || !showTooltip ? undefined : label}
-        >
-          GOG
-        </div>
+        renderBadgeIcon(iconProps, showTooltip, label, 'bg-purple-700 font-bold', (badgeSize) => (
+          <span style={{ fontSize: badgeSize * 0.4 }}>GOG</span>
+        ))
       );
     case 'pc':
       return wrapWithTile(renderPcIcon(iconProps, useTile, showTooltip, label));
     case 'mac':
       return wrapWithTile(renderMacIcon(iconProps, showTooltip, label));
+    case 'linux':
+      return wrapWithTile(renderLinuxIcon(iconProps, showTooltip, label));
     case 'cinema':
       return wrapWithTile(<Image src="/icons/cinema.svg" {...iconProps} />);
     default:
