@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
-import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { parseISO } from 'date-fns';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
@@ -25,7 +25,14 @@ import MidiaCardSkeleton from '../media/MidiaCardSkeleton';
 import { LoadingOverlay } from '@/components/ui/LoadingIndicator';
 import type { Midia, TipoMidia, Filme, Serie, Anime, Jogo } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
@@ -45,6 +52,14 @@ const MONTH_EDGE_BUFFER = 4;
 const MONTH_PREFETCH_DEPTH = 2;
 const EMPTY_MONTH_NAV_LIMIT = 8;
 
+type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
+
+/** Filme tem sessão de cinema (curada ou verificada via ingresso.com) ou algum streaming. */
+const hasFilmeDisponibilidade = (item: Midia): boolean => {
+  const filme = item as Filme;
+  return Boolean(filme.em_cartaz) || Boolean(filme.tem_sessoes) || (item.plataformas_api?.length ?? 0) > 0;
+};
+
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
@@ -57,8 +72,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(initialData.length > 0);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
+  // Sub-filtro do "Em Alta" — só se aplica a filmes (cinema tem conceito próprio de "em cartaz"
+  // que séries/jogos não têm da mesma forma). Padrão ao ativar Em Alta: cinema.
+  const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('cinema');
+  // Filtro padrão do carrossel de lançamentos (modo normal, não Em Alta): esconde filmes
+  // sem nenhuma disponibilidade (sem cinema e sem streaming). Só se aplica a filmes.
+  const [showAllFilmes, setShowAllFilmes] = useState(false);
   const activeFetchesRef = useRef(0);
-  const emAltaLoadedRef = useRef(false);
+  const emAltaLoadedKeyRef = useRef<string | null>(null);
   const fetchingEmAltaRef = useRef(false);
 
   const beginFetch = () => {
@@ -116,37 +137,63 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     [activeSourceItems]
   );
 
+  // Compartilhado entre a lista renderizada (filteredItems) e a navegação por mês
+  // (scrollToToday/navigateByMonth), que precisam calcular índices sobre a MESMA lista
+  // que está de fato nos slides do embla — senão o índice-alvo calculado não bate com o
+  // slide renderizado e o carrossel pula pro lugar errado.
+  const applyDisplayFilters = useCallback(
+    (items: Midia[]): Midia[] => {
+      let result = selectedGenre ? items.filter((item) => item.generos_api?.includes(selectedGenre)) : items;
+      // Lançamentos (modo normal, não Em Alta) de filmes: por padrão esconde quem não tem
+      // nem cinema nem streaming. O modo Em Alta já resolve disponibilidade no servidor.
+      if (mediaType === 'filmes' && !emAltaMode && !showAllFilmes) {
+        result = result.filter(hasFilmeDisponibilidade);
+      }
+      return result;
+    },
+    [selectedGenre, mediaType, emAltaMode, showAllFilmes]
+  );
+
   const filteredItems = useMemo(
-    () =>
-      selectedGenre
-        ? activeSourceItems.filter((item) => item.generos_api?.includes(selectedGenre))
-        : activeSourceItems,
-    [activeSourceItems, selectedGenre]
+    () => applyDisplayFilters(activeSourceItems),
+    [activeSourceItems, applyDisplayFilters]
   );
 
   const loadEmAlta = useCallback(async () => {
-    if (fetchingEmAltaRef.current || emAltaLoadedRef.current) return;
+    const key = mediaType === 'filmes' ? `filmes:${emAltaDisponibilidade}` : mediaType;
+    if (fetchingEmAltaRef.current || emAltaLoadedKeyRef.current === key) return;
     fetchingEmAltaRef.current = true;
     beginFetch();
     try {
-      const response = await fetch(`${API_BASE}/${mediaType}?filtro=populares&limit=40`);
+      const params = new URLSearchParams({ filtro: 'populares', limit: '40' });
+      if (mediaType === 'filmes' && emAltaDisponibilidade !== 'ambos') {
+        params.set('disponibilidade', emAltaDisponibilidade);
+      }
+      const response = await fetch(`${API_BASE}/${mediaType}?${params.toString()}`);
       const data = await response.json();
       setEmAltaItems(Array.isArray(data?.results) ? data.results : []);
-      emAltaLoadedRef.current = true;
+      emAltaLoadedKeyRef.current = key;
     } catch (error) {
       console.error(`Error fetching "em alta" ${mediaType}:`, error);
     } finally {
       fetchingEmAltaRef.current = false;
       endFetch();
     }
-  }, [mediaType]);
+  }, [mediaType, emAltaDisponibilidade]);
+
+  // Recarrega o "Em Alta" ao entrar no modo ou ao trocar a sub-opção de disponibilidade
+  // (o guard em loadEmAlta evita refetch se a combinação já foi carregada).
+  useEffect(() => {
+    if (!emAltaMode) return;
+    void loadEmAlta();
+  }, [emAltaMode, loadEmAlta]);
 
   const toggleEmAlta = () => {
-    setEmAltaMode((prev) => {
-      const next = !prev;
-      if (next) void loadEmAlta();
-      return next;
-    });
+    const next = !emAltaMode;
+    if (next && mediaType === 'filmes') {
+      setEmAltaDisponibilidade('cinema');
+    }
+    setEmAltaMode(next);
   };
 
   useEffect(() => {
@@ -330,14 +377,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!emblaApi || isFetching) return;
     const now = new Date();
     const merged = await loadMonth(now.getFullYear(), now.getMonth() + 1);
-    const list = selectedGenre
-      ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
-      : merged;
+    const list = applyDisplayFilters(merged);
     const todayIndex = calculateCarouselStartIndex(list);
     lastTitleMonthKey.current = '';
     emblaApi.scrollTo(todayIndex, false);
     updateTitleFromIndex(todayIndex, list);
-  }, [emblaApi, isFetching, loadMonth, selectedGenre, updateTitleFromIndex]);
+  }, [emblaApi, isFetching, loadMonth, applyDisplayFilters, updateTitleFromIndex]);
 
   const wasEmAltaMode = useRef(false);
   useEffect(() => {
@@ -370,9 +415,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
     for (let attempt = 0; attempt < EMPTY_MONTH_NAV_LIMIT; attempt++) {
       const merged = await loadMonth(target.year, target.month);
-      const list = selectedGenre
-        ? merged.filter((item) => item.generos_api?.includes(selectedGenre))
-        : merged;
+      const list = applyDisplayFilters(merged);
 
       const targetIndex = findIndexForMonth(list, target.year, target.month);
       if (targetIndex !== -1) {
@@ -420,6 +463,38 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             >
               <TrendingUp className="h-4 w-4" />
             </button>
+            {emAltaMode && mediaType === 'filmes' && (
+              <div
+                className="flex items-center rounded-lg border border-border bg-card overflow-hidden"
+                role="group"
+                aria-label="Filtrar Em Alta por disponibilidade"
+              >
+                <button
+                  onClick={() => setEmAltaDisponibilidade('cinema')}
+                  className={`p-2 orbe-text-primary hover:bg-muted transition-colors ${emAltaDisponibilidade === 'cinema' ? 'bg-primary text-primary-foreground' : ''}`}
+                  title="Em cartaz no cinema"
+                  aria-pressed={emAltaDisponibilidade === 'cinema'}
+                >
+                  <Clapperboard className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEmAltaDisponibilidade('streaming')}
+                  className={`p-2 orbe-text-primary hover:bg-muted transition-colors border-l border-border ${emAltaDisponibilidade === 'streaming' ? 'bg-primary text-primary-foreground' : ''}`}
+                  title="Disponível em streaming"
+                  aria-pressed={emAltaDisponibilidade === 'streaming'}
+                >
+                  <Tv className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEmAltaDisponibilidade('ambos')}
+                  className={`p-2 orbe-text-primary hover:bg-muted transition-colors border-l border-border ${emAltaDisponibilidade === 'ambos' ? 'bg-primary text-primary-foreground' : ''}`}
+                  title="Cinema e streaming"
+                  aria-pressed={emAltaDisponibilidade === 'ambos'}
+                >
+                  <Blend className="h-4 w-4" />
+                </button>
+              </div>
+            )}
             <button
               onClick={toggleFastScroll}
               className={`${CONTROL_BTN} ${fastScrollEnabled ? 'bg-primary text-primary-foreground border-primary' : ''}`}
@@ -435,6 +510,18 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                {mediaType === 'filmes' && !emAltaMode && (
+                  <>
+                    <DropdownMenuCheckboxItem
+                      checked={showAllFilmes}
+                      onCheckedChange={setShowAllFilmes}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      Mostrar todos (inclusive sem disponibilidade)
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onSelect={() => setSelectedGenre(null)}>Todos os Gêneros</DropdownMenuItem>
                 {genres.map((genre) => (
                   <DropdownMenuItem key={genre} onSelect={() => setSelectedGenre(genre)}>
