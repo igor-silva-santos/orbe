@@ -112,7 +112,6 @@ export const apiClient = {
     return response.json();
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   patch: async (endpoint: string, data: any) => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -144,7 +143,6 @@ export const apiClient = {
     return response.json();
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   put: async (endpoint: string, data: any) => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
