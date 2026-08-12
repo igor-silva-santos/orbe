@@ -1,25 +1,41 @@
-import { prisma, tmdbApi } from './clients';
+import { prisma, tmdb } from './clients';
 import { logger } from './logger';
 import puppeteer, { Browser } from 'puppeteer';
+import { parseFilmeTmdbDisponibilidade, refreshFilmeAvailabilityFromTmdb } from './filmeAvailability';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function checkStreamingAvailability(tmdbId: number) {
+async function checkStreamingAvailability(tmdbId: number, filmeDbId: number) {
   try {
-    const response = await tmdbApi.get(`/movie/${tmdbId}/watch/providers`);
-    const brProviders = response.data.results?.BR;
-    const digitalRelease = brProviders?.rent || brProviders?.buy || brProviders?.flatrate;
+    const movieDetails = await tmdb.movieInfo({
+      id: tmdbId,
+      language: 'pt-BR',
+      append_to_response: 'watch/providers,release_dates',
+    });
+    const result = await refreshFilmeAvailabilityFromTmdb(
+      prisma,
+      { id: filmeDbId, tmdbId },
+      movieDetails,
+    );
 
-    if (digitalRelease && digitalRelease.length > 0) {
-      return {
-        available: true,
-        providers: digitalRelease.map((p: any) => p.provider_name),
-      };
-    }
-    return { available: false, providers: [] as string[] };
+    const brProviders = movieDetails['watch/providers']?.results?.BR;
+    const digitalRelease = brProviders?.rent || brProviders?.buy || brProviders?.flatrate;
+    const providerNames = digitalRelease?.map((p: any) => p.provider_name) ?? [];
+
+    return {
+      available: result.estreiaStreaming && result.providerCount > 0,
+      providers: providerNames,
+      estreiaStreaming: result.estreiaStreaming,
+      estreiaCinema: result.estreiaCinema,
+    };
   } catch (error) {
     logger.error(`Erro ao verificar streaming para TMDB ID ${tmdbId}:`, error);
-    return { available: false, providers: [] as string[] };
+    return {
+      available: false,
+      providers: [] as string[],
+      estreiaStreaming: false,
+      estreiaCinema: false,
+    };
   }
 }
 
@@ -138,7 +154,7 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
 
     const targetMovies = await prisma.filme.findMany({
       where: {
-        tipo_midia: 'filme',
+        estreia_cinema: true,
         OR: [{ voteCount: { gt: 25 } }, { popularity: { gt: 10 } }],
         releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead },
       },
@@ -215,7 +231,7 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
           logger.info(`⏭️ "${filme.title}" — pré-venda já confirmada, pulando consulta.`);
         }
 
-        const streaming = await checkStreamingAvailability(filme.tmdbId);
+        const streaming = await checkStreamingAvailability(filme.tmdbId, filme.id);
         const isNowDigital = streaming.available && !filme.streamingProviders.length;
 
         await prisma.filme.update({
@@ -226,7 +242,11 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
             tem_sessoes: temSessoes,
             em_prevenda: emPrevenda,
             prevenda_confirmada: prevendaConfirmada,
-            ultima_verificacao_ingresso: new Date(),
+            ultima_verificacao_ingresso: ingressoMode !== 'none' ? new Date() : filme.ultima_verificacao_ingresso,
+            estreia_streaming: streaming.estreiaStreaming,
+            estreia_cinema: streaming.estreiaCinema,
+            emCartaz: streaming.estreiaCinema ? filme.emCartaz : false,
+            emBreve: streaming.estreiaCinema ? filme.emBreve : false,
             status: streaming.available ? 'Released' : filme.status,
           },
         });

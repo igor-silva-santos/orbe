@@ -344,6 +344,8 @@ export const mapFilmeToMidia = (filme: any) => {
     ingresso_link: filme.ingresso_link,
     tem_sessoes: filme.tem_sessoes ?? false,
     em_cartaz: filme.emCartaz ?? false,
+    estreia_cinema: filme.estreia_cinema ?? false,
+    estreia_streaming: filme.estreia_streaming ?? false,
     popularity: filme.popularity ?? null,
     status: filme.status,
     status_label: translateTmdbStatus(filme.status),
@@ -568,10 +570,10 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
     logo_path: p.provider.logoPath ?? null,
   })),
   em_prevenda: filme.em_prevenda ?? false,
-  // Disponibilidade — usada pelo carrossel de lançamentos pra filtrar por padrão
-  // filmes sem sessão de cinema nem streamer (ver filtro "mostrar todos" no front).
   em_cartaz: filme.emCartaz ?? false,
   tem_sessoes: filme.tem_sessoes ?? false,
+  estreia_cinema: filme.estreia_cinema ?? false,
+  estreia_streaming: filme.estreia_streaming ?? false,
 });
 
 export const mapSerieToCarouselCard = (serie: any) => ({

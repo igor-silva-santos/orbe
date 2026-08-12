@@ -67,7 +67,13 @@ const ANIME_DETAIL_QUERY = `
 
 function mapTmdbMovieToDetails(
   movie: any,
-  dbExtras?: { em_prevenda?: boolean | null; ingresso_link?: string | null; tem_sessoes?: boolean | null }
+  dbExtras?: {
+    em_prevenda?: boolean | null;
+    ingresso_link?: string | null;
+    tem_sessoes?: boolean | null;
+    estreia_cinema?: boolean | null;
+    estreia_streaming?: boolean | null;
+  }
 ) {
   const brProviders = movie['watch/providers']?.results?.BR;
 
@@ -88,6 +94,8 @@ function mapTmdbMovieToDetails(
     em_prevenda: dbExtras?.em_prevenda ?? false,
     ingresso_link: dbExtras?.ingresso_link ?? null,
     tem_sessoes: dbExtras?.tem_sessoes ?? false,
+    estreia_cinema: dbExtras?.estreia_cinema ?? false,
+    estreia_streaming: dbExtras?.estreia_streaming ?? false,
     genres: (movie.genres ?? []).map((g: any) => ({
       genero: { id: g.id, name: g.name, tmdbId: g.id },
     })),
@@ -344,7 +352,15 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
       }),
       prisma.filme.findUnique({
         where: { tmdbId },
-        select: { em_prevenda: true, ingresso_link: true, tem_sessoes: true, premiacoes: true, popularity: true },
+        select: {
+          em_prevenda: true,
+          ingresso_link: true,
+          tem_sessoes: true,
+          premiacoes: true,
+          popularity: true,
+          estreia_cinema: true,
+          estreia_streaming: true,
+        },
       }),
       fetchTmdbPtOverview('movie', tmdbId),
     ]);

@@ -54,15 +54,13 @@ const EMPTY_MONTH_NAV_LIMIT = 8;
 
 type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
 
-/** Filme em cinema (cartaz/sessões/pré-venda) ou com streaming. */
+/** Filme em cinema (TMDB + cartaz/sessões/pré-venda) ou com streaming. */
 const hasFilmeDisponibilidade = (item: Midia): boolean => {
   const filme = item as Filme;
-  return (
-    Boolean(filme.em_cartaz) ||
-    Boolean(filme.tem_sessoes) ||
-    Boolean(filme.em_prevenda) ||
-    (item.plataformas_api?.length ?? 0) > 0
-  );
+  const temCinema =
+    Boolean(filme.estreia_cinema) &&
+    (Boolean(filme.em_cartaz) || Boolean(filme.tem_sessoes) || Boolean(filme.em_prevenda));
+  return temCinema || Boolean(filme.estreia_streaming) || (item.plataformas_api?.length ?? 0) > 0;
 };
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {

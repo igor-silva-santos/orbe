@@ -9,7 +9,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
-import { INGRESSO_FALLBACK_URL } from '@/lib/ingresso';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
@@ -38,12 +37,18 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
 
   const isFutureRelease = releaseDate && releaseDate > now;
   const filmeTitle = resolveFilmeTitle(filme);
-  const ingressoUrl = filme.ingresso_link || INGRESSO_FALLBACK_URL;
   const canBuyTickets = filme.tem_sessoes === true;
+  const estreiaCinema = Boolean(filme.estreia_cinema);
+  const estreiaStreaming = Boolean(filme.estreia_streaming);
+  const ingressoIndisponivel = estreiaCinema && !filme.ingresso_link;
 
   const streamingProviders = (filme.streamingProviders || []).filter(
     (p) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name)
   );
+
+  const hasStreamingInfo = estreiaStreaming || streamingProviders.length > 0;
+  const hasCinemaInfo = estreiaCinema;
+  const ondeAssistirDesconhecido = !hasStreamingInfo && !hasCinemaInfo;
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -68,7 +73,14 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
               </Button>
             )}
 
-            <IngressoButton url={ingressoUrl} canBuy={canBuyTickets} emPrevenda={Boolean(filme.em_prevenda)} />
+            {estreiaCinema && (
+              <IngressoButton
+                url={filme.ingresso_link}
+                canBuy={canBuyTickets}
+                emPrevenda={Boolean(filme.em_prevenda)}
+                unavailable={ingressoIndisponivel}
+              />
+            )}
 
             <Button variant="outline" asChild>
               <a
@@ -93,32 +105,59 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
         </section>
       )}
 
-      {streamingProviders.length > 0 && (
-        <section>
-          <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
-          <div className="flex flex-wrap gap-4 sm:gap-6 mt-2">
-            {streamingProviders.map((p) => (
-              <a
-                key={p.provider.name}
-                href={p.url!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90"
-                aria-label={`Abrir ${p.provider.name}`}
-              >
-                <PlatformIcon
-                  platform={p.provider.name}
-                  logoPath={p.provider.logoPath}
-                  size={48}
-                  variant="circle"
-                  title={p.provider.name}
-                />
-                <span className="text-xs text-center text-muted-foreground leading-tight">{p.provider.name}</span>
-              </a>
-            ))}
+      <section>
+        <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Onde assistir</h2>
+        {ondeAssistirDesconhecido ? (
+          <p className="text-muted-foreground">Desconhecido</p>
+        ) : (
+          <div className="space-y-4">
+            {hasStreamingInfo && streamingProviders.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Streaming</h3>
+                <div className="flex flex-wrap gap-4 sm:gap-6">
+                  {streamingProviders.map((p) => (
+                    <a
+                      key={p.provider.name}
+                      href={p.url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90"
+                      aria-label={`Abrir ${p.provider.name}`}
+                    >
+                      <PlatformIcon
+                        platform={p.provider.name}
+                        logoPath={p.provider.logoPath}
+                        size={48}
+                        variant="circle"
+                        title={p.provider.name}
+                      />
+                      <span className="text-xs text-center text-muted-foreground leading-tight">{p.provider.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            {hasStreamingInfo && streamingProviders.length === 0 && (
+              <p className="text-sm text-muted-foreground">Disponível em streaming (provedores em atualização).</p>
+            )}
+            {hasCinemaInfo && (
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Cinema</h3>
+                {ingressoIndisponivel ? (
+                  <p className="text-sm text-muted-foreground">Ingresso.com indisponível no momento.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-col items-center gap-1.5 w-20">
+                      <PlatformIcon platform="cinema" size={48} variant="circle" title="Cinema" />
+                      <span className="text-xs text-center text-muted-foreground leading-tight">Cinema</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {trailerKey && (
         <section>
