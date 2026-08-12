@@ -531,7 +531,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   className={SLIDE_CLASS}
                 >
                   {!isRendered ? (
-                    <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-muted" aria-hidden />
+                    <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
                   ) : item.type === 'separator' ? (
                     <DaySeparatorCard dayName={item.dayName} />
                   ) : (

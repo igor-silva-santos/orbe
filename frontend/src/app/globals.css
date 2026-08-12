@@ -24,6 +24,9 @@
   --input: #C7D2FE;
   --ring: #4F46E5;
   --radius: 1.25rem;
+  /* --muted (#EBEEF8) fica quase idêntico a --background (#EEF2FF) e a --card (#FFFFFF),
+     deixando os skeletons de carregamento praticamente invisíveis no tema claro. */
+  --skeleton: #D7DDF2;
 
   /* Orbe Nerd — marca Anime-Pop (indigo + laranja + hard shadow) */
   --orbe-gradient-start: #4F46E5;
@@ -67,6 +70,7 @@
   --secondary-foreground: #E0E7FF;
   --muted: #252345;
   --muted-foreground: #A5B4FC;
+  --skeleton: #2D2B52;
   --accent: #252345;
   --accent-foreground: #E0E7FF;
   --destructive: #EF4444;
@@ -113,6 +117,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-skeleton: var(--skeleton);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
