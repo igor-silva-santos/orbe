@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { getWsUrl } from '@/lib/apiBase';
 
 export interface SyncMessage {
-  type: 'SYNC_START' | 'SYNC_PROGRESS' | 'SYNC_COMPLETE' | 'SYNC_ERROR';
-  mediaType: string;
+  type: 'SYNC_START' | 'SYNC_PROGRESS' | 'SYNC_COMPLETE' | 'SYNC_ERROR' | 'CACHE_INVALIDATED';
+  mediaType?: string;
+  scope?: string;
   total?: number;
   current?: number;
   message?: string;
