@@ -6,6 +6,9 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Necessario para o Dockerfile: ele copia .next/standalone e roda server.js dali.
+  // Sem isso o Next nunca gera essa pasta e o build da imagem falha no COPY.
+  output: 'standalone',
   images: {
     minimumCacheTTL: 86400,
     remotePatterns: [

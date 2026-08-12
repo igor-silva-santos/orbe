@@ -10,7 +10,7 @@ const MAX_NOME_LENGTH = 150;
 const MAX_ASSUNTO_LENGTH = 150;
 const MAX_MENSAGEM_LENGTH = 5000;
 
-function isValidEmail(value: unknown): value is string {
+export function isValidEmail(value: unknown): value is string {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 

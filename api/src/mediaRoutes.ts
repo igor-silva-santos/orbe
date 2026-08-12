@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
-import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText, withPortugueseTranslation, matchesPremiacaoFilters } from './mappers';
+import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
 import {
   filmeQualityFilter,
@@ -51,6 +51,9 @@ const CAROUSEL_ITEM_LIMIT = 500;
 const HOMEPAGE_ITEM_LIMIT = 80;
 const DEFAULT_LIST_LIMIT = 48;
 const MAX_LIST_LIMIT = 200;
+// F-11: teto de /eventos — cada evento inclui ate 40 jogos (eventInclude), entao um
+// teto fixo evita carregar a tabela Event inteira de uma vez.
+const EVENTOS_LIST_LIMIT = 100;
 
 const parsePagination = (query: { page?: string; limit?: string }) => {
   const page = Math.max(1, parseInt(query.page ?? '1', 10) || 1);
@@ -62,6 +65,22 @@ const parsePositiveIntId = (raw: string): number | null => {
   const id = parseInt(raw, 10);
   if (!Number.isInteger(id) || id <= 0) return null;
   return id;
+};
+
+// F-07: extrai os anos distintos direto no Postgres com EXTRACT(YEAR FROM ...) em vez
+// de trazer uma linha por data distinta (potencialmente dezenas de milhares) so pra
+// pegar getFullYear() em JS depois. `table` e `column` sao sempre literais internos
+// (nunca entrada do usuario), entao interpolar via Prisma.raw aqui e seguro.
+const getDistinctYears = async (table: 'Filme' | 'Serie' | 'Jogo', column: string): Promise<number[]> => {
+  const col = Prisma.raw(`"${column}"`);
+  const tbl = Prisma.raw(`"${table}"`);
+  const rows = await prisma.$queryRaw<{ year: number }[]>(Prisma.sql`
+    SELECT DISTINCT EXTRACT(YEAR FROM ${col})::int as year
+    FROM ${tbl}
+    WHERE ${col} IS NOT NULL
+    ORDER BY year DESC
+  `);
+  return rows.map((r) => r.year);
 };
 
 const DETAILS_CACHE_SECONDS = 300;
@@ -326,10 +345,12 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
 
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-      cinema: await Promise.all(cinema.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-      streamingFilmes: await Promise.all(streamingFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-      streamingSeries: await Promise.all(streamingSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
-      destaquesJogos: await Promise.all(destaquesJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+      // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+      // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
+      cinema: cinema.map((f) => mapFilmeToMidia(f)),
+      streamingFilmes: streamingFilmes.map((f) => mapFilmeToMidia(f)),
+      streamingSeries: streamingSeries.map((s) => mapSerieToMidia(s)),
+      destaquesJogos: destaquesJogos.map((j) => mapJogoToMidia(j)),
     });
   } catch (error) {
     logger.error(`Erro ao buscar conteúdo de hoje: ${error}`);
@@ -523,21 +544,14 @@ router.put('/filmes/:id', adminMiddleware, async (req, res) => {
 });
 
 // Rota para buscar opções de filtros de Filmes
-router.get('/filmes/filtros', async (req, res) => {
+router.get('/filmes/filtros', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   try {
     const genres = await prisma.genero.findMany({
       where: { filmes: { some: {} } }, // Apenas gêneros que têm filmes
       orderBy: { name: 'asc' },
     });
 
-    const years = await prisma.filme.findMany({
-      where: { releaseDate: { not: null } },
-      distinct: ['releaseDate'],
-      select: { releaseDate: true },
-      orderBy: { releaseDate: 'desc' },
-    });
-
-    const distinctYears = [...new Set(years.map(y => y.releaseDate!.getFullYear()))];
+    const distinctYears = await getDistinctYears('Filme', 'releaseDate');
 
     const statuses = await prisma.filme.findMany({
         where: { status: { not: null } },
@@ -568,7 +582,7 @@ router.get('/filmes/filtros', async (req, res) => {
 });
 
 // Rota para o Carrossel da Homepage de Filmes
-router.get('/filmes/homepage-carousel', async (req, res) => {
+router.get('/filmes/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
     const startYear = currentYear - 5;
@@ -733,21 +747,14 @@ router.put('/series/:id', adminMiddleware, async (req, res) => {
 });
 
 // Rota para buscar opções de filtros de Séries
-router.get('/series/filtros', async (req, res) => {
+router.get('/series/filtros', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   try {
     const genres = await prisma.genero.findMany({
       where: { series: { some: {} } },
       orderBy: { name: 'asc' },
     });
 
-    const years = await prisma.serie.findMany({
-      where: { firstAirDate: { not: null } },
-      distinct: ['firstAirDate'],
-      select: { firstAirDate: true },
-      orderBy: { firstAirDate: 'desc' },
-    });
-
-    const distinctYears = [...new Set(years.map(y => y.firstAirDate!.getFullYear()))];
+    const distinctYears = await getDistinctYears('Serie', 'firstAirDate');
 
     const statuses = await prisma.serie.findMany({
         where: { status: { not: null } },
@@ -778,7 +785,7 @@ router.get('/series/filtros', async (req, res) => {
 });
 
 // Rota para o Carrossel da Homepage de Séries
-router.get('/series/homepage-carousel', async (req, res) => {
+router.get('/series/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
     const startYear = currentYear - 5;
@@ -997,7 +1004,10 @@ router.put('/animes/:id', adminMiddleware, async (req, res) => {
 });
 
 // Rota para buscar opções de filtros de Animes
-router.get('/animes/filtros', async (req, res) => {
+// Nota F-07: aqui `seasonYear` ja e o ano em si (coluna Int), nao uma data —
+// diferente de filme/serie/jogo, o distinct abaixo ja retorna uma linha por ano
+// (nao uma por data), entao nao ha necessidade de EXTRACT(YEAR FROM ...) via SQL raw.
+router.get('/animes/filtros', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   try {
     const genres = await prisma.animeGenero.findMany({ orderBy: { name: 'asc' } });
     const years = await prisma.anime.findMany({ where: { seasonYear: { not: null } }, distinct: ['seasonYear'], select: { seasonYear: true }, orderBy: { seasonYear: 'desc' } });
@@ -1025,14 +1035,22 @@ router.get('/animes/filtros', async (req, res) => {
 // Rota para o próximo episódio de um anime (não cacheada)
 router.get('/animes/:id/next-episode', async (req, res) => {
   const { id } = req.params;
+  const anilistId = parsePositiveIntId(id);
+  if (!anilistId) {
+    return res.status(400).json({ error: 'ID de anime inválido.' });
+  }
   try {
     const nextAiring = await prisma.airingSchedule.findFirst({
       where: {
-        anime: { anilistId: Number(id) },
+        anime: { anilistId },
         airingAt: { gte: new Date() },
       },
+      // F-13: ordenar por `episode` pega o menor numero de episodio entre os
+      // futuros, nao o mais proximo no tempo — com reexibicao/episodio especial
+      // fora de ordem isso mostra o episodio errado. `airingAt` e o campo certo
+      // pra "proximo episodio" de fato.
       orderBy: {
-        episode: 'asc',
+        airingAt: 'asc',
       },
     });
     res.json(nextAiring);
@@ -1149,19 +1167,13 @@ router.put('/jogos/:id', adminMiddleware, async (req, res) => {
 });
 
 // Rota para buscar opções de filtros de Jogos
-router.get('/jogos/filtros', async (req, res) => {
+router.get('/jogos/filtros', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   try {
     const genres = await prisma.jogoGenero.findMany({ orderBy: { name: 'asc' } });
     const platforms = await prisma.jogoPlataforma.findMany({ orderBy: { name: 'asc' } });
     const gameModes = await prisma.gameMode.findMany({ orderBy: { name: 'asc' } });
     const gameEngines = await prisma.gameEngine.findMany({ orderBy: { name: 'asc' } });
-    const years = await prisma.jogo.findMany({
-      where: { firstReleaseDate: { not: null } },
-      distinct: ['firstReleaseDate'],
-      select: { firstReleaseDate: true },
-      orderBy: { firstReleaseDate: 'desc' },
-    });
-    const distinctYears = [...new Set(years.map((y) => y.firstReleaseDate!.getFullYear()))];
+    const distinctYears = await getDistinctYears('Jogo', 'firstReleaseDate');
 
     res.json({
       genres: genres.map(g => g.name),
@@ -1178,7 +1190,7 @@ router.get('/jogos/filtros', async (req, res) => {
 });
 
 // Rota para o Carrossel da Homepage de Jogos
-router.get('/jogos/homepage-carousel', async (req, res) => {
+router.get('/jogos/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
     const startYear = currentYear - 5;
@@ -1354,61 +1366,63 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) =>
   ): MappedJogo[] => jogos.filter(matches).slice(0, perGroup);
 
   try {
-    const recentJogos = await prisma.jogo.findMany({
-      where: {
-        AND: [
-          jogoQualityFilter,
-          {
-            OR: [
-              { firstReleaseDate: { gte: weekAgo } },
-              { hypes: { gte: 5 } },
-              { rating: { gte: 75 } },
-            ],
-          },
-        ],
-      },
-      orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
-      take: 150,
-      include: {
-        platforms: { include: { plataforma: true } },
-        genres: { include: { genero: true } },
-        gameModes: { include: { gameMode: true } },
-      },
-    });
+    // F-10: as tres consultas nao dependem uma da outra — rodam em paralelo em vez
+    // de encadeadas, mesmo padrao ja usado em /hoje e /eventos/resumo neste arquivo.
+    const [recentJogos, steamTrending, steamSales] = await Promise.all([
+      prisma.jogo.findMany({
+        where: {
+          AND: [
+            jogoQualityFilter,
+            {
+              OR: [
+                { firstReleaseDate: { gte: weekAgo } },
+                { hypes: { gte: 5 } },
+                { rating: { gte: 75 } },
+              ],
+            },
+          ],
+        },
+        orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
+        take: 150,
+        include: {
+          platforms: { include: { plataforma: true } },
+          genres: { include: { genero: true } },
+          gameModes: { include: { gameMode: true } },
+        },
+      }),
+      prisma.jogo.findMany({
+        where: {
+          AND: [
+            jogoQualityFilter,
+            { steamPlayerCount: { not: null } },
+          ],
+        },
+        orderBy: { steamPlayerCount: 'desc' },
+        take: 12,
+        include: {
+          platforms: { include: { plataforma: true } },
+          genres: { include: { genero: true } },
+          gameModes: { include: { gameMode: true } },
+        },
+      }),
+      prisma.jogo.findMany({
+        where: {
+          AND: [
+            jogoQualityFilter,
+            { steamDiscountPercent: { gte: 10 } },
+          ],
+        },
+        orderBy: [{ steamDiscountPercent: 'desc' }, { rating: 'desc' }],
+        take: 12,
+        include: {
+          platforms: { include: { plataforma: true } },
+          genres: { include: { genero: true } },
+          gameModes: { include: { gameMode: true } },
+        },
+      }),
+    ]);
 
     const mapped = recentJogos.map(mapJogoToMidia);
-
-    const steamTrending = await prisma.jogo.findMany({
-      where: {
-        AND: [
-          jogoQualityFilter,
-          { steamPlayerCount: { not: null } },
-        ],
-      },
-      orderBy: { steamPlayerCount: 'desc' },
-      take: 12,
-      include: {
-        platforms: { include: { plataforma: true } },
-        genres: { include: { genero: true } },
-        gameModes: { include: { gameMode: true } },
-      },
-    });
-
-    const steamSales = await prisma.jogo.findMany({
-      where: {
-        AND: [
-          jogoQualityFilter,
-          { steamDiscountPercent: { gte: 10 } },
-        ],
-      },
-      orderBy: [{ steamDiscountPercent: 'desc' }, { rating: 'desc' }],
-      take: 12,
-      include: {
-        platforms: { include: { plataforma: true } },
-        genres: { include: { genero: true } },
-        gameModes: { include: { gameMode: true } },
-      },
-    });
 
     const hasSteamData = steamTrending.length > 0 || steamSales.length > 0;
 
@@ -1472,34 +1486,36 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
     let results: any[] = [];
 
+    // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+    // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     if (type === 'filmes') {
       const popularFilmes = await prisma.filme.findMany({
         where: filmeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularFilmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))));
+      results = popularFilmes.map((f) => mapFilmeToMidia(f));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularSeries.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))));
+      results = popularSeries.map((s) => mapSerieToMidia(s));
     } else if (type === 'animes') {
       const popularAnimes = await prisma.anime.findMany({
         where: animeQualityFilter,
         orderBy: { popularity: 'desc' },
         take,
       });
-      results = await Promise.all(popularAnimes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))));
+      results = popularAnimes.map((a) => mapAnimeToMidia(a));
     } else if (type === 'jogos') {
       const popularJogos = await prisma.jogo.findMany({
         where: jogoQualityFilter,
         orderBy: { rating: 'desc' },
         take,
       });
-      results = await Promise.all(popularJogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))));
+      results = popularJogos.map((j) => mapJogoToMidia(j));
     } else {
       const takeForEach = Math.ceil(take / 4) + 2;
 
@@ -1532,10 +1548,10 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       ]);
 
       const trendingResults = [
-        ...(await Promise.all(filmes.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f))))),
-        ...(await Promise.all(series.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s))))),
-        ...(await Promise.all(animes.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a))))),
-        ...(await Promise.all(jogos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j))))),
+        ...filmes.map((f) => mapFilmeToMidia(f)),
+        ...series.map((s) => mapSerieToMidia(s)),
+        ...animes.map((a) => mapAnimeToMidia(a)),
+        ...jogos.map((j) => mapJogoToMidia(j)),
       ];
 
       // Apenas pega os primeiros 10 resultados combinados, sem embaralhar
@@ -1692,6 +1708,71 @@ router.get('/premios/filtros', async (req, res) => {
   }
 });
 
+// F-05: filtra e pagina premiacoes direto no Postgres via jsonb (mesmo padrao de
+// /premios/filtros logo acima, com jsonb_array_elements) em vez de fazer 4 findMany
+// sem `take`, hidratar o catalogo inteiro e paginar o array combinado em memoria.
+type PremioTable = 'Filme' | 'Serie' | 'Anime' | 'Jogo';
+
+// Escapa os curingas do LIKE/ILIKE pra que um awardName contendo '%' ou '_' seja
+// tratado como texto literal, preservando a semantica de substring do
+// `.includes()` original (nao um padrao arbitrario).
+const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, (match) => `\\${match}`);
+
+// Mesma logica de matchesPremiacaoFilters (mappers.ts), traduzida pra SQL: um
+// registro so entra se tiver pelo menos um award "valido" — mesmo criterio de
+// parsePremiacoes() (nome nao vazio, ano > 0) — cujo nome contenha `awardName`
+// (case-insensitive, quando informado) e cujo ano seja exatamente `year` (quando
+// informado). Os filtros dinamicos combinam com AND, igual ao `.some(...)` original.
+const buildPremioAwardCondition = (awardName?: string, year?: number): Prisma.Sql => {
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`award->>'nome' IS NOT NULL AND btrim(award->>'nome') <> ''`,
+    Prisma.sql`award->>'ano' ~ '^[0-9]+$' AND (award->>'ano')::int > 0`,
+  ];
+  if (awardName) {
+    conditions.push(Prisma.sql`award->>'nome' ILIKE ${'%' + escapeLikePattern(awardName) + '%'} ESCAPE '\\'`);
+  }
+  if (year !== undefined && !Number.isNaN(year)) {
+    conditions.push(Prisma.sql`(award->>'ano')::int = ${year}`);
+  }
+  return Prisma.join(conditions, ' AND ');
+};
+
+// `table` vem sempre de PremioTable (literal interno, nunca entrada do usuario),
+// entao interpolar via Prisma.raw pra formar o identificador da tabela e seguro.
+const countPremioMatches = async (table: PremioTable, condition: Prisma.Sql): Promise<number> => {
+  const tbl = Prisma.raw(`"${table}"`);
+  const rows = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    SELECT COUNT(DISTINCT t.id)::bigint as count
+    FROM ${tbl} t
+    CROSS JOIN LATERAL jsonb_array_elements(
+      CASE WHEN jsonb_typeof(t.premiacoes) = 'array' THEN t.premiacoes ELSE '[]'::jsonb END
+    ) as award
+    WHERE ${condition}
+  `);
+  return Number(rows[0]?.count ?? 0);
+};
+
+const selectPremioIds = async (
+  table: PremioTable,
+  condition: Prisma.Sql,
+  offset: number,
+  take: number,
+): Promise<number[]> => {
+  if (take <= 0) return [];
+  const tbl = Prisma.raw(`"${table}"`);
+  const rows = await prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    SELECT DISTINCT t.id
+    FROM ${tbl} t
+    CROSS JOIN LATERAL jsonb_array_elements(
+      CASE WHEN jsonb_typeof(t.premiacoes) = 'array' THEN t.premiacoes ELSE '[]'::jsonb END
+    ) as award
+    WHERE ${condition}
+    ORDER BY t.id ASC
+    OFFSET ${offset} LIMIT ${take}
+  `);
+  return rows.map((r) => r.id);
+};
+
 // Rota para Premiações
 router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   const awardName = typeof req.query.awardName === 'string' ? req.query.awardName : undefined;
@@ -1710,30 +1791,61 @@ router.get('/premios', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, res) => {
   };
 
   try {
+    const condition = buildPremioAwardCondition(awardName, year);
+
+    // Ordem fixa filmes -> series -> animes -> jogos, igual ao comportamento antigo de
+    // concatenar os 4 arrays antes de fatiar. Cada tabela e contada e paginada no
+    // banco (nao mais em memoria) e so buscamos, com include completo, os registros
+    // que realmente caem dentro da janela [skip, skip+limit) pedida.
+    const tables: PremioTable[] = ['Filme', 'Serie', 'Anime', 'Jogo'];
+    const counts = await Promise.all(tables.map((table) => countPremioMatches(table, condition)));
+    const total = counts.reduce((sum, c) => sum + c, 0);
+
+    const idsByTable: Record<PremioTable, number[]> = { Filme: [], Serie: [], Anime: [], Jogo: [] };
+    let cursor = 0;
+    const idFetches: Promise<void>[] = [];
+    tables.forEach((table, i) => {
+      const segStart = cursor;
+      const segCount = counts[i];
+      cursor += segCount;
+      const localOffset = Math.max(skip, segStart) - segStart;
+      const localEnd = Math.min(skip + limit, segStart + segCount) - segStart;
+      const localTake = localEnd - localOffset;
+      if (localTake > 0) {
+        idFetches.push(
+          selectPremioIds(table, condition, localOffset, localTake).then((ids) => {
+            idsByTable[table] = ids;
+          }),
+        );
+      }
+    });
+    await Promise.all(idFetches);
+
     const [filmes, series, animes, jogos] = await Promise.all([
-      prisma.filme.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: premioInclude }),
-      prisma.serie.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: premioInclude }),
-      prisma.anime.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: { genres: { include: { genero: true } } } }),
-      prisma.jogo.findMany({ where: { NOT: { premiacoes: { equals: Prisma.DbNull } } }, include: jogoPremioInclude }),
+      idsByTable.Filme.length
+        ? prisma.filme.findMany({ where: { id: { in: idsByTable.Filme } }, include: premioInclude, orderBy: { id: 'asc' } })
+        : Promise.resolve([]),
+      idsByTable.Serie.length
+        ? prisma.serie.findMany({ where: { id: { in: idsByTable.Serie } }, include: premioInclude, orderBy: { id: 'asc' } })
+        : Promise.resolve([]),
+      idsByTable.Anime.length
+        ? prisma.anime.findMany({
+            where: { id: { in: idsByTable.Anime } },
+            include: { genres: { include: { genero: true } } },
+            orderBy: { id: 'asc' },
+          })
+        : Promise.resolve([]),
+      idsByTable.Jogo.length
+        ? prisma.jogo.findMany({ where: { id: { in: idsByTable.Jogo } }, include: jogoPremioInclude, orderBy: { id: 'asc' } })
+        : Promise.resolve([]),
     ]);
 
-    const filterAndMap = <T extends { premiacoes: unknown }>(
-      items: T[],
-      mapper: (item: T) => object
-    ) =>
-      items
-        .filter((item) => matchesPremiacaoFilters(item.premiacoes, awardName, year))
-        .map(mapper);
-
-    const allAwards = [
-      ...filterAndMap(filmes, mapFilmeToMidia as (item: typeof filmes[number]) => object),
-      ...filterAndMap(series, mapSerieToMidia as (item: typeof series[number]) => object),
-      ...filterAndMap(animes, mapAnimeToMidia as (item: typeof animes[number]) => object),
-      ...filterAndMap(jogos, mapJogoToMidia as (item: typeof jogos[number]) => object),
+    const results = [
+      ...filmes.map(mapFilmeToMidia),
+      ...series.map(mapSerieToMidia),
+      ...animes.map(mapAnimeToMidia),
+      ...jogos.map(mapJogoToMidia),
     ];
-
-    const total = allAwards.length;
-    const results = allAwards.slice(skip, skip + limit);
 
     res.json({ results, total, page, limit });
   } catch (error) {
@@ -1868,16 +1980,18 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
       }),
     ]);
 
+    // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
+    // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     res.json({
       eventos_games: eventosGames.map(mapEventToResponse),
       proximos: {
-        filmes: await Promise.all(filmesProximos.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
-        series: await Promise.all(seriesProximas.map(async (s) => withPortugueseTranslation(mapSerieToMidia(s)))),
-        animes: await Promise.all(animesProximos.map(async (a) => withPortugueseTranslation(mapAnimeToMidia(a)))),
-        jogos: await Promise.all(jogosProximos.map(async (j) => withPortugueseTranslation(mapJogoToMidia(j)))),
+        filmes: filmesProximos.map((f) => mapFilmeToMidia(f)),
+        series: seriesProximas.map((s) => mapSerieToMidia(s)),
+        animes: animesProximos.map((a) => mapAnimeToMidia(a)),
+        jogos: jogosProximos.map((j) => mapJogoToMidia(j)),
       },
       destaques_recentes: {
-        filmes: await Promise.all(filmesEmCartaz.map(async (f) => withPortugueseTranslation(mapFilmeToMidia(f)))),
+        filmes: filmesEmCartaz.map((f) => mapFilmeToMidia(f)),
         eventos: eventosRecentes.map(mapEventToResponse),
       },
     });
@@ -1909,6 +2023,11 @@ router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       where,
       include: eventInclude,
       orderBy: { start_time: 'asc' },
+      // F-11: sem isso a rota trazia a tabela Event inteira, cada evento com ate 40
+      // jogos incluidos (eventInclude). Nenhum consumidor atual pagina essa rota, entao
+      // um teto fixo (em vez de page/limit) evita a varredura sem quebrar o contrato
+      // de resposta (array simples) esperado por quem chama /eventos hoje.
+      take: EVENTOS_LIST_LIMIT,
     });
 
     res.json(events.map(mapEventToResponse));

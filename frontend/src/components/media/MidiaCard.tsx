@@ -75,10 +75,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     priority = false,
   }, ref) => {
 
-  if (!midia) {
-    return null;
-  }
-
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -97,6 +93,18 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
+  const isAnime = type === 'anime';
+  const nextAiringEpisode = isAnime ? (midia as Anime | undefined)?.nextAiringEpisode : null;
+  const countdown = useCountdown(nextAiringEpisode?.airingAt);
+
+  // Precisa vir depois de todas as chamadas de hook acima — Rules of Hooks exige ordem
+  // incondicional em toda renderização, e midia pode legitimamente vir vazio (ex.: item
+  // ainda não carregado de uma lista da API). Antes retornava cedo demais e derrubava a
+  // árvore React inteira (o carrossel, não só o card) na primeira vez que isso acontecesse.
+  if (!midia) {
+    return null;
+  }
+
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
   const providers = getStreamingProviders(midia);
@@ -105,10 +113,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   // `personagens`, que só vem preenchido no payload de detalhe — em cards de carrossel/lista
   // ficava sempre vazio e todo anime dublado aparecia como "Legendado".
   const dubStatus = type === 'anime' ? ((midia as Anime).dublagem_info ? 'Dublado' : 'Legendado') : null;
-
-  const isAnime = type === 'anime';
-  const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;
-  const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
