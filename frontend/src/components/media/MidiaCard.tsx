@@ -15,6 +15,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
+import { useSharedTick } from '@/hooks/useSharedTick';
 import {
   getStreamingProviders,
   getGamePlatforms,
@@ -26,45 +27,47 @@ import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
 
-const useCountdown = (targetDate: string | undefined) => {
-  const [timeLeft, setTimeLeft] = useState('');
+const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+const MINUTE_MS = 60 * 1000;
 
-  useEffect(() => {
-    if (!targetDate) return;
+const formatCountdown = (difference: number): string => {
+  if (difference <= 0) return 'Já disponível';
 
-    const updateCountdown = () => {
-      const difference = new Date(targetDate).getTime() - Date.now();
-      if (difference <= 0) {
-        setTimeLeft('Já disponível');
-        return false;
-      }
+  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
 
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  }
 
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-      } else {
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-      }
-      return true;
-    };
-
-    if (!updateCountdown()) return;
-
-    const interval = setInterval(() => {
-      if (!updateCountdown()) clearInterval(interval);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [targetDate]);
-
-  return timeLeft;
+  const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
+/**
+ * Deriva o texto de contagem regressiva a partir do ticker COMPARTILHADO (useSharedTick)
+ * em vez de criar um `setInterval` próprio por card — com dezenas de cards de anime no
+ * carrossel, isso virava dezenas de timers e re-renders por segundo simultâneos.
+ *
+ * Acima de 1 dia restante o card mostra só "Xd Yh Zm" (basta atualizar por minuto); só
+ * quando cai para o formato HH:MM:SS (menos de 1 dia) que assina o tick de 1s.
+ */
+const useCountdown = (targetDate: string | undefined): string => {
+  const targetMs = targetDate ? new Date(targetDate).getTime() : null;
+  const roughDifference = targetMs !== null ? targetMs - Date.now() : null;
+  const granularityMs = roughDifference !== null && roughDifference < ONE_DAY_MS ? 1000 : MINUTE_MS;
+
+  // Chamado incondicionalmente (sempre a mesma granularidade "por padrão" quando não há
+  // targetDate) pra respeitar Rules of Hooks — o hook em si já lida com null/ausência.
+  const now = useSharedTick(targetDate ? granularityMs : MINUTE_MS);
+
+  if (!targetDate || targetMs === null || now === null) return '';
+
+  return formatCountdown(targetMs - now);
+};
+
+const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   {
     midia,
     type,
@@ -75,7 +78,12 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
     priority = false,
   }, ref) => {
 
-  const { openSuperModal, openRatingModal } = useAppStore();
+  // Cada chamada assina só a fatia que usa (identidade estável entre renders) — assinar a
+  // store inteira (`useAppStore()` sem seletor) reinscrevia o card em TODA mudança global
+  // (busca, notificações, isLoading, scroll rápido), derrubando todos os cards montados
+  // a cada uma dessas mudanças, mesmo sem relação com o card em si.
+  const openSuperModal = useAppStore((s) => s.openSuperModal);
+  const openRatingModal = useAppStore((s) => s.openRatingModal);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -334,7 +342,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
         </TooltipContent>
     </Tooltip>
   );
-});
+}));
 
 MidiaCard.displayName = 'MidiaCard';
 

@@ -71,6 +71,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
   const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
+  // Espelha `emblaApi.selectedScrollSnap()` em estado reativo (atualizado no handler
+  // `onSelect` do embla abaixo) — ler `selectedScrollSnap()` direto durante o render não
+  // é reativo: rolar o carrossel não disparava re-render, então `isPriority` (que decide
+  // `loading="eager"` vs `"lazy"` nas imagens) ficava congelado na posição de alguma
+  // renderização anterior.
+  const [selectedSnap, setSelectedSnap] = useState(startIndex);
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -265,12 +271,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   const loadMonthsInDirection = useCallback(
     async (year: number, month: number, direction: 1 | -1, depth = monthPrefetchDepth) => {
-      for (let step = 1; step <= depth; step++) {
-        const target = addMonths(year, month, step * direction);
-        await loadMonth(target.year, target.month);
-      }
+      // Busca todos os meses em PARALELO (em vez de um `await` por mês dentro de um for),
+      // e mescla os resultados de uma vez só no final. `mergeMediaByDate` já dedupe por id
+      // e reordena por data de lançamento, então a ordem de chegada dos fetches não importa.
+      const targets = Array.from({ length: depth }, (_, step) => addMonths(year, month, (step + 1) * direction));
+      const results = await Promise.all(targets.map((target) => fetchMediaByMonth(target.year, target.month)));
+      const combined = results.filter((data): data is Midia[] => Array.isArray(data) && data.length > 0).flat();
+      if (combined.length) mergeItems(combined);
     },
-    [loadMonth, monthPrefetchDepth]
+    [fetchMediaByMonth, mergeItems, monthPrefetchDepth]
   );
 
   const prefetchAdjacentMonthsForIndex = useCallback(
@@ -315,9 +324,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!emblaApi) return;
 
     const onSelect = () => {
+      const selectedIndex = emblaApi.selectedScrollSnap();
+      // Atualizado sempre (mesmo em modo Em Alta) — é o que mantém `isPriority` correto
+      // nas imagens enquanto o usuário rola, independente do modo do carrossel.
+      setSelectedSnap(selectedIndex);
       if (emAltaMode) return;
       const items = filteredItemsRef.current;
-      const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
       updateTitleFromIndex(selectedIndex, items);
       // Dispara o prefetch já durante o arraste (não só ao soltar) — em rolagens rápidas
@@ -412,29 +424,35 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!monthKey) return;
 
     const [year, month] = monthKey.split('-').map(Number);
-    let target = addMonths(year, month, direction === 'next' ? 1 : -1);
+    const step = direction === 'next' ? 1 : -1;
 
-    for (let attempt = 0; attempt < EMPTY_MONTH_NAV_LIMIT; attempt++) {
-      const merged = await loadMonth(target.year, target.month);
-      const list = applyDisplayFilters(merged);
+    // Busca todos os candidatos (até EMPTY_MONTH_NAV_LIMIT meses na direção escolhida) em
+    // PARALELO, em vez de esperar cada mês por vez procurando o primeiro não-vazio — isso
+    // podia encadear até 8 requests sequenciais com os botões desabilitados o tempo todo.
+    // Ainda respeitamos a ordem: com todos os resultados já resolvidos, percorremos os
+    // candidatos na ordem certa e paramos no primeiro mês não-vazio.
+    const candidates = Array.from({ length: EMPTY_MONTH_NAV_LIMIT }, (_, i) => addMonths(year, month, (i + 1) * step));
+    const results = await Promise.all(candidates.map((target) => loadMonth(target.year, target.month)));
+
+    for (let i = 0; i < candidates.length; i++) {
+      const target = candidates[i];
+      const list = applyDisplayFilters(results[i]);
 
       const targetIndex = findIndexForMonth(list, target.year, target.month);
       if (targetIndex !== -1) {
         lastTitleMonthKey.current = '';
         emblaApi.scrollTo(targetIndex, true);
         updateTitleFromIndex(targetIndex, list);
-        await loadMonthsInDirection(target.year, target.month, direction === 'next' ? 1 : -1);
+        await loadMonthsInDirection(target.year, target.month, step);
         return;
       }
-
-      target = addMonths(target.year, target.month, direction === 'next' ? 1 : -1);
     }
 
-    setCurrentTitle(formatCarouselMonthTitle(new Date(target.year, target.month - 1, 1)));
+    const lastTarget = candidates[candidates.length - 1];
+    setCurrentTitle(formatCarouselMonthTitle(new Date(lastTarget.year, lastTarget.month - 1, 1)));
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, filteredItems.length);
-  const selectedSnap = emblaApi?.selectedScrollSnap() ?? startIndex;
 
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
