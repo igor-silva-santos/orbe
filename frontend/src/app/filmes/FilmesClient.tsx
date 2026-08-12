@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Filter, Grid, Calendar, Star, TrendingUp, Monitor } from 'lucide-react';
+import { Filter, Grid, Calendar, Star, TrendingUp, Monitor, Sparkles, Clapperboard } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Filme } from '@/types';
 import type { FilmesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useEventosResumo } from '@/lib/hooks/useEventosResumo';
 import { useAppStore } from '@/stores/appStore';
 
 const MONTHS = [
@@ -34,6 +37,7 @@ interface FilmesClientProps {
 export default function FilmesClient({ initialData }: FilmesClientProps) {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const { resumo } = useEventosResumo();
   const [filmes, setFilmes] = useState<Filme[]>(initialData.results);
   const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +101,28 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
         title="Filmes"
         description="Descubra os melhores filmes em cartaz, lançamentos e clássicos do cinema"
       />
+
+      {resumo && resumo.proximos.filmes.length > 0 && (
+        <CollapsibleSection id="filmes-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.proximos.filmes}
+            type="filme"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
+
+      {resumo && resumo.destaques_recentes.filmes.length > 0 && (
+        <CollapsibleSection id="filmes-em-cartaz-destaque" title="Em cartaz" icon={Clapperboard} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.destaques_recentes.filmes}
+            type="filme"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="flex flex-wrap gap-2">

@@ -6,6 +6,7 @@ import { ArrowLeft, Gamepad2, Layers, Monitor, Users } from 'lucide-react';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import type { Anime, Filme, Jogo, Serie, TipoMidia, UserAction, UserInteraction } from '@/types';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
@@ -55,13 +56,15 @@ const HorizontalRow = ({ section, userInteractions, onInteraction }: { section: 
 );
 
 const BlockSection = ({
+  id,
   title,
-  icon: Icon,
+  icon,
   sections,
   emptyMessage,
   userInteractions,
   onInteraction,
 }: {
+  id: string;
   title: string;
   icon: typeof Monitor;
   sections: GameSection[];
@@ -69,30 +72,22 @@ const BlockSection = ({
 } & InteractionProps) => {
   if (sections.length === 0) {
     return (
-      <section className="space-y-4">
-        <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
-          <Icon className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-          {title}
-        </h2>
+      <CollapsibleSection id={id} title={title} icon={icon}>
         <div className="bg-card rounded-lg border border-border p-8 text-center">
           <p className="text-muted-foreground text-sm">{emptyMessage}</p>
         </div>
-      </section>
+      </CollapsibleSection>
     );
   }
 
   return (
-    <section className="space-y-4">
-      <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
-        <Icon className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-        {title}
-      </h2>
+    <CollapsibleSection id={id} title={title} icon={icon}>
       <div className="space-y-5">
         {sections.map((section) => (
           <HorizontalRow key={section.id ?? section.nome} section={section} userInteractions={userInteractions} onInteraction={onInteraction} />
         ))}
       </div>
-    </section>
+    </CollapsibleSection>
   );
 };
 
@@ -151,10 +146,7 @@ export default function JogosEmAltaPage() {
           </div>
         ) : data ? (
           <>
-            <section className="space-y-4">
-              <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2">
-                Top da Semana
-              </h2>
+            <CollapsibleSection id="jogos-em-alta-top-semana" title="Top da Semana">
               {data.destaques.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
                   {data.destaques.map((jogo, index) => (
@@ -173,14 +165,10 @@ export default function JogosEmAltaPage() {
                   <p className="text-muted-foreground">Nenhum destaque disponível esta semana.</p>
                 </div>
               )}
-            </section>
+            </CollapsibleSection>
 
             {data.steam_mais_jogados && data.steam_mais_jogados.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
-                  <Monitor className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                  Mais jogados na Steam
-                </h2>
+              <CollapsibleSection id="jogos-em-alta-steam-trending" title="Mais jogados na Steam" icon={Monitor}>
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                   {data.steam_mais_jogados.map((jogo) => (
                     <div key={`steam-trend-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
@@ -188,15 +176,11 @@ export default function JogosEmAltaPage() {
                     </div>
                   ))}
                 </div>
-              </section>
+              </CollapsibleSection>
             )}
 
             {data.steam_promocoes && data.steam_promocoes.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="font-display text-xl orbe-text-primary border-b border-border pb-2 flex items-center gap-2">
-                  <Gamepad2 className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                  Promoções na Steam
-                </h2>
+              <CollapsibleSection id="jogos-em-alta-steam-sales" title="Promoções na Steam" icon={Gamepad2}>
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                   {data.steam_promocoes.map((jogo) => (
                     <div key={`steam-sale-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
@@ -204,10 +188,11 @@ export default function JogosEmAltaPage() {
                     </div>
                   ))}
                 </div>
-              </section>
+              </CollapsibleSection>
             )}
 
             <BlockSection
+              id="jogos-em-alta-por-plataforma"
               title="Mais jogados por plataforma"
               icon={Monitor}
               sections={data.plataformas}
@@ -217,6 +202,7 @@ export default function JogosEmAltaPage() {
             />
 
             <BlockSection
+              id="jogos-em-alta-por-modo"
               title="Por modo de jogo"
               icon={Users}
               sections={data.modos}
@@ -227,6 +213,7 @@ export default function JogosEmAltaPage() {
 
             {data.categorias.length > 0 && (
               <BlockSection
+                id="jogos-em-alta-por-categoria"
                 title="Por categoria"
                 icon={Layers}
                 sections={data.categorias}

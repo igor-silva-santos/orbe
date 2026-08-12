@@ -1,16 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Filter, Gamepad2, Star, Calendar } from 'lucide-react';
+import { Filter, Gamepad2, Star, Calendar, Sparkles } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Jogo } from '@/types';
 import type { JogosPageData } from '@/lib/apiServer';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useEventosResumo } from '@/lib/hooks/useEventosResumo';
 import { useAppStore } from '@/stores/appStore';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
+import { GameEventCard } from '@/components/ui/GameEventCard';
 
 const MONTHS = [
   { value: '1', label: 'Janeiro' },
@@ -34,6 +38,7 @@ interface JogosClientProps {
 export default function JogosClient({ initialData }: JogosClientProps) {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const { resumo } = useEventosResumo();
   const [jogos, setJogos] = useState<Jogo[]>(initialData.results);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
@@ -82,6 +87,32 @@ export default function JogosClient({ initialData }: JogosClientProps) {
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
       <PageHeader title="Jogos" description="Explore o vasto universo dos games, dos indies aos blockbusters." />
+
+      {resumo && resumo.proximos.jogos.length > 0 && (
+        <CollapsibleSection id="jogos-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.proximos.jogos}
+            type="jogo"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
+
+      {resumo && resumo.destaques_recentes.eventos.length > 0 && (
+        <CollapsibleSection id="jogos-eventos-recentes" title="Eventos recentes" icon={Gamepad2} className="mb-8">
+          <div className="space-y-6">
+            {resumo.destaques_recentes.eventos.map((evento) => (
+              <GameEventCard
+                key={`recent-${evento.id}`}
+                evento={evento}
+                userInteractions={userInteractions}
+                onInteraction={handleInteraction}
+              />
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

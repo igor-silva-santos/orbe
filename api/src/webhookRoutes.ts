@@ -1,86 +1,87 @@
-import { Router, Request, Response, NextFunction, json } from 'express';
-import { prisma } from './clients';
+import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import { prisma } from './clients';
 import { logger } from './logger';
+import { translateSynopsisForStorage, isLikelyEnglish } from './translation';
+
 const router = Router();
 
 const WEBHOOK_SECRET = process.env.IGDB_WEBHOOK_SECRET || 'um-segredo-muito-dificil-de-adivinhar';
 
-// Middleware para verificar a assinatura do webhook usando o corpo bruto (raw body)
-const verifyWebhookSignature = (req: Request, res: Response, next: NextFunction) => {
-  const signature = req.header('Twitch-Eventsub-Message-Signature');
-  const messageId = req.header('Twitch-Eventsub-Message-Id');
-  const timestamp = req.header('Twitch-Eventsub-Message-Timestamp');
-  
-  // req.body aqui é um Buffer, graças ao express.raw()
-  const rawBody = (req as any).rawBody;
+/**
+ * IGDB verifica a inscrição com um header `X-Secret` contendo o valor configurado no
+ * registro do webhook (ver igdbWebhooks.ts) — não é o protocolo Twitch EventSub (sem
+ * handshake de challenge, sem assinatura HMAC composta). Se a IGDB tiver mudado esse
+ * contrato, o log abaixo com os headers recebidos ajuda a ajustar rapidamente.
+ */
+const verifyWebhookSecret = (req: Request, res: Response, next: NextFunction) => {
+  const providedSecret = req.header('X-Secret');
 
-  if (!signature || !messageId || !timestamp || !rawBody) {
-    logger.warn('Requisição de webhook da IGDB recebida sem headers de assinatura ou corpo.');
+  if (!providedSecret) {
+    logger.warn(`Webhook IGDB sem header X-Secret. Headers recebidos: ${JSON.stringify(req.headers)}`);
+    return res.status(403).send('Assinatura ausente.');
+  }
+
+  const providedBuf = Buffer.from(providedSecret);
+  const expectedBuf = Buffer.from(WEBHOOK_SECRET);
+  const isValid = providedBuf.length === expectedBuf.length && crypto.timingSafeEqual(providedBuf, expectedBuf);
+
+  if (!isValid) {
+    logger.warn('Webhook IGDB com secret inválido.');
     return res.status(403).send('Assinatura inválida.');
   }
 
-  const computedSignature = 'sha256=' + crypto
-    .createHmac('sha256', WEBHOOK_SECRET)
-    .update(messageId + timestamp + rawBody)
-    .digest('hex');
-
-  const signatureBuf = Buffer.from(signature);
-  const computedBuf = Buffer.from(computedSignature);
-  const signatureValid =
-    signatureBuf.length === computedBuf.length && crypto.timingSafeEqual(signatureBuf, computedBuf);
-
-  if (signatureValid) {
-    next();
-  } else {
-    logger.warn('Assinatura de webhook da IGDB inválida.');
-    res.status(403).send('Falha na verificação da assinatura.');
-  }
+  next();
 };
 
-// Endpoint que recebe as notificações do IGDB
-router.post('/webhooks/igdb', json({ verify: (req: any, res, buf) => { req.rawBody = buf } }), (req, res, next) => {
-  // A primeira chamada do IGDB é um desafio de verificação
-  if (req.header('Twitch-Eventsub-Message-Type') === 'webhook_callback_verification') {
-    const challenge = req.body.challenge;
-    logger.info('Recebido desafio de verificação de webhook da IGDB. Respondendo com sucesso.');
-    return res.status(200).send(challenge);
+/**
+ * Só atualiza jogos que já sincronizamos — o webhook dispara pra todo o catálogo do IGDB,
+ * e a maior parte nunca passou pelo filtro de qualidade do sync pra entrar no nosso banco.
+ * Não criamos linhas novas a partir do webhook, só mantemos as existentes atualizadas.
+ */
+const applyGameUpdate = async (gameData: any) => {
+  if (!gameData?.id) return;
+
+  const existing = await prisma.jogo.findUnique({ where: { igdbId: gameData.id }, select: { id: true } });
+  if (!existing) return;
+
+  const data: Record<string, unknown> = {};
+  if (typeof gameData.name === 'string') data.name = gameData.name;
+  if (typeof gameData.rating === 'number') data.rating = gameData.rating;
+  if (typeof gameData.rating_count === 'number') data.ratingCount = gameData.rating_count;
+  if (typeof gameData.hypes === 'number') data.hypes = gameData.hypes;
+  if (typeof gameData.follows === 'number') data.follows = gameData.follows;
+  if (typeof gameData.first_release_date === 'number') {
+    data.firstReleaseDate = new Date(gameData.first_release_date * 1000);
+  }
+  if (typeof gameData.summary === 'string' && gameData.summary.trim()) {
+    data.summary = isLikelyEnglish(gameData.summary)
+      ? (await translateSynopsisForStorage(gameData.summary)) ?? gameData.summary
+      : gameData.summary;
   }
 
-  // Para todas as outras chamadas (notificações), verificar a assinatura primeiro
-  verifyWebhookSignature(req, res, next);
-}, async (req, res) => {
-  const notification = req.body;
+  if (Object.keys(data).length === 0) return;
 
-  // Se for uma notificação de revogação, apenas logamos
-  if (req.header('Twitch-Eventsub-Message-Type') === 'revocation') {
-    logger.warn('Webhook da IGDB foi revogado!', notification.subscription);
-    return res.status(200).send('OK');
-  }
+  await prisma.jogo.update({ where: { igdbId: gameData.id }, data });
+  logger.info(`Jogo [${gameData.id}] "${gameData.name ?? ''}" atualizado via webhook IGDB.`);
+};
 
-  // Processar a notificação de atualização do jogo
-  if (notification.event && notification.subscription.type === 'games.update') {
-    const gameData = notification.event.game;
-    logger.info(`Webhook da IGDB recebido para o jogo ID: ${gameData.id}`);
+// Endpoint que recebe as notificações do IGDB (registradas via igdbWebhooks.ts)
+router.post('/webhooks/igdb/:endpoint', verifyWebhookSecret, async (req, res) => {
+  const { endpoint } = req.params;
+  const payload = req.body;
 
-    try {
-      // Aqui, teríamos que mapear os dados do webhook para o nosso schema do Prisma
-      // e então usar o prisma.jogo.upsert()
-      // Exemplo simplificado:
-      /*
-      await prisma.jogo.upsert({
-        where: { igdbId: gameData.id },
-        update: { name: gameData.name, summary: gameData.summary },
-        create: { igdbId: gameData.id, name: gameData.name, summary: gameData.summary },
-      });
-      */
-      logger.info(`Jogo ID: ${gameData.id} processado via webhook com sucesso.`);
-
-      // TODO: Disparar notificação interna via WebSocket para o frontend
-
-    } catch (error) {
-      logger.error(`Erro ao processar webhook da IGDB para o jogo ID ${gameData.id}:`, error);
+  try {
+    if (endpoint === 'games') {
+      const games = Array.isArray(payload) ? payload : [payload];
+      for (const game of games) {
+        await applyGameUpdate(game);
+      }
+    } else {
+      logger.info(`Webhook IGDB recebido para endpoint não tratado: ${endpoint}`);
     }
+  } catch (error) {
+    logger.error('Erro ao processar webhook IGDB:', error);
   }
 
   res.status(200).send('OK');

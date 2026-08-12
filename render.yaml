@@ -36,3 +36,10 @@ services:
         sync: false
       - key: CORS_ORIGIN
         sync: false
+      # Webhooks IGDB (opcionais — deixe em branco/false pra manter desativados)
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: IGDB_WEBHOOKS_ENABLED
+        value: "false"
+      - key: IGDB_WEBHOOK_SECRET
+        sync: false
