@@ -7,12 +7,9 @@ param(
     [string]$Destino = "$env:USERPROFILE\repos\projetos\orbe-1"
 )
 
-$RaizRepo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$RaizRepo = Split-Path $PSScriptRoot -Parent
 if (-not (Test-Path "$RaizRepo\orbe-1")) {
-    $RaizRepo = Split-Path $PSScriptRoot -Parent
-}
-if (-not (Test-Path "$RaizRepo\orbe-1")) {
-    Write-Error "Pasta orbe-1 nao encontrada no repo. Rode 'git pull' na branch master primeiro."
+    Write-Error "Pasta orbe-1 nao encontrada em $RaizRepo. Rode 'git pull origin master' primeiro."
     exit 1
 }
 
