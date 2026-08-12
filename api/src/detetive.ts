@@ -72,7 +72,7 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
-export async function runDetetive(fullScan = false) {
+export async function runDetetive(fullScan = false, disconnectWhenDone = false) {
   let browser: Browser | undefined;
   try {
     logger.info(`--- Iniciando Detetive Digital 2.0 ${fullScan ? '(Varredura Completa)' : ''} ---`);
@@ -170,7 +170,11 @@ export async function runDetetive(fullScan = false) {
     logger.error("Erro fatal no Detetive Digital 2.0:", e.message);
   } finally {
     if (browser) await browser.close();
-    await prisma.$disconnect();
+    // Só desconecta quando rodado como script isolado (o processo termina em seguida).
+    // O cron diário e a rota manual /api/run-detetive compartilham o PrismaClient com
+    // o resto do servidor Express — desconectá-lo ali derrubaria as queries de quem
+    // estiver usando a API bem nesse instante.
+    if (disconnectWhenDone) await prisma.$disconnect();
     logger.info('--- Detetive Digital finalizado ---');
   }
 }
@@ -178,5 +182,5 @@ export async function runDetetive(fullScan = false) {
 if (require.main === module) {
   const fullScan = process.argv.includes('--full-scan');
   logger.info(`Detetive Digital sendo executado diretamente... ${fullScan ? 'em modo Varredura Completa' : ''}`);
-  runDetetive(fullScan);
+  runDetetive(fullScan, true);
 }
