@@ -395,7 +395,10 @@ export const mapSerieToMidia = (serie: any) => {
 };
 
 export const mapAnimeToMidia = (anime: any) => {
-  const hasPtBrDub = anime.characters?.some((c: any) =>
+  // `dublagemPtBr` é o campo persistido no sync (funciona mesmo quando a query não incluiu
+  // a relação `characters`, como nas rotas de listagem); cai pro cálculo ao vivo só quando
+  // o objeto veio direto da AniList sem passar pelo banco (fetch de detalhe on-demand).
+  const hasPtBrDub = anime.dublagemPtBr ?? anime.characters?.some((c: any) =>
     c.voiceActors?.some((va: any) =>
       va.dublador?.language?.toUpperCase().includes('PORTUGUESE')
     )
@@ -616,7 +619,7 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     plataformas_api: streamingFromLinks.slice(0, 4),
     format: anime.format,
     isAdult: anime.isAdult,
-    dublagem_info: false,
+    dublagem_info: anime.dublagemPtBr ?? false,
     nextAiringEpisode: nextAiring
       ? { airingAt: new Date(nextAiring.airingAt).toISOString(), episode: nextAiring.episode }
       : null,

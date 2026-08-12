@@ -266,6 +266,11 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
                 hashtag: anime.hashtag,
                 isLicensed: anime.isLicensed,
                 isAdult: anime.isAdult,
+                dublagemPtBr: Boolean(
+                    anime.characters?.edges?.some((edge: any) =>
+                        edge.voiceActors?.some((va: any) => va.language === 'PORTUGUESE')
+                    )
+                ),
             };
 
             const staffToCreate = anime.staff?.edges?.map((edge: any) => ({
