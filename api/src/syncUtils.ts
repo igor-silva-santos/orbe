@@ -27,9 +27,9 @@ type IgdbNamedEntity = { id: number; name: string; slug?: string };
  */
 export async function ensureIgdbNamedEntity(
   delegate: {
-    findUnique: (args: { where: Record<string, number> }) => Promise<{ id: number } | null>;
-    findFirst: (args: { where: { name: string } }) => Promise<{ id: number } | null>;
-    create: (args: { data: Record<string, unknown> }) => Promise<{ id: number }>;
+    findUnique: (args: any) => Promise<{ id: number } | null>;
+    findFirst: (args: any) => Promise<{ id: number } | null>;
+    create: (args: any) => Promise<{ id: number }>;
   },
   idField: 'igdbId' | 'id',
   entity: IgdbNamedEntity,

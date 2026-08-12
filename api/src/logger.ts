@@ -7,7 +7,7 @@ const MAX_BUFFER_LINES = 20_000;
 const MAX_SYNC_BUFFER_LINES = 15_000;
 
 const SYNC_LOG_PATTERN =
-  /sync|sincroniz|⏭️|⏱️|resumo do lote|fase '|pulad|ignorad|checkpoint|filmes|series|animes|jogos|premios|retomando|eta/i;
+  /sync|sincroniz|detetive|ingresso|\[ingresso-api\]|\[detetive\]|⏭️|⏱️|resumo do lote|fase '|pulad|ignorad|checkpoint|filmes|series|animes|jogos|premios|retomando|eta/i;
 
 let logFilePath: string | undefined;
 
