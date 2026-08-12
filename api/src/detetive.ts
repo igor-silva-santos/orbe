@@ -7,11 +7,11 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function checkStreamingAvailability(tmdbId: number, filmeDbId: number) {
   try {
-    const movieDetails = await tmdb.movieInfo({
+    const movieDetails = (await tmdb.movieInfo({
       id: tmdbId,
       language: 'pt-BR',
       append_to_response: 'watch/providers,release_dates',
-    });
+    })) as any;
     const result = await refreshFilmeAvailabilityFromTmdb(
       prisma,
       { id: filmeDbId, tmdbId },
