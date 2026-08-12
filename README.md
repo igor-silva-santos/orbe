@@ -67,8 +67,7 @@ curl -X POST https://<sua-api>/api/run-sync \
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [`docs/FUNCIONALIDADES.md`](docs/FUNCIONALIDADES.md) | Inventário do que o sistema faz hoje |
-| [`docs/ESTADO_DO_PROJETO.md`](docs/ESTADO_DO_PROJETO.md) | Visão original vs. estado atual e lacunas |
+| [`orbe-1/`](orbe-1/) | Arquivo da 1ª iteração — estado e funcionalidades |
 | [`docs/PRODUCAO.md`](docs/PRODUCAO.md) | Deploy em produção |
 | [`docs/SYNC_INICIAL.md`](docs/SYNC_INICIAL.md) | Sync inicial e backfill |
 | [`DESIGN.md`](DESIGN.md) | Direção visual (Pulp Gráfico) |
