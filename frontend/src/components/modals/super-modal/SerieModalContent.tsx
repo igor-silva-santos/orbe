@@ -7,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
-import CommentSection from './CommentSection';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -71,7 +70,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.provider.name} className="h-5 w-5" variant="tile" />
+                <PlatformIcon platform={p.provider.name} size={32} className="h-8 w-8" variant="circle" />
                 <span>{p.provider.name}</span>
               </a>
             ))}
@@ -83,7 +82,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.nome} className="h-5 w-5" variant="tile" />
+                <PlatformIcon platform={p.nome} size={32} className="h-8 w-8" variant="circle" />
                 <span>{p.nome}</span>
               </a>
             ))}
@@ -159,8 +158,6 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           </div>
         </section>
       )}
-
-      <CommentSection midiaId={serie.id} tipoMidia="serie" />
     </div>
   );
 };

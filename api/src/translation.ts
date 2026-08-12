@@ -46,6 +46,19 @@ export const isLikelyEnglish = (text: string | null | undefined): boolean => {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** fetch() nativo não tem timeout — sem isso, uma conexão travada com a MyMemory trava o sync inteiro para sempre. */
+const TRANSLATE_FETCH_TIMEOUT_MS = 10_000;
+
+const fetchWithTimeout = async (url: string, timeoutMs = TRANSLATE_FETCH_TIMEOUT_MS): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 const cacheGet = async (key: string): Promise<string | null> => {
   if (memoryCache.has(key)) return memoryCache.get(key)!;
   const redisClient = getRedisClient();
@@ -111,7 +124,7 @@ const translateChunk = async (text: string): Promise<string | null> => {
 
   try {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleaned.slice(0, 500))}&langpair=en|pt-BR`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     const data = await response.json();
     const translated = data?.responseData?.translatedText as string | undefined;
 

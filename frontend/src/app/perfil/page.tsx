@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Mail, Calendar, Edit2, Shield, Settings, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
 import { isAllowedRemoteImageHost } from '@/lib/image-utils';
@@ -53,7 +54,7 @@ export default function ProfilePage() {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erro ao baixar log de sync:', error);
-      alert('Não foi possível baixar o log de sync. Verifique se há uma sync em andamento ou recente.');
+      toast.error('Não foi possível baixar o log de sync. Verifique se há uma sync em andamento ou recente.');
     } finally {
       setDownloadingLogs(false);
     }

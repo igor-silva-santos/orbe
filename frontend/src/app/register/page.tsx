@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import orbeNerdApi from '@/lib/api';
 import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
@@ -24,11 +25,11 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (formData.password.length < MIN_PASSWORD_LENGTH) {
-      alert(`A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
+      toast.error(`A senha precisa ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      alert('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.');
       return;
     }
 
@@ -47,11 +48,11 @@ export default function RegisterPage() {
         const params = new URLSearchParams(window.location.search);
         window.location.href = safeRedirectPath(params.get('redirect'));
       } else {
-        alert('Não foi possível criar sua conta. Tente novamente.');
+        toast.error('Não foi possível criar sua conta. Tente novamente.');
       }
     } catch (error) {
       console.error('Register API call failed:', error);
-      alert(error instanceof Error ? error.message : 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.');
+      toast.error(error instanceof Error ? error.message : 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.');
     } finally {
       setIsLoading(false);
     }

@@ -72,15 +72,6 @@ export const syncRateLimiter: RequestHandler = rateLimit({
   message: { error: 'Limite de sincronizações atingido. Tente mais tarde.' },
 });
 
-/** Criação de comentários */
-export const commentRateLimiter: RequestHandler = rateLimit({
-  windowMs: 60 * 1000,
-  max: isProduction ? 10 : 60,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Muitos comentários em sequência. Aguarde um momento.' },
-});
-
 /** Interações do usuário (status, avaliação) */
 export const interactionRateLimiter: RequestHandler = rateLimit({
   windowMs: 60 * 1000,

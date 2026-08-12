@@ -332,15 +332,6 @@ export const orbeNerdApi = {
     return apiClient.patch('/users/me', data);
   },
 
-  // Comentários
-  getComments: async (tipo: string, id: number) => {
-    return apiClient.get(`/comments/${tipo}/${id}`);
-  },
-
-  createComment: async (data: { midia_id: number; tipo_midia: string; texto: string; spoiler?: boolean }) => {
-    return apiClient.post('/comments', data);
-  },
-
   // Interações do Usuário
   getInteractions: async () => {
     return apiClient.get('/me/interactions');
@@ -365,11 +356,6 @@ export const orbeNerdApi = {
 
   deleteNotification: async (id: number) => {
     return apiClient.delete(`/notifications/${id}`);
-  },
-
-  // Comentários
-  deleteComment: async (id: number) => {
-    return apiClient.delete(`/comments/${id}`);
   },
 
   // Calendário

@@ -38,6 +38,7 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower.includes('steam')) return 'steam';
   if (lower.includes('epic')) return 'epic';
   if (lower.includes('gog')) return 'gog';
+  if (lower === 'mac' || lower.includes('macos') || lower.includes('mac os')) return 'mac';
   if (lower === 'pc' || lower.includes('windows')) return 'pc';
   if (lower.includes('cinema')) return 'cinema';
   return 'unknown';
@@ -79,6 +80,24 @@ const renderPcIcon = (
     );
   }
   return <Image src="/icons/pc.svg" {...iconProps} />;
+};
+
+const renderMacIcon = (
+  iconProps: { width: number; height: number; className: string; alt: string; title?: string },
+  showTooltip: boolean,
+  label: string,
+) => {
+  const { width, height } = iconProps;
+  return (
+    <div
+      className={`${iconProps.className} rounded-full bg-[#1a1a1a] flex items-center justify-center text-white font-extrabold shrink-0`}
+      style={{ width, height, fontSize: width * 0.34 }}
+      aria-hidden="true"
+      title={showTooltip ? label : undefined}
+    >
+      Mac
+    </div>
+  );
 };
 
 const PlatformIcon: React.FC<PlatformIconProps> = ({
@@ -171,6 +190,8 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
       );
     case 'pc':
       return wrapWithTile(renderPcIcon(iconProps, useTile, showTooltip, label));
+    case 'mac':
+      return wrapWithTile(renderMacIcon(iconProps, showTooltip, label));
     case 'cinema':
       return wrapWithTile(<Image src="/icons/cinema.svg" {...iconProps} />);
     default:

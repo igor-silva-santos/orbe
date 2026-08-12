@@ -806,22 +806,7 @@ model User {
   interacoes      preferencias_usuario_midia[]
   notifications   Notification[]
   watchlistItems  WatchlistItem[]
-  comments        Comment[]
   calendarEvents  UserCalendarEvent[]
-}
-
-model Comment {
-  id             Int      @id @default(autoincrement())
-  usuario_id     Int
-  usuario        User     @relation(fields: [usuario_id], references: [id])
-  midia_id       Int      // ID da API externa
-  tipo_midia     String   // 'filme', 'serie', 'anime', 'jogo'
-  texto          String   @db.Text
-  spoiler        Boolean  @default(false)
-  data_criacao   DateTime @default(now())
-  data_atualizacao DateTime @updatedAt
-
-  @@index([midia_id, tipo_midia])
 }
 
 model WatchlistItem {

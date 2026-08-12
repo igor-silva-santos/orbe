@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MoreVertical,
   Heart,
@@ -82,6 +82,21 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const { openSuperModal, openRatingModal } = useAppStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // `position: fixed` não é confiável aqui: dentro dos carrosséis da home, o Embla aplica um
+  // `transform` inline no track, o que vira o containing block do fixed e encolhe a área "fora"
+  // clicável para o tamanho da faixa do carrossel. Um listener no document não depende disso.
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
@@ -219,7 +234,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     <SteamPriceLabel item={midia} variant="card" />
                   </div>
                 )}
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2" ref={menuRef}>
                   <button
                     onClick={handleMenuToggle}
                     className="bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
@@ -291,10 +306,10 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                         key={p.name}
                         platform={p.icon}
                         logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                        size={type === 'jogo' ? 24 : 18}
+                        size={24}
                         iconOnly
-                        variant={type === 'jogo' ? 'circle' : 'tile'}
-                        className={type === 'jogo' ? 'h-6 w-6' : 'h-[18px] w-[18px]'}
+                        variant="circle"
+                        className="h-6 w-6"
                         title={p.name}
                       />
                     ))}
@@ -302,12 +317,6 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 )}
               </div>
             </div>
-            {isMenuOpen && (
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setIsMenuOpen(false)}
-              />
-            )}
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom">

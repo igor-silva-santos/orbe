@@ -7,7 +7,6 @@ import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import JogoPlatformLinks from './JogoPlatformLinks';
 import SafeImage from '@/components/ui/SafeImage';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import CommentSection from './CommentSection';
 
 interface JogoModalContentProps {
   jogo: Jogo;
@@ -94,8 +93,6 @@ const JogoModalContent: React.FC<JogoModalContentProps> = ({ jogo }) => {
           </Carousel>
         </section>
       )}
-
-      <CommentSection midiaId={jogo.id} tipoMidia="jogo" />
     </div>
   );
 };

@@ -231,9 +231,11 @@ export const useAppStore = create<AppState>()(
       closeNotificationModal: () => set({ isNotificationModalOpen: false }),
       
       openSuperModal: (midia: Filme | Serie | Anime | Jogo, type: 'filme' | 'serie' | 'anime' | 'jogo') => {
-        set({ 
+        set({
           isSuperModalOpen: true,
-          superModalData: { midia, type }
+          superModalData: { midia, type },
+          // Evita o modal de detalhe abrir atrás do overlay de busca quando aberto a partir de um resultado
+          isSearchOpen: false,
         });
       },
 

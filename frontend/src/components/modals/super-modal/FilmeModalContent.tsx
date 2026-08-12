@@ -12,7 +12,6 @@ import IngressoButton from '@/components/ui/IngressoButton';
 import { buildIngressoUrl } from '@/lib/ingresso';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
-import CommentSection from './CommentSection';
 import { useAppStore } from '@/stores/appStore';
 
 interface FilmeModalContentProps {
@@ -106,7 +105,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-3 py-2 rounded-lg transition-colors text-sm"
               >
-                <PlatformIcon platform={p.provider.name} className="h-5 w-5" variant="tile" />
+                <PlatformIcon platform={p.provider.name} size={32} className="h-8 w-8" variant="circle" />
                 <span>{p.provider.name}</span>
               </a>
             ))}
@@ -172,8 +171,6 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
           </TooltipProvider>
         </section>
       )}
-
-      <CommentSection midiaId={filme.id} tipoMidia="filme" />
     </div>
   );
 };

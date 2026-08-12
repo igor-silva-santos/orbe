@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { realApi } from '@/data/realApi';
 import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
@@ -30,11 +31,11 @@ export default function LoginPage() {
         window.location.href = safeRedirectPath(params.get('redirect'));
       } else {
         console.error('Login failed: Invalid credentials or API error');
-        alert('Email ou senha inválidos.');
+        toast.error('Email ou senha inválidos.');
       }
     } catch (error) {
       console.error('Login API call failed:', error);
-      alert('Ocorreu um erro ao tentar fazer login. Tente novamente.');
+      toast.error('Ocorreu um erro ao tentar fazer login. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
