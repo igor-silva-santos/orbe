@@ -11,10 +11,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY api/package*.json ./
-RUN npm install
+RUN npm ci
 COPY api/ .
 RUN npx prisma generate
 RUN npm run build
+
+# Stage separada so pra instalar as dependencies de producao (sem
+# devDependencies como typescript, ts-node, nodemon e os @types/*).
+# Usa o mesmo package.json/package-lock.json do builder pra gerar um
+# node_modules enxuto que vai pro estagio final.
+FROM node:20-slim AS prod-deps
+WORKDIR /app
+
+COPY api/package*.json ./
+RUN npm ci --omit=dev
 
 FROM node:20-slim
 WORKDIR /app
@@ -39,7 +49,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
