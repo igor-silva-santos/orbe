@@ -5,7 +5,6 @@ import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
-import { parseISO } from 'date-fns';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import {
@@ -18,6 +17,7 @@ import {
   monthKeyFromDate,
   monthKeyFromItem,
   monthTitleFromItem,
+  parseReleaseDate,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -90,7 +90,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   };
 
   const loadedMonths = useRef<Set<string>>(
-    new Set(initialData.map((item) => monthKeyFromDate(new Date(item.data_lancamento_api))))
+    new Set(
+      initialData
+        .map((item) => monthKeyFromItem(item))
+        .filter((key): key is string => Boolean(key))
+    )
   );
   const fetchingMonths = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(startIndex);
@@ -205,7 +209,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     const title = monthTitleFromItem(item);
     if (!title || !item?.data_lancamento_api) return;
 
-    const date = parseISO(item.data_lancamento_api);
+    const date = parseReleaseDate(item.data_lancamento_api);
+    if (!date) return;
     const monthKey = monthKeyFromDate(date);
     if (monthKey === lastTitleMonthKey.current) return;
 
@@ -482,17 +487,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     // Ainda respeitamos a ordem: com todos os resultados já resolvidos, percorremos os
     // candidatos na ordem certa e paramos no primeiro mês não-vazio.
     const candidates = Array.from({ length: EMPTY_MONTH_NAV_LIMIT }, (_, i) => addMonths(year, month, (i + 1) * step));
-    const results = await Promise.all(candidates.map((target) => loadMonth(target.year, target.month)));
+    await Promise.all(candidates.map((target) => loadMonth(target.year, target.month)));
+    const list = applyDisplayFilters(mediaItemsRef.current);
 
     for (let i = 0; i < candidates.length; i++) {
       const target = candidates[i];
-      const list = applyDisplayFilters(results[i]);
-
       const targetIndex = findIndexForMonth(list, target.year, target.month);
       if (targetIndex !== -1) {
-        lastTitleMonthKey.current = '';
+        const targetDate = new Date(target.year, target.month - 1, 1);
+        const targetKey = monthKeyFromDate(targetDate);
+        lastTitleMonthKey.current = targetKey;
+        setCurrentTitle(formatCarouselMonthTitle(targetDate));
         emblaApi.scrollTo(targetIndex, true);
-        updateTitleFromIndex(targetIndex, list);
+        previousSelectedIndex.current = targetIndex;
         await loadMonthsInDirection(target.year, target.month, step);
         return;
       }
