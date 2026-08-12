@@ -297,29 +297,30 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
-                {type === 'anime' && dubStatus && (
-                  <div className="h-[20px] mb-1 flex items-center">
+                {/* Altura sempre reservada (mesmo sem dublagem/tipo != anime) — senão cards do
+                    mesmo carrossel/grade ficam com alturas diferentes dependendo do conteúdo. */}
+                <div className="h-[20px] mb-1 flex items-center">
+                  {type === 'anime' && dubStatus && (
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
-                  </div>
-                )}
-                {(type === 'jogo' ? platforms : providers).length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                    {(type === 'jogo' ? platforms : providers).map((p) => (
-                      <PlatformIcon
-                        key={p.name}
-                        platform={p.icon}
-                        logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
-                        size={24}
-                        iconOnly
-                        variant="circle"
-                        className="h-6 w-6"
-                        title={p.name}
-                      />
-                    ))}
-                  </div>
-                )}
+                  )}
+                </div>
+                {/* Idem: altura fixa mesmo sem plataformas/providers, pra não desalinhar os cards vizinhos. */}
+                <div className="h-6 flex flex-wrap items-center gap-1.5 shrink-0">
+                  {(type === 'jogo' ? platforms : providers).map((p) => (
+                    <PlatformIcon
+                      key={p.name}
+                      platform={p.icon}
+                      logoPath={'logo_path' in p ? (p.logo_path as string | null | undefined) : undefined}
+                      size={24}
+                      iconOnly
+                      variant="circle"
+                      className="h-6 w-6"
+                      title={p.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

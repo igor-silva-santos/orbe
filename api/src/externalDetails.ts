@@ -93,12 +93,12 @@ function mapTmdbMovieToDetails(
       .map((p: any) => ({
         job: p.job,
         department: p.department,
-        pessoa: { tmdbId: p.id, name: p.name, profilePath: p.profile_path },
+        pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
       })),
     cast: (movie.credits?.cast ?? []).slice(0, 20).map((p: any) => ({
       character: p.character,
       order: p.order,
-      pessoa: { tmdbId: p.id, name: p.name, profilePath: p.profile_path },
+      pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
     })),
     streamingProviders: (brProviders?.flatrate ?? []).map((provider: any) => ({
       url: brProviders?.link ?? null,
@@ -140,14 +140,14 @@ function mapTmdbSerieToPrismaLike(serie: any) {
     genres: (serie.genres ?? []).map((g: any) => ({ genero: { name: g.name } })),
     cast: (serie.credits?.cast ?? []).slice(0, 20).map((p: any) => ({
       character: p.character,
-      pessoa: { tmdbId: p.id, name: p.name, profilePath: p.profile_path },
+      pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
     })),
     crew: (serie.credits?.crew ?? []).map((p: any) => ({
       job: p.job,
-      pessoa: { tmdbId: p.id, name: p.name, profilePath: p.profile_path },
+      pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
     })),
     createdBy: (serie.created_by ?? []).map((p: any) => ({
-      pessoa: { tmdbId: p.id, name: p.name, profilePath: p.profile_path },
+      pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
     })),
     videos: (serie.videos?.results ?? [])
       .filter((v: any) => v.site === 'YouTube')

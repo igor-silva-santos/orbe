@@ -8,6 +8,7 @@ import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
 import { syncSteamData, refreshStaleSteamPrices } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
+import { runDetetive } from './detetive';
 import { executeFullSync } from './syncOrchestrator';
 import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync } from './cacheInvalidation';
 import {
@@ -415,6 +416,20 @@ router.post('/run-sync-awards', syncRateLimiter, protectSync, async (_req, res) 
     );
   } catch (error) {
     logger.error('Erro no scrape de premiações:', error);
+  }
+});
+
+router.post('/run-detetive', syncRateLimiter, protectSync, async (req, res) => {
+  const fullScan = req.query.fullScan === 'true';
+  logger.info(`Detetive Digital iniciado (manual${fullScan ? ', varredura completa' : ''}).`);
+  res.status(202).json({ message: 'Detetive Digital iniciado. Verifique os logs.' });
+
+  try {
+    await runDetetive(fullScan);
+    await invalidateCacheByPatterns(['cache:/api/homepage*', 'cache:/api/filmes*']);
+    logger.info('Detetive Digital (manual) concluído.');
+  } catch (error) {
+    logger.error('Erro no Detetive Digital (manual):', error);
   }
 });
 

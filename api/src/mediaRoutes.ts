@@ -40,7 +40,15 @@ const isProduction = process.env.NODE_ENV === 'production';
 const TWELVE_HOURS = 43200;
 const TWENTY_FOUR_HOURS = 86400;
 const CAROUSEL_ITEM_LIMIT = 500;
-const HOMEPAGE_ITEM_LIMIT = 200;
+/**
+ * Cap por tipo na homepage. O carrossel do cliente já pré-carrega os meses
+ * adjacentes automaticamente no mount (MediaCarousel/AnimeCarousel, via
+ * rotas by-month) e só precisa de um punhado de itens antes disso terminar —
+ * um valor bem menor que o antigo (200) já cobre isso sem inflar o payload
+ * inicial do /homepage à toa (filmes é o único tipo que de fato batia no
+ * limite antigo; séries/animes/jogos já retornavam bem menos que isso).
+ */
+const HOMEPAGE_ITEM_LIMIT = 80;
 const DEFAULT_LIST_LIMIT = 48;
 const MAX_LIST_LIMIT = 200;
 
@@ -331,7 +339,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
 
 // Rota para Filmes
 router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, mes, status, plataforma } = req.query;
+  const { filtro, genero, ano, mes, status, plataforma, disponibilidade } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
     const allConditions: Prisma.FilmeWhereInput[] = [];
@@ -378,6 +386,15 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       allConditions.push({ releaseDate: { lte: now } });
     } else if (filtro === 'futuros') {
       allConditions.push({ releaseDate: { gte: now } });
+    }
+
+    // Sub-filtro de disponibilidade — usado pelo modo "Em Alta" de filmes
+    // (cinema / streaming / ambos). "ambos" ou ausente não restringe nada,
+    // mantendo o comportamento padrão já existente de "populares".
+    if (disponibilidade === 'cinema') {
+      allConditions.push({ emCartaz: true });
+    } else if (disponibilidade === 'streaming') {
+      allConditions.push({ streamingProviders: { some: {} } });
     }
 
     const where: Prisma.FilmeWhereInput = { AND: allConditions };

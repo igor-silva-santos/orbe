@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
-import { buildIngressoUrl } from '@/lib/ingresso';
+import { INGRESSO_FALLBACK_URL } from '@/lib/ingresso';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
@@ -38,7 +38,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
 
   const isFutureRelease = releaseDate && releaseDate > now;
   const filmeTitle = resolveFilmeTitle(filme);
-  const ingressoUrl = filme.ingresso_link || buildIngressoUrl(filmeTitle);
+  const ingressoUrl = filme.ingresso_link || INGRESSO_FALLBACK_URL;
   const canBuyTickets = filme.tem_sessoes === true;
 
   const streamingProviders = (filme.streamingProviders || []).filter(
