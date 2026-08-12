@@ -30,6 +30,9 @@ export const MIN_ANIME_POPULARITY = 10000;
 /** IGDB: rating 0–100 */
 export const MIN_GAME_RATING = 50;
 export const MIN_GAME_RATING_COUNT = 10;
+/** Lançamentos futuros: antecipação no IGDB (alinhado ao sync) */
+export const MIN_GAME_HYPES = 3;
+export const MIN_GAME_FOLLOWS = 10;
 
 // ── Sync — permissivo (popular o banco com listas curadas) ───────────────────
 
@@ -302,6 +305,9 @@ export const jogoQualityFilter: Prisma.JogoWhereInput = {
   OR: [
     { rating: { gte: MIN_GAME_RATING } },
     { ratingCount: { gte: MIN_GAME_RATING_COUNT } },
+    { hypes: { gte: MIN_GAME_HYPES } },
+    { follows: { gte: MIN_GAME_FOLLOWS } },
+    { events: { some: {} } },
   ],
 };
 
@@ -585,10 +591,11 @@ export function isAnimeRelevantForSeasonalSync(anime: AnimeLike): boolean {
 }
 
 export function isJogoRelevantForDisplay(jogo: JogoLike): boolean {
-  return (
-    (jogo.rating ?? 0) >= MIN_GAME_RATING ||
-    (jogo.ratingCount ?? 0) >= MIN_GAME_RATING_COUNT
-  );
+  if ((jogo.rating ?? 0) >= MIN_GAME_RATING) return true;
+  if ((jogo.ratingCount ?? 0) >= MIN_GAME_RATING_COUNT) return true;
+  if ((jogo.hypes ?? 0) >= MIN_GAME_HYPES) return true;
+  if ((jogo.follows ?? 0) >= MIN_GAME_FOLLOWS) return true;
+  return false;
 }
 
 export function isJogoRelevantForSync(jogo: JogoLike): boolean {
