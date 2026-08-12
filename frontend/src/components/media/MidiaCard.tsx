@@ -21,6 +21,7 @@ import { getStreamingProviders,
   formatRating,
   formatNextEpisodeCard,
   hasSteamPriceDisplay,
+  hasSteamAppId,
 } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_CARD } from '@/lib/platform-icon-sizes';
 import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
@@ -150,7 +151,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const isAdultContent = (midia as any).isAdult === true;
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
-  const showSteamPrice = type === 'jogo' && hasSteamPriceDisplay(midia);
+  const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
 
   const formatReleaseDate = () => {
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;

@@ -495,6 +495,9 @@ export async function fetchJogoDetailsLive(igdbId: number) {
     const baseMapped = mapJogoToMidia(mapIgdbToPrismaLike(game));
     let synopsisText = dbJogo?.summary?.trim() || baseMapped.sinopse;
 
+    let steamPriceCents = dbJogo?.steamPriceCents ?? null;
+    let steamDiscountPercent = dbJogo?.steamDiscountPercent ?? null;
+
     if (dbJogo?.steamAppId) {
       const steamDetails = await fetchSteamAppDetails(dbJogo.steamAppId);
       if (steamDetails?.shortDescription?.trim()) {
@@ -507,6 +510,11 @@ export async function fetchJogoDetailsLive(igdbId: number) {
 
       if (!dbJogo.pcRequirements && steamDetails?.pcRequirements) {
         dbJogo.pcRequirements = steamDetails.pcRequirements;
+      }
+
+      if (steamDetails?.priceCents != null) {
+        steamPriceCents = steamDetails.priceCents;
+        steamDiscountPercent = steamDetails.discountPercent ?? steamDiscountPercent;
       }
     }
 
@@ -535,8 +543,8 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       pc_requirements: dbJogo?.pcRequirements ?? translated.pc_requirements ?? null,
       steam_app_id: dbJogo?.steamAppId ?? translated.steam_app_id ?? null,
       steam_player_count: dbJogo?.steamPlayerCount ?? translated.steam_player_count ?? null,
-      steam_price_cents: dbJogo?.steamPriceCents ?? translated.steam_price_cents ?? null,
-      steam_discount_percent: dbJogo?.steamDiscountPercent ?? translated.steam_discount_percent ?? null,
+      steam_price_cents: steamPriceCents,
+      steam_discount_percent: steamDiscountPercent,
       hypes: dbJogo?.hypes ?? game.hypes ?? null,
       follows: dbJogo?.follows ?? game.follows ?? null,
       premiacoes: parsePremiacoes(dbJogo?.premiacoes),
