@@ -169,6 +169,7 @@ model Jogo {
   category              String?
   status                String?
   hypes                 Int?
+  follows               Int?
   steamAppId            Int?      @unique
   steamPlayerCount      Int?
   steamPriceCents       Int?
@@ -193,8 +194,11 @@ model Jogo {
   gameEngines           JogoOnGameEngine[]
   sourceRelations       GameRelation[] @relation("SourceRelations")
   relatedRelations      GameRelation[] @relation("RelatedRelations")
-  eventId               Int?
-  event                 Event?         @relation(fields: [eventId], references: [id])
+  // Um jogo pode ser anunciado/aparecer em mais de um evento — FK única (`eventId`) fazia a
+  // última sincronização "roubar" o jogo de outro evento correto (ex.: um jogo revelado na
+  // Wholesome Snack em 2023 aparecendo como revelado no Summer Games Showcase 2026 só porque
+  // esse evento foi sincronizado por último).
+  events                Event[]
   premiacoes            Json?
 
   @@index([firstReleaseDate])
@@ -806,22 +810,7 @@ model User {
   interacoes      preferencias_usuario_midia[]
   notifications   Notification[]
   watchlistItems  WatchlistItem[]
-  comments        Comment[]
   calendarEvents  UserCalendarEvent[]
-}
-
-model Comment {
-  id             Int      @id @default(autoincrement())
-  usuario_id     Int
-  usuario        User     @relation(fields: [usuario_id], references: [id])
-  midia_id       Int      // ID da API externa
-  tipo_midia     String   // 'filme', 'serie', 'anime', 'jogo'
-  texto          String   @db.Text
-  spoiler        Boolean  @default(false)
-  data_criacao   DateTime @default(now())
-  data_atualizacao DateTime @updatedAt
-
-  @@index([midia_id, tipo_midia])
 }
 
 model WatchlistItem {

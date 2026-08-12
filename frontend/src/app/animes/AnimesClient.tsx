@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Filter, Calendar, Star, BookOpen, Layers } from 'lucide-react';
+import { Filter, Calendar, Star, BookOpen, Layers, Sparkles } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import AdultContentModal from '@/components/modals/AdultContentModal';
@@ -10,8 +10,11 @@ import type { Anime } from '@/types';
 import type { AnimesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useEventosResumo } from '@/lib/hooks/useEventosResumo';
 import { useAppStore } from '@/stores/appStore';
 
 interface AnimesClientProps {
@@ -21,6 +24,7 @@ interface AnimesClientProps {
 export default function AnimesClient({ initialData }: AnimesClientProps) {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const { resumo } = useEventosResumo();
   const [animes, setAnimes] = useState<Anime[]>(initialData.results);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
@@ -95,6 +99,17 @@ export default function AnimesClient({ initialData }: AnimesClientProps) {
       {showAdultModal && <AdultContentModal onConfirm={handleAdultConsent} />}
 
       <PageHeader title="Animes" description="Navegue pelo universo dos animes, das últimas temporadas aos clássicos." />
+
+      {resumo && resumo.proximos.animes.length > 0 && (
+        <CollapsibleSection id="animes-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.proximos.animes}
+            type="anime"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

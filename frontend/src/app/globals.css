@@ -211,6 +211,30 @@ body {
   animation: countdown-pulse 2s infinite;
 }
 
+@keyframes orbe-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/** Skeleton com um brilho passando por cima em vez do animate-pulse plano padrão do Tailwind. */
+.orbe-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.orbe-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--foreground) 8%, transparent),
+    transparent
+  );
+  animation: orbe-shimmer 1.6s ease-in-out infinite;
+}
+
 .search-overlay {
   position: fixed;
   inset: 0;

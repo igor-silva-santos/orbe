@@ -224,23 +224,6 @@ export interface UserInteraction {
   data_interacao: string;
 }
 
-// Interface para comentários
-export interface Comentario {
-  id: number;
-  usuario_id: number;
-  midia_id: number;
-  tipo_midia: TipoMidia;
-  usuario: {
-    id: number;
-    nome: string | null;
-    avatar: string | null;
-  };
-  texto: string;
-  spoiler: boolean;
-  data_criacao: string;
-  data_atualizacao: string;
-}
-
 // Interface para notificações
 export interface Notification {
   id: number;

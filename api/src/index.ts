@@ -11,11 +11,11 @@ import cors from 'cors';
 
 import mediaRoutes from './mediaRoutes';
 import webhookRoutes from './webhookRoutes';
+import { registerAllIgdbWebhooks } from './igdbWebhooks';
 import userRoutes from './userRoutes';
 import syncRoutes from './syncRoutes';
 import watchlistRoutes from './watchlistRoutes';
 import profileRoutes from './profileRoutes';
-import commentRoutes from './commentRoutes';
 import notificationRoutes from './notificationRoutes';
 import calendarRoutes from './calendarRoutes';
 import contactRoutes from './contactRoutes';
@@ -76,6 +76,7 @@ if (isIgdbWebhooksEnabled()) {
   assertIgdbWebhookSecretConfigured();
   app.use('/api', webhookRoutes);
   logger.info('Webhooks IGDB habilitados.');
+  void registerAllIgdbWebhooks();
 } else {
   logger.info('Webhooks IGDB desabilitados (defina IGDB_WEBHOOKS_ENABLED=true para ativar).');
 }
@@ -83,7 +84,6 @@ app.use('/api', userRoutes);
 app.use('/api', syncRoutes);
 app.use('/api', watchlistRoutes);
 app.use('/api/users', profileRoutes);
-app.use('/api', commentRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', calendarRoutes);
 app.use('/api', contactRoutes);
@@ -275,6 +275,14 @@ cron.schedule('0 4 * * *', async () => {
     logger.error('Erro no refresh diário de preços Steam:', error);
   }
 });
+
+// Renovação diária da inscrição de webhooks IGDB (expira periodicamente)
+if (isIgdbWebhooksEnabled()) {
+  cron.schedule('0 5 * * *', () => {
+    logger.info('Renovando inscrição de webhooks IGDB...');
+    void registerAllIgdbWebhooks();
+  });
+}
 
 const PORT = process.env.PORT || 3001;
 

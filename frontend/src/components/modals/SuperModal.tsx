@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { X, Edit, Calendar, Clock, Star, Tv, BookOpen, Gamepad2, Heart, Bookmark, Check, EyeOff, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -148,7 +149,7 @@ const SuperModal: React.FC = () => {
     if (!details || !midia) return;
 
     if (!isAuthenticated) {
-      alert('Você precisa estar logado para adicionar eventos ao calendário.');
+      toast.error('Você precisa estar logado para adicionar eventos ao calendário.');
       closeCalendarModal();
       return;
     }
@@ -214,10 +215,10 @@ const SuperModal: React.FC = () => {
 
     try {
       await orbeNerdApi.addCalendarEvents(eventsToAdd);
-      alert(`${eventsToAdd.length} evento(s) adicionado(s) ao seu calendário.`);
+      toast.success(`${eventsToAdd.length} evento(s) adicionado(s) ao seu calendário.`);
     } catch (error) {
       console.error('Erro ao salvar eventos de calendário:', error);
-      alert('Não foi possível salvar os eventos no calendário. Tente novamente.');
+      toast.error('Não foi possível salvar os eventos no calendário. Tente novamente.');
     } finally {
       closeCalendarModal();
     }

@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Filter, Calendar, Star, Monitor } from 'lucide-react';
+import { Filter, Calendar, Star, Monitor, Sparkles } from 'lucide-react';
 import { realApi } from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import type { Serie } from '@/types';
 import type { SeriesPageData } from '@/lib/apiServer';
 
 import PageHeader from '@/components/layout/PageHeader';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useEventosResumo } from '@/lib/hooks/useEventosResumo';
 import { useAppStore } from '@/stores/appStore';
 
 const MONTHS = [
@@ -34,6 +37,7 @@ interface SeriesClientProps {
 export default function SeriesClient({ initialData }: SeriesClientProps) {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const { resumo } = useEventosResumo();
   const [series, setSeries] = useState<Serie[]>(initialData.results);
   const [totalResults, setTotalResults] = useState(initialData.total);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +89,17 @@ export default function SeriesClient({ initialData }: SeriesClientProps) {
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
       <PageHeader title="Séries" description="Explore um universo de séries, das mais populares aos clássicos." />
+
+      {resumo && resumo.proximos.series.length > 0 && (
+        <CollapsibleSection id="series-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.proximos.series}
+            type="serie"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

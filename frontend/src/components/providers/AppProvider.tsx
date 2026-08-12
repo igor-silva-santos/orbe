@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/hooks/useTheme';
 import { realApi } from '@/data/realApi';
@@ -17,7 +18,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setInteractions,
   } = useAppStore();
   
-  useTheme();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -54,6 +55,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     <>
       <SyncRefreshListener />
       {children}
+      <Toaster theme={isDark ? 'dark' : 'light'} richColors closeButton position="bottom-right" />
     </>
   );
 }

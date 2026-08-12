@@ -40,18 +40,32 @@ export function useFanCarouselSlides(emblaApi: EmblaCarouselType | undefined) {
       return entry;
     };
 
+    // Só mede/anima os slides perto do centro — os demais já ficam totalmente esmaecidos
+    // bem antes dessa distância, então congelar o resto não é perceptível.
+    const FAN_WINDOW = 10;
+
     const updateSlides = () => {
       const root = emblaApi.rootNode();
       const rootRect = root.getBoundingClientRect();
       const centerX = rootRect.left + rootRect.width / 2;
+      const selected = emblaApi.selectedScrollSnap();
+      const slideNodes = emblaApi.slideNodes();
 
-      emblaApi.slideNodes().forEach((slide) => {
+      // 1ª passada: só leitura de layout (evita intercalar leitura/escrita — cada
+      // getBoundingClientRect() depois de um write do GSAP força um reflow síncrono).
+      const measurements: { slide: HTMLElement; t: number }[] = [];
+      for (let index = 0; index < slideNodes.length; index++) {
+        if (Math.abs(index - selected) > FAN_WINDOW) continue;
+        const slide = slideNodes[index];
         const rect = slide.getBoundingClientRect();
         const slideCenter = rect.left + rect.width / 2;
         const distance = Math.abs(slideCenter - centerX);
         const slideWidth = rect.width || 190;
-        const t = Math.min(distance / (slideWidth * 2.1), 1);
+        measurements.push({ slide, t: Math.min(distance / (slideWidth * 2.1), 1) });
+      }
 
+      // 2ª passada: só escrita.
+      measurements.forEach(({ slide, t }) => {
         const scale = 1 - t * 0.14;
         const opacity = 1 - Math.min(t * 0.5, 0.35);
 

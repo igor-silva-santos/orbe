@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { orbeNerdApi } from '@/lib/api';
 import type { Filme, Serie, Anime, Jogo, TipoMidia, UserAction, UserInteraction } from '@/types';
@@ -26,7 +27,7 @@ export function useMidiaInteraction() {
 
   return async (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => {
     if (!isAuthenticated) {
-      alert('Você precisa estar logado para fazer isso.');
+      toast.error('Você precisa estar logado para fazer isso.');
       return;
     }
 
@@ -42,7 +43,7 @@ export function useMidiaInteraction() {
       upsertInteraction(interaction);
     } catch (error) {
       console.error('Erro ao salvar interação:', error);
-      alert('Não foi possível salvar. Tente novamente.');
+      toast.error('Não foi possível salvar. Tente novamente.');
     }
   };
 }

@@ -5,6 +5,7 @@ import { X, Search } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
+import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import type { SearchResultItem } from '@/types';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 
@@ -252,7 +253,7 @@ const SearchOverlay: React.FC = () => {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                <LoadingIndicator message="" size="lg" />
               </div>
             ) : totalResults > 0 ? (
               <div className="space-y-8 pb-4">

@@ -14,7 +14,6 @@ import {
 } from '@/lib/media-helpers';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
-import CommentSection from './CommentSection';
 
 interface AnimeModalContentProps {
   anime: Anime;
@@ -149,7 +148,7 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
                   className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
                   title={platform.nome}
                 >
-                  <PlatformIcon platform={platform.nome} className="h-6 w-6" iconOnly variant="tile" />
+                  <PlatformIcon platform={platform.nome} size={32} className="h-8 w-8" iconOnly variant="circle" />
                   {!isCrunchyroll && <span>{platform.nome}</span>}
                 </a>
               );
@@ -263,8 +262,6 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
           </div>
         </section>
       )}
-
-      <CommentSection midiaId={anime.id} tipoMidia="anime" />
     </div>
   );
 };

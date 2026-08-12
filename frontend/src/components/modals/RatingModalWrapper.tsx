@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import RatingModal from './RatingModal';
 import { useAppStore } from '@/stores/appStore';
 import { API_BASE } from '@/lib/apiBase';
@@ -27,7 +28,7 @@ const RatingModalWrapper = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Você precisa estar logado para avaliar.');
+        toast.error('Você precisa estar logado para avaliar.');
         closeRatingModal();
         return;
       }
@@ -55,7 +56,7 @@ const RatingModalWrapper = () => {
       closeRatingModal();
     } catch (error) {
       console.error('Erro ao salvar avaliação:', error);
-      alert(error instanceof Error ? error.message : 'Erro ao salvar avaliação. Tente novamente.');
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar avaliação. Tente novamente.');
     }
   };
 

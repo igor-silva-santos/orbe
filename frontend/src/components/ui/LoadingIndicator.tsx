@@ -7,9 +7,9 @@ interface LoadingIndicatorProps {
 }
 
 const sizeClasses = {
-  sm: 'h-5 w-5 border-2',
-  md: 'h-8 w-8 border-2',
-  lg: 'h-10 w-10 border-[3px]',
+  sm: 'h-5 w-5',
+  md: 'h-8 w-8',
+  lg: 'h-10 w-10',
 };
 
 export function LoadingIndicator({
@@ -19,10 +19,11 @@ export function LoadingIndicator({
 }: LoadingIndicatorProps) {
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`} role="status" aria-live="polite">
-      <div
-        className={`${sizeClasses[size]} rounded-full border-primary border-t-transparent animate-spin`}
-        aria-hidden
-      />
+      <div className={`relative ${sizeClasses[size]}`} aria-hidden>
+        <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary border-r-primary/50 animate-spin" />
+        <div className="absolute inset-[22%] rounded-full border-2 border-transparent border-b-primary/80 animate-[spin_0.6s_linear_infinite_reverse]" />
+      </div>
       {message && <p className="text-sm text-muted-foreground text-center max-w-xs">{message}</p>}
     </div>
   );

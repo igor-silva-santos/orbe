@@ -1060,7 +1060,12 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
     const where: Prisma.JogoWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
 
-    const orderBy: Prisma.JogoOrderByWithRelationInput = filtro === 'populares' ? { rating: 'desc' } : { name: 'asc' };
+    // `follows` (quantos usuários seguem o jogo no IGDB) é o sinal de popularidade real;
+    // `rating` é nota de qualidade, não indica se o jogo está "em alta" agora.
+    const orderBy: Prisma.JogoOrderByWithRelationInput[] | Prisma.JogoOrderByWithRelationInput =
+      filtro === 'populares'
+        ? [{ follows: { sort: 'desc', nulls: 'last' } }, { rating: 'desc' }]
+        : { name: 'asc' };
 
     const [jogos, total] = await Promise.all([
       prisma.jogo.findMany({

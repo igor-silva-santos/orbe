@@ -13,8 +13,17 @@ const igdbClientSecret = process.env.IGDB_CLIENT_SECRET;
 // Instantiate moviedb-promise client
 const tmdb = new MovieDb(tmdbApiKey || '');
 
+/** Sem timeout, axios espera para sempre — uma conexão travada com qualquer uma dessas APIs
+ * congela o sync inteiro (o orquestrador roda as fases em sequência com await simples). */
+const EXTERNAL_API_TIMEOUT_MS = 15_000;
+
+// `moviedb-promise` (o client `tmdb` abaixo) usa a instância global do axios por baixo dos panos,
+// sem expor um jeito de configurar timeout no construtor — só via default global.
+axios.defaults.timeout = EXTERNAL_API_TIMEOUT_MS;
+
 const tmdbApi = axios.create({
   baseURL: 'https://api.themoviedb.org/3',
+  timeout: EXTERNAL_API_TIMEOUT_MS,
   params: {
     api_key: tmdbApiKey,
     language: 'pt-BR',
@@ -23,6 +32,7 @@ const tmdbApi = axios.create({
 
 const igdbApi = axios.create({
   baseURL: 'https://api.igdb.com/v4',
+  timeout: EXTERNAL_API_TIMEOUT_MS,
   headers: {
     'Client-ID': igdbClientId,
   },
@@ -30,6 +40,7 @@ const igdbApi = axios.create({
 
 const anilistApi = axios.create({
   baseURL: 'https://graphql.anilist.co',
+  timeout: EXTERNAL_API_TIMEOUT_MS,
 });
 
 let igdbAccessToken: string | null = null;
