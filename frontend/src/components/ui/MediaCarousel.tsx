@@ -54,10 +54,15 @@ const EMPTY_MONTH_NAV_LIMIT = 8;
 
 type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
 
-/** Filme tem sessão de cinema (curada ou verificada via ingresso.com) ou algum streaming. */
+/** Filme em cinema (cartaz/sessões/pré-venda) ou com streaming. */
 const hasFilmeDisponibilidade = (item: Midia): boolean => {
   const filme = item as Filme;
-  return Boolean(filme.em_cartaz) || Boolean(filme.tem_sessoes) || (item.plataformas_api?.length ?? 0) > 0;
+  return (
+    Boolean(filme.em_cartaz) ||
+    Boolean(filme.tem_sessoes) ||
+    Boolean(filme.em_prevenda) ||
+    (item.plataformas_api?.length ?? 0) > 0
+  );
 };
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
@@ -74,7 +79,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   // Sub-filtro do "Em Alta" — só se aplica a filmes (cinema tem conceito próprio de "em cartaz"
   // que séries/jogos não têm da mesma forma). Padrão ao ativar Em Alta: cinema.
-  const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('cinema');
+  const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
   // Filtro padrão do carrossel de lançamentos (modo normal, não Em Alta): esconde filmes
   // sem nenhuma disponibilidade (sem cinema e sem streaming). Só se aplica a filmes.
   const [showAllFilmes, setShowAllFilmes] = useState(false);
@@ -189,11 +194,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   }, [emAltaMode, loadEmAlta]);
 
   const toggleEmAlta = () => {
-    const next = !emAltaMode;
-    if (next && mediaType === 'filmes') {
-      setEmAltaDisponibilidade('cinema');
-    }
-    setEmAltaMode(next);
+    setEmAltaMode((prev) => !prev);
   };
 
   useEffect(() => {

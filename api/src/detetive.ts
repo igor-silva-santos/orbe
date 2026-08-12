@@ -1,54 +1,48 @@
-import { prisma, tmdb, tmdbApi } from './clients';
+import { prisma, tmdbApi } from './clients';
 import { logger } from './logger';
 import puppeteer, { Browser } from 'puppeteer';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Função para buscar provedores de streaming no TMDB (Brasil)
 async function checkStreamingAvailability(tmdbId: number) {
   try {
     const response = await tmdbApi.get(`/movie/${tmdbId}/watch/providers`);
     const brProviders = response.data.results?.BR;
-    
-    // Verificamos se está disponível para aluguel (rent) ou compra (buy)
     const digitalRelease = brProviders?.rent || brProviders?.buy || brProviders?.flatrate;
-    
+
     if (digitalRelease && digitalRelease.length > 0) {
       return {
         available: true,
         providers: digitalRelease.map((p: any) => p.provider_name),
-        link: brProviders.link
       };
     }
-    return { available: false };
+    return { available: false, providers: [] as string[] };
   } catch (error) {
     logger.error(`Erro ao verificar streaming para TMDB ID ${tmdbId}:`, error);
-    return { available: false };
+    return { available: false, providers: [] as string[] };
   }
 }
 
-// Função para criar notificação no sistema
-async function createDigitalReleaseNotification(filme: any, providers: string[]) {
+async function createDigitalReleaseNotification(filme: { tmdbId: number; title: string }, providers: string[]) {
   try {
-    // Busca todos os usuários que favoritaram este filme ou querem assistir
     const interestedUsers = await prisma.preferencias_usuario_midia.findMany({
       where: {
         midia_id: filme.tmdbId,
         tipo_midia: 'filme',
-        status: { in: ['favorito', 'quero_assistir'] }
+        status: { in: ['favorito', 'quero_assistir'] },
       },
-      select: { usuario_id: true }
+      select: { usuario_id: true },
     });
 
     const providerList = providers.slice(0, 3).join(', ');
     const message = `🎬 Boas notícias! "${filme.title}" já está disponível digitalmente (ex: ${providerList}).`;
 
-    const notifications = interestedUsers.map(u => ({
+    const notifications = interestedUsers.map((u) => ({
       userId: u.usuario_id,
       type: 'DIGITAL_RELEASE',
       message,
       relatedMediaId: filme.tmdbId,
-      relatedMediaType: 'filme'
+      relatedMediaType: 'filme',
     }));
 
     if (notifications.length > 0) {
@@ -66,10 +60,61 @@ function slugify(text: string): string {
     .toString()
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Corrigido regex de normalização
-    .replace(/[^a-z0-9 -]/g, '') // Simplificado
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9 -]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function releaseDatePassed(releaseDate: Date | null | undefined, now: Date): boolean {
+  if (!releaseDate) return false;
+  return startOfDay(releaseDate).getTime() <= startOfDay(now).getTime();
+}
+
+function needsIngressoMonitoring(filme: {
+  ingresso_sem_pagina: boolean;
+  ingresso_link: string | null;
+  em_prevenda: boolean | null;
+  prevenda_confirmada: boolean;
+  releaseDate: Date | null;
+}, now: Date): boolean {
+  if (filme.ingresso_sem_pagina) return false;
+  if (releaseDatePassed(filme.releaseDate, now)) return false;
+
+  const hasLink = Boolean(filme.ingresso_link);
+  const preSaleConfirmed = filme.prevenda_confirmada;
+
+  return !hasLink || !preSaleConfirmed;
+}
+
+async function scrapeIngressoPage(
+  browser: Browser,
+  url: string,
+): Promise<{ pageExists: boolean; hasCinemaSessions: boolean; isPreSale: boolean }> {
+  const page = await browser.newPage();
+  try {
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+    );
+    const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+    if (!response?.ok()) {
+      return { pageExists: false, hasCinemaSessions: false, isPreSale: false };
+    }
+    const pageContent = await page.content();
+    return {
+      pageExists: true,
+      hasCinemaSessions: !pageContent.includes('Não há sessões disponíveis no momento.'),
+      isPreSale: /pré-?venda/i.test(pageContent),
+    };
+  } finally {
+    await page.close();
+  }
 }
 
 export async function runDetetive(fullScan = false, disconnectWhenDone = false) {
@@ -78,27 +123,18 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
     logger.info(`--- Iniciando Detetive Digital 2.0 ${fullScan ? '(Varredura Completa)' : ''} ---`);
 
     const now = new Date();
-    const whereClause: any = {
-      tipo_midia: 'filme', // Garantindo que pegamos apenas filmes
-      OR: [
-        { voteCount: { gt: 25 } },
-        { popularity: { gt: 10 } }
-      ]
-    };
-
-    // Focar em filmes lançados nos últimos 6 meses e próximos 3 meses
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const threeMonthsAhead = new Date();
     threeMonthsAhead.setMonth(threeMonthsAhead.getMonth() + 3);
-    whereClause.releaseDate = {
-      gte: sixMonthsAgo,
-      lte: threeMonthsAhead
-    };
 
-    const targetMovies = await prisma.filme.findMany({ 
-      where: whereClause,
-      include: { streamingProviders: true } 
+    const targetMovies = await prisma.filme.findMany({
+      where: {
+        tipo_midia: 'filme',
+        OR: [{ voteCount: { gt: 25 } }, { popularity: { gt: 10 } }],
+        releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead },
+      },
+      include: { streamingProviders: true },
     });
 
     logger.info(`Encontrados ${targetMovies.length} filmes na janela de monitoramento.`);
@@ -109,57 +145,84 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
 
     for (const filme of targetMovies) {
       try {
-        logger.info(`🕵️ Verificando: "${filme.title}"...`);
-        
-        // 1. Verificar Cinema (ingresso.com)
-        const slug = slugify(filme.title);
-        const directUrl = `https://www.ingresso.com/filme/${slug}`;
-        const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36');
-        
-        const response = await page.goto(directUrl, { waitUntil: 'networkidle2', timeout: 15000 });
-        let hasCinemaSessions = false;
-        let isPreSale = false;
-        let pageExists = false;
+        const releasePassed = releaseDatePassed(filme.releaseDate, now);
+        let ingressoSemPagina = filme.ingresso_sem_pagina;
+        let ingressoLink = filme.ingresso_link;
+        let temSessoes = filme.tem_sessoes ?? false;
+        let emPrevenda = releasePassed ? false : Boolean(filme.em_prevenda);
+        let prevendaConfirmada = filme.prevenda_confirmada;
 
-        if (response && response.ok()) {
-          pageExists = true;
-          const pageContent = await page.content();
-          hasCinemaSessions = !pageContent.includes('Não há sessões disponíveis no momento.');
-          // Página do ingresso.com sinaliza pré-venda com o rótulo "Pré-venda" perto do CTA de compra.
-          isPreSale = /pré-?venda/i.test(pageContent);
+        if (releasePassed && filme.em_prevenda) {
+          logger.info(`📅 "${filme.title}" já estreou — removendo flag de pré-venda.`);
         }
-        await page.close();
 
-        // 2. Verificar Streaming/Digital (TMDB)
+        const shouldCheckIngresso = needsIngressoMonitoring(
+          {
+            ingresso_sem_pagina: ingressoSemPagina,
+            ingresso_link: ingressoLink,
+            em_prevenda: emPrevenda,
+            prevenda_confirmada: prevendaConfirmada,
+            releaseDate: filme.releaseDate,
+          },
+          now,
+        );
+
+        if (shouldCheckIngresso) {
+          logger.info(`🕵️ Verificando ingresso.com: "${filme.title}"...`);
+          const slug = slugify(filme.title);
+          const directUrl = `https://www.ingresso.com/filme/${slug}`;
+          const targetUrl = ingressoLink ?? directUrl;
+          const ingresso = await scrapeIngressoPage(browser, targetUrl);
+
+          if (!ingresso.pageExists) {
+            ingressoSemPagina = true;
+            ingressoLink = null;
+            temSessoes = false;
+            logger.info(`🚫 "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
+          } else {
+            ingressoLink = targetUrl;
+            temSessoes = ingresso.hasCinemaSessions;
+
+            if (!prevendaConfirmada && ingresso.isPreSale) {
+              emPrevenda = true;
+              prevendaConfirmada = true;
+              logger.info(`🎟️ "${filme.title}" em pré-venda confirmada.`);
+            } else if (!prevendaConfirmada && !ingresso.isPreSale) {
+              emPrevenda = false;
+            }
+          }
+        } else if (ingressoSemPagina) {
+          logger.info(`⏭️ "${filme.title}" — ingresso.com indisponível, pulando.`);
+        } else if (prevendaConfirmada || emPrevenda) {
+          logger.info(`⏭️ "${filme.title}" — pré-venda já confirmada, pulando consulta.`);
+        } else if (releasePassed) {
+          logger.info(`⏭️ "${filme.title}" — já estreou, pulando ingresso.com.`);
+        }
+
         const streaming = await checkStreamingAvailability(filme.tmdbId);
-
-        // 3. Lógica de Atualização
-        const wasInCinema = filme.tem_sessoes;
         const isNowDigital = streaming.available && !filme.streamingProviders.length;
 
         await prisma.filme.update({
           where: { id: filme.id },
           data: {
-            ingresso_link: pageExists ? directUrl : filme.ingresso_link,
-            tem_sessoes: hasCinemaSessions,
-            em_prevenda: pageExists ? isPreSale : filme.em_prevenda,
+            ingresso_link: ingressoLink,
+            ingresso_sem_pagina: ingressoSemPagina,
+            tem_sessoes: temSessoes,
+            em_prevenda: emPrevenda,
+            prevenda_confirmada: prevendaConfirmada,
             ultima_verificacao_ingresso: new Date(),
-            // Se o filme saiu do cinema e entrou no digital agora, notificamos
-            status: streaming.available ? 'Released' : filme.status
+            status: streaming.available ? 'Released' : filme.status,
           },
         });
 
         if (isNowDigital) {
           logger.info(`✨ NOVIDADE: "${filme.title}" chegou ao streaming!`);
           await createDigitalReleaseNotification(filme, streaming.providers);
-          
-          // Opcional: Aqui poderíamos disparar um sync específico para atualizar os streamingProviders no banco
-          // mas a notificação já cumpre o papel de avisar o usuário.
         }
 
-        logger.info(`✅ "${filme.title}" verificado. Cinema: ${hasCinemaSessions}, Digital: ${streaming.available}`);
-      
+        logger.info(
+          `✅ "${filme.title}" — cinema: ${temSessoes}, pré-venda: ${emPrevenda}, digital: ${streaming.available}`,
+        );
       } catch (error: any) {
         logger.error(`Erro ao verificar "${filme.title}":`, error.message);
       } finally {
@@ -167,13 +230,9 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
       }
     }
   } catch (e: any) {
-    logger.error("Erro fatal no Detetive Digital 2.0:", e.message);
+    logger.error('Erro fatal no Detetive Digital 2.0:', e.message);
   } finally {
     if (browser) await browser.close();
-    // Só desconecta quando rodado como script isolado (o processo termina em seguida).
-    // O cron diário e a rota manual /api/run-detetive compartilham o PrismaClient com
-    // o resto do servidor Express — desconectá-lo ali derrubaria as queries de quem
-    // estiver usando a API bem nesse instante.
     if (disconnectWhenDone) await prisma.$disconnect();
     logger.info('--- Detetive Digital finalizado ---');
   }

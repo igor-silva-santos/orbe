@@ -107,8 +107,9 @@ export interface Filme extends Midia {
   elenco: CastMember[];
   ingresso_link?: string;
   em_prevenda: boolean;
-  em_cartaz?: boolean; // Propriedade adicionada
+  em_cartaz?: boolean;
   tem_sessoes?: boolean;
+  popularity?: number | null;
   ultima_verificacao_ingresso?: string;
   videos?: Video[];
   status?: string;
@@ -189,6 +190,8 @@ export interface Jogo extends Midia {
   steam_player_count?: number | null;
   steam_price_cents?: number | null;
   steam_discount_percent?: number | null;
+  hypes?: number | null;
+  follows?: number | null;
   pc_requirements?: { minimum?: string; recommended?: string } | null;
 }
 
@@ -529,6 +532,10 @@ export interface FilmeDetalhes {
   backdropPath: string | null;
 
   status: string;
+
+  popularity?: number | null;
+  voteAverage?: number | null;
+  voteCount?: number | null;
 
   em_prevenda: boolean;
 

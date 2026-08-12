@@ -343,6 +343,8 @@ export const mapFilmeToMidia = (filme: any) => {
     em_prevenda: filme.em_prevenda,
     ingresso_link: filme.ingresso_link,
     tem_sessoes: filme.tem_sessoes ?? false,
+    em_cartaz: filme.emCartaz ?? false,
+    popularity: filme.popularity ?? null,
     status: filme.status,
     status_label: translateTmdbStatus(filme.status),
     budget: filme.budget ? filme.budget.toString() : null,
@@ -529,6 +531,8 @@ export const mapJogoToMidia = (jogo: any) => {
     steam_price_cents: jogo.steamPriceCents ?? null,
     steam_discount_percent: jogo.steamDiscountPercent ?? null,
     pc_requirements: jogo.pcRequirements ?? null,
+    hypes: jogo.hypes ?? null,
+    follows: jogo.follows ?? null,
     premiacoes: parsePremiacoes(jogo.premiacoes),
   };
 };

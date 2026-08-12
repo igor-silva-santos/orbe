@@ -90,18 +90,16 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
 
   const providers = Array.from(seen.values());
 
-  if (providers.length === 0) {
-    const isFilmeCard =
-      'duracao' in item || (item as { type?: string }).type === 'filme';
-    const emPrevenda = 'em_prevenda' in item && Boolean((item as Filme).em_prevenda);
-    const releaseRaw = item.data_lancamento_api;
-    const isFutureRelease =
-      releaseRaw &&
-      !Number.isNaN(new Date(releaseRaw as string).getTime()) &&
-      new Date(releaseRaw as string) > new Date();
-
-    if (isFilmeCard && (emPrevenda || isFutureRelease)) {
-      return [{ name: 'Nos Cinemas', icon: 'cinema' }];
+  const isFilmeCard =
+    'duracao' in item || (item as { type?: string }).type === 'filme';
+  if (isFilmeCard) {
+    const filme = item as Filme;
+    const emCinema =
+      Boolean(filme.em_cartaz) ||
+      Boolean(filme.tem_sessoes) ||
+      Boolean(filme.em_prevenda);
+    if (emCinema && !seen.has('Nos Cinemas')) {
+      providers.unshift({ name: 'Nos Cinemas', icon: 'cinema' });
     }
   }
 

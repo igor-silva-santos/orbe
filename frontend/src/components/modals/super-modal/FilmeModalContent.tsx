@@ -96,17 +96,24 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
       {streamingProviders.length > 0 && (
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
-          <div className="flex flex-wrap gap-3 mt-2">
+          <div className="flex flex-wrap gap-4 sm:gap-6 mt-2">
             {streamingProviders.map((p) => (
               <a
                 key={p.provider.name}
                 href={p.url!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-3 py-2 rounded-lg transition-colors text-sm"
+                className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90"
+                aria-label={`Abrir ${p.provider.name}`}
               >
-                <PlatformIcon platform={p.provider.name} size={32} className="h-8 w-8" variant="circle" />
-                <span>{p.provider.name}</span>
+                <PlatformIcon
+                  platform={p.provider.name}
+                  logoPath={p.provider.logoPath}
+                  size={48}
+                  variant="circle"
+                  title={p.provider.name}
+                />
+                <span className="text-xs text-center text-muted-foreground leading-tight">{p.provider.name}</span>
               </a>
             ))}
           </div>
