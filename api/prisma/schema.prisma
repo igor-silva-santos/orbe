@@ -194,8 +194,11 @@ model Jogo {
   gameEngines           JogoOnGameEngine[]
   sourceRelations       GameRelation[] @relation("SourceRelations")
   relatedRelations      GameRelation[] @relation("RelatedRelations")
-  eventId               Int?
-  event                 Event?         @relation(fields: [eventId], references: [id])
+  // Um jogo pode ser anunciado/aparecer em mais de um evento — FK única (`eventId`) fazia a
+  // última sincronização "roubar" o jogo de outro evento correto (ex.: um jogo revelado na
+  // Wholesome Snack em 2023 aparecendo como revelado no Summer Games Showcase 2026 só porque
+  // esse evento foi sincronizado por último).
+  events                Event[]
   premiacoes            Json?
 
   @@index([firstReleaseDate])

@@ -211,7 +211,9 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                     ratingCount: game.rating_count,
                     hypes: game.hypes,
                     follows: game.follows,
-                    ...(eventId && { event: { connect: { igdbId: eventId } } })
+                    // `connect` numa relação muitos-para-muitos ADICIONA ao conjunto existente
+                    // em vez de substituir — um jogo pode aparecer em mais de um evento.
+                    ...(eventId && { events: { connect: [{ igdbId: eventId }] } })
                 };
 
                 const createData = {
