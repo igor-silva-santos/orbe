@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
-import { isJogoRelevantForSync } from './qualityFilters';
+import { isJogoRelevantForSync, SYNC_MIN_GAME_HYPES } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy } from './syncUtils';
@@ -97,13 +97,18 @@ async function fetchPopularGameIds(): Promise<number[]> {
         while (hasMore && offset < 2000) {
             const response = await igdbApiWithRetry(() => igdbApi.post(
                 '/games',
-                `fields id, rating, rating_count; where rating >= 50 & category = 0; limit ${limit}; offset ${offset}; sort rating desc;`
+                `fields id, rating, rating_count, hypes, follows; where (rating >= 50 | hypes >= ${SYNC_MIN_GAME_HYPES}) & category = 0; limit ${limit}; offset ${offset}; sort rating desc;`
             ));
 
             const games = response.data;
             if (games && games.length > 0) {
                 for (const game of games) {
-                    if (game.id && isJogoRelevantForSync({ rating: game.rating, ratingCount: game.rating_count })) {
+                    if (game.id && isJogoRelevantForSync({
+                        rating: game.rating,
+                        ratingCount: game.rating_count,
+                        hypes: game.hypes,
+                        follows: game.follows,
+                    })) {
                         gameIds.add(game.id);
                     }
                 }
@@ -161,11 +166,18 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
         for (const game of games) {
 
             try {
-                if (!isJogoRelevantForSync({ rating: game.rating, ratingCount: game.rating_count })) {
+                // Jogos de eventos (Game Awards etc.) são curados pelo IGDB — não aplicar filtro de rating.
+                if (!eventId && !isJogoRelevantForSync({
+                    rating: game.rating,
+                    ratingCount: game.rating_count,
+                    hypes: game.hypes,
+                    follows: game.follows,
+                })) {
                     bumpSkip('quality_filter');
                     logger.info(
                       `⏭️ Jogo [${game.id}] "${game.name}" ignorado: critérios de sync ` +
-                      `(rating=${game.rating ?? 0}).`
+                      `(rating=${game.rating ?? 0}, rating_count=${game.rating_count ?? 0}, ` +
+                      `hypes=${game.hypes ?? 0}, follows=${game.follows ?? 0}).`
                     );
                     continue;
                 }
