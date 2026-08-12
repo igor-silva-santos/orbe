@@ -63,9 +63,17 @@ curl -X POST https://<sua-api>/api/run-sync \
   -d '{"mediaType":"movies","startDate":"2024-01-01","endDate":"2024-12-31"}'
 ```
 
-## Design
+## Documentação
 
-A direção visual ativa está documentada em [`DESIGN.md`](DESIGN.md). Os protótipos HTML ficam em `design-preview/`.
+| Documento | Conteúdo |
+|-----------|----------|
+| [`docs/FUNCIONALIDADES.md`](docs/FUNCIONALIDADES.md) | Inventário do que o sistema faz hoje |
+| [`docs/ESTADO_DO_PROJETO.md`](docs/ESTADO_DO_PROJETO.md) | Visão original vs. estado atual e lacunas |
+| [`docs/PRODUCAO.md`](docs/PRODUCAO.md) | Deploy em produção |
+| [`docs/SYNC_INICIAL.md`](docs/SYNC_INICIAL.md) | Sync inicial e backfill |
+| [`DESIGN.md`](DESIGN.md) | Direção visual (Pulp Gráfico) |
+
+Os protótipos HTML ficam em `design-preview/`.
 
 ## Roadmap
 
