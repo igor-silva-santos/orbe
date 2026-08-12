@@ -18,7 +18,6 @@ import { useAppStore } from '@/stores/appStore';
 import {
   getStreamingProviders,
   getGamePlatforms,
-  getAnimeDubStatus,
   formatRating,
   formatNextEpisodeCard,
   hasSteamPriceDisplay,
@@ -102,7 +101,10 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
   const providers = getStreamingProviders(midia);
   const platforms = type === 'jogo' ? getGamePlatforms(midia as Jogo) : [];
-  const dubStatus = type === 'anime' ? getAnimeDubStatus(midia as Anime) : null;
+  // Lê `dublagem_info` direto (mesmo campo que o modal de detalhe usa) em vez de inferir de
+  // `personagens`, que só vem preenchido no payload de detalhe — em cards de carrossel/lista
+  // ficava sempre vazio e todo anime dublado aparecia como "Legendado".
+  const dubStatus = type === 'anime' ? ((midia as Anime).dublagem_info ? 'Dublado' : 'Legendado') : null;
 
   const isAnime = type === 'anime';
   const nextAiringEpisode = isAnime ? (midia as Anime).nextAiringEpisode : null;

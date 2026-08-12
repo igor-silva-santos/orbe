@@ -130,6 +130,10 @@ model Anime {
   hashtag        String?
   isLicensed     Boolean?
   isAdult        Boolean?  @default(false)
+  // Pré-calculado no sync (checar anime.characters exigiria incluir a relação inteira em
+  // toda lista/carrossel só pra um badge) — evita cards sempre caindo em "Legendado" porque
+  // a query de lista não trouxe os personagens/dubladores.
+  dublagemPtBr   Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

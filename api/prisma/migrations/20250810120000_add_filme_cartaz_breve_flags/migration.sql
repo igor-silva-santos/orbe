@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Filme" ADD COLUMN "emCartaz" BOOLEAN DEFAULT false;
-ALTER TABLE "Filme" ADD COLUMN "emBreve" BOOLEAN DEFAULT false;

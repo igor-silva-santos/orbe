@@ -1,4 +1,4 @@
-import { Midia, Filme, Serie, Anime, Jogo, Character } from '@/types';
+import { Midia, Filme, Serie, Jogo, Character } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -137,27 +137,6 @@ export const getGamePlatforms = (item: Jogo): { name: string; icon: string }[] =
     name: name,
     icon: name.toLowerCase().replace(/ /g, '-')
   }));
-};
-
-/**
- * Verifica se um anime possui dublagem em português.
- * A lógica foi robustecida para iterar sobre todos os personagens.
- * @param item O objeto de anime.
- * @returns "Dublado" ou "Legendado".
- */
-export const getAnimeDubStatus = (item: Anime): 'Dublado' | 'Legendado' => {
-  if (!item.personagens || item.personagens.length === 0) {
-    return 'Legendado';
-  }
-
-  for (const character of item.personagens) {
-    // A propriedade `pt` indica a presença de dublador brasileiro.
-    if (character.dubladores?.pt) {
-      return 'Dublado';
-    }
-  }
-
-  return 'Legendado';
 };
 
 /**

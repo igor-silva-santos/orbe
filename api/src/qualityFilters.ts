@@ -173,10 +173,22 @@ export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
   ],
 };
 
+/**
+ * `originalTitle` é opcional — comparar `contains` direto num campo nulo dá SQL NULL
+ * (não `false`), que se propaga por todo o OR e faz o `NOT` do filtro virar NULL pra
+ * essas linhas. `WHERE NULL` exclui a linha do resultado, então todo filme sem
+ * originalTitle salvo desaparecia de TODOS os carrosséis (homepage, por mês, por ano),
+ * mesmo sem nenhuma palavra de show/concerto no título.
+ */
 function concertTitleMatch(substring: string): Prisma.FilmeWhereInput[] {
   return [
     { title: { contains: substring, mode: 'insensitive' } },
-    { originalTitle: { contains: substring, mode: 'insensitive' } },
+    {
+      AND: [
+        { originalTitle: { not: null } },
+        { originalTitle: { contains: substring, mode: 'insensitive' } },
+      ],
+    },
   ];
 }
 
