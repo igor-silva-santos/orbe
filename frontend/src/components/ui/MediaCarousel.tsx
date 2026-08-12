@@ -27,10 +27,8 @@ import type { Midia, TipoMidia, Filme, Serie, Anime, Jogo } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -54,15 +52,6 @@ const EMPTY_MONTH_NAV_LIMIT = 8;
 
 type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
 
-/** Filme em cinema (TMDB + cartaz/sessões/pré-venda) ou com streaming. */
-const hasFilmeDisponibilidade = (item: Midia): boolean => {
-  const filme = item as Filme;
-  const temCinema =
-    Boolean(filme.estreia_cinema) &&
-    (Boolean(filme.em_cartaz) || Boolean(filme.tem_sessoes) || Boolean(filme.em_prevenda));
-  return temCinema || Boolean(filme.estreia_streaming) || (item.plataformas_api?.length ?? 0) > 0;
-};
-
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
@@ -84,9 +73,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   // Sub-filtro do "Em Alta" — só se aplica a filmes (cinema tem conceito próprio de "em cartaz"
   // que séries/jogos não têm da mesma forma). Padrão ao ativar Em Alta: cinema.
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
-  // Filtro padrão do carrossel de lançamentos (modo normal, não Em Alta): esconde filmes
-  // sem nenhuma disponibilidade (sem cinema e sem streaming). Só se aplica a filmes.
-  const [showAllFilmes, setShowAllFilmes] = useState(false);
   const activeFetchesRef = useRef(0);
   const emAltaLoadedKeyRef = useRef<string | null>(null);
   const fetchingEmAltaRef = useRef(false);
@@ -151,16 +137,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   // que está de fato nos slides do embla — senão o índice-alvo calculado não bate com o
   // slide renderizado e o carrossel pula pro lugar errado.
   const applyDisplayFilters = useCallback(
-    (items: Midia[]): Midia[] => {
-      let result = selectedGenre ? items.filter((item) => item.generos_api?.includes(selectedGenre)) : items;
-      // Lançamentos (modo normal, não Em Alta) de filmes: por padrão esconde quem não tem
-      // nem cinema nem streaming. O modo Em Alta já resolve disponibilidade no servidor.
-      if (mediaType === 'filmes' && !emAltaMode && !showAllFilmes) {
-        result = result.filter(hasFilmeDisponibilidade);
-      }
-      return result;
-    },
-    [selectedGenre, mediaType, emAltaMode, showAllFilmes]
+    (items: Midia[]): Midia[] =>
+      selectedGenre ? items.filter((item) => item.generos_api?.includes(selectedGenre)) : items,
+    [selectedGenre]
   );
 
   const filteredItems = useMemo(
@@ -384,6 +363,65 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   }, [emblaApi, filteredItems]);
 
+  const scrollToNextFilteredRelease = useCallback(async () => {
+    if (!emblaApi || emAltaMode) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const resolveTarget = (items: Midia[]) => {
+      const list = applyDisplayFilters(items);
+      if (list.length === 0) return null;
+      const index = calculateCarouselStartIndex(list);
+      return { list, index };
+    };
+
+    let target = resolveTarget(mediaItemsRef.current);
+
+    if (target) {
+      const centered = target.list[target.index];
+      const centeredDate = centered?.data_lancamento_api ? new Date(centered.data_lancamento_api) : null;
+      const needsFutureMonth =
+        centeredDate && !Number.isNaN(centeredDate.getTime()) && centeredDate < today;
+
+      if (needsFutureMonth) {
+        const now = new Date();
+        let { year, month } = { year: now.getFullYear(), month: now.getMonth() + 1 };
+        for (let attempt = 0; attempt < 12; attempt++) {
+          const merged = await loadMonth(year, month);
+          const candidate = resolveTarget(merged);
+          if (!candidate) {
+            const next = addMonths(year, month, 1);
+            year = next.year;
+            month = next.month;
+            continue;
+          }
+          const item = candidate.list[candidate.index];
+          const release = item?.data_lancamento_api ? new Date(item.data_lancamento_api) : null;
+          if (release && !Number.isNaN(release.getTime()) && release >= today) {
+            target = candidate;
+            break;
+          }
+          const next = addMonths(year, month, 1);
+          year = next.year;
+          month = next.month;
+        }
+      }
+    } else {
+      const now = new Date();
+      const merged = await loadMonth(now.getFullYear(), now.getMonth() + 1);
+      target = resolveTarget(merged);
+    }
+
+    if (!target) return;
+
+    lastTitleMonthKey.current = '';
+    emblaApi.reInit();
+    emblaApi.scrollTo(target.index, false);
+    previousSelectedIndex.current = target.index;
+    updateTitleFromIndex(target.index, target.list);
+  }, [emblaApi, emAltaMode, applyDisplayFilters, loadMonth, updateTitleFromIndex]);
+
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isFetching) return;
     const now = new Date();
@@ -391,9 +429,23 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     const list = applyDisplayFilters(merged);
     const todayIndex = calculateCarouselStartIndex(list);
     lastTitleMonthKey.current = '';
+    emblaApi.reInit();
     emblaApi.scrollTo(todayIndex, false);
+    previousSelectedIndex.current = todayIndex;
     updateTitleFromIndex(todayIndex, list);
   }, [emblaApi, isFetching, loadMonth, applyDisplayFilters, updateTitleFromIndex]);
+
+  const prevGenreRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!emblaApi || emAltaMode) return;
+    if (prevGenreRef.current === undefined) {
+      prevGenreRef.current = selectedGenre;
+      return;
+    }
+    if (prevGenreRef.current === selectedGenre) return;
+    prevGenreRef.current = selectedGenre;
+    void scrollToNextFilteredRelease();
+  }, [selectedGenre, emblaApi, emAltaMode, scrollToNextFilteredRelease]);
 
   const wasEmAltaMode = useRef(false);
   useEffect(() => {
@@ -527,18 +579,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {mediaType === 'filmes' && !emAltaMode && (
-                  <>
-                    <DropdownMenuCheckboxItem
-                      checked={showAllFilmes}
-                      onCheckedChange={setShowAllFilmes}
-                      onSelect={(event) => event.preventDefault()}
-                    >
-                      Mostrar todos (inclusive sem disponibilidade)
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
                 <DropdownMenuItem onSelect={() => setSelectedGenre(null)}>Todos os Gêneros</DropdownMenuItem>
                 {genres.map((genre) => (
                   <DropdownMenuItem key={genre} onSelect={() => setSelectedGenre(genre)}>

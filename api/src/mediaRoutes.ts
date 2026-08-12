@@ -413,9 +413,14 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
     // (cinema / streaming / ambos). "ambos" ou ausente não restringe nada,
     // mantendo o comportamento padrão já existente de "populares".
     if (disponibilidade === 'cinema') {
-      allConditions.push({ emCartaz: true });
+      allConditions.push({
+        estreia_cinema: true,
+        OR: [{ emCartaz: true }, { emBreve: true }, { tem_sessoes: true }, { em_prevenda: true }],
+      });
     } else if (disponibilidade === 'streaming') {
-      allConditions.push({ streamingProviders: { some: {} } });
+      allConditions.push({
+        OR: [{ estreia_streaming: true }, { streamingProviders: { some: {} } }],
+      });
     }
 
     const where: Prisma.FilmeWhereInput = { AND: allConditions };
