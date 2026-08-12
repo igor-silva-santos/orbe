@@ -7,7 +7,7 @@ import { logger } from './logger';
 import { isJogoRelevantForSync, SYNC_MIN_GAME_HYPES } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons, updateSyncProgress } from './syncState';
-import { dedupeBy } from './syncUtils';
+import { dedupeBy, ensureIgdbNamedEntity } from './syncUtils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
@@ -213,6 +213,133 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                   }
                 }));
 
+                const [
+                  genreLinks,
+                  platformLinks,
+                  themeLinks,
+                  perspectiveLinks,
+                  gameModeLinks,
+                  gameEngineLinks,
+                ] = await Promise.all([
+                  Promise.all(
+                    dedupeBy(game.genres, (genre: any) => genre.id).map(async (genre: any) => ({
+                      genero: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.jogoGenero, 'igdbId', {
+                            id: genre.id,
+                            name: genre.name,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                  Promise.all(
+                    dedupeBy(game.platforms, (platform: any) => platform.id).map(async (platform: any) => ({
+                      plataforma: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.jogoPlataforma, 'igdbId', {
+                            id: platform.id,
+                            name: platform.name,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                  Promise.all(
+                    dedupeBy(game.themes, (theme: any) => theme.id).map(async (theme: any) => ({
+                      theme: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.jogoTheme, 'igdbId', {
+                            id: theme.id,
+                            name: theme.name,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                  Promise.all(
+                    dedupeBy(game.player_perspectives, (persp: any) => persp.id).map(async (persp: any) => ({
+                      perspective: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.jogoPlayerPerspective, 'igdbId', {
+                            id: persp.id,
+                            name: persp.name,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                  Promise.all(
+                    dedupeBy(game.game_modes, (mode: any) => mode.id).map(async (mode: any) => ({
+                      gameMode: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.gameMode, 'id', {
+                            id: mode.id,
+                            name: mode.name,
+                            slug: mode.slug,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                  Promise.all(
+                    dedupeBy(game.game_engines, (engine: any) => engine.id).map(async (engine: any) => ({
+                      gameEngine: {
+                        connect: {
+                          id: await ensureIgdbNamedEntity(prisma.gameEngine, 'id', {
+                            id: engine.id,
+                            name: engine.name,
+                            slug: engine.slug,
+                          }),
+                        },
+                      },
+                    })),
+                  ),
+                ]);
+
+                const relationCreates = {
+                  genres: { create: genreLinks },
+                  platforms: { create: platformLinks },
+                  themes: { create: themeLinks },
+                  playerPerspectives: { create: perspectiveLinks },
+                  gameModes: { create: gameModeLinks },
+                  gameEngines: { create: gameEngineLinks },
+                  screenshots: {
+                    create: dedupeBy(game.screenshots, (ss: any) => ss.id).map((ss: any) => ({
+                      igdbId: ss.id,
+                      url: `https:${ss.url.replace('t_thumb', 't_screenshot_huge')}`.replace(
+                        'https://images.igdb.com/igdb/image/upload',
+                        '/api/images/igdb',
+                      ),
+                    })),
+                  },
+                  artworks: {
+                    create: dedupeBy(game.artworks, (art: any) => art.id).map((art: any) => ({
+                      igdbId: art.id,
+                      url: `https:${art.url.replace('t_thumb', 't_1080p')}`.replace(
+                        'https://images.igdb.com/igdb/image/upload',
+                        '/api/images/igdb',
+                      ),
+                    })),
+                  },
+                  websites: {
+                    create:
+                      game.websites
+                        ?.filter((w: any) => w.category != null)
+                        .map((w: any) => ({ url: w.url, category: w.category, igdbId: w.id })) ?? [],
+                  },
+                  videos: {
+                    create:
+                      game.videos?.map((video: any) => ({
+                        key: video.video_id,
+                        name: video.name || '',
+                        site: 'YouTube',
+                        type: 'Trailer',
+                        official: true,
+                      })) ?? [],
+                  },
+                };
+
                 const updateData = {
                     name: game.name,
                     summary: isLikelyEnglish(game.summary)
@@ -232,17 +359,8 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                 const createData = {
                     ...updateData,
                     igdbId: game.id,
-                    genres: { create: dedupeBy(game.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { igdbId: genre.id }, create: { igdbId: genre.id, name: genre.name } } } })) },
                     companies: { create: companiesToCreate },
-                    platforms: { create: dedupeBy(game.platforms, (platform: any) => platform.id).map((platform: any) => ({ plataforma: { connectOrCreate: { where: { igdbId: platform.id }, create: { igdbId: platform.id, name: platform.name } } } })) },
-                    themes: { create: dedupeBy(game.themes, (theme: any) => theme.id).map((theme: any) => ({ theme: { connectOrCreate: { where: { igdbId: theme.id }, create: { igdbId: theme.id, name: theme.name } } } })) },
-                    playerPerspectives: { create: dedupeBy(game.player_perspectives, (persp: any) => persp.id).map((persp: any) => ({ perspective: { connectOrCreate: { where: { igdbId: persp.id }, create: { igdbId: persp.id, name: persp.name } } } })) },
-                    screenshots: { create: dedupeBy(game.screenshots, (ss: any) => ss.id).map((ss: any) => ({ igdbId: ss.id, url: `https:${ss.url.replace('t_thumb', 't_screenshot_huge')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) },
-                    artworks: { create: dedupeBy(game.artworks, (art: any) => art.id).map((art: any) => ({ igdbId: art.id, url: `https:${art.url.replace('t_thumb', 't_1080p')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) },
-                    websites: { create: game.websites?.filter((w: any) => w.category != null).map((w: any) => ({ url: w.url, category: w.category, igdbId: w.id })) ?? [] },
-                    videos: { create: game.videos?.map((video: any) => ({ key: video.video_id, name: video.name || '', site: 'YouTube', type: 'Trailer', official: true })) ?? [] },
-                    gameModes: { create: dedupeBy(game.game_modes, (mode: any) => mode.id).map((mode: any) => ({ gameMode: { connectOrCreate: { where: { id: mode.id }, create: { id: mode.id, name: mode.name, slug: mode.slug } } } })) },
-                    gameEngines: { create: dedupeBy(game.game_engines, (engine: any) => engine.id).map((engine: any) => ({ gameEngine: { connectOrCreate: { where: { id: engine.id }, create: { id: engine.id, name: engine.name, slug: engine.slug } } } })) },
+                    ...relationCreates,
                 };
 
                 const existingGame = await prisma.jogo.findUnique({ where: { igdbId: game.id } });
@@ -252,17 +370,17 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                         where: { igdbId: game.id },
                         data: {
                             ...updateData,
-                            genres: { deleteMany: {}, create: createData.genres.create },
+                            genres: { deleteMany: {}, create: relationCreates.genres.create },
                             companies: { deleteMany: {}, create: createData.companies.create },
-                            platforms: { deleteMany: {}, create: createData.platforms.create },
-                            themes: { deleteMany: {}, create: createData.themes.create },
-                            playerPerspectives: { deleteMany: {}, create: createData.playerPerspectives.create },
-                            screenshots: { deleteMany: {}, create: createData.screenshots.create },
-                            artworks: { deleteMany: {}, create: createData.artworks.create },
-                            websites: { deleteMany: {}, create: createData.websites.create },
-                            videos: { deleteMany: {}, create: createData.videos.create },
-                            gameModes: { deleteMany: {}, create: createData.gameModes.create },
-                            gameEngines: { deleteMany: {}, create: createData.gameEngines.create },
+                            platforms: { deleteMany: {}, create: relationCreates.platforms.create },
+                            themes: { deleteMany: {}, create: relationCreates.themes.create },
+                            playerPerspectives: { deleteMany: {}, create: relationCreates.playerPerspectives.create },
+                            screenshots: { deleteMany: {}, create: relationCreates.screenshots.create },
+                            artworks: { deleteMany: {}, create: relationCreates.artworks.create },
+                            websites: { deleteMany: {}, create: relationCreates.websites.create },
+                            videos: { deleteMany: {}, create: relationCreates.videos.create },
+                            gameModes: { deleteMany: {}, create: relationCreates.gameModes.create },
+                            gameEngines: { deleteMany: {}, create: relationCreates.gameEngines.create },
                         },
                     });
                 } else {

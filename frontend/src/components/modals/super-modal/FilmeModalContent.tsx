@@ -10,6 +10,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
+import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 
@@ -138,7 +139,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                       <PlatformIcon
                         platform={p.provider.name}
                         logoPath={p.provider.logoPath}
-                        size={48}
+                        size={PLATFORM_ICON_SIZE_MODAL}
                         variant="circle"
                         title={p.provider.name}
                       />
@@ -159,7 +160,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                 ) : (
                   <div className="flex flex-wrap gap-4">
                     <div className="flex flex-col items-center gap-1.5 w-20">
-                      <PlatformIcon platform="cinema" size={48} variant="circle" title="Cinema" />
+                      <PlatformIcon platform="cinema" size={PLATFORM_ICON_SIZE_MODAL} variant="circle" title="Cinema" />
                       <span className="text-xs text-center text-muted-foreground leading-tight">Cinema</span>
                     </div>
                   </div>

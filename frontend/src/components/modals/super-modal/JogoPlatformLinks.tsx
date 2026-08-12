@@ -3,6 +3,7 @@
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getGamePlatformDisplayItems } from '@/lib/media-helpers';
+import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import type { Jogo } from '@/types';
 
 interface JogoPlatformLinksProps {
@@ -10,7 +11,7 @@ interface JogoPlatformLinksProps {
   title?: string;
 }
 
-const ICON_SIZE = 48;
+const ICON_SIZE = PLATFORM_ICON_SIZE_MODAL;
 
 const JogoPlatformLinks: React.FC<JogoPlatformLinksProps> = ({
   jogo,
