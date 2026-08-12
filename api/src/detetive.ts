@@ -77,20 +77,28 @@ function releaseDatePassed(releaseDate: Date | null | undefined, now: Date): boo
   return startOfDay(releaseDate).getTime() <= startOfDay(now).getTime();
 }
 
-function needsIngressoMonitoring(filme: {
-  ingresso_sem_pagina: boolean;
-  ingresso_link: string | null;
-  em_prevenda: boolean | null;
-  prevenda_confirmada: boolean;
-  releaseDate: Date | null;
-}, now: Date): boolean {
-  if (filme.ingresso_sem_pagina) return false;
-  if (releaseDatePassed(filme.releaseDate, now)) return false;
+function needsIngressoMonitoring(
+  filme: {
+    ingresso_sem_pagina: boolean;
+    ingresso_link: string | null;
+    prevenda_confirmada: boolean;
+    releaseDate: Date | null;
+  },
+  now: Date,
+): 'none' | 'link_only' | 'full' {
+  if (filme.ingresso_sem_pagina) return 'none';
 
   const hasLink = Boolean(filme.ingresso_link);
-  const preSaleConfirmed = filme.prevenda_confirmada;
+  const releasePassed = releaseDatePassed(filme.releaseDate, now);
 
-  return !hasLink || !preSaleConfirmed;
+  // Após a estreia: só descobrir o link do ingresso.com (sem pré-venda/sessões).
+  if (releasePassed) {
+    return hasLink ? 'none' : 'link_only';
+  }
+
+  // Antes da estreia: link + pré-venda até confirmar ou estrear.
+  if (hasLink && filme.prevenda_confirmada) return 'none';
+  return 'full';
 }
 
 async function scrapeIngressoPage(
@@ -156,19 +164,20 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
           logger.info(`📅 "${filme.title}" já estreou — removendo flag de pré-venda.`);
         }
 
-        const shouldCheckIngresso = needsIngressoMonitoring(
+        const ingressoMode = needsIngressoMonitoring(
           {
             ingresso_sem_pagina: ingressoSemPagina,
             ingresso_link: ingressoLink,
-            em_prevenda: emPrevenda,
             prevenda_confirmada: prevendaConfirmada,
             releaseDate: filme.releaseDate,
           },
           now,
         );
 
-        if (shouldCheckIngresso) {
-          logger.info(`🕵️ Verificando ingresso.com: "${filme.title}"...`);
+        if (ingressoMode !== 'none') {
+          logger.info(
+            `🕵️ Verificando ingresso.com (${ingressoMode === 'link_only' ? 'só link' : 'link + pré-venda'}): "${filme.title}"...`,
+          );
           const slug = slugify(filme.title);
           const directUrl = `https://www.ingresso.com/filme/${slug}`;
           const targetUrl = ingressoLink ?? directUrl;
@@ -177,26 +186,33 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
           if (!ingresso.pageExists) {
             ingressoSemPagina = true;
             ingressoLink = null;
-            temSessoes = false;
+            if (ingressoMode === 'full') {
+              temSessoes = false;
+            }
             logger.info(`🚫 "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
           } else {
             ingressoLink = targetUrl;
-            temSessoes = ingresso.hasCinemaSessions;
 
-            if (!prevendaConfirmada && ingresso.isPreSale) {
-              emPrevenda = true;
-              prevendaConfirmada = true;
-              logger.info(`🎟️ "${filme.title}" em pré-venda confirmada.`);
-            } else if (!prevendaConfirmada && !ingresso.isPreSale) {
-              emPrevenda = false;
+            if (ingressoMode === 'link_only') {
+              logger.info(`🔗 "${filme.title}" — link do ingresso.com salvo (pós-estreia).`);
+            } else {
+              temSessoes = ingresso.hasCinemaSessions;
+
+              if (!prevendaConfirmada && ingresso.isPreSale) {
+                emPrevenda = true;
+                prevendaConfirmada = true;
+                logger.info(`🎟️ "${filme.title}" em pré-venda confirmada.`);
+              } else if (!prevendaConfirmada && !ingresso.isPreSale) {
+                emPrevenda = false;
+              }
             }
           }
         } else if (ingressoSemPagina) {
           logger.info(`⏭️ "${filme.title}" — ingresso.com indisponível, pulando.`);
+        } else if (releasePassed && ingressoLink) {
+          logger.info(`⏭️ "${filme.title}" — já estreou e link do ingresso.com já existe, pulando.`);
         } else if (prevendaConfirmada || emPrevenda) {
           logger.info(`⏭️ "${filme.title}" — pré-venda já confirmada, pulando consulta.`);
-        } else if (releasePassed) {
-          logger.info(`⏭️ "${filme.title}" — já estreou, pulando ingresso.com.`);
         }
 
         const streaming = await checkStreamingAvailability(filme.tmdbId);
