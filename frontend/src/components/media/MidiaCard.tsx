@@ -216,7 +216,7 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   fallbackLabel="Sem imagem"
                 />
                 {type === 'filme' && (midia as any).em_prevenda && (
-                  <div className="absolute top-2 right-2 z-10 rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
+                  <div className="absolute top-2 right-2 z-10 pointer-events-none rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
                     PRÉ-VENDA
                   </div>
                 )}
@@ -236,7 +236,10 @@ const MidiaCard = React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     <SteamPriceLabel item={midia} variant="card" />
                   </div>
                 )}
-                <div className="absolute top-2 right-2" ref={menuRef}>
+                <div
+                  className={`absolute right-2 ${type === 'filme' && (midia as any).em_prevenda ? 'top-10' : 'top-2'}`}
+                  ref={menuRef}
+                >
                   <button
                     onClick={handleMenuToggle}
                     className="bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
