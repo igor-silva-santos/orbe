@@ -111,7 +111,8 @@ app.get('/api/health', async (req, res) => {
       body.db = true;
       body.sync = syncStatus;
     } else if (syncStatus.syncActive || syncStatus.resumeAvailable) {
-      body.syncHint = syncStatus.message ?? 'Ver GET /api/sync/status';
+      // Público só sabe que há sync pendente — endpoints internos ficam reservados ao token de saúde.
+      body.syncHint = 'pending';
     }
     res.json(body);
   } catch {

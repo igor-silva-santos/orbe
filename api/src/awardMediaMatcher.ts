@@ -134,16 +134,24 @@ const buildContainsQuery = (variant: string, mediaType: AwardMediaType) => {
 };
 
 
+/**
+ * take alto de propósito: para tokens curtos/comuns (ex.: "Up", "It", "Coringa") o `contains`
+ * pode casar dezenas de títulos, e sem orderBy por relevância o filme certo podia nunca aparecer
+ * nos antigos 12 primeiros — a pontuação por similaridade abaixo é quem realmente decide o match,
+ * então o candidato certo só precisa estar no lote, não vir primeiro.
+ */
+const CANDIDATE_TAKE = 100;
+
 const findCandidates = async (mediaType: AwardMediaType, where: object) => {
   switch (mediaType) {
     case 'filme':
-      return prisma.filme.findMany({ where: where as Prisma.FilmeWhereInput, take: 12 });
+      return prisma.filme.findMany({ where: where as Prisma.FilmeWhereInput, take: CANDIDATE_TAKE });
     case 'serie':
-      return prisma.serie.findMany({ where: where as Prisma.SerieWhereInput, take: 12 });
+      return prisma.serie.findMany({ where: where as Prisma.SerieWhereInput, take: CANDIDATE_TAKE });
     case 'anime':
-      return prisma.anime.findMany({ where: where as Prisma.AnimeWhereInput, take: 12 });
+      return prisma.anime.findMany({ where: where as Prisma.AnimeWhereInput, take: CANDIDATE_TAKE });
     case 'jogo':
-      return prisma.jogo.findMany({ where: where as Prisma.JogoWhereInput, take: 12 });
+      return prisma.jogo.findMany({ where: where as Prisma.JogoWhereInput, take: CANDIDATE_TAKE });
     default:
       return [];
   }
