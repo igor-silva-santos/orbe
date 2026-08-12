@@ -102,6 +102,46 @@ const TesteIconesPage: React.FC = () => {
           </div>
         </section>
 
+        {/* Réplica do modal "Onde jogar" (JogoPlatformLinks) */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Onde jogar (réplica do modal)</h2>
+          <div className="bg-card p-6 rounded-lg shadow">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
+              {['pc', 'mac', 'playstation', 'xbox', 'linux', 'steam', 'nintendo', 'epic', 'gog'].map((plat) => (
+                <div key={plat} className="flex flex-col items-center gap-1.5 w-20">
+                  <span className="flex items-center justify-center rounded-full border border-border bg-white p-3 shadow-sm ring-1 ring-black/5 dark:bg-white dark:ring-white/20">
+                    <PlatformIcon platform={plat} size={60} variant="circle" title={plat} />
+                  </span>
+                  <span className="text-xs text-center text-muted-foreground leading-tight">{plat}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Réplica das tiles de streaming em card (MidiaCard) e modal (SerieModalContent) */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Streaming (réplica card + modal)</h2>
+          <div className="bg-card p-6 rounded-lg shadow space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Tile 24px (rodapé do card)</h3>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {['netflix', 'prime video', 'disney+', 'hbo max', 'apple tv+', 'crunchyroll', 'star+', 'globoplay', 'claro'].map((plat) => (
+                  <PlatformIcon key={plat} platform={plat} size={24} iconOnly variant="circle" className="h-6 w-6" title={plat} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-medium mb-2">Tile 32px (modal de detalhe)</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                {['netflix', 'prime video', 'disney+', 'hbo max', 'apple tv+', 'crunchyroll', 'star+', 'globoplay', 'claro'].map((plat) => (
+                  <PlatformIcon key={plat} platform={plat} size={32} className="h-8 w-8" variant="circle" title={plat} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Teste de Responsividade */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-6">Teste de Responsividade</h2>
