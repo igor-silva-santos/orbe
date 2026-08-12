@@ -307,7 +307,6 @@ export const jogoQualityFilter: Prisma.JogoWhereInput = {
     { ratingCount: { gte: MIN_GAME_RATING_COUNT } },
     { hypes: { gte: MIN_GAME_HYPES } },
     { follows: { gte: MIN_GAME_FOLLOWS } },
-    { events: { some: {} } },
   ],
 };
 

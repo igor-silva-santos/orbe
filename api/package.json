@@ -19,7 +19,8 @@
     "sync:animes": "cross-env LOG_TO_FILE=true ts-node src/syncAnimes.ts",
     "sync:games": "cross-env LOG_TO_FILE=true ts-node src/syncGames.ts",
     "sync:awards": "cross-env LOG_TO_FILE=true ts-node src/scrapeAwards.ts",
-    "sync:detetive": "cross-env LOG_TO_FILE=true ts-node src/detetive.ts"
+    "sync:detetive": "cross-env LOG_TO_FILE=true ts-node src/detetive.ts",
+    "cache:invalidate": "bash ../scripts/invalidate-cache.sh"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

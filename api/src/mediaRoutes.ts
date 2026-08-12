@@ -1748,8 +1748,8 @@ const eventInclude = {
       genres: { include: { genero: true } },
       platforms: { include: { plataforma: true }, take: 4 },
     },
-    orderBy: { rating: 'desc' as const },
-    take: 40,
+    orderBy: { firstReleaseDate: 'asc' as const },
+    take: 80,
   },
   _count: { select: { games: true } },
 };

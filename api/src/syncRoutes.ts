@@ -10,7 +10,7 @@ import { syncSteamData, refreshStaleSteamPrices } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
 import { runDetetive } from './detetive';
 import { executeFullSync } from './syncOrchestrator';
-import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync } from './cacheInvalidation';
+import { invalidateCacheByPatterns, invalidateCacheAfterMediaSync, getCacheInvalidationPatterns, type CacheInvalidationScope } from './cacheInvalidation';
 import {
   acquireSyncLock,
   failSyncRun,
@@ -123,6 +123,26 @@ router.post('/sync/reset-stale', syncRateLimiter, protectSync, async (_req, res)
   res.json({
     message: 'Lock stale liberado. Use POST /api/run-sync-resume para continuar.',
     status,
+  });
+});
+
+/** Limpa cache Redis sem rodar sync — útil após deploy/correção de filtros. */
+router.post('/sync/invalidate-cache', syncRateLimiter, protectSync, async (req, res) => {
+  const rawScope = typeof req.body?.scope === 'string' ? req.body.scope : 'all';
+  const allowed: CacheInvalidationScope[] = ['all', 'homepage', 'filmes', 'series', 'animes', 'jogos', 'eventos', 'premios'];
+  const scope = allowed.includes(rawScope as CacheInvalidationScope)
+    ? (rawScope as CacheInvalidationScope)
+    : 'all';
+  const patterns = getCacheInvalidationPatterns(scope);
+
+  await invalidateCacheByPatterns(patterns);
+  broadcast({ type: 'CACHE_INVALIDATED', scope });
+
+  res.json({
+    ok: true,
+    scope,
+    patterns,
+    message: `Cache invalidado (escopo: ${scope}). A homepage e listas serão recarregadas na próxima requisição.`,
   });
 });
 

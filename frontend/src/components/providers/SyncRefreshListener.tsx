@@ -24,7 +24,7 @@ export default function SyncRefreshListener() {
   }, [router]);
 
   useEffect(() => {
-    if (lastMessage?.type === 'SYNC_COMPLETE') {
+    if (lastMessage?.type === 'SYNC_COMPLETE' || lastMessage?.type === 'CACHE_INVALIDATED') {
       triggerRefresh();
     }
   }, [lastMessage, triggerRefresh]);
