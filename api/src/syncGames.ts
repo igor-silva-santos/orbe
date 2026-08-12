@@ -133,7 +133,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
     if (gameIds.length === 0) return { skipReasons };
 
     const query = `
-        fields name, summary, cover.url, first_release_date, rating, rating_count, hypes,
+        fields name, summary, cover.url, first_release_date, rating, rating_count, hypes, follows,
                genres.name, genres.id, 
                involved_companies.company.name, involved_companies.company.id, involved_companies.developer, involved_companies.publisher, 
                platforms.name, platforms.id, 
@@ -210,6 +210,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                     rating: game.rating,
                     ratingCount: game.rating_count,
                     hypes: game.hypes,
+                    follows: game.follows,
                     ...(eventId && { event: { connect: { igdbId: eventId } } })
                 };
 

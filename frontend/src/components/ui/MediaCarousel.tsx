@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
-import { ChevronLeft, ChevronRight, Filter, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp } from 'lucide-react';
 import { parseISO } from 'date-fns';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
@@ -54,7 +54,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [emAltaMode, setEmAltaMode] = useState(false);
+  const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const activeFetchesRef = useRef(0);
+  const emAltaLoadedRef = useRef(false);
+  const fetchingEmAltaRef = useRef(false);
 
   const beginFetch = () => {
     activeFetchesRef.current += 1;
@@ -104,15 +108,53 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     return merged;
   }, []);
 
+  const activeSourceItems = emAltaMode ? emAltaItems : mediaItems;
+
   const genres = useMemo(
-    () => Array.from(new Set(mediaItems.flatMap((item) => item.generos_api || []))).filter(Boolean),
-    [mediaItems]
+    () => Array.from(new Set(activeSourceItems.flatMap((item) => item.generos_api || []))).filter(Boolean),
+    [activeSourceItems]
   );
 
   const filteredItems = useMemo(
-    () => (selectedGenre ? mediaItems.filter((item) => item.generos_api?.includes(selectedGenre)) : mediaItems),
-    [mediaItems, selectedGenre]
+    () =>
+      selectedGenre
+        ? activeSourceItems.filter((item) => item.generos_api?.includes(selectedGenre))
+        : activeSourceItems,
+    [activeSourceItems, selectedGenre]
   );
+
+  const loadEmAlta = useCallback(async () => {
+    if (fetchingEmAltaRef.current || emAltaLoadedRef.current) return;
+    fetchingEmAltaRef.current = true;
+    beginFetch();
+    try {
+      const response = await fetch(`${API_BASE}/${mediaType}?filtro=populares&limit=40`);
+      const data = await response.json();
+      setEmAltaItems(Array.isArray(data?.results) ? data.results : []);
+      emAltaLoadedRef.current = true;
+    } catch (error) {
+      console.error(`Error fetching "em alta" ${mediaType}:`, error);
+    } finally {
+      fetchingEmAltaRef.current = false;
+      endFetch();
+    }
+  }, [mediaType]);
+
+  const toggleEmAlta = () => {
+    setEmAltaMode((prev) => {
+      const next = !prev;
+      if (next) void loadEmAlta();
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!emblaApi || !emAltaMode) return;
+    itemsLengthRef.current = filteredItems.length;
+    emblaApi.reInit();
+    emblaApi.scrollTo(0, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emblaApi, emAltaMode, emAltaItems]);
 
   const filteredItemsRef = useRef(filteredItems);
   useEffect(() => {
@@ -223,6 +265,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!emblaApi) return;
 
     const onSelect = () => {
+      if (emAltaMode) return;
       const items = filteredItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
@@ -233,6 +276,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     };
 
     const onSettle = () => {
+      if (emAltaMode) return;
       const items = filteredItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
@@ -247,7 +291,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, prefetchAdjacentMonthsForIndex, updateTitleFromIndex]);
+  }, [emblaApi, prefetchAdjacentMonthsForIndex, updateTitleFromIndex, emAltaMode]);
 
   useEffect(() => {
     if (!emblaApi || !filteredItems[startIndex]) return;
@@ -262,7 +306,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   }, [emblaApi, filteredItems, prefetchAdjacentMonthsForIndex]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || emAltaMode) return;
 
     const prevLength = itemsLengthRef.current;
     const newLength = filteredItems.length;
@@ -292,6 +336,21 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     emblaApi.scrollTo(todayIndex, false);
     updateTitleFromIndex(todayIndex, list);
   }, [emblaApi, isFetching, loadMonth, selectedGenre, updateTitleFromIndex]);
+
+  const wasEmAltaMode = useRef(false);
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (!wasEmAltaMode.current || emAltaMode) {
+      wasEmAltaMode.current = emAltaMode;
+      return;
+    }
+    // Voltando do modo "Em Alta" pro modo mês: os slides trocaram de conteúdo por completo,
+    // reinicializa o embla e usa a navegação existente pra reposicionar no mês atual.
+    wasEmAltaMode.current = emAltaMode;
+    itemsLengthRef.current = filteredItems.length;
+    emblaApi.reInit();
+    void scrollToToday();
+  }, [emAltaMode, emblaApi, filteredItems.length, scrollToToday]);
 
   const navigateByMonth = async (direction: 'next' | 'prev') => {
     if (!emblaApi || isFetching) return;
@@ -336,13 +395,25 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
           className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors"
-          onClick={scrollToToday}
-          title="Ir para o mês atual"
+          onClick={emAltaMode ? undefined : scrollToToday}
+          title={emAltaMode ? undefined : 'Ir para o mês atual'}
         >
-          {isFetching ? 'Carregando conteúdo...' : currentTitle || 'Carregando...'}
+          {emAltaMode
+            ? 'Em Alta'
+            : isFetching
+              ? 'Carregando conteúdo...'
+              : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleEmAlta}
+              className={`${CONTROL_BTN} ${emAltaMode ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+              title={emAltaMode ? 'Ver por data de lançamento' : 'Ver o que está em alta agora'}
+              aria-pressed={emAltaMode}
+            >
+              <TrendingUp className="h-4 w-4" />
+            </button>
             <button
               onClick={toggleFastScroll}
               className={`${CONTROL_BTN} ${fastScrollEnabled ? 'bg-primary text-primary-foreground border-primary' : ''}`}
@@ -366,22 +437,26 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <button
-              onClick={() => navigateByMonth('prev')}
-              className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
-              disabled={isFetching}
-              aria-busy={isFetching}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => navigateByMonth('next')}
-              className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
-              disabled={isFetching}
-              aria-busy={isFetching}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            {!emAltaMode && (
+              <>
+                <button
+                  onClick={() => navigateByMonth('prev')}
+                  className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
+                  disabled={isFetching}
+                  aria-busy={isFetching}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => navigateByMonth('next')}
+                  className={`${CONTROL_BTN} disabled:opacity-50 disabled:pointer-events-none`}
+                  disabled={isFetching}
+                  aria-busy={isFetching}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

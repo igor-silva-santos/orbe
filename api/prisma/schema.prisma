@@ -169,6 +169,7 @@ model Jogo {
   category              String?
   status                String?
   hypes                 Int?
+  follows               Int?
   steamAppId            Int?      @unique
   steamPlayerCount      Int?
   steamPriceCents       Int?

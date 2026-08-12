@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
-import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
@@ -79,7 +79,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('launch');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [emAltaMode, setEmAltaMode] = useState(false);
+  const [emAltaAnimes, setEmAltaAnimes] = useState<Anime[]>([]);
   const activeFetchesRef = useRef(0);
+  const emAltaLoadedRef = useRef(false);
+  const fetchingEmAltaRef = useRef(false);
 
   const beginFetch = () => {
     activeFetchesRef.current += 1;
@@ -158,6 +162,33 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     }
   }, []);
 
+  const loadEmAlta = useCallback(async () => {
+    if (fetchingEmAltaRef.current || emAltaLoadedRef.current) return;
+    fetchingEmAltaRef.current = true;
+    beginFetch();
+    try {
+      const response = await fetch(`${API_BASE}/animes?filtro=populares&limit=40`);
+      const data = await response.json();
+      const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
+      const results: Anime[] = Array.isArray(data?.results) ? data.results : [];
+      setEmAltaAnimes(results.filter((anime) => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult));
+      emAltaLoadedRef.current = true;
+    } catch (error) {
+      console.error('Error fetching "em alta" animes:', error);
+    } finally {
+      fetchingEmAltaRef.current = false;
+      endFetch();
+    }
+  }, []);
+
+  const toggleEmAlta = () => {
+    setEmAltaMode((prev) => {
+      const next = !prev;
+      if (next) void loadEmAlta();
+      return next;
+    });
+  };
+
   // Prefetch temporadas adjacentes em paralelo
   useEffect(() => {
     const seasonIdx = SEASONS.indexOf(initialSeason);
@@ -196,7 +227,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     if (!emblaApi) return;
 
     const onSettle = async () => {
-      if (!emblaApi) return;
+      if (!emblaApi || emAltaMode) return;
 
       if (fetchingSeasons.current.size > 0) {
           return;
@@ -269,23 +300,26 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       emblaApi.off('settle', onSettle);
       emblaApi.off('select', onSettle);
     };
-  }, [emblaApi, fetchSeasonData, fastScrollEnabled]);
+  }, [emblaApi, fetchSeasonData, fastScrollEnabled, emAltaMode]);
 
   useEffect(() => {
     setCurrentTitle(`Temporada de ${SEASON_NAMES[initialSeason]} ${initialYear}`);
   }, [initialSeason, initialYear]);
 
-  const genres = Array.from(new Set(fetchedAnimes.flatMap(anime => anime.generos_api || []))).filter(Boolean);
+  const emAltaSourceAnimes = emAltaMode ? emAltaAnimes : fetchedAnimes;
+  const genres = Array.from(new Set(emAltaSourceAnimes.flatMap(anime => anime.generos_api || []))).filter(Boolean);
 
   const filteredAnimes = selectedGenre
-    ? fetchedAnimes.filter(anime => anime.generos_api?.includes(selectedGenre))
-    : fetchedAnimes;
+    ? emAltaSourceAnimes.filter(anime => anime.generos_api?.includes(selectedGenre))
+    : emAltaSourceAnimes;
 
   useEffect(() => {
     let newCarouselItems: CarouselItem[] = [];
     let newStartIndex = 0;
 
-    if (viewMode === 'launch') {
+    if (emAltaMode) {
+        newCarouselItems = filteredAnimes.map(anime => ({ type: 'media', data: anime }));
+    } else if (viewMode === 'launch') {
         const sortedAnimes = [...filteredAnimes].sort((a, b) => {
             const dateA = a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime() : 0;
             const dateB = b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime() : 0;
@@ -344,7 +378,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     setCarouselItems(newCarouselItems);
     setStartIndex(newStartIndex);
 
-  }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason]);
+  }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason, emAltaMode, emAltaAnimes]);
 
   useEffect(() => {
     if (!emblaApi || itemsLengthRef.current === carouselItems.length) return;
@@ -398,14 +432,22 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   return (
     <div className="overflow-hidden max-w-full">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
-        <h3 
+        <h3
           className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
           onClick={() => emblaApi?.scrollTo(startIndex)}
         >
-          {isFetching ? 'Carregando animes...' : currentTitle || 'Carregando...'}
+          {emAltaMode ? 'Em Alta' : isFetching ? 'Carregando animes...' : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleEmAlta}
+                  className={`p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors ${emAltaMode ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+                  title={emAltaMode ? 'Ver por temporada' : 'Ver o que está em alta agora'}
+                  aria-pressed={emAltaMode}
+                >
+                  <TrendingUp className="h-4 w-4" />
+                </button>
                 <button
                   onClick={toggleFastScroll}
                   className={`p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors ${fastScrollEnabled ? 'bg-primary text-primary-foreground border-primary' : ''}`}
@@ -432,23 +474,27 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <button
-                  onClick={() => navigateSeason('prev')}
-                  className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                  disabled={isFetching}
-                >
-                  <ChevronLeft className="h-4 w-4"/>
-                </button>
-                <button
-                  onClick={() => navigateSeason('next')}
-                  className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                  disabled={isFetching}
-                >
-                  <ChevronRight className="h-4 w-4"/>
-                </button>
+                {!emAltaMode && (
+                  <>
+                    <button
+                      onClick={() => navigateSeason('prev')}
+                      className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                      disabled={isFetching}
+                    >
+                      <ChevronLeft className="h-4 w-4"/>
+                    </button>
+                    <button
+                      onClick={() => navigateSeason('next')}
+                      className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                      disabled={isFetching}
+                    >
+                      <ChevronRight className="h-4 w-4"/>
+                    </button>
+                  </>
+                )}
             </div>
-            {initialData.length > 0 && (
-              <button 
+            {!emAltaMode && initialData.length > 0 && (
+              <button
                   onClick={() => setViewMode(prev => prev === 'launch' ? 'weekly' : 'launch')}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
               >
