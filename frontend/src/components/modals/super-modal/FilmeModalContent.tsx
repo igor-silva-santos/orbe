@@ -40,14 +40,25 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
   const canBuyTickets = filme.tem_sessoes === true;
   const estreiaCinema = Boolean(filme.estreia_cinema);
   const estreiaStreaming = Boolean(filme.estreia_streaming);
-  const ingressoIndisponivel = estreiaCinema && !filme.ingresso_link;
+  const ingressoIndisponivel = !filme.ingresso_link;
+  const mostraBotaoIngresso =
+    estreiaCinema ||
+    Boolean(filme.em_cartaz) ||
+    Boolean(filme.tem_sessoes) ||
+    Boolean(filme.em_prevenda) ||
+    Boolean(filme.ingresso_link);
 
   const streamingProviders = (filme.streamingProviders || []).filter(
     (p) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name)
   );
 
   const hasStreamingInfo = estreiaStreaming || streamingProviders.length > 0;
-  const hasCinemaInfo = estreiaCinema;
+  const hasCinemaInfo =
+    estreiaCinema ||
+    Boolean(filme.em_cartaz) ||
+    Boolean(filme.tem_sessoes) ||
+    Boolean(filme.em_prevenda) ||
+    Boolean(filme.ingresso_link);
   const ondeAssistirDesconhecido = !hasStreamingInfo && !hasCinemaInfo;
 
   return (
@@ -73,7 +84,7 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
               </Button>
             )}
 
-            {estreiaCinema && (
+            {mostraBotaoIngresso && (
               <IngressoButton
                 url={filme.ingresso_link}
                 canBuy={canBuyTickets}

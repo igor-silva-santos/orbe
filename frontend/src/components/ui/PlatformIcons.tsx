@@ -42,6 +42,7 @@ const normalizePlatformKey = (platform?: string | null): string => {
   if (lower === 'pc' || lower.includes('windows')) return 'pc';
   if (lower.includes('linux')) return 'linux';
   if (lower.includes('cinema')) return 'cinema';
+  if (lower.includes('streaming')) return 'streaming';
   return 'unknown';
 };
 
@@ -252,6 +253,8 @@ const PlatformIcon: React.FC<PlatformIconProps> = ({
       return wrapWithTile(renderLinuxIcon(iconProps, showTooltip, label));
     case 'cinema':
       return wrapWithTile(<Image src="/icons/cinema.svg" {...iconProps} />);
+    case 'streaming':
+      return wrapWithTile(<Image src="/icons/streaming.svg" {...iconProps} />);
     default:
       return wrapWithTile(
         <div
