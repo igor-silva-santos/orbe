@@ -351,6 +351,65 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   }, [emblaApi, filteredItems]);
 
+  const scrollToNextFilteredRelease = useCallback(async () => {
+    if (!emblaApi || emAltaMode) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const resolveTarget = (items: Midia[]) => {
+      const list = applyDisplayFilters(items);
+      if (list.length === 0) return null;
+      const index = calculateCarouselStartIndex(list);
+      return { list, index };
+    };
+
+    let target = resolveTarget(mediaItemsRef.current);
+
+    if (target) {
+      const centered = target.list[target.index];
+      const centeredDate = centered?.data_lancamento_api ? new Date(centered.data_lancamento_api) : null;
+      const needsFutureMonth =
+        centeredDate && !Number.isNaN(centeredDate.getTime()) && centeredDate < today;
+
+      if (needsFutureMonth) {
+        const now = new Date();
+        let { year, month } = { year: now.getFullYear(), month: now.getMonth() + 1 };
+        for (let attempt = 0; attempt < 12; attempt++) {
+          const merged = await loadMonth(year, month);
+          const candidate = resolveTarget(merged);
+          if (!candidate) {
+            const next = addMonths(year, month, 1);
+            year = next.year;
+            month = next.month;
+            continue;
+          }
+          const item = candidate.list[candidate.index];
+          const release = item?.data_lancamento_api ? new Date(item.data_lancamento_api) : null;
+          if (release && !Number.isNaN(release.getTime()) && release >= today) {
+            target = candidate;
+            break;
+          }
+          const next = addMonths(year, month, 1);
+          year = next.year;
+          month = next.month;
+        }
+      }
+    } else {
+      const now = new Date();
+      const merged = await loadMonth(now.getFullYear(), now.getMonth() + 1);
+      target = resolveTarget(merged);
+    }
+
+    if (!target) return;
+
+    lastTitleMonthKey.current = '';
+    emblaApi.reInit();
+    emblaApi.scrollTo(target.index, false);
+    previousSelectedIndex.current = target.index;
+    updateTitleFromIndex(target.index, target.list);
+  }, [emblaApi, emAltaMode, applyDisplayFilters, loadMonth, updateTitleFromIndex]);
+
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isFetching) return;
     const now = new Date();
@@ -373,8 +432,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
     if (prevGenreRef.current === selectedGenre) return;
     prevGenreRef.current = selectedGenre;
-    void scrollToToday();
-  }, [selectedGenre, emblaApi, emAltaMode, scrollToToday]);
+    void scrollToNextFilteredRelease();
+  }, [selectedGenre, emblaApi, emAltaMode, scrollToNextFilteredRelease]);
 
   const wasEmAltaMode = useRef(false);
   useEffect(() => {
