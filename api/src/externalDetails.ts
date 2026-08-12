@@ -69,6 +69,7 @@ function mapTmdbMovieToDetails(
   movie: any,
   dbExtras?: {
     em_prevenda?: boolean | null;
+    emCartaz?: boolean | null;
     ingresso_link?: string | null;
     tem_sessoes?: boolean | null;
     estreia_cinema?: boolean | null;
@@ -92,6 +93,7 @@ function mapTmdbMovieToDetails(
     voteAverage: movie.vote_average ?? null,
     voteCount: movie.vote_count ?? null,
     em_prevenda: dbExtras?.em_prevenda ?? false,
+    em_cartaz: dbExtras?.emCartaz ?? false,
     ingresso_link: dbExtras?.ingresso_link ?? null,
     tem_sessoes: dbExtras?.tem_sessoes ?? false,
     estreia_cinema: dbExtras?.estreia_cinema ?? false,
@@ -354,6 +356,7 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
         where: { tmdbId },
         select: {
           em_prevenda: true,
+          emCartaz: true,
           ingresso_link: true,
           tem_sessoes: true,
           premiacoes: true,
