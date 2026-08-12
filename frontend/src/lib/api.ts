@@ -95,10 +95,8 @@ const request = async (
   endpoint: string,
   options?: {
     params?: Record<string, string | number | boolean | undefined | null>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body?: any;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
   const urlString = buildUrl(endpoint, options?.params);
 
