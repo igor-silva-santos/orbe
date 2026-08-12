@@ -7,6 +7,7 @@ import { logger } from './logger';
 import { isJogoRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons, updateSyncProgress } from './syncState';
+import { dedupeBy } from './syncUtils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
@@ -219,17 +220,17 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                 const createData = {
                     ...updateData,
                     igdbId: game.id,
-                    genres: { create: game.genres?.map((genre: any) => ({ genero: { connectOrCreate: { where: { igdbId: genre.id }, create: { igdbId: genre.id, name: genre.name } } } })) ?? [] },
+                    genres: { create: dedupeBy(game.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { igdbId: genre.id }, create: { igdbId: genre.id, name: genre.name } } } })) },
                     companies: { create: companiesToCreate },
-                    platforms: { create: game.platforms?.map((platform: any) => ({ plataforma: { connectOrCreate: { where: { igdbId: platform.id }, create: { igdbId: platform.id, name: platform.name } } } })) ?? [] },
-                    themes: { create: game.themes?.map((theme: any) => ({ theme: { connectOrCreate: { where: { igdbId: theme.id }, create: { igdbId: theme.id, name: theme.name } } } })) ?? [] },
-                    playerPerspectives: { create: game.player_perspectives?.map((persp: any) => ({ perspective: { connectOrCreate: { where: { igdbId: persp.id }, create: { igdbId: persp.id, name: persp.name } } } })) ?? [] },
-                    screenshots: { create: game.screenshots?.map((ss: any) => ({ igdbId: ss.id, url: `https:${ss.url.replace('t_thumb', 't_screenshot_huge')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) ?? [] },
-                    artworks: { create: game.artworks?.map((art: any) => ({ igdbId: art.id, url: `https:${art.url.replace('t_thumb', 't_1080p')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) ?? [] },
+                    platforms: { create: dedupeBy(game.platforms, (platform: any) => platform.id).map((platform: any) => ({ plataforma: { connectOrCreate: { where: { igdbId: platform.id }, create: { igdbId: platform.id, name: platform.name } } } })) },
+                    themes: { create: dedupeBy(game.themes, (theme: any) => theme.id).map((theme: any) => ({ theme: { connectOrCreate: { where: { igdbId: theme.id }, create: { igdbId: theme.id, name: theme.name } } } })) },
+                    playerPerspectives: { create: dedupeBy(game.player_perspectives, (persp: any) => persp.id).map((persp: any) => ({ perspective: { connectOrCreate: { where: { igdbId: persp.id }, create: { igdbId: persp.id, name: persp.name } } } })) },
+                    screenshots: { create: dedupeBy(game.screenshots, (ss: any) => ss.id).map((ss: any) => ({ igdbId: ss.id, url: `https:${ss.url.replace('t_thumb', 't_screenshot_huge')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) },
+                    artworks: { create: dedupeBy(game.artworks, (art: any) => art.id).map((art: any) => ({ igdbId: art.id, url: `https:${art.url.replace('t_thumb', 't_1080p')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') })) },
                     websites: { create: game.websites?.filter((w: any) => w.category != null).map((w: any) => ({ url: w.url, category: w.category, igdbId: w.id })) ?? [] },
                     videos: { create: game.videos?.map((video: any) => ({ key: video.video_id, name: video.name || '', site: 'YouTube', type: 'Trailer', official: true })) ?? [] },
-                    gameModes: { create: game.game_modes?.map((mode: any) => ({ gameMode: { connectOrCreate: { where: { id: mode.id }, create: { id: mode.id, name: mode.name, slug: mode.slug } } } })) ?? [] },
-                    gameEngines: { create: game.game_engines?.map((engine: any) => ({ gameEngine: { connectOrCreate: { where: { id: engine.id }, create: { id: engine.id, name: engine.name, slug: engine.slug } } } })) ?? [] },
+                    gameModes: { create: dedupeBy(game.game_modes, (mode: any) => mode.id).map((mode: any) => ({ gameMode: { connectOrCreate: { where: { id: mode.id }, create: { id: mode.id, name: mode.name, slug: mode.slug } } } })) },
+                    gameEngines: { create: dedupeBy(game.game_engines, (engine: any) => engine.id).map((engine: any) => ({ gameEngine: { connectOrCreate: { where: { id: engine.id }, create: { id: engine.id, name: engine.name, slug: engine.slug } } } })) },
                 };
 
                 const existingGame = await prisma.jogo.findUnique({ where: { igdbId: game.id } });
