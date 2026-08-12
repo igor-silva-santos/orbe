@@ -4,6 +4,34 @@ import { clearBrowserSession } from './session';
 
 const API_BASE_URL = API_BASE;
 
+// Timeout padrao para chamadas via apiClient. Evita requisicao pendurada
+// deixando a UI presa em "carregando" pra sempre quando a API nao responde.
+// 30s cobre a imensa maioria das rotas; endpoints que legitimamente precisam
+// de mais tempo (ex.: sync/detalhes ao vivo) ja documentam seus proprios
+// timeouts nos arquivos correspondentes da API e devem tratar isso lá, nao aqui.
+const DEFAULT_TIMEOUT_MS = 30000;
+
+// NOTA (duplicacao intencional do token — cookie httpOnly + localStorage):
+// O login/registro grava o JWT tanto no cookie httpOnly de sessao
+// (ver lib/session.ts, usado só pelo middleware pra gate de UX em /perfil
+// e /configuracoes) quanto aqui no localStorage, de onde o apiClient le pra
+// montar o header Authorization em toda chamada à API.
+// Por que a duplicacao existe: o cookie httpOnly nao pode ser lido por
+// JavaScript (é o ponto dele), entao o cliente HTTP nao teria como montar o
+// header Authorization a partir dele sem passar as chamadas por um proxy
+// server-side. Como isso ainda nao foi implementado, o token tambem fica no
+// localStorage, que É legível por JS.
+// Risco real: qualquer XSS no app consegue ler o token direto do
+// localStorage e se passar pelo usuário nas chamadas à API — a protecao do
+// cookie httpOnly nao ajuda nesse cenário, porque o vazamento acontece por
+// um caminho que nunca toca o cookie.
+// Correcao completa (fora de escopo aqui — mudanca de arquitetura maior):
+// fazer o proxy /api/* do Next (ver rewrites em next.config.mjs) repassar o
+// cookie de sessao como header Authorization nas rotas que passam por ele,
+// e parar de gravar/ler o JWT no localStorage. Isso exige decidir como
+// tratar chamadas que hoje vao direto pra API_BASE_URL sem passar pelo
+// proxy, entao foi deixado como decisao consciente pra quando houver
+// contexto de produto pra isso, e nao um descuido.
 // Função para obter o token do localStorage
 const getToken = (): string | null => {
   if (typeof window !== 'undefined') {
@@ -34,162 +62,101 @@ const throwHttpError = async (response: Response): Promise<never> => {
   throw new Error(body?.error || `HTTP error! status: ${response.status}`);
 };
 
+const buildUrl = (
+  endpoint: string,
+  params?: Record<string, string | number | boolean | undefined | null>
+): string => {
+  let urlString = `${API_BASE_URL}${endpoint}`;
+
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        searchParams.append(key, params[key]!.toString());
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      urlString += `?${queryString}`;
+    }
+  }
+
+  return urlString;
+};
+
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
+// Núcleo único do cliente HTTP: monta headers, aplica timeout e trata 401
+// de forma consistente pra todos os métodos (get/post/patch/put/delete).
+// Os cinco métodos exportados abaixo são apenas invólucros de uma linha
+// em cima dessa função — preserva assinatura pública de cada um.
+const request = async (
+  method: HttpMethod,
+  endpoint: string,
+  options?: {
+    params?: Record<string, string | number | boolean | undefined | null>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    body?: any;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
+  const urlString = buildUrl(endpoint, options?.params);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(urlString, {
+    method,
+    headers,
+    body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
+    signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+  });
+
+  if (response.status === 401) {
+    removeToken();
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login?error=session_expired';
+    }
+    throw new Error('Sessão expirada. Por favor, faça login novamente.');
+  }
+
+  if (!response.ok) {
+    await throwHttpError(response);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
+};
+
 // Cliente HTTP centralizado
 export const apiClient = {
   get: async (endpoint: string, params?: Record<string, string | number | boolean | undefined | null>) => {
-    let urlString = `${API_BASE_URL}${endpoint}`;
-    
-    if (params) {
-      const searchParams = new URLSearchParams();
-      Object.keys(params).forEach(key => {
-        if (params[key] !== undefined && params[key] !== null) {
-          searchParams.append(key, params[key]!.toString());
-        }
-      });
-      const queryString = searchParams.toString();
-      if (queryString) {
-        urlString += `?${queryString}`;
-      }
-    }
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(urlString, {
-      method: 'GET',
-      headers,
-    });
-
-    if (response.status === 401) {
-      removeToken();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login?error=session_expired';
-      }
-      throw new Error('Sessão expirada. Por favor, faça login novamente.');
-    }
-
-    if (!response.ok) {
-      await throwHttpError(response);
-    }
-
-    return response.json();
+    return request('GET', endpoint, { params });
   },
 
   post: async (endpoint: string, data: Record<string, unknown>) => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(data),
-    });
-
-    if (response.status === 401) {
-      removeToken();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login?error=session_expired';
-      }
-      throw new Error('Sessão expirada. Por favor, faça login novamente.');
-    }
-
-    if (!response.ok) {
-      await throwHttpError(response);
-    }
-
-    return response.json();
+    return request('POST', endpoint, { body: data });
   },
 
   patch: async (endpoint: string, data: any) => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(data),
-    });
-
-    if (response.status === 401) {
-      removeToken();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login?error=session_expired';
-      }
-      throw new Error('Sessão expirada. Por favor, faça login novamente.');
-    }
-
-    if (!response.ok) {
-      await throwHttpError(response);
-    }
-
-    return response.json();
+    return request('PATCH', endpoint, { body: data });
   },
 
   put: async (endpoint: string, data: any) => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      await throwHttpError(response);
-    }
-
-    return response.json();
+    return request('PUT', endpoint, { body: data });
   },
 
   delete: async (endpoint: string) => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE',
-      headers,
-    });
-
-    if (!response.ok) {
-      await throwHttpError(response);
-    }
-
-    if (response.status === 204) {
-      return null;
-    }
-
-    return response.json();
+    return request('DELETE', endpoint);
   },
 };
 
