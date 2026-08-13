@@ -27,7 +27,11 @@ jobs:
         run: |
           API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
           if [ -z "$SYNC_SECRET" ]; then
-            echo "SYNC_SECRET não configurado nos secrets do repositório." >&2
+            echo "::error::SYNC_SECRET não configurado. Vá em Settings → Secrets and variables → Actions e adicione:"
+            echo "  - SYNC_SECRET (mesmo valor do Render)"
+            echo "  - ORBE_API_URL = https://orbe-7bu0.onrender.com"
+            echo ""
+            echo "Alternativa: redeploy da API no Render (PR #101 já invalida cache automaticamente)."
             exit 1
           fi
           echo "Invalidando cache (escopo: ${{ inputs.scope }}) em ${API_BASE} ..."
@@ -35,3 +39,5 @@ jobs:
             -H "x-sync-secret: ${SYNC_SECRET}" \
             -H "Content-Type: application/json" \
             -d "{\"scope\":\"${{ inputs.scope }}\"}"
+          echo ""
+          echo "Cache invalidado com sucesso."
