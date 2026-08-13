@@ -64,7 +64,7 @@ async function enrichJogoWithSteam(
       steamAppId: appId,
       steamPlayerCount: extras?.playerCount ?? details.playerCount,
       steamPriceCents: priceFromDetails ?? priceFromExtras,
-      steamDiscountPercent: extras?.discountPercent ?? details.discountPercent,
+      steamDiscountPercent: details.discountPercent ?? null,
       pcRequirements: details.pcRequirements ?? undefined,
       steamSyncedAt: new Date(),
     },
@@ -128,9 +128,7 @@ export async function syncSteamData(prisma: PrismaClient): Promise<{
     }
 
     if (jogo) {
-      await enrichJogoWithSteam(prisma, jogo.id, sale.appId, {
-        discountPercent: sale.discountPercent,
-      });
+      await enrichJogoWithSteam(prisma, jogo.id, sale.appId);
       salesUpdated++;
     }
     await delay(200);

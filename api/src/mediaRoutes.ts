@@ -3,7 +3,7 @@ import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
 import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
-import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents } from './steamClient';
+import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents, isPlausibleSteamDiscountPercent } from './steamClient';
 import {
   filmeQualityFilter,
   filmeCarouselQualityFilter,
@@ -1171,8 +1171,10 @@ router.get('/jogos/:id/steam-price', cacheMiddleware(60 * 15), async (req, res) 
       Date.now() - jogo.steamSyncedAt.getTime() > 6 * 60 * 60 * 1000;
     const cachedPriceInvalid =
       jogo.steamPriceCents != null && !isPlausibleBrlSteamPriceCents(jogo.steamPriceCents);
+    const cachedDiscountInvalid =
+      jogo.steamDiscountPercent != null && !isPlausibleSteamDiscountPercent(jogo.steamDiscountPercent);
 
-    if (jogo.steamPriceCents != null && !stale && !cachedPriceInvalid) {
+    if (jogo.steamPriceCents != null && !stale && !cachedPriceInvalid && !cachedDiscountInvalid) {
       return res.json({
         steam_price_cents: jogo.steamPriceCents,
         steam_discount_percent: jogo.steamDiscountPercent,

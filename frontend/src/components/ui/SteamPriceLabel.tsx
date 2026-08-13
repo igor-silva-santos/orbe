@@ -8,6 +8,7 @@ import {
   hasSteamAppId,
   hasSteamPriceDisplay,
   isPlausibleBrlSteamPriceCents,
+  isPlausibleSteamDiscountPercent,
 } from '@/lib/media-helpers';
 import { API_BASE } from '@/lib/apiBase';
 import type { Jogo, Midia } from '@/types';
@@ -81,7 +82,11 @@ const SteamPriceLabel: React.FC<SteamPriceLabelProps> = ({
   if (!price) return null;
 
   const discount =
-    typeof discountPercent === 'number' && discountPercent > 0 ? discountPercent : null;
+    typeof discountPercent === 'number' &&
+    isPlausibleSteamDiscountPercent(discountPercent) &&
+    discountPercent > 0
+      ? discountPercent
+      : null;
   const storeUrl = getSteamStoreUrl(appId);
 
   const isCard = variant === 'card';

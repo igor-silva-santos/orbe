@@ -191,6 +191,9 @@ export const isPlausibleBrlSteamPriceCents = (cents: number | null | undefined):
   return cents <= MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS;
 };
 
+export const isPlausibleSteamDiscountPercent = (value: number | null | undefined): boolean =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
+
 export const getSteamStoreUrl = (steamAppId: number | null | undefined): string | null => {
   if (!steamAppId) return null;
   return `https://store.steampowered.com/app/${steamAppId}`;

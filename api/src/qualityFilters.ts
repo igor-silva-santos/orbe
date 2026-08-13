@@ -239,23 +239,44 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
     filmeCarouselQualityFilter,
     filmeCarouselLocalizationFilter,
     filmeCarouselConcertExclusionFilter,
+    { overview: { not: null } },
+    { NOT: { overview: '' } },
+    { voteAverage: { gt: 0 } },
+    { genres: { some: {} } },
+    {
+      OR: [{ streamingProviders: { some: {} } }, { emCartaz: true }],
+    },
   ],
 };
 
 type FilmeCarouselCandidate = {
   title: string;
   originalTitle?: string | null;
+  overview?: string | null;
+  voteAverage?: number | null;
+  emCartaz?: boolean | null;
   genres?: { genero: { tmdbId: number } }[];
+  streamingProviders?: unknown[];
 };
+
+function filmeHasCarouselMetadata(filme: FilmeCarouselCandidate): boolean {
+  const hasSynopsis = Boolean(filme.overview?.trim());
+  const hasRating = typeof filme.voteAverage === 'number' && filme.voteAverage > 0;
+  const hasGenre = (filme.genres?.length ?? 0) > 0;
+  const hasPlatform =
+    (filme.streamingProviders?.length ?? 0) > 0 || Boolean(filme.emCartaz);
+  return hasSynopsis && hasRating && hasGenre && hasPlatform;
+}
 
 /** Pós-filtro em runtime — cobre casos que o Prisma não pega (títulos atípicos) */
 export function filterFilmesForCarousel<T extends FilmeCarouselCandidate>(filmes: T[]): T[] {
-  return filmes.filter((filme) =>
-    !isConcertOrLiveRecording({
-      title: filme.title,
-      original_title: filme.originalTitle ?? undefined,
-      genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
-    }),
+  return filmes.filter(
+    (filme) =>
+      !isConcertOrLiveRecording({
+        title: filme.title,
+        original_title: filme.originalTitle ?? undefined,
+        genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
+      }) && filmeHasCarouselMetadata(filme),
   );
 }
 

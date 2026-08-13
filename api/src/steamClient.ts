@@ -45,6 +45,35 @@ export function isPlausibleBrlSteamPriceCents(cents: number | null | undefined):
   return cents <= MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS;
 }
 
+export function isPlausibleSteamDiscountPercent(value: number | null | undefined): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+/** Recalcula desconto a partir de preços BRL quando o valor salvo parece inconsistente */
+export function resolveSteamDiscountPercent(
+  discountPercent: number | null | undefined,
+  finalCents?: number | null,
+  initialCents?: number | null,
+): number | null {
+  if (
+    finalCents != null &&
+    initialCents != null &&
+    initialCents > 0 &&
+    finalCents <= initialCents
+  ) {
+    const computed = Math.round(((initialCents - finalCents) / initialCents) * 100);
+    if (isPlausibleSteamDiscountPercent(computed)) {
+      if (
+        !isPlausibleSteamDiscountPercent(discountPercent) ||
+        Math.abs(discountPercent! - computed) > 2
+      ) {
+        return computed;
+      }
+    }
+  }
+  return isPlausibleSteamDiscountPercent(discountPercent) ? discountPercent! : null;
+}
+
 /** Extrai Steam App ID de URLs da loja */
 export function extractSteamAppId(url: string): number | null {
   const match = url.match(/steampowered\.com\/app\/(\d+)/i);
@@ -63,6 +92,12 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
     const data = entry.data;
     const priceOverview = data.price_overview;
     const pcReq = data.pc_requirements;
+    const priceCents = priceOverview?.final ?? (data.is_free ? 0 : undefined);
+    const discountPercent = resolveSteamDiscountPercent(
+      priceOverview?.discount_percent,
+      priceCents,
+      priceOverview?.initial,
+    );
 
     return {
       appId,
@@ -70,8 +105,8 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
       shortDescription: data.short_description,
       headerImage: data.header_image,
       isFree: data.is_free,
-      priceCents: priceOverview?.final ?? (data.is_free ? 0 : undefined),
-      discountPercent: priceOverview?.discount_percent,
+      priceCents,
+      discountPercent: discountPercent ?? undefined,
       pcRequirements: pcReq
         ? {
             minimum: pcReq.minimum,
@@ -111,7 +146,7 @@ export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
       items.push({
         appId,
         name: item.name ?? `Steam App ${appId}`,
-        discountPercent: discount,
+        discountPercent: isPlausibleSteamDiscountPercent(discount) ? discount : undefined,
         priceCents:
           currency === 'BRL' && isPlausibleBrlSteamPriceCents(finalPrice) ? finalPrice : undefined,
         originalPriceCents:

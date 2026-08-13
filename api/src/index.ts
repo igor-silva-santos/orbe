@@ -20,6 +20,7 @@ import profileRoutes from './profileRoutes';
 import notificationRoutes from './notificationRoutes';
 import calendarRoutes from './calendarRoutes';
 import contactRoutes, { isValidEmail } from './contactRoutes';
+import dealsRoutes from './dealsRoutes';
 import { verifyBearerToken, MissingTokenError } from './authMiddleware';
 import {
   applySecurityMiddleware,
@@ -132,6 +133,7 @@ app.use('/api/users', profileRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', calendarRoutes);
 app.use('/api', contactRoutes);
+app.use('/api', dealsRoutes);
 
 function timingSafeEqualStrings(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
