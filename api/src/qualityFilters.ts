@@ -328,6 +328,18 @@ export function filterFilmesForCarousel<T extends FilmeCarouselCandidate>(filmes
   );
 }
 
+/** Exclui apenas concertos — alinhado à listagem /filmes (sem metadados extras do carrossel antigo) */
+export function filterFilmesExcludeConcerts<T extends FilmeCarouselCandidate>(filmes: T[]): T[] {
+  return filmes.filter(
+    (filme) =>
+      !isConcertOrLiveRecording({
+        title: filme.title,
+        original_title: filme.originalTitle ?? undefined,
+        genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
+      }),
+  );
+}
+
 export const serieQualityFilter: Prisma.SerieWhereInput = {
   AND: [
     { posterPath: { not: null } },

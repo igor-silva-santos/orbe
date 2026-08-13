@@ -4,7 +4,11 @@
 // identico ao original, apenas movido de lugar.
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
-import { filmeCarouselWhereInput, filterFilmesForCarousel } from '../qualityFilters';
+import {
+  filmeCarouselConcertExclusionFilter,
+  filterFilmesExcludeConcerts,
+  getFilmeQualityFilterForYear,
+} from '../qualityFilters';
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
@@ -106,15 +110,24 @@ export async function fetchFilmesForCarousel(
   options: {
     orderBy?: Prisma.FilmeOrderByWithRelationInput | Prisma.FilmeOrderByWithRelationInput[];
     take?: number;
+    /** Ano de referência para o filtro de qualidade (mesmo critério de /filmes?ano=) */
+    year?: number;
   } = {},
 ) {
+  const qualityYear = options.year ?? new Date().getFullYear();
   const filmes = await prisma.filme.findMany({
-    where: { AND: [filmeCarouselWhereInput, extraWhere] },
+    where: {
+      AND: [
+        getFilmeQualityFilterForYear(qualityYear),
+        filmeCarouselConcertExclusionFilter,
+        extraWhere,
+      ],
+    },
     orderBy: options.orderBy ?? { releaseDate: 'asc' },
     take: options.take,
     include: carouselLiteInclude,
   });
-  return filterFilmesForCarousel(filmes);
+  return filterFilmesExcludeConcerts(filmes);
 }
 
 export const animeCarouselInclude = {

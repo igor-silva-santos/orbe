@@ -96,34 +96,18 @@ export function findIndexForMonth(items: Midia[], year: number, month: number): 
   });
 }
 
-/** Posiciona o carrossel no mês atual (ou no próximo lançamento futuro). */
+/** Posiciona o carrossel no próximo lançamento (primeiro com data >= hoje). */
 export function calculateCarouselStartIndex(data: Midia[]): number {
   if (!data || data.length === 0) return 0;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
 
-  const inCurrentMonthTodayOrFuture = data.findIndex((item) => {
-    const releaseDate = parseMidiaReleaseDate(item);
-    if (!releaseDate) return false;
-    return (
-      releaseDate.getFullYear() === year &&
-      releaseDate.getMonth() + 1 === month &&
-      releaseDate >= today
-    );
-  });
-  if (inCurrentMonthTodayOrFuture >= 0) return inCurrentMonthTodayOrFuture;
-
-  const currentMonthIndex = findIndexForMonth(data, year, month);
-  if (currentMonthIndex >= 0) return currentMonthIndex;
-
-  const nextFuture = data.findIndex((item) => {
+  const nextRelease = data.findIndex((item) => {
     const releaseDate = parseMidiaReleaseDate(item);
     return releaseDate !== null && releaseDate >= today;
   });
-  if (nextFuture >= 0) return nextFuture;
+  if (nextRelease >= 0) return nextRelease;
 
   return data.length - 1;
 }
