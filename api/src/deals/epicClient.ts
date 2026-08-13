@@ -16,14 +16,22 @@ type EpicPromotionOffer = {
   };
 };
 
+type EpicPageMapping = {
+  pageSlug?: string;
+  pageType?: string;
+};
+
 type EpicCatalogElement = {
   title?: string;
   id?: string;
   namespace?: string;
   description?: string;
-  productSlug?: string;
+  productSlug?: string | null;
   urlSlug?: string;
   keyImages?: { type?: string; url?: string }[];
+  customAttributes?: { key?: string; value?: string }[];
+  offerMappings?: EpicPageMapping[];
+  catalogNs?: { mappings?: EpicPageMapping[] };
   promotions?: {
     promotionalOffers?: { promotionalOffers?: EpicPromotionOffer[] }[];
     upcomingPromotionalOffers?: { promotionalOffers?: EpicPromotionOffer[] }[];
@@ -38,6 +46,35 @@ type EpicCatalogElement = {
   };
 };
 
+const EPIC_INTERNAL_SLUG_RE = /^[0-9a-f]{32}$/i;
+
+function epicCustomProductSlug(element: EpicCatalogElement): string | null {
+  const attr = element.customAttributes?.find((item) => item.key === 'com.epicgames.app.productSlug');
+  return attr?.value?.trim() || null;
+}
+
+function epicPageSlugFromMappings(element: EpicCatalogElement): string | null {
+  const mappings = [...(element.offerMappings ?? []), ...(element.catalogNs?.mappings ?? [])];
+  const productHome = mappings.find((mapping) => mapping.pageType === 'productHome' && mapping.pageSlug);
+  if (productHome?.pageSlug) return productHome.pageSlug;
+  return mappings.find((mapping) => mapping.pageSlug)?.pageSlug ?? null;
+}
+
+function epicReadableUrlSlug(urlSlug?: string): string | null {
+  if (!urlSlug?.trim()) return null;
+  if (EPIC_INTERNAL_SLUG_RE.test(urlSlug)) return null;
+  return urlSlug;
+}
+
+function epicStoreSlug(element: EpicCatalogElement): string | null {
+  return (
+    epicCustomProductSlug(element) ??
+    (element.productSlug?.trim() ||
+      epicPageSlugFromMappings(element) ||
+      epicReadableUrlSlug(element.urlSlug))
+  );
+}
+
 function epicImageUrl(element: EpicCatalogElement): string | null {
   const images = element.keyImages ?? [];
   const wide = images.find((img) => img.type === 'OfferImageWide');
@@ -47,11 +84,9 @@ function epicImageUrl(element: EpicCatalogElement): string | null {
 }
 
 function epicStoreUrl(element: EpicCatalogElement): string {
-  if (element.productSlug) {
-    return `https://store.epicgames.com/pt-BR/p/${element.productSlug}`;
-  }
-  if (element.namespace && element.urlSlug) {
-    return `https://store.epicgames.com/pt-BR/p/${element.urlSlug}`;
+  const slug = epicStoreSlug(element);
+  if (slug) {
+    return `https://store.epicgames.com/pt-BR/p/${slug}`;
   }
   return 'https://store.epicgames.com/pt-BR/free-games';
 }
