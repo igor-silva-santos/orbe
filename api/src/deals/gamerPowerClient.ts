@@ -46,6 +46,16 @@ function primaryPlatform(platforms: string): DealPlatform {
   return parts.length ? mapPlatformLabel(parts[0]) : 'other';
 }
 
+function parseWorthValue(worth?: string | null): number | null {
+  if (!worth) return null;
+  const normalized = worth.trim().toLowerCase();
+  if (!normalized || normalized === 'n/a' || normalized === 'free') return 0;
+  const match = normalized.replace(',', '.').match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function mapGamerPowerDeal(item: GamerPowerGiveaway): UnifiedDeal | null {
   if (!item.id || !item.title) return null;
   const platforms = (item.platforms ?? 'PC')
@@ -54,6 +64,9 @@ function mapGamerPowerDeal(item: GamerPowerGiveaway): UnifiedDeal | null {
     .filter(Boolean);
   const storeUrl = item.open_giveaway_url ?? item.open_giveaway ?? item.gamerpower_url;
   if (!storeUrl) return null;
+
+  const worthValue = parseWorthValue(item.worth);
+  const hasEndDate = Boolean(item.end_date?.trim());
 
   return {
     id: `gamerpower:${item.id}`,
@@ -69,6 +82,7 @@ function mapGamerPowerDeal(item: GamerPowerGiveaway): UnifiedDeal | null {
     instructions: item.instructions ?? null,
     endsAt: item.end_date ?? null,
     status: item.status?.toLowerCase() ?? 'active',
+    freeTier: hasEndDate || (worthValue != null && worthValue > 0) ? 'temporary' : 'permanent',
   };
 }
 

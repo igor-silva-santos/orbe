@@ -142,6 +142,7 @@ function mapEpicDeal(element: EpicCatalogElement, offer: EpicPromotionOffer, kin
     startsAt: offer.startDate ?? null,
     endsAt: offer.endDate ?? null,
     status: kind === 'free' ? 'gratis' : 'promocao',
+    freeTier: kind === 'free' ? 'temporary' : null,
   };
 }
 

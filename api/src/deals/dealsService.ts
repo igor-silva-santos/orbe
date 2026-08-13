@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { fetchEpicFreeGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDeals } from './cheapsharkClient';
+import { splitFreeDeals } from './freeTier';
 import type { DealsOverview, UnifiedDeal } from './types';
 
 /** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se cron falhar). */
@@ -49,18 +50,22 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
 
 /** Busca sempre nas APIs externas — uso interno do serviço de cache. */
 export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
-  const [epic, gamerpower, cheapsharkFree, cheapsharkSales] = await Promise.all([
+  const [epic, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales] = await Promise.all([
     safeFetch(fetchEpicFreeGames),
     safeFetch(() => fetchGamerPowerGiveaways()),
     safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 30 })),
+    safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 60 })),
     safeFetch(() => fetchCheapSharkDeals({ pageSize: 40 })),
   ]);
 
-  const gratis = dedupeDeals([
+  const gratisAll = dedupeDeals([
     ...epic.items,
     ...gamerpower.items,
     ...cheapsharkFree.items,
+    ...cheapsharkPermanentFree.items,
   ]);
+
+  const { temporarios: gratisTemporarios, permanentes: gratisPermanentes } = splitFreeDeals(gratisAll);
 
   const promocoes = dedupeDeals(
     cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
@@ -68,7 +73,9 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
 
   return {
     fetchedAt: new Date().toISOString(),
-    gratis,
+    gratis: gratisAll,
+    gratisTemporarios,
+    gratisPermanentes,
     promocoes,
     sources: {
       epic: { ok: !epic.error, count: epic.items.length, error: epic.error },
@@ -78,9 +85,9 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         error: gamerpower.error,
       },
       cheapshark: {
-        ok: !cheapsharkFree.error && !cheapsharkSales.error,
-        count: cheapsharkFree.items.length + cheapsharkSales.items.length,
-        error: cheapsharkFree.error ?? cheapsharkSales.error,
+        ok: !cheapsharkFree.error && !cheapsharkPermanentFree.error && !cheapsharkSales.error,
+        count: cheapsharkFree.items.length + cheapsharkPermanentFree.items.length + cheapsharkSales.items.length,
+        error: cheapsharkFree.error ?? cheapsharkPermanentFree.error ?? cheapsharkSales.error,
       },
     },
   };
@@ -103,7 +110,8 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
       .join(';');
 
   const payload = [
-    snapshot(overview.gratis),
+    snapshot(overview.gratisTemporarios),
+    snapshot(overview.gratisPermanentes),
     snapshot(overview.promocoes),
     overview.sources.epic.ok ? '1' : '0',
     overview.sources.gamerpower.ok ? '1' : '0',
@@ -228,7 +236,7 @@ export async function refreshDealsCache(options?: {
 
     logger.info(
       `[deals-cache] Cache atualizado (${options?.reason ?? 'refresh'}) — ` +
-        `grátis: ${fresh.gratis.length}, promoções: ${fresh.promocoes.length}.`,
+        `grátis: ${fresh.gratis.length} (${fresh.gratisTemporarios.length} temporários, ${fresh.gratisPermanentes.length} permanentes), promoções: ${fresh.promocoes.length}.`,
     );
 
     return {

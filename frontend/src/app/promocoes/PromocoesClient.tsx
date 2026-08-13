@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Gift, RefreshCw, Tag, Sparkles } from 'lucide-react';
+import { ArrowLeft, Gift, RefreshCw, Tag, Sparkles, Clock } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { DealsOverview, DealPlatform, UnifiedDeal } from '@/types/deals';
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
@@ -41,12 +42,111 @@ function groupByPlatform(deals: UnifiedDeal[]): Record<string, UnifiedDeal[]> {
   return groups;
 }
 
+function filterByPlatform(deals: UnifiedDeal[], platformFilter: DealPlatform | 'all'): UnifiedDeal[] {
+  if (platformFilter === 'all') return deals;
+  return deals.filter((d) => d.platform === platformFilter);
+}
+
+function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorityCount?: number }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
+      {deals.map((deal, index) => (
+        <DealCard key={deal.id} deal={deal} priority={index < priorityCount} />
+      ))}
+    </div>
+  );
+}
+
+function DealsByPlatform({
+  deals,
+  platformFilter,
+}: {
+  deals: UnifiedDeal[];
+  platformFilter: DealPlatform | 'all';
+}) {
+  const filtered = useMemo(
+    () => filterByPlatform(deals, platformFilter),
+    [deals, platformFilter],
+  );
+  const byPlatform = useMemo(() => groupByPlatform(filtered), [filtered]);
+
+  if (filtered.length === 0) {
+    return (
+      <div className="bg-card rounded-lg border border-border p-10 text-center">
+        <p className="text-muted-foreground">Nenhum jogo nesta plataforma no momento.</p>
+      </div>
+    );
+  }
+
+  if (platformFilter !== 'all') {
+    return <DealsGrid deals={filtered} />;
+  }
+
+  return (
+    <div className="space-y-8">
+      {Object.entries(byPlatform).map(([platform, platformDeals]) => (
+        <div key={platform}>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            {PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
+          </h3>
+          <DealsGrid deals={platformDeals} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PlatformFilters({
+  platformFilter,
+  onChange,
+}: {
+  platformFilter: DealPlatform | 'all';
+  onChange: (value: DealPlatform | 'all') => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {PLATFORM_FILTERS.map((filter) => (
+        <button
+          key={filter.id}
+          type="button"
+          onClick={() => onChange(filter.id)}
+          className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+            platformFilter === filter.id
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-card border-border orbe-text-primary hover:bg-muted'
+          }`}
+        >
+          {filter.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SourceFooter({ data }: { data: DealsOverview }) {
+  return (
+    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
+      <span>Fontes:</span>
+      <span className={data.sources.epic.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Epic ({data.sources.epic.count})
+      </span>
+      <span className={data.sources.gamerpower.ok ? 'text-emerald-600' : 'text-destructive'}>
+        GamerPower ({data.sources.gamerpower.count})
+      </span>
+      <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
+        CheapShark ({data.sources.cheapshark.count})
+      </span>
+    </div>
+  );
+}
+
 export default function PromocoesClient() {
   const [data, setData] = useState<DealsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
+  const [activeTab, setActiveTab] = useState('gratis');
 
   const loadDeals = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -75,13 +175,27 @@ export default function PromocoesClient() {
     return () => window.clearInterval(timer);
   }, [loadDeals]);
 
-  const filteredGratis = useMemo(() => {
+  const gratisTemporarios = useMemo(() => {
     if (!data) return [];
-    if (platformFilter === 'all') return data.gratis;
-    return data.gratis.filter((d) => d.platform === platformFilter);
-  }, [data, platformFilter]);
+    if (data.gratisTemporarios?.length) return data.gratisTemporarios;
+    return data.gratis.filter((d) => d.freeTier !== 'permanent');
+  }, [data]);
 
-  const gratisByPlatform = useMemo(() => groupByPlatform(filteredGratis), [filteredGratis]);
+  const gratisPermanentes = useMemo(() => {
+    if (!data) return [];
+    if (data.gratisPermanentes?.length) return data.gratisPermanentes;
+    return data.gratis.filter((d) => d.freeTier === 'permanent');
+  }, [data]);
+
+  const filteredTemporarios = useMemo(
+    () => filterByPlatform(gratisTemporarios, platformFilter),
+    [gratisTemporarios, platformFilter],
+  );
+
+  const filteredPermanentes = useMemo(
+    () => filterByPlatform(gratisPermanentes, platformFilter),
+    [gratisPermanentes, platformFilter],
+  );
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
@@ -127,7 +241,7 @@ export default function PromocoesClient() {
         </div>
       </section>
 
-      <main className="container mx-auto px-4 py-8 md:py-10 space-y-12">
+      <main className="container mx-auto px-4 py-8 md:py-10">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -146,89 +260,91 @@ export default function PromocoesClient() {
             </button>
           </div>
         ) : data ? (
-          <>
-            <section className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className="h-auto flex-wrap gap-1 p-1 w-full sm:w-auto">
+              <TabsTrigger value="gratis" className="gap-2 px-4 py-2">
+                <Gift className="h-4 w-4" />
+                Jogos de Graça
+                <span className="text-xs opacity-70">({gratisTemporarios.length + gratisPermanentes.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="promocoes" className="gap-2 px-4 py-2">
+                <Tag className="h-4 w-4" />
+                Promoções
+                <span className="text-xs opacity-70">({data.promocoes.length})</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="gratis" className="space-y-10 mt-0">
+              <section className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-emerald-600" />
+                      Estão de graça
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({filteredTemporarios.length})
+                      </span>
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                      Jogos que custavam e estão com 100% de desconto por tempo limitado — vale resgatar agora.
+                    </p>
+                  </div>
+                  <PlatformFilters platformFilter={platformFilter} onChange={setPlatformFilter} />
+                </div>
+
+                {filteredTemporarios.length === 0 ? (
+                  <div className="bg-card rounded-lg border border-border p-10 text-center">
+                    <p className="text-muted-foreground">Nenhum jogo temporariamente grátis nesta plataforma no momento.</p>
+                  </div>
+                ) : (
+                  <DealsByPlatform deals={gratisTemporarios} platformFilter={platformFilter} />
+                )}
+              </section>
+
+              <CollapsibleSection
+                id="promocoes-jogos-sempre-gratis"
+                title="São de graça"
+                icon={Gift}
+                defaultOpen={false}
+              >
+                <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                  Jogos que nunca custaram — free-to-play ou preço base zero. Ficam aqui embaixo para não competir com as ofertas por tempo limitado.
+                </p>
+                {filteredPermanentes.length > 0 ? (
+                  <DealsByPlatform deals={gratisPermanentes} platformFilter={platformFilter} />
+                ) : (
+                  <div className="bg-card rounded-lg border border-border p-8 text-center">
+                    <p className="text-muted-foreground text-sm">Nenhum jogo permanentemente grátis no momento.</p>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              <SourceFooter data={data} />
+            </TabsContent>
+
+            <TabsContent value="promocoes" className="space-y-4 mt-0">
+              <div>
                 <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
-                  <Gift className="h-5 w-5 text-emerald-600" />
-                  Grátis para resgatar agora
+                  <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                  Melhores promoções
                   <span className="text-sm font-normal text-muted-foreground">
-                    ({filteredGratis.length})
+                    ({data.promocoes.length})
                   </span>
                 </h2>
-                <div className="flex flex-wrap gap-2">
-                  {PLATFORM_FILTERS.map((filter) => (
-                    <button
-                      key={filter.id}
-                      type="button"
-                      onClick={() => setPlatformFilter(filter.id)}
-                      className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
-                        platformFilter === filter.id
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-card border-border orbe-text-primary hover:bg-muted'
-                      }`}
-                    >
-                      {filter.label}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Descontos ativos em lojas parceiras — ainda há preço, mas bem abaixo do normal.
+                </p>
               </div>
 
-              {filteredGratis.length === 0 ? (
-                <div className="bg-card rounded-lg border border-border p-10 text-center">
-                  <p className="text-muted-foreground">Nenhum jogo grátis nesta plataforma no momento.</p>
-                </div>
-              ) : platformFilter === 'all' ? (
-                <div className="space-y-8">
-                  {Object.entries(gratisByPlatform).map(([platform, deals]) => (
-                    <div key={platform}>
-                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                        {PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
-                      </h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
-                        {deals.map((deal, index) => (
-                          <DealCard key={deal.id} deal={deal} priority={index < 6} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
-                  {filteredGratis.map((deal, index) => (
-                    <DealCard key={deal.id} deal={deal} priority={index < 6} />
-                  ))}
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
-                <span>Fontes:</span>
-                <span className={data.sources.epic.ok ? 'text-emerald-600' : 'text-destructive'}>
-                  Epic ({data.sources.epic.count})
-                </span>
-                <span className={data.sources.gamerpower.ok ? 'text-emerald-600' : 'text-destructive'}>
-                  GamerPower ({data.sources.gamerpower.count})
-                </span>
-                <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
-                  CheapShark ({data.sources.cheapshark.count})
-                </span>
-              </div>
-            </section>
-
-            <CollapsibleSection id="promocoes-melhores-ofertas" title="Melhores promoções" icon={Tag}>
               {data.promocoes.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
-                  {data.promocoes.map((deal) => (
-                    <DealCard key={deal.id} deal={deal} />
-                  ))}
-                </div>
+                <DealsGrid deals={data.promocoes} priorityCount={0} />
               ) : (
                 <div className="bg-card rounded-lg border border-border p-8 text-center">
                   <p className="text-muted-foreground text-sm">Nenhuma promoção destacada no momento.</p>
                 </div>
               )}
-            </CollapsibleSection>
-          </>
+            </TabsContent>
+          </Tabs>
         ) : null}
       </main>
     </div>

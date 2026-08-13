@@ -29,6 +29,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   const [hasError, setHasError] = useState(false);
   const resolvedSrc = getImageSrc(src, imageSize);
   const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
+  const isTmdbImage = resolvedSrc.includes('image.tmdb.org');
 
   if (hasError || !src) {
     return (
@@ -53,7 +54,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       placeholder={isPlaceholder ? undefined : 'blur'}
       blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
       onError={() => setHasError(true)}
-      unoptimized={isPlaceholder}
+      unoptimized={isPlaceholder || isTmdbImage}
     />
   );
 };
