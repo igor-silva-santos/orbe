@@ -235,9 +235,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 {cardStatus && (
                   <div
                     className={`absolute z-10 ${
-                      cardStatus.variant === 'em_cartaz'
-                        ? 'bottom-0 left-0 right-0 flex justify-center'
-                        : 'top-2 right-2'
+                      cardStatus.variant === 'em_cartaz' ? 'bottom-2 left-2' : 'top-2 right-2'
                     }`}
                   >
                     <CardStatusBadge status={cardStatus} />

@@ -8,17 +8,23 @@ type Props = {
   item: ContinuacaoItem;
   onClick: () => void;
   compact?: boolean;
+  showOrder?: boolean;
 };
 
-export default function ContinuacaoCard({ item, onClick, compact }: Props) {
+export default function ContinuacaoCard({ item, onClick, compact, showOrder }: Props) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`text-left rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors overflow-hidden w-full ${
+      className={`relative text-left rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors overflow-hidden w-full ${
         compact ? 'flex gap-3 p-2' : 'block'
       }`}
     >
+      {showOrder && item.ordem > 0 ? (
+        <span className="absolute top-2 left-2 z-10 rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5">
+          {item.ordem}
+        </span>
+      ) : null}
       <div className={compact ? 'w-14 shrink-0' : 'aspect-[2/3] w-full'}>
         <SafeImage
           src={item.posterUrl ?? ''}

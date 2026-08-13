@@ -198,6 +198,8 @@ export const realApi = {
   getCheapSharkDeals: orbeNerdApi.getCheapSharkDeals,
   listSagas: orbeNerdApi.listSagas,
   getSaga: orbeNerdApi.getSaga,
+  listUniversos: orbeNerdApi.listUniversos,
+  getUniverso: orbeNerdApi.getUniverso,
   getContinuacoesFilme: orbeNerdApi.getContinuacoesFilme,
   getContinuacoesSerie: orbeNerdApi.getContinuacoesSerie,
 };

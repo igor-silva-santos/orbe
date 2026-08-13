@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { parsePositiveIntId } from './routes/mediaRoutesHelpers';
-import { parseSagasLimit, DEFAULT_SAGAS_LIMIT, MAX_SAGAS_LIMIT } from './continuacoesValidation';
-import { relacaoPorData } from './continuacoesService';
+import { parseSagasLimit, DEFAULT_SAGAS_LIMIT, MAX_SAGAS_LIMIT, parseUniverseId } from './continuacoesValidation';
+import { relacaoPorData, sortContinuacaoItemsChronologically } from './continuacoesService';
 
 describe('parsePositiveIntId', () => {
   it('aceita inteiros positivos', () => {
@@ -54,5 +54,51 @@ describe('relacaoPorData', () => {
 
   it('fora da saga vira recomendado', () => {
     assert.equal(relacaoPorData(newer, older, false), 'recomendado');
+  });
+});
+
+describe('sortContinuacaoItemsChronologically', () => {
+  it('ordena filmes e séries pela data de lançamento', () => {
+    const sorted = sortContinuacaoItemsChronologically([
+      {
+        tipo: 'serie',
+        tmdbId: 2,
+        titulo: 'Série B',
+        posterUrl: null,
+        releaseDate: '2022-01-01',
+        relacao: 'mesma_saga',
+        ordem: 0,
+        noOrbe: true,
+      },
+      {
+        tipo: 'filme',
+        tmdbId: 1,
+        titulo: 'Filme A',
+        posterUrl: null,
+        releaseDate: '2020-01-01',
+        relacao: 'mesma_saga',
+        ordem: 0,
+        noOrbe: true,
+      },
+    ]);
+
+    assert.equal(sorted[0].titulo, 'Filme A');
+    assert.equal(sorted[1].titulo, 'Série B');
+    assert.equal(sorted[0].ordem, 1);
+    assert.equal(sorted[1].ordem, 2);
+  });
+});
+
+describe('parseUniverseId', () => {
+  it('aceita slugs válidos', () => {
+    assert.equal(parseUniverseId('mcu'), 'mcu');
+    assert.equal(parseUniverseId('star-wars'), 'star-wars');
+  });
+
+  it('rejeita IDs inválidos', () => {
+    assert.equal(parseUniverseId(''), null);
+    assert.equal(parseUniverseId('MCU'), 'mcu');
+    assert.equal(parseUniverseId('../etc'), null);
+    assert.equal(parseUniverseId('a b'), null);
   });
 });

@@ -4,6 +4,13 @@ import {
   fetchTmdbMovieRecommendations,
   fetchTmdbTvRecommendations,
 } from './tmdbCollections';
+import {
+  CINEMATIC_UNIVERSES,
+  buildKeywordOrFilter,
+  getUniverseById,
+  matchesUniversePatterns,
+  type CinematicUniverseConfig,
+} from './cinematicUniverses';
 
 export type ContinuacaoRelacao =
   | 'precuela'
@@ -31,6 +38,29 @@ export type SagaSummary = {
   preview: ContinuacaoItem[];
 };
 
+export type UniversoSummary = {
+  id: string;
+  nome: string;
+  descricao: string;
+  posterUrl: string | null;
+  totalFilmes: number;
+  totalSeries: number;
+  totalTitulos: number;
+  preview: ContinuacaoItem[];
+  primeiraData: string | null;
+  ultimaData: string | null;
+};
+
+export type UniversoPayload = {
+  universo: {
+    id: string;
+    nome: string;
+    descricao: string;
+    posterUrl: string | null;
+  };
+  itens: ContinuacaoItem[];
+};
+
 export type ContinuacoesPayload = {
   saga: { id: number; nome: string; posterUrl: string | null; overview: string | null } | null;
   itens: ContinuacaoItem[];
@@ -40,6 +70,183 @@ export type ContinuacoesPayload = {
 
 const posterUrl = (path: string | null | undefined) =>
   path ? `https://image.tmdb.org/t/p/w342${path}` : null;
+
+const formatReleaseDate = (date: Date | string | null | undefined): string | null => {
+  if (!date) return null;
+  if (date instanceof Date) return date.toISOString().split('T')[0];
+  return String(date).split('T')[0];
+};
+
+const releaseTimestamp = (value: string | null | undefined): number => {
+  if (!value) return Number.POSITIVE_INFINITY;
+  const ts = new Date(value).getTime();
+  return Number.isNaN(ts) ? Number.POSITIVE_INFINITY : ts;
+};
+
+/** Ordena filmes e séries pela data de lançamento/estreia (cronológica). */
+export function sortContinuacaoItemsChronologically(items: ContinuacaoItem[]): ContinuacaoItem[] {
+  return [...items]
+    .sort((a, b) => {
+      const diff = releaseTimestamp(a.releaseDate) - releaseTimestamp(b.releaseDate);
+      if (diff !== 0) return diff;
+      return a.titulo.localeCompare(b.titulo, 'pt-BR');
+    })
+    .map((item, index) => ({ ...item, ordem: index + 1 }));
+}
+
+async function collectUniversoItens(universe: CinematicUniverseConfig): Promise<ContinuacaoItem[]> {
+  const byKey = new Map<string, ContinuacaoItem>();
+
+  const addItem = (item: {
+    tipo: 'filme' | 'serie';
+    tmdbId: number;
+    titulo: string;
+    posterUrl: string | null;
+    releaseDate: string | null;
+  }) => {
+    const key = `${item.tipo}:${item.tmdbId}`;
+    if (byKey.has(key)) return;
+    byKey.set(key, {
+      ...item,
+      relacao: 'mesma_saga',
+      ordem: 0,
+      noOrbe: false,
+    });
+  };
+
+  const collections = await prisma.collection.findMany({
+    include: {
+      filmes: {
+        select: {
+          tmdbId: true,
+          title: true,
+          originalTitle: true,
+          posterPath: true,
+          releaseDate: true,
+        },
+      },
+    },
+  });
+
+  for (const collection of collections) {
+    if (!matchesUniversePatterns(collection.name, universe.collectionPatterns)) continue;
+    for (const filme of collection.filmes) {
+      addItem({
+        tipo: 'filme',
+        tmdbId: filme.tmdbId,
+        titulo: filme.title,
+        posterUrl: posterUrl(filme.posterPath),
+        releaseDate: formatReleaseDate(filme.releaseDate),
+      });
+    }
+  }
+
+  const filmeKeywordFilter = buildKeywordOrFilter(universe.searchKeywords, ['title', 'originalTitle']);
+  if (filmeKeywordFilter) {
+    const filmes = await prisma.filme.findMany({
+      where: filmeKeywordFilter,
+      select: {
+        tmdbId: true,
+        title: true,
+        originalTitle: true,
+        posterPath: true,
+        releaseDate: true,
+      },
+    });
+    for (const filme of filmes) {
+      const matches =
+        matchesUniversePatterns(filme.title, universe.titlePatterns) ||
+        matchesUniversePatterns(filme.originalTitle, universe.titlePatterns);
+      if (!matches) continue;
+      addItem({
+        tipo: 'filme',
+        tmdbId: filme.tmdbId,
+        titulo: filme.title,
+        posterUrl: posterUrl(filme.posterPath),
+        releaseDate: formatReleaseDate(filme.releaseDate),
+      });
+    }
+  }
+
+  const serieKeywordFilter = buildKeywordOrFilter(universe.searchKeywords, ['name', 'originalName']);
+  if (serieKeywordFilter) {
+    const series = await prisma.serie.findMany({
+      where: serieKeywordFilter,
+      select: {
+        tmdbId: true,
+        name: true,
+        originalName: true,
+        posterPath: true,
+        firstAirDate: true,
+      },
+    });
+    for (const serie of series) {
+      const matches =
+        matchesUniversePatterns(serie.name, universe.titlePatterns) ||
+        matchesUniversePatterns(serie.originalName, universe.titlePatterns);
+      if (!matches) continue;
+      addItem({
+        tipo: 'serie',
+        tmdbId: serie.tmdbId,
+        titulo: serie.name,
+        posterUrl: posterUrl(serie.posterPath),
+        releaseDate: formatReleaseDate(serie.firstAirDate),
+      });
+    }
+  }
+
+  const sorted = sortContinuacaoItemsChronologically([...byKey.values()]);
+  const filmeIds = sorted.filter((item) => item.tipo === 'filme').map((item) => item.tmdbId);
+  const serieIds = sorted.filter((item) => item.tipo === 'serie').map((item) => item.tmdbId);
+  const [filmesInDb, seriesInDb] = await Promise.all([filmesNoOrbe(filmeIds), seriesNoOrbe(serieIds)]);
+
+  return sorted.map((item) => ({
+    ...item,
+    noOrbe: item.tipo === 'filme' ? filmesInDb.has(item.tmdbId) : seriesInDb.has(item.tmdbId),
+  }));
+}
+
+export async function listUniversos(): Promise<UniversoSummary[]> {
+  const summaries: UniversoSummary[] = [];
+
+  for (const universe of CINEMATIC_UNIVERSES) {
+    const itens = await collectUniversoItens(universe);
+    if (itens.length < 2) continue;
+
+    summaries.push({
+      id: universe.id,
+      nome: universe.nome,
+      descricao: universe.descricao,
+      posterUrl: itens.find((item) => item.posterUrl)?.posterUrl ?? null,
+      totalFilmes: itens.filter((item) => item.tipo === 'filme').length,
+      totalSeries: itens.filter((item) => item.tipo === 'serie').length,
+      totalTitulos: itens.length,
+      preview: itens.slice(0, 6),
+      primeiraData: itens[0]?.releaseDate ?? null,
+      ultimaData: itens[itens.length - 1]?.releaseDate ?? null,
+    });
+  }
+
+  return summaries;
+}
+
+export async function getUniversoById(id: string): Promise<UniversoPayload | null> {
+  const universe = getUniverseById(id);
+  if (!universe) return null;
+
+  const itens = await collectUniversoItens(universe);
+  if (itens.length === 0) return null;
+
+  return {
+    universo: {
+      id: universe.id,
+      nome: universe.nome,
+      descricao: universe.descricao,
+      posterUrl: itens.find((item) => item.posterUrl)?.posterUrl ?? null,
+    },
+    itens,
+  };
+}
 
 export function relacaoPorData(
   atual: Date | null,
@@ -172,9 +379,8 @@ export async function getSagaById(collectionId: number): Promise<ContinuacoesPay
   const tmdbIds = [...partsMap.keys()];
   const inDb = await filmesNoOrbe(tmdbIds);
 
-  const itens: ContinuacaoItem[] = [...partsMap.entries()]
-    .sort((a, b) => (a[1].ordem) - (b[1].ordem))
-    .map(([id, meta]) => ({
+  const itens: ContinuacaoItem[] = sortContinuacaoItemsChronologically(
+    [...partsMap.entries()].map(([id, meta]) => ({
       tipo: 'filme' as const,
       tmdbId: id,
       titulo: meta.title,
@@ -183,7 +389,8 @@ export async function getSagaById(collectionId: number): Promise<ContinuacoesPay
       relacao: 'mesma_saga' as const,
       ordem: meta.ordem,
       noOrbe: inDb.has(id),
-    }));
+    })),
+  );
 
   return {
     saga: { id: collectionId, nome, posterUrl: posterUrl(poster), overview },

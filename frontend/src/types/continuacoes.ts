@@ -40,3 +40,31 @@ export type SagasListResponse = {
   sagas: SagaSummary[];
   total: number;
 };
+
+export type UniversoSummary = {
+  id: string;
+  nome: string;
+  descricao: string;
+  posterUrl: string | null;
+  totalFilmes: number;
+  totalSeries: number;
+  totalTitulos: number;
+  preview: ContinuacaoItem[];
+  primeiraData: string | null;
+  ultimaData: string | null;
+};
+
+export type UniversoPayload = {
+  universo: {
+    id: string;
+    nome: string;
+    descricao: string;
+    posterUrl: string | null;
+  };
+  itens: ContinuacaoItem[];
+};
+
+export type UniversosListResponse = {
+  universos: UniversoSummary[];
+  total: number;
+};
