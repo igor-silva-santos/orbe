@@ -5,6 +5,31 @@ const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
+/** Evita 500 quando joins de gênero/provedor estão órfãos no banco */
+const safeGenreNames = (genres?: { genero?: { name: string } | null }[], limit?: number) => {
+  const names = genres?.map((g) => g.genero?.name).filter((n): n is string => Boolean(n)) ?? [];
+  return limit ? names.slice(0, limit) : names;
+};
+
+const safeStreamingProviders = (
+  providers?: { provider?: { name: string; logoPath?: string | null } | null; url?: string | null }[],
+  limit = 4,
+) =>
+  (providers ?? [])
+    .slice(0, limit)
+    .filter((p) => p.provider?.name)
+    .map((p) => ({
+      nome: p.provider!.name,
+      url: p.url,
+      logo_path: p.provider!.logoPath ?? null,
+    }));
+
+const safeGamePlatforms = (platforms?: { plataforma?: { name: string } | null }[], limit = 4) =>
+  (platforms ?? [])
+    .slice(0, limit)
+    .filter((p) => p.plataforma?.name)
+    .map((p) => ({ nome: p.plataforma!.name }));
+
 const gameGenreTranslations: Record<string, string> = {
   "Action": "Ação",
   "Adventure": "Aventura",
@@ -570,12 +595,8 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   poster_url_api: filme.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${filme.posterPath}` : null,
   data_lancamento_api: filme.releaseDate,
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
-  generos_api: filme.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (filme.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
-    nome: p.provider.name,
-    url: p.url,
-    logo_path: p.provider.logoPath ?? null,
-  })),
+  generos_api: safeGenreNames(filme.genres, 3),
+  plataformas_api: safeStreamingProviders(filme.streamingProviders),
   em_prevenda: filme.em_prevenda ?? false,
   em_cartaz: filme.emCartaz ?? false,
   em_breve: filme.emBreve ?? false,
@@ -594,12 +615,8 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
   data_lancamento_api: serie.firstAirDate,
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
-  generos_api: serie.genres?.map((g: any) => g.genero.name).slice(0, 3) ?? [],
-  plataformas_api: (serie.streamingProviders ?? []).slice(0, 4).map((p: any) => ({
-    nome: p.provider.name,
-    url: p.url,
-    logo_path: p.provider.logoPath ?? null,
-  })),
+  generos_api: safeGenreNames(serie.genres, 3),
+  plataformas_api: safeStreamingProviders(serie.streamingProviders),
 });
 
 export const mapJogoToCarouselCard = (jogo: any) => ({
@@ -610,8 +627,8 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   poster_url_api: resolveIgdbImageUrl(jogo.cover),
   data_lancamento_api: jogo.firstReleaseDate,
   avaliacao: jogo.rating,
-  generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)).slice(0, 3) ?? [],
-  plataformas_api: (jogo.platforms ?? []).slice(0, 4).map((p: any) => ({ nome: p.plataforma.name })),
+  generos_api: safeGenreNames(jogo.genres, 3).map((name) => translateGameGenre(name)),
+  plataformas_api: safeGamePlatforms(jogo.platforms),
   steam_app_id: jogo.steamAppId ?? null,
   steam_price_cents: jogo.steamPriceCents ?? null,
   steam_discount_percent: jogo.steamDiscountPercent ?? null,
@@ -639,7 +656,7 @@ export const mapAnimeToCarouselCard = (anime: any) => {
       day: new Date(anime.startDate).getDate(),
     } : null,
     avaliacao: anime.averageScore,
-    generos_api: anime.genres?.map((g: any) => translateAnimeGenre(g.genero.name)).slice(0, 3) ?? [],
+    generos_api: safeGenreNames(anime.genres, 3).map((name) => translateAnimeGenre(name)),
     plataformas_api: streamingFromLinks.slice(0, 4),
     format: anime.format,
     isAdult: anime.isAdult,

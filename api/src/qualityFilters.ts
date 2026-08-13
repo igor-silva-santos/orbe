@@ -244,7 +244,13 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
     { voteAverage: { gt: 0 } },
     { genres: { some: {} } },
     {
-      OR: [{ streamingProviders: { some: {} } }, { emCartaz: true }],
+      OR: [
+        { streamingProviders: { some: {} } },
+        { emCartaz: true },
+        { emBreve: true },
+        { em_prevenda: true },
+        { releaseDate: { gte: new Date() } },
+      ],
     },
   ],
 };
@@ -255,6 +261,9 @@ type FilmeCarouselCandidate = {
   overview?: string | null;
   voteAverage?: number | null;
   emCartaz?: boolean | null;
+  emBreve?: boolean | null;
+  em_prevenda?: boolean | null;
+  releaseDate?: Date | string | null;
   genres?: { genero: { tmdbId: number } }[];
   streamingProviders?: unknown[];
 };
@@ -263,8 +272,14 @@ function filmeHasCarouselMetadata(filme: FilmeCarouselCandidate): boolean {
   const hasSynopsis = Boolean(filme.overview?.trim());
   const hasRating = typeof filme.voteAverage === 'number' && filme.voteAverage > 0;
   const hasGenre = (filme.genres?.length ?? 0) > 0;
+  const releaseTime = filme.releaseDate ? new Date(filme.releaseDate).getTime() : null;
+  const isUpcoming = releaseTime !== null && !Number.isNaN(releaseTime) && releaseTime >= Date.now();
   const hasPlatform =
-    (filme.streamingProviders?.length ?? 0) > 0 || Boolean(filme.emCartaz);
+    (filme.streamingProviders?.length ?? 0) > 0 ||
+    Boolean(filme.emCartaz) ||
+    Boolean(filme.emBreve) ||
+    Boolean(filme.em_prevenda) ||
+    isUpcoming;
   return hasSynopsis && hasRating && hasGenre && hasPlatform;
 }
 

@@ -4,6 +4,11 @@ import type { Midia } from '@/types';
 
 export function parseReleaseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
+  // Datas só com dia (YYYY-MM-DD) usam calendário local — evita setembro virar agosto no fuso BR
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
   const date = parseISO(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
