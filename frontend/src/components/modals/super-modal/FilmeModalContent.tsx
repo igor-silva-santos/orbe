@@ -13,6 +13,8 @@ import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -108,6 +110,13 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
         </div>
       </div>
 
+      <Tabs defaultValue="detalhes" className="w-full">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
+          <TabsTrigger value="continuacao">Continuação</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="detalhes" className="space-y-6 mt-4">
       {(filme.overview || (filme as { sinopse?: string }).sinopse) && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Sinopse</h2>
@@ -229,6 +238,12 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
           </TooltipProvider>
         </section>
       )}
+        </TabsContent>
+
+        <TabsContent value="continuacao" className="mt-4">
+          <ContinuacaoTabContent tipo="filme" tmdbId={filme.tmdbId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
