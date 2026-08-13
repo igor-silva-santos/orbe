@@ -1,19 +1,13 @@
 name: Sync All (catálogo completo)
 
-# Sincroniza filmes → detetive → séries → animes → jogos → premiações.
-# Diferente de "Invalidate API Cache" — este workflow BUSCA dados novos no TMDB/IGDB.
-#
-# Secrets necessários (Settings → Secrets and variables → Actions):
-#   ORBE_API_URL  — ex.: https://orbe-7bu0.onrender.com
-#   SYNC_SECRET   — mesmo valor do Render
-#
-# Monitore: GET /api/sync/status e logs do Render.
+# ⚠️ NÃO confundir com "Invalidar Cache API" — este workflow SINCRONIZA dados (TMDB/IGDB).
+# Secrets: SYNC_SECRET + ORBE_API_URL (Settings → Secrets → Actions)
 
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: Ação
+        description: 'Ação: resume = retomar checkpoint | sync_all = começar do zero'
         required: true
         default: resume
         type: choice
@@ -21,19 +15,19 @@ on:
           - resume
           - sync_all
       start_date:
-        description: Data início (só para sync_all)
+        description: Data início (só sync_all)
         required: false
         default: '2026-01-01'
       end_date:
-        description: Data fim (só para sync_all)
+        description: Data fim (só sync_all)
         required: false
         default: '2026-12-31'
       start_year:
-        description: Ano início animes (só para sync_all)
+        description: Ano início animes (só sync_all)
         required: false
         default: '2026'
       end_year:
-        description: Ano fim animes (só para sync_all)
+        description: Ano fim animes (só sync_all)
         required: false
         default: '2026'
 
@@ -41,6 +35,23 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Acordar API no Render (cold start)
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          echo "Aguardando API em ${API_BASE}/api/health ..."
+          for i in $(seq 1 12); do
+            if curl -sf "${API_BASE}/api/health" >/dev/null; then
+              echo "API online."
+              exit 0
+            fi
+            echo "Tentativa ${i}/12 — aguardando 10s..."
+            sleep 10
+          done
+          echo "::error::API não respondeu em 2 minutos."
+          exit 1
+
       - name: Disparar sync na API
         env:
           API_URL: ${{ secrets.ORBE_API_URL }}
@@ -53,19 +64,43 @@ jobs:
           fi
 
           if [ "${{ inputs.action }}" = "resume" ]; then
-            echo "Retomando sync do último checkpoint..."
-            curl -sS -f -X POST "${API_BASE}/api/run-sync-resume" \
+            echo "▶ Retomando sync do último checkpoint (run-sync-resume)..."
+            RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-resume" \
               -H "x-sync-secret: ${SYNC_SECRET}" \
-              -H "Content-Type: application/json"
+              -H "Content-Type: application/json")
           else
-            echo "Iniciando sync completo: ${{ inputs.start_date }} → ${{ inputs.end_date }}"
-            curl -sS -f -X POST "${API_BASE}/api/run-sync-all" \
+            echo "▶ Iniciando sync completo: ${{ inputs.start_date }} → ${{ inputs.end_date }}"
+            RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
               -H "x-sync-secret: ${SYNC_SECRET}" \
               -H "Content-Type: application/json" \
-              -d "{\"startDate\":\"${{ inputs.start_date }}\",\"endDate\":\"${{ inputs.end_date }}\",\"startYear\":${{ inputs.start_year }},\"endYear\":${{ inputs.end_year }}}"
+              -d "{\"startDate\":\"${{ inputs.start_date }}\",\"endDate\":\"${{ inputs.end_date }}\",\"startYear\":${{ inputs.start_year }},\"endYear\":${{ inputs.end_year }}}")
           fi
 
-          echo ""
-          echo "Sync disparado (HTTP 202). Acompanhe em:"
-          echo "  ${API_BASE}/api/sync/status"
-          echo "  Logs do Render → serviço orbe-api"
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          echo "HTTP ${HTTP_CODE}"
+          echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::API retornou HTTP ${HTTP_CODE}"
+            exit 1
+          fi
+
+      - name: Verificar se o sync iniciou
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          echo "Aguardando syncActive=true (até 60s)..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+            echo "$STATUS" | python3 -m json.tool 2>/dev/null || echo "$STATUS"
+            ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+            if [ "$ACTIVE" = "True" ]; then
+              echo "✅ Sync em andamento. Acompanhe nos logs do Render."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::syncActive ainda false após 60s. O Render free pode ter interrompido — rode novamente ou use run-sync-resume."
+          exit 0

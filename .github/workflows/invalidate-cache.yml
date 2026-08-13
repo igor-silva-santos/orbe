@@ -1,4 +1,7 @@
-name: Invalidar Cache API
+name: Invalidar Cache API (NÃO é sync)
+
+# ⚠️ Este workflow só LIMPA o cache Redis. Para sincronizar catálogo, use:
+# Actions → "Sync All (catálogo completo)"
 
 on:
   workflow_dispatch:
