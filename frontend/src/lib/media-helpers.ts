@@ -182,6 +182,15 @@ export const formatSteamPriceBRL = (cents: number | null | undefined): string | 
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 };
 
+/** Teto conservador para preço Steam em centavos BRL (R$ 5.000) */
+export const MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS = 500_000;
+
+export const isPlausibleBrlSteamPriceCents = (cents: number | null | undefined): boolean => {
+  if (cents == null || cents < 0) return false;
+  if (cents === 0) return true;
+  return cents <= MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS;
+};
+
 export const getSteamStoreUrl = (steamAppId: number | null | undefined): string | null => {
   if (!steamAppId) return null;
   return `https://store.steampowered.com/app/${steamAppId}`;

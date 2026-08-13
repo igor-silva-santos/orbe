@@ -103,6 +103,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const mediaItemsRef = useRef(mediaItems);
   const lastTitleMonthKey = useRef<string>('');
   const initialPrefetchDone = useRef(false);
+  const initialRepositionDone = useRef(false);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
@@ -426,6 +427,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     previousSelectedIndex.current = target.index;
     updateTitleFromIndex(target.index, target.list);
   }, [emblaApi, emAltaMode, applyDisplayFilters, loadMonth, updateTitleFromIndex]);
+
+  useEffect(() => {
+    if (!emblaApi || emAltaMode || !hasCompletedInitialLoad || initialRepositionDone.current) return;
+    initialRepositionDone.current = true;
+    void scrollToNextFilteredRelease();
+  }, [emblaApi, emAltaMode, hasCompletedInitialLoad, scrollToNextFilteredRelease]);
 
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isFetching) return;

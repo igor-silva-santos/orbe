@@ -36,6 +36,15 @@ export type SteamFeaturedItem = {
   originalPriceCents?: number;
 };
 
+/** Teto conservador para preço Steam em centavos BRL (R$ 5.000) */
+export const MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS = 500_000;
+
+export function isPlausibleBrlSteamPriceCents(cents: number | null | undefined): boolean {
+  if (cents == null || cents < 0) return false;
+  if (cents === 0) return true;
+  return cents <= MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS;
+}
+
 /** Extrai Steam App ID de URLs da loja */
 export function extractSteamAppId(url: string): number | null {
   const match = url.match(/steampowered\.com\/app\/(\d+)/i);
@@ -79,7 +88,9 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
 /** Jogos em promoção e destaques da loja Steam (sem chave) */
 export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
   try {
-    const response = await steamStoreApi.get('/featuredcategories/');
+    const response = await steamStoreApi.get('/featuredcategories/', {
+      params: { cc: 'br', l: 'portuguese' },
+    });
     const specials = response.data?.specials?.items ?? [];
     const dailyDeals = response.data?.daily_deal?.items ?? [];
     const topSellers = response.data?.top_sellers?.items ?? [];
@@ -92,16 +103,21 @@ export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
       if (!appId || seen.has(appId)) continue;
       seen.add(appId);
 
-      const discount = item.discount_percent ?? item.discount_percent;
+      const discount = item.discount_percent;
       const finalPrice = item.final_price ?? item.final;
       const originalPrice = item.original_price ?? item.initial;
+      const currency = String(item.currency ?? 'BRL').toUpperCase();
 
       items.push({
         appId,
         name: item.name ?? `Steam App ${appId}`,
         discountPercent: discount,
-        priceCents: finalPrice,
-        originalPriceCents: originalPrice,
+        priceCents:
+          currency === 'BRL' && isPlausibleBrlSteamPriceCents(finalPrice) ? finalPrice : undefined,
+        originalPriceCents:
+          currency === 'BRL' && isPlausibleBrlSteamPriceCents(originalPrice)
+            ? originalPrice
+            : undefined,
       });
     }
 
