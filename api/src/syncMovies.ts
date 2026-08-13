@@ -12,7 +12,7 @@ import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTran
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
-import { buildTmdbGenreCreates, dedupeBy } from './syncUtils';
+import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
 import { buildStreamingProvidersCreate, parseFilmeTmdbDisponibilidade, refreshFilmesWithIncompleteAvailability } from './filmeAvailability';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -425,7 +425,8 @@ async function processMovieBatch(
         } : undefined
       };
 
-      const genreCreates = await buildTmdbGenreCreates(prisma.genero, movieDetails.genres);
+      const generoIds = await resolveTmdbGeneroIds(prisma.genero, movieDetails.genres);
+      const genreCreates = generoIds.map((generoId) => ({ genero: { connect: { id: generoId } } }));
 
       const relationalData = {
         genres: {
@@ -457,19 +458,31 @@ async function processMovieBatch(
       const existingFilme = await prisma.filme.findUnique({ where: { tmdbId: id }, select: { id: true } });
 
       if (existingFilme) {
-        await prisma.filme.update({
-          where: { tmdbId: id },
-          data: {
-            ...scalarData,
-            genres: { deleteMany: {}, create: relationalData.genres.create },
-            companies: { deleteMany: {}, create: relationalData.companies.create },
-            countries: { deleteMany: {}, create: relationalData.countries.create },
-            languages: { deleteMany: {}, create: relationalData.languages.create },
-            cast: { deleteMany: {}, create: relationalData.cast.create },
-            crew: { deleteMany: {}, create: relationalData.crew.create },
-            videos: { deleteMany: {}, create: relationalData.videos.create },
-            streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
-          },
+        // Gêneros fora do nested deleteMany+create: o Prisma pode recriar FilmeGenero
+        // antes do delete efetivo e estourar unique (filmeId, generoId).
+        await prisma.$transaction(async (tx) => {
+          await tx.filmeGenero.deleteMany({ where: { filmeId: existingFilme.id } });
+
+          await tx.filme.update({
+            where: { id: existingFilme.id },
+            data: {
+              ...scalarData,
+              companies: { deleteMany: {}, create: relationalData.companies.create },
+              countries: { deleteMany: {}, create: relationalData.countries.create },
+              languages: { deleteMany: {}, create: relationalData.languages.create },
+              cast: { deleteMany: {}, create: relationalData.cast.create },
+              crew: { deleteMany: {}, create: relationalData.crew.create },
+              videos: { deleteMany: {}, create: relationalData.videos.create },
+              streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
+            },
+          });
+
+          if (generoIds.length > 0) {
+            await tx.filmeGenero.createMany({
+              data: generoIds.map((generoId) => ({ filmeId: existingFilme.id, generoId })),
+              skipDuplicates: true,
+            });
+          }
         });
       } else {
         await prisma.filme.create({
