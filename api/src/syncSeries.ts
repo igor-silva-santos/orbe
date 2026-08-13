@@ -9,7 +9,7 @@ import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
-import { dedupeBy } from './syncUtils';
+import { buildTmdbGenreCreates, dedupeBy } from './syncUtils';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -220,9 +220,11 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
         tagline: serieDetails.tagline,
       };
 
+      const genreCreates = await buildTmdbGenreCreates(prisma.genero, serieDetails.genres);
+
       const relationalData = {
         genres: {
-          create: dedupeBy(serieDetails.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
+          create: genreCreates,
         },
         networks: {
           create: dedupeBy(serieDetails.networks, (network: any) => network.id).map((network: any) => ({ network: { connectOrCreate: { where: { tmdbId: network.id }, create: { tmdbId: network.id, name: network.name, logoPath: network.logo_path } } } }))

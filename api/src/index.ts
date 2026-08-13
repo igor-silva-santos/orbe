@@ -301,6 +301,7 @@ app.use((err: unknown, req: express.Request, res: express.Response, next: expres
 });
 
 import { runDetetive } from './detetive';
+import { warmUpDealsCache } from './deals/dealsService';
 import cron from 'node-cron';
 import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 import { refreshStaleSteamPrices } from './syncSteam';
@@ -309,6 +310,21 @@ import { refreshStaleSteamPrices } from './syncSteam';
 cron.schedule('0 3 * * *', () => {
   logger.info('Executando o Detetive Digital agendado...');
   runDetetive();
+}, { timezone: 'America/Sao_Paulo' });
+
+// Deals: verifica Epic/GamerPower/CheapShark a cada 10 min e atualiza Redis só se o conteúdo mudou
+cron.schedule('*/10 * * * *', async () => {
+  logger.info('[deals-cache] Warm-up agendado...');
+  try {
+    const result = await warmUpDealsCache();
+    if (result.updated) {
+      logger.info('[deals-cache] Warm-up: conteúdo atualizado no Redis.');
+    } else if (result.unchanged) {
+      logger.info('[deals-cache] Warm-up: sem mudanças (TTL renovado).');
+    }
+  } catch (error) {
+    logger.error('[deals-cache] Warm-up falhou:', error);
+  }
 }, { timezone: 'America/Sao_Paulo' });
 
 // Refresh diário de preços Steam (jogos com steamAppId e sync >24h), horário de São Paulo
@@ -335,6 +351,11 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, async () => {
   logger.info(`Servidor rodando na porta ${PORT}`);
   await checkInterruptedSyncOnStartup(prisma);
+  void warmUpDealsCache().then((result) => {
+    if (result.updated) {
+      logger.info('[deals-cache] Cache pré-aquecido no boot.');
+    }
+  });
 });
 
 // Desligamento gracioso: o Render manda SIGTERM ao reiniciar/redeployar o serviço. Sem isso,

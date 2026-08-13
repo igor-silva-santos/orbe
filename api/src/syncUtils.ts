@@ -6,16 +6,75 @@
  */
 export function dedupeBy<T>(items: T[] | undefined | null, keyFn: (item: T) => string | number | undefined | null): T[] {
   if (!items) return [];
-  const seen = new Set<string | number>();
+  const seen = new Set<string>();
   const result: T[] = [];
   for (const item of items) {
     const key = keyFn(item);
     if (key === undefined || key === null) continue;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const normalizedKey = String(key);
+    if (seen.has(normalizedKey)) continue;
+    seen.add(normalizedKey);
     result.push(item);
   }
   return result;
+}
+
+type TmdbNamedEntity = { id: number; name: string };
+
+type GeneroDelegate = {
+  findUnique: (args: { where: { tmdbId: number } }) => Promise<{ id: number; name: string } | null>;
+  findFirst: (args: { where: { name: string } }) => Promise<{ id: number } | null>;
+  create: (args: { data: { tmdbId: number; name: string } }) => Promise<{ id: number }>;
+  update: (args: { where: { id: number }; data: { name: string } }) => Promise<unknown>;
+};
+
+/**
+ * Garante que um gênero TMDB exista e devolve o id interno. Reutiliza por tmdbId ou name
+ * para evitar P2002 e, no nested create de FilmeGenero/SerieGenero, duplicar o mesmo generoId.
+ */
+export async function ensureTmdbGenero(delegate: GeneroDelegate, genre: TmdbNamedEntity): Promise<number> {
+  const byTmdb = await delegate.findUnique({ where: { tmdbId: genre.id } });
+  if (byTmdb) {
+    if (byTmdb.name !== genre.name) {
+      await delegate.update({ where: { id: byTmdb.id }, data: { name: genre.name } });
+    }
+    return byTmdb.id;
+  }
+
+  const byName = await delegate.findFirst({ where: { name: genre.name } });
+  if (byName) return byName.id;
+
+  try {
+    const created = await delegate.create({ data: { tmdbId: genre.id, name: genre.name } });
+    return created.id;
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      const fallback =
+        (await delegate.findUnique({ where: { tmdbId: genre.id } })) ??
+        (await delegate.findFirst({ where: { name: genre.name } }));
+      if (fallback) return fallback.id;
+    }
+    throw error;
+  }
+}
+
+/** Monta creates de junção com `connect` por id interno, sem duplicar generoId no mesmo filme/série. */
+export async function buildTmdbGenreCreates(
+  delegate: GeneroDelegate,
+  genres: TmdbNamedEntity[] | undefined | null,
+): Promise<{ genero: { connect: { id: number } } }[]> {
+  const unique = dedupeBy(genres, (genre) => genre.id);
+  const seenGeneroIds = new Set<number>();
+  const create: { genero: { connect: { id: number } } }[] = [];
+
+  for (const genre of unique) {
+    const generoId = await ensureTmdbGenero(delegate, genre);
+    if (seenGeneroIds.has(generoId)) continue;
+    seenGeneroIds.add(generoId);
+    create.push({ genero: { connect: { id: generoId } } });
+  }
+
+  return create;
 }
 
 type IgdbNamedEntity = { id: number; name: string; slug?: string };

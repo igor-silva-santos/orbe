@@ -26,7 +26,7 @@ import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
 import { broadcast } from './websocket';
 import adminMiddleware from './adminMiddleware';
-import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer } from './logger';
+import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer, getDetetiveLogBuffer } from './logger';
 
 const router = Router();
 
@@ -99,19 +99,35 @@ router.get(
   },
   (req, res) => {
     const filter = String(req.query.filter || 'sync');
-    const content = filter === 'all' ? getLogBuffer() : getSyncLogBuffer();
+    const content =
+      filter === 'all'
+        ? getLogBuffer()
+        : filter === 'detetive'
+          ? getDetetiveLogBuffer()
+          : getSyncLogBuffer();
     const meta = getLogBufferMeta();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `orbe-${filter === 'all' ? 'app' : 'sync'}-${stamp}.log`;
+    const filename = `orbe-${filter === 'all' ? 'app' : filter}-${stamp}.log`;
 
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('X-Log-Lines', String(filter === 'all' ? meta.totalLines : meta.syncLines));
+    res.setHeader(
+      'X-Log-Lines',
+      String(
+        filter === 'all'
+          ? meta.totalLines
+          : filter === 'detetive'
+            ? meta.detetiveLines
+            : meta.syncLines,
+      ),
+    );
 
     if (!content) {
-      return res.send(
-        '(nenhum log de sync em memória ainda — inicie uma sincronização e tente novamente)\n'
-      );
+      const hint =
+        filter === 'detetive'
+          ? '(nenhum log do Detetive em memória — dispare POST /api/run-detetive e tente novamente)\n'
+          : '(nenhum log de sync em memória ainda — inicie uma sincronização e tente novamente)\n';
+      return res.send(hint);
     }
 
     res.send(content);
@@ -256,8 +272,12 @@ router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
 
   logger.info(`Sincronização completa iniciada: ${startDate} → ${endDate}`);
   res.status(202).json({
-    message: 'Sincronização completa iniciada. Monitore GET /api/sync/status (progresso ~2min nos logs).',
+    message:
+      'Sincronização completa iniciada (filmes → detetive → séries → animes → jogos → premiações). ' +
+      'Logs: GET /api/sync/logs?filter=sync (detetive: ?filter=detetive).',
     statusUrl: '/api/sync/status',
+    logsUrl: '/api/sync/logs?filter=sync',
+    detetiveLogsUrl: '/api/sync/logs?filter=detetive',
   });
 
   try {
@@ -442,7 +462,11 @@ router.post('/run-sync-awards', syncRateLimiter, protectSync, async (_req, res) 
 router.post('/run-detetive', syncRateLimiter, protectSync, async (req, res) => {
   const fullScan = req.query.fullScan === 'true';
   logger.info(`Detetive Digital iniciado (manual${fullScan ? ', varredura completa' : ''}).`);
-  res.status(202).json({ message: 'Detetive Digital iniciado. Verifique os logs.' });
+  res.status(202).json({
+    message: 'Detetive Digital iniciado. Acompanhe os logs em GET /api/sync/logs?filter=detetive',
+    logsUrl: '/api/sync/logs?filter=detetive',
+    fullScan,
+  });
 
   try {
     await runDetetive(fullScan);
