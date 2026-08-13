@@ -458,32 +458,44 @@ async function processMovieBatch(
       const existingFilme = await prisma.filme.findUnique({ where: { tmdbId: id }, select: { id: true } });
 
       if (existingFilme) {
-        // Gêneros fora do nested deleteMany+create: o Prisma pode recriar FilmeGenero
-        // antes do delete efetivo e estourar unique (filmeId, generoId).
+        const filmeId = existingFilme.id;
+        // Deleta junções antes do update — nested deleteMany+create no Prisma pode
+        // recriar FilmeCompany/FilmeGenero antes do delete e estourar unique constraint.
         await prisma.$transaction(async (tx) => {
-          await tx.filmeGenero.deleteMany({ where: { filmeId: existingFilme.id } });
+          await tx.filmeGenero.deleteMany({ where: { filmeId } });
+          await tx.filmeCompany.deleteMany({ where: { filmeId } });
+          await tx.filmeCountry.deleteMany({ where: { filmeId } });
+          await tx.filmeLanguage.deleteMany({ where: { filmeId } });
+          await tx.filmeCast.deleteMany({ where: { filmeId } });
+          await tx.filmeCrew.deleteMany({ where: { filmeId } });
+          await tx.video.deleteMany({ where: { filmeId } });
+          await tx.filmeOnStreamingProvider.deleteMany({ where: { filmeId } });
 
           await tx.filme.update({
-            where: { id: existingFilme.id },
-            data: {
-              ...scalarData,
-              companies: { deleteMany: {}, create: relationalData.companies.create },
-              countries: { deleteMany: {}, create: relationalData.countries.create },
-              languages: { deleteMany: {}, create: relationalData.languages.create },
-              cast: { deleteMany: {}, create: relationalData.cast.create },
-              crew: { deleteMany: {}, create: relationalData.crew.create },
-              videos: { deleteMany: {}, create: relationalData.videos.create },
-              streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
-            },
+            where: { id: filmeId },
+            data: scalarData,
           });
+        }, { maxWait: 15000, timeout: 120000 });
 
-          if (generoIds.length > 0) {
-            await tx.filmeGenero.createMany({
-              data: generoIds.map((generoId) => ({ filmeId: existingFilme.id, generoId })),
-              skipDuplicates: true,
-            });
-          }
+        await prisma.filme.update({
+          where: { id: filmeId },
+          data: {
+            companies: relationalData.companies,
+            countries: relationalData.countries,
+            languages: relationalData.languages,
+            cast: relationalData.cast,
+            crew: relationalData.crew,
+            videos: relationalData.videos,
+            streamingProviders: relationalData.streamingProviders,
+          },
         });
+
+        if (generoIds.length > 0) {
+          await prisma.filmeGenero.createMany({
+            data: generoIds.map((generoId) => ({ filmeId, generoId })),
+            skipDuplicates: true,
+          });
+        }
       } else {
         await prisma.filme.create({
           data: { ...scalarData, ...relationalData },
