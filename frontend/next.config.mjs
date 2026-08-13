@@ -44,6 +44,30 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn1.epicgames.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.gamerpower.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'shared.fastly.steamstatic.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.cloudflare.steamstatic.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.playstation.com',
         port: '',
         pathname: '/**',
