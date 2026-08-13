@@ -229,7 +229,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       fetchingMonths.current.add(key);
       beginFetch();
       try {
-        const response = await fetch(`${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`);
+        const response = await fetch(
+          `${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`,
+          { cache: 'no-store' },
+        );
         if (!response.ok) {
           console.error(`Error fetching ${mediaType} for ${key}: HTTP ${response.status}`);
           return null;
@@ -239,7 +242,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           console.error(`Invalid response for ${mediaType} ${key}`);
           return null;
         }
-        loadedMonths.current.add(key);
+        // Só marca como carregado se trouxe itens — evita travar após cache vazio antigo
+        if (data.length > 0) {
+          loadedMonths.current.add(key);
+        }
         return data;
       } catch (error) {
         console.error(`Error fetching ${mediaType} for ${key}:`, error);
