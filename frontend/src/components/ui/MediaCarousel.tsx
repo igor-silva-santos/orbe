@@ -229,7 +229,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       beginFetch();
       try {
         const response = await fetch(`${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`);
+        if (!response.ok) {
+          console.error(`Error fetching ${mediaType} for ${key}: HTTP ${response.status}`);
+          return null;
+        }
         const data: Midia[] = await response.json();
+        if (!Array.isArray(data)) {
+          console.error(`Invalid response for ${mediaType} ${key}`);
+          return null;
+        }
         loadedMonths.current.add(key);
         return data;
       } catch (error) {
@@ -431,8 +439,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   useEffect(() => {
     if (!emblaApi || emAltaMode || !hasCompletedInitialLoad || initialRepositionDone.current) return;
     initialRepositionDone.current = true;
+    const list = applyDisplayFilters(mediaItemsRef.current);
+    const targetIndex = calculateCarouselStartIndex(list);
+    if (list[targetIndex]) {
+      lastTitleMonthKey.current = '';
+      emblaApi.reInit();
+      emblaApi.scrollTo(targetIndex, false);
+      previousSelectedIndex.current = targetIndex;
+      updateTitleFromIndex(targetIndex, list);
+      void prefetchAdjacentMonthsForIndex(targetIndex, list);
+      return;
+    }
     void scrollToNextFilteredRelease();
-  }, [emblaApi, emAltaMode, hasCompletedInitialLoad, scrollToNextFilteredRelease]);
+  }, [emblaApi, emAltaMode, hasCompletedInitialLoad, applyDisplayFilters, updateTitleFromIndex, prefetchAdjacentMonthsForIndex, scrollToNextFilteredRelease]);
 
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isFetching) return;

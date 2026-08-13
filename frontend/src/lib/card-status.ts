@@ -15,17 +15,17 @@ export type CardStatus = {
 
 const STATUS_STYLES: Record<CardStatusVariant, string> = {
   prevenda:
-    'border-amber-500/60 bg-amber-500/15 text-amber-800 dark:text-amber-200',
+    'border-amber-500/70 bg-amber-500/90 text-white shadow-sm',
   em_cartaz:
-    'border-emerald-500/60 bg-emerald-500/15 text-emerald-800 dark:text-emerald-200',
+    'border-emerald-600 bg-emerald-600 text-white shadow-md',
   streaming:
-    'border-violet-500/60 bg-violet-500/15 text-violet-800 dark:text-violet-200',
+    'border-violet-600 bg-violet-700 text-white shadow-md',
   em_breve:
-    'border-slate-400/50 bg-slate-500/10 text-slate-600 dark:text-slate-300',
+    'border-slate-500/60 bg-slate-600/85 text-white shadow-sm',
   em_exibicao:
-    'border-sky-500/60 bg-sky-500/15 text-sky-800 dark:text-sky-200',
+    'border-sky-500/70 bg-sky-600/90 text-white shadow-sm',
   novo_ep:
-    'border-orange-500/60 bg-orange-500/15 text-orange-800 dark:text-orange-200',
+    'border-orange-500/70 bg-orange-600/90 text-white shadow-sm',
 };
 
 export function cardStatusClassName(variant: CardStatusVariant): string {
@@ -40,7 +40,12 @@ function parseReleaseDate(midia: Midia): Date | null {
       const d = raw as { year: number; month: number; day: number };
       return new Date(d.year, d.month - 1, d.day);
     }
-    return new Date(raw as string);
+    const str = raw as string;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const [year, month, day] = str.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+    return new Date(str);
   } catch {
     return null;
   }

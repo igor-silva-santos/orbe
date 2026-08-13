@@ -43,9 +43,10 @@ export const getDistinctYears = async (table: 'Filme' | 'Serie' | 'Jogo', column
   return rows.map((r) => r.year);
 };
 
+/** Limites do mês em UTC — alinha com datas YYYY-MM-DD armazenadas sem deslocar o mês no servidor */
 export const getMonthDateRange = (year: number, month: number) => {
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+  const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
   return { startDate, endDate };
 };
 

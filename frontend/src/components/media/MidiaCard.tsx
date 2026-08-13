@@ -159,7 +159,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const filme = type === 'filme' ? (midia as Filme) : null;
   const cardStatus = resolveCardStatus(type, midia, { isNewAnimeEpisode: isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
-  const ingressoLink = filme?.ingresso_link ?? null;
   const hasStatusBadge = Boolean(cardStatus);
   const showListIndicator =
     isAuthenticated &&
@@ -234,7 +233,13 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   fallbackLabel="Sem imagem"
                 />
                 {cardStatus && (
-                  <div className="absolute top-2 right-2 z-10">
+                  <div
+                    className={`absolute z-10 ${
+                      cardStatus.variant === 'em_cartaz'
+                        ? 'bottom-0 left-0 right-0 flex justify-center'
+                        : 'top-2 right-2'
+                    }`}
+                  >
                     <CardStatusBadge status={cardStatus} />
                   </div>
                 )}
@@ -338,24 +343,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 </div>
                 {/* Idem: altura fixa mesmo sem plataformas/providers, pra não desalinhar os cards vizinhos. */}
                 <div className="h-6 flex flex-wrap items-center gap-1.5 shrink-0">
-                  {ingressoLink && (
-                    <a
-                      href={ingressoLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      title="Ingressos no Ingresso.com"
-                      aria-label="Ingressos no Ingresso.com"
-                    >
-                      <PlatformIcon
-                        platform="ingresso"
-                        size={PLATFORM_ICON_SIZE_CARD}
-                        iconOnly
-                        variant="circle"
-                        className="h-6 w-6"
-                      />
-                    </a>
-                  )}
                   {platformItems.map((p) => (
                     <PlatformIcon
                       key={p.name}
@@ -368,7 +355,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       title={p.name}
                     />
                   ))}
-                  {platformItems.length === 0 && !ingressoLink && cardStatus?.variant === 'em_breve' && (
+                  {platformItems.length === 0 && cardStatus?.variant === 'em_breve' && (
                     <span className="inline-flex h-6 items-center rounded-full border border-border bg-muted/50 px-2 text-[9px] font-semibold text-muted-foreground">
                       Em breve
                     </span>
