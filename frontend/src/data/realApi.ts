@@ -196,6 +196,10 @@ export const realApi = {
   getEpicFreeGames: orbeNerdApi.getEpicFreeGames,
   getGamerPowerGiveaways: orbeNerdApi.getGamerPowerGiveaways,
   getCheapSharkDeals: orbeNerdApi.getCheapSharkDeals,
+  listSagas: orbeNerdApi.listSagas,
+  getSaga: orbeNerdApi.getSaga,
+  getContinuacoesFilme: orbeNerdApi.getContinuacoesFilme,
+  getContinuacoesSerie: orbeNerdApi.getContinuacoesSerie,
 };
 
 export default realApi;

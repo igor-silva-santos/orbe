@@ -13,6 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hoje',
     '/jogos-em-alta',
     '/promocoes',
+    '/continuacoes',
+    '/eventos',
     '/login',
     '/termos',
     '/privacidade',

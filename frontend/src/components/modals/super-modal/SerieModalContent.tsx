@@ -8,6 +8,8 @@ import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -49,6 +51,14 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           <SerieInfoBlock serie={serie} />
         </div>
       </div>
+
+      <Tabs defaultValue="detalhes" className="w-full">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
+          <TabsTrigger value="continuacao">Continuação</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="detalhes" className="space-y-6 mt-4">
 
       {/* Sinopse */}
       {serie.sinopse && (
@@ -159,6 +169,12 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           </div>
         </section>
       )}
+        </TabsContent>
+
+        <TabsContent value="continuacao" className="mt-4">
+          <ContinuacaoTabContent tipo="serie" tmdbId={serie.id} showSagaLink={false} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

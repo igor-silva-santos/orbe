@@ -368,6 +368,12 @@ export const orbeNerdApi = {
     const suffix = query.toString() ? `?${query.toString()}` : '';
     return apiClient.get(`/deals/cheapshark${suffix}`);
   },
+
+  // Trilogias, sagas e continuações
+  listSagas: async () => apiClient.get('/continuacoes/sagas'),
+  getSaga: async (collectionId: number) => apiClient.get(`/continuacoes/sagas/${collectionId}`),
+  getContinuacoesFilme: async (tmdbId: number) => apiClient.get(`/continuacoes/filmes/${tmdbId}`),
+  getContinuacoesSerie: async (tmdbId: number) => apiClient.get(`/continuacoes/series/${tmdbId}`),
 };
 
 export default orbeNerdApi;

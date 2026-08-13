@@ -12,10 +12,13 @@ const Footer: React.FC = () => {
       { label: 'Séries', href: '/series' },
       { label: 'Animes', href: '/animes' },
       { label: 'Jogos', href: '/jogos' },
-      { label: 'Premiações', href: '/premios' },
-      { label: 'Eventos', href: '/eventos' },
+      { label: 'Continuações', href: '/continuacoes' },
+      { label: 'Promoções', href: '/promocoes' },
       { label: 'Hoje', href: '/hoje' },
-      { label: 'Apoie-nos', href: '/apoie' }
+      { label: 'Eventos', href: '/eventos' },
+      { label: 'Jogos em Alta', href: '/jogos-em-alta' },
+      { label: 'Premiações', href: '/premios' },
+      { label: 'Apoie-nos', href: '/apoie' },
     ],
     suporte: [
       { label: 'Central de Ajuda', href: '/ajuda' },
