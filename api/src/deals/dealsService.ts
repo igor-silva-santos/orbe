@@ -1,7 +1,30 @@
+import crypto from 'crypto';
+import { randomUUID } from 'crypto';
+import { getRedisClient } from '../redisClient';
+import { logger } from '../logger';
 import { fetchEpicFreeGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDeals } from './cheapsharkClient';
 import type { DealsOverview, UnifiedDeal } from './types';
+
+/** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se cron falhar). */
+export const DEALS_HARD_TTL_SECONDS = 60 * 30;
+/** Após este intervalo, requests disparam revalidação em background (usuário não espera). */
+export const DEALS_SOFT_TTL_SECONDS = 60 * 10;
+const DEALS_REDIS_KEY = 'deals:overview:v1';
+const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v1';
+const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v1';
+const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
+const DEALS_LOCK_TTL_SECONDS = 45;
+
+type CachedDealsEntry = {
+  overview: DealsOverview;
+  fingerprint: string;
+  fetchedAtMs: number;
+};
+
+let memoryCache: CachedDealsEntry | null = null;
+let backgroundRefreshInFlight = false;
 
 function dedupeDeals(deals: UnifiedDeal[]): UnifiedDeal[] {
   const seen = new Set<string>();
@@ -24,7 +47,8 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
   }
 }
 
-export async function fetchDealsOverview(): Promise<DealsOverview> {
+/** Busca sempre nas APIs externas — uso interno do serviço de cache. */
+export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const [epic, gamerpower, cheapsharkFree, cheapsharkSales] = await Promise.all([
     safeFetch(fetchEpicFreeGames),
     safeFetch(() => fetchGamerPowerGiveaways()),
@@ -62,12 +86,276 @@ export async function fetchDealsOverview(): Promise<DealsOverview> {
   };
 }
 
+/** Fingerprint estável do conteúdo — detecta mudança real sem comparar JSON inteiro. */
+export function fingerprintDealsOverview(overview: DealsOverview): string {
+  const snapshot = (deals: UnifiedDeal[]) =>
+    deals
+      .map((d) =>
+        [
+          d.id,
+          d.endsAt ?? '',
+          d.salePrice ?? '',
+          d.discountPercent ?? '',
+          d.status ?? '',
+        ].join('|'),
+      )
+      .sort()
+      .join(';');
+
+  const payload = [
+    snapshot(overview.gratis),
+    snapshot(overview.promocoes),
+    overview.sources.epic.ok ? '1' : '0',
+    overview.sources.gamerpower.ok ? '1' : '0',
+    overview.sources.cheapshark.ok ? '1' : '0',
+  ].join('::');
+
+  return crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16);
+}
+
+async function readRedisCache(): Promise<CachedDealsEntry | null> {
+  const redis = getRedisClient();
+  if (!redis) return null;
+
+  try {
+    const [json, fingerprint, fetchedAt] = await redis.mget(
+      DEALS_REDIS_KEY,
+      DEALS_FINGERPRINT_KEY,
+      DEALS_FETCHED_AT_KEY,
+    );
+    if (!json || !fingerprint || !fetchedAt) return null;
+
+    const overview = JSON.parse(json) as DealsOverview;
+    const fetchedAtMs = Date.parse(fetchedAt);
+    if (!Number.isFinite(fetchedAtMs)) return null;
+
+    return { overview, fingerprint, fetchedAtMs };
+  } catch (error: any) {
+    logger.warn(`[deals-cache] Erro ao ler Redis: ${error.message}`);
+    return null;
+  }
+}
+
+async function writeRedisCache(entry: CachedDealsEntry): Promise<void> {
+  const redis = getRedisClient();
+  if (!redis) return;
+
+  const fetchedAtIso = new Date(entry.fetchedAtMs).toISOString();
+  const json = JSON.stringify(entry.overview);
+
+  await redis
+    .multi()
+    .set(DEALS_REDIS_KEY, json, 'EX', DEALS_HARD_TTL_SECONDS)
+    .set(DEALS_FINGERPRINT_KEY, entry.fingerprint, 'EX', DEALS_HARD_TTL_SECONDS)
+    .set(DEALS_FETCHED_AT_KEY, fetchedAtIso, 'EX', DEALS_HARD_TTL_SECONDS)
+    .exec();
+
+  memoryCache = entry;
+}
+
+async function acquireRefreshLock(): Promise<string | null> {
+  const redis = getRedisClient();
+  if (!redis) return randomUUID();
+
+  const token = randomUUID();
+  const got = await redis.set(DEALS_LOCK_KEY, token, 'EX', DEALS_LOCK_TTL_SECONDS, 'NX');
+  return got === 'OK' ? token : null;
+}
+
+async function releaseRefreshLock(token: string): Promise<void> {
+  const redis = getRedisClient();
+  if (!redis) return;
+
+  const script = `
+    if redis.call("GET", KEYS[1]) == ARGV[1] then
+      return redis.call("DEL", KEYS[1])
+    else
+      return 0
+    end
+  `;
+  await redis.eval(script, 1, DEALS_LOCK_KEY, token);
+}
+
+export type DealsCacheRefreshResult = {
+  updated: boolean;
+  unchanged: boolean;
+  fingerprint?: string;
+  previousFingerprint?: string;
+  error?: string;
+};
+
+/**
+ * Busca nas APIs, compara fingerprint e grava no Redis só se o conteúdo mudou
+ * (ou se não há cache). Retorna imediatamente se outro processo já está renovando.
+ */
+export async function refreshDealsCache(options?: {
+  reason?: string;
+}): Promise<DealsCacheRefreshResult> {
+  const lockToken = await acquireRefreshLock();
+  if (!lockToken) {
+    return { updated: false, unchanged: true };
+  }
+
+  try {
+    const previous = (await readRedisCache()) ?? memoryCache;
+    const fresh = await fetchDealsOverviewFresh();
+    const fingerprint = fingerprintDealsOverview(fresh);
+
+    if (previous && previous.fingerprint === fingerprint) {
+      const entry: CachedDealsEntry = {
+        overview: { ...fresh, fetchedAt: new Date(previous.fetchedAtMs).toISOString() },
+        fingerprint,
+        fetchedAtMs: previous.fetchedAtMs,
+      };
+      await writeRedisCache(entry);
+      logger.info(
+        `[deals-cache] Sem mudança (${options?.reason ?? 'refresh'}) — TTL renovado.`,
+      );
+      return {
+        updated: false,
+        unchanged: true,
+        fingerprint,
+        previousFingerprint: previous.fingerprint,
+      };
+    }
+
+    const entry: CachedDealsEntry = {
+      overview: fresh,
+      fingerprint,
+      fetchedAtMs: Date.now(),
+    };
+    await writeRedisCache(entry);
+
+    logger.info(
+      `[deals-cache] Cache atualizado (${options?.reason ?? 'refresh'}) — ` +
+        `grátis: ${fresh.gratis.length}, promoções: ${fresh.promocoes.length}.`,
+    );
+
+    return {
+      updated: true,
+      unchanged: false,
+      fingerprint,
+      previousFingerprint: previous?.fingerprint,
+    };
+  } catch (error: any) {
+    logger.error(`[deals-cache] Falha ao renovar: ${error.message}`);
+    return { updated: false, unchanged: false, error: error.message };
+  } finally {
+    await releaseRefreshLock(lockToken);
+  }
+}
+
+function triggerBackgroundRefresh(reason: string): void {
+  if (backgroundRefreshInFlight) return;
+  backgroundRefreshInFlight = true;
+
+  void refreshDealsCache({ reason: `background:${reason}` })
+    .catch((error) => {
+      logger.warn(`[deals-cache] Background refresh falhou: ${error?.message ?? error}`);
+    })
+    .finally(() => {
+      backgroundRefreshInFlight = false;
+    });
+}
+
+function getCachedEntry(): CachedDealsEntry | null {
+  if (memoryCache) return memoryCache;
+  return null;
+}
+
+async function resolveCachedEntry(): Promise<CachedDealsEntry | null> {
+  if (memoryCache) {
+    const ageMs = Date.now() - memoryCache.fetchedAtMs;
+    if (ageMs < DEALS_HARD_TTL_SECONDS * 1000) return memoryCache;
+  }
+
+  const redisEntry = await readRedisCache();
+  if (redisEntry) {
+    memoryCache = redisEntry;
+    return redisEntry;
+  }
+
+  return null;
+}
+
+export type DealsOverviewMeta = {
+  cacheAgeSeconds: number;
+  fromCache: boolean;
+  stale: boolean;
+};
+
+/**
+ * Ponto único de leitura para todas as rotas /deals.
+ * - Cache hit: resposta imediata, zero chamada externa.
+ * - Após soft TTL: dispara refresh em background; se houver mudança, próximo hit já vê o novo.
+ * - Após hard TTL ou sem cache: refresh síncrono.
+ */
+export async function getDealsOverview(): Promise<DealsOverview & { _meta?: DealsOverviewMeta }> {
+  const cached = await resolveCachedEntry();
+  const now = Date.now();
+
+  if (cached) {
+    const ageSeconds = Math.floor((now - cached.fetchedAtMs) / 1000);
+
+    if (ageSeconds >= DEALS_SOFT_TTL_SECONDS) {
+      triggerBackgroundRefresh('soft-ttl');
+    }
+
+    if (ageSeconds < DEALS_HARD_TTL_SECONDS) {
+      return {
+        ...cached.overview,
+        _meta: { cacheAgeSeconds: ageSeconds, fromCache: true, stale: ageSeconds >= DEALS_SOFT_TTL_SECONDS },
+      };
+    }
+  }
+
+  const result = await refreshDealsCache({ reason: cached ? 'hard-ttl' : 'cold-start' });
+  if (result.error && cached) {
+    logger.warn('[deals-cache] Refresh falhou — servindo cache expirado.');
+    return {
+      ...cached.overview,
+      _meta: {
+        cacheAgeSeconds: Math.floor((now - cached.fetchedAtMs) / 1000),
+        fromCache: true,
+        stale: true,
+      },
+    };
+  }
+
+  const refreshed = (await resolveCachedEntry()) ?? getCachedEntry();
+  if (refreshed) {
+    return {
+      ...refreshed.overview,
+      _meta: {
+        cacheAgeSeconds: Math.floor((Date.now() - refreshed.fetchedAtMs) / 1000),
+        fromCache: !result.updated,
+        stale: false,
+      },
+    };
+  }
+
+  const fresh = await fetchDealsOverviewFresh();
+  return { ...fresh, _meta: { cacheAgeSeconds: 0, fromCache: false, stale: false } };
+}
+
+/** Warm-up do cron — verifica mudanças sem bloquear usuários. */
+export async function warmUpDealsCache(): Promise<DealsCacheRefreshResult> {
+  return refreshDealsCache({ reason: 'cron' });
+}
+
 export async function fetchFreeDeals(): Promise<UnifiedDeal[]> {
-  const overview = await fetchDealsOverview();
+  const overview = await getDealsOverview();
   return overview.gratis;
 }
 
 export async function fetchSaleDeals(): Promise<UnifiedDeal[]> {
-  const overview = await fetchDealsOverview();
+  const overview = await getDealsOverview();
   return overview.promocoes;
+}
+
+/** @deprecated Use getDealsOverview — mantido para compatibilidade interna. */
+export async function fetchDealsOverview(): Promise<DealsOverview> {
+  const { _meta, ...overview } = await getDealsOverview();
+  void _meta;
+  return overview;
 }
