@@ -1,4 +1,5 @@
 import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
+import type { DealsOverview } from '@/types/deals';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
 
@@ -345,6 +346,27 @@ export const orbeNerdApi = {
   // Contato
   sendContactMessage: async (data: { nome: string; email: string; assunto: string; mensagem: string }) => {
     return apiClient.post('/contato', data);
+  },
+
+  // Promoções e jogos grátis (Epic, GamerPower, CheapShark)
+  getDeals: async (): Promise<DealsOverview> => apiClient.get('/deals'),
+  getFreeDeals: async () => apiClient.get('/deals/gratis'),
+  getSaleDeals: async () => apiClient.get('/deals/promocoes'),
+  getEpicFreeGames: async () => apiClient.get('/deals/epic'),
+  getGamerPowerGiveaways: async (params?: { platform?: string; type?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.platform) query.set('platform', params.platform);
+    if (params?.type) query.set('type', params.type);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiClient.get(`/deals/gamerpower${suffix}`);
+  },
+  getCheapSharkDeals: async (params?: { storeId?: string; freeOnly?: boolean; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.storeId) query.set('storeId', params.storeId);
+    if (params?.freeOnly) query.set('freeOnly', '1');
+    if (params?.limit) query.set('limit', String(params.limit));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiClient.get(`/deals/cheapshark${suffix}`);
   },
 };
 

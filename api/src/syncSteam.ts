@@ -8,6 +8,7 @@ import {
   fetchSteamFeaturedSales,
   fetchSteamMostPlayed,
   fetchSteamCurrentPlayers,
+  isPlausibleBrlSteamPriceCents,
 } from './steamClient';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,13 +52,19 @@ async function enrichJogoWithSteam(
   const details = await fetchSteamAppDetails(appId);
   if (!details) return;
 
+  const priceFromDetails = details.priceCents;
+  const priceFromExtras =
+    extras?.priceCents != null && isPlausibleBrlSteamPriceCents(extras.priceCents)
+      ? extras.priceCents
+      : undefined;
+
   await prisma.jogo.update({
     where: { id: jogoId },
     data: {
       steamAppId: appId,
       steamPlayerCount: extras?.playerCount ?? details.playerCount,
-      steamPriceCents: extras?.priceCents ?? details.priceCents,
-      steamDiscountPercent: extras?.discountPercent ?? details.discountPercent,
+      steamPriceCents: priceFromDetails ?? priceFromExtras,
+      steamDiscountPercent: details.discountPercent ?? null,
       pcRequirements: details.pcRequirements ?? undefined,
       steamSyncedAt: new Date(),
     },
@@ -121,10 +128,7 @@ export async function syncSteamData(prisma: PrismaClient): Promise<{
     }
 
     if (jogo) {
-      await enrichJogoWithSteam(prisma, jogo.id, sale.appId, {
-        priceCents: sale.priceCents,
-        discountPercent: sale.discountPercent,
-      });
+      await enrichJogoWithSteam(prisma, jogo.id, sale.appId);
       salesUpdated++;
     }
     await delay(200);

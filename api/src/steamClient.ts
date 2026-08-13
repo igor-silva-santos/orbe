@@ -36,6 +36,44 @@ export type SteamFeaturedItem = {
   originalPriceCents?: number;
 };
 
+/** Teto conservador para preço Steam em centavos BRL (R$ 5.000) */
+export const MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS = 500_000;
+
+export function isPlausibleBrlSteamPriceCents(cents: number | null | undefined): boolean {
+  if (cents == null || cents < 0) return false;
+  if (cents === 0) return true;
+  return cents <= MAX_PLAUSIBLE_BRL_STEAM_PRICE_CENTS;
+}
+
+export function isPlausibleSteamDiscountPercent(value: number | null | undefined): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+/** Recalcula desconto a partir de preços BRL quando o valor salvo parece inconsistente */
+export function resolveSteamDiscountPercent(
+  discountPercent: number | null | undefined,
+  finalCents?: number | null,
+  initialCents?: number | null,
+): number | null {
+  if (
+    finalCents != null &&
+    initialCents != null &&
+    initialCents > 0 &&
+    finalCents <= initialCents
+  ) {
+    const computed = Math.round(((initialCents - finalCents) / initialCents) * 100);
+    if (isPlausibleSteamDiscountPercent(computed)) {
+      if (
+        !isPlausibleSteamDiscountPercent(discountPercent) ||
+        Math.abs(discountPercent! - computed) > 2
+      ) {
+        return computed;
+      }
+    }
+  }
+  return isPlausibleSteamDiscountPercent(discountPercent) ? discountPercent! : null;
+}
+
 /** Extrai Steam App ID de URLs da loja */
 export function extractSteamAppId(url: string): number | null {
   const match = url.match(/steampowered\.com\/app\/(\d+)/i);
@@ -54,6 +92,12 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
     const data = entry.data;
     const priceOverview = data.price_overview;
     const pcReq = data.pc_requirements;
+    const priceCents = priceOverview?.final ?? (data.is_free ? 0 : undefined);
+    const discountPercent = resolveSteamDiscountPercent(
+      priceOverview?.discount_percent,
+      priceCents,
+      priceOverview?.initial,
+    );
 
     return {
       appId,
@@ -61,8 +105,8 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
       shortDescription: data.short_description,
       headerImage: data.header_image,
       isFree: data.is_free,
-      priceCents: priceOverview?.final ?? (data.is_free ? 0 : undefined),
-      discountPercent: priceOverview?.discount_percent,
+      priceCents,
+      discountPercent: discountPercent ?? undefined,
       pcRequirements: pcReq
         ? {
             minimum: pcReq.minimum,
@@ -79,7 +123,9 @@ export async function fetchSteamAppDetails(appId: number): Promise<SteamAppDetai
 /** Jogos em promoção e destaques da loja Steam (sem chave) */
 export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
   try {
-    const response = await steamStoreApi.get('/featuredcategories/');
+    const response = await steamStoreApi.get('/featuredcategories/', {
+      params: { cc: 'br', l: 'portuguese' },
+    });
     const specials = response.data?.specials?.items ?? [];
     const dailyDeals = response.data?.daily_deal?.items ?? [];
     const topSellers = response.data?.top_sellers?.items ?? [];
@@ -92,16 +138,21 @@ export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
       if (!appId || seen.has(appId)) continue;
       seen.add(appId);
 
-      const discount = item.discount_percent ?? item.discount_percent;
+      const discount = item.discount_percent;
       const finalPrice = item.final_price ?? item.final;
       const originalPrice = item.original_price ?? item.initial;
+      const currency = String(item.currency ?? 'BRL').toUpperCase();
 
       items.push({
         appId,
         name: item.name ?? `Steam App ${appId}`,
-        discountPercent: discount,
-        priceCents: finalPrice,
-        originalPriceCents: originalPrice,
+        discountPercent: isPlausibleSteamDiscountPercent(discount) ? discount : undefined,
+        priceCents:
+          currency === 'BRL' && isPlausibleBrlSteamPriceCents(finalPrice) ? finalPrice : undefined,
+        originalPriceCents:
+          currency === 'BRL' && isPlausibleBrlSteamPriceCents(originalPrice)
+            ? originalPrice
+            : undefined,
       });
     }
 

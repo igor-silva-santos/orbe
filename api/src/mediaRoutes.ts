@@ -3,7 +3,7 @@ import { prisma, tmdb } from './clients';
 import { Prisma } from '@prisma/client';
 import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, mapFilmeToCarouselCard, mapSerieToCarouselCard, mapAnimeToCarouselCard, mapJogoToCarouselCard, mapEventToResponse, normalizeSearchText } from './mappers';
 import { fetchFilmeDetailsLive, fetchSerieDetailsLive, fetchAnimeDetailsLive, fetchJogoDetailsLive } from './externalDetails';
-import { fetchSteamAppDetails } from './steamClient';
+import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents, isPlausibleSteamDiscountPercent } from './steamClient';
 import {
   filmeQualityFilter,
   filmeCarouselQualityFilter,
@@ -121,6 +121,21 @@ const carouselDateOrRecentPast = (
   ],
 });
 
+/** Inclui o mês seguinte no bootstrap — evita carrossel preso no mês atual sem lançamentos futuros */
+const carouselDateRecentPastAndNextMonth = (
+  windowStart: Date,
+  windowEnd: Date,
+  recentPastStart: Date,
+): Prisma.JogoWhereInput => {
+  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
+  return {
+    OR: [
+      { firstReleaseDate: { gte: windowStart, lte: nextMonthEnd } },
+      { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
+    ],
+  };
+};
+
 const carouselFirstAirOrRecentPast = (
   windowStart: Date,
   windowEnd: Date,
@@ -225,7 +240,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         where: {
           AND: [
             jogoQualityFilter,
-            carouselDateOrRecentPast(windowStart, windowEnd, recentPastStart),
+            carouselDateRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart),
           ],
         },
         orderBy: { firstReleaseDate: 'asc' },
@@ -1154,8 +1169,12 @@ router.get('/jogos/:id/steam-price', cacheMiddleware(60 * 15), async (req, res) 
     const stale =
       !jogo.steamSyncedAt ||
       Date.now() - jogo.steamSyncedAt.getTime() > 6 * 60 * 60 * 1000;
+    const cachedPriceInvalid =
+      jogo.steamPriceCents != null && !isPlausibleBrlSteamPriceCents(jogo.steamPriceCents);
+    const cachedDiscountInvalid =
+      jogo.steamDiscountPercent != null && !isPlausibleSteamDiscountPercent(jogo.steamDiscountPercent);
 
-    if (jogo.steamPriceCents != null && !stale) {
+    if (jogo.steamPriceCents != null && !stale && !cachedPriceInvalid && !cachedDiscountInvalid) {
       return res.json({
         steam_price_cents: jogo.steamPriceCents,
         steam_discount_percent: jogo.steamDiscountPercent,

@@ -7,6 +7,8 @@ import {
   getSteamStoreUrl,
   hasSteamAppId,
   hasSteamPriceDisplay,
+  isPlausibleBrlSteamPriceCents,
+  isPlausibleSteamDiscountPercent,
 } from '@/lib/media-helpers';
 import { API_BASE } from '@/lib/apiBase';
 import type { Jogo, Midia } from '@/types';
@@ -35,9 +37,13 @@ const SteamPriceLabel: React.FC<SteamPriceLabelProps> = ({
   const cachedDiscount =
     'steam_discount_percent' in item ? item.steam_discount_percent : null;
   const appId = 'steam_app_id' in item ? item.steam_app_id : null;
+  const cachedLooksValid =
+    cachedCents != null && isPlausibleBrlSteamPriceCents(cachedCents);
+  const shouldFetchLive =
+    Boolean(appId) && (variant === 'modal' || !cachedLooksValid);
 
   useEffect(() => {
-    if (!appId || cachedCents != null) {
+    if (!shouldFetchLive) {
       setLivePrice(null);
       return;
     }
@@ -57,19 +63,30 @@ const SteamPriceLabel: React.FC<SteamPriceLabelProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [appId, cachedCents, item.id]);
+  }, [shouldFetchLive, appId, item.id]);
 
   if (!hasSteamAppId(item) && !hasSteamPriceDisplay(item)) return null;
 
-  const priceCents = cachedCents ?? livePrice?.steam_price_cents ?? null;
+  const priceCents =
+    (shouldFetchLive ? livePrice?.steam_price_cents : null) ??
+    (cachedLooksValid ? cachedCents : null) ??
+    livePrice?.steam_price_cents ??
+    null;
   const discountPercent =
-    cachedDiscount ?? livePrice?.steam_discount_percent ?? null;
+    (shouldFetchLive ? livePrice?.steam_discount_percent : null) ??
+    cachedDiscount ??
+    livePrice?.steam_discount_percent ??
+    null;
 
   const price = formatSteamPriceBRL(priceCents);
   if (!price) return null;
 
   const discount =
-    typeof discountPercent === 'number' && discountPercent > 0 ? discountPercent : null;
+    typeof discountPercent === 'number' &&
+    isPlausibleSteamDiscountPercent(discountPercent) &&
+    discountPercent > 0
+      ? discountPercent
+      : null;
   const storeUrl = getSteamStoreUrl(appId);
 
   const isCard = variant === 'card';
