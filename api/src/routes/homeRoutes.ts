@@ -117,6 +117,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       fetchFilmesForCarousel(carouselFilmeRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart), {
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
+        year,
       }),
       prisma.serie.findMany({
         where: {
