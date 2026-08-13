@@ -277,22 +277,24 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
 
 /**
  * Carrossel equilibrado: curadoria mais rígida que /filmes, mas sem bloquear estreias futuras.
- * Diferente do filmeCarouselWhereInput antigo, NÃO exige streaming nem voteAverage > 0.
+ * Não reutiliza filmeCarouselQualityFilter — o bloco de engajamento dele exige pop 30/votos 100
+ * e descarta estreias futuras sem hype ainda.
  */
 export const filmeCarouselBalancedWhereInput: Prisma.FilmeWhereInput = {
   AND: [
-    filmeCarouselQualityFilter,
-    filmeCarouselLocalizationFilter,
+    { posterPath: { not: null } },
+    { OR: [{ adult: false }, { adult: null }] },
     filmeCarouselConcertExclusionFilter,
     { genres: { some: {} } },
     {
       OR: [
         { AND: [{ overview: { not: null } }, { NOT: { overview: '' } }] },
-        { releaseDate: { gte: new Date() } },
+        { emCartaz: true },
         { emBreve: true },
         { em_prevenda: true },
-        { emCartaz: true },
-        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
+        { releaseDate: { gte: new Date() } },
+        { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
+        { voteCount: { gte: 20 } },
       ],
     },
     {
@@ -303,6 +305,7 @@ export const filmeCarouselBalancedWhereInput: Prisma.FilmeWhereInput = {
         { emBreve: true },
         { em_prevenda: true },
         { releaseDate: { gte: new Date() } },
+        { localizacaoPtBr: true },
         { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
       ],
     },
@@ -408,16 +411,9 @@ export function filterFilmesExcludeConcerts<T extends FilmeCarouselCandidate>(fi
   );
 }
 
-/** Pós-filtro equilibrado — curadoria sem exigir streaming em estreias futuras */
+/** Pós-filtro equilibrado — concertos; o Prisma já aplica curadoria */
 export function filterFilmesForCarouselBalanced<T extends FilmeCarouselCandidate>(filmes: T[]): T[] {
-  return filmes.filter(
-    (filme) =>
-      !isConcertOrLiveRecording({
-        title: filme.title,
-        original_title: filme.originalTitle ?? undefined,
-        genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
-      }) && filmeHasBalancedCarouselMetadata(filme),
-  );
+  return filterFilmesExcludeConcerts(filmes);
 }
 
 export const serieQualityFilter: Prisma.SerieWhereInput = {
