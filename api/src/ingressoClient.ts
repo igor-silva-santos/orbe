@@ -61,6 +61,13 @@ export function buildIngressoLink(urlKey: string): string {
   return `${INGRESSO_FILM_BASE}/${urlKey}`;
 }
 
+/** Extrai o slug do filme a partir de uma URL do ingresso.com. */
+export function extractIngressoUrlKey(link: string | null | undefined): string | null {
+  if (!link) return null;
+  const match = link.match(/\/filme\/([^/?#]+)/i);
+  return match?.[1]?.toLowerCase() ?? null;
+}
+
 function buildSlugCandidates(filme: {
   title: string;
   originalTitle?: string | null;
@@ -191,6 +198,28 @@ export async function searchIngressoByTerm(term: string, cityId = 1): Promise<In
   const url = `${INGRESSO_API_BASE}/events/search/${encodeURIComponent(normalizedTerm)}?cityId=${cityId}`;
   const events = await fetchIngressoJson<IngressoEvent[]>(url, `search term="${normalizedTerm}"`);
   return events ?? [];
+}
+
+/**
+ * Busca evento pelo urlKey exato (ex.: link já salvo no banco).
+ * Mais confiável que o catálogo coming-soon, que pode estar desatualizado ou sem o filme.
+ */
+export async function fetchIngressoByUrlKey(urlKey: string): Promise<IngressoMatch | null> {
+  const key = urlKey.toLowerCase().trim();
+  if (!key) return null;
+
+  for (const cityId of DEFAULT_CITY_IDS) {
+    const results = await searchIngressoByTerm(key, cityId);
+    const exact = results.find((event) => event.urlKey?.toLowerCase() === key);
+    if (exact) {
+      logger.info(
+        `[ingresso-api] Refresh por urlKey "${key}" cityId=${cityId} → inPreSale=${exact.inPreSale}, playing=${exact.countIsPlaying}`,
+      );
+      return eventToMatch(exact, 'url_key', 1);
+    }
+  }
+
+  return null;
 }
 
 export async function findIngressoMatchInCatalog(

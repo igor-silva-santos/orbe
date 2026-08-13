@@ -108,9 +108,11 @@ export interface Filme extends Midia {
   ingresso_link?: string;
   em_prevenda: boolean;
   em_cartaz?: boolean;
+  em_breve?: boolean;
   tem_sessoes?: boolean;
   estreia_cinema?: boolean;
   estreia_streaming?: boolean;
+  saga?: { id: number; nome: string } | null;
   popularity?: number | null;
   ultima_verificacao_ingresso?: string;
   videos?: Video[];
@@ -135,6 +137,7 @@ export interface Serie extends Midia {
   numero_episodios: number;
   status?: string;
   status_label?: string;
+  estreia_streaming?: boolean;
   criadores: Creator[];
   elenco: CastMember[];
   videos?: Video[];

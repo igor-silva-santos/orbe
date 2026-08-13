@@ -5,6 +5,8 @@ import { refreshFilmeAvailabilityFromTmdb } from './filmeAvailability';
 import {
   buildIngressoLink,
   buildIngressoSlugCandidates,
+  extractIngressoUrlKey,
+  fetchIngressoByUrlKey,
   fetchIngressoCatalog,
   findIngressoMatchInCatalog,
   findIngressoMatchViaSearch,
@@ -84,6 +86,37 @@ async function createDigitalReleaseNotification(filme: { tmdbId: number; title: 
   }
 }
 
+async function createPreSaleNotification(filme: { tmdbId: number; title: string }, ingressoLink: string | null) {
+  try {
+    const interestedUsers = await prisma.preferencias_usuario_midia.findMany({
+      where: {
+        midia_id: filme.tmdbId,
+        tipo_midia: 'filme',
+        status: { in: ['favorito', 'quero_assistir', 'acompanhando'] },
+      },
+      select: { usuario_id: true },
+    });
+
+    const linkHint = ingressoLink ? ' Ingressos no Ingresso.com.' : '';
+    const message = `🎟️ "${filme.title}" entrou em pré-venda!${linkHint}`;
+
+    const notifications = interestedUsers.map((u) => ({
+      userId: u.usuario_id,
+      type: 'PRE_SALE',
+      message,
+      relatedMediaId: filme.tmdbId,
+      relatedMediaType: 'filme',
+    }));
+
+    if (notifications.length > 0) {
+      await prisma.notification.createMany({ data: notifications });
+      logger.info(`Notificações de pré-venda enviadas para ${notifications.length} usuários sobre "${filme.title}".`);
+    }
+  } catch (error) {
+    logger.error(`Erro ao criar notificações de pré-venda para "${filme.title}":`, error);
+  }
+}
+
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -113,7 +146,7 @@ function needsIngressoMonitoring(
     return hasLink ? 'none' : 'link_only';
   }
 
-  if (hasLink && filme.prevenda_confirmada) return 'none';
+  // Antes da estreia: sempre revalidar link, pré-venda e sessões (dados do Ingresso mudam rápido).
   return 'full';
 }
 
@@ -162,7 +195,10 @@ async function scrapeIngressoPage(browser: Browser, url: string): Promise<Scrape
     }
 
     const hasCinemaSessions = !pageContent.includes('Não há sessões disponíveis no momento.');
-    const isPreSale = /pré-?venda/i.test(pageContent);
+    const isPreSale =
+      /pré-?venda/i.test(pageContent) ||
+      /pre-?sale/i.test(pageContent) ||
+      /"inPreSale"\s*:\s*true/i.test(pageContent);
     logger.info(
       `[detetive] Página OK (${statusCode}) — sessões: ${hasCinemaSessions}, pré-venda: ${isPreSale}`,
     );
@@ -233,22 +269,32 @@ async function resolveIngressoForFilme(
   },
   catalog: IngressoEvent[],
   browser?: Browser,
+  options?: { verifyPreSaleInPage?: boolean },
 ): Promise<{
   match: IngressoMatch | null;
   puppeteerFallback: { link: string | null; pageExists: boolean; hasCinemaSessions: boolean; isPreSale: boolean; transientError: boolean } | null;
 }> {
   logger.info(`[detetive] Resolvendo ingresso.com para "${filme.title}"...`);
 
+  const existingKey = extractIngressoUrlKey(filme.ingresso_link);
+  if (existingKey) {
+    const refreshed = await fetchIngressoByUrlKey(existingKey);
+    if (refreshed) {
+      logger.info(`[detetive] Atualizado via urlKey existente: ${refreshed.link}`);
+      return { match: await maybeVerifyPreSaleInPage(refreshed, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
+    }
+  }
+
   const catalogMatch = await findIngressoMatchInCatalog(filme, catalog);
   if (catalogMatch) {
     logger.info(`[detetive] Encontrado via API (catálogo): ${catalogMatch.link}`);
-    return { match: catalogMatch, puppeteerFallback: null };
+    return { match: await maybeVerifyPreSaleInPage(catalogMatch, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
   }
 
   const searchMatch = await findIngressoMatchViaSearch(filme);
   if (searchMatch) {
     logger.info(`[detetive] Encontrado via API (busca): ${searchMatch.link}`);
-    return { match: searchMatch, puppeteerFallback: null };
+    return { match: await maybeVerifyPreSaleInPage(searchMatch, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
   }
 
   if (!browser) {
@@ -274,6 +320,30 @@ async function resolveIngressoForFilme(
   }
 
   return { match: null, puppeteerFallback: puppeteerResult };
+}
+
+/** API coming-soon às vezes retorna inPreSale=false com pré-venda visível na página — confirma no HTML. */
+async function maybeVerifyPreSaleInPage(
+  match: IngressoMatch,
+  browser?: Browser,
+  verify = true,
+): Promise<IngressoMatch> {
+  if (!verify || !browser || match.inPreSale) return match;
+
+  const scraped = await scrapeIngressoPage(browser, match.link);
+  if (!scraped.pageExists || scraped.transientError) return match;
+
+  if (scraped.isPreSale) {
+    logger.info(`[detetive] API dizia sem pré-venda, página confirma PRÉ-VENDA: ${match.link}`);
+    return {
+      ...match,
+      inPreSale: true,
+      hasCinemaSessions: scraped.hasCinemaSessions || match.hasCinemaSessions,
+      isPlaying: scraped.hasCinemaSessions || match.isPlaying,
+    };
+  }
+
+  return match;
 }
 
 export type DetetiveProgressCallback = (processed: number, total: number) => void | Promise<void>;
@@ -323,16 +393,8 @@ export async function runDetetive(
     logger.info(`[detetive] Catálogo ingresso.com: ${ingressoCatalog.length} filmes indexados.`);
 
     const needsPuppeteer = targetMovies.some((filme) => {
-      const mode = needsIngressoMonitoring(
-        {
-          ingresso_sem_pagina: filme.ingresso_sem_pagina,
-          ingresso_link: filme.ingresso_link,
-          prevenda_confirmada: filme.prevenda_confirmada,
-          releaseDate: filme.releaseDate,
-        },
-        now,
-      );
-      return mode !== 'none';
+      if (filme.ingresso_sem_pagina) return false;
+      return !releaseDatePassed(filme.releaseDate, now);
     });
 
     if (needsPuppeteer) {
@@ -344,6 +406,7 @@ export async function runDetetive(
     for (const filme of targetMovies) {
       try {
         const releasePassed = releaseDatePassed(filme.releaseDate, now);
+        const wasPrevenda = Boolean(filme.em_prevenda);
         let ingressoSemPagina = filme.ingresso_sem_pagina;
         let ingressoLink = filme.ingresso_link;
         let temSessoes = filme.tem_sessoes ?? false;
@@ -369,7 +432,12 @@ export async function runDetetive(
             `[detetive] Verificando ingresso.com (${ingressoMode === 'link_only' ? 'só link' : 'link + pré-venda'}): "${filme.title}"`,
           );
           const hadExistingLink = Boolean(filme.ingresso_link);
-          const { match, puppeteerFallback } = await resolveIngressoForFilme(filme, ingressoCatalog, browser);
+          const { match, puppeteerFallback } = await resolveIngressoForFilme(
+            filme,
+            ingressoCatalog,
+            browser,
+            { verifyPreSaleInPage: ingressoMode === 'full' },
+          );
 
           if (match) {
             ingressoLink = match.link;
@@ -380,11 +448,13 @@ export async function runDetetive(
             } else {
               temSessoes = match.hasCinemaSessions;
 
-              if (!prevendaConfirmada && match.inPreSale) {
+              if (match.inPreSale) {
                 emPrevenda = true;
-                prevendaConfirmada = true;
-                logger.info(`[detetive] "${filme.title}" em pré-venda confirmada (fonte: ${match.source}).`);
-              } else if (!prevendaConfirmada && !match.inPreSale) {
+                if (!prevendaConfirmada) {
+                  prevendaConfirmada = true;
+                  logger.info(`[detetive] "${filme.title}" em pré-venda confirmada (fonte: ${match.source}).`);
+                }
+              } else if (!prevendaConfirmada) {
                 emPrevenda = false;
               }
             }
@@ -392,6 +462,22 @@ export async function runDetetive(
             logger.warn(
               `[detetive] "${filme.title}" — erro transitório no Puppeteer; mantendo estado atual (link=${ingressoLink ?? 'nenhum'}).`,
             );
+          } else if (hadExistingLink && ingressoLink && browser) {
+            const scraped = await scrapeIngressoPage(browser, ingressoLink);
+            if (scraped.pageExists && !scraped.transientError) {
+              temSessoes = scraped.hasCinemaSessions;
+              if (scraped.isPreSale) {
+                emPrevenda = true;
+                if (!prevendaConfirmada) {
+                  prevendaConfirmada = true;
+                  logger.info(`[detetive] "${filme.title}" pré-venda confirmada via página (fallback).`);
+                }
+              }
+            } else {
+              logger.warn(
+                `[detetive] "${filme.title}" — não revalidou link existente; mantendo ${ingressoLink}.`,
+              );
+            }
           } else if (hadExistingLink && ingressoLink) {
             logger.warn(
               `[detetive] "${filme.title}" — não revalidou link existente; mantendo ${ingressoLink}.`,
@@ -408,8 +494,6 @@ export async function runDetetive(
           logger.info(`[detetive] "${filme.title}" — ingresso.com indisponível, pulando.`);
         } else if (releasePassed && ingressoLink) {
           logger.info(`[detetive] "${filme.title}" — já estreou e link existe, pulando.`);
-        } else if (prevendaConfirmada || emPrevenda) {
-          logger.info(`[detetive] "${filme.title}" — pré-venda já confirmada, pulando.`);
         }
 
         const streaming = await checkStreamingAvailability(filme.tmdbId, filme.id);
@@ -435,6 +519,11 @@ export async function runDetetive(
         if (isNowDigital) {
           logger.info(`✨ NOVIDADE: "${filme.title}" chegou ao streaming!`);
           await createDigitalReleaseNotification(filme, streaming.providers);
+        }
+
+        if (!wasPrevenda && emPrevenda && prevendaConfirmada) {
+          logger.info(`🎟️ NOVIDADE: "${filme.title}" em pré-venda!`);
+          await createPreSaleNotification(filme, ingressoLink);
         }
 
         logger.info(

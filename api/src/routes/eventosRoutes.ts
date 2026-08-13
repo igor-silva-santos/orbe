@@ -10,7 +10,7 @@ import {
 } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
-import { TWELVE_HOURS, getCurrentSeason, animeCarouselInclude } from './mediaRoutesHelpers';
+import { TWELVE_HOURS, getCurrentSeason, animeCarouselInclude, cardListInclude } from './mediaRoutesHelpers';
 
 const router = Router();
 
@@ -79,7 +79,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
         },
         orderBy: { releaseDate: 'asc' },
         take: 20,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
       }),
       prisma.serie.findMany({
         where: {
@@ -126,7 +126,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
         where: { AND: [filmeQualityFilter, { emCartaz: true }] },
         orderBy: { popularity: 'desc' },
         take: 20,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
       }),
       prisma.event.findMany({
         where: {

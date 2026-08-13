@@ -72,21 +72,7 @@ router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
     const [animes, total] = await Promise.all([
       prisma.anime.findMany({
         where,
-        include: {
-          sourceRelations: {
-            include: {
-              relatedAnime: { select: { anilistId: true, titleRomaji: true } },
-              sourceAnime: { select: { anilistId: true, titleRomaji: true } }
-            }
-          },
-          relatedRelations: {
-            include: {
-              relatedAnime: { select: { anilistId: true, titleRomaji: true } },
-              sourceAnime: { select: { anilistId: true, titleRomaji: true } }
-            }
-          },
-          tags: { include: { tag: true } }
-        },
+        include: animeCarouselInclude,
         orderBy,
         skip,
         take: limit,

@@ -23,6 +23,7 @@ import {
   getMonthDateRange,
   parseYearMonthQuery,
   fetchFilmesForCarousel,
+  cardListInclude,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -100,7 +101,7 @@ router.get('/filmes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
     const [filmes, total] = await Promise.all([
       prisma.filme.findMany({
         where,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
         orderBy,
         skip,
         take: limit,
