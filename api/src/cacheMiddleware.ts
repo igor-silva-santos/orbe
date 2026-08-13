@@ -26,6 +26,9 @@ end
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Incrementar ao mudar filtros de carrossel/listagem para invalidar Redis sem flush manual */
+const CACHE_KEY_VERSION = process.env.CACHE_KEY_VERSION || '2';
+
 const cacheMiddleware = (duration: number) => async (req: Request, res: Response, next: NextFunction) => {
   // Este middleware e generico e hoje so e usado em rotas GET publicas e nao
   // personalizadas (catalogo de midia) — a chave de cache abaixo nao tem nenhuma
@@ -38,8 +41,8 @@ const cacheMiddleware = (duration: number) => async (req: Request, res: Response
     return next();
   }
 
-  // Usar a URL original como chave de cache
-  const key = `cache:${req.originalUrl}`;
+  // Usar a URL original como chave de cache (versão evita servir payload antigo após deploy)
+  const key = `cache:v${CACHE_KEY_VERSION}:${req.originalUrl}`;
   // Copia "stale" com TTL bem mais longo que o cache normal. So serve pra dar uma
   // resposta razoavel (stale-while-revalidate) pra quem chegar enquanto outro
   // request ja esta recalculando a resposta fresca — nunca e usada como fonte de
