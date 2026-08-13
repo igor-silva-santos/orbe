@@ -276,7 +276,13 @@ async function resolveIngressoForFilme(
   return { match: null, puppeteerFallback: puppeteerResult };
 }
 
-export async function runDetetive(fullScan = false, disconnectWhenDone = false) {
+export type DetetiveProgressCallback = (processed: number, total: number) => void | Promise<void>;
+
+export async function runDetetive(
+  fullScan = false,
+  disconnectWhenDone = false,
+  onProgress?: DetetiveProgressCallback,
+) {
   let browser: Browser | undefined;
   try {
     logger.info(`--- Iniciando Detetive Digital 2.1 ${fullScan ? '(Varredura Completa)' : ''} ---`);
@@ -308,6 +314,9 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
     logger.info(`[detetive] ${targetMovies.length} filmes na janela de monitoramento.`);
 
     if (targetMovies.length === 0) return;
+
+    const totalFilmes = targetMovies.length;
+    let processedFilmes = 0;
 
     logger.info('[detetive] Carregando catálogo ingresso.com (API oficial)...');
     const ingressoCatalog = await fetchIngressoCatalog();
@@ -434,6 +443,8 @@ export async function runDetetive(fullScan = false, disconnectWhenDone = false) 
       } catch (error: any) {
         logger.error(`[detetive] Erro ao verificar "${filme.title}":`, error.message);
       } finally {
+        processedFilmes++;
+        await onProgress?.(processedFilmes, totalFilmes);
         await delay(1500);
       }
     }

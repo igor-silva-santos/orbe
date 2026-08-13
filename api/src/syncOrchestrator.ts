@@ -6,6 +6,7 @@ import { syncAnimes } from './syncAnimes';
 import { syncGames } from './syncGames';
 import { syncSteamData } from './syncSteam';
 import { runAwardScraper } from './scrapeAwards';
+import { runDetetive } from './detetive';
 import {
   markPhaseComplete,
   releaseSyncLock,
@@ -52,6 +53,31 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       await markPhaseComplete(prisma, 'filmes');
     } else {
       logger.info('⏭️ Fase filmes já concluída (checkpoint). Pulando.');
+    }
+
+    if (!phaseDone(completed, 'detetive')) {
+      logger.info('--- Fase DETETIVE (ingresso.com + streaming) ---');
+      const detetivePhase = runProgress.startPhase('DETETIVE');
+      await updateSyncProgress(prisma, { phase: 'detetive', processedInPhase: 0, totalInPhase: 0 });
+
+      let detetiveTotalSet = false;
+      await runDetetive(false, false, async (processed, total) => {
+        if (!detetiveTotalSet && total > 0) {
+          detetivePhase.setTotal(total);
+          detetiveTotalSet = true;
+        }
+        detetivePhase.advance(1);
+        await updateSyncProgress(prisma, {
+          phase: 'detetive',
+          processedInPhase: processed,
+          totalInPhase: total,
+        });
+      });
+
+      await markPhaseComplete(prisma, 'detetive');
+      await invalidateCacheByPatterns(['cache:/api/homepage*', 'cache:/api/filmes*', 'cache:/api/hoje*']);
+    } else {
+      logger.info('⏭️ Fase detetive já concluída (checkpoint). Pulando.');
     }
 
     if (!phaseDone(completed, 'series')) {

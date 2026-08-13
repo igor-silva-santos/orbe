@@ -6,8 +6,9 @@ const BACKFILL_STATE_KEY = 'backfill_state';
 const BACKFILL_DEFAULT_START_YEAR = 2000;
 const STALE_PROGRESS_MS = 10 * 60 * 1000; // 10 min sem progresso = provável crash/cold start
 const STALE_ANIMES_PROGRESS_MS = 30 * 60 * 1000; // animes: lotes lentos (700ms/anime + tradução)
+const STALE_DETETIVE_PROGRESS_MS = 45 * 60 * 1000; // detetive: Puppeteer + ingresso.com por filme
 
-export type SyncPhase = 'filmes' | 'series' | 'animes' | 'jogos' | 'premios';
+export type SyncPhase = 'filmes' | 'detetive' | 'series' | 'animes' | 'jogos' | 'premios';
 
 export type SyncRunState = {
   running: boolean;
@@ -68,6 +69,7 @@ async function writeState(prisma: PrismaClient, state: SyncRunState | null): Pro
 
 function staleThresholdMs(state: SyncRunState): number {
   if (state.phase === 'animes') return STALE_ANIMES_PROGRESS_MS;
+  if (state.phase === 'detetive') return STALE_DETETIVE_PROGRESS_MS;
   return STALE_PROGRESS_MS;
 }
 

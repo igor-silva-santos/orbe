@@ -272,8 +272,12 @@ router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
 
   logger.info(`Sincronização completa iniciada: ${startDate} → ${endDate}`);
   res.status(202).json({
-    message: 'Sincronização completa iniciada. Monitore GET /api/sync/status (progresso ~2min nos logs).',
+    message:
+      'Sincronização completa iniciada (filmes → detetive → séries → animes → jogos → premiações). ' +
+      'Logs: GET /api/sync/logs?filter=sync (detetive: ?filter=detetive).',
     statusUrl: '/api/sync/status',
+    logsUrl: '/api/sync/logs?filter=sync',
+    detetiveLogsUrl: '/api/sync/logs?filter=detetive',
   });
 
   try {
