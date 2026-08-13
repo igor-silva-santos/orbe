@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import {
   MoreVertical,
   Heart,
@@ -12,6 +13,8 @@ import {
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
+import CardStatusBadge from '@/components/media/CardStatusBadge';
+import CardListIndicator from '@/components/media/CardListIndicator';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
@@ -23,10 +26,11 @@ import { getStreamingProviders,
   hasSteamPriceDisplay,
   hasSteamAppId,
 } from '@/lib/media-helpers';
+import { resolveCardStatus, midiaHasReleased } from '@/lib/card-status';
 import { PLATFORM_ICON_SIZE_CARD } from '@/lib/platform-icon-sizes';
 import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import type { MidiaCardProps, UserAction, Anime, Jogo } from '@/types';
+import type { MidiaCardProps, UserAction, Anime, Jogo, Filme } from '@/types';
 
 const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 const MINUTE_MS = 60 * 1000;
@@ -85,6 +89,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   // a cada uma dessas mudanças, mesmo sem relação com o card em si.
   const openSuperModal = useAppStore((s) => s.openSuperModal);
   const openRatingModal = useAppStore((s) => s.openRatingModal);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -148,23 +153,18 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     interaction => interaction.midia_id === midia.id && interaction.tipo_midia === type
   );
 
-  const hasReleased = (() => {
-    const date = midia.data_lancamento_curada || midia.data_lancamento_api;
-    if (!date) return false;
-    try {
-      const releaseDate = typeof date === 'string' ? parseISO(date) : new Date((date as any).year, (date as any).month - 1, (date as any).day);
-      return releaseDate <= new Date();
-    } catch {
-      return false;
-    }
-  })();
+  const hasReleased = midiaHasReleased(midia);
 
   const isAdultContent = (midia as any).isAdult === true;
-  const isFilme = type === 'filme';
-  const filme = isFilme ? (midia as import('@/types').Filme) : null;
-  const showPreVenda = Boolean(filme?.em_prevenda);
-  const showEmBreve = !showPreVenda && (Boolean(filme?.em_breve) || (!hasReleased && isFilme));
+  const filme = type === 'filme' ? (midia as Filme) : null;
+  const cardStatus = resolveCardStatus(type, midia, { isNewAnimeEpisode: isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
+  const ingressoLink = filme?.ingresso_link ?? null;
+  const hasStatusBadge = Boolean(cardStatus);
+  const showListIndicator =
+    isAuthenticated &&
+    userInteraction?.status &&
+    ['favorito', 'quero_assistir', 'acompanhando'].includes(userInteraction.status);
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
@@ -233,18 +233,13 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
-                {showPreVenda && (
-                  <div className="absolute top-2 right-2 z-10 pointer-events-none rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
-                    PRÉ-VENDA
-                  </div>
-                )}
-                {showEmBreve && (
-                  <div className="absolute top-2 right-2 z-10 pointer-events-none rounded-full border-2 border-[var(--orbe-block-border)] bg-background/95 px-2 py-0.5 text-[10.5px] font-bold text-muted-foreground">
-                    EM BREVE
+                {cardStatus && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <CardStatusBadge status={cardStatus} />
                   </div>
                 )}
                 {topAward && (
-                  <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)]">
+                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${showListIndicator ? 'top-10' : ''}`}>
                     <AwardIcon
                       award={topAward.nome}
                       status={topAward.status}
@@ -254,13 +249,14 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     />
                   </div>
                 )}
+                {showListIndicator && <CardListIndicator interaction={userInteraction} />}
                 {showSteamPrice && (
                   <div className="absolute bottom-2 left-2 right-2 z-10">
                     <SteamPriceLabel item={midia} variant="card" />
                   </div>
                 )}
                 <div
-                  className={`absolute right-2 ${showPreVenda || showEmBreve ? 'top-10' : 'top-2'}`}
+                  className={`absolute right-2 ${hasStatusBadge ? 'top-10' : 'top-2'}`}
                   ref={menuRef}
                 >
                   <button
@@ -321,6 +317,16 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     </span>
                   ))}
                 </div>
+                {filme?.saga && (
+                  <Link
+                    href={`/continuacoes?saga=${filme.saga.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mb-1 inline-flex max-w-full items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-semibold text-primary hover:bg-primary/15 truncate"
+                    title={filme.saga.nome}
+                  >
+                    Saga · {filme.saga.nome}
+                  </Link>
+                )}
                 {/* Altura sempre reservada (mesmo sem dublagem/tipo != anime) — senão cards do
                     mesmo carrossel/grade ficam com alturas diferentes dependendo do conteúdo. */}
                 <div className="h-[20px] mb-1 flex items-center">
@@ -332,6 +338,24 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 </div>
                 {/* Idem: altura fixa mesmo sem plataformas/providers, pra não desalinhar os cards vizinhos. */}
                 <div className="h-6 flex flex-wrap items-center gap-1.5 shrink-0">
+                  {ingressoLink && (
+                    <a
+                      href={ingressoLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Ingressos no Ingresso.com"
+                      aria-label="Ingressos no Ingresso.com"
+                    >
+                      <PlatformIcon
+                        platform="ingresso"
+                        size={PLATFORM_ICON_SIZE_CARD}
+                        iconOnly
+                        variant="circle"
+                        className="h-6 w-6"
+                      />
+                    </a>
+                  )}
                   {platformItems.map((p) => (
                     <PlatformIcon
                       key={p.name}
@@ -344,7 +368,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       title={p.name}
                     />
                   ))}
-                  {platformItems.length === 0 && showEmBreve && (
+                  {platformItems.length === 0 && !ingressoLink && cardStatus?.variant === 'em_breve' && (
                     <span className="inline-flex h-6 items-center rounded-full border border-border bg-muted/50 px-2 text-[9px] font-semibold text-muted-foreground">
                       Em breve
                     </span>

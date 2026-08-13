@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Bell, Check, Calendar, Star } from 'lucide-react';
+import { X, Bell, Check, Calendar, Star, Ticket } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { motion, PanInfo } from 'framer-motion';
 
@@ -25,6 +25,10 @@ const NotificationModal: React.FC = () => {
         return <Calendar className="h-4 w-4 text-blue-500" />;
       case 'RELEASE_SOON':
         return <Star className="h-4 w-4 text-yellow-500" />;
+      case 'PRE_SALE':
+        return <Ticket className="h-4 w-4 text-amber-500" />;
+      case 'DIGITAL_RELEASE':
+        return <Bell className="h-4 w-4 text-violet-500" />;
       default:
         return <Bell className="h-4 w-4 text-primary" />;
     }

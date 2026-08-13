@@ -353,8 +353,14 @@ export const mapFilmeToMidia = (filme: any) => {
     budget: filme.budget ? filme.budget.toString() : null,
     revenue: filme.revenue ? filme.revenue.toString() : null,
     premiacoes: parsePremiacoes(filme.premiacoes),
+    saga: mapFilmeSaga(filme),
   };
 };
+
+function mapFilmeSaga(filme: { collection?: { id: number; name: string } | null; collectionId?: number | null }) {
+  if (!filme.collection?.id) return null;
+  return { id: filme.collection.id, nome: filme.collection.name };
+}
 
 export const mapSerieToMidia = (serie: any) => {
   return {
@@ -577,6 +583,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   ingresso_link: filme.ingresso_link ?? null,
   estreia_cinema: filme.estreia_cinema ?? false,
   estreia_streaming: filme.estreia_streaming ?? false,
+  saga: mapFilmeSaga(filme),
 });
 
 export const mapSerieToCarouselCard = (serie: any) => ({

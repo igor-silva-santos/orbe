@@ -84,6 +84,37 @@ async function createDigitalReleaseNotification(filme: { tmdbId: number; title: 
   }
 }
 
+async function createPreSaleNotification(filme: { tmdbId: number; title: string }, ingressoLink: string | null) {
+  try {
+    const interestedUsers = await prisma.preferencias_usuario_midia.findMany({
+      where: {
+        midia_id: filme.tmdbId,
+        tipo_midia: 'filme',
+        status: { in: ['favorito', 'quero_assistir', 'acompanhando'] },
+      },
+      select: { usuario_id: true },
+    });
+
+    const linkHint = ingressoLink ? ' Ingressos no Ingresso.com.' : '';
+    const message = `🎟️ "${filme.title}" entrou em pré-venda!${linkHint}`;
+
+    const notifications = interestedUsers.map((u) => ({
+      userId: u.usuario_id,
+      type: 'PRE_SALE',
+      message,
+      relatedMediaId: filme.tmdbId,
+      relatedMediaType: 'filme',
+    }));
+
+    if (notifications.length > 0) {
+      await prisma.notification.createMany({ data: notifications });
+      logger.info(`Notificações de pré-venda enviadas para ${notifications.length} usuários sobre "${filme.title}".`);
+    }
+  } catch (error) {
+    logger.error(`Erro ao criar notificações de pré-venda para "${filme.title}":`, error);
+  }
+}
+
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -344,6 +375,7 @@ export async function runDetetive(
     for (const filme of targetMovies) {
       try {
         const releasePassed = releaseDatePassed(filme.releaseDate, now);
+        const wasPrevenda = Boolean(filme.em_prevenda);
         let ingressoSemPagina = filme.ingresso_sem_pagina;
         let ingressoLink = filme.ingresso_link;
         let temSessoes = filme.tem_sessoes ?? false;
@@ -435,6 +467,11 @@ export async function runDetetive(
         if (isNowDigital) {
           logger.info(`✨ NOVIDADE: "${filme.title}" chegou ao streaming!`);
           await createDigitalReleaseNotification(filme, streaming.providers);
+        }
+
+        if (!wasPrevenda && emPrevenda && prevendaConfirmada) {
+          logger.info(`🎟️ NOVIDADE: "${filme.title}" em pré-venda!`);
+          await createPreSaleNotification(filme, ingressoLink);
         }
 
         logger.info(

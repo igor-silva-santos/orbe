@@ -76,12 +76,14 @@ export const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
 export const carouselLiteInclude = {
   genres: { include: { genero: true } },
   streamingProviders: { include: { provider: true }, take: 3 },
+  collection: { select: { id: true, name: true } },
 };
 
-/** Include mínimo para cards em listagens e resumos (gêneros + até 4 provedores). */
+/** Include mínimo para cards em listagens e resumos (gêneros + até 4 provedores + saga). */
 export const cardListInclude = {
   genres: { include: { genero: true } },
   streamingProviders: { include: { provider: true }, take: 4 },
+  collection: { select: { id: true, name: true } },
 };
 
 export async function fetchFilmesForCarousel(
