@@ -17,6 +17,7 @@ import {
   monthKeyFromDate,
   monthKeyFromItem,
   monthTitleFromItem,
+  parseMidiaReleaseDate,
   parseReleaseDate,
 } from '@/lib/carousel-utils';
 
@@ -210,7 +211,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     const title = monthTitleFromItem(item);
     if (!title || !item?.data_lancamento_api) return;
 
-    const date = parseReleaseDate(item.data_lancamento_api);
+    const date = parseMidiaReleaseDate(item);
     if (!date) return;
     const monthKey = monthKeyFromDate(date);
     if (monthKey === lastTitleMonthKey.current) return;
@@ -297,6 +298,28 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       }
     },
     [loadMonthsInDirection, monthEdgeBuffer]
+  );
+
+  const scrollToCurrentMonth = useCallback(
+    (list: Midia[], behavior: boolean | 'smooth' = false) => {
+      if (!emblaApi || list.length === 0) return -1;
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const targetIndex = findIndexForMonth(list, year, month);
+      const resolvedIndex = targetIndex >= 0 ? targetIndex : calculateCarouselStartIndex(list);
+
+      lastTitleMonthKey.current = monthKeyFromDate(new Date(year, month - 1, 1));
+      setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
+      emblaApi.reInit();
+      emblaApi.scrollTo(resolvedIndex, behavior);
+      previousSelectedIndex.current = resolvedIndex;
+      updateTitleFromIndex(resolvedIndex, list);
+      void prefetchAdjacentMonthsForIndex(resolvedIndex, list);
+      return resolvedIndex;
+    },
+    [emblaApi, updateTitleFromIndex, prefetchAdjacentMonthsForIndex],
   );
 
   useEffect(() => {
@@ -440,31 +463,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (!emblaApi || emAltaMode || !hasCompletedInitialLoad || initialRepositionDone.current) return;
     initialRepositionDone.current = true;
     const list = applyDisplayFilters(mediaItemsRef.current);
-    const targetIndex = calculateCarouselStartIndex(list);
-    if (list[targetIndex]) {
-      lastTitleMonthKey.current = '';
-      emblaApi.reInit();
-      emblaApi.scrollTo(targetIndex, false);
-      previousSelectedIndex.current = targetIndex;
-      updateTitleFromIndex(targetIndex, list);
-      void prefetchAdjacentMonthsForIndex(targetIndex, list);
-      return;
+    const resolved = scrollToCurrentMonth(list, false);
+    if (resolved === -1) {
+      void scrollToNextFilteredRelease();
     }
-    void scrollToNextFilteredRelease();
-  }, [emblaApi, emAltaMode, hasCompletedInitialLoad, applyDisplayFilters, updateTitleFromIndex, prefetchAdjacentMonthsForIndex, scrollToNextFilteredRelease]);
+  }, [emblaApi, emAltaMode, hasCompletedInitialLoad, applyDisplayFilters, scrollToCurrentMonth, scrollToNextFilteredRelease]);
 
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isFetching) return;
     const now = new Date();
-    const merged = await loadMonth(now.getFullYear(), now.getMonth() + 1);
-    const list = applyDisplayFilters(merged);
-    const todayIndex = calculateCarouselStartIndex(list);
-    lastTitleMonthKey.current = '';
-    emblaApi.reInit();
-    emblaApi.scrollTo(todayIndex, false);
-    previousSelectedIndex.current = todayIndex;
-    updateTitleFromIndex(todayIndex, list);
-  }, [emblaApi, isFetching, loadMonth, applyDisplayFilters, updateTitleFromIndex]);
+    await loadMonth(now.getFullYear(), now.getMonth() + 1);
+    const list = applyDisplayFilters(mediaItemsRef.current);
+    scrollToCurrentMonth(list, false);
+  }, [emblaApi, isFetching, loadMonth, applyDisplayFilters, scrollToCurrentMonth]);
 
   const prevGenreRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {

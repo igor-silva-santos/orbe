@@ -173,6 +173,8 @@ export const filmeCarouselLocalizationFilter: Prisma.FilmeWhereInput = {
     { localizacaoPtBr: true },
     { emCartaz: true },
     { emBreve: true },
+    { em_prevenda: true },
+    { releaseDate: { gte: new Date() } },
     { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
     { voteCount: { gte: CAROUSEL_BYPASS_MIN_VOTE_COUNT } },
     { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
@@ -239,9 +241,26 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
     filmeCarouselQualityFilter,
     filmeCarouselLocalizationFilter,
     filmeCarouselConcertExclusionFilter,
-    { overview: { not: null } },
-    { NOT: { overview: '' } },
-    { voteAverage: { gt: 0 } },
+    {
+      OR: [
+        { AND: [{ overview: { not: null } }, { NOT: { overview: '' } }] },
+        { releaseDate: { gte: new Date() } },
+        { emBreve: true },
+        { em_prevenda: true },
+        { emCartaz: true },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
+      ],
+    },
+    {
+      OR: [
+        { voteAverage: { gt: 0 } },
+        { releaseDate: { gte: new Date() } },
+        { emBreve: true },
+        { em_prevenda: true },
+        { emCartaz: true },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
+      ],
+    },
     { genres: { some: {} } },
     {
       OR: [
@@ -250,6 +269,7 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
         { emBreve: true },
         { em_prevenda: true },
         { releaseDate: { gte: new Date() } },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
       ],
     },
   ],
@@ -260,6 +280,7 @@ type FilmeCarouselCandidate = {
   originalTitle?: string | null;
   overview?: string | null;
   voteAverage?: number | null;
+  popularity?: number | null;
   emCartaz?: boolean | null;
   emBreve?: boolean | null;
   em_prevenda?: boolean | null;
@@ -274,13 +295,25 @@ function filmeHasCarouselMetadata(filme: FilmeCarouselCandidate): boolean {
   const hasGenre = (filme.genres?.length ?? 0) > 0;
   const releaseTime = filme.releaseDate ? new Date(filme.releaseDate).getTime() : null;
   const isUpcoming = releaseTime !== null && !Number.isNaN(releaseTime) && releaseTime >= Date.now();
+  const isTentpole =
+    typeof (filme as { popularity?: number | null }).popularity === 'number' &&
+    (filme as { popularity?: number | null }).popularity! >= CAROUSEL_TENTPOLE_MIN_POPULARITY;
+  const hasRatingOrUpcoming =
+    hasRating ||
+    isUpcoming ||
+    isTentpole ||
+    Boolean(filme.emBreve) ||
+    Boolean(filme.em_prevenda) ||
+    Boolean(filme.emCartaz);
   const hasPlatform =
     (filme.streamingProviders?.length ?? 0) > 0 ||
     Boolean(filme.emCartaz) ||
     Boolean(filme.emBreve) ||
     Boolean(filme.em_prevenda) ||
-    isUpcoming;
-  return hasSynopsis && hasRating && hasGenre && hasPlatform;
+    isUpcoming ||
+    isTentpole;
+  const hasSynopsisOrUpcoming = hasSynopsis || isUpcoming || isTentpole || Boolean(filme.emBreve) || Boolean(filme.em_prevenda);
+  return hasSynopsisOrUpcoming && hasRatingOrUpcoming && hasGenre && hasPlatform;
 }
 
 /** Pós-filtro em runtime — cobre casos que o Prisma não pega (títulos atípicos) */

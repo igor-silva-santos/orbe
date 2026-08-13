@@ -61,6 +61,24 @@ const getRecentCarouselPastStart = (days = 90): Date => {
   return d;
 };
 
+/** Filmes: mês atual + próximo + passado recente (igual jogos/séries) */
+const carouselFilmeRecentPastAndNextMonth = (
+  windowStart: Date,
+  windowEnd: Date,
+  recentPastStart: Date,
+): Prisma.FilmeWhereInput => {
+  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
+  return {
+    OR: [
+      { releaseDate: { gte: windowStart, lte: nextMonthEnd } },
+      { releaseDate: { gte: recentPastStart, lt: windowStart } },
+      {
+        AND: [{ emCartaz: true }, { releaseDate: { lte: nextMonthEnd } }],
+      },
+    ],
+  };
+};
+
 /** Inclui o mês seguinte no bootstrap — evita carrossel preso no mês atual sem lançamentos futuros */
 const carouselDateRecentPastAndNextMonth = (
   windowStart: Date,
@@ -96,20 +114,10 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
 
   try {
     const [filmesRaw, series, jogos, animes] = await Promise.all([
-      fetchFilmesForCarousel(
-        {
-          OR: [
-            { releaseDate: { gte: windowStart, lte: windowEnd } },
-            {
-              AND: [
-                { emCartaz: true },
-                { releaseDate: { lte: windowEnd } },
-              ],
-            },
-          ],
-        },
-        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_ITEM_LIMIT },
-      ),
+      fetchFilmesForCarousel(carouselFilmeRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart), {
+        orderBy: { releaseDate: 'asc' },
+        take: HOMEPAGE_ITEM_LIMIT,
+      }),
       prisma.serie.findMany({
         where: {
           AND: [
