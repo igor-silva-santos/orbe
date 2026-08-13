@@ -372,6 +372,8 @@ export const orbeNerdApi = {
   // Trilogias, sagas e continuações
   listSagas: async () => apiClient.get('/continuacoes/sagas'),
   getSaga: async (collectionId: number) => apiClient.get(`/continuacoes/sagas/${collectionId}`),
+  listUniversos: async () => apiClient.get('/continuacoes/universos'),
+  getUniverso: async (universeId: string) => apiClient.get(`/continuacoes/universos/${universeId}`),
   getContinuacoesFilme: async (tmdbId: number) => apiClient.get(`/continuacoes/filmes/${tmdbId}`),
   getContinuacoesSerie: async (tmdbId: number) => apiClient.get(`/continuacoes/series/${tmdbId}`),
 };

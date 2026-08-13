@@ -22,7 +22,6 @@ import {
   parseMonthQuery,
   getMonthDateRange,
   parseYearMonthQuery,
-  carouselLiteInclude,
   serieCarouselLiteInclude,
 } from './mediaRoutesHelpers';
 

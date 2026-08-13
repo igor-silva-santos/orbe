@@ -6,13 +6,42 @@ import {
   getContinuacoesFilme,
   getContinuacoesSerie,
   getSagaById,
+  getUniversoById,
   listSagas,
+  listUniversos,
 } from '../continuacoesService';
 import { parsePositiveIntId } from './mediaRoutesHelpers';
-import { parseSagasLimit } from '../continuacoesValidation';
+import { parseSagasLimit, parseUniverseId } from '../continuacoesValidation';
 
 const router = Router();
 const CACHE = 60 * 60 * 6;
+
+router.get('/continuacoes/universos', cacheMiddleware(CACHE), async (_req, res) => {
+  try {
+    const universos = await listUniversos();
+    res.json({ universos, total: universos.length });
+  } catch (error) {
+    logger.error(`Erro ao listar universos: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar universos cinematográficos.' });
+  }
+});
+
+router.get('/continuacoes/universos/:id', detailsRateLimiter, cacheMiddleware(CACHE), async (req, res) => {
+  const universeId = parseUniverseId(req.params.id);
+  if (!universeId) {
+    return res.status(400).json({ error: 'ID de universo inválido.' });
+  }
+  try {
+    const universo = await getUniversoById(universeId);
+    if (!universo) {
+      return res.status(404).json({ error: 'Universo não encontrado.' });
+    }
+    res.json(universo);
+  } catch (error) {
+    logger.error(`Erro ao buscar universo ${universeId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar universo cinematográfico.' });
+  }
+});
 
 router.get('/continuacoes/sagas', cacheMiddleware(CACHE), async (req, res) => {
   try {
