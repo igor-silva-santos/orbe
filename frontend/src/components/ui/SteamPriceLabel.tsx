@@ -1,11 +1,16 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import {
   formatSteamPriceBRL,
   getSteamStoreUrl,
+  hasSteamAppId,
   hasSteamPriceDisplay,
+  isPlausibleBrlSteamPriceCents,
+  isPlausibleSteamDiscountPercent,
 } from '@/lib/media-helpers';
+import { API_BASE } from '@/lib/apiBase';
 import type { Jogo, Midia } from '@/types';
 
 type SteamPriceVariant = 'card' | 'modal';
@@ -16,21 +21,73 @@ interface SteamPriceLabelProps {
   className?: string;
 }
 
+type LiveSteamPrice = {
+  steam_price_cents: number | null;
+  steam_discount_percent: number | null;
+};
+
 const SteamPriceLabel: React.FC<SteamPriceLabelProps> = ({
   item,
   variant = 'card',
   className = '',
 }) => {
-  if (!hasSteamPriceDisplay(item)) return null;
+  const [livePrice, setLivePrice] = useState<LiveSteamPrice | null>(null);
 
-  const price = formatSteamPriceBRL(item.steam_price_cents);
+  const cachedCents = 'steam_price_cents' in item ? item.steam_price_cents : null;
+  const cachedDiscount =
+    'steam_discount_percent' in item ? item.steam_discount_percent : null;
+  const appId = 'steam_app_id' in item ? item.steam_app_id : null;
+  const cachedLooksValid =
+    cachedCents != null && isPlausibleBrlSteamPriceCents(cachedCents);
+  const shouldFetchLive =
+    Boolean(appId) && (variant === 'modal' || !cachedLooksValid);
+
+  useEffect(() => {
+    if (!shouldFetchLive) {
+      setLivePrice(null);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/jogos/${item.id}/steam-price`);
+        if (!response.ok) return;
+        const data = (await response.json()) as LiveSteamPrice;
+        if (!cancelled) setLivePrice(data);
+      } catch {
+        // ignora — preço opcional no card
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldFetchLive, appId, item.id]);
+
+  if (!hasSteamAppId(item) && !hasSteamPriceDisplay(item)) return null;
+
+  const priceCents =
+    (shouldFetchLive ? livePrice?.steam_price_cents : null) ??
+    (cachedLooksValid ? cachedCents : null) ??
+    livePrice?.steam_price_cents ??
+    null;
+  const discountPercent =
+    (shouldFetchLive ? livePrice?.steam_discount_percent : null) ??
+    cachedDiscount ??
+    livePrice?.steam_discount_percent ??
+    null;
+
+  const price = formatSteamPriceBRL(priceCents);
   if (!price) return null;
 
   const discount =
-    typeof item.steam_discount_percent === 'number' && item.steam_discount_percent > 0
-      ? item.steam_discount_percent
+    typeof discountPercent === 'number' &&
+    isPlausibleSteamDiscountPercent(discountPercent) &&
+    discountPercent > 0
+      ? discountPercent
       : null;
-  const storeUrl = getSteamStoreUrl(item.steam_app_id);
+  const storeUrl = getSteamStoreUrl(appId);
 
   const isCard = variant === 'card';
 

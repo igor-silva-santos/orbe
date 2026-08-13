@@ -541,6 +541,8 @@ export interface FilmeDetalhes {
 
   em_prevenda: boolean;
 
+  em_cartaz?: boolean;
+
   ingresso_link: string | null;
 
   tem_sessoes?: boolean | null;

@@ -59,16 +59,20 @@ const getRecentCarouselPastStart = (days = 90): Date => {
   return d;
 };
 
-const carouselDateOrRecentPast = (
+/** Inclui o mês seguinte no bootstrap — evita carrossel preso no mês atual sem lançamentos futuros */
+const carouselDateRecentPastAndNextMonth = (
   windowStart: Date,
   windowEnd: Date,
   recentPastStart: Date,
-): Prisma.JogoWhereInput => ({
-  OR: [
-    { firstReleaseDate: { gte: windowStart, lte: windowEnd } },
-    { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
-  ],
-});
+): Prisma.JogoWhereInput => {
+  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
+  return {
+    OR: [
+      { firstReleaseDate: { gte: windowStart, lte: nextMonthEnd } },
+      { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
+    ],
+  };
+};
 
 const carouselFirstAirOrRecentPast = (
   windowStart: Date,
@@ -119,7 +123,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         where: {
           AND: [
             jogoQualityFilter,
-            carouselDateOrRecentPast(windowStart, windowEnd, recentPastStart),
+            carouselDateRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart),
           ],
         },
         orderBy: { firstReleaseDate: 'asc' },

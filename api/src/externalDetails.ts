@@ -3,7 +3,7 @@ import { prisma } from './clients';
 import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
-import { fetchSteamAppDetails } from './steamClient';
+import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -69,6 +69,7 @@ function mapTmdbMovieToDetails(
   movie: any,
   dbExtras?: {
     em_prevenda?: boolean | null;
+    emCartaz?: boolean | null;
     ingresso_link?: string | null;
     tem_sessoes?: boolean | null;
     estreia_cinema?: boolean | null;
@@ -92,6 +93,7 @@ function mapTmdbMovieToDetails(
     voteAverage: movie.vote_average ?? null,
     voteCount: movie.vote_count ?? null,
     em_prevenda: dbExtras?.em_prevenda ?? false,
+    em_cartaz: dbExtras?.emCartaz ?? false,
     ingresso_link: dbExtras?.ingresso_link ?? null,
     tem_sessoes: dbExtras?.tem_sessoes ?? false,
     estreia_cinema: dbExtras?.estreia_cinema ?? false,
@@ -354,6 +356,7 @@ export async function fetchFilmeDetailsLive(tmdbId: number) {
         where: { tmdbId },
         select: {
           em_prevenda: true,
+          emCartaz: true,
           ingresso_link: true,
           tem_sessoes: true,
           premiacoes: true,
@@ -495,8 +498,23 @@ export async function fetchJogoDetailsLive(igdbId: number) {
     const baseMapped = mapJogoToMidia(mapIgdbToPrismaLike(game));
     let synopsisText = dbJogo?.summary?.trim() || baseMapped.sinopse;
 
-    if (dbJogo?.steamAppId) {
-      const steamDetails = await fetchSteamAppDetails(dbJogo.steamAppId);
+    let steamPriceCents = dbJogo?.steamPriceCents ?? null;
+    let steamDiscountPercent = dbJogo?.steamDiscountPercent ?? null;
+    let pcRequirements = dbJogo?.pcRequirements ?? null;
+
+    const resolvedSteamAppId =
+      dbJogo?.steamAppId ??
+      baseMapped.steam_app_id ??
+      dbJogo?.websites
+        ?.map((site) => extractSteamAppId(site.url))
+        .find((id): id is number => id != null) ??
+      (baseMapped.websites as { url: string }[] | undefined)
+        ?.map((site) => extractSteamAppId(site.url))
+        .find((id): id is number => id != null) ??
+      null;
+
+    if (resolvedSteamAppId) {
+      const steamDetails = await fetchSteamAppDetails(resolvedSteamAppId);
       if (steamDetails?.shortDescription?.trim()) {
         if (!isLikelyEnglish(steamDetails.shortDescription)) {
           synopsisText = steamDetails.shortDescription;
@@ -505,9 +523,18 @@ export async function fetchJogoDetailsLive(igdbId: number) {
         }
       }
 
-      if (!dbJogo.pcRequirements && steamDetails?.pcRequirements) {
-        dbJogo.pcRequirements = steamDetails.pcRequirements;
+      if (!pcRequirements && steamDetails?.pcRequirements) {
+        pcRequirements = steamDetails.pcRequirements;
       }
+
+      if (steamDetails?.priceCents != null) {
+        steamPriceCents = steamDetails.priceCents;
+        steamDiscountPercent = steamDetails.discountPercent ?? steamDiscountPercent;
+      } else if (!isPlausibleBrlSteamPriceCents(steamPriceCents)) {
+        steamPriceCents = null;
+      }
+    } else if (!isPlausibleBrlSteamPriceCents(steamPriceCents)) {
+      steamPriceCents = null;
     }
 
     const mappedForTranslation = { ...baseMapped, sinopse: synopsisText };
@@ -530,13 +557,13 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       websites: mergeJogoWebsites(
         translated.websites as { url: string; category: number }[] | undefined,
         dbJogo?.websites,
-        dbJogo?.steamAppId,
+        resolvedSteamAppId,
       ),
-      pc_requirements: dbJogo?.pcRequirements ?? translated.pc_requirements ?? null,
-      steam_app_id: dbJogo?.steamAppId ?? translated.steam_app_id ?? null,
+      pc_requirements: pcRequirements ?? translated.pc_requirements ?? null,
+      steam_app_id: resolvedSteamAppId,
       steam_player_count: dbJogo?.steamPlayerCount ?? translated.steam_player_count ?? null,
-      steam_price_cents: dbJogo?.steamPriceCents ?? translated.steam_price_cents ?? null,
-      steam_discount_percent: dbJogo?.steamDiscountPercent ?? translated.steam_discount_percent ?? null,
+      steam_price_cents: steamPriceCents,
+      steam_discount_percent: steamDiscountPercent,
       hypes: dbJogo?.hypes ?? game.hypes ?? null,
       follows: dbJogo?.follows ?? game.follows ?? null,
       premiacoes: parsePremiacoes(dbJogo?.premiacoes),

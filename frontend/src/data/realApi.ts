@@ -190,6 +190,12 @@ export const realApi = {
   getInteractions: orbeNerdApi.getInteractions,
   upsertInteraction: orbeNerdApi.upsertInteraction,
   getAwards: orbeNerdApi.getAwards,
+  getDeals: orbeNerdApi.getDeals,
+  getFreeDeals: orbeNerdApi.getFreeDeals,
+  getSaleDeals: orbeNerdApi.getSaleDeals,
+  getEpicFreeGames: orbeNerdApi.getEpicFreeGames,
+  getGamerPowerGiveaways: orbeNerdApi.getGamerPowerGiveaways,
+  getCheapSharkDeals: orbeNerdApi.getCheapSharkDeals,
 };
 
 export default realApi;

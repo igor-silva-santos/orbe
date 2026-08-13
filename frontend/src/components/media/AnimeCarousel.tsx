@@ -103,6 +103,27 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const itemsLengthRef = useRef(initialData.length);
   const carouselItemsRef = useRef<CarouselItem[]>([]);
   const fetchedAnimesRef = useRef<Anime[]>(initialData);
+  const viewModeRef = useRef<ViewMode>('launch');
+  const initialViewModeApplied = useRef(false);
+
+  const buildLaunchTitle = useCallback((season: Season, year: number) => {
+    const today = new Date();
+    const currentSeasonObj = getSeason(today);
+    const currentYearObj = today.getFullYear();
+    if (season === currentSeasonObj && year === currentYearObj) {
+      return `Estreias de ${SEASON_NAMES[season]} ${year}`;
+    }
+    return `Temporada de ${SEASON_NAMES[season]} ${year}`;
+  }, []);
+
+  const buildWeeklyTitle = useCallback((season: Season) => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const { startDate } = getSeasonDateRange(year, season);
+    const diffInMs = today.getTime() - startDate.getTime();
+    const diffInWeeks = Math.max(1, Math.ceil(diffInMs / (7 * 24 * 60 * 60 * 1000)));
+    return `Agenda: Semana ${diffInWeeks} de ${SEASON_NAMES[season]}`;
+  }, []);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
@@ -201,27 +222,29 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   }, [fetchSeasonData, initialSeason, initialYear]);
 
   useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
+
+  // Define modo/título inicial apenas uma vez — não sobrescreve escolha do usuário ao rolar
+  useEffect(() => {
+    if (initialViewModeApplied.current) return;
+    initialViewModeApplied.current = true;
+
     const today = new Date();
     const season = getSeason(today);
     const year = today.getFullYear();
-    
-    if (season === currentSeason && year === currentYear) {
-        const { startDate } = getSeasonDateRange(year, season);
-        const diffInMs = today.getTime() - startDate.getTime();
-        const diffInWeeks = Math.ceil(diffInMs / (7 * 24 * 60 * 60 * 1000));
-        
-        if (diffInWeeks >= 4) {
-          setViewMode('weekly');
-          setCurrentTitle(`Agenda: Semana ${diffInWeeks} de ${SEASON_NAMES[season]}`);
-        } else {
-          setViewMode('launch');
-          setCurrentTitle(`Estreias de ${SEASON_NAMES[season]} ${year}`);
-        }
+    const { startDate } = getSeasonDateRange(year, season);
+    const diffInMs = today.getTime() - startDate.getTime();
+    const diffInWeeks = Math.ceil(diffInMs / (7 * 24 * 60 * 60 * 1000));
+
+    if (diffInWeeks >= 4) {
+      setViewMode('weekly');
+      setCurrentTitle(buildWeeklyTitle(season));
     } else {
-        setViewMode('launch');
-        setCurrentTitle(`Temporada de ${SEASON_NAMES[currentSeason]} ${currentYear}`);
+      setViewMode('launch');
+      setCurrentTitle(buildLaunchTitle(season, year));
     }
-  }, [currentSeason, currentYear]);
+  }, [buildLaunchTitle, buildWeeklyTitle]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -239,13 +262,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       const items = carouselItemsRef.current;
       const animes = fetchedAnimesRef.current;
       const selectedItem = items[selectedIndex];
-      if (selectedItem?.type === 'media' && selectedItem.data.startDate) {
-          const itemDate = new Date(selectedItem.data.startDate.year, selectedItem.data.startDate.month - 1, selectedItem.data.startDate.day);
-          const season = getSeason(itemDate);
-          const year = itemDate.getFullYear();
-          setCurrentSeason(season);
-          setCurrentYear(year);
-          setCurrentTitle(`Temporada de ${SEASON_NAMES[season]} ${year}`);
+      if (
+        viewModeRef.current === 'launch' &&
+        selectedItem?.type === 'media' &&
+        selectedItem.data.startDate
+      ) {
+        const itemDate = new Date(
+          selectedItem.data.startDate.year,
+          selectedItem.data.startDate.month - 1,
+          selectedItem.data.startDate.day,
+        );
+        const season = getSeason(itemDate);
+        const year = itemDate.getFullYear();
+        setCurrentSeason(season);
+        setCurrentYear(year);
+        setCurrentTitle(buildLaunchTitle(season, year));
       }
 
       // Com rolagem rápida, o buffer precisa ser maior — o 'settle' de um arraste rápido
@@ -283,28 +314,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     };
 
     emblaApi.on('settle', onSettle);
-    // Também dispara no 'select' (durante o arraste, antes de soltar) — em rolagens
-    // rápidas o 'settle' sozinho chega tarde demais para a temporada seguinte carregar a tempo.
     emblaApi.on('select', onSettle);
-
-    const selectedIndex = emblaApi.selectedScrollSnap();
-    const selectedItem = carouselItems[selectedIndex];
-    if (selectedItem?.type === 'media' && selectedItem.data.startDate) {
-        const itemDate = new Date(selectedItem.data.startDate.year, selectedItem.data.startDate.month - 1, selectedItem.data.startDate.day);
-        const season = getSeason(itemDate);
-        const year = itemDate.getFullYear();
-        setCurrentTitle(`Temporada de ${SEASON_NAMES[season]} ${year}`);
-    }
 
     return () => {
       emblaApi.off('settle', onSettle);
       emblaApi.off('select', onSettle);
     };
-  }, [emblaApi, fetchSeasonData, fastScrollEnabled, emAltaMode]);
-
-  useEffect(() => {
-    setCurrentTitle(`Temporada de ${SEASON_NAMES[initialSeason]} ${initialYear}`);
-  }, [initialSeason, initialYear]);
+  }, [emblaApi, fetchSeasonData, fastScrollEnabled, emAltaMode, buildLaunchTitle]);
 
   const emAltaSourceAnimes = emAltaMode ? emAltaAnimes : fetchedAnimes;
   const genres = Array.from(new Set(emAltaSourceAnimes.flatMap(anime => anime.generos_api || []))).filter(Boolean);
@@ -495,7 +511,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             </div>
             {!emAltaMode && initialData.length > 0 && (
               <button
-                  onClick={() => setViewMode(prev => prev === 'launch' ? 'weekly' : 'launch')}
+                  onClick={() => {
+                    setViewMode((prev) => {
+                      const next = prev === 'launch' ? 'weekly' : 'launch';
+                      if (next === 'weekly') {
+                        setCurrentTitle(buildWeeklyTitle(getSeason(new Date())));
+                      } else {
+                        setCurrentTitle(buildLaunchTitle(currentSeason, currentYear));
+                      }
+                      return next;
+                    });
+                  }}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
               >
                   {viewMode === 'launch' ? <CalendarDays size={20} /> : <ListOrdered size={20} />}
