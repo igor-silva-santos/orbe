@@ -2,7 +2,6 @@ import './loadEnv';
 import express from 'express';
 import http from 'http';
 import crypto from 'crypto';
-import { WebSocketServer, WebSocket } from 'ws';
 import { prisma } from './clients';
 import { Prisma } from '@prisma/client';
 import { logger } from './logger';
@@ -30,87 +29,15 @@ import {
   isIgdbWebhooksEnabled,
   resolveCorsOptions,
 } from './securityMiddleware';
+import { attachWebSocketServer, shutdownWebSocket } from './websocket';
 
 assertJwtSecretConfigured();
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: '/api/ws' });
+attachWebSocketServer(server);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt_super_secreto';
-
-// Gerenciamento de conexões WebSocket
-const clients = new Set<WebSocket>();
-// Rastreia se cada cliente respondeu ao último ping (heartbeat) — ver setInterval abaixo.
-const clientsAlive = new WeakMap<WebSocket, boolean>();
-
-/**
- * CORS não se aplica a upgrades de WebSocket, então reaproveitamos a mesma lista de origens
- * de `resolveCorsOptions` pra decidir manualmente se aceitamos o handshake.
- */
-function isWebSocketOriginAllowed(origin: string | undefined): boolean {
-  const { origin: allowedOrigin } = resolveCorsOptions();
-  if (allowedOrigin === true) return true; // dev sem CORS_ORIGIN configurado — sem restrição
-  if (!origin) return false; // lista explícita configurada e request sem Origin — rejeita
-  if (Array.isArray(allowedOrigin)) return allowedOrigin.includes(origin);
-  if (typeof allowedOrigin === 'string') return origin === allowedOrigin;
-  return false;
-}
-
-wss.on('connection', (ws, request) => {
-  const origin = request.headers.origin;
-  if (!isWebSocketOriginAllowed(origin)) {
-    logger.warn(`Conexão WebSocket rejeitada — origem não permitida: ${origin ?? '(sem origem)'}`);
-    ws.close(1008, 'Origem não permitida');
-    return;
-  }
-
-  clients.add(ws);
-  clientsAlive.set(ws, true);
-  logger.info('Novo cliente WebSocket conectado.');
-
-  ws.on('pong', () => {
-    clientsAlive.set(ws, true);
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    clientsAlive.delete(ws);
-    logger.info('Cliente WebSocket desconectado.');
-  });
-
-  ws.on('error', (error) => {
-    logger.error('Erro no WebSocket:', error);
-    clients.delete(ws);
-    clientsAlive.delete(ws);
-  });
-});
-
-// Heartbeat: derruba clientes que pararam de responder pong (conexão morta sem `close` limpo).
-const HEARTBEAT_INTERVAL_MS = 30_000;
-const wsHeartbeatInterval = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (clientsAlive.get(ws) === false) {
-      clientsAlive.delete(ws);
-      clients.delete(ws);
-      ws.terminate();
-      return;
-    }
-    clientsAlive.set(ws, false);
-    ws.ping();
-  });
-}, HEARTBEAT_INTERVAL_MS);
-
-// Função para enviar mensagem para todos os clientes conectados
-export const broadcast = (message: object) => {
-  const messageString = JSON.stringify(message);
-  logger.info(`Enviando broadcast para ${clients.size} clientes`);
-  clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(messageString);
-    }
-  });
-};
 
 app.use(cors(resolveCorsOptions()));
 app.use(express.json({ limit: '256kb' }));
@@ -427,10 +354,7 @@ function shutdown(signal: string): void {
   }, SHUTDOWN_TIMEOUT_MS);
   forceExitTimer.unref();
 
-  clearInterval(wsHeartbeatInterval);
-  wss.clients.forEach((ws) => {
-    ws.close(1001, 'Servidor reiniciando');
-  });
+  shutdownWebSocket();
 
   server.close(async (closeError) => {
     if (closeError) {

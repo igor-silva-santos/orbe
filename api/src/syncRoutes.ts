@@ -24,7 +24,7 @@ import {
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
-import { broadcast } from './index';
+import { broadcast } from './websocket';
 import adminMiddleware from './adminMiddleware';
 import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer } from './logger';
 

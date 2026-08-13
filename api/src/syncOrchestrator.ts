@@ -18,7 +18,7 @@ import {
 } from './syncState';
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { invalidateCacheByPatterns } from './cacheInvalidation';
-import { broadcast } from './index';
+import { broadcast } from './websocket';
 
 export type FullSyncParams = {
   startDate: string;
