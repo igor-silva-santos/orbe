@@ -275,11 +275,46 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
   ],
 };
 
+/**
+ * Carrossel equilibrado: curadoria mais rígida que /filmes, mas sem bloquear estreias futuras.
+ * Diferente do filmeCarouselWhereInput antigo, NÃO exige streaming nem voteAverage > 0.
+ */
+export const filmeCarouselBalancedWhereInput: Prisma.FilmeWhereInput = {
+  AND: [
+    filmeCarouselQualityFilter,
+    filmeCarouselLocalizationFilter,
+    filmeCarouselConcertExclusionFilter,
+    { genres: { some: {} } },
+    {
+      OR: [
+        { AND: [{ overview: { not: null } }, { NOT: { overview: '' } }] },
+        { releaseDate: { gte: new Date() } },
+        { emBreve: true },
+        { em_prevenda: true },
+        { emCartaz: true },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
+      ],
+    },
+    {
+      OR: [
+        { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
+        { voteCount: { gte: 20 } },
+        { emCartaz: true },
+        { emBreve: true },
+        { em_prevenda: true },
+        { releaseDate: { gte: new Date() } },
+        { popularity: { gte: CAROUSEL_TENTPOLE_MIN_POPULARITY } },
+      ],
+    },
+  ],
+};
+
 type FilmeCarouselCandidate = {
   title: string;
   originalTitle?: string | null;
   overview?: string | null;
   voteAverage?: number | null;
+  voteCount?: number | null;
   popularity?: number | null;
   emCartaz?: boolean | null;
   emBreve?: boolean | null;
@@ -288,6 +323,39 @@ type FilmeCarouselCandidate = {
   genres?: { genero: { tmdbId: number } }[];
   streamingProviders?: unknown[];
 };
+
+function filmeIsUpcomingOrRelevant(filme: FilmeCarouselCandidate): boolean {
+  const releaseTime = filme.releaseDate ? new Date(filme.releaseDate).getTime() : null;
+  const isUpcoming = releaseTime !== null && !Number.isNaN(releaseTime) && releaseTime >= Date.now();
+  const isTentpole =
+    typeof filme.popularity === 'number' && filme.popularity >= CAROUSEL_TENTPOLE_MIN_POPULARITY;
+  return (
+    isUpcoming ||
+    isTentpole ||
+    Boolean(filme.emBreve) ||
+    Boolean(filme.em_prevenda) ||
+    Boolean(filme.emCartaz) ||
+    (typeof filme.popularity === 'number' && filme.popularity >= CAROUSEL_BYPASS_MIN_POPULARITY) ||
+    (typeof filme.voteCount === 'number' && filme.voteCount >= 20)
+  );
+}
+
+function filmeHasBalancedCarouselMetadata(filme: FilmeCarouselCandidate): boolean {
+  const hasSynopsis = Boolean(filme.overview?.trim());
+  const hasGenre = (filme.genres?.length ?? 0) > 0;
+  const releaseTime = filme.releaseDate ? new Date(filme.releaseDate).getTime() : null;
+  const isUpcoming = releaseTime !== null && !Number.isNaN(releaseTime) && releaseTime >= Date.now();
+  const isTentpole =
+    typeof filme.popularity === 'number' && filme.popularity >= CAROUSEL_TENTPOLE_MIN_POPULARITY;
+  const hasContent =
+    hasSynopsis ||
+    isUpcoming ||
+    isTentpole ||
+    Boolean(filme.emBreve) ||
+    Boolean(filme.em_prevenda) ||
+    Boolean(filme.emCartaz);
+  return hasGenre && hasContent && filmeIsUpcomingOrRelevant(filme);
+}
 
 function filmeHasCarouselMetadata(filme: FilmeCarouselCandidate): boolean {
   const hasSynopsis = Boolean(filme.overview?.trim());
@@ -337,6 +405,18 @@ export function filterFilmesExcludeConcerts<T extends FilmeCarouselCandidate>(fi
         original_title: filme.originalTitle ?? undefined,
         genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
       }),
+  );
+}
+
+/** Pós-filtro equilibrado — curadoria sem exigir streaming em estreias futuras */
+export function filterFilmesForCarouselBalanced<T extends FilmeCarouselCandidate>(filmes: T[]): T[] {
+  return filmes.filter(
+    (filme) =>
+      !isConcertOrLiveRecording({
+        title: filme.title,
+        original_title: filme.originalTitle ?? undefined,
+        genre_ids: filme.genres?.map((g) => g.genero.tmdbId) ?? [],
+      }) && filmeHasBalancedCarouselMetadata(filme),
   );
 }
 
