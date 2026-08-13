@@ -1,0 +1,71 @@
+name: Sync All (catálogo completo)
+
+# Sincroniza filmes → detetive → séries → animes → jogos → premiações.
+# Diferente de "Invalidate API Cache" — este workflow BUSCA dados novos no TMDB/IGDB.
+#
+# Secrets necessários (Settings → Secrets and variables → Actions):
+#   ORBE_API_URL  — ex.: https://orbe-7bu0.onrender.com
+#   SYNC_SECRET   — mesmo valor do Render
+#
+# Monitore: GET /api/sync/status e logs do Render.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Ação
+        required: true
+        default: resume
+        type: choice
+        options:
+          - resume
+          - sync_all
+      start_date:
+        description: Data início (só para sync_all)
+        required: false
+        default: '2026-01-01'
+      end_date:
+        description: Data fim (só para sync_all)
+        required: false
+        default: '2026-12-31'
+      start_year:
+        description: Ano início animes (só para sync_all)
+        required: false
+        default: '2026'
+      end_year:
+        description: Ano fim animes (só para sync_all)
+        required: false
+        default: '2026'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar sync na API
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          if [ -z "$SYNC_SECRET" ]; then
+            echo "::error::Configure SYNC_SECRET e ORBE_API_URL em Settings → Secrets → Actions"
+            exit 1
+          fi
+
+          if [ "${{ inputs.action }}" = "resume" ]; then
+            echo "Retomando sync do último checkpoint..."
+            curl -sS -f -X POST "${API_BASE}/api/run-sync-resume" \
+              -H "x-sync-secret: ${SYNC_SECRET}" \
+              -H "Content-Type: application/json"
+          else
+            echo "Iniciando sync completo: ${{ inputs.start_date }} → ${{ inputs.end_date }}"
+            curl -sS -f -X POST "${API_BASE}/api/run-sync-all" \
+              -H "x-sync-secret: ${SYNC_SECRET}" \
+              -H "Content-Type: application/json" \
+              -d "{\"startDate\":\"${{ inputs.start_date }}\",\"endDate\":\"${{ inputs.end_date }}\",\"startYear\":${{ inputs.start_year }},\"endYear\":${{ inputs.end_year }}}"
+          fi
+
+          echo ""
+          echo "Sync disparado (HTTP 202). Acompanhe em:"
+          echo "  ${API_BASE}/api/sync/status"
+          echo "  Logs do Render → serviço orbe-api"

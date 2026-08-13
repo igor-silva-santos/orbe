@@ -1,4 +1,4 @@
-name: Invalidate API Cache
+name: Invalidar Cache API
 
 on:
   workflow_dispatch:
