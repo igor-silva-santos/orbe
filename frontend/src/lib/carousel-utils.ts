@@ -96,7 +96,7 @@ export function findIndexForMonth(items: Midia[], year: number, month: number): 
   });
 }
 
-/** Posiciona o carrossel no próximo lançamento (primeiro com data >= hoje). */
+/** Posiciona o carrossel no próximo lançamento (primeiro com data >= hoje). Retorna -1 se não houver. */
 export function calculateCarouselStartIndex(data: Midia[]): number {
   if (!data || data.length === 0) return 0;
 
@@ -109,7 +109,12 @@ export function calculateCarouselStartIndex(data: Midia[]): number {
   });
   if (nextRelease >= 0) return nextRelease;
 
-  return data.length - 1;
+  return -1;
+}
+
+export function resolveCarouselStartIndex(data: Midia[]): number {
+  const next = calculateCarouselStartIndex(data);
+  return next >= 0 ? next : 0;
 }
 
 export function formatCarouselMonthTitle(date: Date): string {
