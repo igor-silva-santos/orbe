@@ -72,6 +72,12 @@ export function getLogBuffer(): string {
   return logBuffer.join('\n');
 }
 
+const DETETIVE_LOG_PATTERN = /\[detetive\]|Detetive Digital/i;
+
+export function getDetetiveLogBuffer(): string {
+  return syncLogBuffer.filter((line) => DETETIVE_LOG_PATTERN.test(line)).join('\n');
+}
+
 export function getSyncLogBuffer(): string {
   return syncLogBuffer.join('\n');
 }
@@ -80,6 +86,7 @@ export function getLogBufferMeta() {
   return {
     totalLines: logBuffer.length,
     syncLines: syncLogBuffer.length,
+    detetiveLines: syncLogBuffer.filter((line) => DETETIVE_LOG_PATTERN.test(line)).length,
     maxTotalLines: MAX_BUFFER_LINES,
     maxSyncLines: MAX_SYNC_BUFFER_LINES,
     fileLogging: Boolean(logToFile && logFilePath),

@@ -12,7 +12,7 @@ import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTran
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
-import { dedupeBy } from './syncUtils';
+import { buildTmdbGenreCreates, dedupeBy } from './syncUtils';
 import { buildStreamingProvidersCreate, parseFilmeTmdbDisponibilidade, refreshFilmesWithIncompleteAvailability } from './filmeAvailability';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -425,9 +425,11 @@ async function processMovieBatch(
         } : undefined
       };
 
+      const genreCreates = await buildTmdbGenreCreates(prisma.genero, movieDetails.genres);
+
       const relationalData = {
         genres: {
-          create: dedupeBy(movieDetails.genres, (genre: any) => genre.id).map((genre: any) => ({ genero: { connectOrCreate: { where: { tmdbId: genre.id }, create: { tmdbId: genre.id, name: genre.name } } } }))
+          create: genreCreates,
         },
         companies: {
           create: dedupeBy(movieDetails.production_companies, (company: any) => company.id).map((company: any) => ({ company: { connectOrCreate: { where: { tmdbId: company.id }, create: { tmdbId: company.id, name: company.name } } } }))
