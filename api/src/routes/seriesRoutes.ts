@@ -23,6 +23,7 @@ import {
   getMonthDateRange,
   parseYearMonthQuery,
   carouselLiteInclude,
+  serieCarouselLiteInclude,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -232,7 +233,7 @@ router.get('/series/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
         firstAirDate: 'asc',
       },
       take: CAROUSEL_ITEM_LIMIT,
-      include: carouselLiteInclude,
+      include: serieCarouselLiteInclude,
     });
     res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {
@@ -256,7 +257,7 @@ router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
       },
       orderBy: { firstAirDate: 'asc' },
       take: CAROUSEL_ITEM_LIMIT,
-      include: carouselLiteInclude,
+      include: serieCarouselLiteInclude,
     });
     res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {

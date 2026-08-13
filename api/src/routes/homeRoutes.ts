@@ -28,6 +28,7 @@ import {
   getCurrentSeason,
   fetchFilmesForCarousel,
   carouselLiteInclude,
+  serieCarouselLiteInclude,
   animeCarouselInclude,
   cardListInclude,
 } from './mediaRoutesHelpers';
@@ -118,7 +119,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         },
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
-        include: carouselLiteInclude,
+        include: serieCarouselLiteInclude,
       }),
       prisma.jogo.findMany({
         where: {

@@ -75,11 +75,24 @@ export const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   return 'FALL';
 };
 
-export const carouselLiteInclude = {
+const carouselMediaBaseInclude = {
   genres: { include: { genero: true } },
   streamingProviders: { include: { provider: true }, take: 3 },
+} as const;
+
+/** Include de carrossel para filmes (inclui saga/coleção TMDB) */
+export const filmeCarouselLiteInclude = {
+  ...carouselMediaBaseInclude,
   collection: { select: { id: true, name: true } },
 };
+
+/** Include de carrossel para séries — Serie não tem relação `collection` */
+export const serieCarouselLiteInclude = {
+  ...carouselMediaBaseInclude,
+};
+
+/** @deprecated Use filmeCarouselLiteInclude ou serieCarouselLiteInclude conforme o tipo */
+export const carouselLiteInclude = filmeCarouselLiteInclude;
 
 /** Include mínimo para cards em listagens e resumos (gêneros + até 4 provedores + saga). */
 export const cardListInclude = {
