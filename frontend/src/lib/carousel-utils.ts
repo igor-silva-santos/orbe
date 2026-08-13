@@ -2,15 +2,29 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Midia } from '@/types';
 
+function releaseDateInput(value: Midia['data_lancamento_api']): string | null {
+  if (!value) return null;
+  if (typeof value === 'object' && value !== null && 'year' in value) {
+    const d = value as { year: number; month: number; day: number };
+    return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
+  }
+  return String(value);
+}
+
 export function parseReleaseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
-  // Datas só com dia (YYYY-MM-DD) usam calendário local — evita setembro virar agosto no fuso BR
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [year, month, day] = value.split('-').map(Number);
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, year, month, day] = match.map(Number);
     return new Date(year, month - 1, day);
   }
-  const date = parseISO(value);
+  const date = parseISO(String(value));
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function parseMidiaReleaseDate(midia: Midia | undefined): Date | null {
+  if (!midia?.data_lancamento_api) return null;
+  return parseReleaseDate(releaseDateInput(midia.data_lancamento_api));
 }
 
 export function mergeMediaByDate(existing: Midia[], incoming: Midia[]): Midia[] {
@@ -19,10 +33,11 @@ export function mergeMediaByDate(existing: Midia[], incoming: Midia[]): Midia[] 
   for (const item of incoming) {
     byId.set(item.id, item);
   }
-  return Array.from(byId.values()).sort(
-    (a, b) =>
-      new Date(a.data_lancamento_api).getTime() - new Date(b.data_lancamento_api).getTime()
-  );
+  return Array.from(byId.values()).sort((a, b) => {
+    const aTime = parseMidiaReleaseDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
+    const bTime = parseMidiaReleaseDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
+    return aTime - bTime;
+  });
 }
 
 export function monthKeyFromDate(date: Date): string {
@@ -47,7 +62,7 @@ export function addMonths(year: number, month: number, delta: number): { year: n
 }
 
 export function monthKeyFromItem(item: Midia | undefined): string | null {
-  const date = parseReleaseDate(item?.data_lancamento_api);
+  const date = parseMidiaReleaseDate(item);
   if (!date) return null;
   return monthKeyFromDate(date);
 }
@@ -69,19 +84,6 @@ export function findMonthBounds(
   return { start, end };
 }
 
-export function calculateCarouselStartIndex(data: Midia[]): number {
-  if (!data || data.length === 0) return 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const index = data.findIndex((item) => {
-    const releaseDate = parseReleaseDate(item.data_lancamento_api);
-    return releaseDate !== null && releaseDate >= today;
-  });
-
-  return index > -1 ? index : data.length - 1;
-}
-
 export function findIndexForMonth(items: Midia[], year: number, month: number): number {
   const targetKey = monthKeyFromDate(new Date(year, month - 1, 1));
   const exact = items.findIndex((item) => monthKeyFromItem(item) === targetKey);
@@ -89,9 +91,41 @@ export function findIndexForMonth(items: Midia[], year: number, month: number): 
 
   const targetDate = new Date(year, month - 1, 1);
   return items.findIndex((item) => {
-    const releaseDate = parseReleaseDate(item.data_lancamento_api);
+    const releaseDate = parseMidiaReleaseDate(item);
     return releaseDate !== null && releaseDate >= targetDate;
   });
+}
+
+/** Posiciona o carrossel no mês atual (ou no próximo lançamento futuro). */
+export function calculateCarouselStartIndex(data: Midia[]): number {
+  if (!data || data.length === 0) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+
+  const inCurrentMonthTodayOrFuture = data.findIndex((item) => {
+    const releaseDate = parseMidiaReleaseDate(item);
+    if (!releaseDate) return false;
+    return (
+      releaseDate.getFullYear() === year &&
+      releaseDate.getMonth() + 1 === month &&
+      releaseDate >= today
+    );
+  });
+  if (inCurrentMonthTodayOrFuture >= 0) return inCurrentMonthTodayOrFuture;
+
+  const currentMonthIndex = findIndexForMonth(data, year, month);
+  if (currentMonthIndex >= 0) return currentMonthIndex;
+
+  const nextFuture = data.findIndex((item) => {
+    const releaseDate = parseMidiaReleaseDate(item);
+    return releaseDate !== null && releaseDate >= today;
+  });
+  if (nextFuture >= 0) return nextFuture;
+
+  return data.length - 1;
 }
 
 export function formatCarouselMonthTitle(date: Date): string {
@@ -100,11 +134,16 @@ export function formatCarouselMonthTitle(date: Date): string {
 }
 
 export function monthTitleFromItem(item: Midia | undefined): string | null {
-  const date = parseReleaseDate(item?.data_lancamento_api);
+  const date = parseMidiaReleaseDate(item);
   if (!date) return null;
   try {
     return formatCarouselMonthTitle(date);
   } catch {
     return null;
   }
+}
+
+export function currentMonthCarouselTitle(): string {
+  const now = new Date();
+  return formatCarouselMonthTitle(new Date(now.getFullYear(), now.getMonth(), 1));
 }

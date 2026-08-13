@@ -5,6 +5,21 @@ const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
 const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
+/** Datas de lançamento TMDB/IGDB são "dia de calendário" — serializa como YYYY-MM-DD */
+export const toCalendarDateString = (value: Date | string | null | undefined): string | null => {
+  if (value == null) return null;
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 /** Evita 500 quando joins de gênero/provedor estão órfãos no banco */
 const safeGenreNames = (genres?: { genero?: { name: string } | null }[], limit?: number) => {
   const names = genres?.map((g) => g.genero?.name).filter((n): n is string => Boolean(n)) ?? [];
@@ -345,7 +360,7 @@ export const mapFilmeToMidia = (filme: any) => {
     titulo_original: filme.originalTitle,
     sinopse: filme.overview,
     poster_url_api: filme.posterPath ? `${TMDB_IMAGE_BASE_URL}${filme.posterPath}` : null,
-    data_lancamento_api: filme.releaseDate,
+    data_lancamento_api: toCalendarDateString(filme.releaseDate),
     duracao: formatDuration(filme.runtime),
     diretor: getCrewMember(filme.crew, 'Director'),
     escritor: getCrewMember(filme.crew, 'Writer'),
@@ -396,7 +411,7 @@ export const mapSerieToMidia = (serie: any) => {
     titulo_original: serie.originalName,
     sinopse: serie.overview,
     poster_url_api: serie.posterPath ? `${TMDB_IMAGE_BASE_URL}${serie.posterPath}` : null,
-    data_lancamento_api: serie.firstAirDate,
+    data_lancamento_api: toCalendarDateString(serie.firstAirDate),
     numero_temporadas: serie.numberOfSeasons,
     numero_episodios: serie.numberOfEpisodes,
     status: serie.status,
@@ -546,7 +561,7 @@ export const mapJogoToMidia = (jogo: any) => {
     titulo_api: jogo.name,
     sinopse: jogo.summary,
     poster_url_api: resolveIgdbImageUrl(jogo.cover),
-    data_lancamento_api: jogo.firstReleaseDate,
+    data_lancamento_api: toCalendarDateString(jogo.firstReleaseDate),
     avaliacao: jogo.rating,
     trailer_key: findTrailerKey(jogo.videos),
     generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)) ?? [],
@@ -593,7 +608,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   titulo_api: filme.title,
   titulo_curado: filme.titulo_curado ?? null,
   poster_url_api: filme.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${filme.posterPath}` : null,
-  data_lancamento_api: filme.releaseDate,
+  data_lancamento_api: toCalendarDateString(filme.releaseDate),
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: safeGenreNames(filme.genres, 3),
   plataformas_api: safeStreamingProviders(filme.streamingProviders),
@@ -613,7 +628,7 @@ export const mapSerieToCarouselCard = (serie: any) => ({
   titulo_api: serie.name,
   titulo_curado: serie.titulo_curado ?? null,
   poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
-  data_lancamento_api: serie.firstAirDate,
+  data_lancamento_api: toCalendarDateString(serie.firstAirDate),
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: safeGenreNames(serie.genres, 3),
   plataformas_api: safeStreamingProviders(serie.streamingProviders),
@@ -625,7 +640,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   titulo_api: jogo.name,
   titulo_curado: jogo.titulo_curado ?? null,
   poster_url_api: resolveIgdbImageUrl(jogo.cover),
-  data_lancamento_api: jogo.firstReleaseDate,
+  data_lancamento_api: toCalendarDateString(jogo.firstReleaseDate),
   avaliacao: jogo.rating,
   generos_api: safeGenreNames(jogo.genres, 3).map((name) => translateGameGenre(name)),
   plataformas_api: safeGamePlatforms(jogo.platforms),
