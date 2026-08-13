@@ -41,7 +41,7 @@ export type ContinuacoesPayload = {
 const posterUrl = (path: string | null | undefined) =>
   path ? `https://image.tmdb.org/t/p/w342${path}` : null;
 
-function relacaoPorData(
+export function relacaoPorData(
   atual: Date | null,
   outro: Date | null,
   naMesmaSaga: boolean,
@@ -90,30 +90,15 @@ export async function listSagas(limit = 60): Promise<SagaSummary[]> {
   const sagas: SagaSummary[] = [];
 
   for (const collection of collections) {
-    let totalFilmes = collection.filmes.length;
-    let previewSource = collection.filmes.map((f) => ({
+    const totalFilmes = collection.filmes.length;
+    if (totalFilmes < 2) continue;
+
+    const previewSource = collection.filmes.map((f) => ({
       tmdbId: f.tmdbId,
       title: f.title,
       posterPath: f.posterPath,
       releaseDate: f.releaseDate,
     }));
-
-    if (totalFilmes < 2) {
-      const tmdb = await fetchTmdbCollection(collection.id);
-      if (!tmdb || tmdb.parts.length < 2) continue;
-      totalFilmes = tmdb.parts.length;
-      previewSource = tmdb.parts
-        .sort((a, b) => (a.release_date ?? '').localeCompare(b.release_date ?? ''))
-        .slice(0, 4)
-        .map((part) => ({
-          tmdbId: part.id,
-          title: part.title,
-          posterPath: part.poster_path,
-          releaseDate: part.release_date ? new Date(part.release_date) : null,
-        }));
-    }
-
-    if (totalFilmes < 2) continue;
 
     const previewIds = previewSource.map((f) => f.tmdbId);
     const inDb = await filmesNoOrbe(previewIds);

@@ -21,6 +21,7 @@ export const parsePagination = (query: { page?: string; limit?: string }) => {
 };
 
 export const parsePositiveIntId = (raw: string): number | null => {
+  if (!/^\d+$/.test(raw)) return null;
   const id = parseInt(raw, 10);
   if (!Number.isInteger(id) || id <= 0) return null;
   return id;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import cacheMiddleware from '../cacheMiddleware';
 import { logger } from '../logger';
+import { detailsRateLimiter } from '../securityMiddleware';
 import {
   getContinuacoesFilme,
   getContinuacoesSerie,
@@ -8,13 +9,14 @@ import {
   listSagas,
 } from '../continuacoesService';
 import { parsePositiveIntId } from './mediaRoutesHelpers';
+import { parseSagasLimit } from '../continuacoesValidation';
 
 const router = Router();
 const CACHE = 60 * 60 * 6;
 
 router.get('/continuacoes/sagas', cacheMiddleware(CACHE), async (req, res) => {
   try {
-    const limit = Math.min(100, parseInt(String(req.query.limit ?? '48'), 10) || 48);
+    const limit = parseSagasLimit(req.query.limit);
     const sagas = await listSagas(limit);
     res.json({ sagas, total: sagas.length });
   } catch (error) {
@@ -23,7 +25,7 @@ router.get('/continuacoes/sagas', cacheMiddleware(CACHE), async (req, res) => {
   }
 });
 
-router.get('/continuacoes/sagas/:id', cacheMiddleware(CACHE), async (req, res) => {
+router.get('/continuacoes/sagas/:id', detailsRateLimiter, cacheMiddleware(CACHE), async (req, res) => {
   const collectionId = parsePositiveIntId(req.params.id);
   if (!collectionId) {
     return res.status(400).json({ error: 'ID de saga inválido.' });
@@ -40,7 +42,7 @@ router.get('/continuacoes/sagas/:id', cacheMiddleware(CACHE), async (req, res) =
   }
 });
 
-router.get('/continuacoes/filmes/:id', cacheMiddleware(CACHE), async (req, res) => {
+router.get('/continuacoes/filmes/:id', detailsRateLimiter, cacheMiddleware(CACHE), async (req, res) => {
   const tmdbId = parsePositiveIntId(req.params.id);
   if (!tmdbId) {
     return res.status(400).json({ error: 'ID de filme inválido.' });
@@ -54,7 +56,7 @@ router.get('/continuacoes/filmes/:id', cacheMiddleware(CACHE), async (req, res) 
   }
 });
 
-router.get('/continuacoes/series/:id', cacheMiddleware(CACHE), async (req, res) => {
+router.get('/continuacoes/series/:id', detailsRateLimiter, cacheMiddleware(CACHE), async (req, res) => {
   const tmdbId = parsePositiveIntId(req.params.id);
   if (!tmdbId) {
     return res.status(400).json({ error: 'ID de série inválido.' });
