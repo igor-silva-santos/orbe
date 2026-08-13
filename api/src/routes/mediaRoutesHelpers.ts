@@ -78,6 +78,12 @@ export const carouselLiteInclude = {
   streamingProviders: { include: { provider: true }, take: 3 },
 };
 
+/** Include mínimo para cards em listagens e resumos (gêneros + até 4 provedores). */
+export const cardListInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 4 },
+};
+
 export async function fetchFilmesForCarousel(
   extraWhere: Prisma.FilmeWhereInput,
   options: {

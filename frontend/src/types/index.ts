@@ -108,6 +108,7 @@ export interface Filme extends Midia {
   ingresso_link?: string;
   em_prevenda: boolean;
   em_cartaz?: boolean;
+  em_breve?: boolean;
   tem_sessoes?: boolean;
   estreia_cinema?: boolean;
   estreia_streaming?: boolean;

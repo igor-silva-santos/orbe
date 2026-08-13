@@ -148,7 +148,23 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     interaction => interaction.midia_id === midia.id && interaction.tipo_midia === type
   );
 
+  const hasReleased = (() => {
+    const date = midia.data_lancamento_curada || midia.data_lancamento_api;
+    if (!date) return false;
+    try {
+      const releaseDate = typeof date === 'string' ? parseISO(date) : new Date((date as any).year, (date as any).month - 1, (date as any).day);
+      return releaseDate <= new Date();
+    } catch {
+      return false;
+    }
+  })();
+
   const isAdultContent = (midia as any).isAdult === true;
+  const isFilme = type === 'filme';
+  const filme = isFilme ? (midia as import('@/types').Filme) : null;
+  const showPreVenda = Boolean(filme?.em_prevenda);
+  const showEmBreve = !showPreVenda && (Boolean(filme?.em_breve) || (!hasReleased && isFilme));
+  const platformItems = type === 'jogo' ? platforms : providers;
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
@@ -166,17 +182,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
       return 'Data inválida';
     }
   };
-
-  const hasReleased = (() => {
-    const date = midia.data_lancamento_curada || midia.data_lancamento_api;
-    if (!date) return false;
-    try {
-      const releaseDate = typeof date === 'string' ? parseISO(date) : new Date((date as any).year, (date as any).month - 1, (date as any).day);
-      return releaseDate <= new Date();
-    } catch {
-      return false;
-    }
-  })();
 
   const menuActions = [
     { icon: Heart, label: 'Favoritar', action: 'favoritar' as UserAction, active: userInteraction?.status === 'favorito' },
@@ -228,9 +233,14 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
-                {type === 'filme' && (midia as any).em_prevenda && (
+                {showPreVenda && (
                   <div className="absolute top-2 right-2 z-10 pointer-events-none rounded-full border-2 border-[var(--orbe-block-border)] bg-background px-2 py-0.5 text-[10.5px] font-bold orbe-text-primary">
                     PRÉ-VENDA
+                  </div>
+                )}
+                {showEmBreve && (
+                  <div className="absolute top-2 right-2 z-10 pointer-events-none rounded-full border-2 border-[var(--orbe-block-border)] bg-background/95 px-2 py-0.5 text-[10.5px] font-bold text-muted-foreground">
+                    EM BREVE
                   </div>
                 )}
                 {topAward && (
@@ -250,12 +260,13 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   </div>
                 )}
                 <div
-                  className={`absolute right-2 ${type === 'filme' && (midia as any).em_prevenda ? 'top-10' : 'top-2'}`}
+                  className={`absolute right-2 ${showPreVenda || showEmBreve ? 'top-10' : 'top-2'}`}
                   ref={menuRef}
                 >
                   <button
                     onClick={handleMenuToggle}
-                    className="bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
+                    className="bg-black/55 text-white p-1.5 rounded-full opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
+                    aria-label="Ações do card"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </button>
@@ -321,7 +332,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 </div>
                 {/* Idem: altura fixa mesmo sem plataformas/providers, pra não desalinhar os cards vizinhos. */}
                 <div className="h-6 flex flex-wrap items-center gap-1.5 shrink-0">
-                  {(type === 'jogo' ? platforms : providers).map((p) => (
+                  {platformItems.map((p) => (
                     <PlatformIcon
                       key={p.name}
                       platform={p.icon}
@@ -333,6 +344,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                       title={p.name}
                     />
                   ))}
+                  {platformItems.length === 0 && showEmBreve && (
+                    <span className="inline-flex h-6 items-center rounded-full border border-border bg-muted/50 px-2 text-[9px] font-semibold text-muted-foreground">
+                      Em breve
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

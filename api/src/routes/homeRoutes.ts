@@ -29,6 +29,7 @@ import {
   fetchFilmesForCarousel,
   carouselLiteInclude,
   animeCarouselInclude,
+  cardListInclude,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -178,7 +179,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
         orderBy: { popularity: 'desc' },
         take: 12,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
       }),
       prisma.filme.findMany({
         where: {
@@ -186,13 +187,13 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         },
         orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
       }),
       prisma.filme.findMany({
         where: { AND: streamingFilmeFilters },
         orderBy: [{ popularity: 'desc' }, { voteCount: 'desc' }],
         take: 12,
-        include: { streamingProviders: { include: { provider: true } } },
+        include: cardListInclude,
       }),
       prisma.serie.findMany({
         where: {
