@@ -23,7 +23,8 @@ export function parseReleaseDate(value: string | null | undefined): Date | null 
 }
 
 export function parseMidiaReleaseDate(midia: Midia | undefined): Date | null {
-  return parseReleaseDate(releaseDateInput(midia?.data_lancamento_api));
+  if (!midia?.data_lancamento_api) return null;
+  return parseReleaseDate(releaseDateInput(midia.data_lancamento_api));
 }
 
 export function mergeMediaByDate(existing: Midia[], incoming: Midia[]): Midia[] {

@@ -301,7 +301,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   );
 
   const scrollToCurrentMonth = useCallback(
-    (list: Midia[], behavior: boolean | 'smooth' = false) => {
+    (list: Midia[], jump = false) => {
       if (!emblaApi || list.length === 0) return -1;
 
       const now = new Date();
@@ -313,7 +313,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       lastTitleMonthKey.current = monthKeyFromDate(new Date(year, month - 1, 1));
       setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
       emblaApi.reInit();
-      emblaApi.scrollTo(resolvedIndex, behavior);
+      emblaApi.scrollTo(resolvedIndex, jump);
       previousSelectedIndex.current = resolvedIndex;
       updateTitleFromIndex(resolvedIndex, list);
       void prefetchAdjacentMonthsForIndex(resolvedIndex, list);
@@ -417,7 +417,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
     if (target) {
       const centered = target.list[target.index];
-      const centeredDate = centered?.data_lancamento_api ? new Date(centered.data_lancamento_api) : null;
+      const centeredDate = parseMidiaReleaseDate(centered);
       const needsFutureMonth =
         centeredDate && !Number.isNaN(centeredDate.getTime()) && centeredDate < today;
 
@@ -434,7 +434,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             continue;
           }
           const item = candidate.list[candidate.index];
-          const release = item?.data_lancamento_api ? new Date(item.data_lancamento_api) : null;
+          const release = parseMidiaReleaseDate(item);
           if (release && !Number.isNaN(release.getTime()) && release >= today) {
             target = candidate;
             break;
