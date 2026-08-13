@@ -1,0 +1,37 @@
+name: Invalidate API Cache
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Escopo do cache a invalidar
+        required: true
+        default: filmes
+        type: choice
+        options:
+          - all
+          - homepage
+          - filmes
+          - series
+          - animes
+          - jogos
+
+jobs:
+  invalidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invalidar cache Redis na API
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          if [ -z "$SYNC_SECRET" ]; then
+            echo "SYNC_SECRET não configurado nos secrets do repositório." >&2
+            exit 1
+          fi
+          echo "Invalidando cache (escopo: ${{ inputs.scope }}) em ${API_BASE} ..."
+          curl -sS -f -X POST "${API_BASE}/api/sync/invalidate-cache" \
+            -H "x-sync-secret: ${SYNC_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"scope\":\"${{ inputs.scope }}\"}"
