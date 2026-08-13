@@ -58,23 +58,33 @@ export async function ensureTmdbGenero(delegate: GeneroDelegate, genre: TmdbName
   }
 }
 
+/** Resolve ids internos de gênero TMDB, sem duplicatas. */
+export async function resolveTmdbGeneroIds(
+  delegate: GeneroDelegate,
+  genres: TmdbNamedEntity[] | undefined | null,
+): Promise<number[]> {
+  const unique = dedupeBy(genres, (genre) => genre.id);
+  const seenGeneroIds = new Set<number>();
+  const ids: number[] = [];
+
+  for (const genre of unique) {
+    if (!genre?.id || !genre?.name) continue;
+    const generoId = await ensureTmdbGenero(delegate, genre);
+    if (seenGeneroIds.has(generoId)) continue;
+    seenGeneroIds.add(generoId);
+    ids.push(generoId);
+  }
+
+  return ids;
+}
+
 /** Monta creates de junção com `connect` por id interno, sem duplicar generoId no mesmo filme/série. */
 export async function buildTmdbGenreCreates(
   delegate: GeneroDelegate,
   genres: TmdbNamedEntity[] | undefined | null,
 ): Promise<{ genero: { connect: { id: number } } }[]> {
-  const unique = dedupeBy(genres, (genre) => genre.id);
-  const seenGeneroIds = new Set<number>();
-  const create: { genero: { connect: { id: number } } }[] = [];
-
-  for (const genre of unique) {
-    const generoId = await ensureTmdbGenero(delegate, genre);
-    if (seenGeneroIds.has(generoId)) continue;
-    seenGeneroIds.add(generoId);
-    create.push({ genero: { connect: { id: generoId } } });
-  }
-
-  return create;
+  const ids = await resolveTmdbGeneroIds(delegate, genres);
+  return ids.map((id) => ({ genero: { connect: { id } } }));
 }
 
 type IgdbNamedEntity = { id: number; name: string; slug?: string };

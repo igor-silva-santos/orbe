@@ -9,7 +9,7 @@ import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
-import { buildTmdbGenreCreates, dedupeBy } from './syncUtils';
+import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -220,7 +220,8 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
         tagline: serieDetails.tagline,
       };
 
-      const genreCreates = await buildTmdbGenreCreates(prisma.genero, serieDetails.genres);
+      const generoIds = await resolveTmdbGeneroIds(prisma.genero, serieDetails.genres);
+      const genreCreates = generoIds.map((generoId) => ({ genero: { connect: { id: generoId } } }));
 
       const relationalData = {
         genres: {
@@ -268,20 +269,30 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
       const existingSerie = await prisma.serie.findUnique({ where: { tmdbId: id }, select: { id: true } });
 
       if (existingSerie) {
-        await prisma.serie.update({
-          where: { tmdbId: id },
-          data: {
-            ...scalarData,
-            genres: { deleteMany: {}, create: relationalData.genres.create },
-            networks: { deleteMany: {}, create: relationalData.networks.create },
-            languages: { deleteMany: {}, create: relationalData.languages.create },
-            seasons: { deleteMany: {}, create: relationalData.seasons.create },
-            createdBy: { deleteMany: {}, create: relationalData.createdBy.create },
-            cast: { deleteMany: {}, create: relationalData.cast.create },
-            crew: { deleteMany: {}, create: relationalData.crew.create },
-            videos: { deleteMany: {}, create: relationalData.videos.create },
-            streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
-          },
+        await prisma.$transaction(async (tx) => {
+          await tx.serieGenero.deleteMany({ where: { serieId: existingSerie.id } });
+
+          await tx.serie.update({
+            where: { id: existingSerie.id },
+            data: {
+              ...scalarData,
+              networks: { deleteMany: {}, create: relationalData.networks.create },
+              languages: { deleteMany: {}, create: relationalData.languages.create },
+              seasons: { deleteMany: {}, create: relationalData.seasons.create },
+              createdBy: { deleteMany: {}, create: relationalData.createdBy.create },
+              cast: { deleteMany: {}, create: relationalData.cast.create },
+              crew: { deleteMany: {}, create: relationalData.crew.create },
+              videos: { deleteMany: {}, create: relationalData.videos.create },
+              streamingProviders: { deleteMany: {}, create: relationalData.streamingProviders.create },
+            },
+          });
+
+          if (generoIds.length > 0) {
+            await tx.serieGenero.createMany({
+              data: generoIds.map((generoId) => ({ serieId: existingSerie.id, generoId })),
+              skipDuplicates: true,
+            });
+          }
         });
       } else {
         await prisma.serie.create({
