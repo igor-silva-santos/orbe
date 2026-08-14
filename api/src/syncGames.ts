@@ -6,6 +6,7 @@ import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
 import { isJogoRelevantForSync, SYNC_MIN_GAME_HYPES } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
+import { isOpenPeriod } from './syncDateHelpers';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, ensureIgdbNamedEntity } from './syncUtils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -454,6 +455,8 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
         return;
     }
 
+    const periodOpen = isOpenPeriod(endDateArg);
+
     let totalBatches = 0;
     let completedBatches = 0;
 
@@ -470,7 +473,10 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
         await getIgdbAccessToken();
         await updateSyncProgress(prisma, { phase: 'jogos', processedInPhase: 0, totalInPhase: 0 });
 
-        const popularIds = await fetchPopularGameIds();
+        const popularIds = periodOpen ? await fetchPopularGameIds() : [];
+        if (!periodOpen) {
+            logger.info('Período histórico — lista curada de jogos populares ignorada.');
+        }
         const batchSize = 100;
         const countBatches = (ids: number[]) => Math.ceil(ids.length / batchSize) || 0;
 
