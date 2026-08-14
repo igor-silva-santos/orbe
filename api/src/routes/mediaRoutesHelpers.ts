@@ -89,10 +89,34 @@ export const filmeCarouselLiteInclude = {
   collection: { select: { id: true, name: true } },
 };
 
-/** Include de carrossel para séries — Serie não tem relação `collection` */
+/** Include de carrossel para séries — temporadas recentes para data de próxima estreia */
 export const serieCarouselLiteInclude = {
   ...carouselMediaBaseInclude,
+  seasons: {
+    where: { seasonNumber: { gt: 0 }, airDate: { not: null } },
+    orderBy: { airDate: 'desc' as const },
+    take: 6,
+    select: { airDate: true, seasonNumber: true },
+  },
 };
+
+/** Filtro por mês no carrossel: estreia original ou temporada com airDate no intervalo */
+export const serieCarouselDateInRange = (
+  startDate: Date,
+  endDate: Date,
+): Prisma.SerieWhereInput => ({
+  OR: [
+    { firstAirDate: { gte: startDate, lte: endDate } },
+    {
+      seasons: {
+        some: {
+          seasonNumber: { gt: 0 },
+          airDate: { gte: startDate, lte: endDate },
+        },
+      },
+    },
+  ],
+});
 
 /** @deprecated Use filmeCarouselLiteInclude ou serieCarouselLiteInclude conforme o tipo */
 export const carouselLiteInclude = filmeCarouselLiteInclude;
