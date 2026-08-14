@@ -18,11 +18,14 @@ import {
   addMonths,
   findIndexForMonth,
   formatCarouselMonthTitle,
+  filterMidiaForCarouselTimeline,
   monthKeyFromDate,
   monthKeyFromItem,
   monthTitleFromItem,
   parseMonthKey,
   resolveCarouselOpenMonthKey,
+  isCarouselBootstrapReady,
+  currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -62,14 +65,14 @@ type DisplaySlide =
   | { kind: 'dated'; item: Midia; datedIndex: number }
   | YearTbdSlide;
 
-const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
+const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, className }) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
   const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
   const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
-  const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
-  const [selectedSnap, setSelectedSnap] = useState(startIndex);
-  const [currentTitle, setCurrentTitle] = useState('');
+  const [mediaItems, setMediaItems] = useState<Midia[]>([]);
+  const [selectedSnap, setSelectedSnap] = useState(0);
+  const [currentTitle, setCurrentTitle] = useState(currentMonthCarouselTitle);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
@@ -83,9 +86,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const fetchingEmAltaRef = useRef(false);
   const lastVisibleMonthKeyRef = useRef<string>('');
 
-  const previousSelectedIndex = useRef<number>(startIndex);
-  const firstItemIdRef = useRef<number | undefined>(initialData[0]?.id);
-  const itemsLengthRef = useRef(initialData.length);
+  const previousSelectedIndex = useRef<number>(0);
+  const firstItemIdRef = useRef<number | undefined>(undefined);
+  const itemsLengthRef = useRef(0);
   const mediaItemsRef = useRef(mediaItems);
   const lastTitleMonthKey = useRef<string>('');
   const hasInitialPositioningRef = useRef(true);
@@ -107,9 +110,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   );
 
   const applyDisplayFilters = useCallback(
-    (items: Midia[]): Midia[] =>
-      selectedGenre ? items.filter((item) => item.generos_api?.includes(selectedGenre)) : items,
-    [selectedGenre]
+    (items: Midia[]): Midia[] => {
+      const timeline = filterMidiaForCarouselTimeline(items);
+      return selectedGenre
+        ? timeline.filter((item) => item.generos_api?.includes(selectedGenre))
+        : timeline;
+    },
+    [selectedGenre],
   );
 
   const {
@@ -481,7 +488,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, displaySlides.length);
-  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
+  const showPositioningSkeleton = !emAltaMode && (hasInitialPositioning || !isCarouselBootstrapReady(filteredItems));
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
 
@@ -498,7 +505,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             : isNavigating
               ? 'Carregando conteúdo...'
               : showPositioningSkeleton
-                ? 'Carregando...'
+                ? currentTitle
                 : filteredItems.length === 0
                   ? hasCompletedInitialLoad
                     ? 'Nenhum conteúdo encontrado'

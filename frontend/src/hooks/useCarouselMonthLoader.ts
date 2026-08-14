@@ -4,6 +4,8 @@ import { useCallback, useRef, useState, type MutableRefObject, type RefObject } 
 import {
   addMonths,
   findMonthBounds,
+  hasCarouselMonthData,
+  isCarouselBootstrapReady,
   isCarouselOpenIndexReady,
   mergeMediaByDate,
   monthKeyFromDate,
@@ -250,12 +252,22 @@ export function useCarouselMonthLoader({
   const resolveOpenPosition = useCallback(async (): Promise<number> => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const targetMonthKey = monthKeyFromDate(today);
 
     let { year, month } = { year: today.getFullYear(), month: today.getMonth() + 1 };
 
+    // Garante o mês atual antes de qualquer decisão de índice
+    await loadMonth(year, month, 'visible', true);
+
     for (let attempt = 0; attempt < 14; attempt++) {
       const list = applyDisplayFilters(mediaItemsRef.current ?? []);
-      const targetMonthKey = resolveCarouselOpenMonthKey(list);
+
+      if (!hasCarouselMonthData(list, targetMonthKey)) {
+        await loadMonth(year, month, 'visible', true);
+        ({ year, month } = addMonths(year, month, 1));
+        continue;
+      }
+
       const targetIndex = resolveCarouselOpenIndex(list);
 
       if (targetIndex >= 0 && isCarouselOpenIndexReady(list, targetIndex)) {
@@ -276,7 +288,7 @@ export function useCarouselMonthLoader({
     return computeOpenIndex();
   }, [applyDisplayFilters, computeOpenIndex, loadMonth, mediaItemsRef]);
 
-  /** Bootstrap: mês atual + próximo em paralelo, depois reposiciona */
+  /** Bootstrap: mês atual + adjacentes; também pré-carrega passado recente para scroll */
   const bootstrapInitialMonths = useCallback(async (): Promise<number> => {
     if (initialBootstrapDoneRef.current) {
       return resolveOpenPosition();
@@ -286,10 +298,12 @@ export function useCarouselMonthLoader({
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
+    const prev = addMonths(year, month, -1);
     const next = addMonths(year, month, 1);
     const next2 = addMonths(year, month, 2);
 
     await Promise.all([
+      loadMonth(prev.year, prev.month, 'backward', true),
       loadMonth(year, month, 'visible', true),
       loadMonth(next.year, next.month, 'forward', true),
       loadMonth(next2.year, next2.month, 'forward', true),
