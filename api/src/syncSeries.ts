@@ -85,7 +85,7 @@ async function fetchIdsFromTmdbList(
 }
 
 async function fetchCuratedSeriesIds(): Promise<Set<number>> {
-  logger.info('Buscando séries de listas curadas TMDB (popular, on_the_air)...');
+  logger.info('Buscando séries de listas curadas TMDB (popular, on_the_air, airing_today)...');
   const ids = new Set<number>();
 
   const popular = await fetchIdsFromTmdbList('/tv/popular', {}, 15);
@@ -95,6 +95,10 @@ async function fetchCuratedSeriesIds(): Promise<Set<number>> {
   const onTheAir = await fetchIdsFromTmdbList('/tv/on_the_air', {}, 10);
   onTheAir.forEach((id) => ids.add(id));
   logger.info(`  on_the_air: ${onTheAir.length} séries`);
+
+  const airingToday = await fetchIdsFromTmdbList('/tv/airing_today', {}, 5);
+  airingToday.forEach((id) => ids.add(id));
+  logger.info(`  airing_today: ${airingToday.length} séries`);
 
   logger.info(`Total de ${ids.size} IDs únicos de listas curadas.`);
   return ids;
@@ -506,6 +510,17 @@ export async function syncSeries(
               totalInPhase: stats?.total,
             });
         }
+    }
+
+    if (periodOpen) {
+      const refreshIds = await fetchIdsFromTmdbList('/tv/on_the_air', {}, 3);
+      if (refreshIds.length > 0) {
+        logger.info(`Atualizando temporadas de ${refreshIds.length} séries on_the_air (período ${startStr})...`);
+        const refreshBatch = refreshIds.slice(0, 40);
+        const refreshResult = await processSerieBatch(refreshBatch, prisma, curatedIds, period, includeUndated);
+        await addSkipReasons(prisma, 'series', refreshResult.skipReasons);
+        allNoBrProviderIds.push(...refreshResult.noBrProviderIds);
+      }
     }
 
     currentStartDate.setMonth(currentStartDate.getMonth() + 1);

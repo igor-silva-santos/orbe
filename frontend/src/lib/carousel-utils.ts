@@ -67,6 +67,20 @@ export function monthKeyFromItem(item: Midia | undefined): string | null {
   return monthKeyFromDate(date);
 }
 
+/** Ignora reestreias históricas fora da janela do carrossel (alinhado ao passado recente da API) */
+export const CAROUSEL_TIMELINE_PAST_DAYS = 90;
+
+export function getCarouselTimelineMinDate(reference = new Date()): Date {
+  const min = new Date(reference);
+  min.setHours(0, 0, 0, 0);
+  min.setDate(min.getDate() - CAROUSEL_TIMELINE_PAST_DAYS);
+  return min;
+}
+
+export function isCarouselTimelineDate(date: Date, reference = new Date()): boolean {
+  return date >= getCarouselTimelineMinDate(reference);
+}
+
 /** Índices do primeiro e último item de um mês na lista ordenada */
 export function findMonthBounds(
   items: Midia[],
@@ -102,10 +116,15 @@ export function calculateCarouselStartIndex(data: Midia[]): number {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const minTimeline = getCarouselTimelineMinDate(today);
 
   const nextRelease = data.findIndex((item) => {
     const releaseDate = parseMidiaReleaseDate(item);
-    return releaseDate !== null && releaseDate >= today;
+    return (
+      releaseDate !== null &&
+      isCarouselTimelineDate(releaseDate, today) &&
+      releaseDate >= today
+    );
   });
   if (nextRelease >= 0) return nextRelease;
 
@@ -131,11 +150,10 @@ export function resolveCarouselOpenMonthKey(data: Midia[]): string {
   return monthKeyFromDate(today);
 }
 
-/** Índice do primeiro slide do mês-alvo (início do mês na timeline) */
+/** Índice do primeiro slide do mês-alvo (início do mês na timeline). Retorna -1 se o mês não existir nos dados. */
 export function resolveIndexForMonthKey(data: Midia[], monthKey: string): number {
   const { year, month } = parseMonthKey(monthKey);
-  const index = findIndexForMonth(data, year, month);
-  return index >= 0 ? index : 0;
+  return findIndexForMonth(data, year, month);
 }
 
 /** Índice de abertura: início do mês do próximo lançamento >= hoje; senão início do mês atual nos dados */
@@ -151,7 +169,14 @@ export function resolveCarouselOpenIndex(data: Midia[]): number {
   const currentMonthKey = monthKeyFromDate(today);
 
   for (let i = data.length - 1; i >= 0; i--) {
+    const releaseDate = parseMidiaReleaseDate(data[i]);
+    if (!releaseDate || !isCarouselTimelineDate(releaseDate, today)) continue;
     if (monthKeyFromItem(data[i]) === currentMonthKey) return i;
+  }
+
+  for (let i = data.length - 1; i >= 0; i--) {
+    const releaseDate = parseMidiaReleaseDate(data[i]);
+    if (releaseDate && isCarouselTimelineDate(releaseDate, today)) return i;
   }
 
   return data.length - 1;

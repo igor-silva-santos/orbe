@@ -86,6 +86,28 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(resolveCarouselOpenIndex(items), 2);
     assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items)]), '2026-08');
   });
+
+  it('ignores historical re-releases when opening the carousel', () => {
+    const items = [
+      mockMidia(1, '1943-09-17'),
+      mockMidia(2, '1966-08-15'),
+      mockMidia(3, '2026-07-01'),
+      mockMidia(4, '2026-08-05'),
+    ];
+    assert.equal(resolveCarouselOpenIndex(items), 3);
+    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items)]), '2026-08');
+  });
+
+  it('does not jump to index 0 when target month is missing from polluted bootstrap data', () => {
+    const items = [
+      mockMidia(1, '1943-09-17'),
+      mockMidia(2, '2026-07-01'),
+      mockMidia(3, '2026-07-15'),
+    ];
+    const index = resolveCarouselOpenIndex(items);
+    assert.notEqual(index, 0);
+    assert.equal(monthKeyFromItem(items[index]), '2026-07');
+  });
 });
 
 describe('mergeMediaByDate', () => {

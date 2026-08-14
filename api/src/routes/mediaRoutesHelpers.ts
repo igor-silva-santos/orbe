@@ -155,6 +155,67 @@ export async function fetchFilmesForCarousel(
   return filterFilmesForCarouselBalanced(filmes);
 }
 
+/** Mescla listas de carrossel por data ascendente, deduplicando por tmdbId */
+export function mergeCarouselRowsByDateAsc<T extends { tmdbId: number; releaseDate?: Date | string | null }>(
+  priority: T[],
+  past: T[],
+  limit: number,
+): T[] {
+  const seen = new Set<number>();
+  const merged: T[] = [];
+
+  for (const item of priority) {
+    if (seen.has(item.tmdbId)) continue;
+    seen.add(item.tmdbId);
+    merged.push(item);
+  }
+
+  for (const item of past) {
+    if (merged.length >= limit) break;
+    if (seen.has(item.tmdbId)) continue;
+    seen.add(item.tmdbId);
+    merged.push(item);
+  }
+
+  return merged
+    .slice(0, limit)
+    .sort((a, b) => {
+      const aTime = a.releaseDate ? new Date(a.releaseDate).getTime() : Number.POSITIVE_INFINITY;
+      const bTime = b.releaseDate ? new Date(b.releaseDate).getTime() : Number.POSITIVE_INFINITY;
+      return aTime - bTime;
+    });
+}
+
+export function mergeCarouselRowsByFirstReleaseDateAsc<T extends { igdbId: number; firstReleaseDate?: Date | string | null }>(
+  priority: T[],
+  past: T[],
+  limit: number,
+): T[] {
+  const seen = new Set<number>();
+  const merged: T[] = [];
+
+  for (const item of priority) {
+    if (seen.has(item.igdbId)) continue;
+    seen.add(item.igdbId);
+    merged.push(item);
+  }
+
+  for (const item of past) {
+    if (merged.length >= limit) break;
+    if (seen.has(item.igdbId)) continue;
+    seen.add(item.igdbId);
+    merged.push(item);
+  }
+
+  return merged
+    .slice(0, limit)
+    .sort((a, b) => {
+      const aTime = a.firstReleaseDate ? new Date(a.firstReleaseDate).getTime() : Number.POSITIVE_INFINITY;
+      const bTime = b.firstReleaseDate ? new Date(b.firstReleaseDate).getTime() : Number.POSITIVE_INFINITY;
+      return aTime - bTime;
+    });
+}
+
 export const animeCarouselInclude = {
   genres: { include: { genero: true } },
   streamingLinks: { take: 5 },
