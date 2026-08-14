@@ -622,13 +622,57 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
   saga: mapFilmeSaga(filme),
 });
 
+type SerieSeasonDate = { airDate?: Date | string | null; seasonNumber?: number | null };
+
+/** Data de exibição no carrossel: próxima temporada futura, senão estreia original */
+export function resolveSerieCarouselReleaseDate(serie: {
+  firstAirDate?: Date | string | null;
+  seasons?: SerieSeasonDate[] | null;
+}): Date | null {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const seasonDates = (serie.seasons ?? [])
+    .filter((s) => (s.seasonNumber ?? 0) > 0 && s.airDate)
+    .map((s) => {
+      const d = s.airDate instanceof Date ? s.airDate : new Date(s.airDate!);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    })
+    .filter((d) => !Number.isNaN(d.getTime()))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  const upcomingSeason = seasonDates.find((d) => d >= today);
+  if (upcomingSeason) return upcomingSeason;
+
+  if (serie.firstAirDate) {
+    const first = serie.firstAirDate instanceof Date ? new Date(serie.firstAirDate) : new Date(serie.firstAirDate);
+    first.setHours(0, 0, 0, 0);
+    if (!Number.isNaN(first.getTime()) && first >= today) return first;
+  }
+
+  return serie.firstAirDate
+    ? (serie.firstAirDate instanceof Date ? serie.firstAirDate : new Date(serie.firstAirDate))
+    : null;
+}
+
+export function sortSeriesByCarouselDate<T extends { firstAirDate?: Date | string | null; seasons?: SerieSeasonDate[] | null }>(
+  series: T[],
+): T[] {
+  return [...series].sort((a, b) => {
+    const aTime = resolveSerieCarouselReleaseDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
+    const bTime = resolveSerieCarouselReleaseDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
+    return aTime - bTime;
+  });
+}
+
 export const mapSerieToCarouselCard = (serie: any) => ({
   type: 'serie' as const,
   id: serie.tmdbId,
   titulo_api: serie.name,
   titulo_curado: serie.titulo_curado ?? null,
   poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
-  data_lancamento_api: toCalendarDateString(serie.firstAirDate),
+  data_lancamento_api: toCalendarDateString(resolveSerieCarouselReleaseDate(serie)),
   avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
   generos_api: safeGenreNames(serie.genres, 3),
   plataformas_api: safeStreamingProviders(serie.streamingProviders),

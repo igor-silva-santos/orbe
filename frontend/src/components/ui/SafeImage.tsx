@@ -8,6 +8,7 @@ import {
   BLUR_DATA_URL,
   TmdbImageSize,
   TMDB_CARD_SIZE,
+  isIgdbOrProxyImageUrl,
 } from '@/lib/image-utils';
 
 interface SafeImageProps extends Omit<ImageProps, 'src' | 'onError'> {
@@ -30,6 +31,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   const resolvedSrc = getImageSrc(src, imageSize);
   const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
   const isTmdbImage = resolvedSrc.includes('image.tmdb.org');
+  const isIgdbOrProxyImage = isIgdbOrProxyImageUrl(resolvedSrc) || isIgdbOrProxyImageUrl(src);
 
   if (hasError || !src) {
     return (
@@ -54,7 +56,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       placeholder={isPlaceholder ? undefined : 'blur'}
       blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
       onError={() => setHasError(true)}
-      unoptimized={isPlaceholder || isTmdbImage}
+      unoptimized={isPlaceholder || isTmdbImage || isIgdbOrProxyImage}
     />
   );
 };

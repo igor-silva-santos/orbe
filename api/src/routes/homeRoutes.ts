@@ -8,6 +8,7 @@ import {
   mapJogoToMidia,
   mapFilmeToCarouselCard,
   mapSerieToCarouselCard,
+  sortSeriesByCarouselDate,
   mapAnimeToCarouselCard,
   mapJogoToCarouselCard,
   normalizeSearchText,
@@ -104,6 +105,22 @@ const carouselFirstAirOrRecentPast = (
     OR: [
       { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
       { firstAirDate: { gte: recentPastStart, lt: windowStart } },
+      {
+        seasons: {
+          some: {
+            seasonNumber: { gt: 0 },
+            airDate: { gte: windowStart, lte: nextMonthEnd },
+          },
+        },
+      },
+      {
+        seasons: {
+          some: {
+            seasonNumber: { gt: 0 },
+            airDate: { gte: recentPastStart, lt: windowStart },
+          },
+        },
+      },
     ],
   };
 };
@@ -132,7 +149,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: serieCarouselLiteInclude,
-      }),
+      }).then(sortSeriesByCarouselDate),
       prisma.jogo.findMany({
         where: {
           AND: [

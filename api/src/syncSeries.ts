@@ -389,10 +389,16 @@ export async function recheckPendingBrSeries(prisma: PrismaClient, batchLimit = 
 export async function syncSeries(prisma: PrismaClient, startDate: string, endDate: string, limit?: number) {
   let currentStartDate = new Date(startDate);
   const finalEndDate = new Date(endDate);
+  const periodOpen = isOpenPeriod(endDate);
   const runProgress = getSyncRunProgress();
   const phaseTracker = runProgress?.startPhase('SÉRIES');
 
-  logger.info(`Iniciando sincronização de séries (listas curadas + período ${startDate} a ${endDate}).`);
+  logger.info(
+    `Iniciando sincronização de séries ` +
+    (periodOpen
+      ? `(listas curadas + período ${startDate} a ${endDate}).`
+      : `(período histórico ${startDate} a ${endDate} — somente discover por data, sem listas curadas).`),
+  );
 
   if (limit) {
     logger.warn(`O parâmetro limit (${limit}) será aplicado para cada mês, não para o total.`);
@@ -402,7 +408,10 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
 
   const allNoBrProviderIds: number[] = [];
 
-  const curatedIds = await fetchCuratedSeriesIds();
+  const curatedIds = periodOpen ? await fetchCuratedSeriesIds() : new Set<number>();
+  if (!periodOpen) {
+    logger.info('Período histórico — listas curadas (popular/on_the_air) ignoradas.');
+  }
   let curatedIdList = Array.from(curatedIds);
   phaseTracker?.setTotal(curatedIdList.length);
 

@@ -1,5 +1,4 @@
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
-const IGDB_IMAGE_BASE = 'https://images.igdb.com/igdb/image/upload';
 
 export const PLACEHOLDER_POSTER = '/placeholder.svg';
 export const PLACEHOLDER_AVATAR = '/placeholder.svg';
@@ -42,8 +41,7 @@ export function resolveImageUrl(
   }
 
   if (trimmed.startsWith('/api/images/igdb')) {
-    const path = trimmed.replace('/api/images/igdb', '');
-    return `${IGDB_IMAGE_BASE}${path}`;
+    return trimmed;
   }
 
   if (trimmed.startsWith('//')) {
@@ -66,6 +64,21 @@ export function getImageSrc(
 
 export function isValidImageUrl(url: string | null | undefined): boolean {
   return resolveImageUrl(url) !== null;
+}
+
+/** IGDB covers via /api/images/igdb proxy or direct images.igdb.com — skip Vercel image optimizer. */
+export function isIgdbOrProxyImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('/api/images/igdb')) return true;
+  try {
+    const parsed = new URL(trimmed.startsWith('//') ? `https:${trimmed}` : trimmed, 'http://n');
+    return (
+      parsed.pathname.startsWith('/api/images/igdb') || parsed.hostname === 'images.igdb.com'
+    );
+  } catch {
+    return false;
+  }
 }
 
 /** Hosts liberados em next.config.mjs `images.remotePatterns`. */

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
-import { mapSerieToMidia, mapSerieToCarouselCard } from '../mappers';
+import { mapSerieToMidia, mapSerieToCarouselCard, sortSeriesByCarouselDate } from '../mappers';
 import { fetchSerieDetailsLive } from '../externalDetails';
 import { serieQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
@@ -23,6 +23,7 @@ import {
   getMonthDateRange,
   parseYearMonthQuery,
   serieCarouselLiteInclude,
+  serieCarouselDateInRange,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -250,14 +251,16 @@ router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   const { startDate, endDate } = getMonthDateRange(parsed.year, parsed.month);
 
   try {
-    const series = await prisma.serie.findMany({
-      where: {
-        AND: [serieQualityFilter, { firstAirDate: { gte: startDate, lte: endDate } }],
-      },
-      orderBy: { firstAirDate: 'asc' },
-      take: CAROUSEL_ITEM_LIMIT,
-      include: serieCarouselLiteInclude,
-    });
+    const series = sortSeriesByCarouselDate(
+      await prisma.serie.findMany({
+        where: {
+          AND: [serieQualityFilter, serieCarouselDateInRange(startDate, endDate)],
+        },
+        orderBy: { firstAirDate: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: serieCarouselLiteInclude,
+      }),
+    );
     res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar séries por mês: ${error}`);
