@@ -19,7 +19,6 @@ import {
   parseMidiaReleaseDate,
   parseMonthKey,
   resolveCarouselOpenIndex,
-  currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -59,10 +58,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
   const [selectedSnap, setSelectedSnap] = useState(startIndex);
-  const [currentTitle, setCurrentTitle] = useState(currentMonthCarouselTitle);
+  const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
+  const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
@@ -83,6 +83,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const itemsLengthRef = useRef(initialData.length);
   const mediaItemsRef = useRef(mediaItems);
   const lastTitleMonthKey = useRef<string>('');
+  const hasInitialPositioningRef = useRef(true);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
@@ -337,10 +338,22 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** Marca posicionamento inicial concluído quando não há itens para exibir */
+  useEffect(() => {
+    if (!hasCompletedInitialLoad || emAltaMode || filteredItems.length > 0) return;
+    hasInitialPositioningRef.current = false;
+    setHasInitialPositioning(false);
+  }, [hasCompletedInitialLoad, emAltaMode, filteredItems.length]);
+
   /** Aplica scroll pendente só depois que o React renderizou os novos slides */
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
-    if (pendingScrollIndex >= filteredItems.length) return;
+    if (pendingScrollIndex >= filteredItems.length) {
+      setPendingScrollIndex(null);
+      hasInitialPositioningRef.current = false;
+      setHasInitialPositioning(false);
+      return;
+    }
 
     emblaApi.reInit();
     emblaApi.scrollTo(pendingScrollIndex, false);
@@ -355,6 +368,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
 
     setPendingScrollIndex(null);
+    hasInitialPositioningRef.current = false;
+    setHasInitialPositioning(false);
   }, [pendingScrollIndex, filteredItems, emblaApi, emAltaMode, updateTitleFromIndex, ensureUpcomingMonthsLoaded]);
 
   /** Meses passados só depois do posicionamento inicial */
@@ -377,6 +392,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       const selectedIndex = emblaApi.selectedScrollSnap();
       setSelectedSnap(selectedIndex);
       if (emAltaMode) return;
+      if (hasInitialPositioningRef.current) return;
 
       const items = filteredItemsRef.current;
       previousSelectedIndex.current = selectedIndex;
@@ -514,6 +530,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, filteredItems.length);
+  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
 
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
@@ -527,11 +544,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
             ? 'Em Alta'
             : isNavigating
               ? 'Carregando conteúdo...'
-              : filteredItems.length === 0
-                ? hasCompletedInitialLoad
-                  ? 'Nenhum conteúdo encontrado'
-                  : 'Carregando...'
-                : currentTitle || 'Carregando...'}
+              : showPositioningSkeleton
+                ? 'Carregando...'
+                : filteredItems.length === 0
+                  ? hasCompletedInitialLoad
+                    ? 'Nenhum conteúdo encontrado'
+                    : 'Carregando...'
+                  : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
@@ -632,19 +651,25 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >
           <div className="flex">
-            {filteredItems.length === 0
-              ? hasCompletedInitialLoad
-                ? (
-                    <div className="w-full py-10 text-center text-muted-foreground">
-                      Nenhum conteúdo encontrado{selectedGenre ? ` para o gênero "${selectedGenre}"` : ''}.
-                    </div>
-                  )
-                : Array.from({ length: 10 }).map((_, index) => (
-                    <div key={index} className={SLIDE_CLASS}>
-                      <MidiaCardSkeleton />
-                    </div>
-                  ))
-              : filteredItems.map((item, index) => {
+            {showPositioningSkeleton
+              ? Array.from({ length: 10 }).map((_, index) => (
+                  <div key={index} className={SLIDE_CLASS}>
+                    <MidiaCardSkeleton />
+                  </div>
+                ))
+              : filteredItems.length === 0
+                ? hasCompletedInitialLoad
+                  ? (
+                      <div className="w-full py-10 text-center text-muted-foreground">
+                        Nenhum conteúdo encontrado{selectedGenre ? ` para o gênero "${selectedGenre}"` : ''}.
+                      </div>
+                    )
+                  : Array.from({ length: 10 }).map((_, index) => (
+                      <div key={index} className={SLIDE_CLASS}>
+                        <MidiaCardSkeleton />
+                      </div>
+                    ))
+                : filteredItems.map((item, index) => {
                   const isRendered = index >= virtualRange.start && index <= virtualRange.end;
                   const isPriority = Math.abs(index - selectedSnap) <= 4;
                   return (

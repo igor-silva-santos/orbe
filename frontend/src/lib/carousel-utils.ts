@@ -117,11 +117,22 @@ export function resolveCarouselStartIndex(data: Midia[]): number {
   return next >= 0 ? next : 0;
 }
 
-/** Índice de abertura: próximo lançamento >= hoje, ou último item se todos forem passados */
+/** Índice de abertura: próximo lançamento >= hoje; se todos forem passados, último do mês atual */
 export function resolveCarouselOpenIndex(data: Midia[]): number {
   if (!data.length) return 0;
+
   const next = calculateCarouselStartIndex(data);
-  return next >= 0 ? next : data.length - 1;
+  if (next >= 0) return next;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const currentMonthKey = monthKeyFromDate(today);
+
+  for (let i = data.length - 1; i >= 0; i--) {
+    if (monthKeyFromItem(data[i]) === currentMonthKey) return i;
+  }
+
+  return data.length - 1;
 }
 
 export function formatCarouselMonthTitle(date: Date): string {
