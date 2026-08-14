@@ -1,7 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  addMonths,
+  findMonthBounds,
   isCarouselOpenIndexReady,
+  monthKeyFromItem,
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
 } from './carousel-utils';
@@ -70,5 +73,67 @@ describe('resolveCarouselOpenIndex', () => {
     ];
     assert.equal(resolveCarouselOpenMonthKey(items), `${year}-${String(month).padStart(2, '0')}`);
     assert.equal(isCarouselOpenIndexReady(items, 2), false);
+  });
+
+  it('does not open July when the next release is in August (July vs August bug)', () => {
+    const items = [
+      mockMidia(1, '2026-07-01'),
+      mockMidia(2, '2026-07-31'),
+      mockMidia(3, '2026-08-05'),
+    ];
+    assert.equal(resolveCarouselOpenMonthKey(items), '2026-08');
+    assert.equal(resolveCarouselOpenIndex(items), 2);
+    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items)]), '2026-08');
+  });
+});
+
+describe('addMonths', () => {
+  it('advances to next month', () => {
+    assert.deepEqual(addMonths(2026, 7, 1), { year: 2026, month: 8 });
+  });
+
+  it('retreats to previous month', () => {
+    assert.deepEqual(addMonths(2026, 8, -1), { year: 2026, month: 7 });
+  });
+
+  it('rolls over year boundary forward', () => {
+    assert.deepEqual(addMonths(2026, 12, 1), { year: 2027, month: 1 });
+  });
+
+  it('rolls over year boundary backward', () => {
+    assert.deepEqual(addMonths(2026, 1, -1), { year: 2025, month: 12 });
+  });
+});
+
+describe('findMonthBounds', () => {
+  const items = [
+    mockMidia(1, '2026-07-01'),
+    mockMidia(2, '2026-07-15'),
+    mockMidia(3, '2026-08-05'),
+    mockMidia(4, '2026-08-20'),
+    mockMidia(5, '2026-09-01'),
+  ];
+
+  it('returns start/end indices for a month block', () => {
+    assert.deepEqual(findMonthBounds(items, '2026-07'), { start: 0, end: 1 });
+    assert.deepEqual(findMonthBounds(items, '2026-08'), { start: 2, end: 3 });
+  });
+
+  it('returns null when month is absent', () => {
+    assert.equal(findMonthBounds(items, '2026-06'), null);
+  });
+
+  it('supports edge-prefetch buffer checks used by prefetchMonthEdges', () => {
+    const monthEdgeBuffer = 4;
+    const augustBounds = findMonthBounds(items, '2026-08');
+    assert.ok(augustBounds);
+
+    const nearAugustEnd = augustBounds.end - 1;
+    assert.ok(nearAugustEnd >= augustBounds.end - monthEdgeBuffer);
+
+    const nearJulyStart = 0;
+    const julyBounds = findMonthBounds(items, '2026-07');
+    assert.ok(julyBounds);
+    assert.ok(nearJulyStart <= julyBounds.start + monthEdgeBuffer);
   });
 });
