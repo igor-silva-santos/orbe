@@ -156,18 +156,30 @@ export function resolveIndexForMonthKey(data: Midia[], monthKey: string): number
   return findIndexForMonth(data, year, month);
 }
 
-/** Índice de abertura: próximo lançamento >= hoje; senão início do mês atual nos dados */
+/** Índice de abertura: próximo lançamento >= hoje no mês atual; senão próximo global; senão início do mês atual */
 export function resolveCarouselOpenIndex(data: Midia[]): number {
   if (!data.length) return 0;
-
-  const nextIdx = calculateCarouselStartIndex(data);
-  if (nextIdx >= 0) return nextIdx;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const currentMonthKey = monthKeyFromDate(today);
-  const openMonthKey = resolveCarouselOpenMonthKey(data);
-  const monthStartIdx = resolveIndexForMonthKey(data, openMonthKey);
+
+  for (let i = 0; i < data.length; i++) {
+    const releaseDate = parseMidiaReleaseDate(data[i]);
+    if (
+      monthKeyFromItem(data[i]) === currentMonthKey &&
+      releaseDate &&
+      isCarouselTimelineDate(releaseDate, today) &&
+      releaseDate >= today
+    ) {
+      return i;
+    }
+  }
+
+  const nextIdx = calculateCarouselStartIndex(data);
+  if (nextIdx >= 0) return nextIdx;
+
+  const monthStartIdx = resolveIndexForMonthKey(data, currentMonthKey);
   if (monthStartIdx >= 0) return monthStartIdx;
 
   for (let i = data.length - 1; i >= 0; i--) {
@@ -213,12 +225,18 @@ export function formatCarouselMonthTitle(date: Date): string {
 
 export function monthTitleFromItem(item: Midia | undefined): string | null {
   const date = parseMidiaReleaseDate(item);
-  if (!date) return null;
-  try {
-    return formatCarouselMonthTitle(date);
-  } catch {
-    return null;
+  if (date) {
+    try {
+      return formatCarouselMonthTitle(date);
+    } catch {
+      return null;
+    }
   }
+  const year = item?.ano_lancamento_api;
+  if (year && !item?.data_lancamento_confirmada) {
+    return `Lançamentos de ${year} — sem data confirmada`;
+  }
+  return null;
 }
 
 export function currentMonthCarouselTitle(): string {
