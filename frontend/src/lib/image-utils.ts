@@ -37,13 +37,17 @@ export function resolveImageUrl(
     return trimmed;
   }
 
-  if (trimmed.includes('images.igdb.com/igdb/image/upload')) {
+  if (trimmed.includes('images.igdb.com')) {
     try {
       const absolute = trimmed.startsWith('//') ? `https:${trimmed}` : trimmed;
-      const parsed = new URL(absolute);
-      const suffix = parsed.pathname.replace(/^\/igdb\/image\/upload/, '');
-      if (suffix) {
-        return `/api/images/igdb${suffix}`;
+      const parsed = new URL(absolute, 'https://images.igdb.com');
+      const marker = '/igdb/image/upload';
+      const markerIndex = parsed.pathname.indexOf(marker);
+      if (markerIndex >= 0) {
+        const suffix = parsed.pathname.slice(markerIndex + marker.length);
+        if (suffix) {
+          return `/api/images/igdb${suffix}`;
+        }
       }
     } catch {
       // fall through
@@ -62,6 +66,9 @@ export function resolveImageUrl(
   }
 
   if (trimmed.startsWith('//')) {
+    if (trimmed.includes('images.igdb.com')) {
+      return resolveImageUrl(`https:${trimmed}`, size);
+    }
     return `https:${trimmed}`;
   }
 

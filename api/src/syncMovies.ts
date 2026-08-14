@@ -566,7 +566,7 @@ export async function syncMovies(
   maybeOptions?: SyncContentOptions,
 ) {
   const limit = typeof limitOrOptions === 'number' ? limitOrOptions : limitOrOptions?.limit ?? maybeOptions?.limit;
-  const { includeUndated } = resolveSyncContentOptions(
+  const { includeUndated, undatedOnly } = resolveSyncContentOptions(
     typeof limitOrOptions === 'object' ? limitOrOptions : maybeOptions,
   );
   const { start: periodStart, end: periodEnd } = assertValidSyncDates(startDate, endDate);
@@ -580,7 +580,9 @@ export async function syncMovies(
 
   logger.info(
     `Iniciando sincronização de filmes ` +
-    (periodOpen
+    (undatedOnly
+      ? `(somente TBA / ano sem data confirmada, ${startDate} a ${endDate}).`
+      : periodOpen
       ? `(${cinemaOnlyCurated ? 'cinema curado' : 'listas curadas completas'} + período ${startDate} a ${endDate}).`
       : `(período histórico ${startDate} a ${endDate} — somente discover por data, sem listas curadas).`),
   );
@@ -594,8 +596,8 @@ export async function syncMovies(
   let curatedIds: number[] = [];
   const curatedFlags = new Map<number, MovieSourceFlags>();
 
-  if (periodOpen) {
-    const flags = await fetchCuratedMovieIds({ cinemaOnly: cinemaOnlyCurated });
+  if (periodOpen || undatedOnly) {
+    const flags = await fetchCuratedMovieIds({ cinemaOnly: undatedOnly ? false : cinemaOnlyCurated });
     for (const [id, patch] of flags) {
       curatedFlags.set(id, patch);
     }
@@ -631,6 +633,11 @@ export async function syncMovies(
         total: curatedIds.length,
       });
     }
+  }
+
+  if (undatedOnly) {
+    logger.info('Sincronização undated de filmes concluída (somente listas curadas / TBA).');
+    return;
   }
 
   let monthlyProcessed = 0;

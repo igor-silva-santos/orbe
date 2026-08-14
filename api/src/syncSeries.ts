@@ -426,7 +426,7 @@ export async function syncSeries(
   maybeOptions?: SyncContentOptions,
 ) {
   const limit = typeof limitOrOptions === 'number' ? limitOrOptions : limitOrOptions?.limit ?? maybeOptions?.limit;
-  const { includeUndated } = resolveSyncContentOptions(
+  const { includeUndated, undatedOnly } = resolveSyncContentOptions(
     typeof limitOrOptions === 'object' ? limitOrOptions : maybeOptions,
   );
   let currentStartDate = new Date(startDate);
@@ -438,7 +438,9 @@ export async function syncSeries(
 
   logger.info(
     `Iniciando sincronização de séries ` +
-    (periodOpen
+    (undatedOnly
+      ? `(somente TBA / ano sem data confirmada, ${startDate} a ${endDate}).`
+      : periodOpen
       ? `(listas curadas + período ${startDate} a ${endDate}).`
       : `(período histórico ${startDate} a ${endDate} — somente discover por data, sem listas curadas).`),
   );
@@ -451,8 +453,8 @@ export async function syncSeries(
 
   const allNoBrProviderIds: number[] = [];
 
-  const curatedIds = periodOpen ? await fetchCuratedSeriesIds() : new Set<number>();
-  if (!periodOpen) {
+  const curatedIds = periodOpen || undatedOnly ? await fetchCuratedSeriesIds() : new Set<number>();
+  if (!periodOpen && !undatedOnly) {
     logger.info('Período histórico — listas curadas (popular/on_the_air) ignoradas.');
   }
   let curatedIdList = Array.from(curatedIds);
@@ -477,6 +479,11 @@ export async function syncSeries(
         totalInPhase: stats?.total,
       });
     }
+  }
+
+  if (undatedOnly) {
+    logger.info('Sincronização undated de séries concluída (somente listas curadas / TBA).');
+    return;
   }
 
   while (currentStartDate <= finalEndDate) {

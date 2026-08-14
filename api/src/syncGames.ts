@@ -478,6 +478,45 @@ async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string
 }
 
 
+/** Jogos com data TBD (categoria IGDB 7) dentro do intervalo do período */
+async function fetchUndatedGameIdsForPeriod(startDateStr: string, endDateStr: string): Promise<number[]> {
+    logger.info(`Buscando IDs de jogos TBA/TBD para ${startDateStr} a ${endDateStr}...`);
+    const gameIds = new Set<number>();
+    const limit = 500;
+    let offset = 0;
+    let hasMore = true;
+
+    const startTs = Math.floor(new Date(startDateStr).getTime() / 1000);
+    const endTs = Math.floor(new Date(endDateStr).getTime() / 1000);
+
+    try {
+        while (hasMore) {
+            const response = await igdbApiWithRetry(() => igdbApi.post(
+                '/games',
+                `fields id; where release_dates.category = 7 & release_dates.date >= ${startTs} & release_dates.date <= ${endTs}; limit ${limit}; offset ${offset}; sort id asc;`
+            ));
+
+            const games = response.data;
+            if (games?.length > 0) {
+                for (const game of games) {
+                    if (game.id) gameIds.add(game.id);
+                }
+                offset += games.length;
+                hasMore = games.length === limit;
+            } else {
+                hasMore = false;
+            }
+            await delay(250);
+        }
+        logger.info(`Total de ${gameIds.size} IDs TBD únicos encontrados para o período.`);
+        return Array.from(gameIds);
+    } catch (error: any) {
+        logger.error(`Erro ao buscar IDs TBD de jogos: ${error.message || error}`);
+        return Array.from(gameIds);
+    }
+}
+
+
 export async function syncGames(
     prisma: PrismaClient,
     startDate?: string,
@@ -488,7 +527,7 @@ export async function syncGames(
     const startDateArg = startDate || process.argv[2];
     const endDateArg = endDate || process.argv[3];
     const limit = typeof limitOrOptions === 'number' ? limitOrOptions : limitOrOptions?.limit ?? maybeOptions?.limit;
-    const { includeUndated } = resolveSyncContentOptions(
+    const { includeUndated, undatedOnly } = resolveSyncContentOptions(
         typeof limitOrOptions === 'object' ? limitOrOptions : maybeOptions,
     );
 
@@ -516,8 +555,8 @@ export async function syncGames(
         await getIgdbAccessToken();
         await updateSyncProgress(prisma, { phase: 'jogos', processedInPhase: 0, totalInPhase: 0 });
 
-        const popularIds = periodOpen ? await fetchPopularGameIds() : [];
-        if (!periodOpen) {
+        const popularIds = periodOpen || undatedOnly ? await fetchPopularGameIds() : [];
+        if (!periodOpen && !undatedOnly) {
             logger.info('Período histórico — lista curada de jogos populares ignorada.');
         }
         const batchSize = 100;
@@ -527,7 +566,15 @@ export async function syncGames(
         const processedEventGameIds = new Set<number>();
         const plannedEventGameIds = new Set<number>();
 
-        let allGameIds = await fetchAllGameIdsForPeriod(startDateArg, endDateArg);
+        let allGameIds = undatedOnly
+            ? await fetchUndatedGameIdsForPeriod(startDateArg, endDateArg)
+            : await fetchAllGameIdsForPeriod(startDateArg, endDateArg);
+
+        if (!undatedOnly && includeUndated) {
+            const undatedIds = await fetchUndatedGameIdsForPeriod(startDateArg, endDateArg);
+            for (const id of undatedIds) allGameIds.push(id);
+            allGameIds = [...new Set(allGameIds)];
+        }
         for (const event of events) {
             if (!event.games?.length) continue;
             const gameIds = limit ? event.games.slice(0, limit) : event.games;
@@ -576,6 +623,7 @@ export async function syncGames(
             }
         }
 
+        if (!undatedOnly) {
         for (const event of events) {
             if (event.games && event.games.length > 0) {
                 let gameIds = event.games;
@@ -598,9 +646,14 @@ export async function syncGames(
                 }
             }
         }
+        }
 
         if (finalGeneralIds.length === 0) {
-            logger.info('Nenhum jogo geral para atualizar.');
+            if (undatedOnly) {
+                logger.info('Sincronização undated de jogos concluída (sem IDs TBD adicionais).');
+            } else {
+                logger.info('Nenhum jogo geral para atualizar.');
+            }
             return;
         }
 
@@ -612,6 +665,10 @@ export async function syncGames(
             completedBatches++;
             await reportProgress();
             await delay(250);
+        }
+
+        if (undatedOnly) {
+            logger.info('Sincronização undated de jogos concluída.');
         }
         
     } catch (error: any) {

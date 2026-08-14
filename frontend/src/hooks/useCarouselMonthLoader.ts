@@ -12,6 +12,7 @@ import {
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
   resolveIndexForMonthKey,
+  calculateCarouselStartIndex,
 } from '@/lib/carousel-utils';
 import { API_BASE } from '@/lib/apiBase';
 import type { Midia } from '@/types';
@@ -251,25 +252,24 @@ export function useCarouselMonthLoader({
     today.setHours(0, 0, 0, 0);
 
     let { year, month } = { year: today.getFullYear(), month: today.getMonth() + 1 };
-    let index = computeOpenIndex();
-    const list = applyDisplayFilters(mediaItemsRef.current ?? []);
 
-    if (isCarouselOpenIndexReady(list, index)) {
-      return index;
-    }
+    for (let attempt = 0; attempt < 14; attempt++) {
+      const list = applyDisplayFilters(mediaItemsRef.current ?? []);
+      const targetMonthKey = resolveCarouselOpenMonthKey(list);
+      const targetIndex = resolveCarouselOpenIndex(list);
 
-    const targetMonthKey = resolveCarouselOpenMonthKey(list);
+      if (targetIndex >= 0 && isCarouselOpenIndexReady(list, targetIndex)) {
+        return targetIndex;
+      }
 
-    for (let attempt = 0; attempt < 12; attempt++) {
+      const monthIndex = resolveIndexForMonthKey(list, targetMonthKey);
+      if (monthIndex >= 0 && monthKeyFromItem(list[monthIndex]) === targetMonthKey) {
+        const nextIdx = calculateCarouselStartIndex(list);
+        if (nextIdx >= 0) return nextIdx;
+        return monthIndex;
+      }
+
       await loadMonth(year, month, 'visible', true);
-      const updated = applyDisplayFilters(mediaItemsRef.current ?? []);
-      index = resolveIndexForMonthKey(updated, targetMonthKey);
-      if (index >= 0 && isCarouselOpenIndexReady(updated, index)) {
-        return index;
-      }
-      if (index >= 0 && monthKeyFromItem(updated[index]) === targetMonthKey) {
-        return index;
-      }
       ({ year, month } = addMonths(year, month, 1));
     }
 
@@ -287,10 +287,12 @@ export function useCarouselMonthLoader({
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const next = addMonths(year, month, 1);
+    const next2 = addMonths(year, month, 2);
 
     await Promise.all([
       loadMonth(year, month, 'visible', true),
       loadMonth(next.year, next.month, 'forward', true),
+      loadMonth(next2.year, next2.month, 'forward', true),
     ]);
 
     return resolveOpenPosition();

@@ -72,7 +72,7 @@ export function useCarouselYearTbd({ mediaType, enabled = true }: UseCarouselYea
 }
 
 export function formatYearTbdTitle(year: number): string {
-  return `${year} — data a confirmar`;
+  return `Lançamentos de ${year} — sem data confirmada`;
 }
 
 export function isYearTbdMidia(item: Midia | undefined): boolean {

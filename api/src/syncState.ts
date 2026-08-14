@@ -9,7 +9,7 @@ const STALE_PROGRESS_MS = 10 * 60 * 1000; // 10 min sem progresso = provável cr
 const STALE_ANIMES_PROGRESS_MS = 30 * 60 * 1000; // animes: lotes lentos (700ms/anime + tradução)
 const STALE_DETETIVE_PROGRESS_MS = 45 * 60 * 1000; // detetive: Puppeteer + ingresso.com por filme
 
-export type SyncPhase = 'filmes' | 'detetive' | 'series' | 'animes' | 'jogos' | 'premios';
+export type SyncPhase = 'filmes' | 'detetive' | 'series' | 'animes' | 'jogos' | 'undated' | 'premios';
 
 export type SyncRunState = {
   running: boolean;

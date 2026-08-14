@@ -22,6 +22,7 @@ import {
   monthKeyFromItem,
   monthTitleFromItem,
   parseMonthKey,
+  resolveCarouselOpenMonthKey,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -151,7 +152,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       datedIndex,
     }));
     const nowYear = new Date().getFullYear();
-    const appendYears = [nowYear, nowYear + 1, nowYear + 2];
+    const appendYears = Array.from({ length: 6 }, (_, i) => nowYear + i);
     return [...dated, ...getAppendSlides(appendYears)];
   }, [emAltaMode, filteredItems, getAppendSlides, slidesByYear]);
 
@@ -182,10 +183,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   const requestScrollToOpenPosition = useCallback(async () => {
     if (emAltaMode) return;
+    const list = applyDisplayFilters(mediaItemsRef.current ?? []);
+    const targetMonthKey = resolveCarouselOpenMonthKey(list);
+    const { year, month } = parseMonthKey(targetMonthKey);
+    lastTitleMonthKey.current = targetMonthKey;
+    setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
+
     const index = await resolveOpenPosition();
-    lastTitleMonthKey.current = '';
     setPendingScrollIndex(index);
-  }, [emAltaMode, resolveOpenPosition]);
+  }, [emAltaMode, applyDisplayFilters, resolveOpenPosition]);
 
   const loadEmAlta = useCallback(async () => {
     const key = mediaType === 'filmes' ? `filmes:${emAltaDisponibilidade}` : mediaType;
@@ -248,9 +254,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   useEffect(() => {
     if (emAltaMode) return;
     const y = new Date().getFullYear();
-    void loadYearTbd(y);
-    void loadYearTbd(y + 1);
-    void loadYearTbd(y + 2);
+    for (let year = y; year <= y + 5; year++) {
+      void loadYearTbd(year);
+    }
   }, [emAltaMode, loadYearTbd]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
@@ -271,20 +277,28 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
 
     emblaApi.reInit();
-    emblaApi.scrollTo(pendingScrollIndex, false);
-    previousSelectedIndex.current = pendingScrollIndex;
-    setSelectedSnap(pendingScrollIndex);
-    updateTitleFromIndex(pendingScrollIndex, filteredItems);
 
-    const monthKey = monthKeyFromItem(filteredItems[pendingScrollIndex]);
-    if (monthKey) {
-      lastVisibleMonthKeyRef.current = monthKey;
-      ensureUpcomingMonthsLoaded(monthKey);
-    }
+    const applyScroll = () => {
+      emblaApi.scrollTo(pendingScrollIndex, false);
+      const displayIndex = pendingScrollIndex;
+      previousSelectedIndex.current = displayIndex;
+      setSelectedSnap(displayIndex);
+      updateTitleFromIndex(pendingScrollIndex, filteredItems);
 
-    setPendingScrollIndex(null);
-    hasInitialPositioningRef.current = false;
-    setHasInitialPositioning(false);
+      const monthKey = monthKeyFromItem(filteredItems[pendingScrollIndex]);
+      if (monthKey) {
+        lastVisibleMonthKeyRef.current = monthKey;
+        ensureUpcomingMonthsLoaded(monthKey);
+      }
+
+      setPendingScrollIndex(null);
+      hasInitialPositioningRef.current = false;
+      setHasInitialPositioning(false);
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(applyScroll);
+    });
   }, [pendingScrollIndex, filteredItems, emblaApi, emAltaMode, updateTitleFromIndex, ensureUpcomingMonthsLoaded]);
 
   useEffect(() => {
@@ -294,7 +308,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       const selectedIndex = emblaApi.selectedScrollSnap();
       setSelectedSnap(selectedIndex);
       if (emAltaMode) return;
-      if (hasInitialPositioningRef.current) return;
+      if (hasInitialPositioningRef.current || pendingScrollIndex !== null) return;
 
       const slide = displaySlidesRef.current[selectedIndex];
       if (slide?.kind === 'year-tbd-separator') {
@@ -312,10 +326,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       }
 
       const items = filteredItemsRef.current;
+      const datedIndex = slide?.kind === 'dated' ? slide.datedIndex : selectedIndex;
       previousSelectedIndex.current = selectedIndex;
-      updateTitleFromIndex(slide?.kind === 'dated' ? slide.datedIndex : selectedIndex, items);
+      updateTitleFromIndex(datedIndex, items);
 
-      const monthKey = monthKeyFromItem(items[slide?.kind === 'dated' ? slide.datedIndex : selectedIndex]);
+      const monthKey = monthKeyFromItem(items[datedIndex]);
       if (monthKey && monthKey !== lastVisibleMonthKeyRef.current) {
         lastVisibleMonthKeyRef.current = monthKey;
         ensureUpcomingMonthsLoaded(monthKey);
@@ -325,6 +340,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
       if (slide?.kind === 'dated') {
         prefetchMonthEdges(slide.datedIndex, items);
+        const lastDated = items[items.length - 1];
+        const lastDate = lastDated?.data_lancamento_api;
+        if (lastDate && slide.datedIndex >= items.length - monthEdgeBuffer) {
+          const lastYear = new Date(String(lastDate).slice(0, 10)).getFullYear();
+          void loadYearTbd(lastYear);
+          void loadYearTbd(lastYear + 1);
+        }
       }
     };
 
@@ -345,7 +367,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded, loadYearTbd]);
+  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded, loadYearTbd, pendingScrollIndex, monthEdgeBuffer]);
 
   useEffect(() => {
     if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
@@ -383,6 +405,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       await Promise.all([
         loadMonth(year, month, 'visible', true),
         loadMonth(next.year, next.month, 'forward', true),
+        loadMonth(addMonths(year, month, 2).year, addMonths(year, month, 2).month, 'forward', true),
       ]);
       await requestScrollToOpenPosition();
     } finally {

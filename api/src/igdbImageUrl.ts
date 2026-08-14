@@ -21,6 +21,10 @@ export function resolveIgdbImageUrl(url: string | null | undefined): string | nu
     }
   }
 
+  if (trimmed.startsWith('//images.igdb.com/igdb/image/upload')) {
+    return `/api/images/igdb${trimmed.slice('//images.igdb.com/igdb/image/upload'.length)}`;
+  }
+
   if (trimmed.startsWith('//')) {
     return `https:${trimmed}`;
   }

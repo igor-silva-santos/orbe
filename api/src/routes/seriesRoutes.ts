@@ -3,7 +3,7 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapSerieToMidia, mapSerieToCarouselCard, sortSeriesByCarouselDate } from '../mappers';
 import { fetchSerieDetailsLive } from '../externalDetails';
-import { serieQualityFilter } from '../qualityFilters';
+import { serieQualityFilter, serieCarouselQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import adminMiddleware from '../adminMiddleware';
@@ -256,7 +256,7 @@ router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
     const series = sortSeriesByCarouselDate(
       await prisma.serie.findMany({
         where: {
-          AND: [serieQualityFilter, serieCarouselDateInRange(startDate, endDate)],
+          AND: [serieCarouselQualityFilter, serieCarouselDateInRange(startDate, endDate)],
         },
         orderBy: { firstAirDate: 'asc' },
         take: CAROUSEL_ITEM_LIMIT,
@@ -280,7 +280,7 @@ router.get('/series/year-tbd', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   try {
     const series = sortSeriesByCarouselDate(
       await prisma.serie.findMany({
-        where: { AND: [serieQualityFilter, yearOnlySerieWhere(parsedYear)] },
+        where: { AND: [serieCarouselQualityFilter, yearOnlySerieWhere(parsedYear)] },
         orderBy: { releaseYear: 'asc' },
         take: CAROUSEL_ITEM_LIMIT,
         include: serieCarouselLiteInclude,
