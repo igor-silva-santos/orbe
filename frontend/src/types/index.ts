@@ -78,7 +78,11 @@ export interface Midia {
   poster_curado?: string;
   poster_url_api: string;
   data_lancamento_curada?: string;
-  data_lancamento_api: string;
+  data_lancamento_api: string | null;
+  /** Ano conhecido sem dia/mês (TBA) — não entra na timeline mensal */
+  ano_lancamento_api?: number | null;
+  /** false quando só ano_lancamento_api está definido */
+  data_lancamento_confirmada?: boolean;
   sinopse?: string;
   sinopse_curada?: string;
   sinopse_api: string;

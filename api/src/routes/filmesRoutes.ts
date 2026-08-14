@@ -11,6 +11,7 @@ import { invalidateMediaCaches } from '../cacheInvalidation';
 import { translateTmdbStatus } from '../statusLabels';
 import { detailsRateLimiter } from '../securityMiddleware';
 import { mapFilmeAdminUpdate } from '../adminUpdateMappers';
+import { yearOnlyFilmeWhere } from '../yearOnlyRelease';
 import {
   TWELVE_HOURS,
   TWENTY_FOUR_HOURS,
@@ -22,6 +23,7 @@ import {
   parseMonthQuery,
   getMonthDateRange,
   parseYearMonthQuery,
+  parseCarouselYearQuery,
   fetchFilmesForCarousel,
   cardListInclude,
 } from './mediaRoutesHelpers';
@@ -321,6 +323,25 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   } catch (error) {
     logger.error(`Erro ao buscar filmes por mês: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes por mês.' });
+  }
+});
+
+/** Lançamentos só com ano (TBA) — isolado da timeline mensal do carrossel */
+router.get('/filmes/year-tbd', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsedYear = parseCarouselYearQuery(req.query as { year?: string });
+  if (!parsedYear) {
+    return res.status(400).json({ error: 'Ano inválido.' });
+  }
+
+  try {
+    const filmes = await fetchFilmesForCarousel(
+      yearOnlyFilmeWhere(parsedYear),
+      { orderBy: { releaseYear: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsedYear },
+    );
+    res.json(filmes.map(mapFilmeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar filmes year-tbd: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar lançamentos com data a confirmar.' });
   }
 });
 

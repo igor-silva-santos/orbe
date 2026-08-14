@@ -27,6 +27,8 @@ export type FullSyncParams = {
   startYear: number;
   endYear: number;
   resume?: boolean;
+  /** Quando true, persiste lançamentos só com ano (TBA). Padrão false. */
+  includeUndated?: boolean;
   /** Quando true, ao concluir avança o ponteiro do backfill histórico pra endYear + 1. */
   backfill?: boolean;
 };
@@ -40,16 +42,18 @@ function phaseDone(completed: SyncPhase[] | undefined, phase: SyncPhase): boolea
  * Em resume, pula fases já em completedPhases e retoma animes do animesResumeYear.
  */
 export async function executeFullSync(prisma: PrismaClient, params: FullSyncParams): Promise<void> {
-  const { startDate, endDate, startYear, endYear, resume, backfill } = params;
+  const { startDate, endDate, startYear, endYear, resume, backfill, includeUndated } = params;
   const existing = resume ? await readSyncRunState(prisma) : null;
   const completed = existing?.completedPhases ?? [];
 
   const runProgress = startSyncRunProgress();
 
+  const syncOpts = { includeUndated: includeUndated === true };
+
   try {
     if (!phaseDone(completed, 'filmes')) {
       logger.info('--- Fase FILMES ---');
-      await syncMovies(prisma, startDate, endDate);
+      await syncMovies(prisma, startDate, endDate, syncOpts);
       await markPhaseComplete(prisma, 'filmes');
     } else {
       logger.info('⏭️ Fase filmes já concluída (checkpoint). Pulando.');
@@ -82,7 +86,7 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
 
     if (!phaseDone(completed, 'series')) {
       logger.info('--- Fase SÉRIES ---');
-      await syncSeries(prisma, startDate, endDate);
+      await syncSeries(prisma, startDate, endDate, syncOpts);
       await recheckPendingBrSeries(prisma);
       await markPhaseComplete(prisma, 'series');
     } else {
@@ -134,7 +138,7 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       logger.info('--- Fase JOGOS ---');
       await updateSyncProgress(prisma, { phase: 'jogos' });
       runProgress.startPhase('JOGOS');
-      await syncGames(prisma, startDate, endDate);
+      await syncGames(prisma, startDate, endDate, syncOpts);
       await syncSteamData(prisma);
       await markPhaseComplete(prisma, 'jogos');
     } else {

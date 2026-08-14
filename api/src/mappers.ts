@@ -602,13 +602,29 @@ export const mapEventToResponse = (event: any) => {
 };
 
 /** Payload mínimo para cards de carrossel — sem elenco, vídeos ou sinopse */
+const mapCarouselReleaseFields = (entity: {
+  releaseDate?: Date | string | null;
+  firstAirDate?: Date | string | null;
+  firstReleaseDate?: Date | string | null;
+  releaseYear?: number | null;
+}) => {
+  const calendar =
+    entity.releaseDate ?? entity.firstAirDate ?? entity.firstReleaseDate ?? null;
+  const hasCalendar = calendar != null && toCalendarDateString(calendar) != null;
+  return {
+    data_lancamento_api: hasCalendar ? toCalendarDateString(calendar) : null,
+    ano_lancamento_api: entity.releaseYear ?? null,
+    data_lancamento_confirmada: hasCalendar,
+  };
+};
+
 export const mapFilmeToCarouselCard = (filme: any) => ({
   type: 'filme' as const,
   id: filme.tmdbId,
   titulo_api: filme.title,
   titulo_curado: filme.titulo_curado ?? null,
   poster_url_api: filme.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${filme.posterPath}` : null,
-  data_lancamento_api: toCalendarDateString(filme.releaseDate),
+  ...mapCarouselReleaseFields(filme),
   avaliacao: filme.voteAverage ? filme.voteAverage * 10 : null,
   generos_api: safeGenreNames(filme.genres, 3),
   plataformas_api: safeStreamingProviders(filme.streamingProviders),
@@ -666,17 +682,22 @@ export function sortSeriesByCarouselDate<T extends { firstAirDate?: Date | strin
   });
 }
 
-export const mapSerieToCarouselCard = (serie: any) => ({
-  type: 'serie' as const,
-  id: serie.tmdbId,
-  titulo_api: serie.name,
-  titulo_curado: serie.titulo_curado ?? null,
-  poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
-  data_lancamento_api: toCalendarDateString(resolveSerieCarouselReleaseDate(serie)),
-  avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
-  generos_api: safeGenreNames(serie.genres, 3),
-  plataformas_api: safeStreamingProviders(serie.streamingProviders),
-});
+export const mapSerieToCarouselCard = (serie: any) => {
+  const carouselDate = serie.firstAirDate ? resolveSerieCarouselReleaseDate(serie) : null;
+  const releaseFields = mapCarouselReleaseFields(serie);
+  return {
+    type: 'serie' as const,
+    id: serie.tmdbId,
+    titulo_api: serie.name,
+    titulo_curado: serie.titulo_curado ?? null,
+    poster_url_api: serie.posterPath ? `${TMDB_CAROUSEL_POSTER_URL}${serie.posterPath}` : null,
+    ...releaseFields,
+    data_lancamento_api: carouselDate ? toCalendarDateString(carouselDate) : releaseFields.data_lancamento_api,
+    avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
+    generos_api: safeGenreNames(serie.genres, 3),
+    plataformas_api: safeStreamingProviders(serie.streamingProviders),
+  };
+};
 
 export const mapJogoToCarouselCard = (jogo: any) => ({
   type: 'jogo' as const,
@@ -684,7 +705,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   titulo_api: jogo.name,
   titulo_curado: jogo.titulo_curado ?? null,
   poster_url_api: resolveIgdbImageUrl(jogo.cover),
-  data_lancamento_api: toCalendarDateString(jogo.firstReleaseDate),
+  ...mapCarouselReleaseFields(jogo),
   avaliacao: jogo.rating,
   generos_api: safeGenreNames(jogo.genres, 3).map((name) => translateGameGenre(name)),
   plataformas_api: safeGamePlatforms(jogo.platforms),

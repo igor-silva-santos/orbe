@@ -175,7 +175,15 @@ router.post('/sync/invalidate-cache', syncRateLimiter, protectSync, async (req, 
 });
 
 router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
-  const { mediaType, startDate: rawStartDate, endDate: rawEndDate, startYear, endYear } = req.body;
+  const {
+    mediaType,
+    startDate: rawStartDate,
+    endDate: rawEndDate,
+    startYear,
+    endYear,
+    includeUndated,
+  } = req.body;
+  const syncOpts = { includeUndated: includeUndated === true };
 
   if (!mediaType || !((rawStartDate && rawEndDate) || (startYear && endYear))) {
     return res.status(400).json({ error: 'Parâmetros inválidos. Forneça mediaType e (startDate/endDate ou startYear/endYear).' });
@@ -209,11 +217,11 @@ router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
   try {
     switch (mediaType) {
       case 'movies':
-        await syncMovies(prisma, startDate, endDate);
+        await syncMovies(prisma, startDate, endDate, syncOpts);
         await markPhaseComplete(prisma, 'filmes');
         break;
       case 'series':
-        await syncSeries(prisma, startDate, endDate);
+        await syncSeries(prisma, startDate, endDate, syncOpts);
         await recheckPendingBrSeries(prisma);
         await markPhaseComplete(prisma, 'series');
         break;
@@ -251,7 +259,7 @@ router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
       }
       case 'games':
         await updateSyncProgress(prisma, { phase: 'jogos' });
-        await syncGames(prisma, startDate, endDate);
+        await syncGames(prisma, startDate, endDate, syncOpts);
         await syncSteamData(prisma);
         await markPhaseComplete(prisma, 'jogos');
         break;
@@ -283,6 +291,7 @@ router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
   const endDate = req.body?.endDate || '2026-12-31';
   const startYear = parseInt(req.body?.startYear || '2026', 10);
   const endYear = parseInt(req.body?.endYear || '2026', 10);
+  const includeUndated = req.body?.includeUndated === true;
   const force = req.body?.force === true;
 
   const existing = await getSyncStatusDetailed(prisma);
@@ -314,7 +323,7 @@ router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
   });
 
   try {
-    await executeFullSync(prisma, { startDate, endDate, startYear, endYear, resume: false });
+    await executeFullSync(prisma, { startDate, endDate, startYear, endYear, resume: false, includeUndated });
   } catch (error) {
     logger.error('Erro na sincronização completa (checkpoint salvo):', error);
   }

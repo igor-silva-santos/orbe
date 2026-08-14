@@ -11,6 +11,7 @@ import { invalidateMediaCaches } from '../cacheInvalidation';
 import { translateTmdbStatus } from '../statusLabels';
 import { detailsRateLimiter } from '../securityMiddleware';
 import { mapSerieAdminUpdate } from '../adminUpdateMappers';
+import { yearOnlySerieWhere } from '../yearOnlyRelease';
 import {
   TWELVE_HOURS,
   TWENTY_FOUR_HOURS,
@@ -22,6 +23,7 @@ import {
   parseMonthQuery,
   getMonthDateRange,
   parseYearMonthQuery,
+  parseCarouselYearQuery,
   serieCarouselLiteInclude,
   serieCarouselDateInRange,
 } from './mediaRoutesHelpers';
@@ -265,6 +267,29 @@ router.get('/series/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   } catch (error) {
     logger.error(`Erro ao buscar séries por mês: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries por mês.' });
+  }
+});
+
+/** Lançamentos só com ano (TBA) — isolado da timeline mensal */
+router.get('/series/year-tbd', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsedYear = parseCarouselYearQuery(req.query as { year?: string });
+  if (!parsedYear) {
+    return res.status(400).json({ error: 'Ano inválido.' });
+  }
+
+  try {
+    const series = sortSeriesByCarouselDate(
+      await prisma.serie.findMany({
+        where: { AND: [serieQualityFilter, yearOnlySerieWhere(parsedYear)] },
+        orderBy: { releaseYear: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        include: serieCarouselLiteInclude,
+      }),
+    );
+    res.json(series.map(mapSerieToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar séries year-tbd: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar lançamentos com data a confirmar.' });
   }
 });
 

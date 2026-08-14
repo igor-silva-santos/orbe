@@ -115,6 +115,7 @@ export function invalidationPatternsForMedia(
     `cache:/api/${type}*`,
     `cache:/api/${type}/by-year*`,
     `cache:/api/${type}/by-month*`,
+    `cache:/api/${type}/year-tbd*`,
     ...SHARED_LIST_PATTERNS,
   ];
 

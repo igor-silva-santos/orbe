@@ -11,6 +11,7 @@ import adminMiddleware from '../adminMiddleware';
 import { invalidateMediaCaches } from '../cacheInvalidation';
 import { detailsRateLimiter } from '../securityMiddleware';
 import { mapJogoAdminUpdate } from '../adminUpdateMappers';
+import { yearOnlyJogoWhere } from '../yearOnlyRelease';
 import {
   TWELVE_HOURS,
   TWENTY_FOUR_HOURS,
@@ -22,6 +23,7 @@ import {
   parseMonthQuery,
   getMonthDateRange,
   parseYearMonthQuery,
+  parseCarouselYearQuery,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -320,6 +322,30 @@ router.get('/jogos/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   } catch (error) {
     logger.error(`Erro ao buscar jogos por mês: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos por mês.' });
+  }
+});
+
+/** Lançamentos só com ano (TBA) — isolado da timeline mensal */
+router.get('/jogos/year-tbd', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const parsedYear = parseCarouselYearQuery(req.query as { year?: string });
+  if (!parsedYear) {
+    return res.status(400).json({ error: 'Ano inválido.' });
+  }
+
+  try {
+    const jogos = await prisma.jogo.findMany({
+      where: { AND: [jogoQualityFilter, yearOnlyJogoWhere(parsedYear)] },
+      orderBy: { releaseYear: 'asc' },
+      take: CAROUSEL_ITEM_LIMIT,
+      include: {
+        platforms: { include: { plataforma: true }, take: 4 },
+        genres: { include: { genero: true } },
+      },
+    });
+    res.json(jogos.map(mapJogoToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar jogos year-tbd: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar lançamentos com data a confirmar.' });
   }
 });
 
