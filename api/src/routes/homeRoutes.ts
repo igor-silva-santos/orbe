@@ -33,8 +33,6 @@ import {
   serieCarouselLiteInclude,
   animeCarouselInclude,
   cardListInclude,
-  mergeCarouselRowsByDateAsc,
-  mergeCarouselRowsByFirstReleaseDateAsc,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -65,33 +63,14 @@ const getRecentCarouselPastStart = (days = 90): Date => {
   return d;
 };
 
-/** Filmes: mês atual + próximo + passado recente (igual jogos/séries) */
-const carouselFilmePriorityWindow = (
-  windowStart: Date,
-  windowEnd: Date,
+/** Filmes: passado recente (90d) até fim do mês seguinte — sem reestreias históricas */
+const carouselFilmeHomepageWindow = (
   recentPastStart: Date,
+  windowEnd: Date,
 ): Prisma.FilmeWhereInput => {
   const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
   return {
-    OR: [
-      { releaseDate: { gte: windowStart, lte: nextMonthEnd } },
-      {
-        AND: [
-          { emCartaz: true },
-          { releaseDate: { gte: recentPastStart, lte: nextMonthEnd } },
-        ],
-      },
-    ],
-  };
-};
-
-const carouselDatePriorityWindow = (
-  windowStart: Date,
-  windowEnd: Date,
-): Prisma.JogoWhereInput => {
-  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
-  return {
-    firstReleaseDate: { gte: windowStart, lte: nextMonthEnd },
+    releaseDate: { gte: recentPastStart, lte: nextMonthEnd },
   };
 };
 
@@ -141,23 +120,17 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
 
   try {
     const [
-      filmePriority,
-      filmePast,
+      filmeCarousel,
       seriePriority,
       seriePast,
-      jogoPriority,
-      jogoPast,
+      jogoCarousel,
       animes,
     ] = await Promise.all([
-      fetchFilmesForCarousel(carouselFilmePriorityWindow(windowStart, windowEnd, recentPastStart), {
+      fetchFilmesForCarousel(carouselFilmeHomepageWindow(recentPastStart, windowEnd), {
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         year,
       }),
-      fetchFilmesForCarousel(
-        { releaseDate: { gte: recentPastStart, lt: windowStart } },
-        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_ITEM_LIMIT, year },
-      ),
       prisma.serie.findMany({
         where: {
           AND: [serieCarouselQualityFilter, carouselSeriePriorityWindow(windowStart, windowEnd)],
@@ -176,20 +149,14 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       }),
       prisma.jogo.findMany({
         where: {
-          AND: [jogoQualityFilter, carouselDatePriorityWindow(windowStart, windowEnd)],
-        },
-        orderBy: { firstReleaseDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
-        include: {
-          genres: { include: { genero: true } },
-          platforms: { include: { plataforma: true }, take: 4 },
-        },
-      }),
-      prisma.jogo.findMany({
-        where: {
           AND: [
             jogoQualityFilter,
-            { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
+            {
+              firstReleaseDate: {
+                gte: recentPastStart,
+                lte: new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999),
+              },
+            },
           ],
         },
         orderBy: { firstReleaseDate: 'asc' },
@@ -212,13 +179,13 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       }),
     ]);
 
-    const filmesRaw = mergeCarouselRowsByDateAsc(filmePriority, filmePast, HOMEPAGE_ITEM_LIMIT);
+    const filmesRaw = filmeCarousel;
     const seriesById = new Map<number, (typeof seriePriority)[number]>();
     for (const item of [...seriePriority, ...seriePast]) {
       seriesById.set(item.tmdbId, item);
     }
     const series = sortSeriesByCarouselDate(Array.from(seriesById.values())).slice(0, HOMEPAGE_ITEM_LIMIT);
-    const jogos = mergeCarouselRowsByFirstReleaseDateAsc(jogoPriority, jogoPast, HOMEPAGE_ITEM_LIMIT);
+    const jogos = jogoCarousel;
 
     res.json({
       filmes: filmesRaw.map(mapFilmeToCarouselCard),

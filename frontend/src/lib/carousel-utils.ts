@@ -225,3 +225,31 @@ export function currentMonthCarouselTitle(): string {
   const now = new Date();
   return formatCarouselMonthTitle(new Date(now.getFullYear(), now.getMonth(), 1));
 }
+
+/** Remove reestreias históricas fora da janela do carrossel (últimos 90 dias → futuro). */
+export function isMidiaInCarouselTimeline(item: Midia | undefined, reference = new Date()): boolean {
+  const releaseDate = parseMidiaReleaseDate(item);
+  return releaseDate !== null && isCarouselTimelineDate(releaseDate, reference);
+}
+
+export function filterMidiaForCarouselTimeline(items: Midia[], reference = new Date()): Midia[] {
+  return items.filter((item) => isMidiaInCarouselTimeline(item, reference));
+}
+
+export function hasCarouselMonthData(items: Midia[], monthKey: string): boolean {
+  return items.some((item) => monthKeyFromItem(item) === monthKey);
+}
+
+/** Dados suficientes para revelar o carrossel após o bootstrap do mês atual. */
+export function isCarouselBootstrapReady(items: Midia[], reference = new Date()): boolean {
+  if (!items.length) return false;
+
+  const today = new Date(reference);
+  today.setHours(0, 0, 0, 0);
+  const targetMonthKey = monthKeyFromDate(today);
+
+  if (!hasCarouselMonthData(items, targetMonthKey)) return false;
+
+  const index = resolveCarouselOpenIndex(items);
+  return isCarouselOpenIndexReady(items, index);
+}

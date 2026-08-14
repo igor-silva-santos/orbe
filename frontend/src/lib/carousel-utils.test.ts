@@ -8,6 +8,8 @@ import {
   monthKeyFromItem,
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
+  filterMidiaForCarouselTimeline,
+  isCarouselBootstrapReady,
 } from './carousel-utils';
 import type { Midia } from '@/types';
 
@@ -174,6 +176,36 @@ describe('findMonthBounds', () => {
     const julyBounds = findMonthBounds(items, '2026-07');
     assert.ok(julyBounds);
     assert.ok(nearJulyStart <= julyBounds.start + monthEdgeBuffer);
+  });
+});
+
+describe('filterMidiaForCarouselTimeline', () => {
+  it('removes historical re-releases outside the 90-day window', () => {
+    const items = [
+      mockMidia(1, '1943-09-17'),
+      mockMidia(2, '2026-07-01'),
+      mockMidia(3, '2026-08-05'),
+    ];
+    const filtered = filterMidiaForCarouselTimeline(items, new Date('2026-08-14'));
+    assert.equal(filtered.length, 2);
+    assert.equal(filtered[0].id, 2);
+    assert.equal(filtered[1].id, 3);
+  });
+});
+
+describe('isCarouselBootstrapReady', () => {
+  it('returns false until current month data exists', () => {
+    const items = [mockMidia(1, '2026-07-01'), mockMidia(2, '2026-07-15')];
+    assert.equal(isCarouselBootstrapReady(items, new Date('2026-08-14')), false);
+  });
+
+  it('returns true when current month has a future release', () => {
+    const items = [
+      mockMidia(1, '2026-07-01'),
+      mockMidia(2, '2026-08-05'),
+      mockMidia(3, '2026-08-20'),
+    ];
+    assert.equal(isCarouselBootstrapReady(items, new Date('2026-08-14')), true);
   });
 });
 
