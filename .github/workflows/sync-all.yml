@@ -86,7 +86,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verificar se o sync iniciou
+      - name: Manter API acordada até o sync terminar
         env:
           API_URL: ${{ secrets.ORBE_API_URL }}
         run: |
@@ -94,13 +94,31 @@ jobs:
           echo "Aguardando syncActive=true (até 60s)..."
           for i in $(seq 1 12); do
             STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
-            echo "$STATUS" | python3 -m json.tool 2>/dev/null || echo "$STATUS"
             ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
             if [ "$ACTIVE" = "True" ]; then
-              echo "✅ Sync em andamento. Acompanhe nos logs do Render."
-              exit 0
+              break
             fi
             sleep 5
           done
-          echo "::warning::syncActive ainda false após 60s. O Render free pode ter interrompido — rode novamente ou use run-sync-resume."
-          exit 0
+
+          if [ "$ACTIVE" != "True" ]; then
+            echo "::warning::syncActive false — sync pode não ter iniciado. Encerrando."
+            exit 0
+          fi
+
+          echo "✅ Sync ativo. Ping a cada 10 min (máx. 8h) para evitar hibernação do Render free."
+          MAX_ROUNDS=48
+          for i in $(seq 1 $MAX_ROUNDS); do
+            sleep 600
+            curl -sf "${API_BASE}/api/health" >/dev/null || true
+            STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+            ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+            PHASE=$(echo "$STATUS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('phase') or '-')" 2>/dev/null || echo -)
+            PCT=$(echo "$STATUS" | python3 -c "import sys,json; d=json.load(sys.stdin); p=d.get('progressPercent'); print(f'{p}%' if p is not None else '')" 2>/dev/null || echo "")
+            echo "[$(date -u +%H:%M:%S)] keep-alive #${i} — active=${ACTIVE} phase=${PHASE} ${PCT}"
+            if [ "$ACTIVE" != "True" ]; then
+              echo "Sync finalizado ou interrompido. Keep-alive encerrado."
+              exit 0
+            fi
+          done
+          echo "::warning::Limite de 8h atingido. Se o sync não terminou, rode resume."

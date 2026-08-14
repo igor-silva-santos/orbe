@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
+import { startSyncKeepAlive, stopSyncKeepAlive } from './syncKeepAlive';
 
 const SYNC_STATE_KEY = 'sync_run';
 const BACKFILL_STATE_KEY = 'backfill_state';
@@ -233,6 +234,7 @@ export async function acquireSyncLock(
       };
     }
     memoryLocked = true;
+    startSyncKeepAlive();
     return { ok: true };
   }
 
@@ -264,11 +266,13 @@ export async function acquireSyncLock(
   }
 
   memoryLocked = true;
+  startSyncKeepAlive();
   return { ok: true };
 }
 
 export async function releaseSyncLock(prisma: PrismaClient): Promise<void> {
   memoryLocked = false;
+  stopSyncKeepAlive();
   try {
     await writeState(prisma, null);
   } catch (error) {
@@ -279,6 +283,7 @@ export async function releaseSyncLock(prisma: PrismaClient): Promise<void> {
 /** Falha recuperável — mantém checkpoint para resume */
 export async function failSyncRun(prisma: PrismaClient, error: unknown): Promise<void> {
   memoryLocked = false;
+  stopSyncKeepAlive();
   const message = error instanceof Error ? error.message : String(error);
   try {
     const state = await readState(prisma);
@@ -375,6 +380,7 @@ export async function updateSyncProgress(
 /** Libera lock preso após crash/cold start */
 export async function resetStaleSyncLock(prisma: PrismaClient): Promise<SyncStatusPublic> {
   memoryLocked = false;
+  stopSyncKeepAlive();
   const state = await readState(prisma);
   if (state?.running) {
     await writeState(prisma, {
