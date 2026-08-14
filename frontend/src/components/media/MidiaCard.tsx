@@ -139,7 +139,9 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     return diffInHours > 0 && diffInHours <= 24;
   })();
 
-  const animeReleaseDate = isAnime ? new Date((midia as Anime).data_lancamento_api) : null;
+  const animeReleaseDate = isAnime && midia.data_lancamento_api
+    ? new Date(midia.data_lancamento_api)
+    : null;
   const isFutureRelease = animeReleaseDate ? animeReleaseDate > new Date() : false;
   const hasNextEpisode = !!nextAiringEpisode;
   const nextEpisodeNumber =
@@ -169,8 +171,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
 
   const formatReleaseDate = () => {
+    if (midia.ano_lancamento_api && !midia.data_lancamento_confirmada) {
+      return `Previsto para ${midia.ano_lancamento_api}`;
+    }
     const date = midia.data_lancamento_curada || midia.data_lancamento_api;
-    if (!date) return 'A ser anunciado';
+    if (!date) return 'Data a confirmar';
     try {
       if (typeof date === 'object' && date !== null && 'year' in date) {
         const dateObj = date as { year: number, month: number, day: number };

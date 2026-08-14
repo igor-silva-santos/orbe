@@ -21,6 +21,8 @@ model Filme {
   originalTitle   String?
   overview        String?   @db.Text
   releaseDate     DateTime?
+  // Ano de lançamento quando não há data de calendário (TBA). Exige releaseDate null.
+  releaseYear     Int?
   runtime         Int?
   budget          BigInt?
   revenue         BigInt?
@@ -67,6 +69,7 @@ model Filme {
   premiacoes         Json?
 
   @@index([releaseDate])
+  @@index([releaseYear])
   @@index([localizacaoPtBr])
 }
 
@@ -78,6 +81,8 @@ model Serie {
   overview         String?   @db.Text
   firstAirDate     DateTime?
   lastAirDate      DateTime?
+  // Ano de estreia quando não há data de calendário (TBA). Exige firstAirDate null.
+  releaseYear      Int?
   numberOfSeasons  Int?
   numberOfEpisodes Int?
   popularity       Float?
@@ -108,6 +113,7 @@ model Serie {
   premiacoes         Json?
 
   @@index([firstAirDate])
+  @@index([releaseYear])
 }
 
 model Anime {
@@ -172,6 +178,8 @@ model Jogo {
   summary               String?   @db.Text
   storyline             String?   @db.Text
   firstReleaseDate      DateTime?
+  // Ano de lançamento quando não há data de calendário (TBA). Exige firstReleaseDate null.
+  releaseYear           Int?
   rating                Float?
   ratingCount           Int?
   aggregatedRating      Float?
@@ -214,6 +222,7 @@ model Jogo {
   premiacoes            Json?
 
   @@index([firstReleaseDate])
+  @@index([releaseYear])
 }
 
 // =================================================================================

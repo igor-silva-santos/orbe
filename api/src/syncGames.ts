@@ -7,6 +7,9 @@ import { logger } from './logger';
 import { isJogoRelevantForSync, SYNC_MIN_GAME_HYPES } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
+import { resolveIgdbRelease, isYearWithinRange } from './yearOnlyRelease';
+import type { SyncContentOptions } from './syncOptions';
+import { resolveSyncContentOptions } from './syncOptions';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, ensureIgdbNamedEntity } from './syncUtils';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -132,7 +135,13 @@ async function fetchPopularGameIds(): Promise<number[]> {
     }
 }
 
-async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId: number | null = null): Promise<{ skipReasons: Record<string, number> }> {
+async function processGameBatch(
+    gameIds: number[],
+    prisma: PrismaClient,
+    eventId: number | null = null,
+    period?: { start: Date; end: Date },
+    includeUndated = false,
+): Promise<{ skipReasons: Record<string, number> }> {
     const skipReasons: Record<string, number> = {};
     const bumpSkip = (reason: string) => {
         skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
@@ -140,7 +149,8 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
     if (gameIds.length === 0) return { skipReasons };
 
     const query = `
-        fields name, summary, cover.url, first_release_date, rating, rating_count, hypes, follows,
+        fields name, summary, cover.url, first_release_date, release_dates.date, release_dates.category,
+               rating, rating_count, hypes, follows,
                genres.name, genres.id, 
                involved_companies.company.name, involved_companies.company.id, involved_companies.developer, involved_companies.publisher, 
                platforms.name, platforms.id, 
@@ -183,7 +193,28 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                     continue;
                 }
 
-                const firstReleaseDate = game.first_release_date ? new Date(game.first_release_date * 1000) : null;
+                const igdbResolved = resolveIgdbRelease(game);
+                let firstReleaseDate = igdbResolved.calendarDate;
+                let releaseYear = igdbResolved.releaseYear;
+
+                if (!firstReleaseDate && igdbResolved.isYearOnly && releaseYear) {
+                    if (!includeUndated) {
+                        bumpSkip('no_release_date');
+                        continue;
+                    }
+                    if (period && !isYearWithinRange(releaseYear, period.start, period.end)) {
+                        bumpSkip('out_of_period');
+                        continue;
+                    }
+                } else if (!firstReleaseDate) {
+                    if (!includeUndated) {
+                        bumpSkip('no_release_date');
+                        continue;
+                    }
+                } else {
+                    releaseYear = firstReleaseDate.getFullYear();
+                }
+
                 const coverUrl = game.cover?.url ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') : null;
 
                 // De-duplicate company roles
@@ -348,6 +379,7 @@ async function processGameBatch(gameIds: number[], prisma: PrismaClient, eventId
                       : game.summary,
                     cover: coverUrl,
                     firstReleaseDate: firstReleaseDate,
+                    releaseYear: releaseYear,
                     rating: game.rating,
                     ratingCount: game.rating_count,
                     hypes: game.hypes,
@@ -446,9 +478,19 @@ async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string
 }
 
 
-export async function syncGames(prisma: PrismaClient, startDate?: string, endDate?: string, limit?: number) {
+export async function syncGames(
+    prisma: PrismaClient,
+    startDate?: string,
+    endDate?: string,
+    limitOrOptions?: number | SyncContentOptions,
+    maybeOptions?: SyncContentOptions,
+) {
     const startDateArg = startDate || process.argv[2];
     const endDateArg = endDate || process.argv[3];
+    const limit = typeof limitOrOptions === 'number' ? limitOrOptions : limitOrOptions?.limit ?? maybeOptions?.limit;
+    const { includeUndated } = resolveSyncContentOptions(
+        typeof limitOrOptions === 'object' ? limitOrOptions : maybeOptions,
+    );
 
     if (!startDateArg || !endDateArg) {
         logger.error('Datas de início e fim são necessárias para a sincronização de jogos.');
@@ -456,6 +498,7 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
     }
 
     const periodOpen = isOpenPeriod(endDateArg);
+    const period = { start: new Date(startDateArg), end: new Date(endDateArg) };
 
     let totalBatches = 0;
     let completedBatches = 0;
@@ -525,7 +568,7 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
             for (let i = 0; i < idsToSync.length; i += batchSize) {
                 const batch = idsToSync.slice(i, i + batchSize);
                 logger.info(`Processando lote curado de jogos: ${i + 1}-${Math.min(i + batchSize, idsToSync.length)} de ${idsToSync.length}`);
-                const batchResult = await processGameBatch(batch, prisma);
+                const batchResult = await processGameBatch(batch, prisma, null, period, includeUndated);
                 await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
                 completedBatches++;
                 await reportProgress();
@@ -546,7 +589,7 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
                 for (let i = 0; i < gameIds.length; i += batchSize) {
                     const batch = gameIds.slice(i, i + batchSize);
                     logger.info(`Processando lote de jogos do evento ${event.id}: ${i + 1}-${Math.min(i + batchSize, gameIds.length)} de ${gameIds.length}`);
-                    const batchResult = await processGameBatch(batch, prisma, event.id);
+                    const batchResult = await processGameBatch(batch, prisma, event.id, period, includeUndated);
                     await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
                     batch.forEach((id: number) => processedEventGameIds.add(id));
                     completedBatches++;
@@ -564,7 +607,7 @@ export async function syncGames(prisma: PrismaClient, startDate?: string, endDat
         for (let i = 0; i < finalGeneralIds.length; i += batchSize) {
             const batch = finalGeneralIds.slice(i, i + batchSize);
             logger.info(`Processando lote de jogos gerais: ${i + 1}-${Math.min(i + batchSize, finalGeneralIds.length)} de ${finalGeneralIds.length}`);
-            const batchResult = await processGameBatch(batch, prisma);
+            const batchResult = await processGameBatch(batch, prisma, null, period, includeUndated);
             await addSkipReasons(prisma, 'jogos', batchResult.skipReasons);
             completedBatches++;
             await reportProgress();

@@ -7,6 +7,9 @@ import { prisma } from './clients';
 import { isSerieRelevantForSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
+import { resolveTmdbRelease, isYearWithinRange } from './yearOnlyRelease';
+import type { SyncContentOptions } from './syncOptions';
+import { resolveSyncContentOptions } from './syncOptions';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
@@ -152,7 +155,13 @@ async function fetchSeriesIdsForPeriod(startDate: string, endDate: string): Prom
   }
 }
 
-async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curatedIds: Set<number> = new Set()): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number>, noBrProviderIds: number[] }> {
+async function processSerieBatch(
+  serieIds: number[],
+  prisma: PrismaClient,
+  curatedIds: Set<number> = new Set(),
+  period?: { start: Date; end: Date },
+  includeUndated = false,
+): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number>, noBrProviderIds: number[] }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
   const skipReasons: Record<string, number> = {};
   const noBrProviderIds: number[] = [];
@@ -178,10 +187,28 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
         continue;
       }
 
-      const firstAirDate: Date | null = serieDetails.first_air_date ? new Date(serieDetails.first_air_date) : null;
-      if (!firstAirDate) {
-        bumpSkip('no_first_air_date');
-        continue;
+      let firstAirDate: Date | null = serieDetails.first_air_date ? new Date(serieDetails.first_air_date) : null;
+      let releaseYear: number | null = null;
+
+      if (!firstAirDate || Number.isNaN(firstAirDate.getTime())) {
+        const tmdbResolved = resolveTmdbRelease(serieDetails.first_air_date, serieDetails.status);
+        if (tmdbResolved.isYearOnly && tmdbResolved.releaseYear) {
+          if (!includeUndated) {
+            bumpSkip('no_first_air_date');
+            continue;
+          }
+          if (period && !isYearWithinRange(tmdbResolved.releaseYear, period.start, period.end)) {
+            bumpSkip('out_of_period');
+            continue;
+          }
+          firstAirDate = null;
+          releaseYear = tmdbResolved.releaseYear;
+        } else {
+          bumpSkip('no_first_air_date');
+          continue;
+        }
+      } else {
+        releaseYear = firstAirDate.getFullYear();
       }
 
       const isCurated = curatedIds.has(id);
@@ -205,6 +232,7 @@ async function processSerieBatch(serieIds: number[], prisma: PrismaClient, curat
             })) ?? serieDetails.overview
           : serieDetails.overview,
         firstAirDate: firstAirDate,
+        releaseYear: releaseYear,
         lastAirDate: serieDetails.last_air_date ? new Date(serieDetails.last_air_date) : null,
         numberOfEpisodes: serieDetails.number_of_episodes,
         numberOfSeasons: serieDetails.number_of_seasons,
@@ -386,9 +414,20 @@ export async function recheckPendingBrSeries(prisma: PrismaClient, batchLimit = 
 }
 
 
-export async function syncSeries(prisma: PrismaClient, startDate: string, endDate: string, limit?: number) {
+export async function syncSeries(
+  prisma: PrismaClient,
+  startDate: string,
+  endDate: string,
+  limitOrOptions?: number | SyncContentOptions,
+  maybeOptions?: SyncContentOptions,
+) {
+  const limit = typeof limitOrOptions === 'number' ? limitOrOptions : limitOrOptions?.limit ?? maybeOptions?.limit;
+  const { includeUndated } = resolveSyncContentOptions(
+    typeof limitOrOptions === 'object' ? limitOrOptions : maybeOptions,
+  );
   let currentStartDate = new Date(startDate);
   const finalEndDate = new Date(endDate);
+  const period = { start: new Date(startDate), end: new Date(endDate) };
   const periodOpen = isOpenPeriod(endDate);
   const runProgress = getSyncRunProgress();
   const phaseTracker = runProgress?.startPhase('SÉRIES');
@@ -424,7 +463,7 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
     for (let i = 0; i < curatedIdList.length; i += batchSize) {
       const batch = curatedIdList.slice(i, i + batchSize);
       logger.info(`Processando lote curado de séries: ${i + 1}-${Math.min(i + batchSize, curatedIdList.length)} de ${curatedIdList.length}`);
-      const batchResult = await processSerieBatch(batch, prisma, curatedIds);
+      const batchResult = await processSerieBatch(batch, prisma, curatedIds, period, includeUndated);
       await addSkipReasons(prisma, 'series', batchResult.skipReasons);
       allNoBrProviderIds.push(...batchResult.noBrProviderIds);
       phaseTracker?.advance(batch.length);
@@ -457,7 +496,7 @@ export async function syncSeries(prisma: PrismaClient, startDate: string, endDat
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote de séries do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            const batchResult = await processSerieBatch(batch, prisma, curatedIds);
+            const batchResult = await processSerieBatch(batch, prisma, curatedIds, period, includeUndated);
             await addSkipReasons(prisma, 'series', batchResult.skipReasons);
             allNoBrProviderIds.push(...batchResult.noBrProviderIds);
             phaseTracker?.advance(batch.length);

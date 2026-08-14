@@ -154,3 +154,21 @@ describe('findMonthBounds', () => {
     assert.ok(nearJulyStart <= julyBounds.start + monthEdgeBuffer);
   });
 });
+
+describe('monthKeyFromItem year-only isolation', () => {
+  it('returns null for year-only items (excluded from monthly timeline)', () => {
+    const item = {
+      id: 99,
+      titulo_curado: 'Spider-Man 2028',
+      titulo_api: 'Spider-Man 2028',
+      poster_url_api: '',
+      data_lancamento_api: null,
+      ano_lancamento_api: 2028,
+      data_lancamento_confirmada: false,
+      sinopse_api: '',
+      plataformas_api: [],
+      generos_api: [],
+    } as Midia;
+    assert.equal(monthKeyFromItem(item), null);
+  });
+});

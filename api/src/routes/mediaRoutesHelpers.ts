@@ -70,6 +70,13 @@ export const parseYearMonthQuery = (query: { year?: string; month?: string }) =>
   return { year, month };
 };
 
+/** Ano isolado para rotas year-tbd (lançamentos só com ano) */
+export const parseCarouselYearQuery = (query: { year?: string }): number | null => {
+  const year = parseInt(query.year ?? '', 10);
+  if (!year || year < 1900 || year > 2100) return null;
+  return year;
+};
+
 export const getCurrentSeason = (): 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL' => {
   const month = new Date().getMonth();
   if (month <= 2) return 'WINTER';

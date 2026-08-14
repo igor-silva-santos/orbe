@@ -5,6 +5,12 @@ import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { useCarouselMonthLoader } from '@/hooks/useCarouselMonthLoader';
+import {
+  formatYearTbdTitle,
+  useCarouselYearTbd,
+  type YearTbdSlide,
+} from '@/hooks/useCarouselYearTbd';
+import YearTbdSeparatorCard from '../media/YearTbdSeparatorCard';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
@@ -50,6 +56,10 @@ const MONTH_EDGE_BUFFER = 4;
 const EMPTY_MONTH_NAV_LIMIT = 8;
 
 type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
+
+type DisplaySlide =
+  | { kind: 'dated'; item: Midia; datedIndex: number }
+  | YearTbdSlide;
 
 const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, startIndex, className }) => {
   const handleInteraction = useMidiaInteraction();
@@ -117,6 +127,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     monthEdgeBuffer,
   });
 
+  const { loadYearTbd, getAppendSlides, slidesByYear } = useCarouselYearTbd({ mediaType });
+
   const activeSourceItems = emAltaMode ? emAltaItems : mediaItems;
 
   const genres = useMemo(
@@ -129,10 +141,28 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     [activeSourceItems, applyDisplayFilters]
   );
 
+  const displaySlides = useMemo((): DisplaySlide[] => {
+    if (emAltaMode) {
+      return filteredItems.map((item, datedIndex) => ({ kind: 'dated', item, datedIndex }));
+    }
+    const dated: DisplaySlide[] = filteredItems.map((item, datedIndex) => ({
+      kind: 'dated',
+      item,
+      datedIndex,
+    }));
+    const nowYear = new Date().getFullYear();
+    const appendYears = [nowYear, nowYear + 1, nowYear + 2];
+    return [...dated, ...getAppendSlides(appendYears)];
+  }, [emAltaMode, filteredItems, getAppendSlides, slidesByYear]);
+
   const filteredItemsRef = useRef(filteredItems);
+  const displaySlidesRef = useRef(displaySlides);
   useEffect(() => {
     filteredItemsRef.current = filteredItems;
   }, [filteredItems]);
+  useEffect(() => {
+    displaySlidesRef.current = displaySlides;
+  }, [displaySlides]);
 
   useEffect(() => {
     mediaItemsRef.current = mediaItems;
@@ -214,6 +244,15 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** Prefetch isolado de lançamentos só com ano — não entra na timeline mensal */
+  useEffect(() => {
+    if (emAltaMode) return;
+    const y = new Date().getFullYear();
+    void loadYearTbd(y);
+    void loadYearTbd(y + 1);
+    void loadYearTbd(y + 2);
+  }, [emAltaMode, loadYearTbd]);
+
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {
     if (!hasCompletedInitialLoad || emAltaMode || filteredItems.length > 0) return;
@@ -257,25 +296,45 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       if (emAltaMode) return;
       if (hasInitialPositioningRef.current) return;
 
+      const slide = displaySlidesRef.current[selectedIndex];
+      if (slide?.kind === 'year-tbd-separator') {
+        lastTitleMonthKey.current = `year-tbd-${slide.year}`;
+        setCurrentTitle(formatYearTbdTitle(slide.year));
+        return;
+      }
+      if (slide?.kind === 'year-tbd-media') {
+        const year = slide.item.ano_lancamento_api;
+        if (year) {
+          lastTitleMonthKey.current = `year-tbd-${year}`;
+          setCurrentTitle(formatYearTbdTitle(year));
+        }
+        return;
+      }
+
       const items = filteredItemsRef.current;
       previousSelectedIndex.current = selectedIndex;
-      updateTitleFromIndex(selectedIndex, items);
+      updateTitleFromIndex(slide?.kind === 'dated' ? slide.datedIndex : selectedIndex, items);
 
-      const monthKey = monthKeyFromItem(items[selectedIndex]);
+      const monthKey = monthKeyFromItem(items[slide?.kind === 'dated' ? slide.datedIndex : selectedIndex]);
       if (monthKey && monthKey !== lastVisibleMonthKeyRef.current) {
         lastVisibleMonthKeyRef.current = monthKey;
         ensureUpcomingMonthsLoaded(monthKey);
+        const { year } = parseMonthKey(monthKey);
+        void loadYearTbd(year + 1);
       }
 
-      prefetchMonthEdges(selectedIndex, items);
+      if (slide?.kind === 'dated') {
+        prefetchMonthEdges(slide.datedIndex, items);
+      }
     };
 
     const onSettle = () => {
       if (emAltaMode) return;
-      const items = filteredItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
+      const slide = displaySlidesRef.current[selectedIndex];
+      if (slide?.kind !== 'dated') return;
       previousSelectedIndex.current = selectedIndex;
-      prefetchMonthEdges(selectedIndex, items);
+      prefetchMonthEdges(slide.datedIndex, filteredItemsRef.current);
     };
 
     emblaApi.on('select', onSelect);
@@ -286,7 +345,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded]);
+  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded, loadYearTbd]);
 
   useEffect(() => {
     if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
@@ -306,6 +365,12 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
   }, [emblaApi, filteredItems, emAltaMode, pendingScrollIndex]);
+
+  const yearTbdSlideCount = displaySlides.length - filteredItems.length;
+  useEffect(() => {
+    if (!emblaApi || emAltaMode || yearTbdSlideCount === 0) return;
+    emblaApi.reInit();
+  }, [yearTbdSlideCount, emblaApi, emAltaMode]);
 
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isNavigating) return;
@@ -390,7 +455,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   };
 
-  const virtualRange = useCarouselVirtualRange(emblaApi, filteredItems.length);
+  const virtualRange = useCarouselVirtualRange(emblaApi, displaySlides.length);
   const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
@@ -538,9 +603,36 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                         <MidiaCardSkeleton />
                       </div>
                     ))
-                : filteredItems.map((item, index) => {
+                : displaySlides.map((slide, index) => {
                   const isRendered = index >= virtualRange.start && index <= virtualRange.end;
                   const isPriority = Math.abs(index - selectedSnap) <= 4;
+                  if (slide.kind === 'year-tbd-separator') {
+                    return (
+                      <div key={`year-tbd-sep-${slide.year}`} className={SLIDE_CLASS}>
+                        {isRendered ? <YearTbdSeparatorCard year={slide.year} /> : (
+                          <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
+                        )}
+                      </div>
+                    );
+                  }
+                  if (slide.kind === 'year-tbd-media') {
+                    return (
+                      <div key={`year-tbd-${slide.item.id}-${mediaType}`} className={SLIDE_CLASS}>
+                        {isRendered ? (
+                          <MidiaCard
+                            midia={slide.item as Filme | Serie | Anime | Jogo}
+                            type={mediaType.slice(0, -1) as TipoMidia}
+                            priority={isPriority}
+                            userInteractions={userInteractions}
+                            onInteraction={handleInteraction}
+                          />
+                        ) : (
+                          <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
+                        )}
+                      </div>
+                    );
+                  }
+                  const item = slide.item;
                   return (
                     <div key={`${item.id}-${mediaType}`} className={SLIDE_CLASS}>
                       {isRendered ? (
