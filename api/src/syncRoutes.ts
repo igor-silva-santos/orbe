@@ -47,6 +47,18 @@ function verifySyncSecret(provided: string | undefined): boolean {
   return crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
 }
 
+/** Resolve startDate/endDate a partir de datas explícitas ou anos (startYear/endYear). */
+function resolveSyncDateRange(body: {
+  startDate?: string;
+  endDate?: string;
+  startYear?: number | string;
+  endYear?: number | string;
+}): { startDate: string; endDate: string } {
+  const startDate = body.startDate || `${body.startYear}-01-01`;
+  const endDate = body.endDate || `${body.endYear}-12-31`;
+  return { startDate, endDate };
+}
+
 const protectSync = (req: any, res: any, next: any) => {
   const secret = req.headers['x-sync-secret'] as string | undefined;
   if (!verifySyncSecret(secret)) {
@@ -163,24 +175,31 @@ router.post('/sync/invalidate-cache', syncRateLimiter, protectSync, async (req, 
 });
 
 router.post('/run-sync', syncRateLimiter, protectSync, async (req, res) => {
-  const { mediaType, startDate, endDate, startYear, endYear } = req.body;
+  const { mediaType, startDate: rawStartDate, endDate: rawEndDate, startYear, endYear } = req.body;
 
-  if (!mediaType || !((startDate && endDate) || (startYear && endYear))) {
+  if (!mediaType || !((rawStartDate && rawEndDate) || (startYear && endYear))) {
     return res.status(400).json({ error: 'Parâmetros inválidos. Forneça mediaType e (startDate/endDate ou startYear/endYear).' });
   }
 
+  const { startDate, endDate } = resolveSyncDateRange({
+    startDate: rawStartDate,
+    endDate: rawEndDate,
+    startYear,
+    endYear,
+  });
+
   const lock = await acquireSyncLock(prisma, {
-    startDate: startDate || `${startYear}-01-01`,
-    endDate: endDate || `${endYear}-12-31`,
-    startYear: startYear ? parseInt(startYear, 10) : undefined,
-    endYear: endYear ? parseInt(endYear, 10) : undefined,
+    startDate,
+    endDate,
+    startYear: startYear ? parseInt(String(startYear), 10) : undefined,
+    endYear: endYear ? parseInt(String(endYear), 10) : undefined,
   });
 
   if (!lock.ok) {
     return res.status(lock.status).json({ error: lock.message });
   }
 
-  logger.info(`Sincronização manual iniciada para ${mediaType} de ${startDate || startYear} a ${endDate || endYear}`);
+  logger.info(`Sincronização manual iniciada para ${mediaType} de ${startDate} a ${endDate}`);
   const runProgress = startSyncRunProgress();
 
   res.status(202).json({

@@ -9,7 +9,6 @@ import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import {
   addMonths,
-  calculateCarouselStartIndex,
   findIndexForMonth,
   findMonthBounds,
   formatCarouselMonthTitle,
@@ -18,6 +17,9 @@ import {
   monthKeyFromItem,
   monthTitleFromItem,
   parseMidiaReleaseDate,
+  parseMonthKey,
+  resolveCarouselOpenIndex,
+  currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -44,10 +46,8 @@ interface MediaCarouselProps {
 
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
 const CONTROL_BTN = 'p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors';
-/** Quantos slides antes da borda do mês disparam o carregamento do mês adjacente */
+/** Quantos slides antes da borda do mês disparam prefetch extra ao rolar rápido */
 const MONTH_EDGE_BUFFER = 4;
-/** Meses extras pré-carregados ao encostar na borda (carrossel “infinito” sem buscar tudo) */
-const MONTH_PREFETCH_DEPTH = 2;
 const EMPTY_MONTH_NAV_LIMIT = 8;
 
 type FilmeDisponibilidade = 'cinema' | 'streaming' | 'ambos';
@@ -58,63 +58,38 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
   const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
   const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [mediaItems, setMediaItems] = useState<Midia[]>(initialData);
-  // Espelha `emblaApi.selectedScrollSnap()` em estado reativo (atualizado no handler
-  // `onSelect` do embla abaixo) — ler `selectedScrollSnap()` direto durante o render não
-  // é reativo: rolar o carrossel não disparava re-render, então `isPriority` (que decide
-  // `loading="eager"` vs `"lazy"` nas imagens) ficava congelado na posição de alguma
-  // renderização anterior.
   const [selectedSnap, setSelectedSnap] = useState(startIndex);
-  const [currentTitle, setCurrentTitle] = useState('');
+  const [currentTitle, setCurrentTitle] = useState(currentMonthCarouselTitle);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
+  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
-  // Sub-filtro do "Em Alta" — só se aplica a filmes (cinema tem conceito próprio de "em cartaz"
-  // que séries/jogos não têm da mesma forma). Padrão ao ativar Em Alta: cinema.
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
+
   const activeFetchesRef = useRef(0);
   const emAltaLoadedKeyRef = useRef<string | null>(null);
   const fetchingEmAltaRef = useRef(false);
-  const isRepositioningRef = useRef(false);
   const initialBootstrapDoneRef = useRef(false);
+  const pastMonthsLoadedRef = useRef(false);
+  const lastVisibleMonthKeyRef = useRef<string>('');
 
-  const beginBackgroundFetch = () => {
-    activeFetchesRef.current += 1;
-  };
-
-  const endBackgroundFetch = () => {
-    activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
-  };
-
-  const waitForDomPaint = () =>
-    new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-    });
-
-  const loadedMonths = useRef<Set<string>>(
-    new Set(
-      initialData
-        .map((item) => monthKeyFromItem(item))
-        .filter((key): key is string => Boolean(key))
-    )
-  );
+  /** Só meses buscados via API — não inferir do SSR parcial */
+  const loadedMonths = useRef<Set<string>>(new Set());
   const fetchingMonths = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(startIndex);
   const firstItemIdRef = useRef<number | undefined>(initialData[0]?.id);
   const itemsLengthRef = useRef(initialData.length);
   const mediaItemsRef = useRef(mediaItems);
   const lastTitleMonthKey = useRef<string>('');
-  const initialPrefetchDone = useRef(false);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
     startIndex,
     duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
   });
-  /** Com rolagem rápida, pré-carrega mais meses e com mais antecedência para o carrossel não "estourar" o buffer */
   const monthEdgeBuffer = fastScrollEnabled ? MONTH_EDGE_BUFFER * 2 : MONTH_EDGE_BUFFER;
-  const monthPrefetchDepth = fastScrollEnabled ? MONTH_PREFETCH_DEPTH + 1 : MONTH_PREFETCH_DEPTH;
 
   const setViewportRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -123,6 +98,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     },
     [emblaRef]
   );
+
+  const beginBackgroundFetch = () => {
+    activeFetchesRef.current += 1;
+  };
+
+  const endBackgroundFetch = () => {
+    activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
+  };
 
   const mergeItems = useCallback((incoming: Midia[]): Midia[] => {
     if (!incoming.length) return mediaItemsRef.current;
@@ -139,10 +122,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     [activeSourceItems]
   );
 
-  // Compartilhado entre a lista renderizada (filteredItems) e a navegação por mês
-  // (scrollToToday/navigateByMonth), que precisam calcular índices sobre a MESMA lista
-  // que está de fato nos slides do embla — senão o índice-alvo calculado não bate com o
-  // slide renderizado e o carrossel pula pro lugar errado.
   const applyDisplayFilters = useCallback(
     (items: Midia[]): Midia[] =>
       selectedGenre ? items.filter((item) => item.generos_api?.includes(selectedGenre)) : items,
@@ -153,6 +132,145 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     () => applyDisplayFilters(activeSourceItems),
     [activeSourceItems, applyDisplayFilters]
   );
+
+  const filteredItemsRef = useRef(filteredItems);
+  useEffect(() => {
+    filteredItemsRef.current = filteredItems;
+  }, [filteredItems]);
+
+  useEffect(() => {
+    mediaItemsRef.current = mediaItems;
+  }, [mediaItems]);
+
+  const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
+    const item = items[index];
+    const title = monthTitleFromItem(item);
+    if (!title || !item?.data_lancamento_api) return;
+
+    const date = parseMidiaReleaseDate(item);
+    if (!date) return;
+    const monthKey = monthKeyFromDate(date);
+    if (monthKey === lastTitleMonthKey.current) return;
+
+    lastTitleMonthKey.current = monthKey;
+    setCurrentTitle(title);
+  }, []);
+
+  const fetchMediaByMonth = useCallback(
+    async (year: number, month: number, force = false) => {
+      const key = `${year}-${String(month).padStart(2, '0')}`;
+      if (!force && (fetchingMonths.current.has(key) || loadedMonths.current.has(key))) {
+        return null;
+      }
+      fetchingMonths.current.add(key);
+      beginBackgroundFetch();
+      try {
+        const response = await fetch(
+          `${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`,
+          { cache: 'no-store' },
+        );
+        if (!response.ok) {
+          console.error(`Error fetching ${mediaType} for ${key}: HTTP ${response.status}`);
+          return null;
+        }
+        const data: Midia[] = await response.json();
+        if (!Array.isArray(data)) {
+          console.error(`Invalid response for ${mediaType} ${key}`);
+          return null;
+        }
+        loadedMonths.current.add(key);
+        return data;
+      } catch (error) {
+        console.error(`Error fetching ${mediaType} for ${key}:`, error);
+        return null;
+      } finally {
+        fetchingMonths.current.delete(key);
+        endBackgroundFetch();
+      }
+    },
+    [mediaType]
+  );
+
+  const loadMonth = useCallback(
+    async (year: number, month: number, force = false): Promise<Midia[]> => {
+      const data = await fetchMediaByMonth(year, month, force);
+      if (!data?.length) return mediaItemsRef.current;
+      return mergeItems(data);
+    },
+    [fetchMediaByMonth, mergeItems]
+  );
+
+  /** Ao entrar num mês, garante que o próximo (e o seguinte) já estão carregando */
+  const ensureUpcomingMonthsLoaded = useCallback(
+    (monthKey: string) => {
+      const { year, month } = parseMonthKey(monthKey);
+      const next = addMonths(year, month, 1);
+      const next2 = addMonths(year, month, 2);
+      void loadMonth(next.year, next.month);
+      void loadMonth(next2.year, next2.month);
+    },
+    [loadMonth]
+  );
+
+  const prefetchMonthEdges = useCallback(
+    async (selectedIndex: number, items: Midia[]) => {
+      const selectedItem = items[selectedIndex];
+      const monthKey = monthKeyFromItem(selectedItem);
+      if (!monthKey) return;
+
+      const bounds = findMonthBounds(items, monthKey);
+      if (!bounds) return;
+
+      const { year, month } = parseMonthKey(monthKey);
+
+      if (selectedIndex >= bounds.end - monthEdgeBuffer) {
+        const next = addMonths(year, month, 1);
+        await loadMonth(next.year, next.month);
+      }
+
+      if (selectedIndex <= bounds.start + monthEdgeBuffer) {
+        const prev = addMonths(year, month, -1);
+        await loadMonth(prev.year, prev.month);
+      }
+    },
+    [loadMonth, monthEdgeBuffer]
+  );
+
+  const computeOpenIndex = useCallback(
+    (items?: Midia[]) => resolveCarouselOpenIndex(applyDisplayFilters(items ?? mediaItemsRef.current)),
+    [applyDisplayFilters]
+  );
+
+  const requestScrollToOpenPosition = useCallback(async () => {
+    if (emAltaMode) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let index = computeOpenIndex();
+    let { year, month } = { year: today.getFullYear(), month: today.getMonth() + 1 };
+
+    const needsForwardSearch = (() => {
+      const list = applyDisplayFilters(mediaItemsRef.current);
+      if (!list.length) return true;
+      const release = parseMidiaReleaseDate(list[index]);
+      return !release || release < today;
+    })();
+
+    if (needsForwardSearch) {
+      for (let attempt = 0; attempt < 12; attempt++) {
+        await loadMonth(year, month, true);
+        index = computeOpenIndex();
+        const list = applyDisplayFilters(mediaItemsRef.current);
+        const release = parseMidiaReleaseDate(list[index]);
+        if (release && release >= today) break;
+        ({ year, month } = addMonths(year, month, 1));
+      }
+    }
+
+    lastTitleMonthKey.current = '';
+    setPendingScrollIndex(index);
+  }, [emAltaMode, computeOpenIndex, applyDisplayFilters, loadMonth]);
 
   const loadEmAlta = useCallback(async () => {
     const key = mediaType === 'filmes' ? `filmes:${emAltaDisponibilidade}` : mediaType;
@@ -176,8 +294,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
   }, [mediaType, emAltaDisponibilidade]);
 
-  // Recarrega o "Em Alta" ao entrar no modo ou ao trocar a sub-opção de disponibilidade
-  // (o guard em loadEmAlta evita refetch se a combinação já foi carregada).
   useEffect(() => {
     if (!emAltaMode) return;
     void loadEmAlta();
@@ -195,131 +311,84 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emblaApi, emAltaMode, emAltaItems]);
 
-  const filteredItemsRef = useRef(filteredItems);
-  useEffect(() => {
-    filteredItemsRef.current = filteredItems;
-  }, [filteredItems]);
-
-  useEffect(() => {
-    mediaItemsRef.current = mediaItems;
-  }, [mediaItems]);
-
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
 
-  const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
-    const item = items[index];
-    const title = monthTitleFromItem(item);
-    if (!title || !item?.data_lancamento_api) return;
+  /** Bootstrap: mês atual + próximo + seguinte em paralelo, depois reposiciona */
+  useEffect(() => {
+    if (initialBootstrapDoneRef.current) return;
+    initialBootstrapDoneRef.current = true;
 
-    const date = parseMidiaReleaseDate(item);
-    if (!date) return;
-    const monthKey = monthKeyFromDate(date);
-    if (monthKey === lastTitleMonthKey.current) return;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const next = addMonths(year, month, 1);
+    const next2 = addMonths(year, month, 2);
 
-    lastTitleMonthKey.current = monthKey;
-    setCurrentTitle(title);
+    void (async () => {
+      await Promise.all([
+        loadMonth(year, month, true),
+        loadMonth(next.year, next.month, true),
+        loadMonth(next2.year, next2.month, true),
+      ]);
+      setHasCompletedInitialLoad(true);
+      await requestScrollToOpenPosition();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchMediaByMonth = useCallback(
-    async (year: number, month: number) => {
-      const key = `${year}-${String(month).padStart(2, '0')}`;
-      if (fetchingMonths.current.has(key) || loadedMonths.current.has(key)) {
-        return null;
-      }
-      fetchingMonths.current.add(key);
-      beginBackgroundFetch();
-      try {
-        const response = await fetch(
-          `${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`,
-          { cache: 'no-store' },
-        );
-        if (!response.ok) {
-          console.error(`Error fetching ${mediaType} for ${key}: HTTP ${response.status}`);
-          return null;
-        }
-        const data: Midia[] = await response.json();
-        if (!Array.isArray(data)) {
-          console.error(`Invalid response for ${mediaType} ${key}`);
-          return null;
-        }
-        // Marca como carregado mesmo vazio — requests usam cache: 'no-store'
-        loadedMonths.current.add(key);
-        return data;
-      } catch (error) {
-        console.error(`Error fetching ${mediaType} for ${key}:`, error);
-        return null;
-      } finally {
-        fetchingMonths.current.delete(key);
-        endBackgroundFetch();
-      }
-    },
-    [mediaType]
-  );
+  /** Aplica scroll pendente só depois que o React renderizou os novos slides */
+  useEffect(() => {
+    if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
+    if (pendingScrollIndex >= filteredItems.length) return;
 
-  const loadMonth = useCallback(
-    async (year: number, month: number): Promise<Midia[]> => {
-      const data = await fetchMediaByMonth(year, month);
-      if (!data?.length) return mediaItemsRef.current;
-      return mergeItems(data);
-    },
-    [fetchMediaByMonth, mergeItems]
-  );
+    emblaApi.reInit();
+    emblaApi.scrollTo(pendingScrollIndex, false);
+    previousSelectedIndex.current = pendingScrollIndex;
+    setSelectedSnap(pendingScrollIndex);
+    updateTitleFromIndex(pendingScrollIndex, filteredItems);
 
-  const loadMonthsInDirection = useCallback(
-    async (year: number, month: number, direction: 1 | -1, depth = monthPrefetchDepth) => {
-      // Busca todos os meses em PARALELO (em vez de um `await` por mês dentro de um for),
-      // e mescla os resultados de uma vez só no final. `mergeMediaByDate` já dedupe por id
-      // e reordena por data de lançamento, então a ordem de chegada dos fetches não importa.
-      const targets = Array.from({ length: depth }, (_, step) => addMonths(year, month, (step + 1) * direction));
-      const results = await Promise.all(targets.map((target) => fetchMediaByMonth(target.year, target.month)));
-      const combined = results.filter((data): data is Midia[] => Array.isArray(data) && data.length > 0).flat();
-      if (combined.length) mergeItems(combined);
-    },
-    [fetchMediaByMonth, mergeItems, monthPrefetchDepth]
-  );
+    const monthKey = monthKeyFromItem(filteredItems[pendingScrollIndex]);
+    if (monthKey) {
+      lastVisibleMonthKeyRef.current = monthKey;
+      ensureUpcomingMonthsLoaded(monthKey);
+    }
 
-  const prefetchAdjacentMonthsForIndex = useCallback(
-    async (selectedIndex: number, items: Midia[]) => {
-      const selectedItem = items[selectedIndex];
-      const monthKey = monthKeyFromItem(selectedItem);
-      if (!monthKey) return;
+    setPendingScrollIndex(null);
+  }, [pendingScrollIndex, filteredItems, emblaApi, emAltaMode, updateTitleFromIndex, ensureUpcomingMonthsLoaded]);
 
-      const bounds = findMonthBounds(items, monthKey);
-      if (!bounds) return;
-
-      const { year, month } = addMonths(
-        parseInt(monthKey.split('-')[0], 10),
-        parseInt(monthKey.split('-')[1], 10),
-        0
-      );
-
-      if (selectedIndex >= bounds.end - monthEdgeBuffer) {
-        await loadMonthsInDirection(year, month, 1);
-      }
-
-      if (selectedIndex <= bounds.start + monthEdgeBuffer) {
-        await loadMonthsInDirection(year, month, -1);
-      }
-    },
-    [loadMonthsInDirection, monthEdgeBuffer]
-  );
+  /** Meses passados só depois do posicionamento inicial */
+  useEffect(() => {
+    if (!hasCompletedInitialLoad || pendingScrollIndex !== null || pastMonthsLoadedRef.current || emAltaMode) return;
+    pastMonthsLoadedRef.current = true;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const prev = addMonths(year, month, -1);
+    const prev2 = addMonths(year, month, -2);
+    void loadMonth(prev.year, prev.month);
+    void loadMonth(prev2.year, prev2.month);
+  }, [hasCompletedInitialLoad, pendingScrollIndex, emAltaMode, loadMonth]);
 
   useEffect(() => {
     if (!emblaApi) return;
 
     const onSelect = () => {
       const selectedIndex = emblaApi.selectedScrollSnap();
-      // Atualizado sempre (mesmo em modo Em Alta) — é o que mantém `isPriority` correto
-      // nas imagens enquanto o usuário rola, independente do modo do carrossel.
       setSelectedSnap(selectedIndex);
       if (emAltaMode) return;
+
       const items = filteredItemsRef.current;
       previousSelectedIndex.current = selectedIndex;
       updateTitleFromIndex(selectedIndex, items);
-      // Dispara o prefetch já durante o arraste (não só ao soltar) — em rolagens rápidas
-      // o 'settle' chega tarde demais e o mês seguinte ainda não teve tempo de carregar.
-      void prefetchAdjacentMonthsForIndex(selectedIndex, items);
+
+      const monthKey = monthKeyFromItem(items[selectedIndex]);
+      if (monthKey && monthKey !== lastVisibleMonthKeyRef.current) {
+        lastVisibleMonthKeyRef.current = monthKey;
+        ensureUpcomingMonthsLoaded(monthKey);
+      }
+
+      void prefetchMonthEdges(selectedIndex, items);
     };
 
     const onSettle = () => {
@@ -327,7 +396,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       const items = filteredItemsRef.current;
       const selectedIndex = emblaApi.selectedScrollSnap();
       previousSelectedIndex.current = selectedIndex;
-      void prefetchAdjacentMonthsForIndex(selectedIndex, items);
+      void prefetchMonthEdges(selectedIndex, items);
     };
 
     emblaApi.on('select', onSelect);
@@ -338,22 +407,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, prefetchAdjacentMonthsForIndex, updateTitleFromIndex, emAltaMode]);
+  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded]);
 
   useEffect(() => {
-    if (!emblaApi || !filteredItems[startIndex]) return;
-    updateTitleFromIndex(startIndex, filteredItems);
-  }, [emblaApi, filteredItems, startIndex, updateTitleFromIndex]);
-
-  useEffect(() => {
-    if (!emblaApi || initialPrefetchDone.current || filteredItems.length === 0) return;
-    initialPrefetchDone.current = true;
-    const index = emblaApi.selectedScrollSnap();
-    void prefetchAdjacentMonthsForIndex(index, filteredItems);
-  }, [emblaApi, filteredItems, prefetchAdjacentMonthsForIndex]);
-
-  useEffect(() => {
-    if (!emblaApi || emAltaMode || isRepositioningRef.current) return;
+    if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
 
     const prevLength = itemsLengthRef.current;
     const newLength = filteredItems.length;
@@ -369,99 +426,25 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (wasPrepend) {
       emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
-  }, [emblaApi, filteredItems, emAltaMode]);
-
-  const scrollToNextFilteredRelease = useCallback(async () => {
-    if (!emblaApi || emAltaMode) return;
-
-    isRepositioningRef.current = true;
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const resolveTarget = (items: Midia[]) => {
-        const list = applyDisplayFilters(items);
-        if (list.length === 0) return null;
-        const index = calculateCarouselStartIndex(list);
-        if (index < 0) return null;
-        return { list, index };
-      };
-
-      let target = resolveTarget(mediaItemsRef.current);
-      const now = new Date();
-      let { year, month } = { year: now.getFullYear(), month: now.getMonth() + 1 };
-
-      if (!target || (() => {
-        const centeredDate = parseMidiaReleaseDate(target!.list[target!.index]);
-        return centeredDate !== null && centeredDate < today;
-      })()) {
-        for (let attempt = 0; attempt < 12; attempt++) {
-          const merged = await loadMonth(year, month);
-          const candidate = resolveTarget(merged);
-          if (candidate) {
-            const release = parseMidiaReleaseDate(candidate.list[candidate.index]);
-            if (release && release >= today) {
-              target = candidate;
-              break;
-            }
-          }
-          const next = addMonths(year, month, 1);
-          year = next.year;
-          month = next.month;
-        }
-      }
-
-      if (!target) return;
-
-      await waitForDomPaint();
-
-      lastTitleMonthKey.current = '';
-      emblaApi.reInit();
-      emblaApi.scrollTo(target.index, false);
-      previousSelectedIndex.current = target.index;
-      setSelectedSnap(target.index);
-      updateTitleFromIndex(target.index, target.list);
-      void prefetchAdjacentMonthsForIndex(target.index, target.list);
-    } finally {
-      isRepositioningRef.current = false;
-    }
-  }, [emblaApi, emAltaMode, applyDisplayFilters, loadMonth, updateTitleFromIndex, prefetchAdjacentMonthsForIndex]);
-
-  useEffect(() => {
-    if (initialBootstrapDoneRef.current) return;
-    initialBootstrapDoneRef.current = true;
-
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const next = addMonths(year, month, 1);
-
-    void (async () => {
-      await Promise.all([
-        loadMonth(year, month),
-        loadMonth(next.year, next.month),
-      ]);
-      setHasCompletedInitialLoad(true);
-      await scrollToNextFilteredRelease();
-      void loadMonthsInDirection(year, month, -1);
-      void loadMonthsInDirection(next.year, next.month, 1);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadMonth, loadMonthsInDirection, scrollToNextFilteredRelease]);
+  }, [emblaApi, filteredItems, emAltaMode, pendingScrollIndex]);
 
   const scrollToToday = useCallback(async () => {
     if (!emblaApi || isNavigating) return;
     setIsNavigating(true);
     try {
       const now = new Date();
-      await loadMonth(now.getFullYear(), now.getMonth() + 1);
-      const next = addMonths(now.getFullYear(), now.getMonth() + 1, 1);
-      await loadMonth(next.year, next.month);
-      await scrollToNextFilteredRelease();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const next = addMonths(year, month, 1);
+      await Promise.all([
+        loadMonth(year, month, true),
+        loadMonth(next.year, next.month, true),
+      ]);
+      await requestScrollToOpenPosition();
     } finally {
       setIsNavigating(false);
     }
-  }, [emblaApi, isNavigating, loadMonth, scrollToNextFilteredRelease]);
+  }, [emblaApi, isNavigating, loadMonth, requestScrollToOpenPosition]);
 
   const prevGenreRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
@@ -472,8 +455,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     }
     if (prevGenreRef.current === selectedGenre) return;
     prevGenreRef.current = selectedGenre;
-    void scrollToNextFilteredRelease();
-  }, [selectedGenre, emblaApi, emAltaMode, scrollToNextFilteredRelease]);
+    void requestScrollToOpenPosition();
+  }, [selectedGenre, emblaApi, emAltaMode, requestScrollToOpenPosition]);
 
   const wasEmAltaMode = useRef(false);
   useEffect(() => {
@@ -482,8 +465,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
       wasEmAltaMode.current = emAltaMode;
       return;
     }
-    // Voltando do modo "Em Alta" pro modo mês: os slides trocaram de conteúdo por completo,
-    // reinicializa o embla e usa a navegação existente pra reposicionar no mês atual.
     wasEmAltaMode.current = emAltaMode;
     itemsLengthRef.current = filteredItems.length;
     emblaApi.reInit();
@@ -507,7 +488,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     setIsNavigating(true);
     try {
       const candidates = Array.from({ length: EMPTY_MONTH_NAV_LIMIT }, (_, i) => addMonths(year, month, (i + 1) * step));
-      await Promise.all(candidates.map((target) => loadMonth(target.year, target.month)));
+      await Promise.all(candidates.map((target) => loadMonth(target.year, target.month, true)));
       const list = applyDisplayFilters(mediaItemsRef.current);
 
       for (let i = 0; i < candidates.length; i++) {
@@ -517,13 +498,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
           const targetDate = new Date(target.year, target.month - 1, 1);
           const targetKey = monthKeyFromDate(targetDate);
           lastTitleMonthKey.current = targetKey;
+          lastVisibleMonthKeyRef.current = targetKey;
           setCurrentTitle(formatCarouselMonthTitle(targetDate));
-          await waitForDomPaint();
-          emblaApi.reInit();
-          emblaApi.scrollTo(targetIndex, true);
-          previousSelectedIndex.current = targetIndex;
-          setSelectedSnap(targetIndex);
-          await loadMonthsInDirection(target.year, target.month, step);
+          setPendingScrollIndex(targetIndex);
+          ensureUpcomingMonthsLoaded(targetKey);
           return;
         }
       }

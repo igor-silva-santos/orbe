@@ -5,7 +5,7 @@ import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
 import type { Midia, Anime } from '@/types';
-import { calculateCarouselStartIndex, resolveCarouselStartIndex } from '@/lib/carousel-utils';
+import { resolveCarouselOpenIndex } from '@/lib/carousel-utils';
 import orbeNerdApi from '@/lib/api';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 
@@ -82,7 +82,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
             key={`filmes-${carouselKey}`}
             mediaType="filmes"
             initialData={data.filmes}
-            startIndex={resolveCarouselStartIndex(data.filmes)}
+            startIndex={resolveCarouselOpenIndex(data.filmes)}
           />
         </section>
 
@@ -92,7 +92,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
             key={`series-${carouselKey}`}
             mediaType="series"
             initialData={data.series}
-            startIndex={resolveCarouselStartIndex(data.series)}
+            startIndex={resolveCarouselOpenIndex(data.series)}
           />
         </section>
 
@@ -107,7 +107,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
             key={`jogos-${carouselKey}`}
             mediaType="jogos"
             initialData={data.jogos}
-            startIndex={resolveCarouselStartIndex(data.jogos)}
+            startIndex={resolveCarouselOpenIndex(data.jogos)}
           />
         </section>
       </main>

@@ -117,6 +117,13 @@ export function resolveCarouselStartIndex(data: Midia[]): number {
   return next >= 0 ? next : 0;
 }
 
+/** Índice de abertura: próximo lançamento >= hoje, ou último item se todos forem passados */
+export function resolveCarouselOpenIndex(data: Midia[]): number {
+  if (!data.length) return 0;
+  const next = calculateCarouselStartIndex(data);
+  return next >= 0 ? next : data.length - 1;
+}
+
 export function formatCarouselMonthTitle(date: Date): string {
   const title = format(date, "'Lançamentos de' MMMM 'de' yyyy", { locale: ptBR });
   return title.charAt(0).toUpperCase() + title.slice(1);
