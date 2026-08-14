@@ -41,6 +41,9 @@ interface MediaCarouselProps {
 }
 
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
+/** Slides de placeholder durante posicionamento inicial — snap central para align:center do Embla */
+const SKELETON_SLIDE_COUNT = 10;
+const SKELETON_CENTER_INDEX = Math.floor(SKELETON_SLIDE_COUNT / 2);
 const CONTROL_BTN = 'p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors';
 /** Quantos slides antes da borda do mês disparam prefetch extra ao rolar rápido */
 const MONTH_EDGE_BUFFER = 4;
@@ -78,7 +81,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
-    startIndex,
+    // Posicionamento real vem via pendingScrollIndex; skeletons usam snap central.
+    startIndex: SKELETON_CENTER_INDEX,
     duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
   });
   const monthEdgeBuffer = fastScrollEnabled ? MONTH_EDGE_BUFFER * 2 : MONTH_EDGE_BUFFER;
@@ -192,6 +196,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
 
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+
+  /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
+  useEffect(() => {
+    if (!emblaApi || emAltaMode || !hasInitialPositioningRef.current) return;
+    emblaApi.reInit();
+    emblaApi.scrollTo(SKELETON_CENTER_INDEX, false);
+  }, [emblaApi, emAltaMode, hasInitialPositioning]);
 
   /** Bootstrap: mês atual + próximo em paralelo, depois reposiciona */
   useEffect(() => {
@@ -510,8 +521,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
         >
           <div className="flex">
             {showPositioningSkeleton
-              ? Array.from({ length: 10 }).map((_, index) => (
-                  <div key={index} className={SLIDE_CLASS}>
+              ? Array.from({ length: SKELETON_SLIDE_COUNT }).map((_, index) => (
+                  <div key={`positioning-skeleton-${index}`} className={SLIDE_CLASS}>
                     <MidiaCardSkeleton />
                   </div>
                 ))
@@ -522,8 +533,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
                         Nenhum conteúdo encontrado{selectedGenre ? ` para o gênero "${selectedGenre}"` : ''}.
                       </div>
                     )
-                  : Array.from({ length: 10 }).map((_, index) => (
-                      <div key={index} className={SLIDE_CLASS}>
+                  : Array.from({ length: SKELETON_SLIDE_COUNT }).map((_, index) => (
+                      <div key={`loading-skeleton-${index}`} className={SLIDE_CLASS}>
                         <MidiaCardSkeleton />
                       </div>
                     ))
