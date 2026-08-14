@@ -68,6 +68,30 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.akamai.steamstatic.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.greenmangaming.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn2.unrealengine.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.cheapshark.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.playstation.com',
         port: '',
         pathname: '/**',

@@ -2,6 +2,9 @@ export type DealSource = 'epic' | 'gamerpower' | 'cheapshark';
 
 export type DealKind = 'free' | 'sale';
 
+/** temporary = estão de graça (promo 100%); permanent = são de graça (nunca custaram). */
+export type FreeTier = 'temporary' | 'permanent';
+
 export type DealPlatform =
   | 'steam'
   | 'epic'
@@ -33,11 +36,17 @@ export type UnifiedDeal = {
   steamAppId?: number | null;
   dealRating?: number | null;
   status?: string | null;
+  freeTier?: FreeTier | null;
 };
 
 export type DealsOverview = {
   fetchedAt: string;
+  /** @deprecated Use gratisTemporarios + gratisPermanentes */
   gratis: UnifiedDeal[];
+  /** Jogos que estão de graça — promoção 100% por tempo limitado */
+  gratisTemporarios: UnifiedDeal[];
+  /** Jogos que são de graça — F2P / preço base zero */
+  gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
   sources: {
     epic: { ok: boolean; count: number; error?: string };

@@ -43,6 +43,8 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
   const sourceLabel = SOURCE_LABELS[deal.source] ?? deal.source;
   const endsLabel = formatEndsAt(deal.endsAt);
   const isFree = deal.kind === 'free';
+  const isTemporaryFree = isFree && deal.freeTier !== 'permanent';
+  const isPermanentFree = isFree && deal.freeTier === 'permanent';
 
   return (
     <a
@@ -71,9 +73,14 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
           <span className="rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-semibold orbe-text-primary border border-border">
             {platformLabel}
           </span>
-          {isFree && (
+          {isTemporaryFree && (
             <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
               GRÁTIS
+            </span>
+          )}
+          {isPermanentFree && (
+            <span className="rounded-full bg-sky-600 px-2 py-0.5 text-[10px] font-bold text-white">
+              F2P
             </span>
           )}
         </div>
@@ -94,7 +101,7 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
             <Tag className="h-3.5 w-3.5 shrink-0" />
           )}
           <span>
-            {deal.salePrice ?? (isFree ? 'Grátis para resgatar' : 'Ver oferta')}
+            {deal.salePrice ?? (isTemporaryFree ? 'Grátis por tempo limitado' : isPermanentFree ? 'Sempre grátis' : isFree ? 'Grátis para resgatar' : 'Ver oferta')}
             {deal.originalPrice && deal.salePrice && deal.originalPrice !== deal.salePrice && (
               <span className="ml-1 line-through opacity-70">{deal.originalPrice}</span>
             )}

@@ -56,6 +56,7 @@ function parseDiscountPercent(savings?: string): number | null {
 function mapCheapSharkDeal(item: CheapSharkDeal): UnifiedDeal | null {
   if (!item.dealID || !item.title) return null;
   const sale = Number.parseFloat(item.salePrice ?? '');
+  const normal = Number.parseFloat(item.normalPrice ?? '');
   const savings = parseDiscountPercent(item.savings);
   const isFree = sale === 0 || savings === 100;
   const storeName = STORE_NAME_MAP[item.storeID ?? ''] ?? 'Loja parceira';
@@ -76,12 +77,14 @@ function mapCheapSharkDeal(item: CheapSharkDeal): UnifiedDeal | null {
     steamAppId: item.steamAppID ? Number.parseInt(item.steamAppID, 10) : null,
     dealRating: item.dealRating ? Number.parseFloat(item.dealRating) : null,
     status: item.isOnSale === '1' ? 'on_sale' : 'active',
+    freeTier: isFree ? (normal > 0 ? 'temporary' : 'permanent') : null,
   };
 }
 
 export async function fetchCheapSharkDeals(options?: {
   storeId?: string;
   freeOnly?: boolean;
+  permanentFreeOnly?: boolean;
   pageSize?: number;
 }): Promise<UnifiedDeal[]> {
   try {
@@ -89,7 +92,7 @@ export async function fetchCheapSharkDeals(options?: {
     const params: Record<string, string | number> = {
       onSale: 1,
       pageSize,
-      sortBy: options?.freeOnly ? 'Savings' : 'DealRating',
+      sortBy: options?.freeOnly || options?.permanentFreeOnly ? 'Savings' : 'DealRating',
     };
     if (options?.storeId) params.storeID = options.storeId;
 
@@ -100,6 +103,7 @@ export async function fetchCheapSharkDeals(options?: {
       .map(mapCheapSharkDeal)
       .filter((deal): deal is UnifiedDeal => {
         if (!deal) return false;
+        if (options?.permanentFreeOnly) return deal.kind === 'free' && deal.freeTier === 'permanent';
         if (options?.freeOnly) return deal.kind === 'free';
         return true;
       });
