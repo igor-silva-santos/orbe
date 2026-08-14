@@ -18,6 +18,7 @@ import {
   filmeCarouselQualityFilter,
   filmeCarouselLocalizationFilter,
   serieQualityFilter,
+  serieCarouselQualityFilter,
   animeQualityFilter,
   jogoQualityFilter,
 } from '../qualityFilters';
@@ -159,7 +160,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       ),
       prisma.serie.findMany({
         where: {
-          AND: [serieQualityFilter, carouselSeriePriorityWindow(windowStart, windowEnd)],
+          AND: [serieCarouselQualityFilter, carouselSeriePriorityWindow(windowStart, windowEnd)],
         },
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
@@ -167,7 +168,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       }),
       prisma.serie.findMany({
         where: {
-          AND: [serieQualityFilter, carouselSerieRecentPastWindow(windowStart, recentPastStart)],
+          AND: [serieCarouselQualityFilter, carouselSerieRecentPastWindow(windowStart, recentPastStart)],
         },
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,

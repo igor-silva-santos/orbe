@@ -31,7 +31,10 @@ const SafeImage: React.FC<SafeImageProps> = ({
   const resolvedSrc = getImageSrc(src, imageSize);
   const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
   const isTmdbImage = resolvedSrc.includes('image.tmdb.org');
-  const isIgdbOrProxyImage = isIgdbOrProxyImageUrl(resolvedSrc) || isIgdbOrProxyImageUrl(src);
+  const isIgdbOrProxyImage =
+    isIgdbOrProxyImageUrl(resolvedSrc) ||
+    isIgdbOrProxyImageUrl(src) ||
+    resolvedSrc.startsWith('/api/images/igdb');
 
   if (hasError || !src) {
     return (

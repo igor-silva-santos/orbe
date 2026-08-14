@@ -145,6 +145,18 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
       logger.info('⏭️ Fase jogos já concluída (checkpoint). Pulando.');
     }
 
+    if (!phaseDone(completed, 'undated')) {
+      logger.info('--- Fase UNDATED (lançamentos só com ano / data a confirmar) ---');
+      await updateSyncProgress(prisma, { phase: 'undated' });
+      const undatedOpts = { includeUndated: true, undatedOnly: true };
+      await syncMovies(prisma, startDate, endDate, undatedOpts);
+      await syncSeries(prisma, startDate, endDate, undatedOpts);
+      await syncGames(prisma, startDate, endDate, undatedOpts);
+      await markPhaseComplete(prisma, 'undated');
+    } else {
+      logger.info('⏭️ Fase undated já concluída (checkpoint). Pulando.');
+    }
+
     if (!phaseDone(completed, 'premios')) {
       logger.info('--- Fase PREMIAÇÕES ---');
       await updateSyncProgress(prisma, { phase: 'premios' });

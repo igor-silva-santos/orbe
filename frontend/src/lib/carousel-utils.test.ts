@@ -29,7 +29,7 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(resolveCarouselOpenIndex([]), 0);
   });
 
-  it('returns first item of month with next release >= today', () => {
+  it('returns next release >= today (not merely first item of that month)', () => {
     const items = [
       mockMidia(1, '2026-07-01'),
       mockMidia(2, '2026-07-15'),
@@ -37,9 +37,9 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(4, '2026-08-20'),
       mockMidia(5, '2026-09-01'),
     ];
-    assert.equal(resolveCarouselOpenIndex(items), 2);
+    assert.equal(resolveCarouselOpenIndex(items), 3);
     assert.equal(resolveCarouselOpenMonthKey(items), '2026-08');
-    assert.equal(isCarouselOpenIndexReady(items, 2), true);
+    assert.equal(isCarouselOpenIndexReady(items, 3), true);
   });
 
   it('when all releases are past, returns first item of current month', () => {

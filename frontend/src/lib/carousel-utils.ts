@@ -156,17 +156,19 @@ export function resolveIndexForMonthKey(data: Midia[], monthKey: string): number
   return findIndexForMonth(data, year, month);
 }
 
-/** Índice de abertura: início do mês do próximo lançamento >= hoje; senão início do mês atual nos dados */
+/** Índice de abertura: próximo lançamento >= hoje; senão início do mês atual nos dados */
 export function resolveCarouselOpenIndex(data: Midia[]): number {
   if (!data.length) return 0;
 
-  const openMonthKey = resolveCarouselOpenMonthKey(data);
-  const index = resolveIndexForMonthKey(data, openMonthKey);
-  if (index >= 0) return index;
+  const nextIdx = calculateCarouselStartIndex(data);
+  if (nextIdx >= 0) return nextIdx;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const currentMonthKey = monthKeyFromDate(today);
+  const openMonthKey = resolveCarouselOpenMonthKey(data);
+  const monthStartIdx = resolveIndexForMonthKey(data, openMonthKey);
+  if (monthStartIdx >= 0) return monthStartIdx;
 
   for (let i = data.length - 1; i >= 0; i--) {
     const releaseDate = parseMidiaReleaseDate(data[i]);
@@ -192,7 +194,7 @@ export function isCarouselOpenIndexReady(data: Midia[], index: number): boolean 
   const nextIdx = calculateCarouselStartIndex(data);
   if (nextIdx >= 0) {
     const release = parseMidiaReleaseDate(data[nextIdx]);
-    return release !== null && release >= today;
+    return release !== null && release >= today && index === nextIdx;
   }
 
   const item = data[index];

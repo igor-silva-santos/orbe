@@ -1,5 +1,9 @@
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 
+const SKELETON_SLIDE_COUNT = 7;
+const SLIDE_CLASS =
+  'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4';
+
 export default function HomeLoading() {
   return (
     <div className="bg-background overflow-x-hidden">
@@ -13,13 +17,15 @@ export default function HomeLoading() {
       <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4">
         {['Filmes', 'Séries', 'Animes', 'Jogos'].map((title) => (
           <section key={title}>
-            <div className="h-7 w-24 bg-skeleton rounded mb-5 mx-2 animate-pulse" />
-            <div className="flex gap-3 px-2 overflow-hidden">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex-[0_0_170px] min-w-0">
-                  <MidiaCardSkeleton />
-                </div>
-              ))}
+            <div className="h-7 w-48 bg-skeleton rounded mb-5 mx-2 animate-pulse" />
+            <div className="overflow-hidden py-2 px-1 sm:px-2">
+              <div className="flex justify-center">
+                {Array.from({ length: SKELETON_SLIDE_COUNT }).map((_, i) => (
+                  <div key={i} className={SLIDE_CLASS}>
+                    <MidiaCardSkeleton />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         ))}

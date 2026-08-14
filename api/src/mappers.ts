@@ -544,13 +544,23 @@ export const mapAnimeToMidia = (anime: any) => {
   };
 };
 
+function resolveJogoPosterUrl(jogo: {
+  cover?: string | null;
+  screenshots?: { url?: string | null }[] | null;
+}): string | null {
+  const cover = resolveIgdbImageUrl(jogo.cover);
+  if (cover) return cover;
+  const firstShot = jogo.screenshots?.find((s) => s?.url)?.url;
+  return resolveIgdbImageUrl(firstShot);
+}
+
 export const mapJogoToMidia = (jogo: any) => {
   return {
     type: 'jogo',
     id: jogo.igdbId,
     titulo_api: jogo.name,
     sinopse: jogo.summary,
-    poster_url_api: resolveIgdbImageUrl(jogo.cover),
+    poster_url_api: resolveJogoPosterUrl(jogo),
     data_lancamento_api: toCalendarDateString(jogo.firstReleaseDate),
     avaliacao: jogo.rating,
     trailer_key: findTrailerKey(jogo.videos),
@@ -673,7 +683,7 @@ export function sortSeriesByCarouselDate<T extends { firstAirDate?: Date | strin
 }
 
 export const mapSerieToCarouselCard = (serie: any) => {
-  const carouselDate = serie.firstAirDate ? resolveSerieCarouselReleaseDate(serie) : null;
+  const carouselDate = resolveSerieCarouselReleaseDate(serie);
   const releaseFields = mapCarouselReleaseFields(serie);
   return {
     type: 'serie' as const,
@@ -694,7 +704,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
   id: jogo.igdbId,
   titulo_api: jogo.name,
   titulo_curado: jogo.titulo_curado ?? null,
-  poster_url_api: resolveIgdbImageUrl(jogo.cover),
+  poster_url_api: resolveJogoPosterUrl(jogo),
   ...mapCarouselReleaseFields(jogo),
   avaliacao: jogo.rating,
   generos_api: safeGenreNames(jogo.genres, 3).map((name) => translateGameGenre(name)),

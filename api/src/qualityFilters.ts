@@ -439,6 +439,46 @@ export const serieQualityFilter: Prisma.SerieWhereInput = {
   ],
 };
 
+/** Carrossel: inclui estreias futuras ainda sem episódios no ar */
+export const serieCarouselQualityFilter: Prisma.SerieWhereInput = {
+  AND: [
+    { posterPath: { not: null } },
+    { overview: { not: null } },
+    { NOT: { overview: '' } },
+    { OR: [{ adult: false }, { adult: null }] },
+    {
+      OR: [
+        { popularity: { gte: MIN_POPULARITY } },
+        { voteCount: { gte: MIN_VOTE_COUNT } },
+        { status: { in: ['Planned', 'In Production', 'Pilot', 'Rumored'] } },
+      ],
+    },
+    {
+      OR: [
+        { voteCount: { lte: DISPLAY_VOTE_COUNT_FOR_AVERAGE } },
+        { voteCount: null },
+        { voteAverage: { gte: DISPLAY_MIN_VOTE_AVERAGE } },
+        { status: { in: ['Planned', 'In Production', 'Pilot', 'Rumored'] } },
+      ],
+    },
+    {
+      OR: [
+        { numberOfEpisodes: { gte: MIN_SERIE_EPISODES } },
+        { status: { in: ['Planned', 'In Production', 'Pilot', 'Rumored'] } },
+        { firstAirDate: { gt: new Date() } },
+        {
+          seasons: {
+            some: {
+              seasonNumber: { gt: 0 },
+              airDate: { gt: new Date() },
+            },
+          },
+        },
+      ],
+    },
+  ],
+};
+
 export const animeQualityFilter: Prisma.AnimeWhereInput = {
   OR: [
     { averageScore: { gte: MIN_ANIME_SCORE } },
