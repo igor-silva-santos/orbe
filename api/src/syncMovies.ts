@@ -220,6 +220,18 @@ function shouldUseCinemaOnlyCurated(periodStart: Date, periodEnd: Date): boolean
   return spanDays <= 366;
 }
 
+function assertValidSyncDates(startDate: string, endDate: string): { start: Date; end: Date } {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error(`Datas de sync inválidas: startDate=${startDate}, endDate=${endDate}`);
+  }
+  if (start > end) {
+    throw new Error(`Período de sync inválido: ${startDate} é posterior a ${endDate}`);
+  }
+  return { start, end };
+}
+
 async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promise<number[]> {
   const openPeriod = isOpenPeriod(endDate);
   logger.info(
@@ -343,7 +355,9 @@ async function processMovieBatch(
 
       const flags = sourceFlags.get(id) ?? {};
       const disponibilidade = parseFilmeTmdbDisponibilidade(movieDetails);
-      const isCinemaCurated = (flags.emCartaz || flags.emBreve) && disponibilidade.estreiaCinema;
+      const periodOpen = period ? isOpenPeriod(period.end.toISOString().split('T')[0]) : false;
+      const isCinemaCurated =
+        periodOpen && (flags.emCartaz || flags.emBreve) && disponibilidade.estreiaCinema;
 
       if (isConcertOrLiveRecording(movieDetails)) {
         bumpSkip('concert_or_live');
@@ -520,16 +534,20 @@ async function processMovieBatch(
 
 
 export async function syncMovies(prisma: PrismaClient, startDate: string, endDate: string, limit?: number) {
-  let currentStartDate = new Date(startDate);
-  const finalEndDate = new Date(endDate);
-  const period = { start: new Date(startDate), end: new Date(endDate) };
-  const cinemaOnlyCurated = shouldUseCinemaOnlyCurated(period.start, period.end);
+  const { start: periodStart, end: periodEnd } = assertValidSyncDates(startDate, endDate);
+  let currentStartDate = new Date(periodStart);
+  const finalEndDate = new Date(periodEnd);
+  const period = { start: periodStart, end: periodEnd };
+  const periodOpen = isOpenPeriod(endDate);
+  const cinemaOnlyCurated = periodOpen && shouldUseCinemaOnlyCurated(period.start, period.end);
   const runProgress = getSyncRunProgress();
   const phaseTracker = runProgress?.startPhase('FILMES');
 
   logger.info(
     `Iniciando sincronização de filmes ` +
-    `(${cinemaOnlyCurated ? 'cinema curado' : 'listas curadas completas'} + período ${startDate} a ${endDate}).`,
+    (periodOpen
+      ? `(${cinemaOnlyCurated ? 'cinema curado' : 'listas curadas completas'} + período ${startDate} a ${endDate}).`
+      : `(período histórico ${startDate} a ${endDate} — somente discover por data, sem listas curadas).`),
   );
 
   if (limit) {
@@ -538,9 +556,19 @@ export async function syncMovies(prisma: PrismaClient, startDate: string, endDat
 
   await updateSyncProgress(prisma, { phase: 'filmes' });
 
-  const curatedFlags = await fetchCuratedMovieIds({ cinemaOnly: cinemaOnlyCurated });
-  let curatedIds = Array.from(curatedFlags.keys());
-  phaseTracker?.setTotal(curatedIds.length);
+  let curatedIds: number[] = [];
+  const curatedFlags = new Map<number, MovieSourceFlags>();
+
+  if (periodOpen) {
+    const flags = await fetchCuratedMovieIds({ cinemaOnly: cinemaOnlyCurated });
+    for (const [id, patch] of flags) {
+      curatedFlags.set(id, patch);
+    }
+    curatedIds = Array.from(curatedFlags.keys());
+    phaseTracker?.setTotal(curatedIds.length);
+  } else {
+    logger.info('Período histórico — listas curadas (em cartaz/top_rated) ignoradas.');
+  }
 
   if (curatedIds.length > 0) {
     broadcast({ type: 'SYNC_START', mediaType: 'movies', total: curatedIds.length, period: 'cinema (em cartaz / em breve)' });
