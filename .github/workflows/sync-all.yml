@@ -7,13 +7,18 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Ação: resume = retomar checkpoint | sync_all = começar do zero'
+        description: '✅ resume = retomar checkpoint | ⚠️ sync_all = APAGA checkpoint e recomeça'
         required: true
         default: resume
         type: choice
         options:
           - resume
           - sync_all
+      force_restart:
+        description: 'Só sync_all — confirma apagar checkpoint existente (digite true com cuidado)'
+        required: false
+        default: false
+        type: boolean
       start_date:
         description: Data início (só sync_all)
         required: false
@@ -69,11 +74,24 @@ jobs:
               -H "x-sync-secret: ${SYNC_SECRET}" \
               -H "Content-Type: application/json")
           else
+            STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+            RESUME_AVAIL=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('resumeAvailable', False))" 2>/dev/null || echo False)
+            if [ "$RESUME_AVAIL" = "True" ] && [ "${{ inputs.force_restart }}" != "true" ]; then
+              echo "::error::Há checkpoint para retomar! Use action=resume. Para apagar e recomeçar, marque force_restart=true."
+              echo "$STATUS" | python3 -m json.tool 2>/dev/null || echo "$STATUS"
+              exit 1
+            fi
+
+            FORCE_JSON=""
+            if [ "${{ inputs.force_restart }}" = "true" ]; then
+              FORCE_JSON=",\"force\":true"
+            fi
+
             echo "▶ Iniciando sync completo: ${{ inputs.start_date }} → ${{ inputs.end_date }}"
             RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
               -H "x-sync-secret: ${SYNC_SECRET}" \
               -H "Content-Type: application/json" \
-              -d "{\"startDate\":\"${{ inputs.start_date }}\",\"endDate\":\"${{ inputs.end_date }}\",\"startYear\":${{ inputs.start_year }},\"endYear\":${{ inputs.end_year }}}")
+              -d "{\"startDate\":\"${{ inputs.start_date }}\",\"endDate\":\"${{ inputs.end_date }}\",\"startYear\":${{ inputs.start_year }},\"endYear\":${{ inputs.end_year }}${FORCE_JSON}}")
           fi
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)

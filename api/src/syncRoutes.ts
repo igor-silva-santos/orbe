@@ -292,6 +292,20 @@ router.post('/run-sync-all', syncRateLimiter, protectSync, async (req, res) => {
   const startYear = parseInt(req.body?.startYear || '2026', 10);
   const endYear = parseInt(req.body?.endYear || '2026', 10);
   const includeUndated = req.body?.includeUndated === true;
+  const force = req.body?.force === true;
+
+  const existing = await getSyncStatusDetailed(prisma);
+  if ((existing?.resumeAvailable || existing?.interrupted) && !force) {
+    return res.status(409).json({
+      error:
+        'Há checkpoint para retomar — sync_all apagaria o progresso. ' +
+        'Use POST /api/run-sync-resume ou envie force:true para começar do zero.',
+      resumeAvailable: true,
+      completedPhases: existing?.completedPhases ?? [],
+      phase: existing?.phase,
+      animesResumeYear: existing?.animesResumeYear,
+    });
+  }
 
   const lock = await acquireSyncLock(prisma, { startDate, endDate, startYear, endYear });
   if (!lock.ok) {
