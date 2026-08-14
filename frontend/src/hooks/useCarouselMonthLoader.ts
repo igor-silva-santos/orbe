@@ -264,10 +264,10 @@ export function useCarouselMonthLoader({
       await loadMonth(year, month, 'visible', true);
       const updated = applyDisplayFilters(mediaItemsRef.current ?? []);
       index = resolveIndexForMonthKey(updated, targetMonthKey);
-      if (isCarouselOpenIndexReady(updated, index)) {
+      if (index >= 0 && isCarouselOpenIndexReady(updated, index)) {
         return index;
       }
-      if (monthKeyFromItem(updated[index]) === targetMonthKey) {
+      if (index >= 0 && monthKeyFromItem(updated[index]) === targetMonthKey) {
         return index;
       }
       ({ year, month } = addMonths(year, month, 1));

@@ -32,6 +32,8 @@ import {
   serieCarouselLiteInclude,
   animeCarouselInclude,
   cardListInclude,
+  mergeCarouselRowsByDateAsc,
+  mergeCarouselRowsByFirstReleaseDateAsc,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -63,7 +65,7 @@ const getRecentCarouselPastStart = (days = 90): Date => {
 };
 
 /** Filmes: mês atual + próximo + passado recente (igual jogos/séries) */
-const carouselFilmeRecentPastAndNextMonth = (
+const carouselFilmePriorityWindow = (
   windowStart: Date,
   windowEnd: Date,
   recentPastStart: Date,
@@ -72,39 +74,34 @@ const carouselFilmeRecentPastAndNextMonth = (
   return {
     OR: [
       { releaseDate: { gte: windowStart, lte: nextMonthEnd } },
-      { releaseDate: { gte: recentPastStart, lt: windowStart } },
       {
-        AND: [{ emCartaz: true }, { releaseDate: { lte: nextMonthEnd } }],
+        AND: [
+          { emCartaz: true },
+          { releaseDate: { gte: recentPastStart, lte: nextMonthEnd } },
+        ],
       },
     ],
   };
 };
 
-/** Inclui o mês seguinte no bootstrap — evita carrossel preso no mês atual sem lançamentos futuros */
-const carouselDateRecentPastAndNextMonth = (
+const carouselDatePriorityWindow = (
   windowStart: Date,
   windowEnd: Date,
-  recentPastStart: Date,
 ): Prisma.JogoWhereInput => {
   const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
   return {
-    OR: [
-      { firstReleaseDate: { gte: windowStart, lte: nextMonthEnd } },
-      { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
-    ],
+    firstReleaseDate: { gte: windowStart, lte: nextMonthEnd },
   };
 };
 
-const carouselFirstAirOrRecentPast = (
+const carouselSeriePriorityWindow = (
   windowStart: Date,
   windowEnd: Date,
-  recentPastStart: Date,
 ): Prisma.SerieWhereInput => {
   const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
   return {
     OR: [
       { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
-      { firstAirDate: { gte: recentPastStart, lt: windowStart } },
       {
         seasons: {
           some: {
@@ -113,17 +110,26 @@ const carouselFirstAirOrRecentPast = (
           },
         },
       },
-      {
-        seasons: {
-          some: {
-            seasonNumber: { gt: 0 },
-            airDate: { gte: recentPastStart, lt: windowStart },
-          },
-        },
-      },
     ],
   };
 };
+
+const carouselSerieRecentPastWindow = (
+  windowStart: Date,
+  recentPastStart: Date,
+): Prisma.SerieWhereInput => ({
+  OR: [
+    { firstAirDate: { gte: recentPastStart, lt: windowStart } },
+    {
+      seasons: {
+        some: {
+          seasonNumber: { gt: 0 },
+          airDate: { gte: recentPastStart, lt: windowStart },
+        },
+      },
+    },
+  ],
+});
 
 // Homepage — payload leve: mês atual; carrossel carrega adjacentes sob demanda
 router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
@@ -133,28 +139,56 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   const recentPastStart = getRecentCarouselPastStart();
 
   try {
-    const [filmesRaw, series, jogos, animes] = await Promise.all([
-      fetchFilmesForCarousel(carouselFilmeRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart), {
+    const [
+      filmePriority,
+      filmePast,
+      seriePriority,
+      seriePast,
+      jogoPriority,
+      jogoPast,
+      animes,
+    ] = await Promise.all([
+      fetchFilmesForCarousel(carouselFilmePriorityWindow(windowStart, windowEnd, recentPastStart), {
         orderBy: { releaseDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         year,
       }),
+      fetchFilmesForCarousel(
+        { releaseDate: { gte: recentPastStart, lt: windowStart } },
+        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_ITEM_LIMIT, year },
+      ),
       prisma.serie.findMany({
         where: {
-          AND: [
-            serieQualityFilter,
-            carouselFirstAirOrRecentPast(windowStart, windowEnd, recentPastStart),
-          ],
+          AND: [serieQualityFilter, carouselSeriePriorityWindow(windowStart, windowEnd)],
         },
         orderBy: { firstAirDate: 'asc' },
         take: HOMEPAGE_ITEM_LIMIT,
         include: serieCarouselLiteInclude,
-      }).then(sortSeriesByCarouselDate),
+      }),
+      prisma.serie.findMany({
+        where: {
+          AND: [serieQualityFilter, carouselSerieRecentPastWindow(windowStart, recentPastStart)],
+        },
+        orderBy: { firstAirDate: 'asc' },
+        take: HOMEPAGE_ITEM_LIMIT,
+        include: serieCarouselLiteInclude,
+      }),
+      prisma.jogo.findMany({
+        where: {
+          AND: [jogoQualityFilter, carouselDatePriorityWindow(windowStart, windowEnd)],
+        },
+        orderBy: { firstReleaseDate: 'asc' },
+        take: HOMEPAGE_ITEM_LIMIT,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 4 },
+        },
+      }),
       prisma.jogo.findMany({
         where: {
           AND: [
             jogoQualityFilter,
-            carouselDateRecentPastAndNextMonth(windowStart, windowEnd, recentPastStart),
+            { firstReleaseDate: { gte: recentPastStart, lt: windowStart } },
           ],
         },
         orderBy: { firstReleaseDate: 'asc' },
@@ -176,6 +210,14 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         include: animeCarouselInclude,
       }),
     ]);
+
+    const filmesRaw = mergeCarouselRowsByDateAsc(filmePriority, filmePast, HOMEPAGE_ITEM_LIMIT);
+    const seriesById = new Map<number, (typeof seriePriority)[number]>();
+    for (const item of [...seriePriority, ...seriePast]) {
+      seriesById.set(item.tmdbId, item);
+    }
+    const series = sortSeriesByCarouselDate(Array.from(seriesById.values())).slice(0, HOMEPAGE_ITEM_LIMIT);
+    const jogos = mergeCarouselRowsByFirstReleaseDateAsc(jogoPriority, jogoPast, HOMEPAGE_ITEM_LIMIT);
 
     res.json({
       filmes: filmesRaw.map(mapFilmeToCarouselCard),

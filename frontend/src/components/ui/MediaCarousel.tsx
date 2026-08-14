@@ -422,7 +422,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData, s
     if (items.length === 0) return;
 
     const selectedIndex = emblaApi.selectedScrollSnap();
-    const currentItem = items[selectedIndex];
+    const slide = displaySlidesRef.current[selectedIndex];
+    const datedIndex = slide?.kind === 'dated' ? slide.datedIndex : selectedIndex;
+    const currentItem = items[datedIndex];
     const monthKey = monthKeyFromItem(currentItem);
     if (!monthKey) return;
 
