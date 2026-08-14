@@ -1,9 +1,9 @@
 import { translateTmdbStatus } from './statusLabels';
 import { filterGamesForEvent } from './eventGameFilters';
+import { resolveIgdbImageUrl } from './igdbImageUrl';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
-const IGDB_IMAGE_BASE_URL = 'https://images.igdb.com/igdb/image/upload';
 
 /** Datas de lançamento TMDB/IGDB são "dia de calendário" — serializa como YYYY-MM-DD */
 export const toCalendarDateString = (value: Date | string | null | undefined): string | null => {
@@ -155,16 +155,6 @@ const translateGameGenre = (genre: string) => gameGenreTranslations[genre] || ge
 const translateGameTheme = (theme: string) => gameThemeTranslations[theme] || translateGameGenre(theme);
 const translateAnimeStatus = (status: string | null | undefined) =>
   status ? (animeStatusTranslations[status] || status.replace(/_/g, ' ')) : null;
-
-const resolveIgdbImageUrl = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-  if (url.startsWith('/api/images/igdb')) {
-    return `${IGDB_IMAGE_BASE_URL}${url.replace('/api/images/igdb', '')}`;
-  }
-  if (url.startsWith('//')) return `https:${url}`;
-  return url;
-};
 
 const extractYoutubeKey = (url: string | null | undefined): string | null => {
   if (!url) return null;

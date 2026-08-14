@@ -33,6 +33,23 @@ export function resolveImageUrl(
 
   const trimmed = url.trim();
 
+  if (trimmed.startsWith('/api/images/igdb')) {
+    return trimmed;
+  }
+
+  if (trimmed.includes('images.igdb.com/igdb/image/upload')) {
+    try {
+      const absolute = trimmed.startsWith('//') ? `https:${trimmed}` : trimmed;
+      const parsed = new URL(absolute);
+      const suffix = parsed.pathname.replace(/^\/igdb\/image\/upload/, '');
+      if (suffix) {
+        return `/api/images/igdb${suffix}`;
+      }
+    } catch {
+      // fall through
+    }
+  }
+
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     if (trimmed.includes('image.tmdb.org')) {
       return resizeTmdbUrl(trimmed, size);

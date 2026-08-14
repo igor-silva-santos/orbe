@@ -7,6 +7,7 @@ import jogosRoutes from './routes/jogosRoutes';
 import premiosRoutes from './routes/premiosRoutes';
 import eventosRoutes from './routes/eventosRoutes';
 import continuacoesRoutes from './routes/continuacoesRoutes';
+import imagesRoutes from './routes/imagesRoutes';
 
 // Agregador de rotas de midia. Cada tipo de midia (filmes, series, animes,
 // jogos), as rotas cross-tipo (home, hoje, trending, busca) e as rotas de
@@ -16,6 +17,7 @@ import continuacoesRoutes from './routes/continuacoesRoutes';
 const router = Router();
 
 router.use(homeRoutes);
+router.use(imagesRoutes);
 router.use(filmesRoutes);
 router.use(seriesRoutes);
 router.use(animesRoutes);
