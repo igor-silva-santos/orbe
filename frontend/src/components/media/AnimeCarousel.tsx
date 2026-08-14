@@ -78,23 +78,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const [startIndex, setStartIndex] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>('launch');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [hasSettledInitialView, setHasSettledInitialView] = useState(false);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaAnimes, setEmAltaAnimes] = useState<Anime[]>([]);
   const activeFetchesRef = useRef(0);
   const emAltaLoadedRef = useRef(false);
   const fetchingEmAltaRef = useRef(false);
 
-  const beginFetch = () => {
+  const beginBackgroundFetch = () => {
     activeFetchesRef.current += 1;
-    setIsFetching(true);
   };
 
-  const endFetch = () => {
+  const endBackgroundFetch = () => {
     activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
-    if (activeFetchesRef.current === 0) {
-      setIsFetching(false);
-    }
   };
 
   const loadedSeasons = useRef<Set<string>>(new Set([`${initialYear}-${initialSeason}`]));
@@ -155,7 +152,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       return null;
     }
     fetchingSeasons.current.add(seasonId);
-    beginFetch();
+    beginBackgroundFetch();
 
     try {
       const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
@@ -165,12 +162,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       
       loadedSeasons.current.add(seasonId);
 
-      if (direction === 'current') {
-        setFetchedAnimes(newAnimes);
-      } else if (direction === 'next') {
-        setFetchedAnimes(prev => [...prev, ...newAnimes]);
+      if (direction === 'next') {
+        setFetchedAnimes((prev) => {
+          const merged = [...prev, ...newAnimes];
+          fetchedAnimesRef.current = merged;
+          return merged;
+        });
+      } else if (direction === 'prev') {
+        setFetchedAnimes((prev) => {
+          const merged = [...newAnimes, ...prev];
+          fetchedAnimesRef.current = merged;
+          return merged;
+        });
       } else {
-        setFetchedAnimes(prev => [...newAnimes, ...prev]);
+        fetchedAnimesRef.current = newAnimes;
+        setFetchedAnimes(newAnimes);
       }
       
       return newAnimes;
@@ -179,14 +185,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       return null;
     } finally {
       fetchingSeasons.current.delete(seasonId);
-      endFetch();
+      endBackgroundFetch();
     }
   }, []);
 
   const loadEmAlta = useCallback(async () => {
     if (fetchingEmAltaRef.current || emAltaLoadedRef.current) return;
     fetchingEmAltaRef.current = true;
-    beginFetch();
+    beginBackgroundFetch();
     try {
       const response = await fetch(`${API_BASE}/animes?filtro=populares&limit=40`);
       const data = await response.json();
@@ -198,7 +204,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       console.error('Error fetching "em alta" animes:', error);
     } finally {
       fetchingEmAltaRef.current = false;
-      endFetch();
+      endBackgroundFetch();
     }
   }, []);
 
@@ -244,6 +250,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       setViewMode('launch');
       setCurrentTitle(buildLaunchTitle(season, year));
     }
+    setHasSettledInitialView(true);
   }, [buildLaunchTitle, buildWeeklyTitle]);
 
   useEffect(() => {
@@ -414,7 +421,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   }, [carouselItems.length, startIndex, emblaApi]);
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
-    if (isFetching) return;
+    if (isNavigating) return;
     const seasonIndex = SEASONS.indexOf(currentSeason);
     let newSeason: Season;
     let newYear = currentYear;
@@ -428,18 +435,24 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       newSeason = SEASONS[prevSeasonIndex];
       if (prevSeasonIndex === 3) newYear--;
     }
-    
-    if (!loadedSeasons.current.has(`${newYear}-${newSeason}`)) {
-        await fetchSeasonData(newYear, newSeason, 'current');
-    } 
-    
-    const targetIndex = fetchedAnimes.findIndex(anime => anime.startDate && anime.startDate.year === newYear && getSeason(new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day)) === newSeason);
-    if (targetIndex > -1) {
-        emblaApi?.scrollTo(targetIndex);
+
+    setIsNavigating(true);
+    try {
+      const seasonKey = `${newYear}-${newSeason}`;
+      if (!loadedSeasons.current.has(seasonKey)) {
+        await fetchSeasonData(newYear, newSeason, direction);
+      }
+
+      setCurrentSeason(newSeason);
+      setCurrentYear(newYear);
+      setCurrentTitle(
+        viewModeRef.current === 'weekly'
+          ? buildWeeklyTitle(newSeason)
+          : buildLaunchTitle(newSeason, newYear),
+      );
+    } finally {
+      setIsNavigating(false);
     }
-    
-    setCurrentSeason(newSeason);
-    setCurrentYear(newYear);
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
@@ -452,7 +465,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
           className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
           onClick={() => emblaApi?.scrollTo(startIndex)}
         >
-          {emAltaMode ? 'Em Alta' : isFetching ? 'Carregando animes...' : currentTitle || 'Carregando...'}
+          {emAltaMode ? 'Em Alta' : isNavigating ? 'Carregando animes...' : currentTitle || 'Carregando...'}
         </h3>
         <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
@@ -476,7 +489,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   <DropdownMenuTrigger asChild>
                     <button
                       className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                      disabled={isFetching}
+                      disabled={isNavigating}
                     >
                       <Filter className="h-4 w-4" />
                     </button>
@@ -495,14 +508,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                     <button
                       onClick={() => navigateSeason('prev')}
                       className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                      disabled={isFetching}
+                      disabled={isNavigating}
                     >
                       <ChevronLeft className="h-4 w-4"/>
                     </button>
                     <button
                       onClick={() => navigateSeason('next')}
                       className="p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                      disabled={isFetching}
+                      disabled={isNavigating}
                     >
                       <ChevronRight className="h-4 w-4"/>
                     </button>
@@ -533,21 +546,30 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       
       <TooltipProvider delayDuration={300}>
       <div className="relative">
-        {isFetching && (
+        {isNavigating && (
           <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isFetching ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >
         <div className="flex">
           {carouselItems.length === 0
-            ? Array.from({ length: 10 }).map((_, index) => (
-                <div key={`skeleton-${index}`} className={SLIDE_CLASS}>
-                  <MidiaCardSkeleton />
-                </div>
-              ))
+            ? hasSettledInitialView && !isNavigating
+              ? (
+                  <div className="w-full py-10 text-center text-muted-foreground px-4">
+                    {viewMode === 'weekly'
+                      ? 'Nenhum episódio agendado para esta semana.'
+                      : 'Nenhum anime encontrado para esta temporada.'}
+                    {selectedGenre ? ` (gênero: ${selectedGenre})` : ''}
+                  </div>
+                )
+              : Array.from({ length: 10 }).map((_, index) => (
+                  <div key={`skeleton-${index}`} className={SLIDE_CLASS}>
+                    <MidiaCardSkeleton />
+                  </div>
+                ))
             : carouselItems.map((item, index) => {
                 const isRendered = index >= virtualRange.start && index <= virtualRange.end;
                 const isPriority = Math.abs(index - selectedSnap) <= 4;

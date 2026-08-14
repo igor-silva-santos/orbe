@@ -98,12 +98,15 @@ const carouselFirstAirOrRecentPast = (
   windowStart: Date,
   windowEnd: Date,
   recentPastStart: Date,
-): Prisma.SerieWhereInput => ({
-  OR: [
-    { firstAirDate: { gte: windowStart, lte: windowEnd } },
-    { firstAirDate: { gte: recentPastStart, lt: windowStart } },
-  ],
-});
+): Prisma.SerieWhereInput => {
+  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
+  return {
+    OR: [
+      { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
+      { firstAirDate: { gte: recentPastStart, lt: windowStart } },
+    ],
+  };
+};
 
 // Homepage — payload leve: mês atual; carrossel carrega adjacentes sob demanda
 router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
