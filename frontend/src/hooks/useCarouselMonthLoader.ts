@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState, type RefObject } from 'react';
+import { useCallback, useRef, useState, type MutableRefObject, type RefObject } from 'react';
 import {
   addMonths,
   findMonthBounds,
@@ -35,7 +35,7 @@ interface QueuedMonthFetch {
 
 interface UseCarouselMonthLoaderOptions {
   mediaType: 'filmes' | 'series' | 'jogos';
-  mediaItemsRef: RefObject<Midia[]>;
+  mediaItemsRef: MutableRefObject<Midia[]> | RefObject<Midia[]>;
   applyDisplayFilters: (items: Midia[]) => Midia[];
   onItemsMerged: (items: Midia[]) => void;
   monthEdgeBuffer?: number;
@@ -69,6 +69,9 @@ export function useCarouselMonthLoader({
     (incoming: Midia[]): Midia[] => {
       if (!incoming.length) return mediaItemsRef.current ?? [];
       const merged = mergeMediaByDate(mediaItemsRef.current ?? [], incoming);
+      // Atualiza o ref antes do paint do React — evita perder meses quando
+      // bootstrap/navegação busca vários meses em paralelo (Promise.all).
+      (mediaItemsRef as MutableRefObject<Midia[]>).current = merged;
       onItemsMerged(merged);
       return merged;
     },
