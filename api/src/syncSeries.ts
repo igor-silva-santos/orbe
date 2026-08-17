@@ -2,6 +2,7 @@ import './loadEnv';
 
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
+import * as syncLog from './syncLogger';
 import { tmdb, tmdbApi } from './clients';
 import { prisma } from './clients';
 import { isSerieRelevantForSync } from './qualityFilters';
@@ -165,13 +166,29 @@ async function processSerieBatch(
   curatedIds: Set<number> = new Set(),
   period?: { start: Date; end: Date },
   includeUndated = false,
+  batchPeriod?: { year?: number; month?: number },
 ): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number>, noBrProviderIds: number[] }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
   const skipReasons: Record<string, number> = {};
   const noBrProviderIds: number[] = [];
-  const bumpSkip = (reason: string) => {
+  const bumpSkip = (
+    reason: string,
+    ctx: { id?: number; title?: string; year?: number | null; month?: number | null } = {},
+  ) => {
     skippedCount++;
     skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+    syncLog.logSkip(
+      {
+        phase: 'series',
+        mediaType: 'series',
+        itemId: ctx.id,
+        itemTitle: ctx.title,
+        year: ctx.year ?? batchPeriod?.year,
+        month: ctx.month ?? batchPeriod?.month,
+        reason,
+      },
+      `Série [${ctx.id ?? '?'}] "${ctx.title ?? '?'}" pulada: ${reason}.`,
+    );
   };
 
   for (const id of serieIds) {
@@ -186,7 +203,7 @@ async function processSerieBatch(
 
       const brProviders = serieDetails['watch/providers']?.results?.BR;
       if (!brProviders) {
-        bumpSkip('no_br_provider');
+        bumpSkip('no_br_provider', { id, title: serieDetails.name });
         noBrProviderIds.push(id);
         continue;
       }
@@ -198,26 +215,29 @@ async function processSerieBatch(
         const tmdbResolved = resolveTmdbRelease(serieDetails.first_air_date, serieDetails.status);
         if (tmdbResolved.isYearOnly && tmdbResolved.releaseYear) {
           if (!includeUndated) {
-            bumpSkip('no_first_air_date');
+            bumpSkip('no_first_air_date', { id, title: serieDetails.name, year: tmdbResolved.releaseYear });
             continue;
           }
           if (period && !isYearWithinRange(tmdbResolved.releaseYear, period.start, period.end)) {
-            bumpSkip('out_of_period');
+            bumpSkip('out_of_period', { id, title: serieDetails.name, year: tmdbResolved.releaseYear });
             continue;
           }
           firstAirDate = null;
           releaseYear = tmdbResolved.releaseYear;
         } else {
-          bumpSkip('no_first_air_date');
+          bumpSkip('no_first_air_date', { id, title: serieDetails.name });
           continue;
         }
       } else {
         releaseYear = firstAirDate.getFullYear();
       }
 
+      const eventYear = releaseYear ?? batchPeriod?.year;
+      const eventMonth = firstAirDate ? firstAirDate.getMonth() + 1 : batchPeriod?.month;
+
       const isCurated = curatedIds.has(id);
       if (!isCurated && !isSerieRelevantForSync(serieDetails)) {
-        bumpSkip('quality_filter');
+        bumpSkip('quality_filter', { id, title: serieDetails.name, year: eventYear, month: eventMonth });
         logger.info(
           `⏭️ Série [${id}] "${serieDetails.name}" ignorada: critérios de sync ` +
           `(votes=${serieDetails.vote_count ?? 0}, pop=${(serieDetails.popularity ?? 0).toFixed(1)}).`
@@ -333,15 +353,29 @@ async function processSerieBatch(
       }
 
       successCount++;
-      logger.info(`✅ Série [${id}] "${serieDetails.name}" sincronizada.`);
+      const successMessage = `✅ Série [${id}] "${serieDetails.name}" sincronizada.`;
+      logger.info(successMessage);
+      syncLog.logSync(
+        { phase: 'series', mediaType: 'series', itemId: id, itemTitle: serieDetails.name, year: eventYear, month: eventMonth },
+        successMessage,
+      );
 
     } catch (error) {
       errorCount++;
       logger.error(`❌ Erro ao processar a série ID ${id}. Pulando: ${error}`);
+      syncLog.logSyncError(
+        { phase: 'series', mediaType: 'series', itemId: id, year: batchPeriod?.year, month: batchPeriod?.month },
+        `Erro ao processar a série ID ${id}: ${error}`,
+      );
     }
   }
 
-  logger.info(`--- Resumo do Lote (Séries) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
+  const summaryMessage = `--- Resumo do Lote (Séries) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`;
+  logger.info(summaryMessage);
+  syncLog.logCheckpoint(
+    { phase: 'series', mediaType: 'series', year: batchPeriod?.year, month: batchPeriod?.month },
+    summaryMessage,
+  );
   return { successCount, errorCount, skippedCount, skipReasons, noBrProviderIds };
 }
 
@@ -507,7 +541,10 @@ export async function syncSeries(
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote de séries do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            const batchResult = await processSerieBatch(batch, prisma, curatedIds, period, includeUndated);
+            const batchResult = await processSerieBatch(batch, prisma, curatedIds, period, includeUndated, {
+              year: currentStartDate.getFullYear(),
+              month: currentStartDate.getMonth() + 1,
+            });
             await addSkipReasons(prisma, 'series', batchResult.skipReasons);
             allNoBrProviderIds.push(...batchResult.noBrProviderIds);
             phaseTracker?.advance(batch.length);
