@@ -625,10 +625,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     setHasInitialPositioning(false);
   }, [hasSettledInitialView, emAltaMode, carouselItems.length]);
 
-  /** Aplica scroll pendente só depois que o React renderizou os novos slides */
+  /** Aplica scroll pendente só com slides reais no DOM (nunca sobre skeletons) */
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
-    const targetIndex = Math.min(Math.max(0, pendingScrollIndex), Math.max(0, carouselItems.length - 1));
     if (carouselItems.length === 0) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
@@ -636,19 +635,27 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       return;
     }
 
+    const targetIndex = Math.min(Math.max(0, pendingScrollIndex), carouselItems.length - 1);
     emblaApi.reInit();
-    emblaApi.scrollTo(targetIndex, false);
-    previousSelectedIndex.current = targetIndex;
-    setSelectedSnap(targetIndex);
-    updateTitleFromIndex(targetIndex, carouselItems);
 
-    setPendingScrollIndex(null);
-    hasInitialPositioningRef.current = false;
-    setHasInitialPositioning(false);
+    const applyScroll = () => {
+      emblaApi.scrollTo(targetIndex, false);
+      previousSelectedIndex.current = targetIndex;
+      setSelectedSnap(targetIndex);
+      updateTitleFromIndex(targetIndex, carouselItems);
+
+      setPendingScrollIndex(null);
+      hasInitialPositioningRef.current = false;
+      setHasInitialPositioning(false);
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(applyScroll);
+    });
   }, [pendingScrollIndex, carouselItems, emblaApi, emAltaMode, updateTitleFromIndex]);
 
   useEffect(() => {
-    if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
+    if (!emblaApi || emAltaMode) return;
 
     const prevLength = itemsLengthRef.current;
     const newLength = carouselItems.length;
@@ -664,11 +671,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       firstMediaIdRef.current = firstMedia.data.id;
     }
 
+    emblaApi.reInit();
+
     if (wasPrepend) {
-      emblaApi.reInit();
-      emblaApi.scrollTo(previousSelectedIndex.current + added, true);
+      const shiftedIndex = previousSelectedIndex.current + added;
+      if (hasInitialPositioningRef.current) {
+        setPendingScrollIndex(shiftedIndex);
+      } else {
+        emblaApi.scrollTo(shiftedIndex, true);
+      }
     }
-  }, [emblaApi, carouselItems, emAltaMode, pendingScrollIndex]);
+  }, [emblaApi, carouselItems, emAltaMode]);
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
     if (isNavigating) return;
@@ -764,7 +777,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   }, [emAltaMode, emblaApi, carouselItems.length, scrollToToday]);
 
   const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
-  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
+  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning && carouselItems.length === 0;
+  const isPositioningOverlay = !emAltaMode && hasInitialPositioning && carouselItems.length > 0;
 
   const centerHasPoster = useMemo(() => {
     if (showPositioningSkeleton || carouselItems.length === 0) return false;
@@ -873,7 +887,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
           <LoadingOverlay message={viewMode === 'weekly' ? 'Carregando agenda...' : 'Carregando temporada...'} className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating || weeklyLoading ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating || weeklyLoading || isPositioningOverlay ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >
@@ -927,7 +941,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         </div>
       </div>
       <CarouselScrollbar emblaApi={emblaApi} />
-      <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
+      <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster || isPositioningOverlay} />
       </div>
       </TooltipProvider>
     </div>
