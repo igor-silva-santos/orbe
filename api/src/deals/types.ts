@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam';
 
 export type DealKind = 'free' | 'sale';
 
@@ -39,6 +39,9 @@ export type UnifiedDeal = {
   freeTier?: FreeTier | null;
 };
 
+/** Item mínimo do carrossel Steam na aba Promoções (mapJogoToMidia). */
+export type SteamCatalogCarouselItem = Record<string, unknown>;
+
 export type DealsOverview = {
   fetchedAt: string;
   /** @deprecated Use gratisTemporarios + gratisPermanentes */
@@ -48,9 +51,11 @@ export type DealsOverview = {
   /** Jogos que são de graça — F2P / preço base zero */
   gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
+  steamCatalog?: SteamCatalogCarouselItem[];
   sources: {
     epic: { ok: boolean; count: number; error?: string };
     gamerpower: { ok: boolean; count: number; error?: string };
     cheapshark: { ok: boolean; count: number; error?: string };
+    steam: { ok: boolean; count: number; error?: string };
   };
 };

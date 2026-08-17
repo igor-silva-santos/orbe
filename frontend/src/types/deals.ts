@@ -1,4 +1,6 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark';
+import type { Jogo } from '@/types';
+
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam';
 
 export type DealKind = 'free' | 'sale';
 
@@ -45,9 +47,11 @@ export type DealsOverview = {
   gratisTemporarios: UnifiedDeal[];
   gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
+  steamCatalog?: Jogo[];
   sources: {
     epic: { ok: boolean; count: number; error?: string };
     gamerpower: { ok: boolean; count: number; error?: string };
     cheapshark: { ok: boolean; count: number; error?: string };
+    steam: { ok: boolean; count: number; error?: string };
   };
 };

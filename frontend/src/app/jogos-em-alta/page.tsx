@@ -179,18 +179,6 @@ export default function JogosEmAltaPage() {
               </CollapsibleSection>
             )}
 
-            {data.steam_promocoes && data.steam_promocoes.length > 0 && (
-              <CollapsibleSection id="jogos-em-alta-steam-sales" title="Promoções na Steam" icon={Gamepad2}>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-                  {data.steam_promocoes.map((jogo) => (
-                    <div key={`steam-sale-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-                      <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
-                    </div>
-                  ))}
-                </div>
-              </CollapsibleSection>
-            )}
-
             <BlockSection
               id="jogos-em-alta-por-plataforma"
               title="Mais jogados por plataforma"

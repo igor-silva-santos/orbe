@@ -43,8 +43,21 @@ function mapCheapSharkPlatform(storeId?: string): DealPlatform {
   return STORE_PLATFORM_MAP[storeId] ?? 'other';
 }
 
-function cheapSharkStoreUrl(storeId: string | undefined, dealId: string): string {
-  return `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(dealId)}`;
+function resolveCheapSharkStoreUrl(item: CheapSharkDeal): string {
+  const steamAppId = item.steamAppID ? Number.parseInt(item.steamAppID, 10) : null;
+  if (steamAppId && Number.isFinite(steamAppId) && steamAppId > 0) {
+    return `https://store.steampowered.com/app/${steamAppId}`;
+  }
+
+  if (item.storeID === '25') {
+    return 'https://store.epicgames.com/pt-BR/store';
+  }
+
+  if (item.storeID === '7') {
+    return 'https://www.gog.com/';
+  }
+
+  return `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(item.dealID!)}`;
 }
 
 function parseDiscountPercent(savings?: string): number | null {
@@ -69,7 +82,7 @@ function mapCheapSharkDeal(item: CheapSharkDeal): UnifiedDeal | null {
     imageUrl: item.thumb ?? null,
     platform: mapCheapSharkPlatform(item.storeID),
     platforms: [storeName],
-    storeUrl: cheapSharkStoreUrl(item.storeID, item.dealID),
+    storeUrl: resolveCheapSharkStoreUrl(item),
     originalPrice: item.normalPrice ? `$${item.normalPrice}` : null,
     salePrice: item.salePrice ? `$${item.salePrice}` : null,
     discountPercent: savings,

@@ -6,8 +6,12 @@ import { ArrowLeft, Gift, RefreshCw, Tag, Sparkles, Clock } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { DealsOverview, DealPlatform, UnifiedDeal } from '@/types/deals';
+import type { Jogo } from '@/types';
+import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import { useAppStore } from '@/stores/appStore';
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 
@@ -136,11 +140,16 @@ function SourceFooter({ data }: { data: DealsOverview }) {
       <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
         CheapShark ({data.sources.cheapshark.count})
       </span>
+      <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Steam ({data.sources.steam?.count ?? 0})
+      </span>
     </div>
   );
 }
 
 export default function PromocoesClient() {
+  const handleInteraction = useMidiaInteraction();
+  const userInteractions = useAppStore((s) => s.userInteractions);
   const [data, setData] = useState<DealsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -196,6 +205,15 @@ export default function PromocoesClient() {
     () => filterByPlatform(gratisPermanentes, platformFilter),
     [gratisPermanentes, platformFilter],
   );
+
+  const [platformFilterPromo, setPlatformFilterPromo] = useState<DealPlatform | 'all'>('all');
+
+  const filteredPromocoes = useMemo(
+    () => (data ? filterByPlatform(data.promocoes, platformFilterPromo) : []),
+    [data, platformFilterPromo],
+  );
+
+  const steamCatalog = (data?.steamCatalog ?? []) as Jogo[];
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
@@ -322,27 +340,49 @@ export default function PromocoesClient() {
               <SourceFooter data={data} />
             </TabsContent>
 
-            <TabsContent value="promocoes" className="space-y-4 mt-0">
-              <div>
-                <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
-                  <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                  Melhores promoções
-                  <span className="text-sm font-normal text-muted-foreground">
-                    ({data.promocoes.length})
-                  </span>
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                  Descontos ativos em lojas parceiras — ainda há preço, mas bem abaixo do normal.
-                </p>
+            <TabsContent value="promocoes" className="space-y-8 mt-0">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                    Melhores promoções
+                    <span className="text-sm font-normal text-muted-foreground">
+                      ({filteredPromocoes.length})
+                    </span>
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                    Descontos ativos nas lojas — Steam (catálogo BR), Epic, GOG e parceiros. Ordenado por popularidade.
+                  </p>
+                </div>
+                <PlatformFilters platformFilter={platformFilterPromo} onChange={setPlatformFilterPromo} />
               </div>
 
-              {data.promocoes.length > 0 ? (
-                <DealsGrid deals={data.promocoes} priorityCount={0} />
+              {steamCatalog.length > 0 && (
+                <CollapsibleSection
+                  id="promocoes-steam-catalogo"
+                  title="Promoções na Steam (catálogo)"
+                  icon={Tag}
+                  defaultOpen
+                >
+                  <HorizontalMediaRow
+                    items={steamCatalog}
+                    type="jogo"
+                    userInteractions={userInteractions}
+                    onInteraction={handleInteraction}
+                    enableDrag
+                  />
+                </CollapsibleSection>
+              )}
+
+              {filteredPromocoes.length > 0 ? (
+                <DealsByPlatform deals={data.promocoes} platformFilter={platformFilterPromo} />
               ) : (
                 <div className="bg-card rounded-lg border border-border p-8 text-center">
                   <p className="text-muted-foreground text-sm">Nenhuma promoção destacada no momento.</p>
                 </div>
               )}
+
+              <SourceFooter data={data} />
             </TabsContent>
           </Tabs>
         ) : null}

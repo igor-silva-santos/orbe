@@ -35,6 +35,9 @@ const SafeImage: React.FC<SafeImageProps> = ({
   const resolvedSrc = getImageSrc(src, imageSize);
   const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
   const isTmdbImage = resolvedSrc.includes('image.tmdb.org');
+  const isAnilistImage =
+    resolvedSrc.includes('s4.anilist.co') ||
+    Boolean(src?.includes('anilist.co'));
   const isIgdbOrProxyImage =
     isIgdbOrProxyImageUrl(resolvedSrc) ||
     isIgdbOrProxyImageUrl(src) ||
@@ -78,7 +81,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       blurDataURL={isPlaceholder ? undefined : getPosterBlurDataUrl(src)}
       onLoad={() => onLoad?.()}
       onError={() => setHasError(true)}
-      unoptimized={isPlaceholder || isTmdbImage || isIgdbOrProxyImage}
+      unoptimized={isPlaceholder || isTmdbImage || isAnilistImage || isIgdbOrProxyImage}
     />
   );
 };

@@ -96,11 +96,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     () => isCarouselBootstrapReady(timelineFromSsr),
     [timelineFromSsr],
   );
-  const ssrOpenIndex = useMemo(() => {
-    if (!timelineFromSsr.length) return 0;
-    const raw = initialStartIndex >= 0 ? initialStartIndex : resolveCarouselOpenIndex(timelineFromSsr);
-    return clampCarouselOpenIndex(timelineFromSsr, raw);
-  }, [timelineFromSsr, initialStartIndex]);
 
   const [mediaItems, setMediaItems] = useState<Midia[]>(() => mergeMediaByDate([], initialData));
   const [selectedSnap, setSelectedSnap] = useState(0);
@@ -109,9 +104,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(ssrBootstrapReady);
   const [hasInitialPositioning, setHasInitialPositioning] = useState(!ssrBootstrapReady);
-  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(
-    ssrBootstrapReady ? ssrOpenIndex : null,
-  );
+  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
@@ -359,6 +352,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
     void (async () => {
       if (ssrBootstrapReady) {
+        await requestScrollToOpenPosition();
+        setHasCompletedInitialLoad(true);
+
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
@@ -371,7 +367,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
           loadMonth(next.year, next.month, 'forward', false),
           loadMonth(next2.year, next2.month, 'forward', false),
         ]);
-        setHasCompletedInitialLoad(true);
         return;
       }
 
@@ -399,7 +394,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
 
-    const targetIndex = clampCarouselOpenIndex(filteredItems, pendingScrollIndex);
+    const targetIndex = hasInitialPositioningRef.current
+      ? clampCarouselOpenIndex(filteredItems, resolveCarouselOpenIndex(filteredItems))
+      : clampCarouselOpenIndex(filteredItems, pendingScrollIndex);
     if (targetIndex < 0 || targetIndex >= filteredItems.length) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;

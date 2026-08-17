@@ -19,6 +19,7 @@ const SOURCE_LABELS: Record<string, string> = {
   epic: 'Epic Games',
   gamerpower: 'GamerPower',
   cheapshark: 'CheapShark',
+  steam: 'Steam',
 };
 
 function formatEndsAt(endsAt: string | null | undefined): string | null {
@@ -103,9 +104,12 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
           <span>
             {deal.salePrice ?? (isTemporaryFree ? 'Grátis por tempo limitado' : isPermanentFree ? 'Sempre grátis' : isFree ? 'Grátis para resgatar' : 'Ver oferta')}
             {deal.originalPrice && deal.salePrice && deal.originalPrice !== deal.salePrice && (
-              <span className="ml-1 line-through opacity-70">{deal.originalPrice}</span>
+              <span className="ml-1.5 line-through opacity-60 text-[11px]">{deal.originalPrice}</span>
             )}
           </span>
+          {deal.currency === 'BRL' && deal.source === 'steam' && (
+            <span className="block text-[9px] text-muted-foreground mt-0.5">Preço na Steam · Brasil</span>
+          )}
         </div>
 
         {deal.worth && (
