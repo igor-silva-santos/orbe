@@ -28,10 +28,34 @@ const DEALS_LOCK_TTL_SECONDS = 55;
 /**
  * Teto de páginas por fonte paginada — cada fetch já para sozinho assim que uma
  * página volta incompleta (fim real dos resultados), então isso é só uma trava de
- * segurança contra loop indevido, não um corte artificial do catálogo. Alto o
- * bastante pra trazer tudo que a fonte tiver.
+ * segurança contra loop indevido, não um corte artificial do catálogo.
+ * Moderado de propósito: alto o bastante pra trazer bem mais que antes, mas sem
+ * multiplicar demais o número de requests por rodada — CheapShark já devolveu
+ * 429 (rate limit) quando isso estava em 20 com o cron de 1 min.
  */
-const DEALS_MAX_PAGES = 20;
+const DEALS_MAX_PAGES = 8;
+
+/** Evita rebuscar tudo de novo se o cache já foi renovado há poucos segundos
+ * (ex.: warm-up no boot seguido de perto pelo próximo tick do cron). */
+const DEALS_MIN_REFRESH_INTERVAL_SECONDS = 45;
+
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
+ * CheapShark é a fonte mais sensível a rate limit (já devolveu 429 quando as 5
+ * queries abaixo saíam todas em paralelo). Roda uma de cada vez, com um respiro
+ * entre elas, em vez de estourar 5 conexões simultâneas no mesmo host.
+ */
+async function fetchCheapSharkSequential(
+  queries: Array<() => Promise<UnifiedDeal[]>>,
+): Promise<{ items: UnifiedDeal[]; error?: string }[]> {
+  const results: { items: UnifiedDeal[]; error?: string }[] = [];
+  for (let i = 0; i < queries.length; i++) {
+    results.push(await safeFetch(queries[i]));
+    if (i < queries.length - 1) await delay(400);
+  }
+  return results;
+}
 
 /** Páginas CheapShark store Epic (25) — fonte principal de promoções pagas Epic. */
 function epicSaleMaxPages(): number {
@@ -86,44 +110,32 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     forceRefresh: true,
   });
 
-  const [
-    epicFree,
-    epicSales,
-    gamerpower,
-    cheapsharkFree,
-    cheapsharkPermanentFree,
-    cheapsharkSales,
-    cheapsharkEpicSales,
-    cheapsharkUbisoft,
-    steam,
-    catalogoSteamRaw,
-    itchFree,
-    itchOnSale,
-    itadDeals,
-  ] = await Promise.all([
-    safeFetch(fetchEpicFreeGames),
-    safeFetch(fetchEpicSaleGames),
-    safeFetch(() => fetchGamerPowerGiveaways()),
-    safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: DEALS_MAX_PAGES })),
-    safeFetch(() =>
-      fetchCheapSharkDealsPaged({
-        storeId: '25',
-        pageSize: 60,
-        maxPages: epicSaleMaxPages(),
+  const [cheapsharkResults, otherResults] = await Promise.all([
+    fetchCheapSharkSequential([
+      () => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES }),
+      () => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES }),
+      () => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: DEALS_MAX_PAGES }),
+      () => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 60, maxPages: epicSaleMaxPages() }),
+      () => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: DEALS_MAX_PAGES }),
+    ]),
+    Promise.all([
+      safeFetch(fetchEpicFreeGames),
+      safeFetch(fetchEpicSaleGames),
+      safeFetch(() => fetchGamerPowerGiveaways()),
+      safeFetch(fetchSteamDeals),
+      safeFetch(fetchCatalogSteamPromotions),
+      safeFetch(() => fetchItchFreeGames({ maxPages: DEALS_MAX_PAGES })),
+      safeFetch(() => fetchItchOnSaleGames({ maxPages: DEALS_MAX_PAGES })),
+      safeFetch(async () => {
+        if (!isItadConfigured()) return [];
+        return fetchItadShopSales();
       }),
-    ),
-    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: DEALS_MAX_PAGES })),
-    safeFetch(fetchSteamDeals),
-    safeFetch(fetchCatalogSteamPromotions),
-    safeFetch(() => fetchItchFreeGames({ maxPages: DEALS_MAX_PAGES })),
-    safeFetch(() => fetchItchOnSaleGames({ maxPages: DEALS_MAX_PAGES })),
-    safeFetch(async () => {
-      if (!isItadConfigured()) return [];
-      return fetchItadShopSales();
-    }),
+    ]),
   ]);
+
+  const [cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, cheapsharkEpicSales, cheapsharkUbisoft] =
+    cheapsharkResults;
+  const [epicFree, epicSales, gamerpower, steam, catalogoSteamRaw, itchFree, itchOnSale, itadDeals] = otherResults;
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
@@ -356,6 +368,17 @@ export async function refreshDealsCache(options?: {
 
   try {
     const previous = (await readRedisCache()) ?? memoryCache;
+
+    if (previous) {
+      const ageSeconds = (Date.now() - previous.fetchedAtMs) / 1000;
+      if (ageSeconds < DEALS_MIN_REFRESH_INTERVAL_SECONDS) {
+        logger.info(
+          `[deals-cache] Refresh (${options?.reason ?? 'refresh'}) pulado — cache renovado há ${Math.round(ageSeconds)}s.`,
+        );
+        return { updated: false, unchanged: true, fingerprint: previous.fingerprint };
+      }
+    }
+
     const fresh = await fetchDealsOverviewFresh();
     const fingerprint = fingerprintDealsOverview(fresh);
 
