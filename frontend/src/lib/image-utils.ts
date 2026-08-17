@@ -13,6 +13,28 @@ export const TMDB_FULL_SIZE: TmdbImageSize = 'w500';
 export const BLUR_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWExYTJlIi8+PC9zdmc+';
 
+function encodeSvgToDataUrl(svg: string): string {
+  const base64 =
+    typeof btoa === 'function'
+      ? btoa(svg)
+      : Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
+}
+
+/** Placeholder blur determinístico por URL de poster (evita flash idêntico em todos os cards). */
+export function getPosterBlurDataUrl(src: string | null | undefined): string {
+  if (!src || src.trim() === '') return BLUR_DATA_URL;
+
+  let hash = 0;
+  for (let i = 0; i < src.length; i += 1) {
+    hash = (hash * 31 + src.charCodeAt(i)) | 0;
+  }
+
+  const hue = Math.abs(hash) % 360;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="28"><rect width="20" height="28" fill="hsl(${hue}, 22%, 18%)"/></svg>`;
+  return encodeSvgToDataUrl(svg);
+}
+
 function buildTmdbUrl(path: string, size: TmdbImageSize): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${TMDB_IMAGE_BASE}/${size}${normalizedPath}`;

@@ -15,8 +15,10 @@ import YearTbdSeparatorCard from '../media/YearTbdSeparatorCard';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
+import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPosterReveal';
 import { getMediaCarouselLoopBounds, getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
+import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 import {
   addMonths,
   findIndexForMonth,
@@ -94,11 +96,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     () => isCarouselBootstrapReady(timelineFromSsr),
     [timelineFromSsr],
   );
-  const ssrOpenIndex = useMemo(() => {
-    if (!timelineFromSsr.length) return 0;
-    const raw = initialStartIndex >= 0 ? initialStartIndex : resolveCarouselOpenIndex(timelineFromSsr);
-    return clampCarouselOpenIndex(timelineFromSsr, raw);
-  }, [timelineFromSsr, initialStartIndex]);
 
   const [mediaItems, setMediaItems] = useState<Midia[]>(() => mergeMediaByDate([], initialData));
   const [selectedSnap, setSelectedSnap] = useState(0);
@@ -107,9 +104,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(ssrBootstrapReady);
   const [hasInitialPositioning, setHasInitialPositioning] = useState(!ssrBootstrapReady);
-  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(
-    ssrBootstrapReady ? ssrOpenIndex : null,
-  );
+  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
@@ -341,7 +336,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
   useCarouselInfiniteLoop({
     emblaApi,
-    viewportRef,
     enabled: loopEnabled,
     getBounds: getLoopBounds,
     onWrap: handleLoopWrap,
@@ -365,6 +359,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
     void (async () => {
       if (ssrBootstrapReady) {
+        await requestScrollToOpenPosition();
+        setHasCompletedInitialLoad(true);
+
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
@@ -377,7 +374,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
           loadMonth(next.year, next.month, 'forward', false),
           loadMonth(next2.year, next2.month, 'forward', false),
         ]);
-        setHasCompletedInitialLoad(true);
         return;
       }
 
@@ -405,7 +401,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
 
-    const targetIndex = clampCarouselOpenIndex(filteredItems, pendingScrollIndex);
+    const targetIndex = hasInitialPositioningRef.current
+      ? clampCarouselOpenIndex(filteredItems, resolveCarouselOpenIndex(filteredItems))
+      : clampCarouselOpenIndex(filteredItems, pendingScrollIndex);
     if (targetIndex < 0 || targetIndex >= filteredItems.length) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
@@ -652,6 +650,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
 
+  const centerHasPoster = useMemo(() => {
+    if (showPositioningSkeleton || filteredItems.length === 0) return false;
+    const slide = displaySlides[selectedSnap];
+    if (!slide || slide.kind === 'year-tbd-separator') return false;
+    const item = slide.kind === 'dated' || slide.kind === 'year-tbd-media' ? slide.item : null;
+    return Boolean(item?.poster_url_api);
+  }, [displaySlides, selectedSnap, showPositioningSkeleton, filteredItems.length]);
+
+  const { isWaitingForCenterPoster, handleCenterPosterLoad } = useCarouselInitialPosterReveal({
+    hasInitialPositioning,
+    emAltaMode,
+    centerHasPoster,
+  });
+
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
@@ -818,6 +830,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                             isFocused={index === selectedSnap}
                             userInteractions={userInteractions}
                             onInteraction={handleInteraction}
+                            onPosterLoad={index === selectedSnap ? handleCenterPosterLoad : undefined}
                           />
                         ) : (
                           <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
@@ -837,6 +850,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                           isFocused={isCenter}
                           userInteractions={userInteractions}
                           onInteraction={handleInteraction}
+                          onPosterLoad={isCenter ? handleCenterPosterLoad : undefined}
                         />
                       ) : (
                         <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
@@ -846,6 +860,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                 })}
           </div>
         </div>
+        <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
         </div>
       </TooltipProvider>
     </div>

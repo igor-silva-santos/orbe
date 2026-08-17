@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Gamepad2, Layers, Monitor, Users } from 'lucide-react';
+import { Layers, Monitor, Users } from 'lucide-react';
 import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
@@ -189,18 +189,6 @@ export default function JogosEmAltaContent({ showPromocoesBanner = true, compact
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
             {data.steam_mais_jogados.map((jogo) => (
               <div key={`steam-trend-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-                <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
-              </div>
-            ))}
-          </div>
-        </CollapsibleSection>
-      )}
-
-      {data.steam_promocoes && data.steam_promocoes.length > 0 && (
-        <CollapsibleSection id="jogos-em-alta-steam-sales" title="Promoções na Steam (catálogo)" icon={Gamepad2}>
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-            {data.steam_promocoes.map((jogo) => (
-              <div key={`steam-sale-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
                 <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
               </div>
             ))}

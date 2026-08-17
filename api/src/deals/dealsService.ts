@@ -55,9 +55,11 @@ function sortPermanentFree(deals: UnifiedDeal[]): UnifiedDeal[] {
 
 function sortSales(deals: UnifiedDeal[]): UnifiedDeal[] {
   return [...deals].sort((a, b) => {
+    const ratingDiff = (b.dealRating ?? 0) - (a.dealRating ?? 0);
+    if (ratingDiff !== 0) return ratingDiff;
     const discountDiff = (b.discountPercent ?? 0) - (a.discountPercent ?? 0);
     if (discountDiff !== 0) return discountDiff;
-    return (b.dealRating ?? 0) - (a.dealRating ?? 0);
+    return a.title.localeCompare(b.title, 'pt-BR');
   });
 }
 

@@ -135,6 +135,11 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
               <span className="ml-1 line-through opacity-70">{deal.originalPrice}</span>
             )}
           </span>
+          {deal.currency === 'BRL' && (
+            <span className="block text-[9px] text-muted-foreground mt-0.5">
+              {deal.priceConverted ? 'Preço convertido · BRL' : 'Preço na Steam · Brasil'}
+            </span>
+          )}
         </div>
 
         {deal.worth && (

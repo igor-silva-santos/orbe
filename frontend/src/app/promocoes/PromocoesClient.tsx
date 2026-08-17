@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
+import HorizontalDealsRow from '@/components/deals/HorizontalDealsRow';
 import JogosEmAltaContent from '@/components/jogos/JogosEmAltaContent';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -709,7 +710,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                      Catálogo Orbe em promoção
+                      Promoções na Steam (catálogo)
                       <span className="text-sm font-normal text-muted-foreground">
                         ({filteredCatalogo.length})
                       </span>
@@ -722,7 +723,10 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                       Ver aba Em Alta →
                     </button>
                   </div>
-                  <DealsGrid deals={filteredCatalogo} priorityCount={6} />
+                  <p className="text-sm text-muted-foreground max-w-2xl">
+                    Jogos do catálogo Orbe com desconto na Steam — preços em BRL, ordenados por popularidade.
+                  </p>
+                  <HorizontalDealsRow deals={filteredCatalogo} enableDrag priorityCount={8} />
                 </section>
               )}
 

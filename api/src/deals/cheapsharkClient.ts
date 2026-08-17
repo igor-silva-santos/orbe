@@ -61,6 +61,15 @@ function resolveStoreUrl(
   if (steamAppId != null && steamAppId > 0) {
     return `https://store.steampowered.com/app/${steamAppId}`;
   }
+
+  if (storeId === '25') {
+    return 'https://store.epicgames.com/pt-BR/store';
+  }
+
+  if (storeId === '7') {
+    return 'https://www.gog.com/';
+  }
+
   return `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(dealId)}`;
 }
 

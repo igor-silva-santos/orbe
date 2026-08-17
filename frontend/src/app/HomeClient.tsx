@@ -5,7 +5,7 @@ import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
 import type { Midia, Anime } from '@/types';
-import { resolveCarouselOpenIndex } from '@/lib/carousel-utils';
+import { resolveCarouselOpenIndex, filterMidiaForCarouselTimeline } from '@/lib/carousel-utils';
 import orbeNerdApi from '@/lib/api';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useSectionVisible } from '@/hooks/useSectionVisible';
@@ -98,7 +98,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
           <MediaCarousel
             mediaType="filmes"
             initialData={data.filmes}
-            startIndex={resolveCarouselOpenIndex(data.filmes)}
+            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.filmes))}
             bootstrapEnabled={filmesBootstrapEnabled}
           />
         </section>
@@ -108,7 +108,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
           <MediaCarousel
             mediaType="series"
             initialData={data.series}
-            startIndex={resolveCarouselOpenIndex(data.series)}
+            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.series))}
             bootstrapEnabled={seriesVisible}
           />
         </section>
@@ -126,7 +126,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
           <MediaCarousel
             mediaType="jogos"
             initialData={data.jogos}
-            startIndex={resolveCarouselOpenIndex(data.jogos)}
+            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.jogos))}
             bootstrapEnabled={jogosVisible}
           />
         </section>

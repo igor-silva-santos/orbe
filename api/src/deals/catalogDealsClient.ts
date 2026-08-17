@@ -15,7 +15,7 @@ function posterFromJogo(jogo: {
   return resolveIgdbImageUrl(shot);
 }
 
-/** Promoções Steam do catálogo Orbe (IGDB) — mesma base de /jogos-em-alta. */
+/** Promoções Steam do catálogo Orbe (IGDB) — ordenadas por popularidade na Steam. */
 export async function fetchCatalogSteamPromotions(): Promise<UnifiedDeal[]> {
   try {
     const jogos = await prisma.jogo.findMany({
@@ -23,17 +23,24 @@ export async function fetchCatalogSteamPromotions(): Promise<UnifiedDeal[]> {
         AND: [
           jogoQualityFilter,
           { steamAppId: { not: null } },
-          { steamDiscountPercent: { gte: 10 } },
+          { steamDiscountPercent: { gte: 5 } },
+          { steamPriceCents: { not: null } },
         ],
       },
-      orderBy: [{ steamDiscountPercent: 'desc' }, { rating: 'desc' }],
-      take: 40,
+      orderBy: [
+        { steamPlayerCount: 'desc' },
+        { hypes: 'desc' },
+        { steamDiscountPercent: 'desc' },
+      ],
+      take: 80,
       select: {
         igdbId: true,
         name: true,
         steamAppId: true,
         steamPriceCents: true,
         steamDiscountPercent: true,
+        steamPlayerCount: true,
+        hypes: true,
         rating: true,
         cover: true,
         screenshots: { take: 1, select: { url: true } },
@@ -75,7 +82,7 @@ export async function fetchCatalogSteamPromotions(): Promise<UnifiedDeal[]> {
           discountPercent: discount,
           currency: 'BRL',
           steamAppId: appId,
-          dealRating: jogo.rating ?? null,
+          dealRating: jogo.steamPlayerCount ?? jogo.hypes ?? jogo.rating ?? null,
           status: 'promocao',
           orbeGameId: jogo.igdbId,
           orbeUrl: `/jogos/${jogo.igdbId}`,

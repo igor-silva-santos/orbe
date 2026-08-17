@@ -8,8 +8,17 @@ import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
+import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPosterReveal';
 import { getCarouselNavWrapIndex } from '@/lib/carousel-loop';
+import {
+  ANIME_AGENDA_UNSCHEDULED_LABEL,
+  buildWeeklyAnimeAgendaItems,
+  getAnimeAgendaDate,
+  resolveWeeklyAgendaStartIndex,
+  type AnimeAgendaItem,
+} from '@/lib/carousel-anime-agenda';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
+import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -22,9 +31,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
 
-type CarouselItem = 
-  | { type: 'media'; data: Anime }
-  | { type: 'separator'; dayName: string };
+type CarouselItem = AnimeAgendaItem;
 
 type Season = 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL';
 type ViewMode = 'launch' | 'weekly';
@@ -106,26 +113,6 @@ const findSeasonStartIndex = (
       ) === season,
   );
 
-const getAnimeSortTime = (anime: Anime): number => {
-  if (anime.nextAiringEpisode) {
-    return new Date(anime.nextAiringEpisode.airingAt).getTime();
-  }
-  if (anime.startDate) {
-    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day).getTime();
-  }
-  return 0;
-};
-
-const getAnimeAgendaDayIndex = (anime: Anime): number | null => {
-  if (anime.nextAiringEpisode) {
-    return new Date(anime.nextAiringEpisode.airingAt).getDay();
-  }
-  if (anime.startDate) {
-    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day).getDay();
-  }
-  return null;
-};
-
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEnabled = true }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
@@ -203,11 +190,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     if (viewModeRef.current === 'weekly') {
       if (item.type === 'separator') {
         titleKey = `day-${item.dayName}`;
-        title = `Agenda: ${item.dayName}`;
+        title = item.dayName === ANIME_AGENDA_UNSCHEDULED_LABEL
+          ? 'Agenda: Sem episódio agendado'
+          : `Agenda: ${item.dayName}`;
       } else if (item.type === 'media') {
-        const dayIndex = getAnimeAgendaDayIndex(item.data);
-        if (dayIndex !== null) {
-          const dayName = DAY_NAMES[dayIndex];
+        const agendaDate = getAnimeAgendaDate(item.data);
+        if (agendaDate) {
+          const dayName = DAY_NAMES[agendaDate.getDay()];
           titleKey = `day-${dayName}`;
           title = `Agenda: ${dayName}`;
         }
@@ -270,7 +259,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
 
   useCarouselInfiniteLoop({
     emblaApi,
-    viewportRef,
     enabled: loopEnabled,
     getBounds: getLoopBounds,
     onWrap: handleLoopWrap,
@@ -557,28 +545,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         }
 
     } else {
-        const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-        filteredAnimes.forEach(anime => {
-            const dayIndex = getAnimeAgendaDayIndex(anime);
-            if (dayIndex !== null) {
-                animesByDay[dayIndex].push(anime);
-            }
-        });
-
-        const processedItems: CarouselItem[] = [];
-        for (let dayIndex = 0; dayIndex <= 6; dayIndex++) {
-            const animesForDay = animesByDay[dayIndex];
-            if (animesForDay.length > 0) {
-                processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
-                animesForDay.sort((a, b) => getAnimeSortTime(a) - getAnimeSortTime(b));
-                animesForDay.forEach(anime => processedItems.push({ type: 'media', data: anime }));
-            }
-        }
-        
-        newCarouselItems = processedItems;
-        const currentDayIndex = new Date().getDay();
-        const startIndexCandidate = newCarouselItems.findIndex(item => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex]);
-        newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
+        newCarouselItems = buildWeeklyAnimeAgendaItems(filteredAnimes, DAY_NAMES);
+        newStartIndex = resolveWeeklyAgendaStartIndex(newCarouselItems, DAY_NAMES);
     }
     
     setCarouselItems(newCarouselItems);
@@ -719,11 +687,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     setIsNavigating(true);
     try {
       if (viewModeRef.current === 'weekly') {
-        const currentDayIndex = new Date().getDay();
-        const idx = carouselItemsRef.current.findIndex(
-          (item) => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex],
-        );
-        setPendingScrollIndex(idx > -1 ? idx : 0);
+        setPendingScrollIndex(resolveWeeklyAgendaStartIndex(carouselItemsRef.current, DAY_NAMES));
         return;
       }
 
@@ -751,6 +715,18 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
 
   const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
   const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
+
+  const centerHasPoster = useMemo(() => {
+    if (showPositioningSkeleton || carouselItems.length === 0) return false;
+    const item = carouselItems[selectedSnap];
+    return item?.type === 'media' ? Boolean(item.data.poster_url_api) : false;
+  }, [carouselItems, selectedSnap, showPositioningSkeleton]);
+
+  const { isWaitingForCenterPoster, handleCenterPosterLoad } = useCarouselInitialPosterReveal({
+    hasInitialPositioning,
+    emAltaMode,
+    centerHasPoster,
+  });
 
   return (
     <div className="overflow-hidden max-w-full">
@@ -890,12 +866,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                       isFocused={index === selectedSnap}
                       userInteractions={userInteractions}
                       onInteraction={handleInteraction}
+                      onPosterLoad={index === selectedSnap ? handleCenterPosterLoad : undefined}
                     />
                   )}
                 </div>
               );})}
         </div>
       </div>
+      <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
       </div>
       </TooltipProvider>
     </div>
