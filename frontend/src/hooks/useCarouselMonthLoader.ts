@@ -200,45 +200,75 @@ export function useCarouselMonthLoader({
     [enqueueMonthFetch],
   );
 
-  /** Ao entrar num mês visível, garante M+1 e M+2 */
+  /** Ao entrar num mês visível, garante M+1 até M+3 */
   const ensureUpcomingMonthsLoaded = useCallback(
     (visibleMonthKey: string) => {
       const { year, month } = parseMonthKey(visibleMonthKey);
-      const next = addMonths(year, month, 1);
-      const next2 = addMonths(year, month, 2);
-      ensureMonthLoaded(next.year, next.month, 'forward');
-      ensureMonthLoaded(next2.year, next2.month, 'forward');
+      for (let delta = 1; delta <= 3; delta++) {
+        const next = addMonths(year, month, delta);
+        ensureMonthLoaded(next.year, next.month, 'forward');
+      }
     },
     [ensureMonthLoaded],
   );
 
   const prefetchMonthEdges = useCallback(
     (selectedIndex: number, items: Midia[]) => {
+      if (!items.length) return;
+
       const selectedItem = items[selectedIndex];
       const visibleMonthKey = monthKeyFromItem(selectedItem);
-      if (!visibleMonthKey) return;
 
-      ensureMonthLoaded(
-        parseMonthKey(visibleMonthKey).year,
-        parseMonthKey(visibleMonthKey).month,
-        'visible',
-      );
+      if (visibleMonthKey) {
+        ensureMonthLoaded(
+          parseMonthKey(visibleMonthKey).year,
+          parseMonthKey(visibleMonthKey).month,
+          'visible',
+        );
 
-      const bounds = findMonthBounds(items, visibleMonthKey);
-      if (!bounds) return;
+        const bounds = findMonthBounds(items, visibleMonthKey);
+        if (bounds) {
+          const { year, month } = parseMonthKey(visibleMonthKey);
 
-      const { year, month } = parseMonthKey(visibleMonthKey);
+          if (selectedIndex >= bounds.end - monthEdgeBuffer) {
+            for (let delta = 1; delta <= 3; delta++) {
+              const next = addMonths(year, month, delta);
+              ensureMonthLoaded(next.year, next.month, 'forward');
+            }
+          }
 
-      if (selectedIndex >= bounds.end - monthEdgeBuffer) {
-        const next = addMonths(year, month, 1);
-        ensureMonthLoaded(next.year, next.month, 'forward');
-        const next2 = addMonths(year, month, 2);
-        ensureMonthLoaded(next2.year, next2.month, 'forward');
+          if (selectedIndex <= bounds.start + monthEdgeBuffer) {
+            for (let delta = 1; delta <= 2; delta++) {
+              const prev = addMonths(year, month, -delta);
+              ensureMonthLoaded(prev.year, prev.month, 'backward');
+            }
+          }
+        }
       }
 
-      if (selectedIndex <= bounds.start + monthEdgeBuffer) {
-        const prev = addMonths(year, month, -1);
-        ensureMonthLoaded(prev.year, prev.month, 'backward');
+      // Borda da timeline carregada — prefetch meses além do último/primeiro item
+      if (selectedIndex >= items.length - monthEdgeBuffer) {
+        const tail = items[items.length - 1];
+        const tailKey = monthKeyFromItem(tail);
+        if (tailKey) {
+          const { year, month } = parseMonthKey(tailKey);
+          for (let delta = 1; delta <= 4; delta++) {
+            const next = addMonths(year, month, delta);
+            ensureMonthLoaded(next.year, next.month, 'forward');
+          }
+        }
+      }
+
+      if (selectedIndex <= monthEdgeBuffer) {
+        const head = items[0];
+        const headKey = monthKeyFromItem(head);
+        if (headKey) {
+          const { year, month } = parseMonthKey(headKey);
+          for (let delta = 1; delta <= 3; delta++) {
+            const prev = addMonths(year, month, -delta);
+            ensureMonthLoaded(prev.year, prev.month, 'backward');
+          }
+        }
       }
     },
     [ensureMonthLoaded, monthEdgeBuffer],
