@@ -479,22 +479,55 @@ export const serieCarouselQualityFilter: Prisma.SerieWhereInput = {
   ],
 };
 
-export const animeQualityFilter: Prisma.AnimeWhereInput = {
-  OR: [
-    { averageScore: { gte: MIN_ANIME_SCORE } },
-    { popularity: { gte: MIN_ANIME_POPULARITY } },
-  ],
+/**
+ * Nomes de tags AniList tratados como conteúdo adulto — usados tanto para bloquear
+ * no Prisma (nome exato da tag) quanto como fallback quando o payload da AniList
+ * não carrega o campo `isAdult` da tag (ver `isAnimeAdultContent`).
+ */
+export const ANIME_ADULT_TAG_NAMES = ['Hentai', 'Ecchi', 'Yaoi', 'Yuri', 'Adult'];
+
+/**
+ * O campo `Media.isAdult` da AniList é inconsistente — animes com gênero/tag "Hentai"
+ * às vezes vêm com `isAdult: false`. Por isso o site não confia só nesse campo: também
+ * barra pelo gênero "Hentai" e por tags com `isAdult: true` (ou nome na lista acima).
+ * Sem opt-in — conteúdo adulto é banido do site inteiro, não só escondido por padrão.
+ */
+export const animeSafeWhereFilter: Prisma.AnimeWhereInput = {
   isAdult: false,
+  genres: { none: { genero: { name: 'Hentai' } } },
+  tags: {
+    none: {
+      tag: {
+        OR: [{ isAdult: true }, { name: { in: ANIME_ADULT_TAG_NAMES } }],
+      },
+    },
+  },
+};
+
+export const animeQualityFilter: Prisma.AnimeWhereInput = {
+  AND: [
+    animeSafeWhereFilter,
+    {
+      OR: [
+        { averageScore: { gte: MIN_ANIME_SCORE } },
+        { popularity: { gte: MIN_ANIME_POPULARITY } },
+      ],
+    },
+  ],
 };
 
 /** Exibição por temporada — inclui estreias recentes ainda sem nota/popularidade altas */
 export const animeSeasonQualityFilter: Prisma.AnimeWhereInput = {
-  isAdult: false,
-  OR: [
-    { averageScore: { gte: MIN_ANIME_SCORE } },
-    { popularity: { gte: MIN_ANIME_POPULARITY } },
-    { popularity: { gte: MIN_ANIME_SEASON_POPULARITY } },
-    { status: { in: ['RELEASING', 'NOT_YET_RELEASED'] } },
+  AND: [
+    animeSafeWhereFilter,
+    {
+      OR: [
+        { averageScore: { gte: MIN_ANIME_SCORE } },
+        { popularity: { gte: MIN_ANIME_POPULARITY } },
+        { popularity: { gte: MIN_ANIME_SEASON_POPULARITY } },
+        { status: { in: ['RELEASING', 'NOT_YET_RELEASED'] } },
+      ],
+    },
   ],
 };
 
@@ -536,12 +569,16 @@ type SerieLike = {
   adult?: boolean;
 };
 
+type AnimeTagLike = { name?: string | null; isAdult?: boolean | null };
+
 type AnimeLike = {
   averageScore?: number | null;
   popularity?: number | null;
   isAdult?: boolean;
   format?: string | null;
   status?: string | null;
+  genres?: (string | null | undefined)[] | null;
+  tags?: AnimeTagLike[] | null;
 };
 
 type JogoLike = {
@@ -755,8 +792,26 @@ export function isSerieRelevantForSync(serie: SerieLike): boolean {
   );
 }
 
+/**
+ * Detecta conteúdo adulto (hentai/ecchi/etc.) além do campo `isAdult` da AniList,
+ * que é inconsistente para esse tipo de anime. Checa também o gênero "Hentai" e
+ * tags marcadas como adultas (pelo próprio `tag.isAdult` da AniList ou pelo nome).
+ */
+export function isAnimeAdultContent(anime: AnimeLike): boolean {
+  if (anime.isAdult) return true;
+  if (anime.genres?.some((genre) => genre === 'Hentai')) return true;
+  if (
+    anime.tags?.some(
+      (tag) => tag.isAdult === true || (tag.name && ANIME_ADULT_TAG_NAMES.includes(tag.name)),
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function isAnimeRelevantForDisplay(anime: AnimeLike): boolean {
-  if (anime.isAdult) return false;
+  if (isAnimeAdultContent(anime)) return false;
   return (
     (anime.averageScore ?? 0) >= MIN_ANIME_SCORE ||
     (anime.popularity ?? 0) >= MIN_ANIME_POPULARITY
@@ -764,7 +819,7 @@ export function isAnimeRelevantForDisplay(anime: AnimeLike): boolean {
 }
 
 export function isAnimeRelevantForSync(anime: AnimeLike): boolean {
-  if (anime.isAdult) return false;
+  if (isAnimeAdultContent(anime)) return false;
   return (
     (anime.averageScore ?? 0) >= SYNC_MIN_ANIME_SCORE ||
     (anime.popularity ?? 0) >= SYNC_MIN_ANIME_POPULARITY
@@ -773,7 +828,7 @@ export function isAnimeRelevantForSync(anime: AnimeLike): boolean {
 
 /** Critérios para animes de temporada — prioriza lançamentos, não clássicos populares */
 export function isAnimeRelevantForSeasonalSync(anime: AnimeLike): boolean {
-  if (anime.isAdult) return false;
+  if (isAnimeAdultContent(anime)) return false;
 
   if (anime.format && !RELEVANT_ANIME_FORMATS.includes(anime.format as typeof RELEVANT_ANIME_FORMATS[number])) {
     return false;

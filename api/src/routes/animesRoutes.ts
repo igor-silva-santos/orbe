@@ -3,7 +3,7 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapAnimeToMidia, mapAnimeToCarouselCard } from '../mappers';
 import { fetchAnimeDetailsLive } from '../externalDetails';
-import { animeQualityFilter, animeSeasonQualityFilter } from '../qualityFilters';
+import { animeQualityFilter, animeSeasonQualityFilter, animeSafeWhereFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import adminMiddleware from '../adminMiddleware';
@@ -24,49 +24,30 @@ import { getBrazilCalendarWeekBounds, getWeekdayInBrazil } from '../brazilTimezo
 
 const router = Router();
 
-const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
-
 // Rota para Animes
 router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, formato, fonte, status, safeSearch, includeAdult } = req.query;
+  const { filtro, genero, ano, formato, fonte, status } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const where: Prisma.AnimeWhereInput = {};
-    const showAdultContent = includeAdult === 'true';
-
-    if (!showAdultContent) {
-      where.isAdult = false;
-    }
+    const conditions: Prisma.AnimeWhereInput[] = [animeSafeWhereFilter];
 
     if (genero && genero !== 'todos') {
-      where.genres = {
-        some: { genero: { name: genero as string } },
-      };
+      conditions.push({ genres: { some: { genero: { name: genero as string } } } });
     }
     if (formato && formato !== 'todos') {
-      where.format = formato as string;
+      conditions.push({ format: formato as string });
     }
     if (fonte && fonte !== 'todos') {
-      where.source = fonte as string;
+      conditions.push({ source: fonte as string });
     }
     if (status && status !== 'todos') {
-      where.status = status as string;
+      conditions.push({ status: status as string });
     }
     if (ano && ano !== 'todos') {
-      where.seasonYear = parseInt(ano as string);
+      conditions.push({ seasonYear: parseInt(ano as string) });
     }
 
-    if (safeSearch === 'true' || !showAdultContent) {
-      where.tags = {
-        none: {
-          tag: {
-            name: {
-              in: blockedTags,
-            },
-          },
-        },
-      };
-    }
+    const where: Prisma.AnimeWhereInput = { AND: conditions };
 
     const orderBy: Prisma.AnimeOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { titleRomaji: 'asc' };
 
@@ -199,6 +180,7 @@ router.get('/animes/weekly-schedule', async (req, res) => {
           gte: startDate,
           lte: endDate,
         },
+        anime: animeSafeWhereFilter,
       },
       include: {
         anime: true,

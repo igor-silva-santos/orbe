@@ -4,6 +4,7 @@ import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTransla
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
 import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
+import { isAnimeAdultContent } from './qualityFilters';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -434,6 +435,7 @@ export async function fetchAnimeDetailsLive(anilistId: number) {
 
     const anime = response.data.data?.Media;
     if (!anime) return null;
+    if (isAnimeAdultContent(anime)) return null;
 
     const mapped = await withPortugueseTranslation(mapAnimeToMidia(mapAnilistToPrismaLike(anime)));
     return {
