@@ -1,6 +1,7 @@
 import './loadEnv';
 
 import { logger } from './logger';
+import * as syncLog from './syncLogger';
 import { tmdb, tmdbApi } from './clients';
 import { Cast, Crew } from 'moviedb-promise';
 import { PrismaClient } from '@prisma/client';
@@ -320,12 +321,28 @@ async function processMovieBatch(
   sourceFlags: Map<number, MovieSourceFlags> = new Map(),
   period?: { start: Date; end: Date },
   includeUndated = false,
+  batchPeriod?: { year?: number; month?: number },
 ): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number> }> {
   let successCount = 0, errorCount = 0, skippedCount = 0;
   const skipReasons: Record<string, number> = {};
-  const bumpSkip = (reason: string) => {
+  const bumpSkip = (
+    reason: string,
+    ctx: { id?: number; title?: string; year?: number | null; month?: number | null } = {},
+  ) => {
     skippedCount++;
     skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+    syncLog.logSkip(
+      {
+        phase: 'filmes',
+        mediaType: 'movies',
+        itemId: ctx.id,
+        itemTitle: ctx.title,
+        year: ctx.year ?? batchPeriod?.year,
+        month: ctx.month ?? batchPeriod?.month,
+        reason,
+      },
+      `Filme [${ctx.id ?? '?'}] "${ctx.title ?? '?'}" pulado: ${reason}.`,
+    );
   };
 
   for (const id of movieIds) {
@@ -359,22 +376,25 @@ async function processMovieBatch(
         const tmdbResolved = resolveTmdbRelease(movieDetails.release_date, movieDetails.status);
         if (tmdbResolved.isYearOnly && tmdbResolved.releaseYear) {
           if (!includeUndated) {
-            bumpSkip('no_release_date');
+            bumpSkip('no_release_date', { id, title: movieDetails.title, year: tmdbResolved.releaseYear });
             continue;
           }
           if (period && !isYearWithinRange(tmdbResolved.releaseYear, period.start, period.end)) {
-            bumpSkip('out_of_period');
+            bumpSkip('out_of_period', { id, title: movieDetails.title, year: tmdbResolved.releaseYear });
             continue;
           }
           releaseDate = null;
           releaseYear = tmdbResolved.releaseYear;
         } else {
-          bumpSkip('no_release_date');
+          bumpSkip('no_release_date', { id, title: movieDetails.title });
           continue;
         }
       } else {
         releaseYear = releaseDate.getFullYear();
       }
+
+      const eventYear = releaseYear ?? batchPeriod?.year;
+      const eventMonth = releaseDate ? releaseDate.getMonth() + 1 : batchPeriod?.month;
 
       const flags = sourceFlags.get(id) ?? {};
       const disponibilidade = parseFilmeTmdbDisponibilidade(movieDetails);
@@ -383,7 +403,7 @@ async function processMovieBatch(
         periodOpen && (flags.emCartaz || flags.emBreve) && disponibilidade.estreiaCinema;
 
       if (isConcertOrLiveRecording(movieDetails)) {
-        bumpSkip('concert_or_live');
+        bumpSkip('concert_or_live', { id, title: movieDetails.title, year: eventYear, month: eventMonth });
         logger.info(`⏭️ Filme [${id}] "${movieDetails.title}" ignorado: show/concerto ao vivo (não é filme).`);
         continue;
       }
@@ -394,7 +414,7 @@ async function processMovieBatch(
         !isCinemaCurated &&
         !isReleaseWithinPeriod(releaseDate, period.start, period.end)
       ) {
-        bumpSkip('out_of_period');
+        bumpSkip('out_of_period', { id, title: movieDetails.title, year: eventYear, month: eventMonth });
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: lançamento ` +
           `${releaseDate.toISOString().split('T')[0]} fora do período ` +
@@ -404,7 +424,7 @@ async function processMovieBatch(
       }
 
       if (!isCinemaCurated && !isMovieRelevantForSync(movieDetails)) {
-        bumpSkip('quality_filter');
+        bumpSkip('quality_filter', { id, title: movieDetails.title, year: eventYear, month: eventMonth });
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +
           `(votes=${movieDetails.vote_count ?? 0}, pop=${(movieDetails.popularity ?? 0).toFixed(1)}, ` +
@@ -543,17 +563,29 @@ async function processMovieBatch(
 
       successCount++;
       const flagLabel = flags.emCartaz ? 'em cartaz' : flags.emBreve ? 'em breve' : 'período';
-      logger.info(
-        `✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}, pt-BR: ${localizacaoPtBr ? 'sim' : 'não'}) sincronizado.`,
+      const successMessage = `✅ Filme [${id}] "${movieDetails.title}" (${flagLabel}, release type: ${relevantRelease?.type}, pt-BR: ${localizacaoPtBr ? 'sim' : 'não'}) sincronizado.`;
+      logger.info(successMessage);
+      syncLog.logSync(
+        { phase: 'filmes', mediaType: 'movies', itemId: id, itemTitle: movieDetails.title, year: eventYear, month: eventMonth },
+        successMessage,
       );
 
     } catch (error) {
       errorCount++;
       logger.error(`❌ Erro ao processar o filme ID ${id}. Pulando: ${error}`);
+      syncLog.logSyncError(
+        { phase: 'filmes', mediaType: 'movies', itemId: id, year: batchPeriod?.year, month: batchPeriod?.month },
+        `Erro ao processar o filme ID ${id}: ${error}`,
+      );
     }
   }
 
-  logger.info(`--- Resumo do Lote (Filmes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
+  const summaryMessage = `--- Resumo do Lote (Filmes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`;
+  logger.info(summaryMessage);
+  syncLog.logCheckpoint(
+    { phase: 'filmes', mediaType: 'movies', year: batchPeriod?.year, month: batchPeriod?.month },
+    summaryMessage,
+  );
   return { successCount, errorCount, skippedCount, skipReasons };
 }
 
@@ -662,7 +694,10 @@ export async function syncMovies(
         for (let i = 0; i < monthlyIds.length; i += batchSize) {
             const batch = monthlyIds.slice(i, i + batchSize);
             logger.info(`Processando lote do período ${startStr} a ${endStr}: ${i + 1}-${Math.min(i + batchSize, monthlyIds.length)} de ${monthlyIds.length}`);
-            const batchResult = await processMovieBatch(batch, prisma, curatedFlags, period, includeUndated);
+            const batchResult = await processMovieBatch(batch, prisma, curatedFlags, period, includeUndated, {
+              year: currentStartDate.getFullYear(),
+              month: currentStartDate.getMonth() + 1,
+            });
             await addSkipReasons(prisma, 'filmes', batchResult.skipReasons);
             phaseTracker?.advance(batch.length);
             monthlyProcessed += batch.length;
