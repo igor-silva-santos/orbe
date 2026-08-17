@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getMediaCarouselLoopBounds,
+  getCarouselNavWrapIndex,
   wrapCarouselIndex,
 } from './carousel-loop';
 
@@ -36,5 +37,20 @@ describe('wrapCarouselIndex', () => {
   it('wraps backward underflow', () => {
     assert.equal(wrapCarouselIndex(-1, bounds), 4);
     assert.equal(wrapCarouselIndex(-2, bounds), 3);
+  });
+});
+
+describe('getCarouselNavWrapIndex', () => {
+  it('wraps forward to first item', () => {
+    assert.equal(getCarouselNavWrapIndex('next', 10), 0);
+  });
+
+  it('wraps backward to last item', () => {
+    assert.equal(getCarouselNavWrapIndex('prev', 10), 9);
+  });
+
+  it('handles empty list', () => {
+    assert.equal(getCarouselNavWrapIndex('next', 0), 0);
+    assert.equal(getCarouselNavWrapIndex('prev', 0), 0);
   });
 });

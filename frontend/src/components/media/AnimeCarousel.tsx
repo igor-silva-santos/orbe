@@ -8,6 +8,7 @@ import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
+import { getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
@@ -90,6 +91,41 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
     return { startDate, endDate };
 };
 
+const findSeasonStartIndex = (
+  items: CarouselItem[],
+  year: number,
+  season: Season,
+): number =>
+  items.findIndex(
+    (item) =>
+      item.type === 'media' &&
+      item.data.startDate &&
+      item.data.startDate.year === year &&
+      getSeason(
+        new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day),
+      ) === season,
+  );
+
+const getAnimeSortTime = (anime: Anime): number => {
+  if (anime.nextAiringEpisode) {
+    return new Date(anime.nextAiringEpisode.airingAt).getTime();
+  }
+  if (anime.startDate) {
+    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day).getTime();
+  }
+  return 0;
+};
+
+const getAnimeAgendaDayIndex = (anime: Anime): number | null => {
+  if (anime.nextAiringEpisode) {
+    return new Date(anime.nextAiringEpisode.airingAt).getDay();
+  }
+  if (anime.startDate) {
+    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day).getDay();
+  }
+  return null;
+};
+
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEnabled = true }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
@@ -143,6 +179,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   const prevStartIndexRef = useRef(0);
   const firstMediaIdRef = useRef<number | undefined>(initialData[0]?.id);
   const seasonBootstrapRanRef = useRef(false);
+  const seasonNavDirectionRef = useRef<'next' | 'prev'>('next');
 
   const buildLaunchTitle = useCallback((season: Season, year: number) => {
     const today = new Date();
@@ -167,11 +204,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       if (item.type === 'separator') {
         titleKey = `day-${item.dayName}`;
         title = `Agenda: ${item.dayName}`;
-      } else if (item.data.nextAiringEpisode) {
-        const airingDate = new Date(item.data.nextAiringEpisode.airingAt);
-        const dayName = DAY_NAMES[airingDate.getDay()];
-        titleKey = `day-${dayName}`;
-        title = `Agenda: ${dayName}`;
+      } else if (item.type === 'media') {
+        const dayIndex = getAnimeAgendaDayIndex(item.data);
+        if (dayIndex !== null) {
+          const dayName = DAY_NAMES[dayIndex];
+          titleKey = `day-${dayName}`;
+          title = `Agenda: ${dayName}`;
+        }
       }
     } else if (item.type === 'media' && item.data.startDate) {
       const itemDate = new Date(
@@ -211,7 +250,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   }, []);
 
   const loopEnabled =
-    !emAltaMode &&
     !hasInitialPositioning &&
     pendingScrollIndex === null &&
     carouselItems.length > 0;
@@ -256,6 +294,16 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   useEffect(() => {
     fetchedAnimesRef.current = fetchedAnimes;
   }, [fetchedAnimes]);
+
+  /** Atualiza dados após sync sem remontar o carrossel */
+  useEffect(() => {
+    if (!initialData.length) return;
+    setFetchedAnimes((prev) => {
+      const merged = mergeAnimesByStartDate(prev, initialData);
+      fetchedAnimesRef.current = merged;
+      return merged;
+    });
+  }, [initialData]);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;
@@ -328,6 +376,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       return next;
     });
   };
+
+  useEffect(() => {
+    if (!emblaApi || !emAltaMode) return;
+    itemsLengthRef.current = carouselItems.length;
+    emblaApi.reInit();
+    emblaApi.scrollTo(0, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emblaApi, emAltaMode, emAltaAnimes]);
 
   // Busca temporada atual se o SSR não trouxe dados; prefetch adjacentes quando visível
   useEffect(() => {
@@ -486,15 +542,25 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                 item.data.startDate.year === searchYear &&
                 getSeason(new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day)) === searchSeason
             );
-            newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
+            if (startIndexCandidate > -1) {
+              newStartIndex = startIndexCandidate;
+            } else {
+              const mediaItems = newCarouselItems.filter((item): item is { type: 'media'; data: Anime } => item.type === 'media');
+              if (mediaItems.length > 0) {
+                const wrapMediaIndex = getCarouselNavWrapIndex(seasonNavDirectionRef.current, mediaItems.length);
+                const wrapItem = mediaItems[wrapMediaIndex];
+                newStartIndex = newCarouselItems.findIndex(
+                  (item) => item.type === 'media' && item.data.id === wrapItem.data.id,
+                );
+              }
+            }
         }
 
     } else {
         const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
         filteredAnimes.forEach(anime => {
-            if (anime.nextAiringEpisode) {
-                const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
-                const dayIndex = localAiringDate.getDay();
+            const dayIndex = getAnimeAgendaDayIndex(anime);
+            if (dayIndex !== null) {
                 animesByDay[dayIndex].push(anime);
             }
         });
@@ -504,7 +570,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
             const animesForDay = animesByDay[dayIndex];
             if (animesForDay.length > 0) {
                 processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
-                animesForDay.sort((a, b) => new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime());
+                animesForDay.sort((a, b) => getAnimeSortTime(a) - getAnimeSortTime(b));
                 animesForDay.forEach(anime => processedItems.push({ type: 'media', data: anime }));
             }
         }
@@ -588,6 +654,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
     if (isNavigating) return;
+    seasonNavDirectionRef.current = direction;
     const seasonIndex = SEASONS.indexOf(currentSeason);
     let newSeason: Season;
     let newYear = currentYear;
@@ -609,13 +676,78 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         await fetchSeasonData(newYear, newSeason, direction);
       }
 
-      setCurrentSeason(newSeason);
-      setCurrentYear(newYear);
+      const sortedAnimes = [...fetchedAnimesRef.current].sort((a, b) => {
+        const dateA = a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime() : 0;
+        return dateA - dateB;
+      });
+      const launchItems: CarouselItem[] = sortedAnimes.map((anime) => ({ type: 'media', data: anime }));
+      let targetYear = newYear;
+      let targetSeason = newSeason;
+
+      if (findSeasonStartIndex(launchItems, targetYear, targetSeason) === -1 && launchItems.length > 0) {
+        const mediaItems = launchItems.filter((item): item is { type: 'media'; data: Anime } => item.type === 'media');
+        const wrapMediaIndex = getCarouselNavWrapIndex(direction, mediaItems.length);
+        const wrapAnime = mediaItems[wrapMediaIndex].data;
+        if (wrapAnime.startDate) {
+          const wrapDate = new Date(
+            wrapAnime.startDate.year,
+            wrapAnime.startDate.month - 1,
+            wrapAnime.startDate.day,
+          );
+          targetYear = wrapDate.getFullYear();
+          targetSeason = getSeason(wrapDate);
+        }
+      }
+
+      setCurrentSeason(targetSeason);
+      setCurrentYear(targetYear);
       lastTitleKeyRef.current = '';
     } finally {
       setIsNavigating(false);
     }
   };
+
+  const scrollToToday = useCallback(async () => {
+    if (!emblaApi || isNavigating) return;
+
+    if (emAltaMode) {
+      emblaApi.scrollTo(0, true);
+      return;
+    }
+
+    setIsNavigating(true);
+    try {
+      if (viewModeRef.current === 'weekly') {
+        const currentDayIndex = new Date().getDay();
+        const idx = carouselItemsRef.current.findIndex(
+          (item) => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex],
+        );
+        setPendingScrollIndex(idx > -1 ? idx : 0);
+        return;
+      }
+
+      const today = new Date();
+      setCurrentSeason(getSeason(today));
+      setCurrentYear(today.getFullYear());
+      lastTitleKeyRef.current = '';
+    } finally {
+      setIsNavigating(false);
+    }
+  }, [emblaApi, emAltaMode, isNavigating]);
+
+  const wasEmAltaMode = useRef(false);
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (!wasEmAltaMode.current || emAltaMode) {
+      wasEmAltaMode.current = emAltaMode;
+      return;
+    }
+    wasEmAltaMode.current = emAltaMode;
+    itemsLengthRef.current = carouselItems.length;
+    emblaApi.reInit();
+    void scrollToToday();
+  }, [emAltaMode, emblaApi, carouselItems.length, scrollToToday]);
 
   const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
   const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
@@ -624,8 +756,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     <div className="overflow-hidden max-w-full">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
-          onClick={() => emblaApi?.scrollTo(startIndex)}
+          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors"
+          onClick={() => void scrollToToday()}
+          title={emAltaMode ? 'Voltar ao início da lista' : viewMode === 'weekly' ? 'Ir para o dia de hoje' : 'Ir para a temporada atual'}
         >
           {emAltaMode
             ? 'Em Alta'

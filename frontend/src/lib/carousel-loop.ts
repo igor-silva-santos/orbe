@@ -48,3 +48,12 @@ export function getMediaCarouselLoopBounds(
   }
   return { start: 0, end: lastDated };
 }
+
+/** Índice para wrap de navegação por setas quando não há mês na direção pedida. */
+export function getCarouselNavWrapIndex(
+  direction: 'next' | 'prev',
+  itemsLength: number,
+): number {
+  if (itemsLength <= 0) return 0;
+  return direction === 'next' ? 0 : itemsLength - 1;
+}

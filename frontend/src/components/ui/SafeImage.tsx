@@ -26,6 +26,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   imageSize = TMDB_CARD_SIZE,
   loading = 'lazy',
   decoding = 'async',
+  priority = false,
   onLoad,
   ...props
 }) => {
@@ -72,6 +73,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       className={className}
       loading={loading}
       decoding={decoding}
+      fetchPriority={priority ? 'high' : undefined}
       placeholder={isPlaceholder ? undefined : 'blur'}
       blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
       onLoad={() => onLoad?.()}
