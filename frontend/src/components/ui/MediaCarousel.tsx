@@ -123,6 +123,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const lastTitleMonthKey = useRef<string>('');
   const hasInitialPositioningRef = useRef(true);
   const bootstrapRanRef = useRef(false);
+  const positioningTitleLockedRef = useRef(true);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
@@ -212,14 +213,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   }, [mediaItems]);
 
   const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
+    if (positioningTitleLockedRef.current) return;
     const item = items[index];
     const title = monthTitleFromItem(item);
-    if (!title || !item?.data_lancamento_api) return;
+    if (!title) return;
 
     const monthKey = monthKeyFromItem(item);
-    if (!monthKey || monthKey === lastTitleMonthKey.current) return;
+    const yearOnlyKey =
+      item?.ano_lancamento_api && !item?.data_lancamento_confirmada
+        ? `year-tbd-${item.ano_lancamento_api}`
+        : null;
+    const titleKey = monthKey ?? yearOnlyKey;
+    if (!titleKey || titleKey === lastTitleMonthKey.current) return;
 
-    lastTitleMonthKey.current = monthKey;
+    lastTitleMonthKey.current = titleKey;
     setCurrentTitle(title);
   }, []);
 
@@ -344,7 +351,17 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       emblaApi.scrollTo(targetIndex, false);
       previousSelectedIndex.current = targetIndex;
       setSelectedSnap(targetIndex);
-      updateTitleFromIndex(targetIndex, filteredItems);
+
+      positioningTitleLockedRef.current = true;
+      const targetItem = filteredItems[targetIndex];
+      const targetMonthKey = monthKeyFromItem(targetItem);
+      if (targetMonthKey) {
+        lastTitleMonthKey.current = targetMonthKey;
+        const { year, month } = parseMonthKey(targetMonthKey);
+        setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
+      } else {
+        updateTitleFromIndex(targetIndex, filteredItems);
+      }
 
       const monthKey = monthKeyFromItem(filteredItems[targetIndex]);
       if (monthKey) {
@@ -355,6 +372,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
       setHasInitialPositioning(false);
+
+      window.setTimeout(() => {
+        positioningTitleLockedRef.current = false;
+      }, 400);
     };
 
     requestAnimationFrame(() => {
@@ -389,7 +410,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       const items = filteredItemsRef.current;
       const datedIndex = resolveDatedIndexForNavigation(slide, items.length);
       previousSelectedIndex.current = selectedIndex;
-      updateTitleFromIndex(datedIndex, items);
+
+      if (!positioningTitleLockedRef.current) {
+        updateTitleFromIndex(datedIndex, items);
+      }
 
       const monthKey = monthKeyFromItem(items[datedIndex]);
       if (monthKey && monthKey !== lastVisibleMonthKeyRef.current) {
@@ -418,6 +442,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       if (slide?.kind !== 'dated') return;
       previousSelectedIndex.current = selectedIndex;
       prefetchMonthEdges(slide.datedIndex, filteredItemsRef.current);
+
+      if (positioningTitleLockedRef.current) {
+        positioningTitleLockedRef.current = false;
+        updateTitleFromIndex(slide.datedIndex, filteredItemsRef.current);
+      }
     };
 
     emblaApi.on('select', onSelect);
