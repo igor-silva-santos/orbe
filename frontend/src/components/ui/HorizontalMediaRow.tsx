@@ -18,7 +18,7 @@ export function HorizontalMediaRow({
   type,
   userInteractions,
   onInteraction,
-  enableDrag = false,
+  enableDrag = true,
 }: HorizontalMediaRowProps) {
   const { scrollRef, dragging, handlers } = useHorizontalDragScroll();
 
@@ -27,7 +27,7 @@ export function HorizontalMediaRow({
   return (
     <div
       ref={enableDrag ? scrollRef : undefined}
-      className={`flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 ${
+      className={`flex gap-4 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1 ${
         enableDrag ? (dragging ? 'cursor-grabbing select-none' : 'cursor-grab') : ''
       }`}
       style={enableDrag ? { touchAction: 'pan-y' } : undefined}

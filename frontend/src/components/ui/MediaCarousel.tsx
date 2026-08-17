@@ -19,6 +19,7 @@ import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPoster
 import { getMediaCarouselLoopBounds, getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
+import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
 import {
   addMonths,
   findIndexForMonth,
@@ -794,7 +795,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
             <LoadingOverlay message="Carregando novos títulos..." className="rounded-lg" />
           )}
         <div
-          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
+          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating ? 'pointer-events-none' : ''}`}
           ref={setViewportRef}
           style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >
@@ -870,6 +871,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                 })}
           </div>
         </div>
+        <CarouselScrollbar emblaApi={emblaApi} />
         <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
         </div>
       </TooltipProvider>

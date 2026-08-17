@@ -43,6 +43,57 @@ export function getAnimeSortTime(anime: Anime): number {
   return getAnimeAgendaDate(anime)?.getTime() ?? 0;
 }
 
+export function buildWeeklyItemsFromSchedule(
+  grouped: Record<string | number, import('@/types').Anime[]>,
+  dayNames: readonly string[] = DAY_NAMES,
+): AnimeAgendaItem[] {
+  const items: AnimeAgendaItem[] = [];
+
+  for (let dayIndex = 0; dayIndex <= 6; dayIndex += 1) {
+    const animes = grouped[dayIndex] ?? grouped[String(dayIndex)] ?? [];
+    if (animes.length === 0) continue;
+
+    items.push({ type: 'separator', dayName: dayNames[dayIndex] });
+    const sorted = [...animes].sort((a, b) => getAnimeSortTime(a) - getAnimeSortTime(b));
+    for (const anime of sorted) {
+      items.push({ type: 'media', data: anime });
+    }
+  }
+
+  return items;
+}
+
+export function filterWeeklyAgendaByGenre(items: AnimeAgendaItem[], genre: string): AnimeAgendaItem[] {
+  const filtered: AnimeAgendaItem[] = [];
+  let index = 0;
+
+  while (index < items.length) {
+    const item = items[index];
+    if (item.type !== 'separator') {
+      index += 1;
+      continue;
+    }
+
+    const dayName = item.dayName;
+    index += 1;
+    const sectionMedia: AnimeAgendaItem[] = [];
+    while (index < items.length && items[index].type !== 'separator') {
+      const media = items[index];
+      if (media.type === 'media' && media.data.generos_api?.includes(genre)) {
+        sectionMedia.push(media);
+      }
+      index += 1;
+    }
+
+    if (sectionMedia.length > 0) {
+      filtered.push({ type: 'separator', dayName });
+      filtered.push(...sectionMedia);
+    }
+  }
+
+  return filtered;
+}
+
 export function buildWeeklyAnimeAgendaItems(
   animes: Anime[],
   dayNames: readonly string[] = DAY_NAMES,
