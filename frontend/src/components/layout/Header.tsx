@@ -34,7 +34,7 @@ const primaryLinks: NavLink[] = [
 const moreLinks: NavLink[] = [
   { href: '/promocoes?tab=promocoes', label: 'Promoções' },
   { href: '/eventos', label: 'Eventos' },
-  { href: '/jogos-em-alta', label: 'Jogos em Alta' },
+  { href: '/promocoes?tab=em-alta', label: 'Jogos em Alta' },
   { href: '/premios', label: 'Premiações' },
 ];
 

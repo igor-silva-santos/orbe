@@ -42,8 +42,8 @@ O usuário navega por carrosséis temporais, filtra por categoria, pesquisa tít
 | `/series` | Listagem com filtros | ✅ |
 | `/animes` | Listagem (gênero, ano, formato, fonte, status) | ✅ |
 | `/jogos` | Listagem (gênero, plataforma, modo, ano, mês) | ✅ |
-| `/jogos-em-alta` | Destaques Steam, promoções, categorias e plataformas | ✅ |
-| `/promocoes` | Jogos grátis e promoções ao vivo (Epic, Steam, GamerPower, CheapShark) + catálogo Orbe | ✅ |
+| `/jogos-em-alta` | Redireciona para `/promocoes?tab=em-alta` | ✅ |
+| `/promocoes` | Três abas: grátis, promoções ao vivo (Epic, Steam, GamerPower, CheapShark, Ubisoft) + catálogo Orbe; aba **Em Alta** (ex-jogos-em-alta) | ✅ |
 | `/premios` | Vencedores e indicados por prêmio e ano | ✅ |
 | `/eventos` | Showcases e eventos de games com jogos anunciados | ✅ |
 | `/hoje` | Cinema + streaming + jogos do dia | ✅ |

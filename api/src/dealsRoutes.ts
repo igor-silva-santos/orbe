@@ -63,6 +63,7 @@ router.get('/deals', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (req, res)
     const partial: Partial<DealsOverview> & { fetchedAt: string; sourcesHealth: string } = {
       fetchedAt: overview.fetchedAt,
       usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
       sources: overview.sources,
       sourcesHealth: sourcesHealth(overview),
     };
@@ -91,6 +92,7 @@ router.get('/deals/gratis', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (_r
     res.json({
       fetchedAt: overview.fetchedAt,
       usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
       gratisTemporarios: overview.gratisTemporarios,
       gratisPermanentes: overview.gratisPermanentes,
       deals: overview.gratis,
@@ -116,6 +118,7 @@ router.get('/deals/promocoes', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async 
     res.json({
       fetchedAt: overview.fetchedAt,
       usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
       deals: pagination.items,
       promocoes: pagination.items,
       catalogoSteam: overview.catalogoSteam ?? [],
@@ -176,7 +179,15 @@ router.get('/deals/cheapshark', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async
     const pool = freeOnly ? overview.gratis : [...overview.gratis, ...overview.promocoes];
     let deals = pool.filter((d) => d.source === 'cheapshark');
     if (storeId) {
-      const storeMap: Record<string, string> = { '1': 'steam', '7': 'gog', '25': 'epic' };
+      const storeMap: Record<string, string> = {
+        '1': 'steam',
+        '3': 'other',
+        '7': 'gog',
+        '11': 'other',
+        '13': 'ubisoft',
+        '15': 'other',
+        '25': 'epic',
+      };
       const platform = storeMap[storeId];
       if (platform) {
         deals = deals.filter((d) => d.platform === platform);
