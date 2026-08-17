@@ -92,6 +92,18 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'img.itch.zone',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'itch.io',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.playstation.com',
         port: '',
         pathname: '/**',

@@ -13,6 +13,7 @@ const SOURCE_LABELS: Record<string, string> = {
   cheapshark: 'CheapShark',
   steam: 'Steam',
   orbe: 'Catálogo Orbe',
+  itch: 'itch.io',
 };
 
 function steamFallbackImage(appId: number): string {
