@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image, { ImageProps } from 'next/image';
 import {
   getImageSrc,
@@ -11,10 +11,11 @@ import {
   isIgdbOrProxyImageUrl,
 } from '@/lib/image-utils';
 
-interface SafeImageProps extends Omit<ImageProps, 'src' | 'onError'> {
+interface SafeImageProps extends Omit<ImageProps, 'src' | 'onError' | 'onLoad'> {
   src: string | null | undefined;
   fallbackLabel?: string;
   imageSize?: TmdbImageSize;
+  onLoad?: () => void;
 }
 
 const SafeImage: React.FC<SafeImageProps> = ({
@@ -25,9 +26,11 @@ const SafeImage: React.FC<SafeImageProps> = ({
   imageSize = TMDB_CARD_SIZE,
   loading = 'lazy',
   decoding = 'async',
+  onLoad,
   ...props
 }) => {
   const [hasError, setHasError] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const resolvedSrc = getImageSrc(src, imageSize);
   const isPlaceholder = resolvedSrc === PLACEHOLDER_POSTER;
   const isTmdbImage = resolvedSrc.includes('image.tmdb.org');
@@ -35,6 +38,18 @@ const SafeImage: React.FC<SafeImageProps> = ({
     isIgdbOrProxyImageUrl(resolvedSrc) ||
     isIgdbOrProxyImageUrl(src) ||
     resolvedSrc.startsWith('/api/images/igdb');
+
+  useEffect(() => {
+    if (hasError || !src) {
+      onLoad?.();
+      return;
+    }
+
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) {
+      onLoad?.();
+    }
+  }, [hasError, onLoad, resolvedSrc, src]);
 
   if (hasError || !src) {
     return (
@@ -51,6 +66,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   return (
     <Image
       {...props}
+      ref={imageRef}
       src={resolvedSrc}
       alt={alt}
       className={className}
@@ -58,6 +74,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       decoding={decoding}
       placeholder={isPlaceholder ? undefined : 'blur'}
       blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
+      onLoad={() => onLoad?.()}
       onError={() => setHasError(true)}
       unoptimized={isPlaceholder || isTmdbImage || isIgdbOrProxyImage}
     />
