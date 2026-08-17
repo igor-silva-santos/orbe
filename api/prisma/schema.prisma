@@ -915,3 +915,52 @@ model AppSetting {
   value     Json
   updatedAt DateTime @updatedAt
 }
+
+// =================================================================================
+// LOG ESTRUTURADO DE SINCRONIZAÇÃO
+// =================================================================================
+
+// Uma execução de sync (run-sync-all, run-sync-resume, backfill-step, run-sync individual).
+// Guarda o resumo agregado (summary) pra leitura rápida sem varrer os eventos.
+model SyncLogRun {
+  id          Int       @id @default(autoincrement())
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  status      String    @default("running") // running | completed | failed | interrupted
+  trigger     String? // run-sync | run-sync-all | run-sync-resume | run-sync-backfill-step | run-detetive | run-sync-awards | ...
+  startDate   String?
+  endDate     String?
+  totalEvents Int       @default(0)
+  errorCount  Int       @default(0)
+  skipCount   Int       @default(0)
+  summary     Json? // rollup por fase/ano/mês + top erros/motivos de skip, gerado ao concluir/falhar
+  createdAt   DateTime  @default(now())
+
+  events SyncLogEvent[]
+
+  @@index([status])
+  @@index([startedAt])
+}
+
+// Evento individual de log de sync — granular por fase/ano/mês/categoria pra permitir
+// navegação e filtro sem precisar ler o log inteiro (texto corrido não é filtrável).
+model SyncLogEvent {
+  id        BigInt   @id @default(autoincrement())
+  runId     Int
+  run       SyncLogRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  ts        DateTime @default(now())
+  level     String // info | warn | error
+  category  String // sync | skip | error | checkpoint | summary
+  phase     String? // filmes | detetive | series | animes | jogos | undated | premios
+  year      Int?
+  month     Int?
+  mediaType String?
+  itemId    String?
+  itemTitle String?
+  reason    String? // motivo curto e categorizável (ex.: "sem streaming BR", "TMDB timeout")
+  message   String  @db.Text
+
+  @@index([runId, category])
+  @@index([runId, phase, year, month])
+  @@index([runId, level])
+}

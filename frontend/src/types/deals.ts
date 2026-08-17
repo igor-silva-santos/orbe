@@ -1,6 +1,4 @@
-import type { Jogo } from '@/types';
-
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe' | 'itch' | 'itad';
 
 export type DealKind = 'free' | 'sale';
 
@@ -29,6 +27,8 @@ export type UnifiedDeal = {
   storeUrl: string;
   originalPrice?: string | null;
   salePrice?: string | null;
+  originalPriceValue?: number | null;
+  salePriceValue?: number | null;
   discountPercent?: number | null;
   currency?: string | null;
   startsAt?: string | null;
@@ -39,19 +39,57 @@ export type UnifiedDeal = {
   dealRating?: number | null;
   status?: string | null;
   freeTier?: FreeTier | null;
+  priceConverted?: boolean | null;
+  originalSalePriceUsd?: string | null;
+  orbeGameId?: number | null;
+  orbeUrl?: string | null;
 };
+
+export type DealSourceStatus = { ok: boolean; count: number; error?: string };
 
 export type DealsOverview = {
   fetchedAt: string;
+  usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   gratis: UnifiedDeal[];
   gratisTemporarios: UnifiedDeal[];
   gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
-  steamCatalog?: Jogo[];
+  catalogoSteam: UnifiedDeal[];
   sources: {
-    epic: { ok: boolean; count: number; error?: string };
-    gamerpower: { ok: boolean; count: number; error?: string };
-    cheapshark: { ok: boolean; count: number; error?: string };
-    steam: { ok: boolean; count: number; error?: string };
+    epic: DealSourceStatus;
+    gamerpower: DealSourceStatus;
+    cheapshark: DealSourceStatus;
+    steam: DealSourceStatus;
+    orbe: DealSourceStatus;
+    itch: DealSourceStatus;
+    itad: DealSourceStatus;
   };
+  sourcesHealth?: 'ok' | 'degraded' | 'critical';
+};
+
+export type DealsGratisResponse = {
+  fetchedAt: string;
+  usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
+  gratisTemporarios: UnifiedDeal[];
+  gratisPermanentes: UnifiedDeal[];
+  deals: UnifiedDeal[];
+  sources: DealsOverview['sources'];
+  sourcesHealth?: DealsOverview['sourcesHealth'];
+};
+
+export type DealsPromocoesResponse = {
+  fetchedAt: string;
+  usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
+  deals: UnifiedDeal[];
+  promocoes: UnifiedDeal[];
+  catalogoSteam: UnifiedDeal[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+  sources: DealsOverview['sources'];
+  sourcesHealth?: DealsOverview['sourcesHealth'];
 };

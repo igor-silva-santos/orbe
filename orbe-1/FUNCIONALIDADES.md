@@ -42,7 +42,8 @@ O usuário navega por carrosséis temporais, filtra por categoria, pesquisa tít
 | `/series` | Listagem com filtros | ✅ |
 | `/animes` | Listagem (gênero, ano, formato, fonte, status) | ✅ |
 | `/jogos` | Listagem (gênero, plataforma, modo, ano, mês) | ✅ |
-| `/jogos-em-alta` | Destaques Steam, promoções, categorias e plataformas | ✅ |
+| `/jogos-em-alta` | Redireciona para `/promocoes?tab=em-alta` | ✅ |
+| `/promocoes` | Três abas: grátis, promoções ao vivo (Epic, Steam, GamerPower, CheapShark, Ubisoft) + catálogo Orbe; aba **Em Alta** (ex-jogos-em-alta) | ✅ |
 | `/premios` | Vencedores e indicados por prêmio e ano | ✅ |
 | `/eventos` | Showcases e eventos de games com jogos anunciados | ✅ |
 | `/hoje` | Cinema + streaming + jogos do dia | ✅ |
@@ -138,6 +139,23 @@ O usuário navega por carrosséis temporais, filtra por categoria, pesquisa tít
 | Filtros de prêmio | `/api/premios/filtros` |
 | Eventos de games | E3, State of Play etc.; jogos anunciados por evento |
 | Resumo de eventos | `/api/eventos/resumo` |
+
+### 3.6.1 Promoções de jogos (`/promocoes`)
+
+Agrega grátis e promoções de várias fontes com cache Redis (`api/src/deals/`).
+
+| Fonte | Grátis | Promoções pagas | Notas |
+|-------|--------|-----------------|-------|
+| **Epic Games** | `freeGamesPromotions` (REST, preços BRL) | Mesmo feed — só jogos no carrossel promocional (~poucos títulos) | GraphQL e `store.epicgames.com/browse` bloqueados por Cloudflare no servidor |
+| **CheapShark store 25** | Sim | **Fonte principal Epic pagas** — paginação (`EPIC_SALE_MAX_PAGES`, padrão 5 páginas × 60) | USD; dedupe com Epic REST por `steamAppId` ou título |
+| **CheapShark geral** | Sim | Steam, GOG, Ubisoft etc. | `CHEAPSHARK` páginas configuráveis no serviço |
+| **Steam API** | Sim | Sim | Trending + sales |
+| **GamerPower** | Sim (giveaways) | — | Multi-plataforma |
+| **itch.io** | RSS oficial (`price-free.xml`) + fallback JSON | RSS (`on-sale.xml`) + fallback JSON | Preços USD; conversão via câmbio |
+| **IsThereAnyDeal** | — | **Epic (shop 16) + EA (shop 52)** em BRL | Requer `ITAD_API_KEY`; paginação `ITAD_MAX_PAGES` |
+| **Catálogo Orbe** | — | Steam com capa IGDB e link interno | `catalogoSteam` na API |
+
+Dedupe (`dedupeDeals`): cruza fontes por `steamAppId`, slug Epic (`store.epicgames.com/p/...`) e título normalizado — evita perder ofertas CheapShark quando Epic REST repete o mesmo jogo.
 
 ### 3.7 “O que tem pra hoje”
 
@@ -253,6 +271,7 @@ Prefixo base: `/api` (exceto aliases legados de auth na raiz).
 | Séries | Equivalentes em `/series/*` |
 | Animes | `/animes/*`, `/animes/:id/next-episode`, `/animes/weekly-schedule`, `/animes/by-season`, `/animes/by-year` |
 | Jogos | `/jogos/*`, `/jogos/steam/trending`, `/jogos/steam/sales`, `/jogos/em-alta` |
+| Promoções | `GET /deals`, `/deals/gratis`, `/deals/promocoes?page=&limit=`, `/deals/epic`, `/deals/gamerpower`, `/deals/cheapshark` |
 | Busca | `GET /pesquisa`, `/search` |
 | Prêmios | `GET /premios`, `/premios/filtros` |
 | Eventos | `GET /eventos`, `/eventos/resumo` |

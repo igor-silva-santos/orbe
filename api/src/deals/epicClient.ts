@@ -2,8 +2,12 @@ import axios from 'axios';
 import { logger } from '../logger';
 import type { DealKind, UnifiedDeal } from './types';
 
+const EPIC_STATIC_BASE = 'https://store-site-backend-static.ak.epicgames.com';
+const EPIC_STATIC_IPV4_BASE = 'https://store-site-backend-static-ipv4.ak.epicgames.com';
+const EPIC_CONTENT_BASE = 'https://store-content.ak.epicgames.com/api';
+
 const epicStoreApi = axios.create({
-  baseURL: 'https://store-site-backend-static.ak.epicgames.com',
+  baseURL: EPIC_STATIC_BASE,
   timeout: 20000,
 });
 
@@ -45,6 +49,53 @@ type EpicCatalogElement = {
     };
   };
 };
+
+type EpicFeedCandidate = {
+  label: string;
+  baseURL: string;
+  path: string;
+  params?: Record<string, string | number | boolean>;
+};
+
+/**
+ * Endpoints REST públicos testados em servidor (sem GraphQL / sem Cloudflare browse).
+ * Funcionam: freeGamesPromotions (static + ipv4).
+ * 404: browse/content paths em static e store-content.
+ * 401: catalog-public-service-prod.
+ * 403: store.epicgames.com/browse (Cloudflare).
+ */
+const EPIC_SALE_FEED_CANDIDATES: EpicFeedCandidate[] = [
+  {
+    label: 'content-discount-edition-base',
+    baseURL: EPIC_CONTENT_BASE,
+    path: '/content/v2/BR/pt-BR/browse/discount-and-free-games-edition-base',
+    params: { count: 40, start: 0, sortBy: 'currentPrice', sortDirection: 'asc' },
+  },
+  {
+    label: 'static-discount-edition-base',
+    baseURL: EPIC_STATIC_BASE,
+    path: '/content/v2/BR/pt-BR/browse/discount-and-free-games-edition-base',
+    params: { count: 40, start: 0 },
+  },
+  {
+    label: 'static-ipv4-discount-edition-base',
+    baseURL: EPIC_STATIC_IPV4_BASE,
+    path: '/content/v2/BR/pt-BR/browse/discount-and-free-games-edition-base',
+    params: { count: 40, start: 0 },
+  },
+  {
+    label: 'static-browse-discounted',
+    baseURL: EPIC_STATIC_BASE,
+    path: '/browse',
+    params: {
+      locale: 'pt-BR',
+      country: 'BR',
+      category: 'Game/discounted/edition/base',
+      count: 40,
+      start: 0,
+    },
+  },
+];
 
 const EPIC_INTERNAL_SLUG_RE = /^[0-9a-f]{32}$/i;
 
@@ -89,6 +140,81 @@ function epicStoreUrl(element: EpicCatalogElement): string {
     return `https://store.epicgames.com/pt-BR/p/${slug}`;
   }
   return 'https://store.epicgames.com/pt-BR/free-games';
+}
+
+function extractCatalogElements(data: unknown): EpicCatalogElement[] {
+  if (!data || typeof data !== 'object') return [];
+  const root = data as Record<string, unknown>;
+
+  const catalog = root.data as Record<string, unknown> | undefined;
+  const searchStore = catalog?.Catalog as Record<string, unknown> | undefined;
+  const nestedSearch = searchStore?.searchStore as { elements?: EpicCatalogElement[] } | undefined;
+  if (nestedSearch?.elements?.length) return nestedSearch.elements;
+
+  const directSearch = catalog?.searchStore as { elements?: EpicCatalogElement[] } | undefined;
+  if (directSearch?.elements?.length) return directSearch.elements;
+
+  const content = root.content as { items?: EpicCatalogElement[] } | undefined;
+  if (content?.items?.length) return content.items;
+
+  const items = root.items as EpicCatalogElement[] | undefined;
+  if (items?.length) return items;
+
+  return [];
+}
+
+async function fetchEpicCatalogFromCandidate(candidate: EpicFeedCandidate): Promise<EpicCatalogElement[]> {
+  const response = await axios.get(candidate.path, {
+    baseURL: candidate.baseURL,
+    timeout: 20000,
+    params: candidate.params,
+    validateStatus: (status) => status < 500,
+  });
+
+  if (response.status !== 200) {
+    logger.debug(`Epic feed ${candidate.label}: HTTP ${response.status}`);
+    return [];
+  }
+
+  const elements = extractCatalogElements(response.data);
+  if (elements.length === 0) {
+    logger.debug(`Epic feed ${candidate.label}: resposta vazia`);
+    return [];
+  }
+
+  logger.info(`Epic feed ${candidate.label}: ${elements.length} elementos`);
+  return elements;
+}
+
+async function fetchEpicPromotionsFeed(): Promise<EpicCatalogElement[]> {
+  const response = await epicStoreApi.get('/freeGamesPromotions', {
+    params: { locale: 'pt-BR', country: 'BR', allowUnpublished: true },
+  });
+  return extractCatalogElements(response.data);
+}
+
+/** Tenta feeds browse/sale REST; fallback em freeGamesPromotions (feed promocional limitado). */
+export async function fetchEpicCatalogElements(): Promise<EpicCatalogElement[]> {
+  for (const candidate of EPIC_SALE_FEED_CANDIDATES) {
+    try {
+      const elements = await fetchEpicCatalogFromCandidate(candidate);
+      if (elements.length > 0) return elements;
+    } catch (error: any) {
+      logger.debug(`Epic feed ${candidate.label} falhou: ${error.message}`);
+    }
+  }
+
+  try {
+    const elements = await fetchEpicPromotionsFeed();
+    if (elements.length > 0) {
+      logger.info(`Epic feed freeGamesPromotions: ${elements.length} elementos (fallback)`);
+      return elements;
+    }
+  } catch (error: any) {
+    logger.warn(`Epic freeGamesPromotions falhou: ${error.message}`);
+  }
+
+  return [];
 }
 
 function collectPromotionOffers(element: EpicCatalogElement): EpicPromotionOffer[] {
@@ -137,6 +263,8 @@ function mapEpicDeal(element: EpicCatalogElement, offer: EpicPromotionOffer, kin
     storeUrl: epicStoreUrl(element),
     originalPrice: price?.fmtPrice?.originalPrice ?? null,
     salePrice: price?.fmtPrice?.discountPrice ?? (kind === 'free' ? 'Grátis' : null),
+    originalPriceValue: price?.originalPrice != null ? price.originalPrice / 100 : null,
+    salePriceValue: price?.discountPrice != null ? price.discountPrice / 100 : null,
     discountPercent,
     currency: price?.currencyCode ?? 'BRL',
     startsAt: offer.startDate ?? null,
@@ -148,12 +276,7 @@ function mapEpicDeal(element: EpicCatalogElement, offer: EpicPromotionOffer, kin
 
 export async function fetchEpicFreeGames(): Promise<UnifiedDeal[]> {
   try {
-    const response = await epicStoreApi.get('/freeGamesPromotions', {
-      params: { locale: 'pt-BR', country: 'BR', allowUnpublished: true },
-    });
-    const elements: EpicCatalogElement[] =
-      response.data?.data?.Catalog?.searchStore?.elements ?? [];
-
+    const elements = await fetchEpicCatalogElements();
     const deals: UnifiedDeal[] = [];
     const seen = new Set<string>();
 
@@ -170,6 +293,34 @@ export async function fetchEpicFreeGames(): Promise<UnifiedDeal[]> {
     return deals;
   } catch (error: any) {
     logger.warn(`Epic free games falhou: ${error.message}`);
+    return [];
+  }
+}
+
+/** Promoções pagas Epic com desconto ativo. Cobertura REST limitada — CheapShark store 25 é a fonte principal. */
+export async function fetchEpicSaleGames(): Promise<UnifiedDeal[]> {
+  try {
+    const elements = await fetchEpicCatalogElements();
+    const deals: UnifiedDeal[] = [];
+    const seen = new Set<string>();
+
+    for (const element of elements) {
+      const price = element.price?.totalPrice;
+      const original = price?.originalPrice ?? 0;
+      const discount = price?.discountPrice ?? 0;
+      if (original <= 0 || discount <= 0 || discount >= original) continue;
+
+      const offers = collectPromotionOffers(element).filter(isActivePromotion);
+      const offer = offers[0] ?? { startDate: undefined, endDate: undefined };
+      const deal = mapEpicDeal(element, offer, 'sale');
+      if (seen.has(deal.id)) continue;
+      seen.add(deal.id);
+      deals.push(deal);
+    }
+
+    return deals;
+  } catch (error: any) {
+    logger.warn(`Epic sale games falhou: ${error.message}`);
     return [];
   }
 }

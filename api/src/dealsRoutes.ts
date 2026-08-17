@@ -5,6 +5,8 @@ import { fetchCheapSharkStores } from './deals/cheapsharkClient';
 import {
   DEALS_SOFT_TTL_SECONDS,
   getDealsOverview,
+  paginateDeals,
+  sourcesHealth,
 } from './deals/dealsService';
 import type { DealsOverview, UnifiedDeal } from './deals/types';
 
@@ -45,11 +47,38 @@ function dealsJsonMiddleware(_req: Request, res: Response, next: NextFunction): 
 
 router.use(dealsJsonMiddleware);
 
-router.get('/deals', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (_req, res) => {
+router.get('/deals', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (req, res) => {
   try {
     const overview = await getDealsOverview();
     setDealsCacheHeaders(res, overview.fetchedAt);
-    res.json(stripMeta(overview));
+
+    const sectionsParam = typeof req.query.sections === 'string' ? req.query.sections : 'all';
+    const sections = new Set(sectionsParam.split(',').map((s) => s.trim().toLowerCase()));
+
+    if (sectionsParam === 'all' || sections.has('all')) {
+      res.json(stripMeta(overview));
+      return;
+    }
+
+    const partial: Partial<DealsOverview> & { fetchedAt: string; sourcesHealth: string } = {
+      fetchedAt: overview.fetchedAt,
+      usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
+      sources: overview.sources,
+      sourcesHealth: sourcesHealth(overview),
+    };
+
+    if (sections.has('gratis')) {
+      partial.gratis = overview.gratis;
+      partial.gratisTemporarios = overview.gratisTemporarios;
+      partial.gratisPermanentes = overview.gratisPermanentes;
+    }
+    if (sections.has('promocoes')) {
+      partial.promocoes = overview.promocoes;
+      partial.catalogoSteam = overview.catalogoSteam;
+    }
+
+    res.json(partial);
   } catch (error) {
     logger.error(`Erro ao buscar deals agregados: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar promoções e jogos grátis.' });
@@ -60,18 +89,46 @@ router.get('/deals/gratis', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (_r
   try {
     const overview = await getDealsOverview();
     setDealsCacheHeaders(res, overview.fetchedAt);
-    res.json({ fetchedAt: overview.fetchedAt, deals: overview.gratis });
+    res.json({
+      fetchedAt: overview.fetchedAt,
+      usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
+      gratisTemporarios: overview.gratisTemporarios,
+      gratisPermanentes: overview.gratisPermanentes,
+      deals: overview.gratis,
+      sources: overview.sources,
+      sourcesHealth: sourcesHealth(overview),
+    });
   } catch (error) {
     logger.error(`Erro ao buscar jogos grátis: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos grátis.' });
   }
 });
 
-router.get('/deals/promocoes', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (_req, res) => {
+router.get('/deals/promocoes', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (req, res) => {
   try {
     const overview = await getDealsOverview();
     setDealsCacheHeaders(res, overview.fetchedAt);
-    res.json({ fetchedAt: overview.fetchedAt, deals: overview.promocoes });
+
+    const page = Number.parseInt(String(req.query.page ?? '1'), 10);
+    const limit = Number.parseInt(String(req.query.limit ?? '48'), 10);
+
+    const pagination = paginateDeals(overview.promocoes, page, limit);
+
+    res.json({
+      fetchedAt: overview.fetchedAt,
+      usdBrlRate: overview.usdBrlRate,
+      usdBrlRateFetchedAt: overview.usdBrlRateFetchedAt,
+      deals: pagination.items,
+      promocoes: pagination.items,
+      catalogoSteam: overview.catalogoSteam ?? [],
+      total: pagination.total,
+      page: pagination.page,
+      limit: pagination.limit,
+      hasMore: pagination.hasMore,
+      sources: overview.sources,
+      sourcesHealth: sourcesHealth(overview),
+    });
   } catch (error) {
     logger.error(`Erro ao buscar promoções: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar promoções.' });
@@ -122,7 +179,15 @@ router.get('/deals/cheapshark', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async
     const pool = freeOnly ? overview.gratis : [...overview.gratis, ...overview.promocoes];
     let deals = pool.filter((d) => d.source === 'cheapshark');
     if (storeId) {
-      const storeMap: Record<string, string> = { '1': 'steam', '7': 'gog', '25': 'epic' };
+      const storeMap: Record<string, string> = {
+        '1': 'steam',
+        '3': 'other',
+        '7': 'gog',
+        '11': 'other',
+        '13': 'ubisoft',
+        '15': 'other',
+        '25': 'epic',
+      };
       const platform = storeMap[storeId];
       if (platform) {
         deals = deals.filter((d) => d.platform === platform);
