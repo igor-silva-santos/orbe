@@ -12,6 +12,7 @@ import {
   clampCarouselOpenIndex,
   filterMidiaForCarouselTimeline,
   isCarouselBootstrapReady,
+  formatCarouselMonthTitleShort,
 } from './carousel-utils';
 import type { Midia } from '@/types';
 
@@ -247,6 +248,13 @@ describe('clampCarouselOpenIndex', () => {
 
   it('falls back to open index when out of range', () => {
     assert.equal(clampCarouselOpenIndex(items, 99), resolveCarouselOpenIndex(items));
+  });
+});
+
+describe('formatCarouselMonthTitleShort', () => {
+  it('omite o prefixo Lançamentos de para cabeçalhos compactos', () => {
+    const short = formatCarouselMonthTitleShort(new Date(2026, 8, 1));
+    assert.equal(short, 'Setembro de 2026');
   });
 });
 
