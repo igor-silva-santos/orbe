@@ -82,7 +82,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
                 ▶ Começar agora
               </button>
               <Link
-                href="/jogos-em-alta"
+                href="/promocoes?tab=em-alta"
                 className="border border-border rounded-lg px-6 py-3 font-medium inline-flex items-center"
               >
                 🎮 Ver jogos em alta

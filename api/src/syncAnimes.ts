@@ -1,6 +1,7 @@
 import './loadEnv';
 
 import { logger } from './logger';
+import * as syncLog from './syncLogger';
 import { anilistApi } from './clients';
 import { prisma } from './clients';
 import { isAnimeRelevantForSeasonalSync } from './qualityFilters';
@@ -141,12 +142,30 @@ async function fetchSeasonAnimeIds(year: number, seasons: string[]): Promise<Map
     return seasonAnimeIds;
 }
 
-async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number> }> {
+async function processAnimeBatch(
+    animeIds: number[],
+    batchPeriod?: { year?: number },
+): Promise<{ successCount: number, errorCount: number, skippedCount: number, skipReasons: Record<string, number> }> {
     let successCount = 0, errorCount = 0, skippedCount = 0;
     const skipReasons: Record<string, number> = {};
-    const bumpSkip = (reason: string) => {
+    const bumpSkip = (
+        reason: string,
+        ctx: { id?: number; title?: string; year?: number | null; month?: number | null } = {},
+    ) => {
         skippedCount++;
         skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+        syncLog.logSkip(
+            {
+                phase: 'animes',
+                mediaType: 'animes',
+                itemId: ctx.id,
+                itemTitle: ctx.title,
+                year: ctx.year ?? batchPeriod?.year,
+                month: ctx.month,
+                reason,
+            },
+            `Anime [${ctx.id ?? '?'}] "${ctx.title ?? '?'}" pulado: ${reason}.`,
+        );
     };
 
     const detailQuery = `
@@ -218,12 +237,15 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
             const anime = response.data.data.Media;
 
             if (!anime) {
-                bumpSkip('not_found');
+                bumpSkip('not_found', { id, year: batchPeriod?.year });
                 continue;
             }
 
+            const eventYear = anime.startDate?.year ?? batchPeriod?.year;
+            const eventMonth = anime.startDate?.month;
+
             if (!isAnimeRelevantForSeasonalSync(anime)) {
-                bumpSkip('quality_filter');
+                bumpSkip('quality_filter', { id, title: anime.title?.romaji, year: eventYear, month: eventMonth });
                 logger.info(
                   `⏭️ Anime [${id}] "${anime.title?.romaji}" ignorado: critérios de sync ` +
                   `(score=${anime.averageScore ?? 0}, pop=${anime.popularity ?? 0}, status=${anime.status ?? '—'}).`
@@ -415,18 +437,32 @@ async function processAnimeBatch(animeIds: number[]): Promise<{ successCount: nu
             }
 
             successCount++;
-            logger.info(`✅ Anime [${id}] "${anime.title.romaji}" sincronizado.`);
+            const successMessage = `✅ Anime [${id}] "${anime.title.romaji}" sincronizado.`;
+            logger.info(successMessage);
+            syncLog.logSync(
+                { phase: 'animes', mediaType: 'animes', itemId: id, itemTitle: anime.title.romaji, year: eventYear, month: eventMonth },
+                successMessage,
+            );
 
         } catch (error: any) {
             errorCount++;
             const errorMessage = error.response ? JSON.stringify(error.response.data) : error.message;
             logger.error(`❌ Erro ao processar o anime ID ${id}: ${errorMessage}`);
+            syncLog.logSyncError(
+                { phase: 'animes', mediaType: 'animes', itemId: id, year: batchPeriod?.year },
+                `Erro ao processar o anime ID ${id}: ${errorMessage}`,
+            );
         } finally {
             await delay(700);
         }
     }
 
-    logger.info(`--- Resumo do Lote (Animes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`);
+    const summaryMessage = `--- Resumo do Lote (Animes) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`;
+    logger.info(summaryMessage);
+    syncLog.logCheckpoint(
+        { phase: 'animes', mediaType: 'animes', year: batchPeriod?.year },
+        summaryMessage,
+    );
     return { successCount, errorCount, skippedCount, skipReasons };
 }
 
@@ -464,7 +500,7 @@ export async function syncAnimes(year: number, seasons: string[], options?: Sync
         const batch = animeIds.slice(i, i + batchSize);
         const translatedSeason = seasonTranslations[season] || season;
         logger.info(`Processando lote de animes: ${i + 1}-${Math.min(i + batchSize, animeIds.length)} de ${animeIds.length} da temporada ${translatedSeason} de ${year}`);
-        const batchResult = await processAnimeBatch(batch);
+        const batchResult = await processAnimeBatch(batch, { year });
         await addSkipReasons(prisma, 'animes', batchResult.skipReasons);
         if (options?.onBatchComplete) {
           await options.onBatchComplete({

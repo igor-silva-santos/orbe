@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe';
 
 export type DealKind = 'free' | 'sale';
 
@@ -27,6 +27,9 @@ export type UnifiedDeal = {
   storeUrl: string;
   originalPrice?: string | null;
   salePrice?: string | null;
+  /** Valor numérico para ordenação (unidade da moeda indicada em currency). */
+  originalPriceValue?: number | null;
+  salePriceValue?: number | null;
   discountPercent?: number | null;
   currency?: string | null;
   startsAt?: string | null;
@@ -37,10 +40,22 @@ export type UnifiedDeal = {
   dealRating?: number | null;
   status?: string | null;
   freeTier?: FreeTier | null;
+  /** Preço convertido de USD para BRL (aproximado). */
+  priceConverted?: boolean | null;
+  originalSalePriceUsd?: string | null;
+  /** ID IGDB quando o jogo existe no catálogo Orbe. */
+  orbeGameId?: number | null;
+  /** Caminho interno para a página do jogo no site. */
+  orbeUrl?: string | null;
 };
+
+export type DealSourceStatus = { ok: boolean; count: number; error?: string };
 
 export type DealsOverview = {
   fetchedAt: string;
+  /** Taxa USD→BRL usada na conversão de preços internacionais. */
+  usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   /** @deprecated Use gratisTemporarios + gratisPermanentes */
   gratis: UnifiedDeal[];
   /** Jogos que estão de graça — promoção 100% por tempo limitado */
@@ -48,9 +63,13 @@ export type DealsOverview = {
   /** Jogos que são de graça — F2P / preço base zero */
   gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
+  /** Promoções Steam do catálogo Orbe (capas IGDB, link interno). */
+  catalogoSteam: UnifiedDeal[];
   sources: {
-    epic: { ok: boolean; count: number; error?: string };
-    gamerpower: { ok: boolean; count: number; error?: string };
-    cheapshark: { ok: boolean; count: number; error?: string };
+    epic: DealSourceStatus;
+    gamerpower: DealSourceStatus;
+    cheapshark: DealSourceStatus;
+    steam: DealSourceStatus;
+    orbe: DealSourceStatus;
   };
 };

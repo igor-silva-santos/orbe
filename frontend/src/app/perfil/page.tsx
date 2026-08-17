@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Mail, Calendar, Edit2, Shield, Settings, Download } from 'lucide-react';
+import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
@@ -108,16 +108,26 @@ export default function ProfilePage() {
               Configurações
             </button>
             {user.role === 'admin' && (
-              <button
-                type="button"
-                onClick={handleDownloadSyncLogs}
-                disabled={downloadingLogs}
-                className="flex items-center w-full px-4 py-2 bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-500/20 transition-colors text-sm font-medium disabled:opacity-50"
-                title="Temporário — investigação de sync jun–dez"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {downloadingLogs ? 'Baixando log...' : 'Baixar log de sync'}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin/sync-logs')}
+                  className="flex items-center w-full px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors text-sm font-medium"
+                >
+                  <ScrollText className="mr-2 h-4 w-4" />
+                  Logs de sincronização
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadSyncLogs}
+                  disabled={downloadingLogs}
+                  className="flex items-center w-full px-4 py-2 bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-500/20 transition-colors text-sm font-medium disabled:opacity-50"
+                  title="Temporário — investigação de sync jun–dez"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  {downloadingLogs ? 'Baixando log...' : 'Baixar log de sync'}
+                </button>
+              </>
             )}
           </div>
         </div>

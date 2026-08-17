@@ -2,6 +2,18 @@ import PromocoesClient from './PromocoesClient';
 
 export const revalidate = 600;
 
-export default function PromocoesPage() {
-  return <PromocoesClient />;
+export type PromocoesTab = 'gratis' | 'promocoes' | 'em-alta';
+
+type PromocoesPageProps = {
+  searchParams?: { tab?: string };
+};
+
+function resolveInitialTab(tab?: string): PromocoesTab {
+  if (tab === 'promocoes') return 'promocoes';
+  if (tab === 'em-alta') return 'em-alta';
+  return 'gratis';
+}
+
+export default function PromocoesPage({ searchParams }: PromocoesPageProps) {
+  return <PromocoesClient initialTab={resolveInitialTab(searchParams?.tab)} />;
 }
