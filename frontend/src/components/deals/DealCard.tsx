@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
 import type { UnifiedDeal } from '@/types/deals';
@@ -21,6 +22,7 @@ const SOURCE_LABELS: Record<string, string> = {
   gamerpower: 'GamerPower',
   cheapshark: 'CheapShark',
   steam: 'Steam',
+  orbe: 'Catálogo Orbe',
 };
 
 function steamFallbackImage(appId: number): string {
@@ -155,6 +157,16 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
 
         {endsLabel && (
           <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Acaba em {endsLabel}</p>
+        )}
+
+        {deal.orbeUrl && (
+          <Link
+            href={deal.orbeUrl}
+            onClick={(event) => event.stopPropagation()}
+            className="text-[10px] font-medium text-primary hover:underline"
+          >
+            Ver no Orbe →
+          </Link>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">

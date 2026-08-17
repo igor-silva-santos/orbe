@@ -56,8 +56,14 @@ function parseWorthValue(worth?: string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function isGameGiveaway(item: GamerPowerGiveaway): boolean {
+  const type = (item.type ?? 'game').trim().toLowerCase();
+  return type === 'game' || type === 'games';
+}
+
 function mapGamerPowerDeal(item: GamerPowerGiveaway): UnifiedDeal | null {
   if (!item.id || !item.title) return null;
+  if (!isGameGiveaway(item)) return null;
   const platforms = (item.platforms ?? 'PC')
     .split(',')
     .map((p) => p.trim())
@@ -93,6 +99,7 @@ export async function fetchGamerPowerGiveaways(options?: {
   try {
     const response = await gamerPowerApi.get('/giveaways', {
       params: {
+        type: 'game',
         ...(options?.platform ? { platform: options.platform } : {}),
         ...(options?.type ? { type: options.type } : {}),
       },

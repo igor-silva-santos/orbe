@@ -45,7 +45,14 @@ function mapCheapSharkPlatform(storeId?: string): DealPlatform {
   return STORE_PLATFORM_MAP[storeId] ?? 'other';
 }
 
-function cheapSharkStoreUrl(storeId: string | undefined, dealId: string): string {
+function resolveStoreUrl(
+  storeId: string | undefined,
+  dealId: string,
+  steamAppId: number | null,
+): string {
+  if (steamAppId != null && steamAppId > 0) {
+    return `https://store.steampowered.com/app/${steamAppId}`;
+  }
   return `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(dealId)}`;
 }
 
@@ -72,7 +79,7 @@ function mapCheapSharkDeal(item: CheapSharkDeal): UnifiedDeal | null {
     imageUrl: resolveDealImageUrl(item.thumb ?? null, steamAppId),
     platform: mapCheapSharkPlatform(item.storeID),
     platforms: [storeName],
-    storeUrl: cheapSharkStoreUrl(item.storeID, item.dealID),
+    storeUrl: resolveStoreUrl(item.storeID, item.dealID, steamAppId),
     originalPrice: item.normalPrice ? `$${item.normalPrice}` : null,
     salePrice: item.salePrice ? `$${item.salePrice}` : null,
     originalPriceValue: parsePriceNumber(item.normalPrice ? `$${item.normalPrice}` : null),
@@ -91,12 +98,14 @@ export async function fetchCheapSharkDeals(options?: {
   freeOnly?: boolean;
   permanentFreeOnly?: boolean;
   pageSize?: number;
+  pageNumber?: number;
 }): Promise<UnifiedDeal[]> {
   try {
     const pageSize = options?.pageSize ?? 60;
     const params: Record<string, string | number> = {
       onSale: 1,
       pageSize,
+      pageNumber: options?.pageNumber ?? 0,
       sortBy: options?.freeOnly || options?.permanentFreeOnly ? 'Savings' : 'DealRating',
     };
     if (options?.storeId) params.storeID = options.storeId;
@@ -116,6 +125,32 @@ export async function fetchCheapSharkDeals(options?: {
     logger.warn(`CheapShark deals falhou: ${error.message}`);
     return [];
   }
+}
+
+/** Busca várias páginas do CheapShark (paginação real na API externa). */
+export async function fetchCheapSharkDealsPaged(options?: {
+  storeId?: string;
+  freeOnly?: boolean;
+  permanentFreeOnly?: boolean;
+  pageSize?: number;
+  maxPages?: number;
+}): Promise<UnifiedDeal[]> {
+  const pageSize = options?.pageSize ?? 60;
+  const maxPages = options?.maxPages ?? 3;
+  const all: UnifiedDeal[] = [];
+
+  for (let page = 0; page < maxPages; page++) {
+    const batch = await fetchCheapSharkDeals({
+      ...options,
+      pageSize,
+      pageNumber: page,
+    });
+    if (batch.length === 0) break;
+    all.push(...batch);
+    if (batch.length < pageSize) break;
+  }
+
+  return all;
 }
 
 export async function fetchCheapSharkStores(): Promise<{ id: string; name: string }[]> {

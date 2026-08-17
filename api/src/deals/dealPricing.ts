@@ -14,3 +14,9 @@ export function parsePriceNumber(value: string | null | undefined): number | nul
 export function formatBrlFromCents(cents: number): string {
   return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 }
+
+/** Taxa USD→BRL fallback (configurável via env). */
+export function getUsdBrlRate(): number {
+  const raw = Number(process.env.DEALS_USD_BRL_RATE ?? 5.5);
+  return Number.isFinite(raw) && raw > 0 ? raw : 5.5;
+}

@@ -12,6 +12,7 @@ import {
   Clock,
   Search,
   TrendingUp,
+  AlertTriangle,
 } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
@@ -25,10 +26,16 @@ import {
   filterBySearch,
   groupByPlatform,
 } from '@/lib/dealFilters';
-import type { DealsOverview, DealPlatform, UnifiedDeal } from '@/types/deals';
+import type {
+  DealsGratisResponse,
+  DealsOverview,
+  DealsPromocoesResponse,
+  DealPlatform,
+  UnifiedDeal,
+} from '@/types/deals';
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 48;
 
 function formatFetchedAt(iso: string): string {
   const date = new Date(iso);
@@ -51,44 +58,18 @@ function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorit
   );
 }
 
-function LoadMoreButton({
-  visibleCount,
-  totalCount,
-  onLoadMore,
-}: {
-  visibleCount: number;
-  totalCount: number;
-  onLoadMore: () => void;
-}) {
-  if (visibleCount >= totalCount) return null;
-  return (
-    <div className="flex justify-center pt-4">
-      <button
-        type="button"
-        onClick={onLoadMore}
-        className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors"
-      >
-        Carregar mais ({Math.min(PAGE_SIZE, totalCount - visibleCount)} de {totalCount - visibleCount} restantes)
-      </button>
-    </div>
-  );
-}
-
 function DealsByPlatform({
   deals,
   platformFilter,
-  visibleCount,
 }: {
   deals: UnifiedDeal[];
   platformFilter: DealPlatform | 'all';
-  visibleCount: number;
 }) {
   const filtered = useMemo(
     () => filterByPlatform(deals, platformFilter),
     [deals, platformFilter],
   );
-  const visible = filtered.slice(0, visibleCount);
-  const byPlatform = useMemo(() => groupByPlatform(visible), [visible]);
+  const byPlatform = useMemo(() => groupByPlatform(filtered), [filtered]);
 
   if (filtered.length === 0) {
     return (
@@ -99,7 +80,7 @@ function DealsByPlatform({
   }
 
   if (platformFilter !== 'all') {
-    return <DealsGrid deals={visible} />;
+    return <DealsGrid deals={filtered} />;
   }
 
   return (
@@ -189,7 +170,48 @@ function SearchInput({ value, onChange }: { value: string; onChange: (value: str
   );
 }
 
-function SourceFooter({ data }: { data: DealsOverview }) {
+function SourcesAlert({
+  sources,
+  health,
+}: {
+  sources?: DealsOverview['sources'];
+  health?: DealsOverview['sourcesHealth'];
+}) {
+  if (!sources || health === 'ok' || !health) return null;
+
+  const failed = Object.entries(sources).filter(([, status]) => !status.ok);
+  if (failed.length === 0) return null;
+
+  return (
+    <div
+      className={`rounded-lg border p-4 flex gap-3 ${
+        health === 'critical'
+          ? 'border-destructive/40 bg-destructive/10'
+          : 'border-amber-500/40 bg-amber-500/10'
+      }`}
+    >
+      <AlertTriangle
+        className={`h-5 w-5 shrink-0 ${health === 'critical' ? 'text-destructive' : 'text-amber-600'}`}
+      />
+      <div className="text-sm">
+        <p className="font-medium orbe-text-primary">
+          {health === 'critical'
+            ? 'A maioria das fontes está indisponível'
+            : 'Algumas fontes estão indisponíveis'}
+        </p>
+        <p className="text-muted-foreground text-xs mt-1">
+          Falha em: {failed.map(([name]) => name).join(', ')}. A lista pode estar incompleta — tente atualizar em alguns minutos.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SourceFooter({
+  data,
+}: {
+  data: Pick<DealsOverview, 'sources' | 'usdBrlRate'>;
+}) {
   return (
     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
       <span>Fontes:</span>
@@ -205,29 +227,12 @@ function SourceFooter({ data }: { data: DealsOverview }) {
       <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
         Steam ({data.sources.steam?.count ?? 0})
       </span>
-      <span className="text-muted-foreground/80">· Preços USD convertidos com câmbio aproximado</span>
-    </div>
-  );
-}
-
-function JogosEmAltaBanner() {
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div className="flex items-start gap-3">
-        <TrendingUp className="h-5 w-5 text-[var(--orbe-accent-2)] shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium orbe-text-primary">Promoções do catálogo Orbe</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Veja também descontos Steam dos jogos do nosso catálogo, com capas IGDB e notas da comunidade.
-          </p>
-        </div>
-      </div>
-      <Link
-        href="/jogos-em-alta"
-        className="inline-flex items-center justify-center rounded-lg border border-primary/40 px-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors shrink-0"
-      >
-        Abrir Jogos em Alta
-      </Link>
+      <span className={data.sources.orbe?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Orbe ({data.sources.orbe?.count ?? 0})
+      </span>
+      {data.usdBrlRate != null && (
+        <span className="text-muted-foreground/80">· USD/BRL: {data.usdBrlRate.toFixed(2)}</span>
+      )}
     </div>
   );
 }
@@ -237,63 +242,107 @@ type PromocoesClientProps = {
 };
 
 export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClientProps) {
-  const [data, setData] = useState<DealsOverview | null>(null);
+  const [gratisData, setGratisData] = useState<DealsGratisResponse | null>(null);
+  const [promoData, setPromoData] = useState<DealsPromocoesResponse | null>(null);
+  const [promoDeals, setPromoDeals] = useState<UnifiedDeal[]>([]);
+  const [catalogoSteam, setCatalogoSteam] = useState<UnifiedDeal[]>([]);
+  const [promoPage, setPromoPage] = useState(1);
+  const [promoHasMore, setPromoHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
   const [activeTab, setActiveTab] = useState(initialTab);
   const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
   const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
   const [searchQuery, setSearchQuery] = useState('');
-  const [visibleTemporarios, setVisibleTemporarios] = useState(PAGE_SIZE);
-  const [visiblePermanentes, setVisiblePermanentes] = useState(PAGE_SIZE);
-  const [visiblePromocoes, setVisiblePromocoes] = useState(PAGE_SIZE);
 
-  const loadDeals = useCallback(async (silent = false) => {
-    if (!silent) setIsLoading(true);
-    else setIsRefreshing(true);
-    setError(null);
-    try {
-      const overview = await realApi.getDeals();
-      setData(overview as DealsOverview);
-    } catch (err) {
-      console.error(err);
-      setError('Não foi possível carregar promoções e jogos grátis.');
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
+  const loadGratis = useCallback(async () => {
+    const response = (await realApi.getFreeDeals()) as DealsGratisResponse;
+    setGratisData(response);
+    return response;
   }, []);
 
+  const loadPromocoes = useCallback(async (page = 1, append = false) => {
+    const response = (await realApi.getSaleDeals({ page, limit: PAGE_SIZE })) as DealsPromocoesResponse;
+    setPromoData(response);
+    setCatalogoSteam(response.catalogoSteam ?? []);
+    setPromoPage(response.page);
+    setPromoHasMore(response.hasMore);
+    setPromoDeals((current) => (append ? [...current, ...response.deals] : response.deals));
+    return response;
+  }, []);
+
+  const loadActiveTab = useCallback(
+    async (silent = false, tab = activeTab) => {
+      if (!silent) setIsLoading(true);
+      else setIsRefreshing(true);
+      setError(null);
+      try {
+        if (tab === 'gratis') {
+          await loadGratis();
+        } else {
+          await loadPromocoes(1, false);
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Não foi possível carregar promoções e jogos grátis.');
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [activeTab, loadGratis, loadPromocoes],
+  );
+
   useEffect(() => {
-    void loadDeals();
-  }, [loadDeals]);
+    void loadActiveTab(false, initialTab);
+  }, [initialTab, loadActiveTab]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      void loadDeals(true);
+      void loadActiveTab(true);
     }, REFRESH_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [loadDeals]);
+  }, [loadActiveTab]);
 
-  useEffect(() => {
-    setVisibleTemporarios(PAGE_SIZE);
-    setVisiblePermanentes(PAGE_SIZE);
-    setVisiblePromocoes(PAGE_SIZE);
-  }, [platformFilter, searchQuery, freeSort, saleSort, activeTab]);
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'gratis' && !gratisData) void loadGratis();
+    if (tab === 'promocoes' && !promoData) void loadPromocoes(1, false);
+  };
+
+  const handleLoadMorePromos = async () => {
+    if (!promoHasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      await loadPromocoes(promoPage + 1, true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const fetchedAt = gratisData?.fetchedAt ?? promoData?.fetchedAt;
+  const sources = gratisData?.sources ?? promoData?.sources;
+  const sourcesHealth = gratisData?.sourcesHealth ?? promoData?.sourcesHealth;
+  const usdBrlRate = gratisData?.usdBrlRate ?? promoData?.usdBrlRate;
 
   const gratisTemporarios = useMemo(() => {
-    if (!data) return [];
-    if (data.gratisTemporarios?.length) return data.gratisTemporarios;
-    return data.gratis.filter((d) => d.freeTier !== 'permanent');
-  }, [data]);
+    if (!gratisData) return [];
+    return gratisData.gratisTemporarios?.length
+      ? gratisData.gratisTemporarios
+      : gratisData.deals.filter((d) => d.freeTier !== 'permanent');
+  }, [gratisData]);
 
   const gratisPermanentes = useMemo(() => {
-    if (!data) return [];
-    if (data.gratisPermanentes?.length) return data.gratisPermanentes;
-    return data.gratis.filter((d) => d.freeTier === 'permanent');
-  }, [data]);
+    if (!gratisData) return [];
+    return gratisData.gratisPermanentes?.length
+      ? gratisData.gratisPermanentes
+      : gratisData.deals.filter((d) => d.freeTier === 'permanent');
+  }, [gratisData]);
 
   const allFreeDeals = useMemo(
     () => [...gratisTemporarios, ...gratisPermanentes],
@@ -305,9 +354,11 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     [allFreeDeals],
   );
 
+  const salePool = useMemo(() => promoDeals, [promoDeals]);
+
   const salePlatformOptions = useMemo(
-    () => availablePlatformFilters(data?.promocoes ?? []),
-    [data?.promocoes],
+    () => availablePlatformFilters([...salePool, ...catalogoSteam]),
+    [salePool, catalogoSteam],
   );
 
   const activePlatformOptions = activeTab === 'promocoes' ? salePlatformOptions : freePlatformOptions;
@@ -335,15 +386,20 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   }, [gratisPermanentes, platformFilter, searchQuery, freeSort]);
 
   const filteredPromocoes = useMemo(() => {
-    if (!data) return [];
-    const filtered = filterBySearch(
-      filterByPlatform(data.promocoes, platformFilter),
-      searchQuery,
-    );
+    const filtered = filterBySearch(filterByPlatform(salePool, platformFilter), searchQuery);
     return sortDeals(filtered, saleSort);
-  }, [data, platformFilter, searchQuery, saleSort]);
+  }, [salePool, platformFilter, searchQuery, saleSort]);
+
+  const filteredCatalogo = useMemo(() => {
+    const filtered = filterBySearch(filterByPlatform(catalogoSteam, platformFilter), searchQuery);
+    return sortDeals(filtered, saleSort);
+  }, [catalogoSteam, platformFilter, searchQuery, saleSort]);
 
   const permanentSectionDefaultOpen = filteredTemporarios.length === 0 && filteredPermanentes.length > 0;
+
+  const footerData = sources
+    ? { sources, usdBrlRate }
+    : null;
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
@@ -367,18 +423,18 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas gratuitas e promoções reunidas da Epic Games, Steam, GamerPower e CheapShark — preços normalizados em R$ quando possível.
+                Ofertas ao vivo da Epic, Steam, GamerPower e CheapShark — com catálogo Orbe e câmbio USD/BRL atualizado.
               </p>
-              {data?.fetchedAt && (
+              {fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">
-                  Última atualização: {formatFetchedAt(data.fetchedAt)}
+                  Última atualização: {formatFetchedAt(fetchedAt)}
                 </p>
               )}
             </div>
 
             <button
               type="button"
-              onClick={() => void loadDeals(true)}
+              onClick={() => void loadActiveTab(true)}
               disabled={isRefreshing}
               className="inline-flex items-center gap-2 self-start md:self-auto bg-primary text-primary-foreground font-medium text-sm px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
@@ -401,14 +457,16 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
             <p className="text-muted-foreground font-medium">{error}</p>
             <button
               type="button"
-              onClick={() => void loadDeals()}
+              onClick={() => void loadActiveTab()}
               className="mt-4 bg-primary text-primary-foreground font-medium text-sm px-6 py-3 rounded-lg"
             >
               Tentar novamente
             </button>
           </div>
-        ) : data ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        ) : (
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+            <SourcesAlert sources={sources} health={sourcesHealth} />
+
             <TabsList className="h-auto flex-wrap gap-1 p-1 w-full sm:w-auto">
               <TabsTrigger value="gratis" className="gap-2 px-4 py-2">
                 <Gift className="h-4 w-4" />
@@ -420,16 +478,16 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
               <TabsTrigger value="promocoes" className="gap-2 px-4 py-2">
                 <Tag className="h-4 w-4" />
                 Promoções
-                <span className="text-xs opacity-70">({filteredPromocoes.length})</span>
+                <span className="text-xs opacity-70">
+                  ({filteredPromocoes.length + filteredCatalogo.length})
+                </span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="gratis" className="space-y-10 mt-0">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <SearchInput value={searchQuery} onChange={setSearchQuery} />
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
-                  <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
-                </div>
+                <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
               </div>
 
               <PlatformFilters
@@ -447,30 +505,14 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                       ({filteredTemporarios.length})
                     </span>
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                    Jogos que custavam e estão com 100% de desconto por tempo limitado — resgate antes que acabe.
-                  </p>
                 </div>
 
                 {filteredTemporarios.length === 0 ? (
                   <div className="bg-card rounded-lg border border-border p-10 text-center">
-                    <p className="text-muted-foreground">
-                      Nenhum jogo temporariamente grátis nesta plataforma no momento.
-                    </p>
+                    <p className="text-muted-foreground">Nenhum jogo temporariamente grátis no momento.</p>
                   </div>
                 ) : (
-                  <>
-                    <DealsByPlatform
-                      deals={filteredTemporarios}
-                      platformFilter={platformFilter}
-                      visibleCount={visibleTemporarios}
-                    />
-                    <LoadMoreButton
-                      visibleCount={visibleTemporarios}
-                      totalCount={filteredTemporarios.length}
-                      onLoadMore={() => setVisibleTemporarios((count) => count + PAGE_SIZE)}
-                    />
-                  </>
+                  <DealsByPlatform deals={filteredTemporarios} platformFilter={platformFilter} />
                 )}
               </section>
 
@@ -480,22 +522,8 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 icon={Gift}
                 defaultOpen={permanentSectionDefaultOpen}
               >
-                <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
-                  Jogos free-to-play ou com preço base zero — separados das promoções por tempo limitado.
-                </p>
                 {filteredPermanentes.length > 0 ? (
-                  <>
-                    <DealsByPlatform
-                      deals={filteredPermanentes}
-                      platformFilter={platformFilter}
-                      visibleCount={visiblePermanentes}
-                    />
-                    <LoadMoreButton
-                      visibleCount={visiblePermanentes}
-                      totalCount={filteredPermanentes.length}
-                      onLoadMore={() => setVisiblePermanentes((count) => count + PAGE_SIZE)}
-                    />
-                  </>
+                  <DealsByPlatform deals={filteredPermanentes} platformFilter={platformFilter} />
                 ) : (
                   <div className="bg-card rounded-lg border border-border p-8 text-center">
                     <p className="text-muted-foreground text-sm">Nenhum jogo permanentemente grátis no momento.</p>
@@ -503,59 +531,78 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 )}
               </CollapsibleSection>
 
-              <SourceFooter data={data} />
+              {footerData && <SourceFooter data={footerData} />}
             </TabsContent>
 
-            <TabsContent value="promocoes" className="space-y-4 mt-0">
-              <JogosEmAltaBanner />
-
+            <TabsContent value="promocoes" className="space-y-6 mt-0">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
-                    <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                    Melhores promoções
-                    <span className="text-sm font-normal text-muted-foreground">
-                      ({filteredPromocoes.length})
-                    </span>
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                    Descontos na Steam, Epic e lojas parceiras — valores em R$ (câmbio aproximado para ofertas internacionais).
-                  </p>
-                </div>
+                <SearchInput value={searchQuery} onChange={setSearchQuery} />
                 <SortSelect value={saleSort} onChange={setSaleSort} tab="promocoes" />
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <SearchInput value={searchQuery} onChange={setSearchQuery} />
-                <PlatformFilters
-                  options={salePlatformOptions}
-                  platformFilter={platformFilter}
-                  onChange={setPlatformFilter}
-                />
-              </div>
+              <PlatformFilters
+                options={salePlatformOptions}
+                platformFilter={platformFilter}
+                onChange={setPlatformFilter}
+              />
 
-              {filteredPromocoes.length > 0 ? (
-                <>
-                  <DealsGrid
-                    deals={filteredPromocoes.slice(0, visiblePromocoes)}
-                    priorityCount={6}
-                  />
-                  <LoadMoreButton
-                    visibleCount={visiblePromocoes}
-                    totalCount={filteredPromocoes.length}
-                    onLoadMore={() => setVisiblePromocoes((count) => count + PAGE_SIZE)}
-                  />
-                </>
-              ) : (
-                <div className="bg-card rounded-lg border border-border p-8 text-center">
-                  <p className="text-muted-foreground text-sm">Nenhuma promoção destacada nesta plataforma no momento.</p>
-                </div>
+              {filteredCatalogo.length > 0 && (
+                <section className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                      Catálogo Orbe em promoção
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({filteredCatalogo.length})
+                      </span>
+                    </h2>
+                    <Link
+                      href="/jogos-em-alta"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Ver em Jogos em Alta →
+                    </Link>
+                  </div>
+                  <DealsGrid deals={filteredCatalogo} priorityCount={6} />
+                </section>
               )}
 
-              <SourceFooter data={data} />
+              <section className="space-y-4">
+                <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                  <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                  Ofertas ao vivo
+                  <span className="text-sm font-normal text-muted-foreground">
+                    ({filteredPromocoes.length})
+                  </span>
+                </h2>
+
+                {filteredPromocoes.length > 0 ? (
+                  <>
+                    <DealsGrid deals={filteredPromocoes} priorityCount={6} />
+                    {promoHasMore && !searchQuery && platformFilter === 'all' && (
+                      <div className="flex justify-center pt-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleLoadMorePromos()}
+                          disabled={isLoadingMore}
+                          className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors disabled:opacity-60"
+                        >
+                          {isLoadingMore ? 'Carregando...' : 'Carregar mais promoções'}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="bg-card rounded-lg border border-border p-8 text-center">
+                    <p className="text-muted-foreground text-sm">Nenhuma promoção ao vivo nesta plataforma.</p>
+                  </div>
+                )}
+              </section>
+
+              {footerData && <SourceFooter data={footerData} />}
             </TabsContent>
           </Tabs>
-        ) : null}
+        )}
       </main>
     </div>
   );

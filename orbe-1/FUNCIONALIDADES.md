@@ -43,6 +43,7 @@ O usuário navega por carrosséis temporais, filtra por categoria, pesquisa tít
 | `/animes` | Listagem (gênero, ano, formato, fonte, status) | ✅ |
 | `/jogos` | Listagem (gênero, plataforma, modo, ano, mês) | ✅ |
 | `/jogos-em-alta` | Destaques Steam, promoções, categorias e plataformas | ✅ |
+| `/promocoes` | Jogos grátis e promoções ao vivo (Epic, Steam, GamerPower, CheapShark) + catálogo Orbe | ✅ |
 | `/premios` | Vencedores e indicados por prêmio e ano | ✅ |
 | `/eventos` | Showcases e eventos de games com jogos anunciados | ✅ |
 | `/hoje` | Cinema + streaming + jogos do dia | ✅ |
@@ -253,6 +254,7 @@ Prefixo base: `/api` (exceto aliases legados de auth na raiz).
 | Séries | Equivalentes em `/series/*` |
 | Animes | `/animes/*`, `/animes/:id/next-episode`, `/animes/weekly-schedule`, `/animes/by-season`, `/animes/by-year` |
 | Jogos | `/jogos/*`, `/jogos/steam/trending`, `/jogos/steam/sales`, `/jogos/em-alta` |
+| Promoções | `GET /deals`, `/deals/gratis`, `/deals/promocoes?page=&limit=`, `/deals/epic`, `/deals/gamerpower`, `/deals/cheapshark` |
 | Busca | `GET /pesquisa`, `/search` |
 | Prêmios | `GET /premios`, `/premios/filtros` |
 | Eventos | `GET /eventos`, `/eventos/resumo` |

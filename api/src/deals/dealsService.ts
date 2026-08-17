@@ -4,11 +4,13 @@ import { getRedisClient } from '../redisClient';
 import { logger } from '../logger';
 import { fetchEpicFreeGames, fetchEpicSaleGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
-import { fetchCheapSharkDeals } from './cheapsharkClient';
+import { fetchCheapSharkDealsPaged } from './cheapsharkClient';
 import { fetchSteamDeals } from './steamDealsClient';
+import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
 import { splitFreeDeals } from './freeTier';
 import { dedupeDeals } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
+import { resolveUsdBrlRate } from './exchangeRate';
 import type { DealsOverview, UnifiedDeal } from './types';
 
 /** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se cron falhar). */
@@ -16,8 +18,8 @@ export const DEALS_HARD_TTL_SECONDS = 60 * 30;
 /** Após este intervalo, requests disparam revalidação em background (usuário não espera). */
 export const DEALS_SOFT_TTL_SECONDS = 60 * 10;
 const DEALS_REDIS_KEY = 'deals:overview:v2';
-const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v1';
-const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v1';
+const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v2';
+const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v2';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
 const DEALS_LOCK_TTL_SECONDS = 45;
 
@@ -62,29 +64,44 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
 
 /** Busca sempre nas APIs externas — uso interno do serviço de cache. */
 export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
-  const [epicFree, epicSales, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, cheapsharkEpicSales, steam] =
-    await Promise.all([
-      safeFetch(fetchEpicFreeGames),
-      safeFetch(fetchEpicSaleGames),
-      safeFetch(() => fetchGamerPowerGiveaways()),
-      safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 60 })),
-      safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 100 })),
-      safeFetch(() => fetchCheapSharkDeals({ pageSize: 80 })),
-      safeFetch(() => fetchCheapSharkDeals({ storeId: '25', pageSize: 40 })),
-      safeFetch(fetchSteamDeals),
-    ]);
+  const usdBrlRate = await resolveUsdBrlRate();
+
+  const [
+    epicFree,
+    epicSales,
+    gamerpower,
+    cheapsharkFree,
+    cheapsharkPermanentFree,
+    cheapsharkSales,
+    cheapsharkEpicSales,
+    steam,
+    catalogoSteamRaw,
+  ] = await Promise.all([
+    safeFetch(fetchEpicFreeGames),
+    safeFetch(fetchEpicSaleGames),
+    safeFetch(() => fetchGamerPowerGiveaways()),
+    safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: 3 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: 2 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: 3 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 40, maxPages: 2 })),
+    safeFetch(fetchSteamDeals),
+    safeFetch(fetchCatalogSteamPromotions),
+  ]);
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
 
   const gratisAll = normalizeDealsList(
-    dedupeDeals([
-      ...epicFree.items,
-      ...gamerpower.items,
-      ...cheapsharkFree.items,
-      ...cheapsharkPermanentFree.items,
-      ...steamFree,
-    ]),
+    await enrichDealsWithOrbeLinks(
+      dedupeDeals([
+        ...epicFree.items,
+        ...gamerpower.items,
+        ...cheapsharkFree.items,
+        ...cheapsharkPermanentFree.items,
+        ...steamFree,
+      ]),
+    ),
+    usdBrlRate,
   );
 
   const { temporarios: gratisTemporariosRaw, permanentes: gratisPermanentesRaw } =
@@ -93,14 +110,19 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const gratisTemporarios = sortTemporaryFree(gratisTemporariosRaw);
   const gratisPermanentes = sortPermanentFree(gratisPermanentesRaw);
 
+  const catalogoSteam = normalizeDealsList(catalogoSteamRaw.items, usdBrlRate);
+
   const promocoes = sortSales(
     normalizeDealsList(
-      dedupeDeals([
-        ...cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
-        ...cheapsharkEpicSales.items.filter((deal) => deal.kind === 'sale'),
-        ...epicSales.items,
-        ...steamSales,
-      ]),
+      await enrichDealsWithOrbeLinks(
+        dedupeDeals([
+          ...cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
+          ...cheapsharkEpicSales.items.filter((deal) => deal.kind === 'sale'),
+          ...epicSales.items,
+          ...steamSales,
+        ]),
+      ),
+      usdBrlRate,
     ),
   );
 
@@ -108,10 +130,12 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
 
   return {
     fetchedAt: new Date().toISOString(),
+    usdBrlRate,
     gratis: gratisAll,
     gratisTemporarios,
     gratisPermanentes,
     promocoes,
+    catalogoSteam,
     sources: {
       epic: {
         ok: !epicFree.error && !epicSales.error,
@@ -141,6 +165,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
           cheapsharkEpicSales.error,
       },
       steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
+      orbe: { ok: !catalogoSteamRaw.error, count: catalogoSteam.length, error: catalogoSteamRaw.error },
     },
   };
 }
@@ -165,10 +190,13 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     snapshot(overview.gratisTemporarios),
     snapshot(overview.gratisPermanentes),
     snapshot(overview.promocoes),
+    snapshot(overview.catalogoSteam ?? []),
     overview.sources.epic.ok ? '1' : '0',
     overview.sources.gamerpower.ok ? '1' : '0',
     overview.sources.cheapshark.ok ? '1' : '0',
     overview.sources.steam.ok ? '1' : '0',
+    overview.sources.orbe?.ok ? '1' : '0',
+    String(overview.usdBrlRate ?? ''),
   ].join('::');
 
   return crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16);
@@ -412,6 +440,34 @@ export async function fetchFreeDeals(): Promise<UnifiedDeal[]> {
 export async function fetchSaleDeals(): Promise<UnifiedDeal[]> {
   const overview = await getDealsOverview();
   return overview.promocoes;
+}
+
+export function paginateDeals<T>(items: T[], page: number, limit: number): {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+} {
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(Math.floor(limit), 100) : 48;
+  const start = (safePage - 1) * safeLimit;
+  const slice = items.slice(start, start + safeLimit);
+  return {
+    items: slice,
+    total: items.length,
+    page: safePage,
+    limit: safeLimit,
+    hasMore: start + safeLimit < items.length,
+  };
+}
+
+export function sourcesHealth(overview: DealsOverview): 'ok' | 'degraded' | 'critical' {
+  const statuses = Object.values(overview.sources);
+  const failed = statuses.filter((source) => !source.ok).length;
+  if (failed === 0) return 'ok';
+  if (failed >= statuses.length - 1) return 'critical';
+  return 'degraded';
 }
 
 /** @deprecated Use getDealsOverview — mantido para compatibilidade interna. */
