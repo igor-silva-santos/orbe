@@ -1,11 +1,5 @@
-import { formatBrlFromCents, parsePriceNumber } from './dealPricing';
+import { formatBrlFromCents, getUsdBrlRate, parsePriceNumber } from './dealPricing';
 import type { UnifiedDeal } from './types';
-
-/** Taxa USD→BRL para exibição/ordenação (configurável via env). */
-export function getUsdBrlRate(): number {
-  const raw = Number(process.env.DEALS_USD_BRL_RATE ?? 5.5);
-  return Number.isFinite(raw) && raw > 0 ? raw : 5.5;
-}
 
 function formatBrlFromUnits(value: number): string {
   return `R$ ${value.toFixed(2).replace('.', ',')}`;
@@ -22,11 +16,11 @@ function normalizeEpicPrices(deal: UnifiedDeal): UnifiedDeal {
   };
 }
 
-/** Converte preços USD (CheapShark) para BRL aproximado para exibição e ordenação. */
-export function normalizeDealToBrl(deal: UnifiedDeal): UnifiedDeal {
+/** Converte preços USD (CheapShark) para BRL usando taxa informada. */
+export function normalizeDealToBrl(deal: UnifiedDeal, usdBrlRate: number): UnifiedDeal {
   let normalized = deal.source === 'epic' ? normalizeEpicPrices(deal) : deal;
 
-  if (normalized.currency === 'BRL' || normalized.source === 'steam') {
+  if (normalized.currency === 'BRL' || normalized.source === 'steam' || normalized.source === 'orbe') {
     return { ...normalized, priceConverted: false };
   }
 
@@ -34,11 +28,10 @@ export function normalizeDealToBrl(deal: UnifiedDeal): UnifiedDeal {
     return { ...normalized, priceConverted: false };
   }
 
-  const rate = getUsdBrlRate();
-  const brlSale = Math.round(normalized.salePriceValue * rate * 100) / 100;
+  const brlSale = Math.round(normalized.salePriceValue * usdBrlRate * 100) / 100;
   const brlOrig =
     normalized.originalPriceValue != null
-      ? Math.round(normalized.originalPriceValue * rate * 100) / 100
+      ? Math.round(normalized.originalPriceValue * usdBrlRate * 100) / 100
       : null;
 
   return {
@@ -53,6 +46,9 @@ export function normalizeDealToBrl(deal: UnifiedDeal): UnifiedDeal {
   };
 }
 
-export function normalizeDealsList(deals: UnifiedDeal[]): UnifiedDeal[] {
-  return deals.map(normalizeDealToBrl);
+export function normalizeDealsList(deals: UnifiedDeal[], usdBrlRate?: number): UnifiedDeal[] {
+  const rate = usdBrlRate ?? getUsdBrlRate();
+  return deals.map((deal) => normalizeDealToBrl(deal, rate));
 }
+
+export { getUsdBrlRate };

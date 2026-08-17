@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe';
 
 export type DealKind = 'free' | 'sale';
 
@@ -41,18 +41,50 @@ export type UnifiedDeal = {
   freeTier?: FreeTier | null;
   priceConverted?: boolean | null;
   originalSalePriceUsd?: string | null;
+  orbeGameId?: number | null;
+  orbeUrl?: string | null;
 };
+
+export type DealSourceStatus = { ok: boolean; count: number; error?: string };
 
 export type DealsOverview = {
   fetchedAt: string;
+  usdBrlRate?: number | null;
   gratis: UnifiedDeal[];
   gratisTemporarios: UnifiedDeal[];
   gratisPermanentes: UnifiedDeal[];
   promocoes: UnifiedDeal[];
+  catalogoSteam: UnifiedDeal[];
   sources: {
-    epic: { ok: boolean; count: number; error?: string };
-    gamerpower: { ok: boolean; count: number; error?: string };
-    cheapshark: { ok: boolean; count: number; error?: string };
-    steam: { ok: boolean; count: number; error?: string };
+    epic: DealSourceStatus;
+    gamerpower: DealSourceStatus;
+    cheapshark: DealSourceStatus;
+    steam: DealSourceStatus;
+    orbe: DealSourceStatus;
   };
+  sourcesHealth?: 'ok' | 'degraded' | 'critical';
+};
+
+export type DealsGratisResponse = {
+  fetchedAt: string;
+  usdBrlRate?: number | null;
+  gratisTemporarios: UnifiedDeal[];
+  gratisPermanentes: UnifiedDeal[];
+  deals: UnifiedDeal[];
+  sources: DealsOverview['sources'];
+  sourcesHealth?: DealsOverview['sourcesHealth'];
+};
+
+export type DealsPromocoesResponse = {
+  fetchedAt: string;
+  usdBrlRate?: number | null;
+  deals: UnifiedDeal[];
+  promocoes: UnifiedDeal[];
+  catalogoSteam: UnifiedDeal[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+  sources: DealsOverview['sources'];
+  sourcesHealth?: DealsOverview['sourcesHealth'];
 };

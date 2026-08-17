@@ -1,5 +1,5 @@
 import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
-import type { DealsOverview } from '@/types/deals';
+import type { DealsOverview, DealsGratisResponse, DealsPromocoesResponse } from '@/types/deals';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
 
@@ -349,9 +349,19 @@ export const orbeNerdApi = {
   },
 
   // Promoções e jogos grátis (Epic, GamerPower, CheapShark)
-  getDeals: async (): Promise<DealsOverview> => apiClient.get('/deals'),
-  getFreeDeals: async () => apiClient.get('/deals/gratis'),
-  getSaleDeals: async () => apiClient.get('/deals/promocoes'),
+  getDeals: async (params?: { sections?: string }): Promise<DealsOverview> => {
+    const query = params?.sections ? `?sections=${encodeURIComponent(params.sections)}` : '';
+    return apiClient.get(`/deals${query}`);
+  },
+  getFreeDeals: async (): Promise<DealsGratisResponse> => apiClient.get('/deals/gratis'),
+  getSaleDeals: async (params?: { page?: number; limit?: number; includeCatalog?: boolean }): Promise<DealsPromocoesResponse> => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.includeCatalog === false) query.set('includeCatalog', '0');
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiClient.get(`/deals/promocoes${suffix}`);
+  },
   getEpicFreeGames: async () => apiClient.get('/deals/epic'),
   getGamerPowerGiveaways: async (params?: { platform?: string; type?: string }) => {
     const query = new URLSearchParams();
