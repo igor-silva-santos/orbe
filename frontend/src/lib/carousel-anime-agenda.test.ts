@@ -112,6 +112,27 @@ describe('resolveWeeklyAgendaStartIndex', () => {
       'Segunda',
     );
   });
+
+  it('vai para o próximo dia com episódio quando hoje não tem agenda', () => {
+    const week = getCalendarWeekBounds(new Date('2026-08-17T12:00:00'));
+    const items = buildWeeklyAnimeAgendaItems(
+      [mockAnime(1, { airingAt: '2026-08-19T21:00:00' })],
+      undefined,
+      week,
+    );
+
+    const startIndex = resolveWeeklyAgendaStartIndex(
+      items,
+      undefined,
+      new Date('2026-08-17T12:00:00'),
+    );
+
+    assert.equal(items[startIndex]?.type, 'separator');
+    assert.equal(
+      items[startIndex]?.type === 'separator' ? items[startIndex].dayName : '',
+      'Quarta',
+    );
+  });
 });
 
 describe('isDateWithinWeek', () => {

@@ -29,12 +29,10 @@ import {
   monthKeyFromItem,
   monthTitleFromItem,
   parseMonthKey,
-  resolveCarouselOpenMonthKey,
   resolveCarouselOpenIndex,
   resolveDatedIndexForNavigation,
   clampCarouselOpenIndex,
   isCarouselBootstrapReady,
-  currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -99,7 +97,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
   const [mediaItems, setMediaItems] = useState<Midia[]>(() => mergeMediaByDate([], initialData));
   const [selectedSnap, setSelectedSnap] = useState(0);
-  const [currentTitle, setCurrentTitle] = useState(currentMonthCarouselTitle);
+  const [currentTitle, setCurrentTitle] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(ssrBootstrapReady);
@@ -240,11 +238,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const requestScrollToOpenPosition = useCallback(async () => {
     if (emAltaMode) return;
     const list = applyTimelineFilters(mediaItemsRef.current ?? []);
-    const targetMonthKey = resolveCarouselOpenMonthKey(list);
-    const { year, month } = parseMonthKey(targetMonthKey);
-    lastTitleMonthKey.current = targetMonthKey;
-    setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
-
     const index = await resolveOpenPosition();
     setPendingScrollIndex(clampCarouselOpenIndex(list, index));
   }, [emAltaMode, applyTimelineFilters, resolveOpenPosition]);
@@ -365,15 +358,16 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
-        const prev = addMonths(year, month, -1);
         const next = addMonths(year, month, 1);
         const next2 = addMonths(year, month, 2);
         void Promise.all([
-          loadMonth(prev.year, prev.month, 'backward', false),
           loadMonth(year, month, 'visible', false),
           loadMonth(next.year, next.month, 'forward', false),
           loadMonth(next2.year, next2.month, 'forward', false),
-        ]);
+        ]).then(() => {
+          const prev = addMonths(year, month, -1);
+          void loadMonth(prev.year, prev.month, 'backward', false);
+        });
         return;
       }
 
@@ -423,8 +417,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       const targetMonthKey = monthKeyFromItem(targetItem);
       if (targetMonthKey) {
         lastTitleMonthKey.current = targetMonthKey;
-        const { year, month } = parseMonthKey(targetMonthKey);
-        setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
+        setCurrentTitle(formatCarouselMonthTitle(new Date(
+          parseMonthKey(targetMonthKey).year,
+          parseMonthKey(targetMonthKey).month - 1,
+          1,
+        )));
       } else {
         updateTitleFromIndex(targetIndex, filteredItems);
       }
@@ -505,14 +502,27 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       if (emAltaMode) return;
       const selectedIndex = emblaApi.selectedScrollSnap();
       const slide = displaySlidesRef.current[selectedIndex];
-      if (slide?.kind !== 'dated') return;
+      if (!slide) return;
       previousSelectedIndex.current = selectedIndex;
-      prefetchMonthEdges(slide.datedIndex, filteredItemsRef.current);
 
-      if (positioningTitleLockedRef.current) {
-        positioningTitleLockedRef.current = false;
-        updateTitleFromIndex(slide.datedIndex, filteredItemsRef.current);
+      if (slide.kind === 'year-tbd-separator') {
+        lastTitleMonthKey.current = `year-tbd-${slide.year}`;
+        setCurrentTitle(formatYearTbdTitle(slide.year));
+        return;
       }
+      if (slide.kind === 'year-tbd-media') {
+        const year = slide.item.ano_lancamento_api;
+        if (year) {
+          lastTitleMonthKey.current = `year-tbd-${year}`;
+          setCurrentTitle(formatYearTbdTitle(year));
+        }
+        return;
+      }
+      if (slide.kind !== 'dated') return;
+
+      prefetchMonthEdges(slide.datedIndex, filteredItemsRef.current);
+      positioningTitleLockedRef.current = false;
+      updateTitleFromIndex(slide.datedIndex, filteredItemsRef.current);
     };
 
     emblaApi.on('select', onSelect);

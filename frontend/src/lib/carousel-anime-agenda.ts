@@ -97,11 +97,25 @@ export function resolveWeeklyAgendaStartIndex(
   dayNames: readonly string[] = DAY_NAMES,
   reference: Date = new Date(),
 ): number {
-  const currentDayName = dayNames[reference.getDay()];
-  const todayIndex = items.findIndex(
-    (item) => item.type === 'separator' && item.dayName === currentDayName,
-  );
-  if (todayIndex > -1) return todayIndex;
+  const currentDay = reference.getDay();
+
+  for (let offset = 0; offset <= 6; offset += 1) {
+    const dayIndex = (currentDay + offset) % 7;
+    const dayName = dayNames[dayIndex];
+    const idx = items.findIndex(
+      (item) => item.type === 'separator' && item.dayName === dayName,
+    );
+    if (idx > -1) return idx;
+  }
+
+  for (let offset = 1; offset <= currentDay; offset += 1) {
+    const dayIndex = currentDay - offset;
+    const dayName = dayNames[dayIndex];
+    const idx = items.findIndex(
+      (item) => item.type === 'separator' && item.dayName === dayName,
+    );
+    if (idx > -1) return idx;
+  }
 
   const unscheduledIndex = items.findIndex(
     (item) => item.type === 'separator' && item.dayName === ANIME_AGENDA_UNSCHEDULED_LABEL,

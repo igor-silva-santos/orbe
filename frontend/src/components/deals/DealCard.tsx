@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
 import { getPlatformLabel } from '@/lib/dealFilters';
@@ -118,6 +117,24 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
             -{deal.discountPercent}%
           </span>
         )}
+        {!isFree && deal.salePrice && deal.currency === 'BRL' && (
+          <div className="absolute bottom-2 left-2 right-2 z-10">
+            <div className="rounded-md border border-border/80 bg-background/95 px-2 py-1">
+              <div className="flex items-center gap-1.5">
+                {(deal.platform === 'steam' || deal.source === 'orbe') && (
+                  <Image src="/icons/steam.svg" alt="" width={14} height={14} className="shrink-0 opacity-90" />
+                )}
+                <span className="text-xs font-bold orbe-text-primary">{deal.salePrice}</span>
+                {deal.originalPrice && deal.originalPrice !== deal.salePrice && (
+                  <span className="text-[9px] line-through text-muted-foreground">{deal.originalPrice}</span>
+                )}
+              </div>
+              <span className="text-[9px] text-muted-foreground leading-tight block">
+                {deal.priceConverted ? 'Preço convertido · BRL' : 'Preço na Steam · Brasil'}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-3 flex flex-col gap-2 flex-1">
@@ -131,15 +148,10 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
           )}
           <span>
             {deal.salePrice ?? (isTemporaryFree ? 'Grátis por tempo limitado' : isPermanentFree ? 'Sempre grátis' : isFree ? 'Grátis para resgatar' : 'Ver oferta')}
-            {deal.originalPrice && deal.salePrice && deal.originalPrice !== deal.salePrice && (
+            {deal.originalPrice && deal.salePrice && deal.originalPrice !== deal.salePrice && deal.currency !== 'BRL' && (
               <span className="ml-1 line-through opacity-70">{deal.originalPrice}</span>
             )}
           </span>
-          {deal.currency === 'BRL' && (
-            <span className="block text-[9px] text-muted-foreground mt-0.5">
-              {deal.priceConverted ? 'Preço convertido · BRL' : 'Preço na Steam · Brasil'}
-            </span>
-          )}
         </div>
 
         {deal.worth && (
@@ -154,16 +166,6 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
 
         {endsLabel && (
           <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Acaba em {endsLabel}</p>
-        )}
-
-        {deal.orbeUrl && (
-          <Link
-            href={deal.orbeUrl}
-            onClick={(event) => event.stopPropagation()}
-            className="text-[10px] font-medium text-primary hover:underline"
-          >
-            Ver no Orbe →
-          </Link>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
