@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Image, { ImageProps } from 'next/image';
 import {
   getImageSrc,
+  getPosterBlurDataUrl,
   PLACEHOLDER_POSTER,
-  BLUR_DATA_URL,
   TmdbImageSize,
   TMDB_CARD_SIZE,
   isIgdbOrProxyImageUrl,
@@ -75,7 +75,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       decoding={decoding}
       fetchPriority={priority ? 'high' : undefined}
       placeholder={isPlaceholder ? undefined : 'blur'}
-      blurDataURL={isPlaceholder ? undefined : BLUR_DATA_URL}
+      blurDataURL={isPlaceholder ? undefined : getPosterBlurDataUrl(src)}
       onLoad={() => onLoad?.()}
       onError={() => setHasError(true)}
       unoptimized={isPlaceholder || isTmdbImage || isIgdbOrProxyImage}

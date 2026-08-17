@@ -6,7 +6,6 @@ import type { CarouselLoopBounds } from '@/lib/carousel-loop';
 
 export interface UseCarouselInfiniteLoopOptions {
   emblaApi: EmblaCarouselType | undefined;
-  viewportRef: React.RefObject<HTMLElement | null>;
   enabled: boolean;
   getBounds: () => CarouselLoopBounds;
   onWrap?: (targetIndex: number) => void;
@@ -20,7 +19,6 @@ export interface UseCarouselInfiniteLoopOptions {
  */
 export function useCarouselInfiniteLoop({
   emblaApi,
-  viewportRef,
   enabled,
   getBounds,
   onWrap,
@@ -29,10 +27,6 @@ export function useCarouselInfiniteLoop({
   const onWrapRef = useRef(onWrap);
   const directionRef = useRef<'forward' | 'backward' | null>(null);
   const prevSnapRef = useRef(0);
-  const edgeAtGestureStartRef = useRef<{ atStart: boolean; atEnd: boolean }>({
-    atStart: false,
-    atEnd: false,
-  });
 
   useEffect(() => {
     getBoundsRef.current = getBounds;
@@ -76,24 +70,12 @@ export function useCarouselInfiniteLoop({
       }
     };
 
-    const node = viewportRef.current;
-    const onPointerDown = () => {
-      const bounds = getBoundsRef.current();
-      const snap = emblaApi.selectedScrollSnap();
-      edgeAtGestureStartRef.current = {
-        atStart: snap <= bounds.start,
-        atEnd: snap >= bounds.end,
-      };
-    };
-
     emblaApi.on('select', onSelect);
     emblaApi.on('settle', onSettle);
-    node?.addEventListener('pointerdown', onPointerDown);
 
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
-      node?.removeEventListener('pointerdown', onPointerDown);
     };
-  }, [emblaApi, enabled, viewportRef]);
+  }, [emblaApi, enabled]);
 }

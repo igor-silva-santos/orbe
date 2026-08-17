@@ -15,8 +15,10 @@ import YearTbdSeparatorCard from '../media/YearTbdSeparatorCard';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
+import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPosterReveal';
 import { getMediaCarouselLoopBounds, getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
+import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 import {
   addMonths,
   findIndexForMonth,
@@ -334,7 +336,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
   useCarouselInfiniteLoop({
     emblaApi,
-    viewportRef,
     enabled: loopEnabled,
     getBounds: getLoopBounds,
     onWrap: handleLoopWrap,
@@ -623,6 +624,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
 
+  const centerHasPoster = useMemo(() => {
+    if (showPositioningSkeleton || filteredItems.length === 0) return false;
+    const slide = displaySlides[selectedSnap];
+    if (!slide || slide.kind === 'year-tbd-separator') return false;
+    const item = slide.kind === 'dated' || slide.kind === 'year-tbd-media' ? slide.item : null;
+    return Boolean(item?.poster_url_api);
+  }, [displaySlides, selectedSnap, showPositioningSkeleton, filteredItems.length]);
+
+  const { isWaitingForCenterPoster, handleCenterPosterLoad } = useCarouselInitialPosterReveal({
+    hasInitialPositioning,
+    emAltaMode,
+    centerHasPoster,
+  });
+
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
@@ -789,6 +804,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                             isFocused={index === selectedSnap}
                             userInteractions={userInteractions}
                             onInteraction={handleInteraction}
+                            onPosterLoad={index === selectedSnap ? handleCenterPosterLoad : undefined}
                           />
                         ) : (
                           <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
@@ -808,6 +824,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                           isFocused={isCenter}
                           userInteractions={userInteractions}
                           onInteraction={handleInteraction}
+                          onPosterLoad={isCenter ? handleCenterPosterLoad : undefined}
                         />
                       ) : (
                         <div className="w-full max-w-[210px] mx-auto aspect-[206/290] rounded-lg bg-skeleton orbe-shimmer" aria-hidden />
@@ -817,6 +834,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                 })}
           </div>
         </div>
+        <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
         </div>
       </TooltipProvider>
     </div>
