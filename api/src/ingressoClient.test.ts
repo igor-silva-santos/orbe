@@ -62,6 +62,31 @@ describe('ingressoClient matching', () => {
     assert.equal(match?.urlKey, 'perdida-no-artico');
   });
 
+  it('usa tituloBr persistido para gerar slug do ingresso', () => {
+    const slugs = buildIngressoSlugCandidates({
+      title: 'Ice Skater',
+      originalTitle: 'Ice Skater',
+      tituloBr: 'Perdida no Ártico',
+      releaseDate: new Date('2026-08-20'),
+    });
+
+    assert.ok(slugs.indexOf('perdida-no-artico') >= 0);
+  });
+
+  it('faz match via tituloBr quando title do TMDB esta em ingles', () => {
+    const match = pickBestMatch(
+      {
+        title: 'Ice Skater',
+        originalTitle: 'Ice Skater',
+        tituloBr: 'Perdida no Ártico',
+      },
+      [perdidaNoArtico],
+      'catalog',
+    );
+
+    assert.equal(match?.urlKey, 'perdida-no-artico');
+  });
+
   it('slugifica acentos como o ingresso.com', () => {
     assert.equal(slugify('Perdida no Ártico'), 'perdida-no-artico');
   });

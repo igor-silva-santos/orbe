@@ -80,3 +80,30 @@ export function getBrOverviewFromTranslations(
   const overview = findBrTranslation(translations)?.data?.overview?.trim();
   return overview || null;
 }
+
+/** Título oficial pt-BR quando disponível na entrada de tradução BR do TMDB. */
+export function getBrTitleFromTranslations(
+  translations: TmdbTranslationEntry[] | null | undefined,
+): string | null {
+  const title = findBrTranslation(translations)?.data?.title?.trim();
+  return title && title.length >= 2 ? title : null;
+}
+
+/**
+ * Resolve o melhor título pt-BR para matching com o Ingresso:
+ * tradução BR explícita, ou título já localizado na resposta pt-BR do TMDB.
+ */
+export function resolveMovieTituloBr(
+  movie: MovieLike,
+  translations: TmdbTranslationEntry[] | null | undefined,
+): string | null {
+  const fromTranslations = getBrTitleFromTranslations(translations);
+  if (fromTranslations) return fromTranslations;
+
+  const title = movie.title?.trim();
+  if (!title || title.length < 2) return null;
+
+  if (hasLocalizedPortugueseTitle(movie)) return title;
+
+  return null;
+}

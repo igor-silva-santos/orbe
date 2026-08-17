@@ -8,7 +8,7 @@ import { prisma } from './clients';
 import { broadcast } from './websocket';
 import { isMovieRelevantForSync, hasPortugueseLocalization, isConcertOrLiveRecording } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
-import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
+import { detectMovieBrLocalization, getBrOverviewFromTranslations, resolveMovieTituloBr, type TmdbTranslationEntry } from './tmdbBrLocalization';
 import { isOpenPeriod } from './syncDateHelpers';
 import { resolveTmdbRelease, isYearWithinRange } from './yearOnlyRelease';
 import type { SyncContentOptions } from './syncOptions';
@@ -418,11 +418,13 @@ async function processMovieBatch(
       const translations = (movieDetails.translations?.translations ?? []) as TmdbTranslationEntry[];
       const localizacaoPtBr = detectMovieBrLocalization(movieDetails, translations);
       const brOverview = getBrOverviewFromTranslations(translations);
+      const tituloBr = resolveMovieTituloBr(movieDetails, translations);
 
       const scalarData = {
         tmdbId: movieDetails.id,
         title: movieDetails.title!,
         originalTitle: movieDetails.original_title,
+        tituloBr,
         overview: isLikelyEnglish(movieDetails.overview)
           ? (brOverview
             ?? (await translateSynopsisForStorage(movieDetails.overview, {
