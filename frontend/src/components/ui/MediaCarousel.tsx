@@ -34,6 +34,7 @@ import {
   resolveDatedIndexForNavigation,
   clampCarouselOpenIndex,
   isCarouselBootstrapReady,
+  currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -98,11 +99,11 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
   const [mediaItems, setMediaItems] = useState<Midia[]>(() => mergeMediaByDate([], initialData));
   const [selectedSnap, setSelectedSnap] = useState(0);
-  const [currentTitle, setCurrentTitle] = useState('');
+  const [currentTitle, setCurrentTitle] = useState(() => currentMonthCarouselTitle());
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(ssrBootstrapReady);
-  const [hasInitialPositioning, setHasInitialPositioning] = useState(!ssrBootstrapReady);
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
+  const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);

@@ -18,6 +18,7 @@ import {
   resolveWeeklyAgendaStartIndex,
   type AnimeAgendaItem,
 } from '@/lib/carousel-anime-agenda';
+import { getWeekdayInBrazil } from '@/lib/brazil-timezone';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
@@ -199,7 +200,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       } else if (item.type === 'media') {
         const agendaDate = getAnimeAgendaDate(item.data);
         if (agendaDate) {
-          const dayName = DAY_NAMES[agendaDate.getDay()];
+          const dayName = DAY_NAMES[getWeekdayInBrazil(agendaDate)];
           titleKey = `day-${dayName}`;
           title = `Agenda: ${dayName}`;
         }
@@ -242,6 +243,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   }, []);
 
   const loopEnabled =
+    viewMode === 'weekly' &&
+    !emAltaMode &&
     !hasInitialPositioning &&
     pendingScrollIndex === null &&
     carouselItems.length > 0;
