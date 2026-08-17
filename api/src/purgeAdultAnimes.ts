@@ -2,14 +2,15 @@ import './loadEnv';
 
 import { prisma } from './clients';
 import { logger } from './logger';
-import { ANIME_ADULT_TAG_NAMES } from './qualityFilters';
+import { HENTAI_TAG_NAME } from './qualityFilters';
 import type { Prisma } from '@prisma/client';
 
 /**
- * Remove do banco animes adultos (hentai/ecchi/etc.) que entraram antes da curadoria
- * adulta ser desativada por completo. Mesmo critério usado agora no sync e nas rotas
- * de exibição (`isAnimeAdultContent` em qualityFilters.ts): `isAdult: true`, gênero
- * "Hentai" ou qualquer tag marcada `isAdult: true`/com nome bloqueado.
+ * Remove do banco animes hentai que entraram antes dessa correção (o campo
+ * `isAdult` da AniList é inconsistente pra esse tipo de anime). Mesmo critério
+ * usado agora no sync e nas rotas de exibição (`isAnimeAdultContent` em
+ * qualityFilters.ts): `isAdult: true`, gênero "Hentai" ou tag "Hentai".
+ * Não mexe em Ecchi/Yaoi/Yuri — esses continuam no site normalmente.
  *
  * Uso:
  *   npx ts-node src/purgeAdultAnimes.ts            (dry-run — só lista o que seria removido)
@@ -19,16 +20,8 @@ import type { Prisma } from '@prisma/client';
 const adultAnimeWhere: Prisma.AnimeWhereInput = {
   OR: [
     { isAdult: true },
-    { genres: { some: { genero: { name: 'Hentai' } } } },
-    {
-      tags: {
-        some: {
-          tag: {
-            OR: [{ isAdult: true }, { name: { in: ANIME_ADULT_TAG_NAMES } }],
-          },
-        },
-      },
-    },
+    { genres: { some: { genero: { name: HENTAI_TAG_NAME } } } },
+    { tags: { some: { tag: { name: HENTAI_TAG_NAME } } } },
   ],
 };
 

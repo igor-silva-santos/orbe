@@ -480,28 +480,20 @@ export const serieCarouselQualityFilter: Prisma.SerieWhereInput = {
 };
 
 /**
- * Nomes de tags AniList tratados como conteúdo adulto — usados tanto para bloquear
- * no Prisma (nome exato da tag) quanto como fallback quando o payload da AniList
- * não carrega o campo `isAdult` da tag (ver `isAnimeAdultContent`).
+ * Único critério de bloqueio: hentai. Ecchi/Yaoi/Yuri/etc. não são barrados —
+ * passam normalmente, sem modal de consentimento nem opt-in.
  */
-export const ANIME_ADULT_TAG_NAMES = ['Hentai', 'Ecchi', 'Yaoi', 'Yuri', 'Adult'];
+export const HENTAI_TAG_NAME = 'Hentai';
 
 /**
  * O campo `Media.isAdult` da AniList é inconsistente — animes com gênero/tag "Hentai"
  * às vezes vêm com `isAdult: false`. Por isso o site não confia só nesse campo: também
- * barra pelo gênero "Hentai" e por tags com `isAdult: true` (ou nome na lista acima).
- * Sem opt-in — conteúdo adulto é banido do site inteiro, não só escondido por padrão.
+ * barra pelo gênero "Hentai" e pela tag "Hentai" quando presentes.
  */
 export const animeSafeWhereFilter: Prisma.AnimeWhereInput = {
   isAdult: false,
-  genres: { none: { genero: { name: 'Hentai' } } },
-  tags: {
-    none: {
-      tag: {
-        OR: [{ isAdult: true }, { name: { in: ANIME_ADULT_TAG_NAMES } }],
-      },
-    },
-  },
+  genres: { none: { genero: { name: HENTAI_TAG_NAME } } },
+  tags: { none: { tag: { name: HENTAI_TAG_NAME } } },
 };
 
 export const animeQualityFilter: Prisma.AnimeWhereInput = {
@@ -793,20 +785,14 @@ export function isSerieRelevantForSync(serie: SerieLike): boolean {
 }
 
 /**
- * Detecta conteúdo adulto (hentai/ecchi/etc.) além do campo `isAdult` da AniList,
- * que é inconsistente para esse tipo de anime. Checa também o gênero "Hentai" e
- * tags marcadas como adultas (pelo próprio `tag.isAdult` da AniList ou pelo nome).
+ * Detecta hentai além do campo `isAdult` da AniList, que é inconsistente para esse
+ * tipo de anime — às vezes vem `isAdult: false` num anime com gênero/tag "Hentai".
+ * Não barra Ecchi/Yaoi/Yuri/etc., só hentai mesmo.
  */
 export function isAnimeAdultContent(anime: AnimeLike): boolean {
   if (anime.isAdult) return true;
-  if (anime.genres?.some((genre) => genre === 'Hentai')) return true;
-  if (
-    anime.tags?.some(
-      (tag) => tag.isAdult === true || (tag.name && ANIME_ADULT_TAG_NAMES.includes(tag.name)),
-    )
-  ) {
-    return true;
-  }
+  if (anime.genres?.some((genre) => genre === HENTAI_TAG_NAME)) return true;
+  if (anime.tags?.some((tag) => tag.name === HENTAI_TAG_NAME)) return true;
   return false;
 }
 
