@@ -2,18 +2,7 @@ import type { UnifiedDeal } from './types';
 
 export type FreeTier = 'temporary' | 'permanent';
 
-/** Extrai valor numérico de strings como "$24.99", "R$ 0,00" ou "N/A". */
-function parsePriceValue(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const normalized = value.trim().toLowerCase();
-  if (!normalized || normalized === 'n/a' || normalized === 'free' || normalized === 'grátis' || normalized === 'gratis') {
-    return 0;
-  }
-  const match = normalized.replace(',', '.').match(/(\d+(?:\.\d+)?)/);
-  if (!match) return null;
-  const parsed = Number.parseFloat(match[1]);
-  return Number.isFinite(parsed) ? parsed : null;
-}
+import { parsePriceNumber } from './dealPricing';
 
 /**
  * Jogos "estão de graça": tinham preço e estão 100% grátis por tempo limitado.
@@ -24,12 +13,20 @@ export function classifyFreeTier(deal: UnifiedDeal): FreeTier {
 
   if (deal.source === 'epic') return 'temporary';
 
-  const original = parsePriceValue(deal.originalPrice);
-  const worth = parsePriceValue(deal.worth);
+  const original = parsePriceNumber(deal.originalPrice);
+  const worth = parsePriceNumber(deal.worth);
 
   if (deal.source === 'gamerpower') {
     if (deal.endsAt) return 'temporary';
     if (worth != null && worth > 0) return 'temporary';
+    if (original != null && original > 0) return 'temporary';
+    // Giveaways de jogos completos costumam ser promoções temporárias
+    if ((deal.status ?? '').toLowerCase() === 'active') return 'temporary';
+    return 'permanent';
+  }
+
+  if (deal.source === 'steam') {
+    if (deal.freeTier === 'permanent' || deal.freeTier === 'temporary') return deal.freeTier;
     if (original != null && original > 0) return 'temporary';
     return 'permanent';
   }

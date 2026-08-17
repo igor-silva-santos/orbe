@@ -137,6 +137,8 @@ function mapEpicDeal(element: EpicCatalogElement, offer: EpicPromotionOffer, kin
     storeUrl: epicStoreUrl(element),
     originalPrice: price?.fmtPrice?.originalPrice ?? null,
     salePrice: price?.fmtPrice?.discountPrice ?? (kind === 'free' ? 'Grátis' : null),
+    originalPriceValue: price?.originalPrice != null ? price.originalPrice / 100 : null,
+    salePriceValue: price?.discountPrice != null ? price.discountPrice / 100 : null,
     discountPercent,
     currency: price?.currencyCode ?? 'BRL',
     startsAt: offer.startDate ?? null,
@@ -170,6 +172,39 @@ export async function fetchEpicFreeGames(): Promise<UnifiedDeal[]> {
     return deals;
   } catch (error: any) {
     logger.warn(`Epic free games falhou: ${error.message}`);
+    return [];
+  }
+}
+
+/** Promoções pagas Epic com desconto ativo (mesmo feed, preço promocional < original). */
+export async function fetchEpicSaleGames(): Promise<UnifiedDeal[]> {
+  try {
+    const response = await epicStoreApi.get('/freeGamesPromotions', {
+      params: { locale: 'pt-BR', country: 'BR', allowUnpublished: true },
+    });
+    const elements: EpicCatalogElement[] =
+      response.data?.data?.Catalog?.searchStore?.elements ?? [];
+
+    const deals: UnifiedDeal[] = [];
+    const seen = new Set<string>();
+
+    for (const element of elements) {
+      const price = element.price?.totalPrice;
+      const original = price?.originalPrice ?? 0;
+      const discount = price?.discountPrice ?? 0;
+      if (original <= 0 || discount <= 0 || discount >= original) continue;
+
+      const offers = collectPromotionOffers(element).filter(isActivePromotion);
+      const offer = offers[0] ?? { startDate: undefined, endDate: undefined };
+      const deal = mapEpicDeal(element, offer, 'sale');
+      if (seen.has(deal.id)) continue;
+      seen.add(deal.id);
+      deals.push(deal);
+    }
+
+    return deals;
+  } catch (error: any) {
+    logger.warn(`Epic sale games falhou: ${error.message}`);
     return [];
   }
 }

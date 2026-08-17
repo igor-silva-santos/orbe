@@ -2,17 +2,20 @@ import crypto from 'crypto';
 import { randomUUID } from 'crypto';
 import { getRedisClient } from '../redisClient';
 import { logger } from '../logger';
-import { fetchEpicFreeGames } from './epicClient';
+import { fetchEpicFreeGames, fetchEpicSaleGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDeals } from './cheapsharkClient';
+import { fetchSteamDeals } from './steamDealsClient';
 import { splitFreeDeals } from './freeTier';
+import { dedupeDeals } from './dedupeDeals';
+import { normalizeDealsList } from './normalizeDeals';
 import type { DealsOverview, UnifiedDeal } from './types';
 
 /** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se cron falhar). */
 export const DEALS_HARD_TTL_SECONDS = 60 * 30;
 /** Após este intervalo, requests disparam revalidação em background (usuário não espera). */
 export const DEALS_SOFT_TTL_SECONDS = 60 * 10;
-const DEALS_REDIS_KEY = 'deals:overview:v1';
+const DEALS_REDIS_KEY = 'deals:overview:v2';
 const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v1';
 const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v1';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
@@ -27,16 +30,25 @@ type CachedDealsEntry = {
 let memoryCache: CachedDealsEntry | null = null;
 let backgroundRefreshInFlight = false;
 
-function dedupeDeals(deals: UnifiedDeal[]): UnifiedDeal[] {
-  const seen = new Set<string>();
-  const result: UnifiedDeal[] = [];
-  for (const deal of deals) {
-    const key = `${deal.platform}:${deal.title.toLowerCase()}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(deal);
-  }
-  return result;
+function sortTemporaryFree(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => {
+    const aEnd = a.endsAt ? Date.parse(a.endsAt) : Number.POSITIVE_INFINITY;
+    const bEnd = b.endsAt ? Date.parse(b.endsAt) : Number.POSITIVE_INFINITY;
+    if (aEnd !== bEnd) return aEnd - bEnd;
+    return (b.dealRating ?? 0) - (a.dealRating ?? 0);
+  });
+}
+
+function sortPermanentFree(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'));
+}
+
+function sortSales(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => {
+    const discountDiff = (b.discountPercent ?? 0) - (a.discountPercent ?? 0);
+    if (discountDiff !== 0) return discountDiff;
+    return (b.dealRating ?? 0) - (a.dealRating ?? 0);
+  });
 }
 
 async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error?: string }> {
@@ -50,26 +62,49 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
 
 /** Busca sempre nas APIs externas — uso interno do serviço de cache. */
 export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
-  const [epic, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales] = await Promise.all([
-    safeFetch(fetchEpicFreeGames),
-    safeFetch(() => fetchGamerPowerGiveaways()),
-    safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 30 })),
-    safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 60 })),
-    safeFetch(() => fetchCheapSharkDeals({ pageSize: 40 })),
-  ]);
+  const [epicFree, epicSales, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, cheapsharkEpicSales, steam] =
+    await Promise.all([
+      safeFetch(fetchEpicFreeGames),
+      safeFetch(fetchEpicSaleGames),
+      safeFetch(() => fetchGamerPowerGiveaways()),
+      safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 60 })),
+      safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 100 })),
+      safeFetch(() => fetchCheapSharkDeals({ pageSize: 80 })),
+      safeFetch(() => fetchCheapSharkDeals({ storeId: '25', pageSize: 40 })),
+      safeFetch(fetchSteamDeals),
+    ]);
 
-  const gratisAll = dedupeDeals([
-    ...epic.items,
-    ...gamerpower.items,
-    ...cheapsharkFree.items,
-    ...cheapsharkPermanentFree.items,
-  ]);
+  const steamFree = steam.items.filter((deal) => deal.kind === 'free');
+  const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
 
-  const { temporarios: gratisTemporarios, permanentes: gratisPermanentes } = splitFreeDeals(gratisAll);
-
-  const promocoes = dedupeDeals(
-    cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
+  const gratisAll = normalizeDealsList(
+    dedupeDeals([
+      ...epicFree.items,
+      ...gamerpower.items,
+      ...cheapsharkFree.items,
+      ...cheapsharkPermanentFree.items,
+      ...steamFree,
+    ]),
   );
+
+  const { temporarios: gratisTemporariosRaw, permanentes: gratisPermanentesRaw } =
+    splitFreeDeals(gratisAll);
+
+  const gratisTemporarios = sortTemporaryFree(gratisTemporariosRaw);
+  const gratisPermanentes = sortPermanentFree(gratisPermanentesRaw);
+
+  const promocoes = sortSales(
+    normalizeDealsList(
+      dedupeDeals([
+        ...cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
+        ...cheapsharkEpicSales.items.filter((deal) => deal.kind === 'sale'),
+        ...epicSales.items,
+        ...steamSales,
+      ]),
+    ),
+  );
+
+  const epicCount = epicFree.items.length + epicSales.items.length;
 
   return {
     fetchedAt: new Date().toISOString(),
@@ -78,17 +113,34 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     gratisPermanentes,
     promocoes,
     sources: {
-      epic: { ok: !epic.error, count: epic.items.length, error: epic.error },
+      epic: {
+        ok: !epicFree.error && !epicSales.error,
+        count: epicCount,
+        error: epicFree.error ?? epicSales.error,
+      },
       gamerpower: {
         ok: !gamerpower.error,
         count: gamerpower.items.length,
         error: gamerpower.error,
       },
       cheapshark: {
-        ok: !cheapsharkFree.error && !cheapsharkPermanentFree.error && !cheapsharkSales.error,
-        count: cheapsharkFree.items.length + cheapsharkPermanentFree.items.length + cheapsharkSales.items.length,
-        error: cheapsharkFree.error ?? cheapsharkPermanentFree.error ?? cheapsharkSales.error,
+        ok:
+          !cheapsharkFree.error &&
+          !cheapsharkPermanentFree.error &&
+          !cheapsharkSales.error &&
+          !cheapsharkEpicSales.error,
+        count:
+          cheapsharkFree.items.length +
+          cheapsharkPermanentFree.items.length +
+          cheapsharkSales.items.length +
+          cheapsharkEpicSales.items.length,
+        error:
+          cheapsharkFree.error ??
+          cheapsharkPermanentFree.error ??
+          cheapsharkSales.error ??
+          cheapsharkEpicSales.error,
       },
+      steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
     },
   };
 }
@@ -116,6 +168,7 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     overview.sources.epic.ok ? '1' : '0',
     overview.sources.gamerpower.ok ? '1' : '0',
     overview.sources.cheapshark.ok ? '1' : '0',
+    overview.sources.steam.ok ? '1' : '0',
   ].join('::');
 
   return crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16);
