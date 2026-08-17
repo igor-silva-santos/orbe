@@ -86,7 +86,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: 3 })),
     safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: 2 })),
     safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: 3 })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 40, maxPages: 2 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 60, maxPages: 5 })),
     safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: 2 })),
     safeFetch(fetchSteamDeals),
     safeFetch(fetchCatalogSteamPromotions),
