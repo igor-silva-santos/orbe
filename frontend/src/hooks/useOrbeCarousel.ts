@@ -8,7 +8,8 @@ import type { EmblaOptionsType } from 'embla-carousel';
 export const ORBE_CAROUSEL_OPTIONS: EmblaOptionsType = {
   align: 'center',
   dragFree: true,
-  containScroll: 'trimSnaps',
+  // false keeps center alignment at edges; infinite wrap is handled in useCarouselInfiniteLoop.
+  containScroll: false,
   duration: 40,
   skipSnaps: false,
 };
