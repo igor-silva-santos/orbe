@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { fetchEpicFreeGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDeals } from './cheapsharkClient';
+import { fetchSteamDeals } from './steamDealsClient';
 import { splitFreeDeals } from './freeTier';
 import type { DealsOverview, UnifiedDeal } from './types';
 
@@ -27,16 +28,46 @@ type CachedDealsEntry = {
 let memoryCache: CachedDealsEntry | null = null;
 let backgroundRefreshInFlight = false;
 
+function dealQualityScore(deal: UnifiedDeal): number {
+  let score = 0;
+  if (deal.imageUrl) score += 100;
+  if (deal.dealRating != null) score += deal.dealRating * 10;
+  if (deal.source === 'steam' || deal.source === 'epic') score += 25;
+  if (deal.endsAt) score += 5;
+  return score;
+}
+
 function dedupeDeals(deals: UnifiedDeal[]): UnifiedDeal[] {
-  const seen = new Set<string>();
-  const result: UnifiedDeal[] = [];
+  const byKey = new Map<string, UnifiedDeal>();
   for (const deal of deals) {
-    const key = `${deal.platform}:${deal.title.toLowerCase()}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(deal);
+    const key = `${deal.platform}:${deal.title.toLowerCase().trim()}`;
+    const existing = byKey.get(key);
+    if (!existing || dealQualityScore(deal) > dealQualityScore(existing)) {
+      byKey.set(key, deal);
+    }
   }
-  return result;
+  return Array.from(byKey.values());
+}
+
+function sortTemporaryFree(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => {
+    const aEnd = a.endsAt ? Date.parse(a.endsAt) : Number.POSITIVE_INFINITY;
+    const bEnd = b.endsAt ? Date.parse(b.endsAt) : Number.POSITIVE_INFINITY;
+    if (aEnd !== bEnd) return aEnd - bEnd;
+    return (b.dealRating ?? 0) - (a.dealRating ?? 0);
+  });
+}
+
+function sortPermanentFree(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => a.title.localeCompare(b.title, 'pt-BR'));
+}
+
+function sortSales(deals: UnifiedDeal[]): UnifiedDeal[] {
+  return [...deals].sort((a, b) => {
+    const discountDiff = (b.discountPercent ?? 0) - (a.discountPercent ?? 0);
+    if (discountDiff !== 0) return discountDiff;
+    return (b.dealRating ?? 0) - (a.dealRating ?? 0);
+  });
 }
 
 async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error?: string }> {
@@ -50,25 +81,35 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
 
 /** Busca sempre nas APIs externas — uso interno do serviço de cache. */
 export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
-  const [epic, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales] = await Promise.all([
-    safeFetch(fetchEpicFreeGames),
-    safeFetch(() => fetchGamerPowerGiveaways()),
-    safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 30 })),
-    safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 60 })),
-    safeFetch(() => fetchCheapSharkDeals({ pageSize: 40 })),
-  ]);
+  const [epic, gamerpower, cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, steam] =
+    await Promise.all([
+      safeFetch(fetchEpicFreeGames),
+      safeFetch(() => fetchGamerPowerGiveaways()),
+      safeFetch(() => fetchCheapSharkDeals({ freeOnly: true, pageSize: 60 })),
+      safeFetch(() => fetchCheapSharkDeals({ permanentFreeOnly: true, pageSize: 100 })),
+      safeFetch(() => fetchCheapSharkDeals({ pageSize: 80 })),
+      safeFetch(fetchSteamDeals),
+    ]);
+
+  const steamFree = steam.items.filter((deal) => deal.kind === 'free');
+  const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
 
   const gratisAll = dedupeDeals([
     ...epic.items,
     ...gamerpower.items,
     ...cheapsharkFree.items,
     ...cheapsharkPermanentFree.items,
+    ...steamFree,
   ]);
 
-  const { temporarios: gratisTemporarios, permanentes: gratisPermanentes } = splitFreeDeals(gratisAll);
+  const { temporarios: gratisTemporariosRaw, permanentes: gratisPermanentesRaw } =
+    splitFreeDeals(gratisAll);
 
-  const promocoes = dedupeDeals(
-    cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
+  const gratisTemporarios = sortTemporaryFree(gratisTemporariosRaw);
+  const gratisPermanentes = sortPermanentFree(gratisPermanentesRaw);
+
+  const promocoes = sortSales(
+    dedupeDeals([...cheapsharkSales.items.filter((deal) => deal.kind === 'sale'), ...steamSales]),
   );
 
   return {
@@ -86,9 +127,13 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
       },
       cheapshark: {
         ok: !cheapsharkFree.error && !cheapsharkPermanentFree.error && !cheapsharkSales.error,
-        count: cheapsharkFree.items.length + cheapsharkPermanentFree.items.length + cheapsharkSales.items.length,
+        count:
+          cheapsharkFree.items.length +
+          cheapsharkPermanentFree.items.length +
+          cheapsharkSales.items.length,
         error: cheapsharkFree.error ?? cheapsharkPermanentFree.error ?? cheapsharkSales.error,
       },
+      steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
     },
   };
 }
@@ -116,6 +161,7 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     overview.sources.epic.ok ? '1' : '0',
     overview.sources.gamerpower.ok ? '1' : '0',
     overview.sources.cheapshark.ok ? '1' : '0',
+    overview.sources.steam.ok ? '1' : '0',
   ].join('::');
 
   return crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16);
