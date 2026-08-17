@@ -354,11 +354,10 @@ export const orbeNerdApi = {
     return apiClient.get(`/deals${query}`);
   },
   getFreeDeals: async (): Promise<DealsGratisResponse> => apiClient.get('/deals/gratis'),
-  getSaleDeals: async (params?: { page?: number; limit?: number; includeCatalog?: boolean }): Promise<DealsPromocoesResponse> => {
+  getSaleDeals: async (params?: { page?: number; limit?: number }): Promise<DealsPromocoesResponse> => {
     const query = new URLSearchParams();
     if (params?.page) query.set('page', String(params.page));
     if (params?.limit) query.set('limit', String(params.limit));
-    if (params?.includeCatalog === false) query.set('includeCatalog', '0');
     const suffix = query.toString() ? `?${query.toString()}` : '';
     return apiClient.get(`/deals/promocoes${suffix}`);
   },
