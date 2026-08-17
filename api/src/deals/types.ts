@@ -40,6 +40,9 @@ export type UnifiedDeal = {
   dealRating?: number | null;
   status?: string | null;
   freeTier?: FreeTier | null;
+  /** Preço convertido de USD para BRL (aproximado). */
+  priceConverted?: boolean | null;
+  originalSalePriceUsd?: string | null;
 };
 
 export type DealsOverview = {

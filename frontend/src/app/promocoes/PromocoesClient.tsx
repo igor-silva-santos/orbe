@@ -2,25 +2,33 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowDownUp, ArrowLeft, Gift, RefreshCw, Tag, Sparkles, Clock } from 'lucide-react';
+import {
+  ArrowDownUp,
+  ArrowLeft,
+  Gift,
+  RefreshCw,
+  Tag,
+  Sparkles,
+  Clock,
+  Search,
+  TrendingUp,
+} from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { sortDeals, sortOptionsForTab, type DealSortOption } from '@/lib/dealSort';
+import {
+  ALL_PLATFORM_FILTERS,
+  availablePlatformFilters,
+  filterByPlatform,
+  filterBySearch,
+  groupByPlatform,
+} from '@/lib/dealFilters';
 import type { DealsOverview, DealPlatform, UnifiedDeal } from '@/types/deals';
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-
-const PLATFORM_FILTERS: { id: DealPlatform | 'all'; label: string }[] = [
-  { id: 'all', label: 'Todas' },
-  { id: 'steam', label: 'Steam' },
-  { id: 'epic', label: 'Epic' },
-  { id: 'gog', label: 'GOG' },
-  { id: 'ubisoft', label: 'Ubisoft' },
-  { id: 'origin', label: 'EA' },
-  { id: 'itch', label: 'itch.io' },
-];
+const PAGE_SIZE = 24;
 
 function formatFetchedAt(iso: string): string {
   const date = new Date(iso);
@@ -33,21 +41,6 @@ function formatFetchedAt(iso: string): string {
   });
 }
 
-function groupByPlatform(deals: UnifiedDeal[]): Record<string, UnifiedDeal[]> {
-  const groups: Record<string, UnifiedDeal[]> = {};
-  for (const deal of deals) {
-    const key = deal.platform;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(deal);
-  }
-  return groups;
-}
-
-function filterByPlatform(deals: UnifiedDeal[], platformFilter: DealPlatform | 'all'): UnifiedDeal[] {
-  if (platformFilter === 'all') return deals;
-  return deals.filter((d) => d.platform === platformFilter);
-}
-
 function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorityCount?: number }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
@@ -58,18 +51,44 @@ function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorit
   );
 }
 
+function LoadMoreButton({
+  visibleCount,
+  totalCount,
+  onLoadMore,
+}: {
+  visibleCount: number;
+  totalCount: number;
+  onLoadMore: () => void;
+}) {
+  if (visibleCount >= totalCount) return null;
+  return (
+    <div className="flex justify-center pt-4">
+      <button
+        type="button"
+        onClick={onLoadMore}
+        className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors"
+      >
+        Carregar mais ({Math.min(PAGE_SIZE, totalCount - visibleCount)} de {totalCount - visibleCount} restantes)
+      </button>
+    </div>
+  );
+}
+
 function DealsByPlatform({
   deals,
   platformFilter,
+  visibleCount,
 }: {
   deals: UnifiedDeal[];
   platformFilter: DealPlatform | 'all';
+  visibleCount: number;
 }) {
   const filtered = useMemo(
     () => filterByPlatform(deals, platformFilter),
     [deals, platformFilter],
   );
-  const byPlatform = useMemo(() => groupByPlatform(filtered), [filtered]);
+  const visible = filtered.slice(0, visibleCount);
+  const byPlatform = useMemo(() => groupByPlatform(visible), [visible]);
 
   if (filtered.length === 0) {
     return (
@@ -80,7 +99,7 @@ function DealsByPlatform({
   }
 
   if (platformFilter !== 'all') {
-    return <DealsGrid deals={filtered} />;
+    return <DealsGrid deals={visible} />;
   }
 
   return (
@@ -88,7 +107,7 @@ function DealsByPlatform({
       {Object.entries(byPlatform).map(([platform, platformDeals]) => (
         <div key={platform}>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
+            {ALL_PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
           </h3>
           <DealsGrid deals={platformDeals} />
         </div>
@@ -98,15 +117,17 @@ function DealsByPlatform({
 }
 
 function PlatformFilters({
+  options,
   platformFilter,
   onChange,
 }: {
+  options: typeof ALL_PLATFORM_FILTERS;
   platformFilter: DealPlatform | 'all';
   onChange: (value: DealPlatform | 'all') => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {PLATFORM_FILTERS.map((filter) => (
+      {options.map((filter) => (
         <button
           key={filter.id}
           type="button"
@@ -153,6 +174,21 @@ function SortSelect({
   );
 }
 
+function SearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="relative block w-full sm:max-w-xs">
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <input
+        type="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="Buscar jogo..."
+        className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm orbe-text-primary placeholder:text-muted-foreground"
+      />
+    </label>
+  );
+}
+
 function SourceFooter({ data }: { data: DealsOverview }) {
   return (
     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
@@ -169,19 +205,50 @@ function SourceFooter({ data }: { data: DealsOverview }) {
       <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
         Steam ({data.sources.steam?.count ?? 0})
       </span>
+      <span className="text-muted-foreground/80">· Preços USD convertidos com câmbio aproximado</span>
     </div>
   );
 }
 
-export default function PromocoesClient() {
+function JogosEmAltaBanner() {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex items-start gap-3">
+        <TrendingUp className="h-5 w-5 text-[var(--orbe-accent-2)] shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium orbe-text-primary">Promoções do catálogo Orbe</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Veja também descontos Steam dos jogos do nosso catálogo, com capas IGDB e notas da comunidade.
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/jogos-em-alta"
+        className="inline-flex items-center justify-center rounded-lg border border-primary/40 px-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors shrink-0"
+      >
+        Abrir Jogos em Alta
+      </Link>
+    </div>
+  );
+}
+
+type PromocoesClientProps = {
+  initialTab?: 'gratis' | 'promocoes';
+};
+
+export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClientProps) {
   const [data, setData] = useState<DealsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
-  const [activeTab, setActiveTab] = useState('gratis');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
   const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [visibleTemporarios, setVisibleTemporarios] = useState(PAGE_SIZE);
+  const [visiblePermanentes, setVisiblePermanentes] = useState(PAGE_SIZE);
+  const [visiblePromocoes, setVisiblePromocoes] = useState(PAGE_SIZE);
 
   const loadDeals = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -210,6 +277,12 @@ export default function PromocoesClient() {
     return () => window.clearInterval(timer);
   }, [loadDeals]);
 
+  useEffect(() => {
+    setVisibleTemporarios(PAGE_SIZE);
+    setVisiblePermanentes(PAGE_SIZE);
+    setVisiblePromocoes(PAGE_SIZE);
+  }, [platformFilter, searchQuery, freeSort, saleSort, activeTab]);
+
   const gratisTemporarios = useMemo(() => {
     if (!data) return [];
     if (data.gratisTemporarios?.length) return data.gratisTemporarios;
@@ -222,21 +295,53 @@ export default function PromocoesClient() {
     return data.gratis.filter((d) => d.freeTier === 'permanent');
   }, [data]);
 
+  const allFreeDeals = useMemo(
+    () => [...gratisTemporarios, ...gratisPermanentes],
+    [gratisTemporarios, gratisPermanentes],
+  );
+
+  const freePlatformOptions = useMemo(
+    () => availablePlatformFilters(allFreeDeals),
+    [allFreeDeals],
+  );
+
+  const salePlatformOptions = useMemo(
+    () => availablePlatformFilters(data?.promocoes ?? []),
+    [data?.promocoes],
+  );
+
+  const activePlatformOptions = activeTab === 'promocoes' ? salePlatformOptions : freePlatformOptions;
+
+  useEffect(() => {
+    if (platformFilter === 'all') return;
+    const hasFilter = activePlatformOptions.some((option) => option.id === platformFilter);
+    if (!hasFilter) setPlatformFilter('all');
+  }, [activePlatformOptions, platformFilter]);
+
   const filteredTemporarios = useMemo(() => {
-    const filtered = filterByPlatform(gratisTemporarios, platformFilter);
+    const filtered = filterBySearch(
+      filterByPlatform(gratisTemporarios, platformFilter),
+      searchQuery,
+    );
     return sortDeals(filtered, freeSort);
-  }, [gratisTemporarios, platformFilter, freeSort]);
+  }, [gratisTemporarios, platformFilter, searchQuery, freeSort]);
 
   const filteredPermanentes = useMemo(() => {
-    const filtered = filterByPlatform(gratisPermanentes, platformFilter);
+    const filtered = filterBySearch(
+      filterByPlatform(gratisPermanentes, platformFilter),
+      searchQuery,
+    );
     return sortDeals(filtered, freeSort === 'ending_soon' ? 'title' : freeSort);
-  }, [gratisPermanentes, platformFilter, freeSort]);
+  }, [gratisPermanentes, platformFilter, searchQuery, freeSort]);
 
   const filteredPromocoes = useMemo(() => {
     if (!data) return [];
-    const filtered = filterByPlatform(data.promocoes, platformFilter);
+    const filtered = filterBySearch(
+      filterByPlatform(data.promocoes, platformFilter),
+      searchQuery,
+    );
     return sortDeals(filtered, saleSort);
-  }, [data, platformFilter, saleSort]);
+  }, [data, platformFilter, searchQuery, saleSort]);
 
   const permanentSectionDefaultOpen = filteredTemporarios.length === 0 && filteredPermanentes.length > 0;
 
@@ -262,7 +367,7 @@ export default function PromocoesClient() {
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas gratuitas e promoções reunidas da Epic Games, Steam, GamerPower e CheapShark — clique para resgatar na loja.
+                Ofertas gratuitas e promoções reunidas da Epic Games, Steam, GamerPower e CheapShark — preços normalizados em R$ quando possível.
               </p>
               {data?.fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">
@@ -309,8 +414,7 @@ export default function PromocoesClient() {
                 <Gift className="h-4 w-4" />
                 Jogos de Graça
                 <span className="text-xs opacity-70">
-                  ({filterByPlatform(gratisTemporarios, platformFilter).length +
-                    filterByPlatform(gratisPermanentes, platformFilter).length})
+                  ({filterBySearch(filterByPlatform(allFreeDeals, platformFilter), searchQuery).length})
                 </span>
               </TabsTrigger>
               <TabsTrigger value="promocoes" className="gap-2 px-4 py-2">
@@ -321,10 +425,18 @@ export default function PromocoesClient() {
             </TabsList>
 
             <TabsContent value="gratis" className="space-y-10 mt-0">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <PlatformFilters platformFilter={platformFilter} onChange={setPlatformFilter} />
-                <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
+                  <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
+                </div>
               </div>
+
+              <PlatformFilters
+                options={freePlatformOptions}
+                platformFilter={platformFilter}
+                onChange={setPlatformFilter}
+              />
 
               <section className="space-y-4">
                 <div>
@@ -347,7 +459,18 @@ export default function PromocoesClient() {
                     </p>
                   </div>
                 ) : (
-                  <DealsByPlatform deals={filteredTemporarios} platformFilter={platformFilter} />
+                  <>
+                    <DealsByPlatform
+                      deals={filteredTemporarios}
+                      platformFilter={platformFilter}
+                      visibleCount={visibleTemporarios}
+                    />
+                    <LoadMoreButton
+                      visibleCount={visibleTemporarios}
+                      totalCount={filteredTemporarios.length}
+                      onLoadMore={() => setVisibleTemporarios((count) => count + PAGE_SIZE)}
+                    />
+                  </>
                 )}
               </section>
 
@@ -361,7 +484,18 @@ export default function PromocoesClient() {
                   Jogos free-to-play ou com preço base zero — separados das promoções por tempo limitado.
                 </p>
                 {filteredPermanentes.length > 0 ? (
-                  <DealsByPlatform deals={filteredPermanentes} platformFilter={platformFilter} />
+                  <>
+                    <DealsByPlatform
+                      deals={filteredPermanentes}
+                      platformFilter={platformFilter}
+                      visibleCount={visiblePermanentes}
+                    />
+                    <LoadMoreButton
+                      visibleCount={visiblePermanentes}
+                      totalCount={filteredPermanentes.length}
+                      onLoadMore={() => setVisiblePermanentes((count) => count + PAGE_SIZE)}
+                    />
+                  </>
                 ) : (
                   <div className="bg-card rounded-lg border border-border p-8 text-center">
                     <p className="text-muted-foreground text-sm">Nenhum jogo permanentemente grátis no momento.</p>
@@ -373,7 +507,9 @@ export default function PromocoesClient() {
             </TabsContent>
 
             <TabsContent value="promocoes" className="space-y-4 mt-0">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <JogosEmAltaBanner />
+
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <div>
                   <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
                     <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
@@ -383,16 +519,33 @@ export default function PromocoesClient() {
                     </span>
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                    Descontos ativos na Steam e em lojas parceiras — preços em R$ (Steam) ou USD (CheapShark).
+                    Descontos na Steam, Epic e lojas parceiras — valores em R$ (câmbio aproximado para ofertas internacionais).
                   </p>
                 </div>
                 <SortSelect value={saleSort} onChange={setSaleSort} tab="promocoes" />
               </div>
 
-              <PlatformFilters platformFilter={platformFilter} onChange={setPlatformFilter} />
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                <PlatformFilters
+                  options={salePlatformOptions}
+                  platformFilter={platformFilter}
+                  onChange={setPlatformFilter}
+                />
+              </div>
 
               {filteredPromocoes.length > 0 ? (
-                <DealsGrid deals={filteredPromocoes} priorityCount={6} />
+                <>
+                  <DealsGrid
+                    deals={filteredPromocoes.slice(0, visiblePromocoes)}
+                    priorityCount={6}
+                  />
+                  <LoadMoreButton
+                    visibleCount={visiblePromocoes}
+                    totalCount={filteredPromocoes.length}
+                    onLoadMore={() => setVisiblePromocoes((count) => count + PAGE_SIZE)}
+                  />
+                </>
               ) : (
                 <div className="bg-card rounded-lg border border-border p-8 text-center">
                   <p className="text-muted-foreground text-sm">Nenhuma promoção destacada nesta plataforma no momento.</p>

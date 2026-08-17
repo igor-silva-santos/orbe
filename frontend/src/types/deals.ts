@@ -39,6 +39,8 @@ export type UnifiedDeal = {
   dealRating?: number | null;
   status?: string | null;
   freeTier?: FreeTier | null;
+  priceConverted?: boolean | null;
+  originalSalePriceUsd?: string | null;
 };
 
 export type DealsOverview = {

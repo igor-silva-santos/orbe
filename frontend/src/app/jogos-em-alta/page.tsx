@@ -146,6 +146,21 @@ export default function JogosEmAltaPage() {
           </div>
         ) : data ? (
           <>
+            <div className="rounded-lg border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium orbe-text-primary">Ofertas ao vivo de várias lojas</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Promoções grátis e com desconto da Epic, Steam, GOG e mais — atualizadas a cada 10 minutos.
+                </p>
+              </div>
+              <Link
+                href="/promocoes?tab=promocoes"
+                className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2 text-xs font-medium hover:bg-primary/90 transition-colors shrink-0"
+              >
+                Ver todas as promoções
+              </Link>
+            </div>
+
             <CollapsibleSection id="jogos-em-alta-top-semana" title="Top da Semana">
               {data.destaques.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">

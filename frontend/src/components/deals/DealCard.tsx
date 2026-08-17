@@ -61,6 +61,11 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(initialImage);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  useEffect(() => {
+    setImageSrc(initialImage);
+    setImageLoaded(false);
+  }, [initialImage, deal.id]);
+
   const handleImageError = () => {
     if (deal.steamAppId && imageSrc !== steamFallbackImage(deal.steamAppId)) {
       setImageSrc(steamFallbackImage(deal.steamAppId));
@@ -140,6 +145,12 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
 
         {deal.worth && (
           <p className="text-[10px] text-muted-foreground">Valor: {deal.worth}</p>
+        )}
+
+        {deal.priceConverted && deal.originalSalePriceUsd && (
+          <p className="text-[10px] text-muted-foreground">
+            Original: {deal.originalSalePriceUsd} (câmbio aprox.)
+          </p>
         )}
 
         {endsLabel && (
