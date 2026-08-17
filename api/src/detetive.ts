@@ -1,6 +1,7 @@
 import { prisma, tmdb } from './clients';
 import { logger } from './logger';
 import puppeteer, { Browser } from 'puppeteer';
+import type { Prisma } from '@prisma/client';
 import { refreshFilmeAvailabilityFromTmdb } from './filmeAvailability';
 import {
   buildIngressoLink,
@@ -13,6 +14,7 @@ import {
   IngressoEvent,
   IngressoMatch,
 } from './ingressoClient';
+import { parseIngressoPageContent } from './ingressoPageParser';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -128,6 +130,63 @@ function releaseDatePassed(releaseDate: Date | null | undefined, now: Date): boo
   return startOfDay(releaseDate).getTime() <= startOfDay(now).getTime();
 }
 
+export type CinemaFlagsInput = {
+  filmeEmCartaz: boolean;
+  filmeEmBreve: boolean;
+  temSessoes: boolean;
+  emPrevenda: boolean;
+  ingressoLink: string | null;
+  ingressoMode: 'none' | 'link_only' | 'full';
+  estreiaCinema: boolean;
+  releasePassed: boolean;
+};
+
+export type CinemaFlagsResult = {
+  emCartaz: boolean;
+  emBreve: boolean;
+};
+
+function hasIngressoEvidence(input: Pick<CinemaFlagsInput, 'temSessoes' | 'emPrevenda' | 'ingressoLink' | 'ingressoMode'>): boolean {
+  return (
+    input.temSessoes ||
+    input.emPrevenda ||
+    (Boolean(input.ingressoLink) && input.ingressoMode !== 'none')
+  );
+}
+
+/** Resolve emCartaz/emBreve without letting TMDB estreia_cinema blindly wipe Ingresso/sync evidence. */
+export function resolveCinemaFlags(input: CinemaFlagsInput): CinemaFlagsResult {
+  const {
+    filmeEmCartaz,
+    filmeEmBreve,
+    temSessoes,
+    emPrevenda,
+    ingressoLink,
+    estreiaCinema,
+    releasePassed,
+  } = input;
+
+  const ingressoEvidence = hasIngressoEvidence(input);
+  const hasLink = Boolean(ingressoLink);
+
+  let emCartaz: boolean;
+  if (releasePassed && !temSessoes && !hasLink) {
+    emCartaz = false;
+  } else {
+    emCartaz =
+      temSessoes ||
+      (filmeEmCartaz && (ingressoEvidence || hasLink)) ||
+      (estreiaCinema && filmeEmCartaz);
+  }
+
+  const emBreve =
+    emPrevenda ||
+    (!releasePassed && filmeEmBreve) ||
+    (estreiaCinema && filmeEmBreve && !releasePassed);
+
+  return { emCartaz, emBreve };
+}
+
 function needsIngressoMonitoring(
   filme: {
     ingresso_sem_pagina: boolean;
@@ -137,10 +196,11 @@ function needsIngressoMonitoring(
   },
   now: Date,
 ): 'none' | 'link_only' | 'full' {
-  if (filme.ingresso_sem_pagina) return 'none';
-
   const hasLink = Boolean(filme.ingresso_link);
   const releasePassed = releaseDatePassed(filme.releaseDate, now);
+
+  // Antes da estreia, reabre monitoramento mesmo se uma tentativa anterior falhou.
+  if (filme.ingresso_sem_pagina && releasePassed) return 'none';
 
   if (releasePassed) {
     return hasLink ? 'none' : 'link_only';
@@ -148,6 +208,53 @@ function needsIngressoMonitoring(
 
   // Antes da estreia: sempre revalidar link, pré-venda e sessões (dados do Ingresso mudam rápido).
   return 'full';
+}
+
+function buildDetetiveMovieWhere(
+  now: Date,
+  fullScan: boolean,
+): {
+  sixMonthsAgo: Date;
+  threeMonthsAhead: Date;
+  where: Prisma.FilmeWhereInput;
+} {
+  const sixMonthsAgo = new Date(now);
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const threeMonthsAhead = new Date(now);
+  threeMonthsAhead.setMonth(threeMonthsAhead.getMonth() + (fullScan ? 6 : 3));
+
+  const cinemaInterestFilter = {
+    OR: [
+      { estreia_cinema: true },
+      { emCartaz: true },
+      { emBreve: true },
+      { em_prevenda: true },
+    ],
+  };
+
+  const releaseWindowFilter = fullScan
+    ? { releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead } }
+    : {
+        OR: [
+          { releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead } },
+          {
+            AND: [
+              cinemaInterestFilter,
+              { ingresso_sem_pagina: true },
+              { ingresso_link: null },
+              { releaseDate: { gte: now } },
+            ],
+          },
+        ],
+      };
+
+  return {
+    sixMonthsAgo,
+    threeMonthsAhead,
+    where: {
+      AND: [cinemaInterestFilter, releaseWindowFilter],
+    },
+  };
 }
 
 function getPuppeteerLaunchOptions() {
@@ -160,10 +267,6 @@ function getPuppeteerLaunchOptions() {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
     ...(executablePath ? { executablePath } : {}),
   };
-}
-
-function isIngressoNotFound(content: string): boolean {
-  return content.includes('NEXT_HTTP_ERROR_FALLBACK') || /Ocorreu um erro/i.test(content);
 }
 
 function isTransientPuppeteerError(message: string): boolean {
@@ -183,7 +286,7 @@ async function scrapeIngressoPage(browser: Browser, url: string): Promise<Scrape
     await page.waitForSelector('body', { timeout: 5_000 }).catch(() => undefined);
     const pageContent = await page.content();
 
-    if (!response || statusCode === 404 || isIngressoNotFound(pageContent)) {
+    if (!response || statusCode === 404) {
       logger.info(`[detetive] Página não encontrada (${statusCode ?? 'sem status'}): ${url}`);
       return {
         pageExists: false,
@@ -194,19 +297,26 @@ async function scrapeIngressoPage(browser: Browser, url: string): Promise<Scrape
       };
     }
 
-    const hasCinemaSessions = !pageContent.includes('Não há sessões disponíveis no momento.');
-    const isPreSale =
-      /pré-?venda/i.test(pageContent) ||
-      /pre-?sale/i.test(pageContent) ||
-      /"inPreSale"\s*:\s*true/i.test(pageContent);
+    const parsed = parseIngressoPageContent(pageContent);
+    if (!parsed.pageExists) {
+      logger.info(`[detetive] Página não encontrada (${statusCode ?? 'sem status'}): ${url}`);
+      return {
+        pageExists: false,
+        hasCinemaSessions: false,
+        isPreSale: false,
+        transientError: false,
+        statusCode,
+      };
+    }
+
     logger.info(
-      `[detetive] Página OK (${statusCode}) — sessões: ${hasCinemaSessions}, pré-venda: ${isPreSale}`,
+      `[detetive] Página OK (${statusCode}) — sessões: ${parsed.hasCinemaSessions}, pré-venda: ${parsed.isPreSale}`,
     );
 
     return {
       pageExists: true,
-      hasCinemaSessions,
-      isPreSale,
+      hasCinemaSessions: parsed.hasCinemaSessions,
+      isPreSale: parsed.isPreSale,
       transientError: false,
       statusCode,
     };
@@ -358,26 +468,29 @@ export async function runDetetive(
     logger.info(`--- Iniciando Detetive Digital 2.1 ${fullScan ? '(Varredura Completa)' : ''} ---`);
 
     const now = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const threeMonthsAhead = new Date();
-    threeMonthsAhead.setMonth(threeMonthsAhead.getMonth() + 3);
+    const { where: movieWhere } = buildDetetiveMovieWhere(now, fullScan);
+
+    if (fullScan) {
+      const reopened = await prisma.filme.updateMany({
+        where: {
+          ingresso_sem_pagina: true,
+          ingresso_link: null,
+          OR: [
+            { estreia_cinema: true },
+            { emCartaz: true },
+            { emBreve: true },
+            { em_prevenda: true },
+          ],
+        },
+        data: { ingresso_sem_pagina: false },
+      });
+      if (reopened.count > 0) {
+        logger.info(`[detetive] Varredura completa reabriu ${reopened.count} filme(s) sem página no Ingresso.`);
+      }
+    }
 
     const targetMovies = await prisma.filme.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              { estreia_cinema: true },
-              { emCartaz: true },
-              { emBreve: true },
-              { em_prevenda: true },
-            ],
-          },
-          { OR: [{ voteCount: { gt: 25 } }, { popularity: { gt: 10 } }] },
-          { releaseDate: { gte: sixMonthsAgo, lte: threeMonthsAhead } },
-        ],
-      },
+      where: movieWhere,
       include: { streamingProviders: true },
     });
 
@@ -393,7 +506,7 @@ export async function runDetetive(
     logger.info(`[detetive] Catálogo ingresso.com: ${ingressoCatalog.length} filmes indexados.`);
 
     const needsPuppeteer = targetMovies.some((filme) => {
-      if (filme.ingresso_sem_pagina) return false;
+      if (filme.ingresso_sem_pagina && releaseDatePassed(filme.releaseDate, now)) return false;
       return !releaseDatePassed(filme.releaseDate, now);
     });
 
@@ -483,14 +596,21 @@ export async function runDetetive(
               `[detetive] "${filme.title}" — não revalidou link existente; mantendo ${ingressoLink}.`,
             );
           } else {
-            ingressoSemPagina = true;
-            ingressoLink = null;
-            if (ingressoMode === 'full') {
-              temSessoes = false;
+            const canBlacklist = releasePassed && !puppeteerFallback?.transientError;
+            if (canBlacklist) {
+              ingressoSemPagina = true;
+              ingressoLink = null;
+              if (ingressoMode === 'full') {
+                temSessoes = false;
+              }
+              logger.info(`[detetive] "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
+            } else {
+              logger.info(
+                `[detetive] "${filme.title}" ainda sem link no ingresso.com; nova tentativa na próxima execução.`,
+              );
             }
-            logger.info(`[detetive] "${filme.title}" sem página no ingresso.com — monitoramento encerrado.`);
           }
-        } else if (ingressoSemPagina) {
+        } else if (ingressoSemPagina && releasePassed) {
           logger.info(`[detetive] "${filme.title}" — ingresso.com indisponível, pulando.`);
         } else if (releasePassed && ingressoLink) {
           logger.info(`[detetive] "${filme.title}" — já estreou e link existe, pulando.`);
@@ -498,6 +618,16 @@ export async function runDetetive(
 
         const streaming = await checkStreamingAvailability(filme.tmdbId, filme.id);
         const isNowDigital = streaming.available && !filme.streamingProviders.length;
+        const cinemaFlags = resolveCinemaFlags({
+          filmeEmCartaz: Boolean(filme.emCartaz),
+          filmeEmBreve: Boolean(filme.emBreve),
+          temSessoes,
+          emPrevenda,
+          ingressoLink,
+          ingressoMode,
+          estreiaCinema: streaming.estreiaCinema,
+          releasePassed,
+        });
 
         await prisma.filme.update({
           where: { id: filme.id },
@@ -510,8 +640,8 @@ export async function runDetetive(
             ultima_verificacao_ingresso: ingressoMode !== 'none' ? new Date() : filme.ultima_verificacao_ingresso,
             estreia_streaming: streaming.estreiaStreaming,
             estreia_cinema: streaming.estreiaCinema,
-            emCartaz: streaming.estreiaCinema ? filme.emCartaz : false,
-            emBreve: streaming.estreiaCinema ? filme.emBreve : false,
+            emCartaz: cinemaFlags.emCartaz,
+            emBreve: cinemaFlags.emBreve,
             status: streaming.available ? 'Released' : filme.status,
           },
         });
