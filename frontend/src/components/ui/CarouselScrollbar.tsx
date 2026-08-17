@@ -14,6 +14,7 @@ export function CarouselScrollbar({ emblaApi, className = '' }: CarouselScrollba
   const [thumbRatio, setThumbRatio] = useState(1);
   const [thumbOffset, setThumbOffset] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const draggingRef = useRef(false);
 
   const update = useCallback(() => {
@@ -56,47 +57,112 @@ export function CarouselScrollbar({ emblaApi, className = '' }: CarouselScrollba
     [emblaApi],
   );
 
+  const beginDrag = useCallback(
+    (clientX: number) => {
+      draggingRef.current = true;
+      setIsDragging(true);
+      seekFromClientX(clientX);
+    },
+    [seekFromClientX],
+  );
+
+  const moveDrag = useCallback(
+    (clientX: number) => {
+      if (!draggingRef.current) return;
+      seekFromClientX(clientX);
+    },
+    [seekFromClientX],
+  );
+
+  const endDrag = useCallback(() => {
+    draggingRef.current = false;
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      event.preventDefault();
+      moveDrag(event.clientX);
+    };
+
+    const onPointerUp = () => {
+      endDrag();
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!draggingRef.current || event.touches.length === 0) return;
+      event.preventDefault();
+      moveDrag(event.touches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+      endDrag();
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [isDragging, moveDrag, endDrag]);
+
   if (!visible) return null;
 
   return (
     <div
       ref={trackRef}
-      className={`mt-2 px-2 sm:px-4 select-none ${className}`}
+      className={`mt-2 px-2 sm:px-4 select-none touch-none ${className}`}
+      style={{ touchAction: 'none' }}
       role="scrollbar"
       aria-orientation="horizontal"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(thumbOffset * 100)}
-      onPointerDown={(e) => {
-        if (e.button !== 0) return;
-        draggingRef.current = true;
-        trackRef.current?.setPointerCapture(e.pointerId);
-        seekFromClientX(e.clientX);
+      onPointerDown={(event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        event.preventDefault();
+        beginDrag(event.clientX);
+        trackRef.current?.setPointerCapture(event.pointerId);
       }}
-      onPointerMove={(e) => {
-        if (!draggingRef.current) return;
-        seekFromClientX(e.clientX);
+      onTouchStart={(event) => {
+        if (event.touches.length === 0) return;
+        event.preventDefault();
+        beginDrag(event.touches[0].clientX);
       }}
-      onPointerUp={(e) => {
-        draggingRef.current = false;
+      onPointerUp={(event) => {
+        endDrag();
         try {
-          trackRef.current?.releasePointerCapture(e.pointerId);
+          trackRef.current?.releasePointerCapture(event.pointerId);
         } catch {
           // ignore
         }
       }}
-      onPointerCancel={(e) => {
-        draggingRef.current = false;
+      onPointerCancel={(event) => {
+        endDrag();
         try {
-          trackRef.current?.releasePointerCapture(e.pointerId);
+          trackRef.current?.releasePointerCapture(event.pointerId);
         } catch {
           // ignore
         }
       }}
     >
-      <div className="relative h-1.5 w-full rounded-full bg-muted cursor-pointer">
+      <div
+        className={`relative h-2 w-full rounded-full bg-muted ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
+      >
         <div
-          className="absolute top-0 h-full rounded-full bg-primary/80 hover:bg-primary transition-colors cursor-grab active:cursor-grabbing"
+          className={`absolute top-0 h-full rounded-full bg-primary/80 transition-colors ${isDragging ? 'bg-primary cursor-grabbing' : 'hover:bg-primary cursor-grab'}`}
           style={{
             width: `${thumbRatio * 100}%`,
             left: `${thumbOffset * 100}%`,
