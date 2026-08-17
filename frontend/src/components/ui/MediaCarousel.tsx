@@ -15,7 +15,7 @@ import YearTbdSeparatorCard from '../media/YearTbdSeparatorCard';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
 import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
-import { getMediaCarouselLoopBounds } from '@/lib/carousel-loop';
+import { getMediaCarouselLoopBounds, getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import {
   addMonths,
@@ -214,6 +214,16 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     mediaItemsRef.current = mediaItems;
   }, [mediaItems]);
 
+  /** Atualiza dados após sync sem remontar o carrossel */
+  useEffect(() => {
+    if (!initialData.length) return;
+    setMediaItems((prev) => {
+      const merged = mergeMediaByDate(prev, initialData);
+      mediaItemsRef.current = merged;
+      return merged;
+    });
+  }, [initialData]);
+
   const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
     if (positioningTitleLockedRef.current) return;
     const item = items[index];
@@ -282,19 +292,22 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   }, [emblaApi, emAltaMode, emAltaItems]);
 
   const getLoopBounds = useCallback(() => {
+    if (emAltaMode) {
+      const last = Math.max(0, filteredItemsRef.current.length - 1);
+      return { start: 0, end: last };
+    }
     const snap = emblaApi?.selectedScrollSnap() ?? 0;
     return getMediaCarouselLoopBounds(
       snap,
       filteredItemsRef.current.length,
       displaySlidesRef.current.length,
     );
-  }, [emblaApi]);
+  }, [emblaApi, emAltaMode]);
 
   const loopEnabled =
-    !emAltaMode &&
     !hasInitialPositioning &&
     pendingScrollIndex === null &&
-    filteredItems.length > 0;
+    (emAltaMode ? filteredItems.length > 0 : filteredItems.length > 0);
 
   const infiniteLoopConfig = useMemo(
     () => ({ enabled: loopEnabled, getBounds: getLoopBounds }),
@@ -617,6 +630,18 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
           return;
         }
       }
+
+      const wrapIndex = getCarouselNavWrapIndex(direction, list.length);
+      const wrapItem = list[wrapIndex];
+      const wrapKey = monthKeyFromItem(wrapItem);
+      if (wrapKey) {
+        const { year: wy, month: wm } = parseMonthKey(wrapKey);
+        lastTitleMonthKey.current = wrapKey;
+        lastVisibleMonthKeyRef.current = wrapKey;
+        setCurrentTitle(formatCarouselMonthTitle(new Date(wy, wm - 1, 1)));
+        setPendingScrollIndex(wrapIndex);
+        ensureUpcomingMonthsLoaded(wrapKey);
+      }
     } finally {
       setIsNavigating(false);
     }
@@ -632,8 +657,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
           className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors flex items-center gap-2"
-          onClick={emAltaMode ? undefined : scrollToToday}
-          title={emAltaMode ? undefined : 'Ir para o mês atual'}
+          onClick={emAltaMode ? () => emblaApi?.scrollTo(0, true) : scrollToToday}
+          title={emAltaMode ? 'Voltar ao início da lista' : 'Ir para o mês atual'}
         >
           {emAltaMode
             ? 'Em Alta'

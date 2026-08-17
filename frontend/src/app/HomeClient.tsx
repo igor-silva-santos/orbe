@@ -23,7 +23,6 @@ interface HomeClientProps {
 
 export default function HomeClient({ initialData }: HomeClientProps) {
   const [data, setData] = useState(initialData);
-  const [carouselKey, setCarouselKey] = useState(0);
 
   const heroRef = useRef<HTMLElement>(null);
   const filmesRef = useRef<HTMLElement>(null);
@@ -53,7 +52,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         jogos: (fresh.jogos ?? []) as Midia[],
         animes: (fresh.animes ?? []) as Anime[],
       });
-      setCarouselKey((k) => k + 1);
     } catch (error) {
       console.error('Erro ao atualizar homepage após sync:', error);
     }
@@ -98,7 +96,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section ref={filmesRef} id="filmes" className="overflow-hidden">
           <SectionHeading title="Filmes" href="/filmes" />
           <MediaCarousel
-            key={`filmes-${carouselKey}`}
             mediaType="filmes"
             initialData={data.filmes}
             startIndex={resolveCarouselOpenIndex(data.filmes)}
@@ -109,7 +106,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section ref={seriesRef} id="series" className="overflow-hidden">
           <SectionHeading title="Séries" href="/series" />
           <MediaCarousel
-            key={`series-${carouselKey}`}
             mediaType="series"
             initialData={data.series}
             startIndex={resolveCarouselOpenIndex(data.series)}
@@ -120,7 +116,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section ref={animesRef} id="animes" className="overflow-hidden">
           <SectionHeading title="Animes" href="/animes" />
           <AnimeCarousel
-            key={`animes-${carouselKey}`}
             initialData={data.animes}
             bootstrapEnabled={animesVisible}
           />
@@ -129,7 +124,6 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         <section ref={jogosRef} id="jogos" className="overflow-hidden">
           <SectionHeading title="Jogos" href="/jogos" />
           <MediaCarousel
-            key={`jogos-${carouselKey}`}
             mediaType="jogos"
             initialData={data.jogos}
             startIndex={resolveCarouselOpenIndex(data.jogos)}

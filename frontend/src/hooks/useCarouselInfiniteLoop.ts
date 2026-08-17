@@ -65,24 +65,13 @@ export function useCarouselInfiniteLoop({
 
       const bounds = getBoundsRef.current();
       const snap = emblaApi.selectedScrollSnap();
-      const { atStart, atEnd } = edgeAtGestureStartRef.current;
 
-      if (
-        direction === 'forward' &&
-        atEnd &&
-        snap >= bounds.end &&
-        !emblaApi.canScrollNext()
-      ) {
+      if (direction === 'forward' && snap >= bounds.end && !emblaApi.canScrollNext()) {
         wrapTo(bounds.start);
         return;
       }
 
-      if (
-        direction === 'backward' &&
-        atStart &&
-        snap <= bounds.start &&
-        !emblaApi.canScrollPrev()
-      ) {
+      if (direction === 'backward' && snap <= bounds.start && !emblaApi.canScrollPrev()) {
         wrapTo(bounds.end);
       }
     };
