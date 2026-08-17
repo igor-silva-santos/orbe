@@ -4,18 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
+import { getPlatformLabel } from '@/lib/dealFilters';
 import type { UnifiedDeal } from '@/types/deals';
-
-const PLATFORM_LABELS: Record<string, string> = {
-  steam: 'Steam',
-  epic: 'Epic Games',
-  gog: 'GOG',
-  ubisoft: 'Ubisoft',
-  origin: 'EA / Origin',
-  itch: 'itch.io',
-  pc: 'PC',
-  other: 'Loja',
-};
 
 const SOURCE_LABELS: Record<string, string> = {
   epic: 'Epic Games',
@@ -47,7 +37,7 @@ interface DealCardProps {
 }
 
 export default function DealCard({ deal, priority = false }: DealCardProps) {
-  const platformLabel = PLATFORM_LABELS[deal.platform] ?? deal.platforms[0] ?? 'Loja';
+  const platformLabel = getPlatformLabel(deal.platform) || deal.platforms[0] || 'Loja';
   const sourceLabel = SOURCE_LABELS[deal.source] ?? deal.source;
   const endsLabel = formatEndsAt(deal.endsAt);
   const isFree = deal.kind === 'free';

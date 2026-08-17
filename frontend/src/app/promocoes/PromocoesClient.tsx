@@ -2,42 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  ArrowDownUp,
-  ArrowLeft,
-  Gift,
-  RefreshCw,
-  Tag,
-  Sparkles,
-  Clock,
-  Search,
-  TrendingUp,
-  AlertTriangle,
-  Gamepad2,
-} from 'lucide-react';
+import { ArrowLeft, Gift, RefreshCw, Tag, Sparkles, Clock } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
-import JogosEmAltaContent from '@/components/jogos/JogosEmAltaContent';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { sortDeals, sortOptionsForTab, type DealSortOption } from '@/lib/dealSort';
 import {
   ALL_PLATFORM_FILTERS,
+  FREE_FEATURED_PLATFORMS,
   availablePlatformFilters,
   filterByPlatform,
-  filterBySearch,
+  getPlatformLabel,
   groupByPlatform,
 } from '@/lib/dealFilters';
-import type {
-  DealsGratisResponse,
-  DealsOverview,
-  DealsPromocoesResponse,
-  DealPlatform,
-  UnifiedDeal,
-} from '@/types/deals';
+import type { DealsOverview, DealPlatform, UnifiedDeal } from '@/types/deals';
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-const PAGE_SIZE = 48;
 
 function formatFetchedAt(iso: string): string {
   const date = new Date(iso);
@@ -48,6 +28,11 @@ function formatFetchedAt(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function excludePlatforms(deals: UnifiedDeal[], platforms: DealPlatform[]): UnifiedDeal[] {
+  if (platforms.length === 0) return deals;
+  return deals.filter((deal) => !platforms.includes(deal.platform));
 }
 
 function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorityCount?: number }) {
@@ -90,7 +75,7 @@ function DealsByPlatform({
       {Object.entries(byPlatform).map(([platform, platformDeals]) => (
         <div key={platform}>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {ALL_PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
+            {getPlatformLabel(platform)}
           </h3>
           <DealsGrid deals={platformDeals} />
         </div>
@@ -128,92 +113,46 @@ function PlatformFilters({
   );
 }
 
-function SortSelect({
-  value,
+function FreeQuickFilters({
+  deals,
+  platformFilter,
   onChange,
-  tab,
 }: {
-  value: DealSortOption;
-  onChange: (value: DealSortOption) => void;
-  tab: 'gratis' | 'promocoes';
+  deals: UnifiedDeal[];
+  platformFilter: DealPlatform | 'all';
+  onChange: (value: DealPlatform | 'all') => void;
 }) {
-  const options = sortOptionsForTab(tab);
-  return (
-    <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-      <ArrowDownUp className="h-3.5 w-3.5 shrink-0" />
-      <span className="sr-only">Ordenar por</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value as DealSortOption)}
-        className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs orbe-text-primary"
-      >
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+  const quickOptions = FREE_FEATURED_PLATFORMS.filter((platform) =>
+    deals.some((deal) => deal.platform === platform),
   );
-}
 
-function SearchInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  return (
-    <label className="relative block w-full sm:max-w-xs">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <input
-        type="search"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="Buscar jogo..."
-        className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm orbe-text-primary placeholder:text-muted-foreground"
-      />
-    </label>
-  );
-}
-
-function SourcesAlert({
-  sources,
-  health,
-}: {
-  sources?: DealsOverview['sources'];
-  health?: DealsOverview['sourcesHealth'];
-}) {
-  if (!sources || health === 'ok' || !health) return null;
-
-  const failed = Object.entries(sources).filter(([, status]) => !status.ok);
-  if (failed.length === 0) return null;
+  if (quickOptions.length === 0) return null;
 
   return (
-    <div
-      className={`rounded-lg border p-4 flex gap-3 ${
-        health === 'critical'
-          ? 'border-destructive/40 bg-destructive/10'
-          : 'border-amber-500/40 bg-amber-500/10'
-      }`}
-    >
-      <AlertTriangle
-        className={`h-5 w-5 shrink-0 ${health === 'critical' ? 'text-destructive' : 'text-amber-600'}`}
-      />
-      <div className="text-sm">
-        <p className="font-medium orbe-text-primary">
-          {health === 'critical'
-            ? 'A maioria das fontes está indisponível'
-            : 'Algumas fontes estão indisponíveis'}
-        </p>
-        <p className="text-muted-foreground text-xs mt-1">
-          Falha em: {failed.map(([name]) => name).join(', ')}. A lista pode estar incompleta — tente atualizar em alguns minutos.
-        </p>
-      </div>
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-muted-foreground">Destaques:</span>
+      {quickOptions.map((platform) => {
+        const isActive = platformFilter === platform;
+        return (
+          <button
+            key={platform}
+            type="button"
+            onClick={() => onChange(isActive ? 'all' : platform)}
+            className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+              isActive
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card border-border orbe-text-primary hover:bg-muted'
+            }`}
+          >
+            {getPlatformLabel(platform)}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function SourceFooter({
-  data,
-}: {
-  data: Pick<DealsOverview, 'sources' | 'usdBrlRate' | 'usdBrlRateFetchedAt'>;
-}) {
+function SourceFooter({ data }: { data: DealsOverview }) {
   return (
     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
       <span>Fontes:</span>
@@ -226,147 +165,65 @@ function SourceFooter({
       <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
         CheapShark ({data.sources.cheapshark.count})
       </span>
-      <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        Steam ({data.sources.steam?.count ?? 0})
+      <span className={data.sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        itch.io ({data.sources.itch?.count ?? 0})
       </span>
-      <span className={data.sources.orbe?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        Orbe ({data.sources.orbe?.count ?? 0})
-      </span>
-      {data.usdBrlRate != null && (
-        <span className="text-muted-foreground/80">
-          · USD/BRL: {data.usdBrlRate.toFixed(2)}
-          {data.usdBrlRateFetchedAt && (
-            <>
-              {' '}
-              (atualizada{' '}
-              {new Date(data.usdBrlRateFetchedAt).toLocaleString('pt-BR', {
-                dateStyle: 'short',
-                timeStyle: 'short',
-              })}
-              )
-            </>
-          )}
-        </span>
-      )}
     </div>
   );
 }
 
-type PromocoesTab = 'gratis' | 'promocoes' | 'em-alta';
-
-type PromocoesClientProps = {
-  initialTab?: PromocoesTab;
-};
-
-export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClientProps) {
-  const [gratisData, setGratisData] = useState<DealsGratisResponse | null>(null);
-  const [promoData, setPromoData] = useState<DealsPromocoesResponse | null>(null);
-  const [promoDeals, setPromoDeals] = useState<UnifiedDeal[]>([]);
-  const [catalogoSteam, setCatalogoSteam] = useState<UnifiedDeal[]>([]);
-  const [promoPage, setPromoPage] = useState(1);
-  const [promoHasMore, setPromoHasMore] = useState(false);
+export default function PromocoesClient({
+  initialTab = 'gratis',
+}: {
+  initialTab?: 'gratis' | 'promocoes' | 'em-alta';
+} = {}) {
+  const [data, setData] = useState<DealsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
-  const [activeTab, setActiveTab] = useState(initialTab);
-  const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
-  const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const loadGratis = useCallback(async () => {
-    const response = (await realApi.getFreeDeals()) as DealsGratisResponse;
-    setGratisData(response);
-    return response;
-  }, []);
-
-  const loadPromocoes = useCallback(async (page = 1, append = false) => {
-    const response = (await realApi.getSaleDeals({ page, limit: PAGE_SIZE })) as DealsPromocoesResponse;
-    setPromoData(response);
-    setCatalogoSteam(response.catalogoSteam ?? []);
-    setPromoPage(response.page);
-    setPromoHasMore(response.hasMore);
-    setPromoDeals((current) => (append ? [...current, ...response.deals] : response.deals));
-    return response;
-  }, []);
-
-  const loadActiveTab = useCallback(
-    async (silent = false, tab: PromocoesTab = activeTab as PromocoesTab) => {
-      if (tab === 'em-alta') {
-        setIsLoading(false);
-        setIsRefreshing(false);
-        return;
-      }
-      if (!silent) setIsLoading(true);
-      else setIsRefreshing(true);
-      setError(null);
-      try {
-        if (tab === 'gratis') {
-          await loadGratis();
-        } else {
-          await loadPromocoes(1, false);
-        }
-      } catch (err) {
-        console.error(err);
-        setError('Não foi possível carregar promoções e jogos grátis.');
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [activeTab, loadGratis, loadPromocoes],
+  const [activeTab, setActiveTab] = useState<'gratis' | 'promocoes'>(
+    initialTab === 'promocoes' ? 'promocoes' : 'gratis',
   );
 
+  const loadDeals = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    else setIsRefreshing(true);
+    setError(null);
+    try {
+      const overview = await realApi.getDeals();
+      setData(overview as DealsOverview);
+    } catch (err) {
+      console.error(err);
+      setError('Não foi possível carregar promoções e jogos grátis.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
   useEffect(() => {
-    void loadActiveTab(false, initialTab);
-  }, [initialTab, loadActiveTab]);
+    void loadDeals();
+  }, [loadDeals]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      if (activeTab !== 'em-alta') void loadActiveTab(true);
+      void loadDeals(true);
     }, REFRESH_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [loadActiveTab, activeTab]);
-
-  const handleTabChange = (tab: PromocoesTab) => {
-    setActiveTab(tab);
-    if (tab === 'gratis' && !gratisData) void loadGratis();
-    if (tab === 'promocoes' && !promoData) void loadPromocoes(1, false);
-    if (tab === 'em-alta') setIsLoading(false);
-  };
-
-  const handleLoadMorePromos = async () => {
-    if (!promoHasMore || isLoadingMore) return;
-    setIsLoadingMore(true);
-    try {
-      await loadPromocoes(promoPage + 1, true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  const fetchedAt = gratisData?.fetchedAt ?? promoData?.fetchedAt;
-  const sources = gratisData?.sources ?? promoData?.sources;
-  const sourcesHealth = gratisData?.sourcesHealth ?? promoData?.sourcesHealth;
-  const usdBrlRate = gratisData?.usdBrlRate ?? promoData?.usdBrlRate;
-  const usdBrlRateFetchedAt = gratisData?.usdBrlRateFetchedAt ?? promoData?.usdBrlRateFetchedAt;
+  }, [loadDeals]);
 
   const gratisTemporarios = useMemo(() => {
-    if (!gratisData) return [];
-    return gratisData.gratisTemporarios?.length
-      ? gratisData.gratisTemporarios
-      : gratisData.deals.filter((d) => d.freeTier !== 'permanent');
-  }, [gratisData]);
+    if (!data) return [];
+    if (data.gratisTemporarios?.length) return data.gratisTemporarios;
+    return data.gratis.filter((d) => d.freeTier !== 'permanent');
+  }, [data]);
 
   const gratisPermanentes = useMemo(() => {
-    if (!gratisData) return [];
-    return gratisData.gratisPermanentes?.length
-      ? gratisData.gratisPermanentes
-      : gratisData.deals.filter((d) => d.freeTier === 'permanent');
-  }, [gratisData]);
+    if (!data) return [];
+    if (data.gratisPermanentes?.length) return data.gratisPermanentes;
+    return data.gratis.filter((d) => d.freeTier === 'permanent');
+  }, [data]);
 
   const allFreeDeals = useMemo(
     () => [...gratisTemporarios, ...gratisPermanentes],
@@ -378,52 +235,45 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     [allFreeDeals],
   );
 
-  const salePool = useMemo(() => promoDeals, [promoDeals]);
+  const showFeaturedSections = platformFilter === 'all';
 
-  const salePlatformOptions = useMemo(
-    () => availablePlatformFilters([...salePool, ...catalogoSteam]),
-    [salePool, catalogoSteam],
+  const featuredPlatformsWithDeals = useMemo(
+    () =>
+      showFeaturedSections
+        ? FREE_FEATURED_PLATFORMS.filter((platform) =>
+            allFreeDeals.some((deal) => deal.platform === platform),
+          )
+        : [],
+    [allFreeDeals, showFeaturedSections],
   );
 
-  const activePlatformOptions = activeTab === 'promocoes' ? salePlatformOptions : freePlatformOptions;
+  const mainTemporarios = useMemo(() => {
+    const base = showFeaturedSections
+      ? excludePlatforms(gratisTemporarios, featuredPlatformsWithDeals)
+      : gratisTemporarios;
+    return filterByPlatform(base, platformFilter);
+  }, [gratisTemporarios, platformFilter, showFeaturedSections, featuredPlatformsWithDeals]);
+
+  const mainPermanentes = useMemo(() => {
+    const base = showFeaturedSections
+      ? excludePlatforms(gratisPermanentes, featuredPlatformsWithDeals)
+      : gratisPermanentes;
+    return filterByPlatform(base, platformFilter);
+  }, [gratisPermanentes, platformFilter, showFeaturedSections, featuredPlatformsWithDeals]);
+
+  const featuredDealsByPlatform = useMemo(() => {
+    const grouped: Partial<Record<DealPlatform, UnifiedDeal[]>> = {};
+    for (const platform of featuredPlatformsWithDeals) {
+      grouped[platform] = filterByPlatform(allFreeDeals, platform);
+    }
+    return grouped;
+  }, [allFreeDeals, featuredPlatformsWithDeals]);
 
   useEffect(() => {
     if (platformFilter === 'all') return;
-    const hasFilter = activePlatformOptions.some((option) => option.id === platformFilter);
+    const hasFilter = freePlatformOptions.some((option) => option.id === platformFilter);
     if (!hasFilter) setPlatformFilter('all');
-  }, [activePlatformOptions, platformFilter]);
-
-  const filteredTemporarios = useMemo(() => {
-    const filtered = filterBySearch(
-      filterByPlatform(gratisTemporarios, platformFilter),
-      searchQuery,
-    );
-    return sortDeals(filtered, freeSort);
-  }, [gratisTemporarios, platformFilter, searchQuery, freeSort]);
-
-  const filteredPermanentes = useMemo(() => {
-    const filtered = filterBySearch(
-      filterByPlatform(gratisPermanentes, platformFilter),
-      searchQuery,
-    );
-    return sortDeals(filtered, freeSort === 'ending_soon' ? 'title' : freeSort);
-  }, [gratisPermanentes, platformFilter, searchQuery, freeSort]);
-
-  const filteredPromocoes = useMemo(() => {
-    const filtered = filterBySearch(filterByPlatform(salePool, platformFilter), searchQuery);
-    return sortDeals(filtered, saleSort);
-  }, [salePool, platformFilter, searchQuery, saleSort]);
-
-  const filteredCatalogo = useMemo(() => {
-    const filtered = filterBySearch(filterByPlatform(catalogoSteam, platformFilter), searchQuery);
-    return sortDeals(filtered, saleSort);
-  }, [catalogoSteam, platformFilter, searchQuery, saleSort]);
-
-  const permanentSectionDefaultOpen = filteredTemporarios.length === 0 && filteredPermanentes.length > 0;
-
-  const footerData = sources
-    ? { sources, usdBrlRate, usdBrlRateFetchedAt }
-    : null;
+  }, [freePlatformOptions, platformFilter]);
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
@@ -447,18 +297,19 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas ao vivo da Epic, Steam, GamerPower e CheapShark — com catálogo Orbe e câmbio USD/BRL atualizado.
+                Ofertas gratuitas e promoções reunidas da Epic Games, GamerPower, CheapShark e itch.io
+                — incluindo giveaways na EA App. Clique para resgatar na loja.
               </p>
-              {fetchedAt && (
+              {data?.fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">
-                  Última atualização: {formatFetchedAt(fetchedAt)}
+                  Última atualização: {formatFetchedAt(data.fetchedAt)}
                 </p>
               )}
             </div>
 
             <button
               type="button"
-              onClick={() => void loadActiveTab(true)}
+              onClick={() => void loadDeals(true)}
               disabled={isRefreshing}
               className="inline-flex items-center gap-2 self-start md:self-auto bg-primary text-primary-foreground font-medium text-sm px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
@@ -470,7 +321,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
       </section>
 
       <main className="container mx-auto px-4 py-8 md:py-10">
-        {isLoading && activeTab !== 'em-alta' ? (
+        {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="w-full max-w-[210px] aspect-[206/290] rounded-[20px] bg-skeleton orbe-shimmer" />
@@ -481,81 +332,120 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
             <p className="text-muted-foreground font-medium">{error}</p>
             <button
               type="button"
-              onClick={() => void loadActiveTab()}
+              onClick={() => void loadDeals()}
               className="mt-4 bg-primary text-primary-foreground font-medium text-sm px-6 py-3 rounded-lg"
             >
               Tentar novamente
             </button>
           </div>
-        ) : (
+        ) : data ? (
           <Tabs
             value={activeTab}
-            onValueChange={(value) => handleTabChange(value as PromocoesTab)}
+            onValueChange={(tab) => setActiveTab(tab as 'gratis' | 'promocoes')}
             className="space-y-8"
           >
-            <SourcesAlert sources={sources} health={sourcesHealth} />
-
             <TabsList className="h-auto flex-wrap gap-1 p-1 w-full sm:w-auto">
               <TabsTrigger value="gratis" className="gap-2 px-4 py-2">
                 <Gift className="h-4 w-4" />
                 Jogos de Graça
-                <span className="text-xs opacity-70">
-                  ({filterBySearch(filterByPlatform(allFreeDeals, platformFilter), searchQuery).length})
-                </span>
+                <span className="text-xs opacity-70">({allFreeDeals.length})</span>
               </TabsTrigger>
               <TabsTrigger value="promocoes" className="gap-2 px-4 py-2">
                 <Tag className="h-4 w-4" />
                 Promoções
-                <span className="text-xs opacity-70">
-                  ({filteredPromocoes.length + filteredCatalogo.length})
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="em-alta" className="gap-2 px-4 py-2">
-                <Gamepad2 className="h-4 w-4" />
-                Em Alta
+                <span className="text-xs opacity-70">({data.promocoes.length})</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="gratis" className="space-y-10 mt-0">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <SearchInput value={searchQuery} onChange={setSearchQuery} />
-                <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
-              </div>
-
-              <PlatformFilters
-                options={freePlatformOptions}
+              <FreeQuickFilters
+                deals={allFreeDeals}
                 platformFilter={platformFilter}
                 onChange={setPlatformFilter}
               />
 
               <section className="space-y-4">
-                <div>
-                  <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-emerald-600" />
-                    Estão de graça
-                    <span className="text-sm font-normal text-muted-foreground">
-                      ({filteredTemporarios.length})
-                    </span>
-                  </h2>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-emerald-600" />
+                      Estão de graça
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({mainTemporarios.length})
+                      </span>
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                      Jogos que custavam e estão com 100% de desconto por tempo limitado — vale resgatar agora.
+                    </p>
+                  </div>
+                  <PlatformFilters
+                    options={freePlatformOptions}
+                    platformFilter={platformFilter}
+                    onChange={setPlatformFilter}
+                  />
                 </div>
 
-                {filteredTemporarios.length === 0 ? (
+                {mainTemporarios.length === 0 ? (
                   <div className="bg-card rounded-lg border border-border p-10 text-center">
-                    <p className="text-muted-foreground">Nenhum jogo temporariamente grátis no momento.</p>
+                    <p className="text-muted-foreground">
+                      Nenhum jogo temporariamente grátis nesta plataforma no momento.
+                    </p>
                   </div>
                 ) : (
-                  <DealsByPlatform deals={filteredTemporarios} platformFilter={platformFilter} />
+                  <DealsByPlatform
+                    deals={
+                      showFeaturedSections
+                        ? excludePlatforms(gratisTemporarios, featuredPlatformsWithDeals)
+                        : gratisTemporarios
+                    }
+                    platformFilter={platformFilter}
+                  />
                 )}
               </section>
+
+              {featuredPlatformsWithDeals.map((platform) => {
+                const deals = featuredDealsByPlatform[platform] ?? [];
+                if (deals.length === 0) return null;
+
+                const sectionTitle =
+                  platform === 'origin'
+                    ? 'Grátis na EA'
+                    : `Grátis na ${getPlatformLabel(platform)}`;
+
+                return (
+                  <CollapsibleSection
+                    key={platform}
+                    id={`promocoes-gratis-${platform}`}
+                    title={sectionTitle}
+                    icon={Gift}
+                    defaultOpen
+                  >
+                    <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                      Giveaways gratuitos na {getPlatformLabel(platform)} via GamerPower.
+                    </p>
+                    <DealsGrid deals={deals} />
+                  </CollapsibleSection>
+                );
+              })}
 
               <CollapsibleSection
                 id="promocoes-jogos-sempre-gratis"
                 title="São de graça"
                 icon={Gift}
-                defaultOpen={permanentSectionDefaultOpen}
+                defaultOpen={false}
               >
-                {filteredPermanentes.length > 0 ? (
-                  <DealsByPlatform deals={filteredPermanentes} platformFilter={platformFilter} />
+                <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                  Jogos que nunca custaram — free-to-play ou preço base zero. Ficam aqui embaixo para não competir com as ofertas por tempo limitado.
+                </p>
+                {mainPermanentes.length > 0 ? (
+                  <DealsByPlatform
+                    deals={
+                      showFeaturedSections
+                        ? excludePlatforms(gratisPermanentes, featuredPlatformsWithDeals)
+                        : gratisPermanentes
+                    }
+                    platformFilter={platformFilter}
+                  />
                 ) : (
                   <div className="bg-card rounded-lg border border-border p-8 text-center">
                     <p className="text-muted-foreground text-sm">Nenhum jogo permanentemente grátis no momento.</p>
@@ -563,83 +453,33 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 )}
               </CollapsibleSection>
 
-              {footerData && <SourceFooter data={footerData} />}
+              <SourceFooter data={data} />
             </TabsContent>
 
-            <TabsContent value="promocoes" className="space-y-6 mt-0">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <SearchInput value={searchQuery} onChange={setSearchQuery} />
-                <SortSelect value={saleSort} onChange={setSaleSort} tab="promocoes" />
-              </div>
-
-              <PlatformFilters
-                options={salePlatformOptions}
-                platformFilter={platformFilter}
-                onChange={setPlatformFilter}
-              />
-
-              {filteredCatalogo.length > 0 && (
-                <section className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                      Catálogo Orbe em promoção
-                      <span className="text-sm font-normal text-muted-foreground">
-                        ({filteredCatalogo.length})
-                      </span>
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => handleTabChange('em-alta')}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Ver aba Em Alta →
-                    </button>
-                  </div>
-                  <DealsGrid deals={filteredCatalogo} priorityCount={6} />
-                </section>
-              )}
-
-              <section className="space-y-4">
-                <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+            <TabsContent value="promocoes" className="space-y-4 mt-0">
+              <div>
+                <h2 className="font-display text-xl orbe-text-primary flex items-center gap-2">
                   <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                  Ofertas ao vivo
+                  Melhores promoções
                   <span className="text-sm font-normal text-muted-foreground">
-                    ({filteredPromocoes.length})
+                    ({data.promocoes.length})
                   </span>
                 </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Descontos ativos em lojas parceiras — ainda há preço, mas bem abaixo do normal.
+                </p>
+              </div>
 
-                {filteredPromocoes.length > 0 ? (
-                  <>
-                    <DealsGrid deals={filteredPromocoes} priorityCount={6} />
-                    {promoHasMore && !searchQuery && platformFilter === 'all' && (
-                      <div className="flex justify-center pt-2">
-                        <button
-                          type="button"
-                          onClick={() => void handleLoadMorePromos()}
-                          disabled={isLoadingMore}
-                          className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors disabled:opacity-60"
-                        >
-                          {isLoadingMore ? 'Carregando...' : 'Carregar mais promoções'}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-card rounded-lg border border-border p-8 text-center">
-                    <p className="text-muted-foreground text-sm">Nenhuma promoção ao vivo nesta plataforma.</p>
-                  </div>
-                )}
-              </section>
-
-              {footerData && <SourceFooter data={footerData} />}
-            </TabsContent>
-
-            <TabsContent value="em-alta" className="space-y-6 mt-0">
-              <JogosEmAltaContent showPromocoesBanner compact />
+              {data.promocoes.length > 0 ? (
+                <DealsGrid deals={data.promocoes} priorityCount={0} />
+              ) : (
+                <div className="bg-card rounded-lg border border-border p-8 text-center">
+                  <p className="text-muted-foreground text-sm">Nenhuma promoção destacada no momento.</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
-        )}
+        ) : null}
       </main>
     </div>
   );
