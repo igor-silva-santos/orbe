@@ -81,6 +81,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     onClick,
     isFocused,
     priority = false,
+    onPosterLoad,
   }, ref) => {
 
   // Cada chamada assina só a fatia que usa (identidade estável entre renders) — assinar a
@@ -236,6 +237,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   priority={priority}
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
+                  onLoad={onPosterLoad}
                 />
                 {cardStatus && (
                   <div

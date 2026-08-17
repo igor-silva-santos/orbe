@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
@@ -8,6 +8,7 @@ import type { Midia, Anime } from '@/types';
 import { resolveCarouselOpenIndex } from '@/lib/carousel-utils';
 import orbeNerdApi from '@/lib/api';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
+import { useSectionVisible } from '@/hooks/useSectionVisible';
 
 export interface HomepageData {
   filmes: Midia[];
@@ -23,6 +24,21 @@ interface HomeClientProps {
 export default function HomeClient({ initialData }: HomeClientProps) {
   const [data, setData] = useState(initialData);
   const [carouselKey, setCarouselKey] = useState(0);
+
+  const heroRef = useRef<HTMLElement>(null);
+  const filmesRef = useRef<HTMLElement>(null);
+  const seriesRef = useRef<HTMLElement>(null);
+  const animesRef = useRef<HTMLElement>(null);
+  const jogosRef = useRef<HTMLElement>(null);
+
+  const heroVisible = useSectionVisible(heroRef);
+  const filmesVisible = useSectionVisible(filmesRef);
+  const seriesVisible = useSectionVisible(seriesRef);
+  const animesVisible = useSectionVisible(animesRef);
+  const jogosVisible = useSectionVisible(jogosRef);
+
+  /** Filmes bootstraps when hero or its own section is near viewport */
+  const filmesBootstrapEnabled = heroVisible || filmesVisible;
 
   useEffect(() => {
     setData(initialData);
@@ -47,7 +63,10 @@ export default function HomeClient({ initialData }: HomeClientProps) {
 
   return (
     <div className="bg-background overflow-x-hidden">
-      <section className="relative overflow-hidden border-b border-border/40 py-14 md:py-16">
+      <section
+        ref={heroRef}
+        className="relative overflow-hidden border-b border-border/40 py-14 md:py-16"
+      >
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto">
             <h1 className="font-display text-[clamp(2.25rem,5.5vw,3.6rem)] leading-[1.05] mb-5 orbe-text-primary">
@@ -76,38 +95,45 @@ export default function HomeClient({ initialData }: HomeClientProps) {
       </section>
 
       <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4 overflow-x-hidden">
-        <section id="filmes" className="overflow-hidden">
-          <SectionHeading title="Filmes" />
+        <section ref={filmesRef} id="filmes" className="overflow-hidden">
+          <SectionHeading title="Filmes" href="/filmes" />
           <MediaCarousel
             key={`filmes-${carouselKey}`}
             mediaType="filmes"
             initialData={data.filmes}
             startIndex={resolveCarouselOpenIndex(data.filmes)}
+            bootstrapEnabled={filmesBootstrapEnabled}
           />
         </section>
 
-        <section id="series" className="overflow-hidden">
-          <SectionHeading title="Séries" />
+        <section ref={seriesRef} id="series" className="overflow-hidden">
+          <SectionHeading title="Séries" href="/series" />
           <MediaCarousel
             key={`series-${carouselKey}`}
             mediaType="series"
             initialData={data.series}
             startIndex={resolveCarouselOpenIndex(data.series)}
+            bootstrapEnabled={seriesVisible}
           />
         </section>
 
-        <section id="animes" className="overflow-hidden">
-          <SectionHeading title="Animes" />
-          <AnimeCarousel key={`animes-${carouselKey}`} initialData={data.animes} />
+        <section ref={animesRef} id="animes" className="overflow-hidden">
+          <SectionHeading title="Animes" href="/animes" />
+          <AnimeCarousel
+            key={`animes-${carouselKey}`}
+            initialData={data.animes}
+            bootstrapEnabled={animesVisible}
+          />
         </section>
 
-        <section id="jogos" className="overflow-hidden">
-          <SectionHeading title="Jogos" />
+        <section ref={jogosRef} id="jogos" className="overflow-hidden">
+          <SectionHeading title="Jogos" href="/jogos" />
           <MediaCarousel
             key={`jogos-${carouselKey}`}
             mediaType="jogos"
             initialData={data.jogos}
             startIndex={resolveCarouselOpenIndex(data.jogos)}
+            bootstrapEnabled={jogosVisible}
           />
         </section>
       </main>
@@ -115,8 +141,15 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   );
 }
 
-function SectionHeading({ title }: { title: string }) {
+function SectionHeading({ title, href }: { title: string; href: string }) {
   return (
-    <h2 className="text-2xl md:text-3xl font-bold mb-6 orbe-text-primary px-2 sm:px-0">{title}</h2>
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 orbe-text-primary px-2 sm:px-0">
+      <Link
+        href={href}
+        className="inline-block hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+      >
+        {title}
+      </Link>
+    </h2>
   );
 }

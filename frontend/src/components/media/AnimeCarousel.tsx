@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
+import { useCarouselDragClickGuard } from '@/hooks/useCarouselDragClickGuard';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
+import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
@@ -28,6 +30,8 @@ type ViewMode = 'launch' | 'weekly';
 
 interface AnimeCarouselProps {
     initialData: Anime[];
+    /** When false, defers season bootstrap/prefetch until section is near viewport */
+    bootstrapEnabled?: boolean;
 }
 
 const SEASONS: Season[] = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
@@ -43,6 +47,29 @@ const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_
 /** Slides de placeholder durante posicionamento inicial — snap central para align:center do Embla */
 const SKELETON_SLIDE_COUNT = 10;
 const SKELETON_CENTER_INDEX = Math.floor(SKELETON_SLIDE_COUNT / 2);
+
+const RELEVANT_ANIME_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
+
+const mergeAnimesByStartDate = (existing: Anime[], incoming: Anime[]): Anime[] => {
+  const byId = new Map(existing.map((anime) => [anime.id, anime]));
+  for (const anime of incoming) {
+    byId.set(anime.id, anime);
+  }
+  return Array.from(byId.values()).sort((a, b) => {
+    const dateA = a.startDate
+      ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime()
+      : 0;
+    const dateB = b.startDate
+      ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime()
+      : 0;
+    return dateA - dateB;
+  });
+};
+
+const filterRelevantAnimes = (animes: Anime[]): Anime[] =>
+  animes.filter(
+    (anime) => anime.format && RELEVANT_ANIME_FORMATS.includes(anime.format) && !anime.isAdult,
+  );
 
 const getSeason = (date: Date): Season => {
   const month = date.getMonth();
@@ -63,7 +90,7 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
     return { startDate, endDate };
 };
 
-const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
+const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEnabled = true }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
     const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
@@ -84,7 +111,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasSettledInitialView, setHasSettledInitialView] = useState(false);
-  const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
+  const [hasInitialPositioning, setHasInitialPositioning] = useState(initialData.length === 0);
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaAnimes, setEmAltaAnimes] = useState<Anime[]>([]);
@@ -100,7 +127,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
   };
 
-  const loadedSeasons = useRef<Set<string>>(new Set([`${initialYear}-${initialSeason}`]));
+  const loadedSeasons = useRef<Set<string>>(
+    initialData.length > 0 ? new Set([`${initialYear}-${initialSeason}`]) : new Set(),
+  );
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
@@ -109,9 +138,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   const viewModeRef = useRef<ViewMode>('launch');
   const initialViewModeApplied = useRef(false);
   const lastTitleKeyRef = useRef('');
-  const hasInitialPositioningRef = useRef(true);
+  const hasInitialPositioningRef = useRef(initialData.length === 0);
+  const initialScrollDoneRef = useRef(false);
   const prevStartIndexRef = useRef(0);
   const firstMediaIdRef = useRef<number | undefined>(initialData[0]?.id);
+  const seasonBootstrapRanRef = useRef(false);
 
   const buildLaunchTitle = useCallback((season: Season, year: number) => {
     const today = new Date();
@@ -174,8 +205,42 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     [emblaRef]
   );
 
+  const getLoopBounds = useCallback(() => {
+    const last = Math.max(0, carouselItemsRef.current.length - 1);
+    return { start: 0, end: last };
+  }, []);
+
+  const loopEnabled =
+    !emAltaMode &&
+    !hasInitialPositioning &&
+    pendingScrollIndex === null &&
+    carouselItems.length > 0;
+
+  const infiniteLoopConfig = useMemo(
+    () => ({ enabled: loopEnabled, getBounds: getLoopBounds }),
+    [loopEnabled, getLoopBounds],
+  );
+
+  const handleLoopWrap = useCallback(
+    (targetIndex: number) => {
+      previousSelectedIndex.current = targetIndex;
+      setSelectedSnap(targetIndex);
+      updateTitleFromIndex(targetIndex, carouselItemsRef.current);
+    },
+    [updateTitleFromIndex],
+  );
+
+  useCarouselInfiniteLoop({
+    emblaApi,
+    viewportRef,
+    enabled: loopEnabled,
+    getBounds: getLoopBounds,
+    onWrap: handleLoopWrap,
+  });
+
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled, infiniteLoopConfig);
+  useCarouselDragClickGuard(viewportRef);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
   useEffect(() => {
@@ -203,26 +268,28 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     try {
       const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
       const animes: Anime[] = await response.json();
-      const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
-      const newAnimes = animes.filter(anime => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult);
-      
-      loadedSeasons.current.add(seasonId);
+      const newAnimes = filterRelevantAnimes(animes);
+
+      if (newAnimes.length > 0) {
+        loadedSeasons.current.add(seasonId);
+      }
 
       if (direction === 'next') {
         setFetchedAnimes((prev) => {
-          const merged = [...prev, ...newAnimes];
+          const merged = mergeAnimesByStartDate(prev, newAnimes);
           fetchedAnimesRef.current = merged;
           return merged;
         });
       } else if (direction === 'prev') {
         setFetchedAnimes((prev) => {
-          const merged = [...newAnimes, ...prev];
+          const merged = mergeAnimesByStartDate(newAnimes, prev);
           fetchedAnimesRef.current = merged;
           return merged;
         });
       } else {
-        fetchedAnimesRef.current = newAnimes;
-        setFetchedAnimes(newAnimes);
+        const merged = mergeAnimesByStartDate([], newAnimes);
+        fetchedAnimesRef.current = merged;
+        setFetchedAnimes(merged);
       }
       
       return newAnimes;
@@ -244,7 +311,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       const data = await response.json();
       const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
       const results: Anime[] = Array.isArray(data?.results) ? data.results : [];
-      setEmAltaAnimes(results.filter((anime) => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult));
+      setEmAltaAnimes(filterRelevantAnimes(results));
       emAltaLoadedRef.current = true;
     } catch (error) {
       console.error('Error fetching "em alta" animes:', error);
@@ -262,8 +329,15 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     });
   };
 
-  // Prefetch temporadas adjacentes em paralelo
+  // Busca temporada atual se o SSR não trouxe dados; prefetch adjacentes quando visível
   useEffect(() => {
+    if (!bootstrapEnabled || seasonBootstrapRanRef.current) return;
+    seasonBootstrapRanRef.current = true;
+
+    if (initialData.length === 0) {
+      void fetchSeasonData(initialYear, initialSeason, 'current');
+    }
+
     const seasonIdx = SEASONS.indexOf(initialSeason);
     const prevSeason = SEASONS[(seasonIdx - 1 + 4) % 4];
     const prevYear = seasonIdx === 0 ? initialYear - 1 : initialYear;
@@ -271,7 +345,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const nextYear = seasonIdx === 3 ? initialYear + 1 : initialYear;
     void fetchSeasonData(prevYear, prevSeason, 'prev');
     void fetchSeasonData(nextYear, nextSeason, 'next');
-  }, [fetchSeasonData, initialSeason, initialYear]);
+  }, [bootstrapEnabled, fetchSeasonData, initialData.length, initialSeason, initialYear]);
 
   useEffect(() => {
     viewModeRef.current = viewMode;
@@ -394,7 +468,15 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                 item.data.startDate &&
                 new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day) >= today
             );
-            newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : newCarouselItems.length -1;
+            const seasonStartCandidate = newCarouselItems.findIndex(item =>
+                item.type === 'media' &&
+                item.data.startDate &&
+                item.data.startDate.year === currentYearObj &&
+                getSeason(new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day)) === currentSeasonObj
+            );
+            newStartIndex = startIndexCandidate > -1
+              ? startIndexCandidate
+              : (seasonStartCandidate > -1 ? seasonStartCandidate : 0);
         } else {
             const searchYear = currentYear;
             const searchSeason = currentSeason;
@@ -442,7 +524,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     firstMediaIdRef.current = firstMedia?.type === 'media' ? firstMedia.data.id : undefined;
 
     if (emAltaMode) return;
-    if (hasInitialPositioningRef.current && newCarouselItems.length > 0) {
+    if (!initialScrollDoneRef.current && newCarouselItems.length > 0) {
+      initialScrollDoneRef.current = true;
       setPendingScrollIndex(newStartIndex);
     } else if (startIndexChanged) {
       lastTitleKeyRef.current = '';
@@ -461,7 +544,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   /** Aplica scroll pendente só depois que o React renderizou os novos slides */
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
-    if (pendingScrollIndex >= carouselItems.length) {
+    const targetIndex = Math.min(Math.max(0, pendingScrollIndex), Math.max(0, carouselItems.length - 1));
+    if (carouselItems.length === 0) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
       setHasInitialPositioning(false);
@@ -469,10 +553,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     }
 
     emblaApi.reInit();
-    emblaApi.scrollTo(pendingScrollIndex, false);
-    previousSelectedIndex.current = pendingScrollIndex;
-    setSelectedSnap(pendingScrollIndex);
-    updateTitleFromIndex(pendingScrollIndex, carouselItems);
+    emblaApi.scrollTo(targetIndex, false);
+    previousSelectedIndex.current = targetIndex;
+    setSelectedSnap(targetIndex);
+    updateTitleFromIndex(targetIndex, carouselItems);
 
     setPendingScrollIndex(null);
     hasInitialPositioningRef.current = false;
@@ -606,7 +690,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                   </>
                 )}
             </div>
-            {!emAltaMode && initialData.length > 0 && (
+            {!emAltaMode && fetchedAnimes.length > 0 && (
               <button
                   onClick={() => {
                     setViewMode((prev) => (prev === 'launch' ? 'weekly' : 'launch'));
@@ -670,6 +754,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
                       midia={item.data}
                       type="anime"
                       priority={isPriority}
+                      isFocused={index === selectedSnap}
                       userInteractions={userInteractions}
                       onInteraction={handleInteraction}
                     />
