@@ -36,8 +36,9 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   const animesVisible = useSectionVisible(animesRef);
   const jogosVisible = useSectionVisible(jogosRef);
 
-  /** Filmes bootstraps when hero or its own section is near viewport */
+  /** Filmes e jogos bootstraps quando o hero ou a própria seção estão perto do viewport */
   const filmesBootstrapEnabled = heroVisible || filmesVisible;
+  const jogosBootstrapEnabled = heroVisible || jogosVisible;
 
   useEffect(() => {
     setData(initialData);
@@ -127,7 +128,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
             mediaType="jogos"
             initialData={data.jogos}
             startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.jogos))}
-            bootstrapEnabled={jogosVisible}
+            bootstrapEnabled={jogosBootstrapEnabled}
           />
         </section>
       </main>

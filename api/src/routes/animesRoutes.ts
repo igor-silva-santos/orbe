@@ -20,6 +20,7 @@ import {
   parsePositiveIntId,
   animeCarouselInclude,
 } from './mediaRoutesHelpers';
+import { getBrazilCalendarWeekBounds, getWeekdayInBrazil } from '../brazilTimezone';
 
 const router = Router();
 
@@ -190,15 +191,7 @@ router.get('/animes/:id/next-episode', async (req, res) => {
 // Rota para Animes da Semana
 router.get('/animes/weekly-schedule', async (req, res) => {
   try {
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 (Dom) - 6 (Sáb)
-    const startDate = new Date(now);
-    startDate.setDate(now.getDate() - dayOfWeek);
-    startDate.setHours(0, 0, 0, 0);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-    endDate.setHours(23, 59, 59, 999);
+    const { start: startDate, end: endDate } = getBrazilCalendarWeekBounds(new Date());
 
     const schedule = await prisma.airingSchedule.findMany({
       where: {
@@ -216,7 +209,7 @@ router.get('/animes/weekly-schedule', async (req, res) => {
     });
 
     const groupedByDay = schedule.reduce((acc, item) => {
-      const day = item.airingAt.getDay();
+      const day = getWeekdayInBrazil(item.airingAt);
       const mapped = {
         ...mapAnimeToMidia(item.anime),
         nextAiringEpisode: {

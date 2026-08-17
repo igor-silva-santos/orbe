@@ -1,4 +1,5 @@
 import type { Anime } from '@/types';
+import { brazilLocalToUtc, getBrazilCalendarWeekBounds, getWeekdayInBrazil } from '@/lib/brazil-timezone';
 
 export const ANIME_AGENDA_UNSCHEDULED_LABEL = 'Sem episódio agendado';
 
@@ -14,15 +15,7 @@ export interface WeekBounds {
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] as const;
 
 export function getCalendarWeekBounds(reference: Date = new Date()): WeekBounds {
-  const start = new Date(reference);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - start.getDay());
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-
-  return { start, end };
+  return getBrazilCalendarWeekBounds(reference);
 }
 
 export function isDateWithinWeek(date: Date, week: WeekBounds): boolean {
@@ -34,7 +27,14 @@ export function getAnimeAgendaDate(anime: Anime): Date | null {
     return new Date(anime.nextAiringEpisode.airingAt);
   }
   if (anime.startDate) {
-    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day);
+    return brazilLocalToUtc(
+      anime.startDate.year,
+      anime.startDate.month,
+      anime.startDate.day,
+      12,
+      0,
+      0,
+    );
   }
   return null;
 }
@@ -116,7 +116,7 @@ export function buildWeeklyAnimeAgendaItems(
       continue;
     }
 
-    animesByDay[agendaDate.getDay()].push(anime);
+    animesByDay[getWeekdayInBrazil(agendaDate)].push(anime);
   }
 
   const items: AnimeAgendaItem[] = [];
@@ -148,7 +148,7 @@ export function resolveWeeklyAgendaStartIndex(
   dayNames: readonly string[] = DAY_NAMES,
   reference: Date = new Date(),
 ): number {
-  const currentDay = reference.getDay();
+  const currentDay = getWeekdayInBrazil(reference);
 
   for (let offset = 0; offset <= 6; offset += 1) {
     const dayIndex = (currentDay + offset) % 7;
