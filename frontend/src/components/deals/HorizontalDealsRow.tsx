@@ -13,7 +13,7 @@ interface HorizontalDealsRowProps {
 /** Fileira horizontal de promoções — suporta arrastar com mouse quando enableDrag=true. */
 export function HorizontalDealsRow({
   deals,
-  enableDrag = false,
+  enableDrag = true,
   priorityCount = 6,
 }: HorizontalDealsRowProps) {
   const { scrollRef, dragging, handlers } = useHorizontalDragScroll();
@@ -23,7 +23,7 @@ export function HorizontalDealsRow({
   return (
     <div
       ref={enableDrag ? scrollRef : undefined}
-      className={`flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 ${
+      className={`flex gap-4 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1 ${
         enableDrag ? (dragging ? 'cursor-grabbing select-none' : 'cursor-grab') : ''
       }`}
       style={enableDrag ? { touchAction: 'pan-y' } : undefined}

@@ -4,6 +4,8 @@ import type { Anime } from '@/types';
 import {
   ANIME_AGENDA_UNSCHEDULED_LABEL,
   buildWeeklyAnimeAgendaItems,
+  buildWeeklyItemsFromSchedule,
+  filterWeeklyAgendaByGenre,
   getCalendarWeekBounds,
   isDateWithinWeek,
   resolveWeeklyAgendaStartIndex,
@@ -89,6 +91,34 @@ describe('buildWeeklyAnimeAgendaItems', () => {
     );
 
     assert.equal(items.length, 0);
+  });
+});
+
+describe('buildWeeklyItemsFromSchedule', () => {
+  it('monta separadores por dia a partir da API', () => {
+    const items = buildWeeklyItemsFromSchedule({
+      1: [mockAnime(1, { airingAt: '2026-08-17T21:00:00' })],
+      3: [mockAnime(2, { airingAt: '2026-08-19T21:00:00' })],
+    });
+
+    assert.equal(items.filter((item) => item.type === 'separator').length, 2);
+    assert.equal(items[0].type === 'separator' ? items[0].dayName : '', 'Segunda');
+    assert.equal(items[2].type === 'separator' ? items[2].dayName : '', 'Quarta');
+  });
+});
+
+describe('filterWeeklyAgendaByGenre', () => {
+  it('mantém separadores apenas dos dias com mídia filtrada', () => {
+    const items = buildWeeklyItemsFromSchedule({
+      1: [
+        mockAnime(1, { airingAt: '2026-08-17T21:00:00' }),
+        { ...mockAnime(2, { airingAt: '2026-08-17T22:00:00' }), generos_api: ['Ação'] },
+      ],
+    });
+    items[1].type === 'media' && (items[1].data.generos_api = ['Drama']);
+    const filtered = filterWeeklyAgendaByGenre(items, 'Ação');
+    assert.equal(filtered.filter((item) => item.type === 'media').length, 1);
+    assert.equal(filtered[0].type === 'separator' ? filtered[0].dayName : '', 'Segunda');
   });
 });
 

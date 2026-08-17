@@ -405,10 +405,10 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) =>
   type MappedJogo = ReturnType<typeof mapJogoToMidia>;
 
   const PLATFORM_BLOCKS: { id: string; nome: string; match: (name: string) => boolean }[] = [
+    { id: 'pc', nome: 'PC', match: (n) => /\b(pc|windows|steam|mac)\b/i.test(n) },
     { id: 'xbox', nome: 'Xbox', match: (n) => /xbox/i.test(n) },
     { id: 'playstation', nome: 'PlayStation', match: (n) => /playstation|ps4|ps5|ps vita/i.test(n) },
     { id: 'nintendo', nome: 'Nintendo', match: (n) => /nintendo|switch|wii|3ds/i.test(n) },
-    { id: 'pc', nome: 'PC', match: (n) => /\b(pc|windows|steam|mac)\b/i.test(n) },
   ];
 
   const MODE_BLOCKS: { id: string; nome: string; match: (mode: string) => boolean }[] = [

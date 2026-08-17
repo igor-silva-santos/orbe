@@ -7,6 +7,7 @@ import realApi from '@/data/realApi';
 import MidiaCard from '@/components/media/MidiaCard';
 import MidiaCardSkeleton from '@/components/media/MidiaCardSkeleton';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { HorizontalMediaRow } from '@/components/ui/HorizontalMediaRow';
 import type { Anime, Filme, Jogo, Serie, TipoMidia, UserAction, UserInteraction } from '@/types';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
@@ -34,6 +35,15 @@ type InteractionProps = {
   onInteraction: (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => void;
 };
 
+const PLATFORM_ORDER = ['pc', 'xbox', 'playstation', 'nintendo'];
+
+const sortPlatformSections = (sections: GameSection[]): GameSection[] =>
+  [...sections].sort((a, b) => {
+    const indexA = PLATFORM_ORDER.indexOf(a.id ?? '');
+    const indexB = PLATFORM_ORDER.indexOf(b.id ?? '');
+    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+  });
+
 const HorizontalRow = ({ section, userInteractions, onInteraction }: { section: GameSection } & InteractionProps) => (
   <section className="bg-card rounded-lg border border-border p-4 md:p-5 space-y-4">
     <div className="flex items-center justify-between gap-3">
@@ -45,13 +55,13 @@ const HorizontalRow = ({ section, userInteractions, onInteraction }: { section: 
         {section.total} {section.total === 1 ? 'jogo' : 'jogos'}
       </span>
     </div>
-    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-      {section.jogos.map((jogo) => (
-        <div key={`${section.nome}-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-          <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={onInteraction} />
-        </div>
-      ))}
-    </div>
+    <HorizontalMediaRow
+      items={section.jogos}
+      type="jogo"
+      userInteractions={userInteractions}
+      onInteraction={onInteraction}
+      enableDrag
+    />
   </section>
 );
 
@@ -186,13 +196,13 @@ export default function JogosEmAltaContent({ showPromocoesBanner = true, compact
 
       {data.steam_mais_jogados && data.steam_mais_jogados.length > 0 && (
         <CollapsibleSection id="jogos-em-alta-steam-trending" title="Mais jogados na Steam" icon={Monitor}>
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-            {data.steam_mais_jogados.map((jogo) => (
-              <div key={`steam-trend-${jogo.id}`} className="flex-shrink-0 w-[170px] sm:w-[190px]">
-                <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />
-              </div>
-            ))}
-          </div>
+          <HorizontalMediaRow
+            items={data.steam_mais_jogados}
+            type="jogo"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+            enableDrag
+          />
         </CollapsibleSection>
       )}
 
@@ -200,7 +210,7 @@ export default function JogosEmAltaContent({ showPromocoesBanner = true, compact
         id="jogos-em-alta-por-plataforma"
         title="Mais jogados por plataforma"
         icon={Monitor}
-        sections={data.plataformas}
+        sections={sortPlatformSections(data.plataformas)}
         emptyMessage="Nenhum jogo em destaque por plataforma esta semana."
         userInteractions={userInteractions}
         onInteraction={handleInteraction}

@@ -12,13 +12,15 @@ import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPoster
 import { getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import {
   ANIME_AGENDA_UNSCHEDULED_LABEL,
-  buildWeeklyAnimeAgendaItems,
+  buildWeeklyItemsFromSchedule,
+  filterWeeklyAgendaByGenre,
   getAnimeAgendaDate,
   resolveWeeklyAgendaStartIndex,
   type AnimeAgendaItem,
 } from '@/lib/carousel-anime-agenda';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
+import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -138,6 +140,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaAnimes, setEmAltaAnimes] = useState<Anime[]>([]);
+  const [weeklyLoading, setWeeklyLoading] = useState(false);
   const activeFetchesRef = useRef(0);
   const emAltaLoadedRef = useRef(false);
   const fetchingEmAltaRef = useRef(false);
@@ -545,8 +548,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         }
 
     } else {
-        newCarouselItems = buildWeeklyAnimeAgendaItems(filteredAnimes, DAY_NAMES);
-        newStartIndex = resolveWeeklyAgendaStartIndex(newCarouselItems, DAY_NAMES);
+        return;
     }
     
     setCarouselItems(newCarouselItems);
@@ -567,6 +569,51 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     }
 
   }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason, emAltaMode, emAltaAnimes]);
+
+  /** Agenda semanal: dados do cronograma real (airingSchedule) via API */
+  useEffect(() => {
+    if (emAltaMode || viewMode !== 'weekly') return;
+
+    let cancelled = false;
+    setWeeklyLoading(true);
+
+    void (async () => {
+      try {
+        const response = await fetch(`${API_BASE}/animes/weekly-schedule`);
+        if (!response.ok) throw new Error('weekly-schedule failed');
+        const grouped = (await response.json()) as Record<string | number, Anime[]>;
+        if (cancelled) return;
+
+        let items = buildWeeklyItemsFromSchedule(grouped, DAY_NAMES);
+        if (selectedGenre) {
+          items = filterWeeklyAgendaByGenre(items, selectedGenre);
+        }
+
+        const startIndex = resolveWeeklyAgendaStartIndex(items, DAY_NAMES);
+        setCarouselItems(items);
+        setStartIndex(startIndex);
+        prevStartIndexRef.current = startIndex;
+        lastTitleKeyRef.current = '';
+        setPendingScrollIndex(items.length > 0 ? startIndex : null);
+        if (items.length === 0) {
+          hasInitialPositioningRef.current = false;
+          setHasInitialPositioning(false);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar agenda semanal:', error);
+        if (!cancelled) {
+          setCarouselItems([]);
+          setPendingScrollIndex(null);
+        }
+      } finally {
+        if (!cancelled) setWeeklyLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewMode, emAltaMode, selectedGenre]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {
@@ -738,7 +785,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         >
           {emAltaMode
             ? 'Em Alta'
-            : isNavigating
+            : isNavigating || weeklyLoading
               ? 'Carregando animes...'
               : showPositioningSkeleton
                 ? 'Carregando...'
@@ -780,7 +827,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {!emAltaMode && (
+                {!emAltaMode && viewMode === 'launch' && (
                   <>
                     <button
                       onClick={() => navigateSeason('prev')}
@@ -804,6 +851,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                   onClick={() => {
                     setViewMode((prev) => (prev === 'launch' ? 'weekly' : 'launch'));
                     lastTitleKeyRef.current = '';
+                    setPendingScrollIndex(null);
+                    hasInitialPositioningRef.current = true;
+                    setHasInitialPositioning(true);
                   }}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
               >
@@ -817,10 +867,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       <TooltipProvider delayDuration={300}>
       <div className="relative">
         {isNavigating && (
-          <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
+          <LoadingOverlay message={viewMode === 'weekly' ? 'Carregando agenda...' : 'Carregando temporada...'} className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating || weeklyLoading ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >
@@ -873,6 +923,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
               );})}
         </div>
       </div>
+      <CarouselScrollbar emblaApi={emblaApi} />
       <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster} />
       </div>
       </TooltipProvider>

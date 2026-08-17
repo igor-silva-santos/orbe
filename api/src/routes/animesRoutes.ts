@@ -217,12 +217,19 @@ router.get('/animes/weekly-schedule', async (req, res) => {
 
     const groupedByDay = schedule.reduce((acc, item) => {
       const day = item.airingAt.getDay();
+      const mapped = {
+        ...mapAnimeToMidia(item.anime),
+        nextAiringEpisode: {
+          episode: item.episode,
+          airingAt: item.airingAt.toISOString(),
+        },
+      };
       if (!acc[day]) {
         acc[day] = [];
       }
-      acc[day].push(mapAnimeToMidia(item.anime));
+      acc[day].push(mapped);
       return acc;
-    }, {} as Record<number, any[]>);
+    }, {} as Record<number, ReturnType<typeof mapAnimeToMidia>[]>);
 
     res.json(groupedByDay);
   } catch (error) {
