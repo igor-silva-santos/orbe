@@ -275,6 +275,9 @@ function SourceFooter({
       <span className={data.sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
         itch.io ({data.sources.itch?.count ?? 0})
       </span>
+      <span className={data.sources.itad?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        ITAD ({data.sources.itad?.count ?? 0})
+      </span>
       <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
         Steam ({data.sources.steam?.count ?? 0})
       </span>
@@ -530,8 +533,8 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas ao vivo da Epic, Steam, GamerPower, CheapShark e itch.io — incluindo giveaways na EA App,
-                com catálogo Orbe e câmbio USD/BRL atualizado.
+                Ofertas ao vivo da Epic, EA App, Steam, GamerPower, CheapShark e itch.io
+                — com catálogo Orbe, preços em BRL (ITAD quando configurado) e câmbio USD/BRL atualizado.
               </p>
               {fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">

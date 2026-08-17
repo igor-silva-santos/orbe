@@ -18,7 +18,7 @@ function dealQualityScore(deal: UnifiedDeal): number {
   if (deal.source === 'epic' && deal.platform === 'epic') score += 30;
   if (deal.endsAt) score += 5;
   if (!deal.priceConverted) score += 10;
-  if (deal.currency === 'BRL') score += 15;
+  if (deal.source === 'itad' && deal.currency === 'BRL') score += 25;
   return score;
 }
 

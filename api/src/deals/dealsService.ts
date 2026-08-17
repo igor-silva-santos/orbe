@@ -8,6 +8,7 @@ import { fetchCheapSharkDealsPaged } from './cheapsharkClient';
 import { fetchSteamDeals } from './steamDealsClient';
 import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
 import { fetchItchFreeGames, fetchItchOnSaleGames } from './itchClient';
+import { fetchItadShopSales, isItadConfigured } from './itadClient';
 import { splitFreeDeals } from './freeTier';
 import { dedupeDeals } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
@@ -88,6 +89,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     catalogoSteamRaw,
     itchFree,
     itchOnSale,
+    itadDeals,
   ] = await Promise.all([
     safeFetch(fetchEpicFreeGames),
     safeFetch(fetchEpicSaleGames),
@@ -107,12 +109,18 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     safeFetch(fetchCatalogSteamPromotions),
     safeFetch(() => fetchItchFreeGames({ maxPages: 2 })),
     safeFetch(() => fetchItchOnSaleGames({ maxPages: 2 })),
+    safeFetch(async () => {
+      if (!isItadConfigured()) return [];
+      return fetchItadShopSales();
+    }),
   ]);
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
   const itchTemporaryFree = itchOnSale.items.filter((deal) => deal.kind === 'free');
   const itchSales = itchOnSale.items.filter((deal) => deal.kind === 'sale');
+  const itadTemporaryFree = itadDeals.items.filter((deal) => deal.kind === 'free');
+  const itadSales = itadDeals.items.filter((deal) => deal.kind === 'sale');
 
   const gratisAll = normalizeDealsList(
     await enrichDealsWithOrbeLinks(
@@ -125,6 +133,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         ...steamFree,
         ...itchFree.items,
         ...itchTemporaryFree,
+        ...itadTemporaryFree,
       ]),
     ),
     usdBrlRate,
@@ -146,6 +155,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
           ...cheapsharkEpicSales.items.filter((deal) => deal.kind === 'sale'),
           ...cheapsharkUbisoft.items.filter((deal) => deal.kind === 'sale'),
           ...epicSales.items,
+          ...itadSales,
           ...steamSales,
           ...itchSales,
         ]),
@@ -203,6 +213,15 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         count: itchFree.items.length + itchOnSale.items.length,
         error: itchFree.error ?? itchOnSale.error,
       },
+      itad: {
+        ok: isItadConfigured()
+          ? !itadDeals.error
+          : true,
+        count: itadDeals.items.length,
+        error: isItadConfigured()
+          ? itadDeals.error ?? undefined
+          : undefined,
+      },
     },
   };
 }
@@ -234,6 +253,7 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     overview.sources.steam.ok ? '1' : '0',
     overview.sources.orbe?.ok ? '1' : '0',
     overview.sources.itch?.ok ? '1' : '0',
+    overview.sources.itad?.ok ? '1' : '0',
     String(overview.usdBrlRate ?? ''),
     overview.usdBrlRateFetchedAt ?? '',
   ].join('::');

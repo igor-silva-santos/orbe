@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { dedupeDeals, dealDedupeKey } from './dedupeDeals';
 import { classifyFreeTier } from './freeTier';
 import { mapItchBrowseGame, parseItchBrowseHtml } from './itchClient';
+import { parseItchRssXml } from './itchRss';
+import { mapItadListItem, ITAD_SHOP_EPIC, ITAD_SHOP_EA } from './itadClient';
 import { normalizeDealToBrl } from './normalizeDeals';
 import { paginateDeals, sourcesHealth } from './dealsService';
 import type { DealsOverview, UnifiedDeal } from './types';
@@ -165,6 +167,7 @@ describe('sourcesHealth', () => {
         steam: { ok: true, count: 1 },
         orbe: { ok: true, count: 1 },
         itch: { ok: true, count: 1 },
+        itad: { ok: true, count: 1 },
       },
     } as DealsOverview;
     assert.equal(sourcesHealth(overview), 'degraded');
@@ -264,5 +267,98 @@ describe('itchClient mapping', () => {
     assert.equal(deal.kind, 'free');
     assert.equal(deal.freeTier, 'temporary');
     assert.equal(classifyFreeTier(deal), 'temporary');
+  });
+});
+
+const mockItchFreeRss = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"><channel>
+<item>
+  <guid>https://twistandscream.itch.io/foreborn</guid>
+  <plainTitle>Foreborn</plainTitle>
+  <imageurl>https://img.itch.zone/foreborn.png</imageurl>
+  <price>$0.00</price>
+  <link>https://twistandscream.itch.io/foreborn</link>
+  <platforms><windows>yes</windows></platforms>
+</item>
+</channel></rss>`;
+
+const mockItchSaleRss = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"><channel>
+<item>
+  <guid>https://rustylake.itch.io/servant-of-the-lake</guid>
+  <plainTitle>Servant of the Lake</plainTitle>
+  <imageurl>https://img.itch.zone/servant.png</imageurl>
+  <price>$5.99</price>
+  <fullPrice>$7.99</fullPrice>
+  <discountpercent>25</discountpercent>
+  <saleends>Fri, 21 Aug 2026 09:00:00 GMT</saleends>
+  <link>https://rustylake.itch.io/servant-of-the-lake</link>
+  <platforms><windows>yes</windows><osx>yes</osx></platforms>
+</item>
+</channel></rss>`;
+
+describe('itchRss parsing', () => {
+  it('mapeia feed RSS de jogos grátis', () => {
+    const deals = parseItchRssXml(mockItchFreeRss, 'free');
+    assert.equal(deals.length, 1);
+    assert.equal(deals[0].id, 'itch:foreborn');
+    assert.equal(deals[0].kind, 'free');
+    assert.equal(deals[0].freeTier, 'permanent');
+  });
+
+  it('mapeia feed RSS de promoções com desconto e data de fim', () => {
+    const deals = parseItchRssXml(mockItchSaleRss, 'sale');
+    assert.equal(deals.length, 1);
+    assert.equal(deals[0].kind, 'sale');
+    assert.equal(deals[0].discountPercent, 25);
+    assert.equal(deals[0].originalPriceValue, 7.99);
+    assert.ok(deals[0].endsAt);
+  });
+});
+
+describe('itadClient mapping', () => {
+  it('mapeia promoção Epic em BRL', () => {
+    const deal = mapItadListItem(
+      {
+        id: '018d937e-test-epic',
+        title: 'Control Ultimate Edition',
+        assets: { boxart: 'https://cdn.example/boxart.jpg' },
+        deal: {
+          shop: { id: ITAD_SHOP_EPIC, name: 'Epic Game Store' },
+          price: { amount: 39.99, currency: 'BRL' },
+          regular: { amount: 199.99, currency: 'BRL' },
+          cut: 80,
+          url: 'https://store.epicgames.com/pt-BR/p/control',
+          expiry: '2026-12-31T23:59:59+00:00',
+        },
+      },
+      ITAD_SHOP_EPIC,
+    );
+    assert.ok(deal);
+    assert.equal(deal.source, 'itad');
+    assert.equal(deal.platform, 'epic');
+    assert.equal(deal.currency, 'BRL');
+    assert.equal(deal.discountPercent, 80);
+    assert.equal(deal.salePriceValue, 39.99);
+  });
+
+  it('mapeia promoção EA App', () => {
+    const deal = mapItadListItem(
+      {
+        id: '018d937e-test-ea',
+        title: 'Battlefield 2042',
+        deal: {
+          shop: { id: ITAD_SHOP_EA, name: 'EA Store' },
+          price: { amount: 29.9, currency: 'BRL' },
+          regular: { amount: 199.9, currency: 'BRL' },
+          cut: 85,
+          url: 'https://www.ea.com/games/battlefield/battlefield-2042',
+        },
+      },
+      ITAD_SHOP_EA,
+    );
+    assert.ok(deal);
+    assert.equal(deal.platform, 'origin');
+    assert.equal(deal.kind, 'sale');
   });
 });

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { logger } from '../logger';
+import { parseItchRssXml } from './itchRss';
 import type { UnifiedDeal } from './types';
 
 const ITCH_USER_AGENT = 'OrbeNerd/1.0 (promocoes@orbe.app)';
@@ -10,8 +11,9 @@ const itchApi = axios.create({
   timeout: 20000,
   headers: {
     'User-Agent': ITCH_USER_AGENT,
-    Accept: 'application/json',
+    Accept: 'application/json, application/xml, text/xml, */*',
   },
+  maxRedirects: 5,
 });
 
 type ItchBrowseResponse = {
@@ -153,6 +155,17 @@ export function parseItchBrowseHtml(html: string, browseKind: 'free' | 'sale'): 
   return deals;
 }
 
+async function fetchItchRssFeed(path: '/games/price-free.xml' | '/games/on-sale.xml'): Promise<UnifiedDeal[]> {
+  const browseKind = path.includes('free') ? 'free' : 'sale';
+  const response = await itchApi.get<string>(path, {
+    responseType: 'text',
+    headers: { Accept: 'application/xml, text/xml, */*' },
+  });
+  const xml = typeof response.data === 'string' ? response.data : '';
+  if (!xml.trim()) return [];
+  return parseItchRssXml(xml, browseKind);
+}
+
 async function fetchItchBrowsePage(
   path: '/games/free' | '/games/on-sale',
   page: number,
@@ -187,8 +200,16 @@ async function fetchItchBrowseGames(
 
 /** Jogos permanentemente grátis no itch.io (preço base zero). */
 export async function fetchItchFreeGames(options?: { maxPages?: number }): Promise<UnifiedDeal[]> {
+  void options;
   try {
-    return await fetchItchBrowseGames('/games/free', options);
+    const rssDeals = await fetchItchRssFeed('/games/price-free.xml');
+    if (rssDeals.length > 0) return rssDeals;
+  } catch (error: any) {
+    logger.warn(`itch.io RSS grátis falhou, tentando JSON: ${error.message}`);
+  }
+
+  try {
+    return await fetchItchBrowseGames('/games/free', { maxPages: options?.maxPages ?? 2 });
   } catch (error: any) {
     logger.warn(`itch.io free games falhou: ${error.message}`);
     return [];
@@ -198,7 +219,14 @@ export async function fetchItchFreeGames(options?: { maxPages?: number }): Promi
 /** Promoções ativas no itch.io (inclui 100% de desconto como kind=free). */
 export async function fetchItchOnSaleGames(options?: { maxPages?: number }): Promise<UnifiedDeal[]> {
   try {
-    return await fetchItchBrowseGames('/games/on-sale', options);
+    const rssDeals = await fetchItchRssFeed('/games/on-sale.xml');
+    if (rssDeals.length > 0) return rssDeals;
+  } catch (error: any) {
+    logger.warn(`itch.io RSS promoções falhou, tentando JSON: ${error.message}`);
+  }
+
+  try {
+    return await fetchItchBrowseGames('/games/on-sale', { maxPages: options?.maxPages ?? 2 });
   } catch (error: any) {
     logger.warn(`itch.io on-sale games falhou: ${error.message}`);
     return [];

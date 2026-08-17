@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe' | 'itch';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe' | 'itch' | 'itad';
 
 export type DealKind = 'free' | 'sale';
 
@@ -63,6 +63,7 @@ export type DealsOverview = {
     steam: DealSourceStatus;
     orbe: DealSourceStatus;
     itch: DealSourceStatus;
+    itad: DealSourceStatus;
   };
   sourcesHealth?: 'ok' | 'degraded' | 'critical';
 };

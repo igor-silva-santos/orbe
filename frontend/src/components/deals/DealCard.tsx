@@ -14,6 +14,7 @@ const SOURCE_LABELS: Record<string, string> = {
   steam: 'Steam',
   orbe: 'Catálogo Orbe',
   itch: 'itch.io',
+  itad: 'IsThereAnyDeal',
 };
 
 function steamFallbackImage(appId: number): string {
