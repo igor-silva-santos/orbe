@@ -240,6 +240,27 @@ export function hasCarouselMonthData(items: Midia[], monthKey: string): boolean 
   return items.some((item) => monthKeyFromItem(item) === monthKey);
 }
 
+/** Índice na lista datada para navegação — na zona year-tbd usa o último mês datado. */
+export function resolveDatedIndexForNavigation(
+  slide: { kind: string; datedIndex?: number } | undefined,
+  itemsLength: number,
+): number {
+  if (slide?.kind === 'dated' && typeof slide.datedIndex === 'number') {
+    return slide.datedIndex;
+  }
+  if (itemsLength === 0) return 0;
+  return itemsLength - 1;
+}
+
+/** Garante índice válido para scroll; recalcula abertura se estiver fora do range. */
+export function clampCarouselOpenIndex(items: Midia[], index: number): number {
+  if (!items.length) return 0;
+  if (index >= 0 && index < items.length) return index;
+  const fallback = resolveCarouselOpenIndex(items);
+  if (fallback >= 0 && fallback < items.length) return fallback;
+  return Math.min(Math.max(0, index), items.length - 1);
+}
+
 /** Dados suficientes para revelar o carrossel após o bootstrap do mês atual. */
 export function isCarouselBootstrapReady(items: Midia[], reference = new Date()): boolean {
   if (!items.length) return false;

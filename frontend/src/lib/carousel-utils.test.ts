@@ -8,6 +8,8 @@ import {
   monthKeyFromItem,
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
+  resolveDatedIndexForNavigation,
+  clampCarouselOpenIndex,
   filterMidiaForCarouselTimeline,
   isCarouselBootstrapReady,
 } from './carousel-utils';
@@ -206,6 +208,33 @@ describe('isCarouselBootstrapReady', () => {
       mockMidia(3, '2026-08-20'),
     ];
     assert.equal(isCarouselBootstrapReady(items, new Date('2026-08-14')), true);
+  });
+});
+
+describe('resolveDatedIndexForNavigation', () => {
+  it('returns datedIndex for dated slides', () => {
+    assert.equal(resolveDatedIndexForNavigation({ kind: 'dated', datedIndex: 3 }, 10), 3);
+  });
+
+  it('returns last dated item when in year-tbd zone', () => {
+    assert.equal(resolveDatedIndexForNavigation({ kind: 'year-tbd-media' }, 5), 4);
+    assert.equal(resolveDatedIndexForNavigation({ kind: 'year-tbd-separator', year: 2028 }, 3), 2);
+  });
+});
+
+describe('clampCarouselOpenIndex', () => {
+  const items = [
+    mockMidia(1, '2026-08-01'),
+    mockMidia(2, '2026-08-20'),
+    mockMidia(3, '2026-09-01'),
+  ];
+
+  it('keeps valid index', () => {
+    assert.equal(clampCarouselOpenIndex(items, 1), 1);
+  });
+
+  it('falls back to open index when out of range', () => {
+    assert.equal(clampCarouselOpenIndex(items, 99), resolveCarouselOpenIndex(items));
   });
 });
 
