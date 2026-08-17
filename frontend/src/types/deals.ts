@@ -50,6 +50,7 @@ export type DealSourceStatus = { ok: boolean; count: number; error?: string };
 export type DealsOverview = {
   fetchedAt: string;
   usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   gratis: UnifiedDeal[];
   gratisTemporarios: UnifiedDeal[];
   gratisPermanentes: UnifiedDeal[];
@@ -68,6 +69,7 @@ export type DealsOverview = {
 export type DealsGratisResponse = {
   fetchedAt: string;
   usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   gratisTemporarios: UnifiedDeal[];
   gratisPermanentes: UnifiedDeal[];
   deals: UnifiedDeal[];
@@ -78,6 +80,7 @@ export type DealsGratisResponse = {
 export type DealsPromocoesResponse = {
   fetchedAt: string;
   usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   deals: UnifiedDeal[];
   promocoes: UnifiedDeal[];
   catalogoSteam: UnifiedDeal[];

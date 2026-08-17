@@ -13,9 +13,11 @@ import {
   Search,
   TrendingUp,
   AlertTriangle,
+  Gamepad2,
 } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
+import JogosEmAltaContent from '@/components/jogos/JogosEmAltaContent';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { sortDeals, sortOptionsForTab, type DealSortOption } from '@/lib/dealSort';
@@ -210,7 +212,7 @@ function SourcesAlert({
 function SourceFooter({
   data,
 }: {
-  data: Pick<DealsOverview, 'sources' | 'usdBrlRate'>;
+  data: Pick<DealsOverview, 'sources' | 'usdBrlRate' | 'usdBrlRateFetchedAt'>;
 }) {
   return (
     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
@@ -231,14 +233,29 @@ function SourceFooter({
         Orbe ({data.sources.orbe?.count ?? 0})
       </span>
       {data.usdBrlRate != null && (
-        <span className="text-muted-foreground/80">· USD/BRL: {data.usdBrlRate.toFixed(2)}</span>
+        <span className="text-muted-foreground/80">
+          · USD/BRL: {data.usdBrlRate.toFixed(2)}
+          {data.usdBrlRateFetchedAt && (
+            <>
+              {' '}
+              (atualizada{' '}
+              {new Date(data.usdBrlRateFetchedAt).toLocaleString('pt-BR', {
+                dateStyle: 'short',
+                timeStyle: 'short',
+              })}
+              )
+            </>
+          )}
+        </span>
       )}
     </div>
   );
 }
 
+type PromocoesTab = 'gratis' | 'promocoes' | 'em-alta';
+
 type PromocoesClientProps = {
-  initialTab?: 'gratis' | 'promocoes';
+  initialTab?: PromocoesTab;
 };
 
 export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClientProps) {
@@ -275,7 +292,12 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   }, []);
 
   const loadActiveTab = useCallback(
-    async (silent = false, tab = activeTab) => {
+    async (silent = false, tab: PromocoesTab = activeTab as PromocoesTab) => {
+      if (tab === 'em-alta') {
+        setIsLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
       if (!silent) setIsLoading(true);
       else setIsRefreshing(true);
       setError(null);
@@ -302,15 +324,16 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      void loadActiveTab(true);
+      if (activeTab !== 'em-alta') void loadActiveTab(true);
     }, REFRESH_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [loadActiveTab]);
+  }, [loadActiveTab, activeTab]);
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (tab: PromocoesTab) => {
     setActiveTab(tab);
     if (tab === 'gratis' && !gratisData) void loadGratis();
     if (tab === 'promocoes' && !promoData) void loadPromocoes(1, false);
+    if (tab === 'em-alta') setIsLoading(false);
   };
 
   const handleLoadMorePromos = async () => {
@@ -329,6 +352,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   const sources = gratisData?.sources ?? promoData?.sources;
   const sourcesHealth = gratisData?.sourcesHealth ?? promoData?.sourcesHealth;
   const usdBrlRate = gratisData?.usdBrlRate ?? promoData?.usdBrlRate;
+  const usdBrlRateFetchedAt = gratisData?.usdBrlRateFetchedAt ?? promoData?.usdBrlRateFetchedAt;
 
   const gratisTemporarios = useMemo(() => {
     if (!gratisData) return [];
@@ -398,7 +422,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   const permanentSectionDefaultOpen = filteredTemporarios.length === 0 && filteredPermanentes.length > 0;
 
   const footerData = sources
-    ? { sources, usdBrlRate }
+    ? { sources, usdBrlRate, usdBrlRateFetchedAt }
     : null;
 
   return (
@@ -446,7 +470,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
       </section>
 
       <main className="container mx-auto px-4 py-8 md:py-10">
-        {isLoading ? (
+        {isLoading && activeTab !== 'em-alta' ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="w-full max-w-[210px] aspect-[206/290] rounded-[20px] bg-skeleton orbe-shimmer" />
@@ -464,7 +488,11 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
             </button>
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => handleTabChange(value as PromocoesTab)}
+            className="space-y-8"
+          >
             <SourcesAlert sources={sources} health={sourcesHealth} />
 
             <TabsList className="h-auto flex-wrap gap-1 p-1 w-full sm:w-auto">
@@ -481,6 +509,10 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 <span className="text-xs opacity-70">
                   ({filteredPromocoes.length + filteredCatalogo.length})
                 </span>
+              </TabsTrigger>
+              <TabsTrigger value="em-alta" className="gap-2 px-4 py-2">
+                <Gamepad2 className="h-4 w-4" />
+                Em Alta
               </TabsTrigger>
             </TabsList>
 
@@ -556,12 +588,13 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                         ({filteredCatalogo.length})
                       </span>
                     </h2>
-                    <Link
-                      href="/jogos-em-alta"
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange('em-alta')}
                       className="text-xs text-primary hover:underline"
                     >
-                      Ver em Jogos em Alta →
-                    </Link>
+                      Ver aba Em Alta →
+                    </button>
                   </div>
                   <DealsGrid deals={filteredCatalogo} priorityCount={6} />
                 </section>
@@ -600,6 +633,10 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
               </section>
 
               {footerData && <SourceFooter data={footerData} />}
+            </TabsContent>
+
+            <TabsContent value="em-alta" className="space-y-6 mt-0">
+              <JogosEmAltaContent showPromocoesBanner compact />
             </TabsContent>
           </Tabs>
         )}

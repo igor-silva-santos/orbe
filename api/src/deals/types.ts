@@ -55,6 +55,7 @@ export type DealsOverview = {
   fetchedAt: string;
   /** Taxa USD→BRL usada na conversão de preços internacionais. */
   usdBrlRate?: number | null;
+  usdBrlRateFetchedAt?: string | null;
   /** @deprecated Use gratisTemporarios + gratisPermanentes */
   gratis: UnifiedDeal[];
   /** Jogos que estão de graça — promoção 100% por tempo limitado */

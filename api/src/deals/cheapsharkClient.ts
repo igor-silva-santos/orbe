@@ -16,13 +16,21 @@ const cheapsharkApi = axios.create({
 
 const STORE_PLATFORM_MAP: Record<string, DealPlatform> = {
   '1': 'steam',
+  '3': 'other',
   '7': 'gog',
+  '11': 'other',
+  '13': 'ubisoft',
+  '15': 'other',
   '25': 'epic',
 };
 
 const STORE_NAME_MAP: Record<string, string> = {
   '1': 'Steam',
+  '3': 'Green Man Gaming',
   '7': 'GOG',
+  '11': 'Humble Store',
+  '13': 'Ubisoft',
+  '15': 'Fanatical',
   '25': 'Epic Games Store',
 };
 
