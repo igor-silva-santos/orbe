@@ -14,6 +14,8 @@ import {
 import YearTbdSeparatorCard from '../media/YearTbdSeparatorCard';
 import { ChevronLeft, ChevronRight, Filter, Zap, TrendingUp, Clapperboard, Tv, Blend } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
+import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
+import { getMediaCarouselLoopBounds } from '@/lib/carousel-loop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import {
   addMonths,
@@ -268,8 +270,61 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emblaApi, emAltaMode, emAltaItems]);
 
+  const getLoopBounds = useCallback(() => {
+    const snap = emblaApi?.selectedScrollSnap() ?? 0;
+    return getMediaCarouselLoopBounds(
+      snap,
+      filteredItemsRef.current.length,
+      displaySlidesRef.current.length,
+    );
+  }, [emblaApi]);
+
+  const loopEnabled =
+    !emAltaMode &&
+    !hasInitialPositioning &&
+    pendingScrollIndex === null &&
+    filteredItems.length > 0;
+
+  const infiniteLoopConfig = useMemo(
+    () => ({ enabled: loopEnabled, getBounds: getLoopBounds }),
+    [loopEnabled, getLoopBounds],
+  );
+
+  const handleLoopWrap = useCallback(
+    (targetIndex: number) => {
+      previousSelectedIndex.current = targetIndex;
+      setSelectedSnap(targetIndex);
+      const slide = displaySlidesRef.current[targetIndex];
+      if (slide?.kind === 'year-tbd-separator') {
+        lastTitleMonthKey.current = `year-tbd-${slide.year}`;
+        setCurrentTitle(formatYearTbdTitle(slide.year));
+        return;
+      }
+      if (slide?.kind === 'year-tbd-media') {
+        const year = slide.item.ano_lancamento_api;
+        if (year) {
+          lastTitleMonthKey.current = `year-tbd-${year}`;
+          setCurrentTitle(formatYearTbdTitle(year));
+        }
+        return;
+      }
+      const items = filteredItemsRef.current;
+      const datedIndex = resolveDatedIndexForNavigation(slide, items.length);
+      updateTitleFromIndex(datedIndex, items);
+    },
+    [updateTitleFromIndex],
+  );
+
+  useCarouselInfiniteLoop({
+    emblaApi,
+    viewportRef,
+    enabled: loopEnabled,
+    getBounds: getLoopBounds,
+    onWrap: handleLoopWrap,
+  });
+
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled, infiniteLoopConfig);
   useCarouselDragClickGuard(viewportRef);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */

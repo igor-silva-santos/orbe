@@ -2,8 +2,14 @@
 
 import { useEffect, type RefObject } from 'react';
 import type { EmblaCarouselType } from 'embla-carousel';
+import { wrapCarouselIndex, type CarouselLoopBounds } from '@/lib/carousel-loop';
 
 const HORIZONTAL_THRESHOLD = 48;
+
+export interface CarouselInfiniteScrollOptions {
+  enabled: boolean;
+  getBounds: () => CarouselLoopBounds;
+}
 
 /**
  * Scroll horizontal no carrossel: touchpad (deltaX acumulado) ou Ctrl/Cmd + scroll vertical.
@@ -20,7 +26,8 @@ const HORIZONTAL_THRESHOLD = 48;
 export function useCtrlWheelCarousel(
   emblaApi: EmblaCarouselType | undefined,
   viewportRef: RefObject<HTMLElement | null>,
-  fast = false
+  fast = false,
+  infiniteLoop?: CarouselInfiniteScrollOptions,
 ) {
   useEffect(() => {
     const node = viewportRef.current;
@@ -36,6 +43,30 @@ export function useCtrlWheelCarousel(
       return cachedSlideWidth;
     };
 
+    const scrollForward = () => {
+      if (infiniteLoop?.enabled) {
+        const bounds = infiniteLoop.getBounds();
+        const snap = emblaApi.selectedScrollSnap();
+        if (snap >= bounds.end) {
+          emblaApi.scrollTo(bounds.start, false);
+          return;
+        }
+      }
+      emblaApi.scrollNext();
+    };
+
+    const scrollBackward = () => {
+      if (infiniteLoop?.enabled) {
+        const bounds = infiniteLoop.getBounds();
+        const snap = emblaApi.selectedScrollSnap();
+        if (snap <= bounds.start) {
+          emblaApi.scrollTo(bounds.end, false);
+          return;
+        }
+      }
+      emblaApi.scrollPrev();
+    };
+
     const onWheel = (e: WheelEvent) => {
       const absX = Math.abs(e.deltaX);
       const absY = Math.abs(e.deltaY);
@@ -43,8 +74,8 @@ export function useCtrlWheelCarousel(
       if (e.ctrlKey || e.metaKey) {
         if (absY < 1) return;
         e.preventDefault();
-        if (e.deltaY > 0) emblaApi.scrollNext();
-        else emblaApi.scrollPrev();
+        if (e.deltaY > 0) scrollForward();
+        else scrollBackward();
         return;
       }
 
@@ -58,8 +89,17 @@ export function useCtrlWheelCarousel(
         const slideWidth = getSlideWidth();
         const slidesToMove = Math.trunc(accumulatedX / slideWidth);
         if (slidesToMove === 0) return;
-        const lastIndex = emblaApi.scrollSnapList().length - 1;
-        const target = Math.min(Math.max(emblaApi.selectedScrollSnap() + slidesToMove, 0), lastIndex);
+
+        const snap = emblaApi.selectedScrollSnap();
+        let target = snap + slidesToMove;
+
+        if (infiniteLoop?.enabled) {
+          target = wrapCarouselIndex(target, infiniteLoop.getBounds());
+        } else {
+          const lastIndex = emblaApi.scrollSnapList().length - 1;
+          target = Math.min(Math.max(target, 0), lastIndex);
+        }
+
         emblaApi.scrollTo(target, false);
         accumulatedX -= slidesToMove * slideWidth;
         return;
@@ -67,12 +107,12 @@ export function useCtrlWheelCarousel(
 
       if (Math.abs(accumulatedX) < HORIZONTAL_THRESHOLD) return;
 
-      if (accumulatedX > 0) emblaApi.scrollNext();
-      else emblaApi.scrollPrev();
+      if (accumulatedX > 0) scrollForward();
+      else scrollBackward();
       accumulatedX = 0;
     };
 
     node.addEventListener('wheel', onWheel, { passive: false });
     return () => node.removeEventListener('wheel', onWheel);
-  }, [emblaApi, viewportRef, fast]);
+  }, [emblaApi, viewportRef, fast, infiniteLoop]);
 }
