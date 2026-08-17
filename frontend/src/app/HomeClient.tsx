@@ -77,7 +77,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
 
       <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4 overflow-x-hidden">
         <section id="filmes" className="overflow-hidden">
-          <SectionHeading title="Filmes" />
+          <SectionHeading title="Filmes" href="/filmes" />
           <MediaCarousel
             key={`filmes-${carouselKey}`}
             mediaType="filmes"
@@ -87,7 +87,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         </section>
 
         <section id="series" className="overflow-hidden">
-          <SectionHeading title="Séries" />
+          <SectionHeading title="Séries" href="/series" />
           <MediaCarousel
             key={`series-${carouselKey}`}
             mediaType="series"
@@ -97,12 +97,12 @@ export default function HomeClient({ initialData }: HomeClientProps) {
         </section>
 
         <section id="animes" className="overflow-hidden">
-          <SectionHeading title="Animes" />
+          <SectionHeading title="Animes" href="/animes" />
           <AnimeCarousel key={`animes-${carouselKey}`} initialData={data.animes} />
         </section>
 
         <section id="jogos" className="overflow-hidden">
-          <SectionHeading title="Jogos" />
+          <SectionHeading title="Jogos" href="/jogos" />
           <MediaCarousel
             key={`jogos-${carouselKey}`}
             mediaType="jogos"
@@ -115,8 +115,15 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   );
 }
 
-function SectionHeading({ title }: { title: string }) {
+function SectionHeading({ title, href }: { title: string; href: string }) {
   return (
-    <h2 className="text-2xl md:text-3xl font-bold mb-6 orbe-text-primary px-2 sm:px-0">{title}</h2>
+    <h2 className="text-2xl md:text-3xl font-bold mb-6 orbe-text-primary px-2 sm:px-0">
+      <Link
+        href={href}
+        className="inline-block hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+      >
+        {title}
+      </Link>
+    </h2>
   );
 }
