@@ -162,7 +162,7 @@ O ponteiro só avança quando o ano termina com sucesso (todas as fases + prêmi
 Dois workflows agendados cobrem a operação normal, sem precisar de clique manual:
 
 - **`.github/workflows/sync-daily.yml`** — todo dia às 05:30 UTC (~02:30 BRT): se há checkpoint pendente, chama `run-sync-resume`; senão, dispara um `run-sync-all` novo pro ano corrente (pega lançamentos novos). Não faz nada se já houver um sync ativo e saudável.
-- **`.github/workflows/keep-alive.yml`** — faz `GET /api/health` a cada 12min, 24h por dia. Necessário porque o Render free tier hiberna o serviço após ~15min sem tráfego de entrada, o que também interromperia os crons internos do Node (`api/src/index.ts`): deals/promoções a cada 10min, Detetive Digital 3h, refresh de preços Steam 4h, renovação de webhooks IGDB 5h (todos horário de SP).
+- **`.github/workflows/keep-alive.yml`** — faz `GET /api/health` a cada 12min, 24h por dia. Necessário porque o Render free tier hiberna o serviço após ~15min sem tráfego de entrada, o que também interromperia os crons internos do Node (`api/src/index.ts`): deals/promoções a cada 1min, Detetive Digital 3h, refresh de preços Steam 4h, renovação de webhooks IGDB 5h (todos horário de SP).
 
 Ambos usam os mesmos secrets do `sync-all.yml` (`ORBE_API_URL`, `SYNC_SECRET`) e podem ser disparados manualmente via `workflow_dispatch` a qualquer momento.
 

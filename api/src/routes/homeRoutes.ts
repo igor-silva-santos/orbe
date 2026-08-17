@@ -20,6 +20,7 @@ import {
   serieQualityFilter,
   serieCarouselQualityFilter,
   animeQualityFilter,
+  animeSafeWhereFilter,
   jogoQualityFilter,
 } from '../qualityFilters';
 import { logger } from '../logger';
@@ -452,10 +453,15 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.anime.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
-              { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
-              { titleNative: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              animeSafeWhereFilter,
+              {
+                OR: [
+                  { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
+                  { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
+                  { titleNative: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },

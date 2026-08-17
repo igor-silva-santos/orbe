@@ -39,7 +39,6 @@ import type {
   UnifiedDeal,
 } from '@/types/deals';
 
-const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 const PAGE_SIZE = 48;
 
 function formatFetchedAt(iso: string): string {
@@ -375,13 +374,6 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     void loadActiveTab(false, initialTab);
   }, [initialTab, loadActiveTab]);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (activeTab !== 'em-alta') void loadActiveTab(true);
-    }, REFRESH_INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, [loadActiveTab, activeTab]);
-
   const handleTabChange = (tab: PromocoesTab) => {
     setActiveTab(tab);
     if (tab === 'gratis' && !gratisData) void loadGratis();
@@ -527,7 +519,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <p className="text-sm text-[var(--orbe-accent-2)] font-medium uppercase tracking-wide mb-4">
-                Atualização automática a cada 10 min
+                Catálogo atualizado a cada minuto — clique em Atualizar para ver o mais recente
               </p>
               <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] leading-tight orbe-text-primary flex items-center gap-3">
                 <Sparkles className="h-8 w-8 text-[var(--orbe-accent-2)] shrink-0" />

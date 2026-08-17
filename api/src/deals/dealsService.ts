@@ -15,20 +15,28 @@ import { normalizeDealsList } from './normalizeDeals';
 import { resolveUsdBrlRate } from './exchangeRate';
 import type { DealsOverview, UnifiedDeal } from './types';
 
-/** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se cron falhar). */
-export const DEALS_HARD_TTL_SECONDS = 60 * 30;
+/** Tempo máximo servindo cache sem forçar refresh síncrono (fallback se o cron de 1 min falhar). */
+export const DEALS_HARD_TTL_SECONDS = 60 * 2;
 /** Após este intervalo, requests disparam revalidação em background (usuário não espera). */
-export const DEALS_SOFT_TTL_SECONDS = 60 * 10;
+export const DEALS_SOFT_TTL_SECONDS = 60;
 const DEALS_REDIS_KEY = 'deals:overview:v2';
 const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v2';
 const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v2';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
-const DEALS_LOCK_TTL_SECONDS = 45;
+const DEALS_LOCK_TTL_SECONDS = 55;
+
+/**
+ * Teto de páginas por fonte paginada — cada fetch já para sozinho assim que uma
+ * página volta incompleta (fim real dos resultados), então isso é só uma trava de
+ * segurança contra loop indevido, não um corte artificial do catálogo. Alto o
+ * bastante pra trazer tudo que a fonte tiver.
+ */
+const DEALS_MAX_PAGES = 20;
 
 /** Páginas CheapShark store Epic (25) — fonte principal de promoções pagas Epic. */
 function epicSaleMaxPages(): number {
-  const parsed = Number.parseInt(process.env.EPIC_SALE_MAX_PAGES ?? '5', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 20) : 5;
+  const parsed = Number.parseInt(process.env.EPIC_SALE_MAX_PAGES ?? String(DEALS_MAX_PAGES), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, DEALS_MAX_PAGES) : DEALS_MAX_PAGES;
 }
 
 type CachedDealsEntry = {
@@ -96,9 +104,9 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     safeFetch(fetchEpicFreeGames),
     safeFetch(fetchEpicSaleGames),
     safeFetch(() => fetchGamerPowerGiveaways()),
-    safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: 3 })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: 2 })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: 3 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: DEALS_MAX_PAGES })),
     safeFetch(() =>
       fetchCheapSharkDealsPaged({
         storeId: '25',
@@ -106,11 +114,11 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         maxPages: epicSaleMaxPages(),
       }),
     ),
-    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: 2 })),
+    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: DEALS_MAX_PAGES })),
     safeFetch(fetchSteamDeals),
     safeFetch(fetchCatalogSteamPromotions),
-    safeFetch(() => fetchItchFreeGames({ maxPages: 2 })),
-    safeFetch(() => fetchItchOnSaleGames({ maxPages: 2 })),
+    safeFetch(() => fetchItchFreeGames({ maxPages: DEALS_MAX_PAGES })),
+    safeFetch(() => fetchItchOnSaleGames({ maxPages: DEALS_MAX_PAGES })),
     safeFetch(async () => {
       if (!isItadConfigured()) return [];
       return fetchItadShopSales();

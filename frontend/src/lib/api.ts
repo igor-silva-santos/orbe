@@ -188,12 +188,8 @@ export const orbeNerdApi = {
   },
 
   // Animes
-  getAnimes: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string; includeAdult?: boolean }) => {
-    return apiClient.get('/animes', {
-      ...params,
-      includeAdult: params?.includeAdult ? 'true' : undefined,
-      safeSearch: params?.includeAdult ? undefined : 'true',
-    });
+  getAnimes: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; ano?: string; formato?: string; fonte?: string; status?: string }) => {
+    return apiClient.get('/animes', params);
   },
 
   getAnimeDetails: async (id: number) => {
