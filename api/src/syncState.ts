@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logger';
 import { startSyncKeepAlive, stopSyncKeepAlive } from './syncKeepAlive';
+import * as syncLogger from './syncLogger';
 
 const SYNC_STATE_KEY = 'sync_run';
 const BACKFILL_STATE_KEY = 'backfill_state';
@@ -162,6 +163,8 @@ export async function checkInterruptedSyncOnStartup(prisma: PrismaClient): Promi
     const state = await readState(prisma);
     if (!state?.running) return;
 
+    await syncLogger.closeDanglingSyncLogRuns();
+
     logger.warn(
       '⚠️ Sincronização interrompida (restart/cold start). ' +
         `Iniciada em ${state.startedAt}, período ${state.startDate} → ${state.endDate}` +
@@ -235,6 +238,11 @@ export async function acquireSyncLock(
     }
     memoryLocked = true;
     startSyncKeepAlive();
+    await syncLogger.startSyncLogRun({
+      trigger: existing!.backfill ? 'backfill-resume' : 'resume',
+      startDate: newState.startDate,
+      endDate: newState.endDate,
+    });
     return { ok: true };
   }
 
@@ -267,12 +275,18 @@ export async function acquireSyncLock(
 
   memoryLocked = true;
   startSyncKeepAlive();
+  await syncLogger.startSyncLogRun({
+    trigger: meta.backfill ? 'backfill' : 'new',
+    startDate: meta.startDate,
+    endDate: meta.endDate,
+  });
   return { ok: true };
 }
 
 export async function releaseSyncLock(prisma: PrismaClient): Promise<void> {
   memoryLocked = false;
   stopSyncKeepAlive();
+  await syncLogger.finishSyncLogRun('completed');
   try {
     await writeState(prisma, null);
   } catch (error) {
@@ -284,6 +298,7 @@ export async function releaseSyncLock(prisma: PrismaClient): Promise<void> {
 export async function failSyncRun(prisma: PrismaClient, error: unknown): Promise<void> {
   memoryLocked = false;
   stopSyncKeepAlive();
+  await syncLogger.finishSyncLogRun('failed');
   const message = error instanceof Error ? error.message : String(error);
   try {
     const state = await readState(prisma);
@@ -313,6 +328,7 @@ export async function markPhaseComplete(prisma: PrismaClient, phase: SyncPhase):
       completedPhases: Array.from(completed),
       lastProgressAt: new Date().toISOString(),
     });
+    syncLogger.logCheckpoint({ phase }, `Fase '${phase}' concluída.`);
     logger.info(`✅ Fase '${phase}' concluída e registrada no checkpoint.`);
   } catch (error) {
     logger.error(`Erro ao marcar fase ${phase} como completa:`, error);
@@ -367,6 +383,10 @@ export async function updateSyncProgress(
     const state = await readState(prisma);
     if (!state?.running) return;
 
+    if (patch.phase && patch.phase !== state.phase) {
+      syncLogger.logCheckpoint({ phase: patch.phase }, `Fase iniciada: ${patch.phase}.`);
+    }
+
     await writeState(prisma, {
       ...state,
       ...patch,
@@ -381,6 +401,7 @@ export async function updateSyncProgress(
 export async function resetStaleSyncLock(prisma: PrismaClient): Promise<SyncStatusPublic> {
   memoryLocked = false;
   stopSyncKeepAlive();
+  await syncLogger.finishSyncLogRun('interrupted');
   const state = await readState(prisma);
   if (state?.running) {
     await writeState(prisma, {

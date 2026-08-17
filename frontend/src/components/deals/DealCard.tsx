@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
 import type { UnifiedDeal } from '@/types/deals';
 
@@ -19,7 +20,12 @@ const SOURCE_LABELS: Record<string, string> = {
   epic: 'Epic Games',
   gamerpower: 'GamerPower',
   cheapshark: 'CheapShark',
+  steam: 'Steam',
 };
+
+function steamFallbackImage(appId: number): string {
+  return `https://shared.fastly.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`;
+}
 
 function formatEndsAt(endsAt: string | null | undefined): string | null {
   if (!endsAt) return null;
@@ -46,6 +52,28 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
   const isTemporaryFree = isFree && deal.freeTier !== 'permanent';
   const isPermanentFree = isFree && deal.freeTier === 'permanent';
 
+  const initialImage = useMemo(() => {
+    if (deal.imageUrl) return deal.imageUrl;
+    if (deal.steamAppId) return steamFallbackImage(deal.steamAppId);
+    return null;
+  }, [deal.imageUrl, deal.steamAppId]);
+
+  const [imageSrc, setImageSrc] = useState<string | null>(initialImage);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setImageSrc(initialImage);
+    setImageLoaded(false);
+  }, [initialImage, deal.id]);
+
+  const handleImageError = () => {
+    if (deal.steamAppId && imageSrc !== steamFallbackImage(deal.steamAppId)) {
+      setImageSrc(steamFallbackImage(deal.steamAppId));
+      return;
+    }
+    setImageSrc(null);
+  };
+
   return (
     <a
       href={deal.storeUrl}
@@ -54,15 +82,22 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
       className="group flex flex-col bg-card rounded-[20px] border border-border overflow-hidden hover:border-primary/50 transition-colors w-full max-w-[210px]"
     >
       <div className="relative aspect-[206/290] w-full bg-muted overflow-hidden">
-        {deal.imageUrl ? (
+        {!imageLoaded && imageSrc && (
+          <div className="absolute inset-0 bg-skeleton orbe-shimmer" aria-hidden />
+        )}
+        {imageSrc ? (
           <Image
-            src={deal.imageUrl}
+            src={imageSrc}
             alt={deal.title}
             fill
             sizes="210px"
-            className="object-cover transition-transform group-hover:scale-[1.02]"
+            className={`object-cover transition-transform group-hover:scale-[1.02] ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             priority={priority}
             unoptimized
+            onLoad={() => setImageLoaded(true)}
+            onError={handleImageError}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -75,7 +110,7 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
           </span>
           {isTemporaryFree && (
             <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
-              GRÁTIS
+              GRÁTIS AGORA
             </span>
           )}
           {isPermanentFree && (
@@ -112,8 +147,14 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
           <p className="text-[10px] text-muted-foreground">Valor: {deal.worth}</p>
         )}
 
+        {deal.priceConverted && deal.originalSalePriceUsd && (
+          <p className="text-[10px] text-muted-foreground">
+            Original: {deal.originalSalePriceUsd} (câmbio aprox.)
+          </p>
+        )}
+
         {endsLabel && (
-          <p className="text-[10px] text-muted-foreground">Até {endsLabel}</p>
+          <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Acaba em {endsLabel}</p>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">

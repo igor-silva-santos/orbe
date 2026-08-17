@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark';
+export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam';
 
 export type DealKind = 'free' | 'sale';
 
@@ -27,6 +27,8 @@ export type UnifiedDeal = {
   storeUrl: string;
   originalPrice?: string | null;
   salePrice?: string | null;
+  originalPriceValue?: number | null;
+  salePriceValue?: number | null;
   discountPercent?: number | null;
   currency?: string | null;
   startsAt?: string | null;
@@ -37,6 +39,8 @@ export type UnifiedDeal = {
   dealRating?: number | null;
   status?: string | null;
   freeTier?: FreeTier | null;
+  priceConverted?: boolean | null;
+  originalSalePriceUsd?: string | null;
 };
 
 export type DealsOverview = {
@@ -49,5 +53,6 @@ export type DealsOverview = {
     epic: { ok: boolean; count: number; error?: string };
     gamerpower: { ok: boolean; count: number; error?: string };
     cheapshark: { ok: boolean; count: number; error?: string };
+    steam: { ok: boolean; count: number; error?: string };
   };
 };

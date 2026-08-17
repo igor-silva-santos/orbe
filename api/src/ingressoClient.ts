@@ -4,9 +4,65 @@ import { logger } from './logger';
 
 const INGRESSO_API_BASE = 'https://api-content.ingresso.com/v0';
 const INGRESSO_FILM_BASE = 'https://www.ingresso.com/filme';
-const DEFAULT_CITY_IDS = [1, 2]; // São Paulo, Rio de Janeiro
+const CATALOG_FETCH_BATCH_SIZE = 4;
+
+/** IDs de cidades no Ingresso.com (api-content.ingresso.com). Verificados via /events/coming-soon. */
+export const INGRESSO_CITY_IDS = [
+  1, // São Paulo
+  2, // Rio de Janeiro
+  3, // Brasília
+  4, // Salvador
+  5, // Fortaleza
+  6, // Belo Horizonte
+  7, // Manaus
+  8, // Curitiba
+  9, // Recife
+  10, // Porto Alegre
+  11, // Goiânia
+  12, // Belém
+  13, // Guarulhos
+  14, // Campinas
+  15, // São Luís
+  16, // São Gonçalo
+  17, // Maceió
+  18, // Duque de Caxias
+  19, // Natal
+  20, // Teresina
+] as const;
+
+export const DEFAULT_CITY_IDS: number[] = [...INGRESSO_CITY_IDS];
 const SEARCH_TIMEOUT_MS = 12_000;
 const SIMILARITY_THRESHOLD = 0.82;
+const ORIGINAL_TITLE_SIMILARITY_THRESHOLD = 0.78;
+const SEARCH_STOPWORDS = new Set([
+  'the',
+  'uma',
+  'um',
+  'uns',
+  'umas',
+  'dos',
+  'das',
+  'nos',
+  'nas',
+  'para',
+  'com',
+  'sem',
+  'por',
+  'and',
+  'de',
+  'do',
+  'da',
+  'no',
+  'na',
+  'em',
+  'ao',
+  'aos',
+  'as',
+  'os',
+  'e',
+  'o',
+  'a',
+]);
 
 export interface IngressoEvent {
   id: string;
@@ -108,7 +164,71 @@ function isFilmEvent(event: IngressoEvent): boolean {
   return !type || type === 'filme';
 }
 
-function pickBestMatch(
+function collectNormalizedTitles(filme: { title: string; originalTitle?: string | null }): string[] {
+  const titles = new Set<string>();
+  for (const raw of [filme.title, filme.originalTitle]) {
+    const normalized = normalizeTitle(raw ?? '');
+    if (normalized) titles.add(normalized);
+  }
+  return Array.from(titles);
+}
+
+function collectEventTitles(event: IngressoEvent): string[] {
+  const titles = new Set<string>();
+  for (const raw of [event.title, event.originalTitle]) {
+    const normalized = normalizeTitle(raw ?? '');
+    if (normalized) titles.add(normalized);
+  }
+  return Array.from(titles);
+}
+
+function titlesMatchExactly(filmeTitles: string[], eventTitles: string[]): boolean {
+  for (const filmeTitle of filmeTitles) {
+    for (const eventTitle of eventTitles) {
+      if (filmeTitle === eventTitle) return true;
+    }
+  }
+  return false;
+}
+
+function scoreTitlePair(left: string, right: string): number {
+  if (!left || !right) return 0;
+  if (left === right) return 1;
+  return stringSimilarity.compareTwoStrings(left, right);
+}
+
+function buildSearchTerms(filme: {
+  title: string;
+  originalTitle?: string | null;
+  releaseDate?: Date | null;
+}): string[] {
+  const terms = new Set<string>();
+
+  for (const title of [filme.title, filme.originalTitle].filter((value): value is string => Boolean(value?.trim()))) {
+    terms.add(title);
+    const slug = slugify(title);
+    if (slug) {
+      terms.add(slug);
+      terms.add(slug.replace(/-/g, ' '));
+    }
+  }
+
+  for (const title of [filme.title, filme.originalTitle].filter((value): value is string => Boolean(value?.trim()))) {
+    for (const word of normalizeTitle(title).split(' ')) {
+      if (word.length >= 4 && !SEARCH_STOPWORDS.has(word)) {
+        terms.add(word);
+      }
+    }
+  }
+
+  for (const slug of buildSlugCandidates(filme)) {
+    terms.add(slug);
+  }
+
+  return Array.from(terms);
+}
+
+export function pickBestMatch(
   filme: { title: string; originalTitle?: string | null },
   events: IngressoEvent[],
   source: IngressoMatch['source'],
@@ -116,34 +236,40 @@ function pickBestMatch(
   const candidates = events.filter(isFilmEvent);
   if (candidates.length === 0) return null;
 
-  const normalizedTitle = normalizeTitle(filme.title);
+  const filmeTitles = collectNormalizedTitles(filme);
+  const normalizedTitle = filmeTitles[0] ?? '';
   const normalizedOriginal = normalizeTitle(filme.originalTitle ?? '');
 
   for (const event of candidates) {
-    const eventTitles = [event.title, event.originalTitle ?? ''].map(normalizeTitle).filter(Boolean);
-    for (const eventTitle of eventTitles) {
-      if (eventTitle === normalizedTitle || (normalizedOriginal && eventTitle === normalizedOriginal)) {
-        return eventToMatch(event, source, 1);
-      }
+    if (titlesMatchExactly(filmeTitles, collectEventTitles(event))) {
+      return eventToMatch(event, source, 1);
     }
   }
 
   let best: { event: IngressoEvent; score: number } | null = null;
   for (const event of candidates) {
-    const compareAgainst = [event.title, event.originalTitle ?? ''].filter(Boolean);
-    for (const candidateTitle of compareAgainst) {
-      const scoreTitle = stringSimilarity.compareTwoStrings(normalizedTitle, normalizeTitle(candidateTitle));
-      const scoreOriginal =
-        normalizedOriginal &&
-        stringSimilarity.compareTwoStrings(normalizedOriginal, normalizeTitle(candidateTitle));
-      const score = Math.max(scoreTitle, scoreOriginal || 0);
-      if (!best || score > best.score) {
-        best = { event, score };
+    const eventTitles = collectEventTitles(event);
+    for (const filmeTitle of filmeTitles) {
+      for (const eventTitle of eventTitles) {
+        const score = scoreTitlePair(filmeTitle, eventTitle);
+        if (!best || score > best.score) {
+          best = { event, score };
+        }
       }
     }
   }
 
-  if (best && best.score >= SIMILARITY_THRESHOLD) {
+  if (!best) return null;
+
+  const threshold =
+    normalizedOriginal &&
+    collectEventTitles(best.event).some(
+      (eventTitle) => scoreTitlePair(normalizedOriginal, eventTitle) >= ORIGINAL_TITLE_SIMILARITY_THRESHOLD,
+    )
+      ? ORIGINAL_TITLE_SIMILARITY_THRESHOLD
+      : SIMILARITY_THRESHOLD;
+
+  if (best.score >= threshold) {
     return eventToMatch(best.event, source, best.score);
   }
 
@@ -174,20 +300,34 @@ async function fetchIngressoJson<T>(url: string, label: string): Promise<T | nul
   }
 }
 
+async function fetchComingSoonForCity(cityId: number): Promise<IngressoEvent[]> {
+  const url = `${INGRESSO_API_BASE}/events/coming-soon?cityId=${cityId}&partnership=home`;
+  const events = await fetchIngressoJson<IngressoEvent[]>(url, `coming-soon cityId=${cityId}`);
+  return events ?? [];
+}
+
 export async function fetchIngressoCatalog(cityIds: number[] = DEFAULT_CITY_IDS): Promise<IngressoEvent[]> {
   const byUrlKey = new Map<string, IngressoEvent>();
 
-  for (const cityId of cityIds) {
-    const url = `${INGRESSO_API_BASE}/events/coming-soon?cityId=${cityId}&partnership=home`;
-    const events = await fetchIngressoJson<IngressoEvent[]>(url, `coming-soon cityId=${cityId}`);
-    if (!events?.length) continue;
+  for (let offset = 0; offset < cityIds.length; offset += CATALOG_FETCH_BATCH_SIZE) {
+    const batch = cityIds.slice(offset, offset + CATALOG_FETCH_BATCH_SIZE);
+    const batchResults = await Promise.all(batch.map((cityId) => fetchComingSoonForCity(cityId)));
 
-    for (const event of events) {
-      if (event.urlKey) byUrlKey.set(event.urlKey, event);
+    for (let index = 0; index < batch.length; index++) {
+      const cityId = batch[index];
+      const events = batchResults[index];
+      if (!events.length) continue;
+
+      for (const event of events) {
+        if (event.urlKey) byUrlKey.set(event.urlKey, event);
+      }
+      logger.info(`[ingresso-api] cityId=${cityId}: ${events.length} eventos (${byUrlKey.size} únicos no catálogo)`);
     }
-    logger.info(`[ingresso-api] cityId=${cityId}: ${events.length} eventos (${byUrlKey.size} únicos no catálogo)`);
   }
 
+  logger.info(
+    `[ingresso-api] Catálogo consolidado: ${byUrlKey.size} eventos únicos de ${cityIds.length} cidades`,
+  );
   return Array.from(byUrlKey.values());
 }
 
@@ -247,17 +387,24 @@ export async function findIngressoMatchInCatalog(
 export async function findIngressoMatchViaSearch(
   filme: { title: string; originalTitle?: string | null; releaseDate?: Date | null },
 ): Promise<IngressoMatch | null> {
-  const searchTerms = new Set<string>();
-  for (const title of [filme.title, filme.originalTitle].filter((t): t is string => Boolean(t?.trim()))) {
-    searchTerms.add(title);
-    const slug = slugify(title);
-    if (slug) searchTerms.add(slug.replace(/-/g, ' '));
-  }
+  const searchTerms = buildSearchTerms(filme);
 
   for (const term of searchTerms) {
     for (const cityId of DEFAULT_CITY_IDS) {
       const results = await searchIngressoByTerm(term, cityId);
       if (!results.length) continue;
+
+      const exactBySlug = results.find((event) => {
+        if (!isFilmEvent(event)) return false;
+        return buildSlugCandidates(filme).includes(event.urlKey);
+      });
+      if (exactBySlug) {
+        const match = eventToMatch(exactBySlug, 'search', 1);
+        logger.info(
+          `[ingresso-api] Match na busca "${term}" cityId=${cityId} por urlKey → "${match.title}" [${match.urlKey}]`,
+        );
+        return match;
+      }
 
       const match = pickBestMatch(filme, results, 'search');
       if (match) {

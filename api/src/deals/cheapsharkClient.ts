@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { logger } from '../logger';
+import { resolveDealImageUrl } from './dealImages';
+import { parsePriceNumber } from './dealPricing';
 import type { DealPlatform, UnifiedDeal } from './types';
 
 const CHEAPSHARK_USER_AGENT = 'OrbeNerd/1.0 (promocoes@orbe.app)';
@@ -60,21 +62,24 @@ function mapCheapSharkDeal(item: CheapSharkDeal): UnifiedDeal | null {
   const savings = parseDiscountPercent(item.savings);
   const isFree = sale === 0 || savings === 100;
   const storeName = STORE_NAME_MAP[item.storeID ?? ''] ?? 'Loja parceira';
+  const steamAppId = item.steamAppID ? Number.parseInt(item.steamAppID, 10) : null;
 
   return {
     id: `cheapshark:${item.dealID}`,
     source: 'cheapshark',
     kind: isFree ? 'free' : 'sale',
     title: item.title,
-    imageUrl: item.thumb ?? null,
+    imageUrl: resolveDealImageUrl(item.thumb ?? null, steamAppId),
     platform: mapCheapSharkPlatform(item.storeID),
     platforms: [storeName],
     storeUrl: cheapSharkStoreUrl(item.storeID, item.dealID),
     originalPrice: item.normalPrice ? `$${item.normalPrice}` : null,
     salePrice: item.salePrice ? `$${item.salePrice}` : null,
+    originalPriceValue: parsePriceNumber(item.normalPrice ? `$${item.normalPrice}` : null),
+    salePriceValue: parsePriceNumber(item.salePrice ? `$${item.salePrice}` : null),
     discountPercent: savings,
     currency: 'USD',
-    steamAppId: item.steamAppID ? Number.parseInt(item.steamAppID, 10) : null,
+    steamAppId,
     dealRating: item.dealRating ? Number.parseFloat(item.dealRating) : null,
     status: item.isOnSale === '1' ? 'on_sale' : 'active',
     freeTier: isFree ? (normal > 0 ? 'temporary' : 'permanent') : null,
@@ -88,7 +93,7 @@ export async function fetchCheapSharkDeals(options?: {
   pageSize?: number;
 }): Promise<UnifiedDeal[]> {
   try {
-    const pageSize = options?.pageSize ?? 40;
+    const pageSize = options?.pageSize ?? 60;
     const params: Record<string, string | number> = {
       onSale: 1,
       pageSize,
