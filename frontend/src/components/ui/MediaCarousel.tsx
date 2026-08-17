@@ -53,6 +53,8 @@ interface MediaCarouselProps {
   initialData: Midia[];
   startIndex: number;
   className?: string;
+  /** When false, defers by-month/year-tbd bootstrap until section is near viewport */
+  bootstrapEnabled?: boolean;
 }
 
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
@@ -75,6 +77,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   initialData,
   startIndex: initialStartIndex,
   className,
+  bootstrapEnabled = true,
 }) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
@@ -119,6 +122,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   const mediaItemsRef = useRef<Midia[]>(mergeMediaByDate([], initialData));
   const lastTitleMonthKey = useRef<string>('');
   const hasInitialPositioningRef = useRef(true);
+  const bootstrapRanRef = useRef(false);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [emblaRef, emblaApi] = useOrbeCarousel({
@@ -281,6 +285,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
 
   /** Bootstrap: usa SSR quando pronto; senão busca meses adjacentes antes de reposicionar */
   useEffect(() => {
+    if (!bootstrapEnabled || bootstrapRanRef.current) return;
+    bootstrapRanRef.current = true;
+
     void (async () => {
       if (ssrBootstrapReady) {
         const now = new Date();
@@ -304,13 +311,13 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       await requestScrollToOpenPosition();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bootstrapEnabled]);
 
   /** Prefetch year-tbd do ano atual; demais anos sob demanda ao rolar */
   useEffect(() => {
-    if (emAltaMode) return;
+    if (!bootstrapEnabled || emAltaMode) return;
     void loadYearTbd(new Date().getFullYear());
-  }, [emAltaMode, loadYearTbd]);
+  }, [bootstrapEnabled, emAltaMode, loadYearTbd]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {
