@@ -3,6 +3,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildIngressoSlugCandidates,
+  DEFAULT_CITY_IDS,
+  INGRESSO_CITY_IDS,
   pickBestMatch,
   slugify,
   type IngressoEvent,
@@ -20,6 +22,15 @@ const perdidaNoArtico: IngressoEvent = {
 };
 
 describe('ingressoClient matching', () => {
+  it('mantém lista de cidades do ingresso.com não vazia', () => {
+    assert.ok(INGRESSO_CITY_IDS.length > 0);
+    assert.ok(DEFAULT_CITY_IDS.length > 0);
+    assert.deepEqual(DEFAULT_CITY_IDS, [...INGRESSO_CITY_IDS]);
+    assert.ok(INGRESSO_CITY_IDS.includes(1));
+    assert.ok(INGRESSO_CITY_IDS.includes(2));
+    assert.ok(INGRESSO_CITY_IDS.includes(10));
+  });
+
   it('gera slug brasileiro para titulo localizado', () => {
     const slugs = buildIngressoSlugCandidates({
       title: 'Perdida no Ártico',

@@ -4,7 +4,33 @@ import { logger } from './logger';
 
 const INGRESSO_API_BASE = 'https://api-content.ingresso.com/v0';
 const INGRESSO_FILM_BASE = 'https://www.ingresso.com/filme';
-const DEFAULT_CITY_IDS = [1, 2]; // São Paulo, Rio de Janeiro
+const CATALOG_FETCH_BATCH_SIZE = 4;
+
+/** IDs de cidades no Ingresso.com (api-content.ingresso.com). Verificados via /events/coming-soon. */
+export const INGRESSO_CITY_IDS = [
+  1, // São Paulo
+  2, // Rio de Janeiro
+  3, // Brasília
+  4, // Salvador
+  5, // Fortaleza
+  6, // Belo Horizonte
+  7, // Manaus
+  8, // Curitiba
+  9, // Recife
+  10, // Porto Alegre
+  11, // Goiânia
+  12, // Belém
+  13, // Guarulhos
+  14, // Campinas
+  15, // São Luís
+  16, // São Gonçalo
+  17, // Maceió
+  18, // Duque de Caxias
+  19, // Natal
+  20, // Teresina
+] as const;
+
+export const DEFAULT_CITY_IDS: number[] = [...INGRESSO_CITY_IDS];
 const SEARCH_TIMEOUT_MS = 12_000;
 const SIMILARITY_THRESHOLD = 0.82;
 const ORIGINAL_TITLE_SIMILARITY_THRESHOLD = 0.78;
@@ -274,20 +300,34 @@ async function fetchIngressoJson<T>(url: string, label: string): Promise<T | nul
   }
 }
 
+async function fetchComingSoonForCity(cityId: number): Promise<IngressoEvent[]> {
+  const url = `${INGRESSO_API_BASE}/events/coming-soon?cityId=${cityId}&partnership=home`;
+  const events = await fetchIngressoJson<IngressoEvent[]>(url, `coming-soon cityId=${cityId}`);
+  return events ?? [];
+}
+
 export async function fetchIngressoCatalog(cityIds: number[] = DEFAULT_CITY_IDS): Promise<IngressoEvent[]> {
   const byUrlKey = new Map<string, IngressoEvent>();
 
-  for (const cityId of cityIds) {
-    const url = `${INGRESSO_API_BASE}/events/coming-soon?cityId=${cityId}&partnership=home`;
-    const events = await fetchIngressoJson<IngressoEvent[]>(url, `coming-soon cityId=${cityId}`);
-    if (!events?.length) continue;
+  for (let offset = 0; offset < cityIds.length; offset += CATALOG_FETCH_BATCH_SIZE) {
+    const batch = cityIds.slice(offset, offset + CATALOG_FETCH_BATCH_SIZE);
+    const batchResults = await Promise.all(batch.map((cityId) => fetchComingSoonForCity(cityId)));
 
-    for (const event of events) {
-      if (event.urlKey) byUrlKey.set(event.urlKey, event);
+    for (let index = 0; index < batch.length; index++) {
+      const cityId = batch[index];
+      const events = batchResults[index];
+      if (!events.length) continue;
+
+      for (const event of events) {
+        if (event.urlKey) byUrlKey.set(event.urlKey, event);
+      }
+      logger.info(`[ingresso-api] cityId=${cityId}: ${events.length} eventos (${byUrlKey.size} únicos no catálogo)`);
     }
-    logger.info(`[ingresso-api] cityId=${cityId}: ${events.length} eventos (${byUrlKey.size} únicos no catálogo)`);
   }
 
+  logger.info(
+    `[ingresso-api] Catálogo consolidado: ${byUrlKey.size} eventos únicos de ${cityIds.length} cidades`,
+  );
   return Array.from(byUrlKey.values());
 }
 
