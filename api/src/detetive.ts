@@ -13,10 +13,50 @@ import {
   findIngressoMatchViaSearch,
   IngressoEvent,
   IngressoMatch,
+  IngressoFilmeRef,
 } from './ingressoClient';
 import { parseIngressoPageContent } from './ingressoPageParser';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const DETETIVE_DELAY_STREAMING_ONLY_MS = 300;
+export const DETETIVE_DELAY_API_MS = 500;
+export const DETETIVE_DELAY_PUPPETEER_MS = 1500;
+
+export function getDetetiveInterFilmDelayMs(input: {
+  ingressoMode: 'none' | 'link_only' | 'full';
+  usedPuppeteer: boolean;
+}): number {
+  if (input.ingressoMode === 'none') return DETETIVE_DELAY_STREAMING_ONLY_MS;
+  return input.usedPuppeteer ? DETETIVE_DELAY_PUPPETEER_MS : DETETIVE_DELAY_API_MS;
+}
+
+function filmNeedsPuppeteer(
+  filme: {
+    ingresso_sem_pagina: boolean;
+    ingresso_link: string | null;
+    prevenda_confirmada: boolean;
+    releaseDate: Date | null;
+  },
+  now: Date,
+): boolean {
+  const mode = needsIngressoMonitoring(filme, now);
+  return mode === 'full' || mode === 'link_only';
+}
+
+function toIngressoFilmeRef(filme: {
+  title: string;
+  originalTitle?: string | null;
+  tituloBr?: string | null;
+  releaseDate?: Date | null;
+}): IngressoFilmeRef {
+  return {
+    title: filme.title,
+    originalTitle: filme.originalTitle,
+    tituloBr: filme.tituloBr,
+    releaseDate: filme.releaseDate,
+  };
+}
 
 type ScrapeResult = {
   pageExists: boolean;
@@ -338,7 +378,7 @@ async function scrapeIngressoPage(browser: Browser, url: string): Promise<Scrape
 
 async function discoverIngressoViaPuppeteer(
   browser: Browser,
-  filme: { title: string; originalTitle?: string | null; releaseDate?: Date | null },
+  filme: IngressoFilmeRef,
   existingLink?: string | null,
 ): Promise<{ link: string | null; pageExists: boolean; hasCinemaSessions: boolean; isPreSale: boolean; transientError: boolean }> {
   const urlsToTry = new Set<string>();
@@ -371,54 +411,58 @@ async function discoverIngressoViaPuppeteer(
 }
 
 async function resolveIngressoForFilme(
-  filme: {
-    title: string;
-    originalTitle?: string | null;
-    releaseDate?: Date | null;
-    ingresso_link?: string | null;
-  },
+  filme: IngressoFilmeRef & { ingresso_link?: string | null },
   catalog: IngressoEvent[],
   browser?: Browser,
   options?: { verifyPreSaleInPage?: boolean },
 ): Promise<{
   match: IngressoMatch | null;
   puppeteerFallback: { link: string | null; pageExists: boolean; hasCinemaSessions: boolean; isPreSale: boolean; transientError: boolean } | null;
+  usedPuppeteer: boolean;
 }> {
-  logger.info(`[detetive] Resolvendo ingresso.com para "${filme.title}"...`);
+  const ingressoFilme = toIngressoFilmeRef(filme);
+  const displayTitle = filme.tituloBr ?? filme.title;
+  logger.info(`[detetive] Resolvendo ingresso.com para "${displayTitle}"...`);
+
+  let usedPuppeteer = false;
 
   const existingKey = extractIngressoUrlKey(filme.ingresso_link);
   if (existingKey) {
     const refreshed = await fetchIngressoByUrlKey(existingKey);
     if (refreshed) {
       logger.info(`[detetive] Atualizado via urlKey existente: ${refreshed.link}`);
-      return { match: await maybeVerifyPreSaleInPage(refreshed, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
+      const verified = await maybeVerifyPreSaleInPage(refreshed, browser, options?.verifyPreSaleInPage);
+      return { match: verified.match, puppeteerFallback: null, usedPuppeteer: verified.usedPuppeteer };
     }
   }
 
-  const catalogMatch = await findIngressoMatchInCatalog(filme, catalog);
+  const catalogMatch = await findIngressoMatchInCatalog(ingressoFilme, catalog);
   if (catalogMatch) {
     logger.info(`[detetive] Encontrado via API (catálogo): ${catalogMatch.link}`);
-    return { match: await maybeVerifyPreSaleInPage(catalogMatch, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
+    const verified = await maybeVerifyPreSaleInPage(catalogMatch, browser, options?.verifyPreSaleInPage);
+    return { match: verified.match, puppeteerFallback: null, usedPuppeteer: verified.usedPuppeteer };
   }
 
-  const searchMatch = await findIngressoMatchViaSearch(filme);
+  const searchMatch = await findIngressoMatchViaSearch(ingressoFilme);
   if (searchMatch) {
     logger.info(`[detetive] Encontrado via API (busca): ${searchMatch.link}`);
-    return { match: await maybeVerifyPreSaleInPage(searchMatch, browser, options?.verifyPreSaleInPage), puppeteerFallback: null };
+    const verified = await maybeVerifyPreSaleInPage(searchMatch, browser, options?.verifyPreSaleInPage);
+    return { match: verified.match, puppeteerFallback: null, usedPuppeteer: verified.usedPuppeteer };
   }
 
   if (!browser) {
-    logger.warn(`[detetive] Sem match na API e Puppeteer indisponível para "${filme.title}"`);
-    return { match: null, puppeteerFallback: null };
+    logger.warn(`[detetive] Sem match na API e Puppeteer indisponível para "${displayTitle}"`);
+    return { match: null, puppeteerFallback: null, usedPuppeteer: false };
   }
 
-  logger.info(`[detetive] API sem match — tentando Puppeteer para "${filme.title}"`);
-  const puppeteerResult = await discoverIngressoViaPuppeteer(browser, filme, filme.ingresso_link);
+  logger.info(`[detetive] API sem match — tentando Puppeteer para "${displayTitle}"`);
+  usedPuppeteer = true;
+  const puppeteerResult = await discoverIngressoViaPuppeteer(browser, ingressoFilme, filme.ingresso_link);
   if (puppeteerResult.pageExists && puppeteerResult.link) {
     return {
       match: {
         urlKey: puppeteerResult.link.split('/filme/')[1]?.split('?')[0] ?? '',
-        title: filme.title,
+        title: displayTitle,
         link: puppeteerResult.link,
         inPreSale: puppeteerResult.isPreSale,
         isPlaying: puppeteerResult.hasCinemaSessions,
@@ -426,10 +470,11 @@ async function resolveIngressoForFilme(
         source: 'url_key',
       },
       puppeteerFallback: puppeteerResult,
+      usedPuppeteer,
     };
   }
 
-  return { match: null, puppeteerFallback: puppeteerResult };
+  return { match: null, puppeteerFallback: puppeteerResult, usedPuppeteer };
 }
 
 /** API coming-soon às vezes retorna inPreSale=false com pré-venda visível na página — confirma no HTML. */
@@ -437,23 +482,26 @@ async function maybeVerifyPreSaleInPage(
   match: IngressoMatch,
   browser?: Browser,
   verify = true,
-): Promise<IngressoMatch> {
-  if (!verify || !browser || match.inPreSale) return match;
+): Promise<{ match: IngressoMatch; usedPuppeteer: boolean }> {
+  if (!verify || !browser || match.inPreSale) return { match, usedPuppeteer: false };
 
   const scraped = await scrapeIngressoPage(browser, match.link);
-  if (!scraped.pageExists || scraped.transientError) return match;
+  if (!scraped.pageExists || scraped.transientError) return { match, usedPuppeteer: true };
 
   if (scraped.isPreSale) {
     logger.info(`[detetive] API dizia sem pré-venda, página confirma PRÉ-VENDA: ${match.link}`);
     return {
-      ...match,
-      inPreSale: true,
-      hasCinemaSessions: scraped.hasCinemaSessions || match.hasCinemaSessions,
-      isPlaying: scraped.hasCinemaSessions || match.isPlaying,
+      match: {
+        ...match,
+        inPreSale: true,
+        hasCinemaSessions: scraped.hasCinemaSessions || match.hasCinemaSessions,
+        isPlaying: scraped.hasCinemaSessions || match.isPlaying,
+      },
+      usedPuppeteer: true,
     };
   }
 
-  return match;
+  return { match, usedPuppeteer: true };
 }
 
 export type DetetiveProgressCallback = (processed: number, total: number) => void | Promise<void>;
@@ -505,10 +553,17 @@ export async function runDetetive(
     const ingressoCatalog = await fetchIngressoCatalog();
     logger.info(`[detetive] Catálogo ingresso.com: ${ingressoCatalog.length} filmes indexados.`);
 
-    const needsPuppeteer = targetMovies.some((filme) => {
-      if (filme.ingresso_sem_pagina && releaseDatePassed(filme.releaseDate, now)) return false;
-      return !releaseDatePassed(filme.releaseDate, now);
-    });
+    const needsPuppeteer = targetMovies.some((filme) =>
+      filmNeedsPuppeteer(
+        {
+          ingresso_sem_pagina: filme.ingresso_sem_pagina,
+          ingresso_link: filme.ingresso_link,
+          prevenda_confirmada: filme.prevenda_confirmada,
+          releaseDate: filme.releaseDate,
+        },
+        now,
+      ),
+    );
 
     if (needsPuppeteer) {
       browser = await puppeteer.launch(getPuppeteerLaunchOptions());
@@ -517,6 +572,9 @@ export async function runDetetive(
     }
 
     for (const filme of targetMovies) {
+      let ingressoMode: 'none' | 'link_only' | 'full' = 'none';
+      let usedPuppeteer = false;
+
       try {
         const releasePassed = releaseDatePassed(filme.releaseDate, now);
         const wasPrevenda = Boolean(filme.em_prevenda);
@@ -530,7 +588,7 @@ export async function runDetetive(
           logger.info(`[detetive] "${filme.title}" já estreou — removendo flag de pré-venda.`);
         }
 
-        const ingressoMode = needsIngressoMonitoring(
+        ingressoMode = needsIngressoMonitoring(
           {
             ingresso_sem_pagina: ingressoSemPagina,
             ingresso_link: ingressoLink,
@@ -539,18 +597,21 @@ export async function runDetetive(
           },
           now,
         );
+        usedPuppeteer = false;
 
         if (ingressoMode !== 'none') {
           logger.info(
-            `[detetive] Verificando ingresso.com (${ingressoMode === 'link_only' ? 'só link' : 'link + pré-venda'}): "${filme.title}"`,
+            `[detetive] Verificando ingresso.com (${ingressoMode === 'link_only' ? 'só link' : 'link + pré-venda'}): "${filme.tituloBr ?? filme.title}"`,
           );
           const hadExistingLink = Boolean(filme.ingresso_link);
-          const { match, puppeteerFallback } = await resolveIngressoForFilme(
+          const ingressoResult = await resolveIngressoForFilme(
             filme,
             ingressoCatalog,
             browser,
             { verifyPreSaleInPage: ingressoMode === 'full' },
           );
+          const { match, puppeteerFallback } = ingressoResult;
+          usedPuppeteer = ingressoResult.usedPuppeteer;
 
           if (match) {
             ingressoLink = match.link;
@@ -577,6 +638,7 @@ export async function runDetetive(
             );
           } else if (hadExistingLink && ingressoLink && browser) {
             const scraped = await scrapeIngressoPage(browser, ingressoLink);
+            usedPuppeteer = true;
             if (scraped.pageExists && !scraped.transientError) {
               temSessoes = scraped.hasCinemaSessions;
               if (scraped.isPreSale) {
@@ -664,7 +726,12 @@ export async function runDetetive(
       } finally {
         processedFilmes++;
         await onProgress?.(processedFilmes, totalFilmes);
-        await delay(1500);
+        await delay(
+          getDetetiveInterFilmDelayMs({
+            ingressoMode,
+            usedPuppeteer,
+          }),
+        );
       }
     }
   } catch (e: any) {

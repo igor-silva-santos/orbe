@@ -89,6 +89,29 @@ export interface IngressoMatch {
   score?: number;
 }
 
+export type IngressoFilmeRef = {
+  title: string;
+  originalTitle?: string | null;
+  tituloBr?: string | null;
+  releaseDate?: Date | null;
+};
+
+function collectFilmeTitleVariants(filme: IngressoFilmeRef): string[] {
+  const titles: string[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of [filme.tituloBr, filme.title, filme.originalTitle]) {
+    const trimmed = raw?.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    titles.push(trimmed);
+  }
+
+  return titles;
+}
+
 export function slugify(text: string): string {
   if (!text) return '';
   return text
@@ -124,13 +147,9 @@ export function extractIngressoUrlKey(link: string | null | undefined): string |
   return match?.[1]?.toLowerCase() ?? null;
 }
 
-function buildSlugCandidates(filme: {
-  title: string;
-  originalTitle?: string | null;
-  releaseDate?: Date | null;
-}): string[] {
+function buildSlugCandidates(filme: IngressoFilmeRef): string[] {
   const slugs = new Set<string>();
-  const titles = [filme.title, filme.originalTitle].filter((title): title is string => Boolean(title?.trim()));
+  const titles = collectFilmeTitleVariants(filme);
 
   for (const title of titles) {
     const base = slugify(title);
@@ -164,10 +183,10 @@ function isFilmEvent(event: IngressoEvent): boolean {
   return !type || type === 'filme';
 }
 
-function collectNormalizedTitles(filme: { title: string; originalTitle?: string | null }): string[] {
+function collectNormalizedTitles(filme: IngressoFilmeRef): string[] {
   const titles = new Set<string>();
-  for (const raw of [filme.title, filme.originalTitle]) {
-    const normalized = normalizeTitle(raw ?? '');
+  for (const raw of collectFilmeTitleVariants(filme)) {
+    const normalized = normalizeTitle(raw);
     if (normalized) titles.add(normalized);
   }
   return Array.from(titles);
@@ -197,14 +216,10 @@ function scoreTitlePair(left: string, right: string): number {
   return stringSimilarity.compareTwoStrings(left, right);
 }
 
-function buildSearchTerms(filme: {
-  title: string;
-  originalTitle?: string | null;
-  releaseDate?: Date | null;
-}): string[] {
+function buildSearchTerms(filme: IngressoFilmeRef): string[] {
   const terms = new Set<string>();
 
-  for (const title of [filme.title, filme.originalTitle].filter((value): value is string => Boolean(value?.trim()))) {
+  for (const title of collectFilmeTitleVariants(filme)) {
     terms.add(title);
     const slug = slugify(title);
     if (slug) {
@@ -213,7 +228,7 @@ function buildSearchTerms(filme: {
     }
   }
 
-  for (const title of [filme.title, filme.originalTitle].filter((value): value is string => Boolean(value?.trim()))) {
+  for (const title of collectFilmeTitleVariants(filme)) {
     for (const word of normalizeTitle(title).split(' ')) {
       if (word.length >= 4 && !SEARCH_STOPWORDS.has(word)) {
         terms.add(word);
@@ -229,7 +244,7 @@ function buildSearchTerms(filme: {
 }
 
 export function pickBestMatch(
-  filme: { title: string; originalTitle?: string | null },
+  filme: IngressoFilmeRef,
   events: IngressoEvent[],
   source: IngressoMatch['source'],
 ): IngressoMatch | null {
@@ -363,7 +378,7 @@ export async function fetchIngressoByUrlKey(urlKey: string): Promise<IngressoMat
 }
 
 export async function findIngressoMatchInCatalog(
-  filme: { title: string; originalTitle?: string | null },
+  filme: IngressoFilmeRef,
   catalog: IngressoEvent[],
 ): Promise<IngressoMatch | null> {
   const slugCandidates = buildSlugCandidates(filme);
@@ -385,7 +400,7 @@ export async function findIngressoMatchInCatalog(
 }
 
 export async function findIngressoMatchViaSearch(
-  filme: { title: string; originalTitle?: string | null; releaseDate?: Date | null },
+  filme: IngressoFilmeRef,
 ): Promise<IngressoMatch | null> {
   const searchTerms = buildSearchTerms(filme);
 
@@ -419,10 +434,6 @@ export async function findIngressoMatchViaSearch(
   return null;
 }
 
-export function buildIngressoSlugCandidates(filme: {
-  title: string;
-  originalTitle?: string | null;
-  releaseDate?: Date | null;
-}): string[] {
+export function buildIngressoSlugCandidates(filme: IngressoFilmeRef): string[] {
   return buildSlugCandidates(filme);
 }

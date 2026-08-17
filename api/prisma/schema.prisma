@@ -19,6 +19,8 @@ model Filme {
   imdbId          String?   @unique
   title           String
   originalTitle   String?
+  // Título pt-BR oficial do TMDB (tradução BR), usado pelo Detetive no matching do Ingresso
+  tituloBr        String?
   overview        String?   @db.Text
   releaseDate     DateTime?
   // Ano de lançamento quando não há data de calendário (TBA). Exige releaseDate null.
