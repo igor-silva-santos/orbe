@@ -68,8 +68,10 @@ describe('dedupeDeals', () => {
     });
     const result = dedupeDeals([epicDeal, cheapsharkEpic]);
     assert.equal(result.length, 1);
+    assert.equal(result[0].currency, 'BRL');
     assert.equal(result[0].steamAppId, 1582650);
     assert.equal(result[0].imageUrl, 'https://cdn.example/caravan.jpg');
+    assert.match(result[0].storeUrl, /epicgames\.com/);
   });
 
   it('cruza Epic REST e CheapShark Epic pelo título quando não há steamAppId', () => {
@@ -92,8 +94,10 @@ describe('dedupeDeals', () => {
     });
     const result = dedupeDeals([epicDeal, cheapsharkEpic]);
     assert.equal(result.length, 1);
-    assert.equal(result[0].source, 'epic');
+    assert.equal(result[0].currency, 'BRL');
+    assert.equal(result[0].salePrice, 'R$ 17,49');
     assert.equal(result[0].imageUrl, 'https://cdn.example/nfs.jpg');
+    assert.match(result[0].storeUrl, /epicgames\.com/);
   });
 });
 
