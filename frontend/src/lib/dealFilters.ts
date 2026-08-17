@@ -1,14 +1,32 @@
 import type { DealPlatform, UnifiedDeal } from '@/types/deals';
 
+export const PLATFORM_LABELS: Record<DealPlatform, string> = {
+  steam: 'Steam',
+  epic: 'Epic Games',
+  gog: 'GOG',
+  ubisoft: 'Ubisoft',
+  origin: 'EA App',
+  itch: 'itch.io',
+  pc: 'PC',
+  other: 'Loja',
+};
+
 export const ALL_PLATFORM_FILTERS: { id: DealPlatform | 'all'; label: string }[] = [
   { id: 'all', label: 'Todas' },
-  { id: 'steam', label: 'Steam' },
-  { id: 'epic', label: 'Epic' },
-  { id: 'gog', label: 'GOG' },
-  { id: 'ubisoft', label: 'Ubisoft' },
-  { id: 'origin', label: 'EA' },
-  { id: 'itch', label: 'itch.io' },
+  { id: 'steam', label: PLATFORM_LABELS.steam },
+  { id: 'epic', label: PLATFORM_LABELS.epic },
+  { id: 'gog', label: PLATFORM_LABELS.gog },
+  { id: 'ubisoft', label: PLATFORM_LABELS.ubisoft },
+  { id: 'origin', label: PLATFORM_LABELS.origin },
+  { id: 'itch', label: PLATFORM_LABELS.itch },
 ];
+
+/** Plataformas com seção/atalho dedicado na aba Grátis. */
+export const FREE_FEATURED_PLATFORMS: DealPlatform[] = ['itch', 'origin'];
+
+export function getPlatformLabel(platform: string): string {
+  return PLATFORM_LABELS[platform as DealPlatform] ?? platform;
+}
 
 export function filterByPlatform(
   deals: UnifiedDeal[],

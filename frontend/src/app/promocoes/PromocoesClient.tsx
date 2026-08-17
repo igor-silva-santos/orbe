@@ -23,9 +23,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { sortDeals, sortOptionsForTab, type DealSortOption } from '@/lib/dealSort';
 import {
   ALL_PLATFORM_FILTERS,
+  FREE_FEATURED_PLATFORMS,
   availablePlatformFilters,
   filterByPlatform,
   filterBySearch,
+  getPlatformLabel,
   groupByPlatform,
 } from '@/lib/dealFilters';
 import type {
@@ -48,6 +50,11 @@ function formatFetchedAt(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function excludePlatforms(deals: UnifiedDeal[], platforms: DealPlatform[]): UnifiedDeal[] {
+  if (platforms.length === 0) return deals;
+  return deals.filter((deal) => !platforms.includes(deal.platform));
 }
 
 function DealsGrid({ deals, priorityCount = 6 }: { deals: UnifiedDeal[]; priorityCount?: number }) {
@@ -90,7 +97,7 @@ function DealsByPlatform({
       {Object.entries(byPlatform).map(([platform, platformDeals]) => (
         <div key={platform}>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {ALL_PLATFORM_FILTERS.find((f) => f.id === platform)?.label ?? platform}
+            {getPlatformLabel(platform)}
           </h3>
           <DealsGrid deals={platformDeals} />
         </div>
@@ -124,6 +131,45 @@ function PlatformFilters({
           {filter.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+function FreeQuickFilters({
+  deals,
+  platformFilter,
+  onChange,
+}: {
+  deals: UnifiedDeal[];
+  platformFilter: DealPlatform | 'all';
+  onChange: (value: DealPlatform | 'all') => void;
+}) {
+  const quickOptions = FREE_FEATURED_PLATFORMS.filter((platform) =>
+    deals.some((deal) => deal.platform === platform),
+  );
+
+  if (quickOptions.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-muted-foreground">Destaques:</span>
+      {quickOptions.map((platform) => {
+        const isActive = platformFilter === platform;
+        return (
+          <button
+            key={platform}
+            type="button"
+            onClick={() => onChange(isActive ? 'all' : platform)}
+            className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+              isActive
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card border-border orbe-text-primary hover:bg-muted'
+            }`}
+          >
+            {getPlatformLabel(platform)}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -226,6 +272,9 @@ function SourceFooter({
       <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
         CheapShark ({data.sources.cheapshark.count})
       </span>
+      <span className={data.sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        itch.io ({data.sources.itch?.count ?? 0})
+      </span>
       <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
         Steam ({data.sources.steam?.count ?? 0})
       </span>
@@ -270,7 +319,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState<PromocoesTab>(initialTab);
   const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
   const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,7 +341,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   }, []);
 
   const loadActiveTab = useCallback(
-    async (silent = false, tab: PromocoesTab = activeTab as PromocoesTab) => {
+    async (silent = false, tab: PromocoesTab = activeTab) => {
       if (tab === 'em-alta') {
         setIsLoading(false);
         setIsRefreshing(false);
@@ -393,6 +442,8 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     if (!hasFilter) setPlatformFilter('all');
   }, [activePlatformOptions, platformFilter]);
 
+  const showFeaturedSections = platformFilter === 'all' && !searchQuery.trim();
+
   const filteredTemporarios = useMemo(() => {
     const filtered = filterBySearch(
       filterByPlatform(gratisTemporarios, platformFilter),
@@ -409,6 +460,40 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     return sortDeals(filtered, freeSort === 'ending_soon' ? 'title' : freeSort);
   }, [gratisPermanentes, platformFilter, searchQuery, freeSort]);
 
+  const featuredPlatformsWithDeals = useMemo(() => {
+    if (!showFeaturedSections) return [];
+    return FREE_FEATURED_PLATFORMS.filter(
+      (platform) =>
+        filteredTemporarios.some((deal) => deal.platform === platform) ||
+        filteredPermanentes.some((deal) => deal.platform === platform),
+    );
+  }, [filteredTemporarios, filteredPermanentes, showFeaturedSections]);
+
+  const mainTemporarios = useMemo(() => {
+    if (!showFeaturedSections) return filteredTemporarios;
+    return excludePlatforms(filteredTemporarios, featuredPlatformsWithDeals);
+  }, [filteredTemporarios, featuredPlatformsWithDeals, showFeaturedSections]);
+
+  const mainPermanentes = useMemo(() => {
+    if (!showFeaturedSections) return filteredPermanentes;
+    return excludePlatforms(filteredPermanentes, featuredPlatformsWithDeals);
+  }, [filteredPermanentes, featuredPlatformsWithDeals, showFeaturedSections]);
+
+  const featuredDealsByPlatform = useMemo(() => {
+    const grouped: Partial<Record<DealPlatform, UnifiedDeal[]>> = {};
+    for (const platform of featuredPlatformsWithDeals) {
+      const pool = sortDeals(
+        filterBySearch(
+          [...gratisTemporarios, ...gratisPermanentes].filter((deal) => deal.platform === platform),
+          searchQuery,
+        ),
+        freeSort === 'ending_soon' ? 'title' : freeSort,
+      );
+      grouped[platform] = pool;
+    }
+    return grouped;
+  }, [featuredPlatformsWithDeals, gratisTemporarios, gratisPermanentes, searchQuery, freeSort]);
+
   const filteredPromocoes = useMemo(() => {
     const filtered = filterBySearch(filterByPlatform(salePool, platformFilter), searchQuery);
     return sortDeals(filtered, saleSort);
@@ -419,11 +504,9 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     return sortDeals(filtered, saleSort);
   }, [catalogoSteam, platformFilter, searchQuery, saleSort]);
 
-  const permanentSectionDefaultOpen = filteredTemporarios.length === 0 && filteredPermanentes.length > 0;
+  const permanentSectionDefaultOpen = mainTemporarios.length === 0 && mainPermanentes.length > 0;
 
-  const footerData = sources
-    ? { sources, usdBrlRate, usdBrlRateFetchedAt }
-    : null;
+  const footerData = sources ? { sources, usdBrlRate, usdBrlRateFetchedAt } : null;
 
   return (
     <div className="bg-background min-h-screen overflow-x-hidden">
@@ -447,7 +530,8 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas ao vivo da Epic, Steam, GamerPower e CheapShark — com catálogo Orbe e câmbio USD/BRL atualizado.
+                Ofertas ao vivo da Epic, Steam, GamerPower, CheapShark e itch.io — incluindo giveaways na EA App,
+                com catálogo Orbe e câmbio USD/BRL atualizado.
               </p>
               {fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">
@@ -522,6 +606,12 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 <SortSelect value={freeSort} onChange={setFreeSort} tab="gratis" />
               </div>
 
+              <FreeQuickFilters
+                deals={allFreeDeals}
+                platformFilter={platformFilter}
+                onChange={setPlatformFilter}
+              />
+
               <PlatformFilters
                 options={freePlatformOptions}
                 platformFilter={platformFilter}
@@ -534,19 +624,49 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                     <Clock className="h-5 w-5 text-emerald-600" />
                     Estão de graça
                     <span className="text-sm font-normal text-muted-foreground">
-                      ({filteredTemporarios.length})
+                      ({mainTemporarios.length})
                     </span>
                   </h2>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                    Jogos que custavam e estão com 100% de desconto por tempo limitado — vale resgatar agora.
+                  </p>
                 </div>
 
-                {filteredTemporarios.length === 0 ? (
+                {mainTemporarios.length === 0 ? (
                   <div className="bg-card rounded-lg border border-border p-10 text-center">
                     <p className="text-muted-foreground">Nenhum jogo temporariamente grátis no momento.</p>
                   </div>
                 ) : (
-                  <DealsByPlatform deals={filteredTemporarios} platformFilter={platformFilter} />
+                  <DealsByPlatform deals={mainTemporarios} platformFilter={platformFilter} />
                 )}
               </section>
+
+              {featuredPlatformsWithDeals.map((platform) => {
+                const deals = featuredDealsByPlatform[platform] ?? [];
+                if (deals.length === 0) return null;
+
+                const sectionTitle =
+                  platform === 'origin'
+                    ? 'Grátis na EA'
+                    : `Grátis na ${getPlatformLabel(platform)}`;
+
+                return (
+                  <CollapsibleSection
+                    key={platform}
+                    id={`promocoes-gratis-${platform}`}
+                    title={sectionTitle}
+                    icon={Gift}
+                    defaultOpen
+                  >
+                    <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                      {platform === 'itch'
+                        ? 'Jogos gratuitos na itch.io — incluindo ofertas permanentes e temporárias.'
+                        : `Giveaways gratuitos na ${getPlatformLabel(platform)} via GamerPower.`}
+                    </p>
+                    <DealsGrid deals={deals} />
+                  </CollapsibleSection>
+                );
+              })}
 
               <CollapsibleSection
                 id="promocoes-jogos-sempre-gratis"
@@ -554,8 +674,11 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 icon={Gift}
                 defaultOpen={permanentSectionDefaultOpen}
               >
-                {filteredPermanentes.length > 0 ? (
-                  <DealsByPlatform deals={filteredPermanentes} platformFilter={platformFilter} />
+                <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+                  Jogos que nunca custaram — free-to-play ou preço base zero.
+                </p>
+                {mainPermanentes.length > 0 ? (
+                  <DealsByPlatform deals={mainPermanentes} platformFilter={platformFilter} />
                 ) : (
                   <div className="bg-card rounded-lg border border-border p-8 text-center">
                     <p className="text-muted-foreground text-sm">Nenhum jogo permanentemente grátis no momento.</p>

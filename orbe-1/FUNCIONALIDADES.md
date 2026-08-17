@@ -140,6 +140,21 @@ O usuário navega por carrosséis temporais, filtra por categoria, pesquisa tít
 | Eventos de games | E3, State of Play etc.; jogos anunciados por evento |
 | Resumo de eventos | `/api/eventos/resumo` |
 
+### 3.6.1 Promoções de jogos (`/promocoes`)
+
+Agrega grátis e promoções de várias fontes com cache Redis (`api/src/deals/`).
+
+| Fonte | Grátis | Promoções pagas | Notas |
+|-------|--------|-----------------|-------|
+| **Epic Games** | `freeGamesPromotions` (REST, preços BRL) | Mesmo feed — só jogos no carrossel promocional (~poucos títulos) | GraphQL e `store.epicgames.com/browse` bloqueados por Cloudflare no servidor |
+| **CheapShark store 25** | Sim | **Fonte principal Epic pagas** — paginação (`EPIC_SALE_MAX_PAGES`, padrão 5 páginas × 60) | USD; dedupe com Epic REST por `steamAppId` ou título |
+| **CheapShark geral** | Sim | Steam, GOG, Ubisoft etc. | `CHEAPSHARK` páginas configuráveis no serviço |
+| **Steam API** | Sim | Sim | Trending + sales |
+| **GamerPower** | Sim (giveaways) | — | Multi-plataforma |
+| **Catálogo Orbe** | — | Steam com capa IGDB e link interno | `catalogoSteam` na API |
+
+Dedupe (`dedupeDeals`): cruza fontes por `steamAppId`, slug Epic (`store.epicgames.com/p/...`) e título normalizado — evita perder ofertas CheapShark quando Epic REST repete o mesmo jogo.
+
 ### 3.7 “O que tem pra hoje”
 
 Agrega em `/api/hoje` e exibe em `/hoje`:

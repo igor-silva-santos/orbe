@@ -7,6 +7,7 @@ import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDealsPaged } from './cheapsharkClient';
 import { fetchSteamDeals } from './steamDealsClient';
 import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
+import { fetchItchFreeGames, fetchItchOnSaleGames } from './itchClient';
 import { splitFreeDeals } from './freeTier';
 import { dedupeDeals } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
@@ -22,6 +23,12 @@ const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v2';
 const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v2';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
 const DEALS_LOCK_TTL_SECONDS = 45;
+
+/** Páginas CheapShark store Epic (25) — fonte principal de promoções pagas Epic. */
+function epicSaleMaxPages(): number {
+  const parsed = Number.parseInt(process.env.EPIC_SALE_MAX_PAGES ?? '5', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 20) : 5;
+}
 
 type CachedDealsEntry = {
   overview: DealsOverview;
@@ -79,6 +86,8 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     cheapsharkUbisoft,
     steam,
     catalogoSteamRaw,
+    itchFree,
+    itchOnSale,
   ] = await Promise.all([
     safeFetch(fetchEpicFreeGames),
     safeFetch(fetchEpicSaleGames),
@@ -86,14 +95,24 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     safeFetch(() => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: 3 })),
     safeFetch(() => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: 2 })),
     safeFetch(() => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: 3 })),
-    safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 40, maxPages: 2 })),
+    safeFetch(() =>
+      fetchCheapSharkDealsPaged({
+        storeId: '25',
+        pageSize: 60,
+        maxPages: epicSaleMaxPages(),
+      }),
+    ),
     safeFetch(() => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: 2 })),
     safeFetch(fetchSteamDeals),
     safeFetch(fetchCatalogSteamPromotions),
+    safeFetch(() => fetchItchFreeGames({ maxPages: 2 })),
+    safeFetch(() => fetchItchOnSaleGames({ maxPages: 2 })),
   ]);
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
+  const itchTemporaryFree = itchOnSale.items.filter((deal) => deal.kind === 'free');
+  const itchSales = itchOnSale.items.filter((deal) => deal.kind === 'sale');
 
   const gratisAll = normalizeDealsList(
     await enrichDealsWithOrbeLinks(
@@ -104,6 +123,8 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         ...cheapsharkPermanentFree.items,
         ...cheapsharkUbisoft.items.filter((d) => d.kind === 'free'),
         ...steamFree,
+        ...itchFree.items,
+        ...itchTemporaryFree,
       ]),
     ),
     usdBrlRate,
@@ -126,6 +147,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
           ...cheapsharkUbisoft.items.filter((deal) => deal.kind === 'sale'),
           ...epicSales.items,
           ...steamSales,
+          ...itchSales,
         ]),
       ),
       usdBrlRate,
@@ -176,6 +198,11 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
       },
       steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
       orbe: { ok: !catalogoSteamRaw.error, count: catalogoSteam.length, error: catalogoSteamRaw.error },
+      itch: {
+        ok: !itchFree.error && !itchOnSale.error,
+        count: itchFree.items.length + itchOnSale.items.length,
+        error: itchFree.error ?? itchOnSale.error,
+      },
     },
   };
 }
@@ -206,6 +233,7 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     overview.sources.cheapshark.ok ? '1' : '0',
     overview.sources.steam.ok ? '1' : '0',
     overview.sources.orbe?.ok ? '1' : '0',
+    overview.sources.itch?.ok ? '1' : '0',
     String(overview.usdBrlRate ?? ''),
     overview.usdBrlRateFetchedAt ?? '',
   ].join('::');
