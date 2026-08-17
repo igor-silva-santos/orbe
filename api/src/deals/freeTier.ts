@@ -43,6 +43,13 @@ export function classifyFreeTier(deal: UnifiedDeal): FreeTier {
     return 'permanent';
   }
 
+  if (deal.source === 'itad') {
+    if (deal.freeTier === 'temporary') return 'temporary';
+    if (deal.discountPercent === 100) return 'temporary';
+    if (original != null && original > 0) return 'temporary';
+    return 'permanent';
+  }
+
   if (original != null && original > 0) return 'temporary';
   return 'permanent';
 }

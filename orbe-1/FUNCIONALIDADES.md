@@ -151,6 +151,8 @@ Agrega grátis e promoções de várias fontes com cache Redis (`api/src/deals/`
 | **CheapShark geral** | Sim | Steam, GOG, Ubisoft etc. | `CHEAPSHARK` páginas configuráveis no serviço |
 | **Steam API** | Sim | Sim | Trending + sales |
 | **GamerPower** | Sim (giveaways) | — | Multi-plataforma |
+| **itch.io** | RSS oficial (`price-free.xml`) + fallback JSON | RSS (`on-sale.xml`) + fallback JSON | Preços USD; conversão via câmbio |
+| **IsThereAnyDeal** | — | **Epic (shop 16) + EA (shop 52)** em BRL | Requer `ITAD_API_KEY`; paginação `ITAD_MAX_PAGES` |
 | **Catálogo Orbe** | — | Steam com capa IGDB e link interno | `catalogoSteam` na API |
 
 Dedupe (`dedupeDeals`): cruza fontes por `steamAppId`, slug Epic (`store.epicgames.com/p/...`) e título normalizado — evita perder ofertas CheapShark quando Epic REST repete o mesmo jogo.
