@@ -296,6 +296,7 @@ export interface MidiaCardProps {
   onClick?: () => void;
   isFocused?: boolean;
   priority?: boolean;
+  onPosterLoad?: () => void;
 }
 
 export interface HeaderProps {

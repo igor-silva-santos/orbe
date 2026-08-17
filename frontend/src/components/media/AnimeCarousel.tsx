@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
 import { useCarouselDragClickGuard } from '@/hooks/useCarouselDragClickGuard';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
+import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 
 import MidiaCard from './MidiaCard';
@@ -204,8 +205,41 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     [emblaRef]
   );
 
+  const getLoopBounds = useCallback(() => {
+    const last = Math.max(0, carouselItemsRef.current.length - 1);
+    return { start: 0, end: last };
+  }, []);
+
+  const loopEnabled =
+    !emAltaMode &&
+    !hasInitialPositioning &&
+    pendingScrollIndex === null &&
+    carouselItems.length > 0;
+
+  const infiniteLoopConfig = useMemo(
+    () => ({ enabled: loopEnabled, getBounds: getLoopBounds }),
+    [loopEnabled, getLoopBounds],
+  );
+
+  const handleLoopWrap = useCallback(
+    (targetIndex: number) => {
+      previousSelectedIndex.current = targetIndex;
+      setSelectedSnap(targetIndex);
+      updateTitleFromIndex(targetIndex, carouselItemsRef.current);
+    },
+    [updateTitleFromIndex],
+  );
+
+  useCarouselInfiniteLoop({
+    emblaApi,
+    viewportRef,
+    enabled: loopEnabled,
+    getBounds: getLoopBounds,
+    onWrap: handleLoopWrap,
+  });
+
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled, infiniteLoopConfig);
   useCarouselDragClickGuard(viewportRef);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
