@@ -63,7 +63,7 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(resolveCarouselOpenIndex(items), 2);
   });
 
-  it('when data ends before current month, targets current month key for forward load', () => {
+  it('when data ends before current month, title matches last available month', () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
@@ -76,8 +76,20 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(2, `${y}-${m}-15`),
       mockMidia(3, `${y}-${m}-28`),
     ];
-    assert.equal(resolveCarouselOpenMonthKey(items), `${year}-${String(month).padStart(2, '0')}`);
+    assert.equal(resolveCarouselOpenMonthKey(items), `${y}-${m}`);
     assert.equal(isCarouselOpenIndexReady(items, 2), false);
+  });
+
+  it('does not show current month title when only past-month data is loaded', () => {
+    const items = [
+      mockMidia(1, '2026-05-22'),
+      mockMidia(2, '2026-05-28'),
+      mockMidia(3, '2026-05-31'),
+    ];
+    const index = resolveCarouselOpenIndex(items);
+    const monthKey = monthKeyFromItem(items[index]);
+    assert.equal(resolveCarouselOpenMonthKey(items), monthKey);
+    assert.equal(monthKey, '2026-05');
   });
 
   it('does not open July when the next release is in August (July vs August bug)', () => {

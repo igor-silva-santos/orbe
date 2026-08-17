@@ -136,18 +136,23 @@ export function resolveCarouselStartIndex(data: Midia[]): number {
   return next >= 0 ? next : 0;
 }
 
-/** Mês (YYYY-MM) do próximo lançamento >= hoje presente nos dados, ou mês atual se nenhum futuro */
+/** Mês (YYYY-MM) alinhado ao índice real de abertura — evita título "agosto" com slides de maio. */
 export function resolveCarouselOpenMonthKey(data: Midia[]): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  if (!data.length) return monthKeyFromDate(new Date());
 
-  const nextIdx = calculateCarouselStartIndex(data);
-  if (nextIdx >= 0) {
-    const monthKey = monthKeyFromItem(data[nextIdx]);
-    if (monthKey) return monthKey;
+  const index = resolveCarouselOpenIndex(data);
+  const monthKey = monthKeyFromItem(data[index]);
+  if (monthKey) return monthKey;
+
+  return monthKeyFromDate(new Date());
+}
+
+function findFirstMonthKeyOnOrAfter(data: Midia[], targetMonthKey: string): number {
+  for (let i = 0; i < data.length; i++) {
+    const key = monthKeyFromItem(data[i]);
+    if (key && key >= targetMonthKey) return i;
   }
-
-  return monthKeyFromDate(today);
+  return -1;
 }
 
 /** Índice do primeiro slide do mês-alvo (início do mês na timeline). Retorna -1 se o mês não existir nos dados. */
@@ -188,9 +193,14 @@ export function resolveCarouselOpenIndex(data: Midia[]): number {
     if (monthKeyFromItem(data[i]) === currentMonthKey) return i;
   }
 
+  const forwardIdx = findFirstMonthKeyOnOrAfter(data, currentMonthKey);
+  if (forwardIdx >= 0) return forwardIdx;
+
   for (let i = data.length - 1; i >= 0; i--) {
     const releaseDate = parseMidiaReleaseDate(data[i]);
-    if (releaseDate && isCarouselTimelineDate(releaseDate, today)) return i;
+    if (!releaseDate || !isCarouselTimelineDate(releaseDate, today)) continue;
+    const itemMonth = monthKeyFromItem(data[i]);
+    if (itemMonth && itemMonth >= currentMonthKey) return i;
   }
 
   return data.length - 1;
