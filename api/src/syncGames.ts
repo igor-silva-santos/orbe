@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from './clients';
 import { igdbApi, getIgdbAccessToken } from './clients';
 import { logger } from './logger';
+import * as syncLog from './syncLogger';
 import { isJogoRelevantForSync, SYNC_MIN_GAME_HYPES } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { isOpenPeriod } from './syncDateHelpers';
@@ -141,12 +142,32 @@ async function processGameBatch(
     eventId: number | null = null,
     period?: { start: Date; end: Date },
     includeUndated = false,
-): Promise<{ skipReasons: Record<string, number> }> {
+    batchPeriod?: { year?: number; month?: number },
+): Promise<{ skipReasons: Record<string, number>; successCount: number; errorCount: number }> {
     const skipReasons: Record<string, number> = {};
-    const bumpSkip = (reason: string) => {
+    let skippedCount = 0;
+    let successCount = 0;
+    let errorCount = 0;
+    const bumpSkip = (
+        reason: string,
+        ctx: { id?: number; title?: string; year?: number | null; month?: number | null } = {},
+    ) => {
+        skippedCount++;
         skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+        syncLog.logSkip(
+            {
+                phase: 'jogos',
+                mediaType: 'games',
+                itemId: ctx.id,
+                itemTitle: ctx.title,
+                year: ctx.year ?? batchPeriod?.year,
+                month: ctx.month ?? batchPeriod?.month,
+                reason,
+            },
+            `Jogo [${ctx.id ?? '?'}] "${ctx.title ?? '?'}" pulado: ${reason}.`,
+        );
     };
-    if (gameIds.length === 0) return { skipReasons };
+    if (gameIds.length === 0) return { skipReasons, successCount, errorCount };
 
     const query = `
         fields name, summary, cover.url, first_release_date, release_dates.date, release_dates.category,
@@ -177,6 +198,16 @@ async function processGameBatch(
         for (const game of games) {
 
             try {
+                const igdbResolved = resolveIgdbRelease(game);
+                let firstReleaseDate = igdbResolved.calendarDate;
+                let releaseYear = igdbResolved.releaseYear;
+                const skipCtx = () => ({
+                    id: game.id,
+                    title: game.name,
+                    year: releaseYear ?? batchPeriod?.year,
+                    month: firstReleaseDate ? firstReleaseDate.getMonth() + 1 : batchPeriod?.month,
+                });
+
                 // Jogos de eventos (Game Awards etc.) são curados pelo IGDB — não aplicar filtro de rating.
                 if (!eventId && !isJogoRelevantForSync({
                     rating: game.rating,
@@ -184,7 +215,7 @@ async function processGameBatch(
                     hypes: game.hypes,
                     follows: game.follows,
                 })) {
-                    bumpSkip('quality_filter');
+                    bumpSkip('quality_filter', skipCtx());
                     logger.info(
                       `⏭️ Jogo [${game.id}] "${game.name}" ignorado: critérios de sync ` +
                       `(rating=${game.rating ?? 0}, rating_count=${game.rating_count ?? 0}, ` +
@@ -193,27 +224,26 @@ async function processGameBatch(
                     continue;
                 }
 
-                const igdbResolved = resolveIgdbRelease(game);
-                let firstReleaseDate = igdbResolved.calendarDate;
-                let releaseYear = igdbResolved.releaseYear;
-
                 if (!firstReleaseDate && igdbResolved.isYearOnly && releaseYear) {
                     if (!includeUndated) {
-                        bumpSkip('no_release_date');
+                        bumpSkip('no_release_date', skipCtx());
                         continue;
                     }
                     if (period && !isYearWithinRange(releaseYear, period.start, period.end)) {
-                        bumpSkip('out_of_period');
+                        bumpSkip('out_of_period', skipCtx());
                         continue;
                     }
                 } else if (!firstReleaseDate) {
                     if (!includeUndated) {
-                        bumpSkip('no_release_date');
+                        bumpSkip('no_release_date', skipCtx());
                         continue;
                     }
                 } else {
                     releaseYear = firstReleaseDate.getFullYear();
                 }
+
+                const eventYear = releaseYear ?? batchPeriod?.year;
+                const eventMonth = firstReleaseDate ? firstReleaseDate.getMonth() + 1 : batchPeriod?.month;
 
                 const coverUrl = game.cover?.url ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`.replace('https://images.igdb.com/igdb/image/upload', '/api/images/igdb') : null;
 
@@ -420,17 +450,50 @@ async function processGameBatch(
                     await prisma.jogo.create({ data: createData });
                 }
 
-                logger.info(`${existingGame ? '🔄' : '✅'} Jogo [${game.id}] "${game.name}" sincronizado.`);
+                successCount++;
+                const successMessage = `${existingGame ? '🔄' : '✅'} Jogo [${game.id}] "${game.name}" sincronizado.`;
+                logger.info(successMessage);
+                syncLog.logSync(
+                    { phase: 'jogos', mediaType: 'games', itemId: game.id, itemTitle: game.name, year: eventYear, month: eventMonth },
+                    successMessage,
+                );
 
             } catch (error) {
+                errorCount++;
                 logger.error(`❌ Erro ao processar o jogo ID ${game.id}. Pulando: ${error}`);
+                syncLog.logSyncError(
+                    {
+                        phase: 'jogos',
+                        mediaType: 'games',
+                        itemId: game.id,
+                        itemTitle: game.name,
+                        year: batchPeriod?.year,
+                        month: batchPeriod?.month,
+                    },
+                    `Erro ao processar o jogo ID ${game.id}: ${error}`,
+                );
             }
         }
     } catch (error: any) {
         logger.error(`❌ Erro ao processar o lote de jogos IDs ${gameIds.join(',')}. Pulando: ${error.message || error}`);
+        syncLog.logSyncError(
+            {
+                phase: 'jogos',
+                mediaType: 'games',
+                itemId: eventId ?? undefined,
+                year: batchPeriod?.year,
+                month: batchPeriod?.month,
+            },
+            `Erro ao processar o lote de jogos IDs ${gameIds.join(',')}: ${error.message || error}`,
+        );
     }
 
-    return { skipReasons };
+    const summaryMessage = `--- Resumo do Lote (Jogos) --- Sucesso: ${successCount}, Erros: ${errorCount}, Pulados: ${skippedCount}`;
+    syncLog.logCheckpoint(
+        { phase: 'jogos', mediaType: 'games', year: batchPeriod?.year, month: batchPeriod?.month },
+        summaryMessage,
+    );
+    return { skipReasons, successCount, errorCount };
 }
 
 async function fetchAllGameIdsForPeriod(startDateStr: string, endDateStr: string): Promise<number[]> {

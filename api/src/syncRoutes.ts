@@ -146,6 +146,140 @@ router.get(
   }
 );
 
+/** Middleware compartilhado pelas rotas de leitura do log estruturado (admin ou x-sync-secret) */
+const protectLogRead = (req: any, res: any, next: any) => {
+  const secret = req.headers['x-sync-secret'] as string | undefined;
+  if (verifySyncSecret(secret)) {
+    return next();
+  }
+  return adminMiddleware(req, res, next);
+};
+
+function serializeLogEvent(event: any) {
+  return { ...event, id: String(event.id) };
+}
+
+/** Lista execuções de sync (mais recentes primeiro) — visão geral antes de entrar no detalhe. */
+router.get('/sync/log-runs', protectLogRead, async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '20'), 10) || 20, 1), 100);
+  const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+
+  const runs = await prisma.syncLogRun.findMany({
+    where: status ? { status } : undefined,
+    orderBy: { startedAt: 'desc' },
+    take: limit,
+    select: {
+      id: true,
+      startedAt: true,
+      finishedAt: true,
+      status: true,
+      trigger: true,
+      startDate: true,
+      endDate: true,
+      totalEvents: true,
+      errorCount: true,
+      skipCount: true,
+    },
+  });
+
+  res.json({ runs });
+});
+
+/** Resumo agregado de uma execução — o que uma IA (ou você) deve ler primeiro, não os eventos brutos. */
+router.get('/sync/log-runs/:id', protectLogRead, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'id inválido.' });
+
+  const run = await prisma.syncLogRun.findUnique({ where: { id } });
+  if (!run) return res.status(404).json({ error: 'Run não encontrado.' });
+
+  res.json(run);
+});
+
+/** Eventos paginados e filtráveis de uma execução — só consultar quando o resumo não for suficiente. */
+router.get('/sync/log-runs/:id/events', protectLogRead, async (req, res) => {
+  const runId = parseInt(req.params.id, 10);
+  if (Number.isNaN(runId)) return res.status(400).json({ error: 'id inválido.' });
+
+  const { phase, category, level, mediaType } = req.query as Record<string, string | undefined>;
+  const year = req.query.year ? parseInt(String(req.query.year), 10) : undefined;
+  const month = req.query.month ? parseInt(String(req.query.month), 10) : undefined;
+  const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '200'), 10) || 200, 1), 1000);
+  let cursor: bigint | undefined;
+  if (req.query.cursor) {
+    try {
+      cursor = BigInt(String(req.query.cursor));
+    } catch {
+      return res.status(400).json({ error: 'cursor inválido.' });
+    }
+  }
+
+  const where = {
+    runId,
+    ...(phase ? { phase } : {}),
+    ...(category ? { category } : {}),
+    ...(level ? { level } : {}),
+    ...(mediaType ? { mediaType } : {}),
+    ...(year !== undefined && !Number.isNaN(year) ? { year } : {}),
+    ...(month !== undefined && !Number.isNaN(month) ? { month } : {}),
+  };
+
+  const events = await prisma.syncLogEvent.findMany({
+    where,
+    orderBy: { id: 'asc' },
+    take: limit,
+    ...(cursor !== undefined ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+
+  const nextCursor = events.length === limit ? String(events[events.length - 1].id) : null;
+
+  res.json({ events: events.map(serializeLogEvent), nextCursor });
+});
+
+/** Export completo (streaming) em NDJSON — pra levar um recorte filtrado pra análise (IA ou não). */
+router.get('/sync/log-runs/:id/export', protectLogRead, async (req, res) => {
+  const runId = parseInt(req.params.id, 10);
+  if (Number.isNaN(runId)) return res.status(400).json({ error: 'id inválido.' });
+
+  const { phase, category, level, mediaType } = req.query as Record<string, string | undefined>;
+  const year = req.query.year ? parseInt(String(req.query.year), 10) : undefined;
+  const month = req.query.month ? parseInt(String(req.query.month), 10) : undefined;
+
+  const where = {
+    runId,
+    ...(phase ? { phase } : {}),
+    ...(category ? { category } : {}),
+    ...(level ? { level } : {}),
+    ...(mediaType ? { mediaType } : {}),
+    ...(year !== undefined && !Number.isNaN(year) ? { year } : {}),
+    ...(month !== undefined && !Number.isNaN(month) ? { month } : {}),
+  };
+
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="orbe-sync-run-${runId}-${stamp}.ndjson"`);
+
+  const pageSize = 1000;
+  let cursor: bigint | undefined;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const batch = await prisma.syncLogEvent.findMany({
+      where,
+      orderBy: { id: 'asc' },
+      take: pageSize,
+      ...(cursor !== undefined ? { cursor: { id: cursor }, skip: 1 } : {}),
+    });
+    if (batch.length === 0) break;
+    for (const event of batch) {
+      res.write(JSON.stringify(serializeLogEvent(event)) + '\n');
+    }
+    cursor = batch[batch.length - 1].id;
+    if (batch.length < pageSize) break;
+  }
+
+  res.end();
+});
+
 router.post('/sync/reset-stale', syncRateLimiter, protectSync, async (_req, res) => {
   const status = await resetStaleSyncLock(prisma);
   res.json({
