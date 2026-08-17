@@ -20,10 +20,12 @@ import { getMediaCarouselLoopBounds, getCarouselNavWrapIndex } from '@/lib/carou
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
+import CarouselSectionHeading from '@/components/ui/CarouselSectionHeading';
 import {
   addMonths,
   findIndexForMonth,
   formatCarouselMonthTitle,
+  formatCarouselMonthTitleShort,
   filterMidiaForCarouselTimeline,
   mergeMediaByDate,
   monthKeyFromDate,
@@ -701,33 +703,49 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     centerHasPoster,
   });
 
+  const resolvedTitle = emAltaMode
+    ? 'Em Alta'
+    : isNavigating
+      ? 'Carregando conteúdo...'
+      : showPositioningSkeleton
+        ? currentTitle
+        : filteredItems.length === 0
+          ? hasCompletedInitialLoad
+            ? 'Nenhum conteúdo encontrado'
+            : 'Carregando...'
+          : currentTitle || 'Carregando...';
+
+  const resolvedShortTitle = useMemo(() => {
+    if (emAltaMode) return 'Em Alta';
+    const key = lastTitleMonthKey.current;
+    if (key && /^\d{4}-\d{2}$/.test(key)) {
+      const { year, month } = parseMonthKey(key);
+      return formatCarouselMonthTitleShort(new Date(year, month - 1, 1));
+    }
+    if (key?.startsWith('year-tbd-')) {
+      const year = Number(key.replace('year-tbd-', ''));
+      return Number.isFinite(year) ? `${year} — sem data` : resolvedTitle;
+    }
+    return resolvedTitle;
+  }, [emAltaMode, resolvedTitle, currentTitle]);
+
   return (
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
-        <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors flex items-center gap-2"
+      <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
+        <CarouselSectionHeading
+          title={resolvedTitle}
+          shortTitle={resolvedShortTitle}
           onClick={emAltaMode ? () => emblaApi?.scrollTo(0, true) : scrollToToday}
-          title={emAltaMode ? 'Voltar ao início da lista' : 'Ir para o mês atual'}
+          hint={emAltaMode ? 'Voltar ao início da lista' : 'Ir para o mês atual'}
         >
-          {emAltaMode
-            ? 'Em Alta'
-            : isNavigating
-              ? 'Carregando conteúdo...'
-              : showPositioningSkeleton
-                ? currentTitle
-                : filteredItems.length === 0
-                  ? hasCompletedInitialLoad
-                    ? 'Nenhum conteúdo encontrado'
-                    : 'Carregando...'
-                  : currentTitle || 'Carregando...'}
           {showAdjacentPrefetchIndicator && (
             <span
               className="inline-block h-3.5 w-3.5 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
               aria-hidden
             />
           )}
-        </h3>
-        <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
+        </CarouselSectionHeading>
+        <div className="flex justify-end items-center w-full md:w-auto gap-2 shrink-0">
           <div className="flex items-center gap-2">
             <button
               onClick={toggleEmAlta}

@@ -22,6 +22,7 @@ import { getWeekdayInBrazil } from '@/lib/brazil-timezone';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
 import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
 import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
+import CarouselSectionHeading from '@/components/ui/CarouselSectionHeading';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -792,23 +793,38 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     centerHasPoster,
   });
 
+  const resolvedTitle = emAltaMode
+    ? 'Em Alta'
+    : isNavigating || weeklyLoading
+      ? 'Carregando animes...'
+      : showPositioningSkeleton
+        ? 'Carregando...'
+        : currentTitle || 'Carregando...';
+
+  const resolvedShortTitle = useMemo(() => {
+    if (emAltaMode) return 'Em Alta';
+    if (viewMode === 'weekly') {
+      if (resolvedTitle.startsWith('Agenda: ')) {
+        return resolvedTitle.replace('Agenda: ', '');
+      }
+      return resolvedTitle;
+    }
+    if (resolvedTitle.startsWith('Temporada de ')) {
+      return resolvedTitle.replace('Temporada de ', '');
+    }
+    return resolvedTitle;
+  }, [emAltaMode, viewMode, resolvedTitle]);
+
   return (
     <div className="overflow-hidden max-w-full">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
-        <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors"
+      <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
+        <CarouselSectionHeading
+          title={resolvedTitle}
+          shortTitle={resolvedShortTitle}
           onClick={() => void scrollToToday()}
-          title={emAltaMode ? 'Voltar ao início da lista' : viewMode === 'weekly' ? 'Ir para o dia de hoje' : 'Ir para a temporada atual'}
-        >
-          {emAltaMode
-            ? 'Em Alta'
-            : isNavigating || weeklyLoading
-              ? 'Carregando animes...'
-              : showPositioningSkeleton
-                ? 'Carregando...'
-                : currentTitle || 'Carregando...'}
-        </h3>
-        <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
+          hint={emAltaMode ? 'Voltar ao início da lista' : viewMode === 'weekly' ? 'Ir para o dia de hoje' : 'Ir para a temporada atual'}
+        />
+        <div className="flex justify-between items-center w-full md:mt-0 md:w-auto md:gap-4 shrink-0">
             <div className="flex items-center gap-2">
                 <button
                   onClick={toggleEmAlta}

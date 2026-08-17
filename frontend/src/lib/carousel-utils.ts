@@ -233,6 +233,12 @@ export function formatCarouselMonthTitle(date: Date): string {
   return title.charAt(0).toUpperCase() + title.slice(1);
 }
 
+/** Versão compacta para telas estreitas — evita quebra de linha no cabeçalho do carrossel. */
+export function formatCarouselMonthTitleShort(date: Date): string {
+  const title = format(date, "MMMM 'de' yyyy", { locale: ptBR });
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
 export function monthTitleFromItem(item: Midia | undefined): string | null {
   const date = parseMidiaReleaseDate(item);
   if (date) {
