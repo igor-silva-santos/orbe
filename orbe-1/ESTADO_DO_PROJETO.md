@@ -217,6 +217,7 @@ Ordem sugerida para fechar o gap com a visão original:
 
 | Arquivo | Conteúdo |
 |---------|----------|
+| [`../docs/PLANO_PERFIL.md`](../docs/PLANO_PERFIL.md) | **Plano de ação** — perfil logado, personalização, Match (sprints) |
 | [`FUNCIONALIDADES.md`](./FUNCIONALIDADES.md) | Inventário detalhado do que o sistema faz hoje |
 | [`../docs/PRODUCAO.md`](../docs/PRODUCAO.md) | Checklist de deploy |
 | [`../docs/SYNC_INICIAL.md`](../docs/SYNC_INICIAL.md) | Comandos de sync e backfill |
