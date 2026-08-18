@@ -312,7 +312,7 @@ cron.schedule('0 3 * * *', () => {
   runDetetive();
 }, { timezone: 'America/Sao_Paulo' });
 
-// Deals: verifica Epic/GamerPower/CheapShark a cada 1 min e atualiza Redis só se o conteúdo mudou
+// Deals: verifica Epic/Steam/GamerPower/ITAD a cada 1 min e atualiza Redis só se o conteúdo mudou
 // (o frontend não faz polling — só busca o cache quando o usuário dá F5 ou clica em "Atualizar")
 cron.schedule('* * * * *', async () => {
   logger.info('[deals-cache] Warm-up agendado...');

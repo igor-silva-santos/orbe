@@ -297,7 +297,7 @@ export async function fetchEpicFreeGames(): Promise<UnifiedDeal[]> {
   }
 }
 
-/** Promoções pagas Epic com desconto ativo. Cobertura REST limitada — CheapShark store 25 é a fonte principal. */
+/** Promoções pagas Epic com desconto ativo (API REST oficial Epic). */
 export async function fetchEpicSaleGames(): Promise<UnifiedDeal[]> {
   try {
     const elements = await fetchEpicCatalogElements();

@@ -8,15 +8,19 @@ const ITAD_USER_AGENT = 'OrbeNerd/1.0 (promocoes@orbe.app)';
 export const ITAD_SHOP_EPIC = 16;
 /** EA App / EA Store no IsThereAnyDeal. */
 export const ITAD_SHOP_EA = 52;
+/** Microsoft Store (Xbox PC) no IsThereAnyDeal. */
+export const ITAD_SHOP_MICROSOFT = 48;
 
 const SHOP_PLATFORM_MAP: Record<number, DealPlatform> = {
   [ITAD_SHOP_EPIC]: 'epic',
   [ITAD_SHOP_EA]: 'origin',
+  [ITAD_SHOP_MICROSOFT]: 'xbox',
 };
 
 const SHOP_LABEL_MAP: Record<number, string> = {
   [ITAD_SHOP_EPIC]: 'Epic Games Store',
   [ITAD_SHOP_EA]: 'EA App',
+  [ITAD_SHOP_MICROSOFT]: 'Microsoft Store',
 };
 
 type ItadMoney = {
@@ -158,7 +162,7 @@ function itadMaxPages(): number {
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
 }
 
-/** Promoções pagas (e grátis temporários) de lojas ITAD — Epic (16) e EA (52). */
+/** Promoções pagas (e grátis temporários) via ITAD — Epic, EA e Microsoft Store, links oficiais. */
 export async function fetchItadShopSales(options?: {
   shopIds?: number[];
   country?: string;
@@ -168,7 +172,7 @@ export async function fetchItadShopSales(options?: {
     return [];
   }
 
-  const shopIds = options?.shopIds ?? [ITAD_SHOP_EPIC, ITAD_SHOP_EA];
+  const shopIds = options?.shopIds ?? [ITAD_SHOP_EPIC, ITAD_SHOP_EA, ITAD_SHOP_MICROSOFT];
   const country = options?.country ?? process.env.ITAD_COUNTRY ?? 'BR';
   const maxPages = options?.maxPages ?? itadMaxPages();
   const pageSize = 20;

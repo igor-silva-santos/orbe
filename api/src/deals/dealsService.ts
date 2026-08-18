@@ -4,11 +4,11 @@ import { getRedisClient } from '../redisClient';
 import { logger } from '../logger';
 import { fetchEpicFreeGames, fetchEpicSaleGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
-import { fetchCheapSharkDealsPaged } from './cheapsharkClient';
 import { fetchSteamDeals } from './steamDealsClient';
 import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
 import { fetchItchFreeGames, fetchItchOnSaleGames } from './itchClient';
 import { fetchItadShopSales, isItadConfigured } from './itadClient';
+import { filterDealsWithOfficialStoreUrls } from './dealStoreUrl';
 import { splitFreeDeals } from './freeTier';
 import { dedupeDeals } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
@@ -25,52 +25,11 @@ const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v2';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
 const DEALS_LOCK_TTL_SECONDS = 55;
 
-/**
- * Teto de páginas por fonte paginada — cada fetch já para sozinho assim que uma
- * página volta incompleta (fim real dos resultados), então isso é só uma trava de
- * segurança contra loop indevido, não um corte artificial do catálogo.
- * Moderado de propósito: alto o bastante pra trazer bem mais que antes, mas sem
- * multiplicar demais o número de requests por rodada — CheapShark já devolveu
- * 429 (rate limit) quando isso estava em 20 com o cron de 1 min.
- */
+/** Teto de páginas por fonte paginada. */
 const DEALS_MAX_PAGES = 8;
 
-/** Evita rebuscar tudo de novo se o cache já foi renovado há poucos segundos
- * (ex.: warm-up no boot seguido de perto pelo próximo tick do cron). */
+/** Evita rebuscar tudo de novo se o cache já foi renovado há poucos segundos. */
 const DEALS_MIN_REFRESH_INTERVAL_SECONDS = 45;
-
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/**
- * CheapShark é a fonte mais sensível a rate limit (já devolveu 429 quando as 5
- * queries abaixo saíam todas em paralelo). Roda uma de cada vez, com um respiro
- * entre elas, em vez de estourar 5 conexões simultâneas no mesmo host.
- */
-async function fetchCheapSharkSequential(
-  queries: Array<() => Promise<UnifiedDeal[]>>,
-): Promise<{ items: UnifiedDeal[]; error?: string }[]> {
-  const results: { items: UnifiedDeal[]; error?: string }[] = [];
-  for (let i = 0; i < queries.length; i++) {
-    results.push(await safeFetch(queries[i]));
-    if (i < queries.length - 1) await delay(400);
-  }
-  return results;
-}
-
-/** Páginas CheapShark store Epic (25) — fonte principal de promoções pagas Epic. */
-function epicSaleMaxPages(): number {
-  const parsed = Number.parseInt(process.env.EPIC_SALE_MAX_PAGES ?? String(DEALS_MAX_PAGES), 10);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, DEALS_MAX_PAGES) : DEALS_MAX_PAGES;
-}
-
-type CachedDealsEntry = {
-  overview: DealsOverview;
-  fingerprint: string;
-  fetchedAtMs: number;
-};
-
-let memoryCache: CachedDealsEntry | null = null;
-let backgroundRefreshInFlight = false;
 
 function sortTemporaryFree(deals: UnifiedDeal[]): UnifiedDeal[] {
   return [...deals].sort((a, b) => {
@@ -110,15 +69,8 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     forceRefresh: true,
   });
 
-  const [cheapsharkResults, otherResults] = await Promise.all([
-    fetchCheapSharkSequential([
-      () => fetchCheapSharkDealsPaged({ freeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES }),
-      () => fetchCheapSharkDealsPaged({ permanentFreeOnly: true, pageSize: 60, maxPages: DEALS_MAX_PAGES }),
-      () => fetchCheapSharkDealsPaged({ pageSize: 60, maxPages: DEALS_MAX_PAGES }),
-      () => fetchCheapSharkDealsPaged({ storeId: '25', pageSize: 60, maxPages: epicSaleMaxPages() }),
-      () => fetchCheapSharkDealsPaged({ storeId: '13', pageSize: 40, maxPages: DEALS_MAX_PAGES }),
-    ]),
-    Promise.all([
+  const [epicFree, epicSales, gamerpower, steam, catalogoSteamRaw, itchFree, itchOnSale, itadDeals] =
+    await Promise.all([
       safeFetch(fetchEpicFreeGames),
       safeFetch(fetchEpicSaleGames),
       safeFetch(() => fetchGamerPowerGiveaways()),
@@ -130,12 +82,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         if (!isItadConfigured()) return [];
         return fetchItadShopSales();
       }),
-    ]),
-  ]);
-
-  const [cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, cheapsharkEpicSales, cheapsharkUbisoft] =
-    cheapsharkResults;
-  const [epicFree, epicSales, gamerpower, steam, catalogoSteamRaw, itchFree, itchOnSale, itadDeals] = otherResults;
+    ]);
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
@@ -145,18 +92,17 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const itadSales = itadDeals.items.filter((deal) => deal.kind === 'sale');
 
   const gratisAll = normalizeDealsList(
-    await enrichDealsWithOrbeLinks(
-      dedupeDeals([
-        ...epicFree.items,
-        ...gamerpower.items,
-        ...cheapsharkFree.items,
-        ...cheapsharkPermanentFree.items,
-        ...cheapsharkUbisoft.items.filter((d) => d.kind === 'free'),
-        ...steamFree,
-        ...itchFree.items,
-        ...itchTemporaryFree,
-        ...itadTemporaryFree,
-      ]),
+    filterDealsWithOfficialStoreUrls(
+      await enrichDealsWithOrbeLinks(
+        dedupeDeals([
+          ...epicFree.items,
+          ...gamerpower.items,
+          ...steamFree,
+          ...itchFree.items,
+          ...itchTemporaryFree,
+          ...itadTemporaryFree,
+        ]),
+      ),
     ),
     usdBrlRate,
   );
@@ -171,16 +117,15 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
 
   const promocoes = sortSales(
     normalizeDealsList(
-      await enrichDealsWithOrbeLinks(
-        dedupeDeals([
-          ...cheapsharkSales.items.filter((deal) => deal.kind === 'sale'),
-          ...cheapsharkEpicSales.items.filter((deal) => deal.kind === 'sale'),
-          ...cheapsharkUbisoft.items.filter((deal) => deal.kind === 'sale'),
-          ...epicSales.items,
-          ...itadSales,
-          ...steamSales,
-          ...itchSales,
-        ]),
+      filterDealsWithOfficialStoreUrls(
+        await enrichDealsWithOrbeLinks(
+          dedupeDeals([
+            ...epicSales.items,
+            ...itadSales,
+            ...steamSales,
+            ...itchSales,
+          ]),
+        ),
       ),
       usdBrlRate,
     ),
@@ -208,26 +153,6 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         count: gamerpower.items.length,
         error: gamerpower.error,
       },
-      cheapshark: {
-        ok:
-          !cheapsharkFree.error &&
-          !cheapsharkPermanentFree.error &&
-          !cheapsharkSales.error &&
-          !cheapsharkEpicSales.error &&
-          !cheapsharkUbisoft.error,
-        count:
-          cheapsharkFree.items.length +
-          cheapsharkPermanentFree.items.length +
-          cheapsharkSales.items.length +
-          cheapsharkEpicSales.items.length +
-          cheapsharkUbisoft.items.length,
-        error:
-          cheapsharkFree.error ??
-          cheapsharkPermanentFree.error ??
-          cheapsharkSales.error ??
-          cheapsharkEpicSales.error ??
-          cheapsharkUbisoft.error,
-      },
       steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
       orbe: { ok: !catalogoSteamRaw.error, count: catalogoSteam.length, error: catalogoSteamRaw.error },
       itch: {
@@ -236,13 +161,9 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
         error: itchFree.error ?? itchOnSale.error,
       },
       itad: {
-        ok: isItadConfigured()
-          ? !itadDeals.error
-          : true,
+        ok: isItadConfigured() ? !itadDeals.error : true,
         count: itadDeals.items.length,
-        error: isItadConfigured()
-          ? itadDeals.error ?? undefined
-          : undefined,
+        error: isItadConfigured() ? itadDeals.error ?? undefined : undefined,
       },
     },
   };
@@ -271,7 +192,6 @@ export function fingerprintDealsOverview(overview: DealsOverview): string {
     snapshot(overview.catalogoSteam ?? []),
     overview.sources.epic.ok ? '1' : '0',
     overview.sources.gamerpower.ok ? '1' : '0',
-    overview.sources.cheapshark.ok ? '1' : '0',
     overview.sources.steam.ok ? '1' : '0',
     overview.sources.orbe?.ok ? '1' : '0',
     overview.sources.itch?.ok ? '1' : '0',
@@ -353,6 +273,15 @@ export type DealsCacheRefreshResult = {
   previousFingerprint?: string;
   error?: string;
 };
+
+type CachedDealsEntry = {
+  overview: DealsOverview;
+  fingerprint: string;
+  fetchedAtMs: number;
+};
+
+let memoryCache: CachedDealsEntry | null = null;
+let backgroundRefreshInFlight = false;
 
 /**
  * Busca nas APIs, compara fingerprint e grava no Redis só se o conteúdo mudou

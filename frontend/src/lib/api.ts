@@ -344,7 +344,7 @@ export const orbeNerdApi = {
     return apiClient.post('/contato', data);
   },
 
-  // Promoções e jogos grátis (Epic, GamerPower, CheapShark)
+  // Promoções e jogos grátis (Epic, Steam, GamerPower, ITAD, itch.io)
   getDeals: async (params?: { sections?: string }): Promise<DealsOverview> => {
     const query = params?.sections ? `?sections=${encodeURIComponent(params.sections)}` : '';
     return apiClient.get(`/deals${query}`);
@@ -364,14 +364,6 @@ export const orbeNerdApi = {
     if (params?.type) query.set('type', params.type);
     const suffix = query.toString() ? `?${query.toString()}` : '';
     return apiClient.get(`/deals/gamerpower${suffix}`);
-  },
-  getCheapSharkDeals: async (params?: { storeId?: string; freeOnly?: boolean; limit?: number }) => {
-    const query = new URLSearchParams();
-    if (params?.storeId) query.set('storeId', params.storeId);
-    if (params?.freeOnly) query.set('freeOnly', '1');
-    if (params?.limit) query.set('limit', String(params.limit));
-    const suffix = query.toString() ? `?${query.toString()}` : '';
-    return apiClient.get(`/deals/cheapshark${suffix}`);
   },
 
   // Trilogias, sagas e continuações

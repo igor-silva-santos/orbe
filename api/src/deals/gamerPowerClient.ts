@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { logger } from '../logger';
+import { isOfficialStoreUrl } from './dealStoreUrl';
 import type { DealPlatform, UnifiedDeal } from './types';
 
 const gamerPowerApi = axios.create({
@@ -33,6 +34,8 @@ function mapPlatformLabel(raw: string): DealPlatform {
   if (value.includes('ubisoft')) return 'ubisoft';
   if (value.includes('origin') || value.includes('ea app')) return 'origin';
   if (value.includes('itch')) return 'itch';
+  if (value.includes('xbox') || value.includes('microsoft')) return 'xbox';
+  if (value.includes('playstation') || value.includes('ps4') || value.includes('ps5')) return 'playstation';
   if (value.includes('pc')) return 'pc';
   return 'other';
 }
@@ -68,8 +71,8 @@ function mapGamerPowerDeal(item: GamerPowerGiveaway): UnifiedDeal | null {
     .split(',')
     .map((p) => p.trim())
     .filter(Boolean);
-  const storeUrl = item.open_giveaway_url ?? item.open_giveaway ?? item.gamerpower_url;
-  if (!storeUrl) return null;
+  const storeUrl = item.open_giveaway_url ?? item.open_giveaway;
+  if (!storeUrl || !isOfficialStoreUrl(storeUrl)) return null;
 
   const worthValue = parseWorthValue(item.worth);
   const hasEndDate = Boolean(item.end_date?.trim());

@@ -31,12 +31,6 @@ export function classifyFreeTier(deal: UnifiedDeal): FreeTier {
     return 'permanent';
   }
 
-  if (deal.source === 'cheapshark') {
-    if (original != null && original > 0) return 'temporary';
-    if (deal.discountPercent === 100 && original != null && original > 0) return 'temporary';
-    return 'permanent';
-  }
-
   if (deal.source === 'itch') {
     if (deal.freeTier === 'permanent' || deal.freeTier === 'temporary') return deal.freeTier;
     if (deal.discountPercent === 100) return 'temporary';

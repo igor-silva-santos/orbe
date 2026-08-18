@@ -4,20 +4,47 @@ import { dedupeDeals, dealDedupeKey } from './dedupeDeals';
 import { classifyFreeTier } from './freeTier';
 import { mapItchBrowseGame, parseItchBrowseHtml } from './itchClient';
 import { parseItchRssXml } from './itchRss';
-import { mapItadListItem, ITAD_SHOP_EPIC, ITAD_SHOP_EA } from './itadClient';
+import { mapItadListItem, ITAD_SHOP_EPIC, ITAD_SHOP_EA, ITAD_SHOP_MICROSOFT } from './itadClient';
 import { normalizeDealToBrl } from './normalizeDeals';
+import { parsePriceNumber } from './dealPricing';
+import { isOfficialStoreUrl } from './dealStoreUrl';
 import { paginateDeals, sourcesHealth } from './dealsService';
 import type { DealsOverview, UnifiedDeal } from './types';
 
 const baseDeal = (overrides: Partial<UnifiedDeal>): UnifiedDeal => ({
   id: 'test:1',
-  source: 'cheapshark',
+  source: 'steam',
   kind: 'sale',
   title: 'Test Game',
   platform: 'steam',
   platforms: ['Steam'],
-  storeUrl: 'https://example.com',
+  storeUrl: 'https://store.steampowered.com/app/570',
   ...overrides,
+});
+
+describe('parsePriceNumber', () => {
+  it('interpreta USD com ponto decimal', () => {
+    assert.equal(parsePriceNumber('$3.49'), 3.49);
+    assert.equal(parsePriceNumber('$69.99'), 69.99);
+  });
+
+  it('interpreta BRL com vírgula decimal', () => {
+    assert.equal(parsePriceNumber('R$ 19,90'), 19.9);
+    assert.equal(parsePriceNumber('R$ 1.234,56'), 1234.56);
+  });
+});
+
+describe('isOfficialStoreUrl', () => {
+  it('aceita lojas oficiais', () => {
+    assert.equal(isOfficialStoreUrl('https://store.steampowered.com/app/570'), true);
+    assert.equal(isOfficialStoreUrl('https://store.epicgames.com/pt-BR/p/foo'), true);
+    assert.equal(isOfficialStoreUrl('https://dev.itch.io/my-game'), true);
+  });
+
+  it('rejeita agregadores', () => {
+    assert.equal(isOfficialStoreUrl('https://www.cheapshark.com/redirect?dealID=1'), false);
+    assert.equal(isOfficialStoreUrl('https://www.gamerpower.com/giveaway/foo'), false);
+  });
 });
 
 describe('dealDedupeKey', () => {
@@ -30,7 +57,8 @@ describe('dealDedupeKey', () => {
 describe('dedupeDeals', () => {
   it('mantém o deal com melhor qualidade para o mesmo steamAppId', () => {
     const worse = baseDeal({
-      id: 'cheapshark:1',
+      id: 'itad:1',
+      source: 'itad',
       steamAppId: 570,
       title: 'Dota 2',
       imageUrl: null,
@@ -49,7 +77,7 @@ describe('dedupeDeals', () => {
     assert.equal(result[0].source, 'steam');
   });
 
-  it('cruza Epic REST e CheapShark Epic pelo steamAppId', () => {
+  it('prioriza Epic REST sobre ITAD para o mesmo jogo', () => {
     const epicDeal = baseDeal({
       id: 'epic:ns:2025',
       source: 'epic',
@@ -59,8 +87,9 @@ describe('dedupeDeals', () => {
       currency: 'BRL',
       salePrice: 'Grátis',
     });
-    const cheapsharkEpic = baseDeal({
-      id: 'cheapshark:epic1',
+    const itadEpic = baseDeal({
+      id: 'itad:epic1',
+      source: 'itad',
       platform: 'epic',
       title: 'Caravan SandWitch',
       steamAppId: 1582650,
@@ -68,7 +97,7 @@ describe('dedupeDeals', () => {
       imageUrl: 'https://cdn.example/caravan.jpg',
       storeUrl: 'https://store.steampowered.com/app/1582650',
     });
-    const result = dedupeDeals([epicDeal, cheapsharkEpic]);
+    const result = dedupeDeals([epicDeal, itadEpic]);
     assert.equal(result.length, 1);
     assert.equal(result[0].currency, 'BRL');
     assert.equal(result[0].steamAppId, 1582650);
@@ -76,7 +105,7 @@ describe('dedupeDeals', () => {
     assert.match(result[0].storeUrl, /epicgames\.com/);
   });
 
-  it('cruza Epic REST e CheapShark Epic pelo título quando não há steamAppId', () => {
+  it('cruza Epic REST e ITAD pelo título quando não há steamAppId', () => {
     const epicDeal = baseDeal({
       id: 'epic:ns:sale',
       source: 'epic',
@@ -86,15 +115,16 @@ describe('dedupeDeals', () => {
       currency: 'BRL',
       salePrice: 'R$ 17,49',
     });
-    const cheapsharkEpic = baseDeal({
-      id: 'cheapshark:epic2',
+    const itadEpic = baseDeal({
+      id: 'itad:epic2',
+      source: 'itad',
       platform: 'epic',
       title: 'Need for Speed Heat Deluxe Edition',
       dealRating: 9,
       imageUrl: 'https://cdn.example/nfs.jpg',
-      storeUrl: 'https://www.cheapshark.com/redirect?dealID=abc',
+      storeUrl: 'https://store.epicgames.com/pt-BR/p/need-for-speed-heat-deluxe',
     });
-    const result = dedupeDeals([epicDeal, cheapsharkEpic]);
+    const result = dedupeDeals([epicDeal, itadEpic]);
     assert.equal(result.length, 1);
     assert.equal(result[0].currency, 'BRL');
     assert.equal(result[0].salePrice, 'R$ 17,49');
@@ -118,7 +148,7 @@ describe('classifyFreeTier', () => {
   it('classifica jogo com preço original como temporário', () => {
     const tier = classifyFreeTier(
       baseDeal({
-        source: 'cheapshark',
+        source: 'gamerpower',
         kind: 'free',
         originalPrice: '$19.99',
       }),
@@ -131,6 +161,7 @@ describe('normalizeDealToBrl', () => {
   it('converte USD para BRL com taxa informada', () => {
     const deal = normalizeDealToBrl(
       baseDeal({
+        source: 'itch',
         currency: 'USD',
         salePrice: '$10.00',
         salePriceValue: 10,
@@ -142,6 +173,22 @@ describe('normalizeDealToBrl', () => {
     assert.equal(deal.salePriceValue, 50);
     assert.equal(deal.priceConverted, true);
     assert.equal(deal.currency, 'BRL');
+  });
+
+  it('converte preço USD $3.49 corretamente (não trata ponto como milhar)', () => {
+    const deal = normalizeDealToBrl(
+      baseDeal({
+        source: 'itch',
+        currency: 'USD',
+        salePrice: '$3.49',
+        salePriceValue: parsePriceNumber('$3.49'),
+        originalPrice: '$69.99',
+        originalPriceValue: parsePriceNumber('$69.99'),
+      }),
+      5.5,
+    );
+    assert.equal(deal.salePriceValue, 19.2);
+    assert.equal(deal.originalPriceValue, 384.95);
   });
 });
 
@@ -163,7 +210,6 @@ describe('sourcesHealth', () => {
       sources: {
         epic: { ok: true, count: 1 },
         gamerpower: { ok: false, count: 0, error: 'fail' },
-        cheapshark: { ok: true, count: 1 },
         steam: { ok: true, count: 1 },
         orbe: { ok: true, count: 1 },
         itch: { ok: true, count: 1 },
@@ -359,6 +405,26 @@ describe('itadClient mapping', () => {
     );
     assert.ok(deal);
     assert.equal(deal.platform, 'origin');
+    assert.equal(deal.kind, 'sale');
+  });
+
+  it('mapeia promoção Microsoft Store', () => {
+    const deal = mapItadListItem(
+      {
+        id: '018d937e-test-ms',
+        title: 'Halo Infinite',
+        deal: {
+          shop: { id: ITAD_SHOP_MICROSOFT, name: 'Microsoft Store' },
+          price: { amount: 99.9, currency: 'BRL' },
+          regular: { amount: 199.9, currency: 'BRL' },
+          cut: 50,
+          url: 'https://www.xbox.com/games/store/halo-infinite',
+        },
+      },
+      ITAD_SHOP_MICROSOFT,
+    );
+    assert.ok(deal);
+    assert.equal(deal.platform, 'xbox');
     assert.equal(deal.kind, 'sale');
   });
 });

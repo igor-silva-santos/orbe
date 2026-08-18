@@ -1,4 +1,4 @@
-export type DealSource = 'epic' | 'gamerpower' | 'cheapshark' | 'steam' | 'orbe' | 'itch' | 'itad';
+export type DealSource = 'epic' | 'gamerpower' | 'steam' | 'orbe' | 'itch' | 'itad';
 
 export type DealKind = 'free' | 'sale';
 
@@ -12,6 +12,8 @@ export type DealPlatform =
   | 'ubisoft'
   | 'origin'
   | 'itch'
+  | 'xbox'
+  | 'playstation'
   | 'pc'
   | 'other';
 
@@ -68,7 +70,6 @@ export type DealsOverview = {
   sources: {
     epic: DealSourceStatus;
     gamerpower: DealSourceStatus;
-    cheapshark: DealSourceStatus;
     steam: DealSourceStatus;
     orbe: DealSourceStatus;
     itch: DealSourceStatus;

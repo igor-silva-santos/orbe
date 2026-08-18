@@ -269,9 +269,6 @@ function SourceFooter({
       <span className={data.sources.gamerpower.ok ? 'text-emerald-600' : 'text-destructive'}>
         GamerPower ({data.sources.gamerpower.count})
       </span>
-      <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
-        CheapShark ({data.sources.cheapshark.count})
-      </span>
       <span className={data.sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
         itch.io ({data.sources.itch?.count ?? 0})
       </span>
@@ -526,8 +523,8 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 Promoções & Jogos Grátis
               </h1>
               <p className="text-muted-foreground text-sm md:text-base mt-2 max-w-2xl">
-                Ofertas ao vivo da Epic, EA App, Steam, GamerPower, CheapShark e itch.io
-                — com catálogo Orbe, preços em BRL (ITAD quando configurado) e câmbio USD/BRL atualizado.
+                Ofertas oficiais da Epic, Steam, EA App, Microsoft Store (via ITAD), GamerPower e itch.io
+                — links diretos às lojas, preços em BRL quando disponível.
               </p>
               {fetchedAt && (
                 <p className="text-xs text-muted-foreground mt-3">

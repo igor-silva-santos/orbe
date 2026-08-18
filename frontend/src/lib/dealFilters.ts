@@ -7,6 +7,8 @@ export const PLATFORM_LABELS: Record<DealPlatform, string> = {
   ubisoft: 'Ubisoft',
   origin: 'EA App',
   itch: 'itch.io',
+  xbox: 'Xbox / Microsoft',
+  playstation: 'PlayStation',
   pc: 'PC',
   other: 'Loja',
 };
@@ -15,6 +17,8 @@ export const ALL_PLATFORM_FILTERS: { id: DealPlatform | 'all'; label: string }[]
   { id: 'all', label: 'Todas' },
   { id: 'steam', label: PLATFORM_LABELS.steam },
   { id: 'epic', label: PLATFORM_LABELS.epic },
+  { id: 'xbox', label: PLATFORM_LABELS.xbox },
+  { id: 'playstation', label: PLATFORM_LABELS.playstation },
   { id: 'gog', label: PLATFORM_LABELS.gog },
   { id: 'ubisoft', label: PLATFORM_LABELS.ubisoft },
   { id: 'origin', label: PLATFORM_LABELS.origin },

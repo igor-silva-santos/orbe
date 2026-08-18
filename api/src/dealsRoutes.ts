@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import cacheMiddleware from './cacheMiddleware';
 import { logger } from './logger';
-import { fetchCheapSharkStores } from './deals/cheapsharkClient';
 import {
   DEALS_SOFT_TTL_SECONDS,
   getDealsOverview,
@@ -168,49 +167,6 @@ router.get('/deals/gamerpower', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async
   } catch (error) {
     logger.error(`Erro ao buscar giveaways GamerPower: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar giveaways do GamerPower.' });
-  }
-});
-
-router.get('/deals/cheapshark', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async (req, res) => {
-  try {
-    const storeId = typeof req.query.storeId === 'string' ? req.query.storeId : undefined;
-    const freeOnly = req.query.freeOnly === '1' || req.query.freeOnly === 'true';
-    const overview = await getDealsOverview();
-    const pool = freeOnly ? overview.gratis : [...overview.gratis, ...overview.promocoes];
-    let deals = pool.filter((d) => d.source === 'cheapshark');
-    if (storeId) {
-      const storeMap: Record<string, string> = {
-        '1': 'steam',
-        '3': 'other',
-        '7': 'gog',
-        '11': 'other',
-        '13': 'ubisoft',
-        '15': 'other',
-        '25': 'epic',
-      };
-      const platform = storeMap[storeId];
-      if (platform) {
-        deals = deals.filter((d) => d.platform === platform);
-      }
-    }
-    if (freeOnly) {
-      deals = deals.filter((d) => d.kind === 'free');
-    }
-    setDealsCacheHeaders(res, overview.fetchedAt);
-    res.json({ fetchedAt: overview.fetchedAt, deals });
-  } catch (error) {
-    logger.error(`Erro ao buscar deals CheapShark: ${error}`);
-    res.status(500).json({ error: 'Erro ao buscar deals do CheapShark.' });
-  }
-});
-
-router.get('/deals/cheapshark/stores', cacheMiddleware(60 * 60 * 24), async (_req, res) => {
-  try {
-    const stores = await fetchCheapSharkStores();
-    res.json({ stores });
-  } catch (error) {
-    logger.error(`Erro ao buscar lojas CheapShark: ${error}`);
-    res.status(500).json({ error: 'Erro ao buscar lojas do CheapShark.' });
   }
 });
 

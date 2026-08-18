@@ -9,7 +9,6 @@ import type { UnifiedDeal } from '@/types/deals';
 const SOURCE_LABELS: Record<string, string> = {
   epic: 'Epic Games',
   gamerpower: 'GamerPower',
-  cheapshark: 'CheapShark',
   steam: 'Steam',
   orbe: 'Catálogo Orbe',
   itch: 'itch.io',

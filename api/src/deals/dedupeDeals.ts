@@ -22,7 +22,7 @@ function dealQualityScore(deal: UnifiedDeal): number {
   return score;
 }
 
-/** Chaves alternativas para o mesmo jogo — permite cruzar Epic REST, CheapShark e Steam. */
+/** Chaves alternativas para o mesmo jogo — cruza Epic REST e Steam por steamAppId ou slug. */
 export function dealDedupeKeys(deal: UnifiedDeal): string[] {
   const keys = new Set<string>();
 

@@ -5,9 +5,25 @@ export function parsePriceNumber(value: string | null | undefined): number | nul
   if (!normalized || normalized === 'n/a' || normalized === 'free' || normalized === 'grátis' || normalized === 'gratis') {
     return 0;
   }
-  const match = normalized.replace(/\./g, '').replace(',', '.').match(/(\d+(?:\.\d+)?)/);
-  if (!match) return null;
-  const parsed = Number.parseFloat(match[1]);
+
+  const cleaned = normalized.replace(/[r$€£\s]/gi, '');
+
+  let numeric: string;
+  if (/\d,\d{1,2}$/.test(cleaned)) {
+    // BRL: vírgula decimal — remove pontos de milhar (1.234,56 → 1234.56)
+    numeric = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (/\d\.\d{1,2}$/.test(cleaned)) {
+    // USD/EUR: ponto decimal — remove vírgulas de milhar ($1,234.56 → 1234.56)
+    numeric = cleaned.replace(/,/g, '');
+  } else {
+    const match = cleaned.match(/(\d+(?:[.,]\d+)?)/);
+    if (!match) return null;
+    numeric = match[1].includes(',') && !match[1].includes('.')
+      ? match[1].replace(',', '.')
+      : match[1].replace(/,/g, '');
+  }
+
+  const parsed = Number.parseFloat(numeric);
   return Number.isFinite(parsed) ? parsed : null;
 }
 

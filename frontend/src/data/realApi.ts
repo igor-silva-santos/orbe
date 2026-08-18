@@ -195,7 +195,6 @@ export const realApi = {
   getSaleDeals: orbeNerdApi.getSaleDeals,
   getEpicFreeGames: orbeNerdApi.getEpicFreeGames,
   getGamerPowerGiveaways: orbeNerdApi.getGamerPowerGiveaways,
-  getCheapSharkDeals: orbeNerdApi.getCheapSharkDeals,
   listSagas: orbeNerdApi.listSagas,
   getSaga: orbeNerdApi.getSaga,
   listUniversos: orbeNerdApi.listUniversos,

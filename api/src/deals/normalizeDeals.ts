@@ -16,7 +16,7 @@ function normalizeEpicPrices(deal: UnifiedDeal): UnifiedDeal {
   };
 }
 
-/** Converte preços USD (CheapShark) para BRL usando taxa informada. */
+/** Converte preços USD (itch.io etc.) para BRL usando taxa informada. */
 export function normalizeDealToBrl(deal: UnifiedDeal, usdBrlRate: number): UnifiedDeal {
   let normalized = deal.source === 'epic' ? normalizeEpicPrices(deal) : deal;
 

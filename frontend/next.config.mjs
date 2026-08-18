@@ -86,12 +86,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'www.cheapshark.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'img.itch.zone',
         port: '',
         pathname: '/**',
