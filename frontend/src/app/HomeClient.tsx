@@ -83,10 +83,16 @@ export default function HomeClient({ initialData }: HomeClientProps) {
                 ▶ Começar agora
               </button>
               <Link
-                href="/promocoes?tab=em-alta"
-                className="border border-border rounded-lg px-6 py-3 font-medium inline-flex items-center"
+                href="/promocoes?tab=gratis"
+                className="border border-border rounded-lg px-6 py-3 font-medium inline-flex items-center hover:bg-muted transition-colors"
               >
-                🎮 Ver jogos em alta
+                🎁 Jogos grátis
+              </Link>
+              <Link
+                href="/promocoes?tab=em-alta"
+                className="border border-border rounded-lg px-6 py-3 font-medium inline-flex items-center hover:bg-muted transition-colors"
+              >
+                🎮 Jogos em alta
               </Link>
             </div>
           </div>

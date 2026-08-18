@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { dedupeDeals, dealDedupeKey } from './dedupeDeals';
+import { dedupeDeals, dealDedupeKey, mergeFreeDealsWithPrimary } from './dedupeDeals';
 import { classifyFreeTier } from './freeTier';
 import { mapItchBrowseGame, parseItchBrowseHtml } from './itchClient';
 import { parseItchRssXml } from './itchRss';
@@ -99,6 +99,35 @@ describe('dedupeDeals', () => {
     assert.equal(result[0].currency, 'BRL');
     assert.equal(result[0].salePrice, 'R$ 17,49');
     assert.equal(result[0].imageUrl, 'https://cdn.example/nfs.jpg');
+    assert.match(result[0].storeUrl, /epicgames\.com/);
+  });
+
+  it('mergeFreeDealsWithPrimary mantém Epic/Steam e enriquece com secundárias', () => {
+    const epicDeal = baseDeal({
+      id: 'epic:ns:2025',
+      source: 'epic',
+      platform: 'epic',
+      kind: 'free',
+      title: 'Caravan SandWitch',
+      storeUrl: 'https://store.epicgames.com/pt-BR/p/caravan-sandwitch',
+      currency: 'BRL',
+      salePrice: 'Grátis',
+    });
+    const cheapsharkEpic = baseDeal({
+      id: 'cheapshark:epic1',
+      platform: 'epic',
+      kind: 'free',
+      title: 'Caravan SandWitch',
+      steamAppId: 1582650,
+      dealRating: 10,
+      imageUrl: 'https://cdn.example/caravan.jpg',
+      storeUrl: 'https://store.steampowered.com/app/1582650',
+    });
+    const result = mergeFreeDealsWithPrimary([epicDeal], [cheapsharkEpic]);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].source, 'epic');
+    assert.equal(result[0].steamAppId, 1582650);
+    assert.equal(result[0].imageUrl, 'https://cdn.example/caravan.jpg');
     assert.match(result[0].storeUrl, /epicgames\.com/);
   });
 });

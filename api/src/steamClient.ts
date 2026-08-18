@@ -163,7 +163,51 @@ export async function fetchSteamFeaturedSales(): Promise<SteamFeaturedItem[]> {
   }
 }
 
-/** Mais jogados agora na Steam (requer STEAM_API_KEY) */
+/** Jogos permanentemente grátis na Steam (F2P) via busca oficial da loja. */
+export async function fetchSteamPermanentFreeGames(): Promise<SteamFeaturedItem[]> {
+  try {
+    const response = await steamStoreApi.get('/search/results/', {
+      params: {
+        query: '',
+        category1: 998,
+        maxprice: 'free',
+        cc: 'br',
+        l: 'portuguese',
+        json: 1,
+        count: 50,
+      },
+      baseURL: 'https://store.steampowered.com',
+    });
+
+    const items: unknown[] = response.data?.items ?? [];
+    const seen = new Set<number>();
+    const result: SteamFeaturedItem[] = [];
+
+    for (const raw of items) {
+      if (!raw || typeof raw !== 'object') continue;
+      const item = raw as { name?: string; logo?: string };
+      const logo = item.logo ?? '';
+      const match = logo.match(/\/apps\/(\d+)\//);
+      if (!match) continue;
+      const appId = Number.parseInt(match[1], 10);
+      if (!Number.isFinite(appId) || seen.has(appId)) continue;
+      seen.add(appId);
+      result.push({
+        appId,
+        name: item.name?.trim() || `Steam App ${appId}`,
+        discountPercent: 100,
+        priceCents: 0,
+        originalPriceCents: 0,
+      });
+    }
+
+    return result;
+  } catch (error: any) {
+    logger.warn(`Steam search free games falhou: ${error.message}`);
+    return [];
+  }
+}
+
 export async function fetchSteamMostPlayed(): Promise<{ appId: number; playerCount: number }[]> {
   const key = process.env.STEAM_API_KEY;
   if (!key) {

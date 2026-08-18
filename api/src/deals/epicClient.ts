@@ -276,7 +276,24 @@ function mapEpicDeal(element: EpicCatalogElement, offer: EpicPromotionOffer, kin
 
 export async function fetchEpicFreeGames(): Promise<UnifiedDeal[]> {
   try {
-    const elements = await fetchEpicCatalogElements();
+    let elements: EpicCatalogElement[] = [];
+
+    try {
+      elements = await fetchEpicPromotionsFeed();
+      if (elements.length > 0) {
+        logger.info(`Epic freeGamesPromotions (fonte primária): ${elements.length} elementos`);
+      }
+    } catch (error: any) {
+      logger.warn(`Epic freeGamesPromotions falhou: ${error.message}`);
+    }
+
+    if (elements.length === 0) {
+      elements = await fetchEpicCatalogElements();
+      if (elements.length > 0) {
+        logger.info(`Epic browse fallback para grátis: ${elements.length} elementos`);
+      }
+    }
+
     const deals: UnifiedDeal[] = [];
     const seen = new Set<string>();
 

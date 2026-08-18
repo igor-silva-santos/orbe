@@ -109,3 +109,55 @@ export function dedupeDeals(deals: UnifiedDeal[]): UnifiedDeal[] {
 
   return result;
 }
+
+/** Mescla ofertas secundárias enriquecendo a lista primária sem substituir Epic/Steam. */
+export function mergeDealPairPreferPrimary(primary: UnifiedDeal, secondary: UnifiedDeal): UnifiedDeal {
+  return {
+    ...primary,
+    imageUrl: primary.imageUrl ?? secondary.imageUrl,
+    dealRating: primary.dealRating ?? secondary.dealRating,
+    steamAppId: primary.steamAppId ?? secondary.steamAppId,
+    endsAt: primary.endsAt ?? secondary.endsAt,
+    startsAt: primary.startsAt ?? secondary.startsAt,
+    worth: primary.worth ?? secondary.worth,
+    description: primary.description ?? secondary.description,
+    orbeGameId: primary.orbeGameId ?? secondary.orbeGameId,
+    orbeUrl: primary.orbeUrl ?? secondary.orbeUrl,
+  };
+}
+
+export function mergeFreeDealsWithPrimary(
+  primary: UnifiedDeal[],
+  secondary: UnifiedDeal[],
+): UnifiedDeal[] {
+  const result = dedupeDeals(primary);
+  const keyToIndex = new Map<string, number>();
+
+  for (let i = 0; i < result.length; i++) {
+    for (const key of dealDedupeKeys(result[i])) keyToIndex.set(key, i);
+  }
+
+  for (const deal of secondary) {
+    let matchIndex: number | undefined;
+    for (const key of dealDedupeKeys(deal)) {
+      const idx = keyToIndex.get(key);
+      if (idx !== undefined) {
+        matchIndex = idx;
+        break;
+      }
+    }
+
+    if (matchIndex !== undefined) {
+      const merged = mergeDealPairPreferPrimary(result[matchIndex], deal);
+      result[matchIndex] = merged;
+      for (const key of dealDedupeKeys(merged)) keyToIndex.set(key, matchIndex);
+      continue;
+    }
+
+    const idx = result.length;
+    result.push(deal);
+    for (const key of dealDedupeKeys(deal)) keyToIndex.set(key, idx);
+  }
+
+  return result;
+}

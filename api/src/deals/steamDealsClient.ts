@@ -1,6 +1,6 @@
 import { prisma } from '../clients';
 import { jogoQualityFilter } from '../qualityFilters';
-import { fetchSteamFeaturedSales } from '../steamClient';
+import { fetchSteamFeaturedSales, fetchSteamPermanentFreeGames } from '../steamClient';
 import { logger } from '../logger';
 import { resolveDealImageUrl } from './dealImages';
 import { formatBrlFromCents } from './dealPricing';
@@ -117,6 +117,38 @@ export async function fetchSteamFeaturedDeals(): Promise<UnifiedDeal[]> {
       .filter((deal): deal is UnifiedDeal => deal != null);
   } catch (error: any) {
     logger.warn(`Steam featured deals falhou: ${error.message}`);
+    return [];
+  }
+}
+
+/** Jogos grátis direto da Steam Store API (promoções 100% + F2P). */
+export async function fetchSteamFreeGames(): Promise<UnifiedDeal[]> {
+  try {
+    const [featured, permanentFree] = await Promise.all([
+      fetchSteamFeaturedSales(),
+      fetchSteamPermanentFreeGames(),
+    ]);
+
+    const temporaryFree = featured.filter(
+      (item) => item.discountPercent === 100 || item.priceCents === 0,
+    );
+
+    const byAppId = new Map<number, UnifiedDeal>();
+    for (const item of [...temporaryFree, ...permanentFree]) {
+      const deal = mapSteamDeal({
+        appId: item.appId,
+        title: item.name,
+        discountPercent: item.discountPercent,
+        priceCents: item.priceCents,
+        originalPriceCents: item.originalPriceCents,
+      });
+      if (!deal || deal.kind !== 'free') continue;
+      byAppId.set(item.appId, deal);
+    }
+
+    return Array.from(byAppId.values());
+  } catch (error: any) {
+    logger.warn(`Steam free games falhou: ${error.message}`);
     return [];
   }
 }

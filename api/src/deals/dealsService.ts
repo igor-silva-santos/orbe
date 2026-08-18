@@ -5,12 +5,12 @@ import { logger } from '../logger';
 import { fetchEpicFreeGames, fetchEpicSaleGames } from './epicClient';
 import { fetchGamerPowerGiveaways } from './gamerPowerClient';
 import { fetchCheapSharkDealsPaged } from './cheapsharkClient';
-import { fetchSteamDeals } from './steamDealsClient';
+import { fetchSteamDeals, fetchSteamFreeGames } from './steamDealsClient';
 import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
 import { fetchItchFreeGames, fetchItchOnSaleGames } from './itchClient';
 import { fetchItadShopSales, isItadConfigured } from './itadClient';
 import { splitFreeDeals } from './freeTier';
-import { dedupeDeals } from './dedupeDeals';
+import { dedupeDeals, mergeFreeDealsWithPrimary } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
 import { resolveUsdBrlRate } from './exchangeRate';
 import type { DealsOverview, UnifiedDeal } from './types';
@@ -121,6 +121,7 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
     Promise.all([
       safeFetch(fetchEpicFreeGames),
       safeFetch(fetchEpicSaleGames),
+      safeFetch(fetchSteamFreeGames),
       safeFetch(() => fetchGamerPowerGiveaways()),
       safeFetch(fetchSteamDeals),
       safeFetch(fetchCatalogSteamPromotions),
@@ -135,7 +136,8 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
 
   const [cheapsharkFree, cheapsharkPermanentFree, cheapsharkSales, cheapsharkEpicSales, cheapsharkUbisoft] =
     cheapsharkResults;
-  const [epicFree, epicSales, gamerpower, steam, catalogoSteamRaw, itchFree, itchOnSale, itadDeals] = otherResults;
+  const [epicFree, epicSales, steamFreePrimary, gamerpower, steam, catalogoSteamRaw, itchFree, itchOnSale, itadDeals] =
+    otherResults;
 
   const steamFree = steam.items.filter((deal) => deal.kind === 'free');
   const steamSales = steam.items.filter((deal) => deal.kind === 'sale');
@@ -144,20 +146,20 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const itadTemporaryFree = itadDeals.items.filter((deal) => deal.kind === 'free');
   const itadSales = itadDeals.items.filter((deal) => deal.kind === 'sale');
 
+  const primaryFree = dedupeDeals([...epicFree.items, ...steamFreePrimary.items]);
+  const secondaryFree = [
+    ...gamerpower.items,
+    ...cheapsharkFree.items,
+    ...cheapsharkPermanentFree.items,
+    ...cheapsharkUbisoft.items.filter((d) => d.kind === 'free'),
+    ...steamFree,
+    ...itchFree.items,
+    ...itchTemporaryFree,
+    ...itadTemporaryFree,
+  ];
+
   const gratisAll = normalizeDealsList(
-    await enrichDealsWithOrbeLinks(
-      dedupeDeals([
-        ...epicFree.items,
-        ...gamerpower.items,
-        ...cheapsharkFree.items,
-        ...cheapsharkPermanentFree.items,
-        ...cheapsharkUbisoft.items.filter((d) => d.kind === 'free'),
-        ...steamFree,
-        ...itchFree.items,
-        ...itchTemporaryFree,
-        ...itadTemporaryFree,
-      ]),
-    ),
+    await enrichDealsWithOrbeLinks(mergeFreeDealsWithPrimary(primaryFree, secondaryFree)),
     usdBrlRate,
   );
 
@@ -228,7 +230,11 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
           cheapsharkEpicSales.error ??
           cheapsharkUbisoft.error,
       },
-      steam: { ok: !steam.error, count: steam.items.length, error: steam.error },
+      steam: {
+        ok: !steam.error && !steamFreePrimary.error,
+        count: steamFreePrimary.items.length + steam.items.length,
+        error: steamFreePrimary.error ?? steam.error,
+      },
       orbe: { ok: !catalogoSteamRaw.error, count: catalogoSteam.length, error: catalogoSteamRaw.error },
       itch: {
         ok: !itchFree.error && !itchOnSale.error,
