@@ -6,7 +6,7 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
-import { sanitizeTranslatedText } from '@/lib/media-helpers';
+import { sanitizeTranslatedText, dedupeStreamingProvidersForDisplay } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
@@ -25,13 +25,20 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
 
   const trailerKey = serie.trailer_key || serie.videos?.find(v => v.type === 'Trailer')?.key;
 
-  const streamingProviders = (serie.streamingProviders || [])
-    .filter((p: any) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name));
+  const streamingProviders = dedupeStreamingProvidersForDisplay([
+    ...(serie.streamingProviders || []).filter(
+      (p: { url?: string | null; provider?: { name?: string | null } }) =>
+        p.url && p.provider?.name && !isTmdbProvider(p.provider.name),
+    ),
+    ...(serie.plataformas_api || [])
+      .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome))
+      .map((p) => ({
+        url: p.url,
+        provider: { name: p.nome, logoPath: p.logo_path ?? null },
+      })),
+  ]);
 
-  const fallbackPlatforms = (serie.plataformas_api || [])
-    .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome));
-
-  const hasStreaming = streamingProviders.length > 0 || fallbackPlatforms.length > 0;
+  const hasStreaming = streamingProviders.length > 0;
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -73,28 +80,16 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-4 mt-2">
-            {streamingProviders.map((p: any) => (
+            {streamingProviders.map((p) => (
               <a
-                key={p.provider.name}
+                key={p.provider?.name ?? p.url}
                 href={p.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
               >
-                <PlatformIcon platform={p.provider.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
-                <span>{p.provider.name}</span>
-              </a>
-            ))}
-            {fallbackPlatforms.map((p) => (
-              <a
-                key={p.nome}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
-              >
-                <PlatformIcon platform={p.nome} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
-                <span>{p.nome}</span>
+                <PlatformIcon platform={p.provider?.name ?? ''} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
+                <span>{p.provider?.name}</span>
               </a>
             ))}
           </div>

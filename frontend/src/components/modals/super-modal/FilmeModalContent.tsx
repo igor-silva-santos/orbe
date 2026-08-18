@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
-import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
+import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText, dedupeStreamingProvidersForDisplay } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
@@ -51,8 +51,10 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
     Boolean(filme.em_prevenda) ||
     Boolean(filme.ingresso_link);
 
-  const streamingProviders = (filme.streamingProviders || []).filter(
-    (p) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name)
+  const streamingProviders = dedupeStreamingProvidersForDisplay(
+    (filme.streamingProviders || []).filter(
+      (p) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name),
+    ),
   );
 
   const hasStreamingInfo = estreiaStreaming || streamingProviders.length > 0;
