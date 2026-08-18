@@ -1,5 +1,6 @@
 import { translateTmdbStatus } from './statusLabels';
 import { filterGamesForEvent } from './eventGameFilters';
+import { buildIgdbEventUrl, getEventStatus, type EventStatus } from './eventHelpers';
 import { resolveIgdbImageUrl } from './igdbImageUrl';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
@@ -586,8 +587,16 @@ export const mapJogoToMidia = (jogo: any) => {
   };
 };
 
-export const mapEventToResponse = (event: any) => {
-  const jogos = filterGamesForEvent(event.games ?? [], event);
+export const mapEventToResponse = (event: any, options?: { gamesLimit?: number }) => {
+  const allGames = event.games ?? [];
+  const filteredGames = filterGamesForEvent(allGames, event);
+  const gamesLimit = options?.gamesLimit;
+  const jogos =
+    gamesLimit != null && gamesLimit > 0
+      ? filteredGames.slice(0, gamesLimit)
+      : filteredGames;
+  const totalCatalogo = event._count?.games ?? allGames.length;
+
   return {
     id: event.igdbId,
     igdbId: event.igdbId,
@@ -596,7 +605,13 @@ export const mapEventToResponse = (event: any) => {
     data_inicio: event.start_time?.toISOString?.() ?? event.start_time ?? null,
     data_fim: event.end_time?.toISOString?.() ?? event.end_time ?? null,
     url: event.url ?? null,
-    total_jogos: jogos.length,
+    live_stream_url: event.liveStreamUrl ?? null,
+    slug: event.slug ?? null,
+    link_igdb: buildIgdbEventUrl(event.slug, event.igdbId),
+    status: getEventStatus(event) as EventStatus,
+    total_jogos: filteredGames.length,
+    total_jogos_catalogo: totalCatalogo,
+    total_jogos_exibidos: jogos.length,
     jogos: jogos.map(mapJogoToMidia),
   };
 };

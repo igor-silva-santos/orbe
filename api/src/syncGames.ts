@@ -13,6 +13,7 @@ import type { SyncContentOptions } from './syncOptions';
 import { resolveSyncContentOptions } from './syncOptions';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, ensureIgdbNamedEntity } from './syncUtils';
+import { pickEventWebsiteUrl } from './eventHelpers';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /** 401/403 (chave inválida/sem permissão) não deve virar "lista vazia" silenciosa — precisa falhar o sync. */
@@ -50,12 +51,17 @@ async function fetchAndSyncEvents(prisma: PrismaClient, startDateStr: string, en
     const startDate = Math.floor(new Date(startDateStr).getTime() / 1000);
     const endDate = Math.floor(new Date(endDateStr).getTime() / 1000);
     const nowTs = Math.floor(Date.now() / 1000);
+    const yearStartTs = Math.floor(new Date(new Date(startDateStr).getFullYear(), 0, 1).getTime() / 1000);
 
     const query = `
-        fields name, description, start_time, end_time, games;
-        where (start_time >= ${startDate} & start_time <= ${endDate}) | start_time > ${nowTs};
+        fields name, description, slug, start_time, end_time, live_stream_url, games,
+               event_networks.url, event_networks.network_type.name;
+        where (start_time >= ${yearStartTs} & start_time <= ${endDate})
+          | (end_time >= ${yearStartTs} & end_time <= ${endDate})
+          | (start_time <= ${endDate} & end_time >= ${yearStartTs})
+          | start_time > ${nowTs};
         sort start_time asc;
-        limit 200;
+        limit 500;
     `;
     logger.info(`Query IGDB para eventos: ${query}`);
     try {
@@ -66,20 +72,29 @@ async function fetchAndSyncEvents(prisma: PrismaClient, startDateStr: string, en
         for (const event of events) {
             if (seenIds.has(event.id)) continue;
             seenIds.add(event.id);
+
+            const websiteUrl = pickEventWebsiteUrl(event);
+
             await prisma.event.upsert({
                 where: { igdbId: event.id },
                 update: {
                     name: event.name,
                     description: event.description,
+                    slug: event.slug ?? null,
                     start_time: event.start_time ? new Date(event.start_time * 1000) : null,
                     end_time: event.end_time ? new Date(event.end_time * 1000) : null,
+                    url: websiteUrl,
+                    liveStreamUrl: event.live_stream_url ?? null,
                 },
                 create: {
                     igdbId: event.id,
                     name: event.name,
                     description: event.description,
+                    slug: event.slug ?? null,
                     start_time: event.start_time ? new Date(event.start_time * 1000) : null,
                     end_time: event.end_time ? new Date(event.end_time * 1000) : null,
+                    url: websiteUrl,
+                    liveStreamUrl: event.live_stream_url ?? null,
                 },
             });
             logger.info(`✅ Evento [${event.id}] "${event.name}" sincronizado.`);

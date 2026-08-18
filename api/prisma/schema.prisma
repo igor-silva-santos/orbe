@@ -800,14 +800,16 @@ model GameRelation {
 }
 
 model Event {
-  id          Int       @id @default(autoincrement())
-  igdbId      Int       @unique
-  name        String
-  description String?
-  start_time  DateTime?
-  end_time    DateTime?
-  url         String?
-  games       Jogo[]
+  id            Int       @id @default(autoincrement())
+  igdbId        Int       @unique
+  name          String
+  description   String?
+  start_time    DateTime?
+  end_time      DateTime?
+  url           String?
+  liveStreamUrl String?
+  slug          String?
+  games         Jogo[]
 }
 
 // =================================================================================

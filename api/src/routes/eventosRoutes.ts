@@ -8,24 +8,36 @@ import {
   animeSeasonQualityFilter,
   jogoQualityFilter,
 } from '../qualityFilters';
+import { getYearBounds } from '../eventHelpers';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
-import { TWELVE_HOURS, getCurrentSeason, animeCarouselInclude, cardListInclude } from './mediaRoutesHelpers';
+import { TWELVE_HOURS, getCurrentSeason, animeCarouselInclude, cardListInclude, parsePositiveIntId } from './mediaRoutesHelpers';
 
 const router = Router();
 
-// F-11: teto de /eventos — cada evento inclui ate 40 jogos (eventInclude), entao um
-// teto fixo evita carregar a tabela Event inteira de uma vez.
-const EVENTOS_LIST_LIMIT = 100;
+const EVENTOS_LIST_LIMIT = 200;
+const EVENT_GAMES_PREVIEW = 16;
+const EVENT_GAMES_DETAIL = 120;
 
-const eventInclude = {
+const gamePreviewInclude = {
+  genres: { include: { genero: true } },
+  platforms: { include: { plataforma: true }, take: 4 },
+};
+
+const eventListInclude = {
   games: {
-    include: {
-      genres: { include: { genero: true } },
-      platforms: { include: { plataforma: true }, take: 4 },
-    },
+    include: gamePreviewInclude,
     orderBy: { firstReleaseDate: 'asc' as const },
-    take: 80,
+    take: EVENT_GAMES_PREVIEW,
+  },
+  _count: { select: { games: true } },
+};
+
+const eventDetailInclude = {
+  games: {
+    include: gamePreviewInclude,
+    orderBy: { firstReleaseDate: 'asc' as const },
+    take: EVENT_GAMES_DETAIL,
   },
   _count: { select: { games: true } },
 };
@@ -37,7 +49,26 @@ const getProximosWindow = () => {
   return { now, threeMonthsAhead };
 };
 
-// Resumo agregado para a página de Eventos (relatório)
+function buildYearEventWhere(year: number): Prisma.EventWhereInput {
+  const { start: yearStart, end: yearEnd } = getYearBounds(year);
+  return {
+    OR: [
+      { start_time: { gte: yearStart, lte: yearEnd } },
+      { end_time: { gte: yearStart, lte: yearEnd } },
+      { AND: [{ start_time: { lte: yearEnd } }, { end_time: { gte: yearStart } }] },
+      { AND: [{ start_time: { lte: yearEnd } }, { end_time: null }] },
+    ],
+  };
+}
+
+function parseYearQuery(raw: unknown, fallback: number): number {
+  if (typeof raw !== 'string' || !/^\d{4}$/.test(raw)) return fallback;
+  const year = parseInt(raw, 10);
+  if (year < 2000 || year > 2100) return fallback;
+  return year;
+}
+
+// Resumo agregado para gavetas da home/jogos (mantém compatibilidade)
 router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const now = new Date();
   const { threeMonthsAhead } = getProximosWindow();
@@ -45,6 +76,15 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const year = now.getFullYear();
   const season = getCurrentSeason();
+
+  const resumoEventInclude = {
+    games: {
+      include: gamePreviewInclude,
+      orderBy: { firstReleaseDate: 'asc' as const },
+      take: EVENT_GAMES_PREVIEW,
+    },
+    _count: { select: { games: true } },
+  };
 
   try {
     const [
@@ -66,8 +106,9 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
             },
           ],
         },
-        include: eventInclude,
+        include: resumoEventInclude,
         orderBy: { start_time: 'asc' },
+        take: 20,
       }),
       prisma.filme.findMany({
         where: {
@@ -138,16 +179,14 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
             },
           ],
         },
-        include: eventInclude,
+        include: resumoEventInclude,
         orderBy: { start_time: 'desc' },
         take: 10,
       }),
     ]);
 
-    // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
-    // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     res.json({
-      eventos_games: eventosGames.map(mapEventToResponse),
+      eventos_games: eventosGames.map((e) => mapEventToResponse(e, { gamesLimit: EVENT_GAMES_PREVIEW })),
       proximos: {
         filmes: filmesProximos.map((f) => mapFilmeToMidia(f)),
         series: seriesProximas.map((s) => mapSerieToMidia(s)),
@@ -156,7 +195,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
       },
       destaques_recentes: {
         filmes: filmesEmCartaz.map((f) => mapFilmeToMidia(f)),
-        eventos: eventosRecentes.map(mapEventToResponse),
+        eventos: eventosRecentes.map((e) => mapEventToResponse(e, { gamesLimit: EVENT_GAMES_PREVIEW })),
       },
     });
   } catch (error) {
@@ -165,39 +204,91 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
   }
 });
 
-// Rota para Eventos de games (IGDB — E3, Gamescom, State of Play, etc.)
-router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const status = typeof req.query.status === 'string' ? req.query.status : 'all';
-  const now = new Date();
+// Lista rápida de eventos de um ano (página Eventos — sem filmes/séries/animes extras)
+router.get('/eventos/ano', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const year = parseYearQuery(req.query.year, new Date().getFullYear());
 
   try {
-    let where: Prisma.EventWhereInput = {};
-    if (status === 'upcoming') {
-      where = { start_time: { gte: now } };
-    } else if (status === 'ongoing') {
-      where = {
-        start_time: { lte: now },
-        OR: [{ end_time: { gte: now } }, { end_time: null }],
-      };
-    } else if (status === 'past') {
-      where = { end_time: { lt: now } };
-    }
-
     const events = await prisma.event.findMany({
-      where,
-      include: eventInclude,
+      where: buildYearEventWhere(year),
+      include: eventListInclude,
       orderBy: { start_time: 'asc' },
-      // F-11: sem isso a rota trazia a tabela Event inteira, cada evento com ate 40
-      // jogos incluidos (eventInclude). Nenhum consumidor atual pagina essa rota, entao
-      // um teto fixo (em vez de page/limit) evita a varredura sem quebrar o contrato
-      // de resposta (array simples) esperado por quem chama /eventos hoje.
       take: EVENTOS_LIST_LIMIT,
     });
 
-    res.json(events.map(mapEventToResponse));
+    res.json({
+      ano: year,
+      total: events.length,
+      fonte: 'IGDB',
+      eventos: events.map((event) => mapEventToResponse(event, { gamesLimit: EVENT_GAMES_PREVIEW })),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar eventos do ano ${year}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar eventos do ano.' });
+  }
+});
+
+// Rota legada — eventos por status (upcoming/ongoing/past)
+router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const status = typeof req.query.status === 'string' ? req.query.status : 'all';
+  const year = req.query.year != null ? parseYearQuery(req.query.year, new Date().getFullYear()) : null;
+  const now = new Date();
+
+  try {
+    const conditions: Prisma.EventWhereInput[] = [];
+
+    if (year != null) {
+      conditions.push(buildYearEventWhere(year));
+    }
+
+    if (status === 'upcoming') {
+      conditions.push({ start_time: { gte: now } });
+    } else if (status === 'ongoing') {
+      conditions.push({
+        start_time: { lte: now },
+        OR: [{ end_time: { gte: now } }, { end_time: null }],
+      });
+    } else if (status === 'past') {
+      conditions.push({ end_time: { lt: now } });
+    }
+
+    const where: Prisma.EventWhereInput = conditions.length > 0 ? { AND: conditions } : {};
+
+    const events = await prisma.event.findMany({
+      where,
+      include: eventListInclude,
+      orderBy: { start_time: 'asc' },
+      take: EVENTOS_LIST_LIMIT,
+    });
+
+    res.json(events.map((event) => mapEventToResponse(event, { gamesLimit: EVENT_GAMES_PREVIEW })));
   } catch (error) {
     logger.error(`Erro ao buscar eventos: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar eventos.' });
+  }
+});
+
+// Detalhe de um evento com mais jogos anunciados
+router.get('/eventos/:id', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const igdbId = parsePositiveIntId(req.params.id);
+  if (!igdbId) {
+    return res.status(400).json({ error: 'ID de evento inválido.' });
+  }
+
+  try {
+    const event = await prisma.event.findUnique({
+      where: { igdbId },
+      include: eventDetailInclude,
+    });
+
+    if (!event) {
+      return res.status(404).json({ error: 'Evento não encontrado.' });
+    }
+
+    res.json(mapEventToResponse(event));
+  } catch (error) {
+    logger.error(`Erro ao buscar evento ${igdbId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar evento.' });
   }
 });
 

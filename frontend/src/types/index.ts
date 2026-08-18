@@ -249,6 +249,8 @@ export interface Notification {
 }
 
 // Interface para eventos de games (IGDB)
+export type EventoStatus = 'upcoming' | 'ongoing' | 'past';
+
 export interface Evento {
   id: number;
   igdbId: number;
@@ -257,8 +259,21 @@ export interface Evento {
   data_inicio?: string | null;
   data_fim?: string | null;
   url?: string | null;
+  live_stream_url?: string | null;
+  slug?: string | null;
+  link_igdb?: string | null;
+  status?: EventoStatus;
   total_jogos: number;
+  total_jogos_catalogo?: number;
+  total_jogos_exibidos?: number;
   jogos: Jogo[];
+}
+
+export interface EventosAnoResponse {
+  ano: number;
+  total: number;
+  fonte: string;
+  eventos: Evento[];
 }
 
 export interface EventoProximos {

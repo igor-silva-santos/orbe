@@ -1,4 +1,4 @@
-import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
+import type { Filme, Serie, Anime, Jogo, EventoResumo, Evento, EventosAnoResponse } from '@/types';
 import type { DealsOverview, DealsGratisResponse, DealsPromocoesResponse } from '@/types/deals';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
@@ -240,8 +240,19 @@ export const orbeNerdApi = {
     return apiClient.get('/premios/filtros');
   },
 
-  getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
-    return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
+  getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all', year?: number) => {
+    const params: Record<string, string> = {};
+    if (status && status !== 'all') params.status = status;
+    if (year) params.year = String(year);
+    return apiClient.get('/eventos', Object.keys(params).length ? params : undefined);
+  },
+
+  getEventosAno: async (year?: number): Promise<EventosAnoResponse> => {
+    return apiClient.get('/eventos/ano', year ? { year: String(year) } : undefined);
+  },
+
+  getEventoById: async (id: number): Promise<Evento> => {
+    return apiClient.get(`/eventos/${id}`);
   },
 
   getEventosResumo: async (): Promise<EventoResumo> => {
