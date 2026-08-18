@@ -63,6 +63,29 @@ export function buildWeeklyItemsFromSchedule(
   return items;
 }
 
+export function mergeAnimesById(primary: Anime[], extra: Anime[]): Anime[] {
+  const byId = new Map<number, Anime>();
+  for (const anime of primary) byId.set(anime.id, anime);
+  for (const anime of extra) {
+    if (!byId.has(anime.id)) byId.set(anime.id, anime);
+  }
+  return Array.from(byId.values());
+}
+
+export function flattenGroupedSchedule(grouped: Record<string | number, Anime[]>): Anime[] {
+  const merged: Anime[] = [];
+  const seen = new Set<number>();
+  for (const key of Object.keys(grouped)) {
+    for (const anime of grouped[key] ?? []) {
+      if (!seen.has(anime.id)) {
+        seen.add(anime.id);
+        merged.push(anime);
+      }
+    }
+  }
+  return merged;
+}
+
 export function filterWeeklyAgendaByGenre(items: AnimeAgendaItem[], genre: string): AnimeAgendaItem[] {
   const filtered: AnimeAgendaItem[] = [];
   let index = 0;

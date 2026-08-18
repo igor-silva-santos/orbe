@@ -3,7 +3,7 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapAnimeToMidia, mapAnimeToCarouselCard } from '../mappers';
 import { fetchAnimeDetailsLive } from '../externalDetails';
-import { animeQualityFilter, animeSeasonQualityFilter, animeSafeWhereFilter } from '../qualityFilters';
+import { animeQualityFilter, animeSeasonQualityFilter, animeSafeWhereFilter, animeWeeklyAgendaFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import adminMiddleware from '../adminMiddleware';
@@ -180,10 +180,12 @@ router.get('/animes/weekly-schedule', async (req, res) => {
           gte: startDate,
           lte: endDate,
         },
-        anime: animeSafeWhereFilter,
+        anime: animeWeeklyAgendaFilter,
       },
       include: {
-        anime: true,
+        anime: {
+          include: animeCarouselInclude,
+        },
       },
       orderBy: {
         airingAt: 'asc',
@@ -193,7 +195,7 @@ router.get('/animes/weekly-schedule', async (req, res) => {
     const groupedByDay = schedule.reduce((acc, item) => {
       const day = getWeekdayInBrazil(item.airingAt);
       const mapped = {
-        ...mapAnimeToMidia(item.anime),
+        ...mapAnimeToCarouselCard(item.anime),
         nextAiringEpisode: {
           episode: item.episode,
           airingAt: item.airingAt.toISOString(),
@@ -204,7 +206,7 @@ router.get('/animes/weekly-schedule', async (req, res) => {
       }
       acc[day].push(mapped);
       return acc;
-    }, {} as Record<number, ReturnType<typeof mapAnimeToMidia>[]>);
+    }, {} as Record<number, ReturnType<typeof mapAnimeToCarouselCard>[]>;
 
     res.json(groupedByDay);
   } catch (error) {
