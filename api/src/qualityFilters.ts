@@ -523,6 +523,9 @@ export const animeSeasonQualityFilter: Prisma.AnimeWhereInput = {
   ],
 };
 
+/** Agenda semanal — sem barra por nota; só conteúdo seguro (não adulto) */
+export const animeWeeklyAgendaFilter: Prisma.AnimeWhereInput = animeSafeWhereFilter;
+
 export const jogoQualityFilter: Prisma.JogoWhereInput = {
   OR: [
     { rating: { gte: MIN_GAME_RATING } },

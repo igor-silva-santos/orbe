@@ -12,7 +12,9 @@ import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPoster
 import { getCarouselNavWrapIndex } from '@/lib/carousel-loop';
 import {
   ANIME_AGENDA_UNSCHEDULED_LABEL,
-  buildWeeklyItemsFromSchedule,
+  buildWeeklyAnimeAgendaItems,
+  flattenGroupedSchedule,
+  mergeAnimesById,
   filterWeeklyAgendaByGenre,
   getAnimeAgendaDate,
   resolveWeeklyAgendaStartIndex,
@@ -588,7 +590,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         const grouped = (await response.json()) as Record<string | number, Anime[]>;
         if (cancelled) return;
 
-        let items = buildWeeklyItemsFromSchedule(grouped, DAY_NAMES);
+        const fromApi = flattenGroupedSchedule(grouped);
+        const fromLaunchCarousel = fetchedAnimesRef.current.filter(
+          (anime) => anime.nextAiringEpisode && filterRelevantAnimes([anime]).length > 0,
+        );
+        const mergedAnimes = mergeAnimesById(fromApi, fromLaunchCarousel);
+
+        let items = buildWeeklyAnimeAgendaItems(mergedAnimes, DAY_NAMES);
         if (selectedGenre) {
           items = filterWeeklyAgendaByGenre(items, selectedGenre);
         }
@@ -617,7 +625,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     return () => {
       cancelled = true;
     };
-  }, [viewMode, emAltaMode, selectedGenre]);
+  }, [viewMode, emAltaMode, selectedGenre, fetchedAnimes]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {

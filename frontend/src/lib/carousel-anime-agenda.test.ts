@@ -6,6 +6,8 @@ import {
   buildWeeklyAnimeAgendaItems,
   buildWeeklyItemsFromSchedule,
   filterWeeklyAgendaByGenre,
+  flattenGroupedSchedule,
+  mergeAnimesById,
   getCalendarWeekBounds,
   isDateWithinWeek,
   resolveWeeklyAgendaStartIndex,
@@ -104,6 +106,18 @@ describe('buildWeeklyItemsFromSchedule', () => {
     assert.equal(items.filter((item) => item.type === 'separator').length, 2);
     assert.equal(items[0].type === 'separator' ? items[0].dayName : '', 'Segunda');
     assert.equal(items[2].type === 'separator' ? items[2].dayName : '', 'Quarta');
+  });
+});
+
+describe('mergeAnimesById', () => {
+  it('inclui animes extras sem pontuação que não vieram da API', () => {
+    const fromApi = [mockAnime(1, { airingAt: '2026-08-17T21:00:00' })];
+    const extra = mockAnime(2, { airingAt: '2026-08-18T21:00:00' });
+    extra.avaliacao = undefined;
+
+    const merged = mergeAnimesById(fromApi, [extra]);
+    assert.equal(merged.length, 2);
+    assert.ok(merged.some((a) => a.id === 2));
   });
 });
 
