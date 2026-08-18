@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Notification, Theme, Filme, Serie, Anime, Jogo, UserInteraction } from '@/types';
+import type { UnifiedDeal } from '@/types/deals';
 import orbeNerdApi from '@/lib/api';
 
 interface AppState {
@@ -35,6 +36,8 @@ interface AppState {
     midia: Filme | Serie | Anime | Jogo | null;
     type: 'filme' | 'serie' | 'anime' | 'jogo' | null;
   };
+  isDealModalOpen: boolean;
+  dealModalData: { deal: UnifiedDeal | null };
   currentDetailModal: {
     isOpen: boolean;
     midia: Filme | Serie | Anime | Jogo | null;
@@ -76,6 +79,8 @@ interface AppState {
   closeRatingModal: () => void;
   openCalendarModal: (data: { midia: Filme | Serie | Anime | Jogo | null; type: 'filme' | 'serie' | 'anime' | 'jogo' | null; }) => void;
   closeCalendarModal: () => void;
+  openDealModal: (deal: UnifiedDeal) => void;
+  closeDealModal: () => void;
   openDetailModal: (midia: Filme | Serie | Anime | Jogo, type: string) => void;
   closeDetailModal: () => void;
   
@@ -111,6 +116,8 @@ export const useAppStore = create<AppState>()(
         midia: null,
         type: null
       },
+      isDealModalOpen: false,
+      dealModalData: { deal: null },
       currentDetailModal: null,
       isLoading: false,
       fastScrollEnabled: false,
@@ -270,6 +277,21 @@ export const useAppStore = create<AppState>()(
         set({ 
           isCalendarModalOpen: false,
           calendarModalData: { midia: null, type: null }
+        });
+      },
+
+      openDealModal: (deal) => {
+        set({
+          isDealModalOpen: true,
+          dealModalData: { deal },
+          isSearchOpen: false,
+        });
+      },
+
+      closeDealModal: () => {
+        set({
+          isDealModalOpen: false,
+          dealModalData: { deal: null },
         });
       },
       
