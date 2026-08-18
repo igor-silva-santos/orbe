@@ -68,6 +68,7 @@ curl -X POST https://<sua-api>/api/run-sync \
 | Documento | Conteúdo |
 |-----------|----------|
 | [`orbe-1/`](orbe-1/) | Arquivo da 1ª iteração — estado e funcionalidades |
+| [`docs/PLANO_PERFIL.md`](docs/PLANO_PERFIL.md) | Plano de perfil logado, personalização e Match |
 | [`docs/PRODUCAO.md`](docs/PRODUCAO.md) | Deploy em produção |
 | [`docs/SYNC_INICIAL.md`](docs/SYNC_INICIAL.md) | Sync inicial e backfill |
 | [`DESIGN.md`](DESIGN.md) | Direção visual (Pulp Gráfico) |
