@@ -1,10 +1,34 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
+import { useRef } from 'react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+  const router = useRouter();
+  const yearTapRef = useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null }>({
+    count: 0,
+    timer: null,
+  });
+
+  const handleYearTap = () => {
+    if (pathname !== '/') return;
+
+    const state = yearTapRef.current;
+    state.count += 1;
+    if (state.timer) clearTimeout(state.timer);
+    state.timer = setTimeout(() => {
+      state.count = 0;
+    }, 2000);
+
+    if (state.count >= 3) {
+      state.count = 0;
+      router.push('/admin/logs');
+    }
+  };
 
   const footerLinks = {
     navegacao: [
@@ -111,7 +135,16 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span>© {currentYear} Orbe Nerd. Todos os direitos reservados.</span>
+              <span>© </span>
+              <button
+                type="button"
+                onClick={handleYearTap}
+                className="text-muted-foreground hover:text-foreground transition-colors cursor-default select-none rounded px-0.5"
+                aria-label={`${currentYear}`}
+              >
+                {currentYear}
+              </button>
+              <span> Orbe Nerd. Todos os direitos reservados.</span>
             </div>
 
             {/* Créditos */}

@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import cacheMiddleware from './cacheMiddleware';
 import { logger } from './logger';
-import adminMiddleware from './adminMiddleware';
 import { prisma } from './clients';
 import {
   DEALS_SOFT_TTL_SECONDS,
@@ -172,8 +171,8 @@ router.get('/deals/gamerpower', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async
   }
 });
 
-/** Histórico persistido de refresh de promoções (filtro de URLs). */
-router.get('/deals/log-runs', adminMiddleware, async (req, res) => {
+/** Histórico persistido de refresh de promoções (acesso oculto — sem role admin). */
+router.get('/deals/log-runs', async (req, res) => {
   try {
     const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '30'), 10) || 30, 1), 100);
     const runs = await prisma.dealsLogRun.findMany({
@@ -196,7 +195,7 @@ router.get('/deals/log-runs', adminMiddleware, async (req, res) => {
   }
 });
 
-router.get('/deals/log-runs/:id', adminMiddleware, async (req, res) => {
+router.get('/deals/log-runs/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) return res.status(400).json({ error: 'id inválido.' });

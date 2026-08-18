@@ -25,7 +25,6 @@ import {
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
 import { broadcast } from './websocket';
-import adminMiddleware from './adminMiddleware';
 import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer, getDetetiveLogBuffer, getDealsLogBuffer } from './logger';
 
 const router = Router();
@@ -99,17 +98,8 @@ router.get('/sync/db-size', protectSync, async (_req, res) => {
   }
 });
 
-/** Download de logs em memória — admin ou x-sync-secret (investigação temporária) */
-router.get(
-  '/sync/logs',
-  (req, res, next) => {
-    const secret = req.headers['x-sync-secret'] as string | undefined;
-    if (verifySyncSecret(secret)) {
-      return next();
-    }
-    return adminMiddleware(req, res, next);
-  },
-  (req, res) => {
+/** Download de logs em memória — público (acesso oculto na UI). */
+router.get('/sync/logs', (req, res) => {
     const filter = String(req.query.filter || 'sync');
     const content =
       filter === 'all'
@@ -149,24 +139,14 @@ router.get(
     }
 
     res.send(content);
-  }
-);
-
-/** Middleware compartilhado pelas rotas de leitura do log estruturado (admin ou x-sync-secret) */
-const protectLogRead = (req: any, res: any, next: any) => {
-  const secret = req.headers['x-sync-secret'] as string | undefined;
-  if (verifySyncSecret(secret)) {
-    return next();
-  }
-  return adminMiddleware(req, res, next);
-};
+});
 
 function serializeLogEvent(event: any) {
   return { ...event, id: String(event.id) };
 }
 
 /** Lista execuções de sync (mais recentes primeiro) — visão geral antes de entrar no detalhe. */
-router.get('/sync/log-runs', protectLogRead, async (req, res) => {
+router.get('/sync/log-runs', async (req, res) => {
   const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '20'), 10) || 20, 1), 100);
   const status = typeof req.query.status === 'string' ? req.query.status : undefined;
 
@@ -192,7 +172,7 @@ router.get('/sync/log-runs', protectLogRead, async (req, res) => {
 });
 
 /** Resumo agregado de uma execução — o que uma IA (ou você) deve ler primeiro, não os eventos brutos. */
-router.get('/sync/log-runs/:id', protectLogRead, async (req, res) => {
+router.get('/sync/log-runs/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'id inválido.' });
 
@@ -203,7 +183,7 @@ router.get('/sync/log-runs/:id', protectLogRead, async (req, res) => {
 });
 
 /** Eventos paginados e filtráveis de uma execução — só consultar quando o resumo não for suficiente. */
-router.get('/sync/log-runs/:id/events', protectLogRead, async (req, res) => {
+router.get('/sync/log-runs/:id/events', async (req, res) => {
   const runId = parseInt(req.params.id, 10);
   if (Number.isNaN(runId)) return res.status(400).json({ error: 'id inválido.' });
 
@@ -243,7 +223,7 @@ router.get('/sync/log-runs/:id/events', protectLogRead, async (req, res) => {
 });
 
 /** Export completo (streaming) em NDJSON — pra levar um recorte filtrado pra análise (IA ou não). */
-router.get('/sync/log-runs/:id/export', protectLogRead, async (req, res) => {
+router.get('/sync/log-runs/:id/export', async (req, res) => {
   const runId = parseInt(req.params.id, 10);
   if (Number.isNaN(runId)) return res.status(400).json({ error: 'id inválido.' });
 

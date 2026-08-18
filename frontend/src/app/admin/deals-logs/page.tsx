@@ -169,11 +169,11 @@ export default function DealsLogsPage() {
         <div>
           <button
             type="button"
-            onClick={() => router.push('/perfil')}
+            onClick={() => router.push('/admin/logs')}
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar ao perfil
+            Voltar aos logs
           </button>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Tag className="h-6 w-6 text-primary" />
@@ -205,10 +205,10 @@ export default function DealsLogsPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/admin/sync-logs')}
+            onClick={() => router.push('/admin/logs')}
             className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-muted"
           >
-            Logs de sync
+            Hub de logs
           </button>
         </div>
       </div>

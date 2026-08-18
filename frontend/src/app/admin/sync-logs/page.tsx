@@ -17,7 +17,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
 
 // ---------- Tipos ----------
@@ -222,9 +221,6 @@ export default function SyncLogsAdminPage() {
   const router = useRouter();
 
   // ---- Acesso ----
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // ---- Lista de execuções ----
   const [runs, setRuns] = useState<SyncLogRunListItem[]>([]);
   const [runsLoading, setRunsLoading] = useState(true);
   const [runsError, setRunsError] = useState<string | null>(null);
@@ -254,28 +250,6 @@ export default function SyncLogsAdminPage() {
   // ---- Export ----
   const [exporting, setExporting] = useState(false);
 
-  // ---- Proteção de acesso ----
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const profile = await orbeNerdApi.getUserProfile();
-        if (cancelled) return;
-        if (!profile || profile.role !== 'admin') {
-          router.push('/perfil');
-          return;
-        }
-        setAuthLoading(false);
-      } catch (error) {
-        console.error('Erro ao carregar perfil:', error);
-        if (!cancelled) router.push('/login');
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
-
   // ---- Carrega lista de execuções ----
   const fetchRuns = useCallback(async () => {
     setRunsLoading(true);
@@ -295,8 +269,8 @@ export default function SyncLogsAdminPage() {
   }, [statusFilter]);
 
   useEffect(() => {
-    if (!authLoading) fetchRuns();
-  }, [authLoading, fetchRuns]);
+    fetchRuns();
+  }, [fetchRuns]);
 
   // ---- Carrega detalhe da execução selecionada ----
   const fetchRunDetail = useCallback(async (runId: number) => {
@@ -434,25 +408,17 @@ export default function SyncLogsAdminPage() {
     return Array.from(keys).sort();
   }, [runDetail]);
 
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="container max-w-6xl mx-auto py-10 px-4 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <button
             type="button"
-            onClick={() => router.push('/perfil')}
+            onClick={() => router.push('/admin/logs')}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar ao perfil
+            Voltar aos logs
           </button>
           <h1 className="text-2xl font-bold">Logs de sincronização</h1>
           <p className="text-sm text-muted-foreground mt-1">
