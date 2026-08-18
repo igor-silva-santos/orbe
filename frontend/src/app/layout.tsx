@@ -14,6 +14,7 @@ const SuperModal = dynamic(() => import("@/components/modals/SuperModal"), { ssr
 const NotificationModal = dynamic(() => import("@/components/modals/NotificationModal"), { ssr: false });
 const RatingModal = dynamic(() => import("@/components/modals/RatingModalWrapper"), { ssr: false });
 const DealModal = dynamic(() => import("@/components/modals/DealModal"), { ssr: false });
+const SeasonModal = dynamic(() => import("@/components/modals/SeasonModal"), { ssr: false });
 
 const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -96,6 +97,7 @@ export default function RootLayout({
                 <NotificationModal />
                 <RatingModal />
                 <DealModal />
+                <SeasonModal />
               </ClientOnly>
             </div>
           </TooltipProvider>

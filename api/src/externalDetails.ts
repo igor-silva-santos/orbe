@@ -1,6 +1,6 @@
 import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
-import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
+import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes, mapSeasonDetailsToResponse } from './mappers';
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
 import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
@@ -177,6 +177,8 @@ function mapTmdbSerieToPrismaLike(serie: any) {
       episodeCount: s.episode_count,
       name: s.name,
       posterPath: s.poster_path,
+      overview: s.overview,
+      airDate: s.air_date ? new Date(s.air_date) : null,
     })),
     streamingProviders: (brProviders?.flatrate ?? []).map((provider: any) => ({
       url: brProviders?.link ?? null,
@@ -477,6 +479,7 @@ export async function fetchJogoDetailsLive(igdbId: number) {
         select: {
           summary: true,
           premiacoes: true,
+          firstReleaseDate: true,
           steamAppId: true,
           steamPlayerCount: true,
           steamPriceCents: true,
@@ -486,6 +489,15 @@ export async function fetchJogoDetailsLive(igdbId: number) {
           hypes: true,
           follows: true,
           websites: { select: { url: true, category: true } },
+          events: {
+            select: {
+              igdbId: true,
+              name: true,
+              start_time: true,
+              end_time: true,
+              url: true,
+            },
+          },
         },
       }),
     ]);
@@ -554,6 +566,13 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       }
     }
 
+    const releaseDate =
+      dbJogo?.firstReleaseDate ??
+      (game.first_release_date ? new Date(game.first_release_date * 1000) : null);
+    const eventosAnuncio = dbJogo?.events?.length
+      ? mapJogoToMidia({ firstReleaseDate: releaseDate, events: dbJogo.events }).eventos_anuncio
+      : undefined;
+
     return {
       ...translated,
       websites: mergeJogoWebsites(
@@ -569,9 +588,46 @@ export async function fetchJogoDetailsLive(igdbId: number) {
       hypes: dbJogo?.hypes ?? game.hypes ?? null,
       follows: dbJogo?.follows ?? game.follows ?? null,
       premiacoes: parsePremiacoes(dbJogo?.premiacoes),
+      ...(eventosAnuncio?.length ? { eventos_anuncio: eventosAnuncio } : {}),
     };
   } catch (error) {
     logger.error(`Erro ao buscar jogo ${igdbId} no IGDB: ${error}`);
+    throw error;
+  }
+}
+
+export async function fetchSerieSeasonDetailsLive(tmdbId: number, seasonNumber: number) {
+  if (!Number.isInteger(tmdbId) || tmdbId <= 0) return null;
+  if (!Number.isInteger(seasonNumber) || seasonNumber < 0) return null;
+
+  try {
+    const [season, dbSerie] = await Promise.all([
+      tmdb.seasonInfo({
+        id: tmdbId,
+        season_number: seasonNumber,
+        language: 'pt-BR',
+      }),
+      prisma.serie.findUnique({
+        where: { tmdbId },
+        select: { name: true },
+      }),
+    ]);
+
+    if (!season?.id) return null;
+
+    const mapped = mapSeasonDetailsToResponse(
+      tmdbId,
+      dbSerie?.name,
+      { ...season, season_number: season.season_number ?? seasonNumber },
+    );
+    if (mapped.sinopse?.trim()) {
+      const translated = await withPortugueseTranslation({ sinopse: mapped.sinopse });
+      mapped.sinopse = translated.sinopse;
+    }
+    return mapped;
+  } catch (error: any) {
+    if (error?.status === 404 || error?.response?.status === 404) return null;
+    logger.error(`Erro ao buscar temporada ${seasonNumber} da série ${tmdbId}: ${error}`);
     throw error;
   }
 }

@@ -1,5 +1,5 @@
 import { translateTmdbStatus } from './statusLabels';
-import { filterGamesForEvent } from './eventGameFilters';
+import { filterGamesForEvent, filterEventsForGame } from './eventGameFilters';
 import { resolveIgdbImageUrl } from './igdbImageUrl';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
@@ -428,9 +428,11 @@ export const mapSerieToMidia = (serie: any) => {
     trailer_key: findTrailerKey(serie.videos),
     temporadas: serie.seasons?.map((s: any) => ({
       numero: s.seasonNumber,
-      episodios: s.episodeCount,
+      episodios: s.episodeCount ?? 0,
       nome: s.name,
       poster_url: s.posterPath ? `${TMDB_IMAGE_BASE_URL}${s.posterPath}` : null,
+      sinopse: s.overview ?? null,
+      data_exibicao: toCalendarDateString(s.airDate),
     })) ?? [],
     premiacoes: parsePremiacoes(serie.premiacoes),
   };
@@ -583,8 +585,47 @@ export const mapJogoToMidia = (jogo: any) => {
     hypes: jogo.hypes ?? null,
     follows: jogo.follows ?? null,
     premiacoes: parsePremiacoes(jogo.premiacoes),
+    ...(jogo.events?.length
+      ? {
+          eventos_anuncio: filterEventsForGame(jogo.events, { firstReleaseDate: jogo.firstReleaseDate }).map(
+            (e: any) => ({
+              id: e.igdbId,
+              nome: e.name,
+              data_inicio: toCalendarDateString(e.start_time),
+              data_fim: toCalendarDateString(e.end_time),
+              url: e.url ?? null,
+            }),
+          ),
+        }
+      : {}),
   };
 };
+
+const TMDB_STILL_BASE_URL = 'https://image.tmdb.org/t/p/w300';
+
+export const mapSeasonDetailsToResponse = (
+  tmdbId: number,
+  serieTitle: string | null | undefined,
+  season: any,
+) => ({
+  serie_id: tmdbId,
+  serie_titulo: serieTitle ?? null,
+  numero: season.season_number,
+  nome: season.name ?? null,
+  sinopse: season.overview ?? null,
+  poster_url: season.poster_path ? `${TMDB_IMAGE_BASE_URL}${season.poster_path}` : null,
+  data_exibicao: season.air_date ?? null,
+  episodios: (season.episodes ?? [])
+    .filter((ep: any) => ep.episode_number != null)
+    .map((ep: any) => ({
+      numero: ep.episode_number,
+      nome: ep.name ?? null,
+      sinopse: ep.overview ?? null,
+      still_url: ep.still_path ? `${TMDB_STILL_BASE_URL}${ep.still_path}` : null,
+      data_exibicao: ep.air_date ?? null,
+      duracao_min: ep.runtime ?? null,
+    })),
+});
 
 export const mapEventToResponse = (event: any) => {
   const jogos = filterGamesForEvent(event.games ?? [], event);

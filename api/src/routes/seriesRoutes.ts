@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapSerieToMidia, mapSerieToCarouselCard, sortSeriesByCarouselDate } from '../mappers';
-import { fetchSerieDetailsLive } from '../externalDetails';
+import { fetchSerieDetailsLive, fetchSerieSeasonDetailsLive } from '../externalDetails';
 import { serieQualityFilter, serieCarouselQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
@@ -103,6 +103,26 @@ router.get('/series/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CA
   } catch (error) {
     logger.error(`Erro ao buscar detalhes da série: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes da série.' });
+  }
+});
+
+// Detalhes de uma temporada (episódios ao vivo do TMDB)
+router.get('/series/:id/seasons/:seasonNumber', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {
+  const tmdbId = parsePositiveIntId(req.params.id);
+  const seasonRaw = req.params.seasonNumber;
+  if (!tmdbId || !/^\d+$/.test(seasonRaw)) {
+    return res.status(400).json({ error: 'ID de série ou número de temporada inválido.' });
+  }
+  const seasonNumber = parseInt(seasonRaw, 10);
+  try {
+    const temporada = await fetchSerieSeasonDetailsLive(tmdbId, seasonNumber);
+    if (!temporada) {
+      return res.status(404).json({ error: 'Temporada não encontrada.' });
+    }
+    res.json(temporada);
+  } catch (error) {
+    logger.error(`Erro ao buscar temporada ${seasonNumber} da série ${tmdbId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar detalhes da temporada.' });
   }
 });
 

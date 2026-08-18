@@ -128,6 +128,29 @@ export interface Temporada {
   numero: number;
   nome?: string;
   episodios: number;
+  poster_url?: string | null;
+  sinopse?: string | null;
+  data_exibicao?: string | null;
+}
+
+export interface Episodio {
+  numero: number;
+  nome?: string | null;
+  sinopse?: string | null;
+  still_url?: string | null;
+  data_exibicao?: string | null;
+  duracao_min?: number | null;
+}
+
+export interface TemporadaDetalhe {
+  serie_id: number;
+  serie_titulo?: string | null;
+  numero: number;
+  nome?: string | null;
+  sinopse?: string | null;
+  poster_url?: string | null;
+  data_exibicao?: string | null;
+  episodios: Episodio[];
 }
 
 export interface SerieStreamingProvider {
@@ -192,6 +215,7 @@ export interface Jogo extends Midia {
   perspectivas?: string[];
   screenshots?: string[];
   evento_anuncio_id?: number;
+  eventos_anuncio?: EventoAnuncioJogo[];
   websites?: Website[];
   temas?: string[];
   videos?: Video[];
@@ -277,6 +301,15 @@ export interface EventoResumo {
   eventos_games: Evento[];
   proximos: EventoProximos;
   destaques_recentes: EventoDestaquesRecentes;
+}
+
+// Interface para eventos de anúncio vinculados a um jogo (IGDB)
+export interface EventoAnuncioJogo {
+  id: number;
+  nome: string;
+  data_inicio?: string | null;
+  data_fim?: string | null;
+  url?: string | null;
 }
 
 // Interface para eventos de anúncio (legado)

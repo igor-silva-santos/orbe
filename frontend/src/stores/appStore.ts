@@ -39,6 +39,13 @@ interface AppState {
   };
   isDealModalOpen: boolean;
   dealModalData: { deal: UnifiedDeal | null };
+  isSeasonModalOpen: boolean;
+  seasonModalData: {
+    serieId: number;
+    serieTitle: string;
+    seasonNumber: number;
+    seasonName?: string;
+  } | null;
   currentDetailModal: {
     isOpen: boolean;
     midia: Filme | Serie | Anime | Jogo | null;
@@ -85,6 +92,8 @@ interface AppState {
   closeCalendarModal: () => void;
   openDealModal: (deal: UnifiedDeal) => void;
   closeDealModal: () => void;
+  openSeasonModal: (data: { serieId: number; serieTitle: string; seasonNumber: number; seasonName?: string }) => void;
+  closeSeasonModal: () => void;
   openDetailModal: (midia: Filme | Serie | Anime | Jogo, type: string) => void;
   closeDetailModal: () => void;
   
@@ -123,6 +132,8 @@ export const useAppStore = create<AppState>()(
       },
       isDealModalOpen: false,
       dealModalData: { deal: null },
+      isSeasonModalOpen: false,
+      seasonModalData: null,
       currentDetailModal: null,
       isLoading: false,
       fastScrollEnabled: false,
@@ -313,6 +324,20 @@ export const useAppStore = create<AppState>()(
         set({
           isDealModalOpen: false,
           dealModalData: { deal: null },
+        });
+      },
+
+      openSeasonModal: (data) => {
+        set({
+          isSeasonModalOpen: true,
+          seasonModalData: data,
+        });
+      },
+
+      closeSeasonModal: () => {
+        set({
+          isSeasonModalOpen: false,
+          seasonModalData: null,
         });
       },
       

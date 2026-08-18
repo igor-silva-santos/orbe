@@ -49,3 +49,7 @@ export function isGameAnnouncementForEvent(game: GameLike, event: EventLike): bo
 export function filterGamesForEvent<T extends GameLike>(games: T[], event: EventLike): T[] {
   return games.filter((game) => isGameAnnouncementForEvent(game, event));
 }
+
+export function filterEventsForGame<T extends EventLike>(events: T[], game: GameLike): T[] {
+  return events.filter((event) => isGameAnnouncementForEvent(game, event));
+}

@@ -10,6 +10,10 @@ import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import { useAppStore } from '@/stores/appStore';
+import { ChevronRight } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -19,6 +23,8 @@ interface SerieModalContentProps {
 const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().includes('tmdb');
 
 const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
+  const openSeasonModal = useAppStore((s) => s.openSeasonModal);
+
   if (!serie) {
     return <div>Carregando...</div>;
   }
@@ -160,12 +166,53 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Temporadas</h2>
           <div className="space-y-2">
-            {serie.temporadas.map(season => (
-              <div key={season.numero} className="flex justify-between items-center bg-muted p-2 rounded-lg">
-                <span className="font-medium">{season.nome || `Temporada ${season.numero}`}</span>
-                <span className="text-muted-foreground">{season.episodios} episódios</span>
-              </div>
-            ))}
+            {serie.temporadas.map((season) => {
+              const seasonLabel = season.nome || (season.numero === 0 ? 'Especiais' : `Temporada ${season.numero}`);
+              const seasonDate = season.data_exibicao
+                ? (() => {
+                    try {
+                      return format(parseISO(season.data_exibicao), 'dd/MM/yyyy', { locale: ptBR });
+                    } catch {
+                      return null;
+                    }
+                  })()
+                : null;
+
+              return (
+                <button
+                  key={season.numero}
+                  type="button"
+                  onClick={() =>
+                    openSeasonModal({
+                      serieId: serie.id,
+                      serieTitle: serie.titulo_curado || serie.titulo_api || 'Série',
+                      seasonNumber: season.numero,
+                      seasonName: season.nome,
+                    })
+                  }
+                  className="w-full flex items-center gap-3 bg-muted hover:bg-muted/80 p-3 rounded-lg transition-colors text-left group"
+                >
+                  {season.poster_url && (
+                    <SafeImage
+                      src={season.poster_url}
+                      alt={seasonLabel}
+                      width={48}
+                      height={72}
+                      className="rounded object-cover w-12 h-16 shrink-0"
+                      fallbackLabel="?"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium block truncate">{seasonLabel}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {season.episodios} episódio(s)
+                      {seasonDate ? ` · ${seasonDate}` : ''}
+                    </span>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
