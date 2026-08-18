@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText } from 'lucide-react';
+import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
@@ -109,6 +109,14 @@ export default function ProfilePage() {
             </button>
             {user.role === 'admin' && (
               <>
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin/deals-logs')}
+                  className="flex items-center w-full px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors text-sm font-medium"
+                >
+                  <Tag className="mr-2 h-4 w-4" />
+                  Logs de promoções
+                </button>
                 <button
                   type="button"
                   onClick={() => router.push('/admin/sync-logs')}

@@ -9,6 +9,8 @@ const MAX_SYNC_BUFFER_LINES = 15_000;
 const SYNC_LOG_PATTERN =
   /sync|sincroniz|detetive|ingresso|\[ingresso-api\]|\[detetive\]|⏭️|⏱️|resumo do lote|fase '|pulad|ignorad|checkpoint|filmes|series|animes|jogos|premios|retomando|eta/i;
 
+const DEALS_LOG_PATTERN = /\[deals-cache\]|\[deals-filter\]/i;
+
 let logFilePath: string | undefined;
 
 if (logToFile) {
@@ -22,6 +24,7 @@ if (logToFile) {
 
 const logBuffer: string[] = [];
 const syncLogBuffer: string[] = [];
+const dealsLogBuffer: string[] = [];
 
 function appendToBuffer(buffer: string[], line: string, maxLines: number): void {
   buffer.push(line);
@@ -56,6 +59,9 @@ const log = (...args: any[]) => {
   if (SYNC_LOG_PATTERN.test(message)) {
     appendToBuffer(syncLogBuffer, logMessage, MAX_SYNC_BUFFER_LINES);
   }
+  if (DEALS_LOG_PATTERN.test(message)) {
+    appendToBuffer(dealsLogBuffer, logMessage, MAX_SYNC_BUFFER_LINES);
+  }
 
   if (level === 'error') {
     console.error(logMessage);
@@ -82,10 +88,15 @@ export function getSyncLogBuffer(): string {
   return syncLogBuffer.join('\n');
 }
 
+export function getDealsLogBuffer(): string {
+  return dealsLogBuffer.join('\n');
+}
+
 export function getLogBufferMeta() {
   return {
     totalLines: logBuffer.length,
     syncLines: syncLogBuffer.length,
+    dealsLines: dealsLogBuffer.length,
     detetiveLines: syncLogBuffer.filter((line) => DETETIVE_LOG_PATTERN.test(line)).length,
     maxTotalLines: MAX_BUFFER_LINES,
     maxSyncLines: MAX_SYNC_BUFFER_LINES,

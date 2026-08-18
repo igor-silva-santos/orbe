@@ -7,7 +7,7 @@ import { parseItchRssXml } from './itchRss';
 import { mapItadListItem, ITAD_SHOP_EPIC, ITAD_SHOP_EA, ITAD_SHOP_MICROSOFT } from './itadClient';
 import { normalizeDealToBrl } from './normalizeDeals';
 import { parsePriceNumber } from './dealPricing';
-import { isOfficialStoreUrl } from './dealStoreUrl';
+import { isOfficialStoreUrl, getStoreUrlRejectReason } from './dealStoreUrl';
 import { paginateDeals, sourcesHealth } from './dealsService';
 import type { DealsOverview, UnifiedDeal } from './types';
 
@@ -42,8 +42,13 @@ describe('isOfficialStoreUrl', () => {
   });
 
   it('rejeita agregadores', () => {
+    assert.equal(getStoreUrlRejectReason('https://www.cheapshark.com/redirect?dealID=1'), 'blocked_aggregator');
     assert.equal(isOfficialStoreUrl('https://www.cheapshark.com/redirect?dealID=1'), false);
     assert.equal(isOfficialStoreUrl('https://www.gamerpower.com/giveaway/foo'), false);
+  });
+
+  it('rejeita host não listado como oficial', () => {
+    assert.equal(getStoreUrlRejectReason('https://www.humblebundle.com/store/foo'), 'unofficial_host');
   });
 });
 

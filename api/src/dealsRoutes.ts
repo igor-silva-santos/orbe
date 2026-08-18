@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import cacheMiddleware from './cacheMiddleware';
 import { logger } from './logger';
+import adminMiddleware from './adminMiddleware';
+import { prisma } from './clients';
 import {
   DEALS_SOFT_TTL_SECONDS,
   getDealsOverview,
@@ -167,6 +169,45 @@ router.get('/deals/gamerpower', cacheMiddleware(DEALS_HTTP_CACHE_SECONDS), async
   } catch (error) {
     logger.error(`Erro ao buscar giveaways GamerPower: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar giveaways do GamerPower.' });
+  }
+});
+
+/** Histórico persistido de refresh de promoções (filtro de URLs). */
+router.get('/deals/log-runs', adminMiddleware, async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '30'), 10) || 30, 1), 100);
+    const runs = await prisma.dealsLogRun.findMany({
+      orderBy: { startedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        startedAt: true,
+        finishedAt: true,
+        status: true,
+        trigger: true,
+        fingerprint: true,
+        summary: true,
+      },
+    });
+    res.json({ runs });
+  } catch (error) {
+    logger.error(`Erro ao listar DealsLogRun: ${error}`);
+    res.status(500).json({ error: 'Erro ao listar histórico de promoções.' });
+  }
+});
+
+router.get('/deals/log-runs/:id', adminMiddleware, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) return res.status(400).json({ error: 'id inválido.' });
+
+    const run = await prisma.dealsLogRun.findUnique({ where: { id } });
+    if (!run) return res.status(404).json({ error: 'Registro não encontrado.' });
+
+    res.json(run);
+  } catch (error) {
+    logger.error(`Erro ao buscar DealsLogRun ${req.params.id}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar histórico de promoções.' });
   }
 });
 

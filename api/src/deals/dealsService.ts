@@ -8,7 +8,14 @@ import { fetchSteamDeals } from './steamDealsClient';
 import { fetchCatalogSteamPromotions, enrichDealsWithOrbeLinks } from './catalogDealsClient';
 import { fetchItchFreeGames, fetchItchOnSaleGames } from './itchClient';
 import { fetchItadShopSales, isItadConfigured } from './itadClient';
-import { filterDealsWithOfficialStoreUrls } from './dealStoreUrl';
+import { filterDealsWithUrlReport } from './dealStoreUrl';
+import {
+  mergeRejectedSamples,
+  recordDealsRefreshRun,
+  type DealsFilterSummary,
+  type DealsRejectedSample,
+  type DealsUrlRejectReason,
+} from './dealsLogger';
 import { splitFreeDeals } from './freeTier';
 import { dedupeDeals } from './dedupeDeals';
 import { normalizeDealsList } from './normalizeDeals';
@@ -63,8 +70,29 @@ async function safeFetch<T>(fn: () => Promise<T[]>): Promise<{ items: T[]; error
   }
 }
 
+function aggregateRejected(rejected: DealsRejectedSample[]) {
+  const byReason: Record<DealsUrlRejectReason, number> = {
+    empty: 0,
+    invalid_url: 0,
+    blocked_aggregator: 0,
+    unofficial_host: 0,
+  };
+  const bySource: Record<string, number> = {};
+  for (const sample of rejected) {
+    byReason[sample.reason]++;
+    bySource[sample.source] = (bySource[sample.source] ?? 0) + 1;
+  }
+  return {
+    total: rejected.length,
+    byReason,
+    bySource,
+    samples: rejected.slice(0, 80),
+  };
+}
+
 /** Busca sempre nas APIs externas — uso interno do serviço de cache. */
-export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
+export async function fetchDealsOverviewFresh(options?: { trigger?: string }): Promise<DealsOverview> {
+  const trigger = options?.trigger ?? 'manual';
   const { rate: usdBrlRate, fetchedAt: usdBrlRateFetchedAt } = await resolveUsdBrlRate({
     forceRefresh: true,
   });
@@ -91,21 +119,39 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const itadTemporaryFree = itadDeals.items.filter((deal) => deal.kind === 'free');
   const itadSales = itadDeals.items.filter((deal) => deal.kind === 'sale');
 
-  const gratisAll = normalizeDealsList(
-    filterDealsWithOfficialStoreUrls(
-      await enrichDealsWithOrbeLinks(
-        dedupeDeals([
-          ...epicFree.items,
-          ...gamerpower.items,
-          ...steamFree,
-          ...itchFree.items,
-          ...itchTemporaryFree,
-          ...itadTemporaryFree,
-        ]),
-      ),
-    ),
-    usdBrlRate,
+  const rawBySource: Record<string, number> = {
+    epic: epicFree.items.length + epicSales.items.length,
+    gamerpower: gamerpower.items.length,
+    steam: steam.items.length,
+    itch: itchFree.items.length + itchOnSale.items.length,
+    itad: itadDeals.items.length,
+  };
+
+  const gratisDeduped = await enrichDealsWithOrbeLinks(
+    dedupeDeals([
+      ...epicFree.items,
+      ...gamerpower.items,
+      ...steamFree,
+      ...itchFree.items,
+      ...itchTemporaryFree,
+      ...itadTemporaryFree,
+    ]),
   );
+  const gratisFiltered = filterDealsWithUrlReport(gratisDeduped, 'gratis');
+
+  const promocoesDeduped = await enrichDealsWithOrbeLinks(
+    dedupeDeals([
+      ...epicSales.items,
+      ...itadSales,
+      ...steamSales,
+      ...itchSales,
+    ]),
+  );
+  const promocoesFiltered = filterDealsWithUrlReport(promocoesDeduped, 'promocoes');
+
+  const allRejected = mergeRejectedSamples(gratisFiltered.rejected, promocoesFiltered.rejected);
+
+  const gratisAll = normalizeDealsList(gratisFiltered.accepted, usdBrlRate);
 
   const { temporarios: gratisTemporariosRaw, permanentes: gratisPermanentesRaw } =
     splitFreeDeals(gratisAll);
@@ -116,24 +162,12 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
   const catalogoSteam = normalizeDealsList(catalogoSteamRaw.items, usdBrlRate);
 
   const promocoes = sortSales(
-    normalizeDealsList(
-      filterDealsWithOfficialStoreUrls(
-        await enrichDealsWithOrbeLinks(
-          dedupeDeals([
-            ...epicSales.items,
-            ...itadSales,
-            ...steamSales,
-            ...itchSales,
-          ]),
-        ),
-      ),
-      usdBrlRate,
-    ),
+    normalizeDealsList(promocoesFiltered.accepted, usdBrlRate),
   );
 
   const epicCount = epicFree.items.length + epicSales.items.length;
 
-  return {
+  const overview: DealsOverview = {
     fetchedAt: new Date().toISOString(),
     usdBrlRate,
     usdBrlRateFetchedAt,
@@ -167,6 +201,37 @@ export async function fetchDealsOverviewFresh(): Promise<DealsOverview> {
       },
     },
   };
+
+  const filterSummary: DealsFilterSummary = {
+    rawBySource,
+    afterDedupe: {
+      gratis: gratisDeduped.length,
+      promocoes: promocoesDeduped.length,
+    },
+    accepted: {
+      gratis: gratisFiltered.accepted.length,
+      promocoes: promocoesFiltered.accepted.length,
+    },
+    rejected: aggregateRejected(allRejected),
+    finalCounts: {
+      gratis: overview.gratis.length,
+      gratisTemporarios: overview.gratisTemporarios.length,
+      gratisPermanentes: overview.gratisPermanentes.length,
+      promocoes: overview.promocoes.length,
+      catalogoSteam: overview.catalogoSteam.length,
+    },
+    usdBrlRate,
+  };
+
+  const fingerprint = fingerprintDealsOverview(overview);
+  await recordDealsRefreshRun({
+    trigger,
+    status: 'completed',
+    fingerprint,
+    summary: filterSummary,
+  });
+
+  return overview;
 }
 
 /** Fingerprint estável do conteúdo — detecta mudança real sem comparar JSON inteiro. */
@@ -308,7 +373,7 @@ export async function refreshDealsCache(options?: {
       }
     }
 
-    const fresh = await fetchDealsOverviewFresh();
+    const fresh = await fetchDealsOverviewFresh({ trigger: options?.reason ?? 'refresh' });
     const fingerprint = fingerprintDealsOverview(fresh);
 
     if (previous && previous.fingerprint === fingerprint) {
@@ -444,7 +509,7 @@ export async function getDealsOverview(): Promise<DealsOverview & { _meta?: Deal
     };
   }
 
-  const fresh = await fetchDealsOverviewFresh();
+  const fresh = await fetchDealsOverviewFresh({ trigger: 'cold-start' });
   return { ...fresh, _meta: { cacheAgeSeconds: 0, fromCache: false, stale: false } };
 }
 

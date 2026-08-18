@@ -964,3 +964,20 @@ model SyncLogEvent {
   @@index([runId, phase, year, month])
   @@index([runId, level])
 }
+
+// =================================================================================
+// LOG DE REFRESH DE PROMOÇÕES (filtro de URLs oficiais)
+// =================================================================================
+
+model DealsLogRun {
+  id          Int       @id @default(autoincrement())
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  status      String    @default("completed") // completed | failed
+  trigger     String? // cron | soft-ttl | hard-ttl | cold-start | background:...
+  fingerprint String?
+  summary     Json? // contagens por fonte, rejeições por motivo + amostras
+  createdAt   DateTime  @default(now())
+
+  @@index([startedAt])
+}

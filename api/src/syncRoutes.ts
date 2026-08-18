@@ -26,7 +26,7 @@ import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { syncRateLimiter } from './securityMiddleware';
 import { broadcast } from './websocket';
 import adminMiddleware from './adminMiddleware';
-import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer, getDetetiveLogBuffer } from './logger';
+import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer, getDetetiveLogBuffer, getDealsLogBuffer } from './logger';
 
 const router = Router();
 
@@ -116,7 +116,9 @@ router.get(
         ? getLogBuffer()
         : filter === 'detetive'
           ? getDetetiveLogBuffer()
-          : getSyncLogBuffer();
+          : filter === 'deals'
+            ? getDealsLogBuffer()
+            : getSyncLogBuffer();
     const meta = getLogBufferMeta();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `orbe-${filter === 'all' ? 'app' : filter}-${stamp}.log`;
@@ -130,7 +132,9 @@ router.get(
           ? meta.totalLines
           : filter === 'detetive'
             ? meta.detetiveLines
-            : meta.syncLines,
+            : filter === 'deals'
+              ? meta.dealsLines
+              : meta.syncLines,
       ),
     );
 
@@ -138,7 +142,9 @@ router.get(
       const hint =
         filter === 'detetive'
           ? '(nenhum log do Detetive em memória — dispare POST /api/run-detetive e tente novamente)\n'
-          : '(nenhum log de sync em memória ainda — inicie uma sincronização e tente novamente)\n';
+          : filter === 'deals'
+            ? '(nenhum log de promoções em memória — aguarde o cron de deals ou force refresh)\n'
+            : '(nenhum log de sync em memória ainda — inicie uma sincronização e tente novamente)\n';
       return res.send(hint);
     }
 
