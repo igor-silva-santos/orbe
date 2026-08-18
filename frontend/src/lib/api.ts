@@ -301,6 +301,25 @@ export const orbeNerdApi = {
     return apiClient.post('/me/interactions', data);
   },
 
+  getDealPreferences: async () => {
+    return apiClient.get('/me/deal-preferences');
+  },
+
+  upsertDealPreference: async (data: {
+    deal_id: string;
+    status: string;
+    steam_app_id?: number;
+    platform?: string;
+    title?: string;
+    orbe_game_id?: number;
+  }) => {
+    return apiClient.post('/me/deal-preferences', data);
+  },
+
+  deleteDealPreference: async (dealId: string) => {
+    return apiClient.delete(`/me/deal-preferences/${encodeURIComponent(dealId)}`);
+  },
+
   // Notificações
   getNotifications: async () => {
     return apiClient.get('/notifications');

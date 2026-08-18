@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { getPlatformLabel } from '@/lib/dealFilters';
+import { DEAL_PREFERENCE_LABELS } from '@/lib/dealPreferences';
+import { useDealPreference } from '@/lib/hooks/useDealPreference';
 import { DealPriceBadge } from '@/components/deals/DealPriceBadge';
 import type { UnifiedDeal } from '@/types/deals';
 
@@ -41,6 +43,8 @@ interface DealCardProps {
 
 export default function DealCard({ deal, priority = false }: DealCardProps) {
   const openDealModal = useAppStore((s) => s.openDealModal);
+  const { getPreference } = useDealPreference();
+  const preference = getPreference(deal.id);
   const platformLabel = getPlatformLabel(deal.platform) || deal.platforms[0] || 'Loja';
   const sourceLabel = SOURCE_LABELS[deal.source] ?? deal.source;
   const endsLabel = formatEndsAt(deal.endsAt);
@@ -74,7 +78,11 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
 
   return (
     <article
-      className="group flex flex-col bg-card rounded-[20px] border border-border overflow-hidden hover:border-primary/50 transition-colors w-full max-w-[210px]"
+      className={`group flex flex-col bg-card rounded-[20px] border overflow-hidden transition-colors w-full max-w-[210px] ${
+        preference?.status === 'sem_interesse'
+          ? 'border-border/60 opacity-75'
+          : 'border-border hover:border-primary/50'
+      }`}
     >
       <div className="relative aspect-[206/290] w-full bg-muted overflow-hidden">
         <button
@@ -136,6 +144,12 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
         className="p-3 flex flex-col gap-2 flex-1 text-left w-full hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-b-[20px]"
       >
         <h3 className="font-semibold text-sm orbe-text-primary line-clamp-2 leading-snug">{deal.title}</h3>
+
+        {preference && (
+          <span className="text-[10px] font-medium text-primary">
+            {DEAL_PREFERENCE_LABELS[preference.status]}
+          </span>
+        )}
 
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {isFree ? (

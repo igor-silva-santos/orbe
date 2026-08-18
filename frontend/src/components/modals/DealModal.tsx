@@ -12,6 +12,7 @@ import { getPlatformLabel } from '@/lib/dealFilters';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { DealPriceBadge } from '@/components/deals/DealPriceBadge';
+import DealPreferenceActions from '@/components/deals/DealPreferenceActions';
 import type { Jogo } from '@/types';
 import type { UnifiedDeal } from '@/types/deals';
 
@@ -214,6 +215,8 @@ export default function DealModal() {
                 Abra a loja oficial para ver descrição, requisitos e avaliações antes de resgatar.
               </p>
             )}
+
+            <DealPreferenceActions deal={deal} />
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border">
               <a

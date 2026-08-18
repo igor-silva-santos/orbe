@@ -68,6 +68,19 @@ export type DealsOverview = {
   sourcesHealth?: 'ok' | 'degraded' | 'critical';
 };
 
+export type DealPreferenceStatus = 'ja_tenho' | 'sem_interesse' | 'quero';
+
+export type DealPreference = {
+  id: number;
+  usuario_id: number;
+  deal_id: string;
+  steam_app_id?: number | null;
+  platform?: string | null;
+  title?: string | null;
+  status: DealPreferenceStatus;
+  data_interacao: string;
+};
+
 export type DealsGratisResponse = {
   fetchedAt: string;
   usdBrlRate?: number | null;

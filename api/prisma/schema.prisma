@@ -829,6 +829,7 @@ model User {
 
   // Relacionamento com as preferências do usuário
   interacoes      preferencias_usuario_midia[]
+  preferenciasOferta preferencias_usuario_oferta[]
   notifications   Notification[]
   watchlistItems  WatchlistItem[]
   calendarEvents  UserCalendarEvent[]
@@ -907,6 +908,23 @@ model preferencias_usuario_midia {
   usuario        User     @relation(fields: [usuario_id], references: [id])
 
   @@unique([usuario_id, midia_id, tipo_midia], name: "usuario_midia_unique")
+}
+
+/** Preferências em ofertas (promoções / jogos grátis) — base para alertas futuros. */
+model preferencias_usuario_oferta {
+  id             Int      @id @default(autoincrement())
+  usuario_id     Int
+  deal_id        String   // id estável UnifiedDeal (ex.: steam:570, epic:...)
+  steam_app_id   Int?
+  platform       String?
+  title          String?
+  status         String   // ja_tenho | sem_interesse | quero (alertas futuros)
+  data_interacao DateTime @default(now())
+
+  usuario        User     @relation(fields: [usuario_id], references: [id])
+
+  @@unique([usuario_id, deal_id], name: "usuario_oferta_unique")
+  @@index([usuario_id, steam_app_id])
 }
 
 // Estado persistente da aplicação (ex.: sync em andamento)

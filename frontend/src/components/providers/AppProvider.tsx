@@ -16,6 +16,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setNotifications,
     setUser,
     setInteractions,
+    setDealPreferences,
   } = useAppStore();
   
   const { isDark } = useTheme();
@@ -46,10 +47,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('Erro ao carregar interações do usuário:', error);
       }
+
+      try {
+        const dealPreferences = await orbeNerdApi.getDealPreferences();
+        setDealPreferences(dealPreferences);
+      } catch (error) {
+        console.error('Erro ao carregar preferências de ofertas:', error);
+      }
     };
 
     initializeApp();
-  }, [setUser, setNotifications, setInteractions]);
+  }, [setUser, setNotifications, setInteractions, setDealPreferences]);
 
   return (
     <>

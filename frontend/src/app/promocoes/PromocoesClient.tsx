@@ -31,6 +31,8 @@ import {
   getPlatformLabel,
   groupByPlatform,
 } from '@/lib/dealFilters';
+import { filterDealsByUserPreference } from '@/lib/dealPreferences';
+import { useAppStore } from '@/stores/appStore';
 import type {
   DealsGratisResponse,
   DealsOverview,
@@ -326,6 +328,21 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
   const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showHiddenOffers, setShowHiddenOffers] = useState(false);
+  const dealPreferences = useAppStore((s) => s.dealPreferences);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+
+  const hiddenOfferCount = useMemo(
+    () =>
+      dealPreferences.filter((p) => p.status === 'ja_tenho' || p.status === 'sem_interesse').length,
+    [dealPreferences],
+  );
+
+  const applyPreferenceFilter = useCallback(
+    (deals: UnifiedDeal[]) =>
+      filterDealsByUserPreference(deals, dealPreferences, showHiddenOffers),
+    [dealPreferences, showHiddenOffers],
+  );
 
   const loadGratis = useCallback(async () => {
     const response = (await realApi.getFreeDeals()) as DealsGratisResponse;
@@ -445,16 +462,18 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
       filterByPlatform(gratisTemporarios, platformFilter),
       searchQuery,
     );
-    return sortDeals(filtered, freeSort);
-  }, [gratisTemporarios, platformFilter, searchQuery, freeSort]);
+    return applyPreferenceFilter(sortDeals(filtered, freeSort));
+  }, [gratisTemporarios, platformFilter, searchQuery, freeSort, applyPreferenceFilter]);
 
   const filteredPermanentes = useMemo(() => {
     const filtered = filterBySearch(
       filterByPlatform(gratisPermanentes, platformFilter),
       searchQuery,
     );
-    return sortDeals(filtered, freeSort === 'ending_soon' ? 'title' : freeSort);
-  }, [gratisPermanentes, platformFilter, searchQuery, freeSort]);
+    return applyPreferenceFilter(
+      sortDeals(filtered, freeSort === 'ending_soon' ? 'title' : freeSort),
+    );
+  }, [gratisPermanentes, platformFilter, searchQuery, freeSort, applyPreferenceFilter]);
 
   const featuredPlatformsWithDeals = useMemo(() => {
     if (!showFeaturedSections) return [];
@@ -492,15 +511,20 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
 
   const filteredPromocoes = useMemo(() => {
     const filtered = filterBySearch(filterByPlatform(salePool, platformFilter), searchQuery);
-    return sortDeals(filtered, saleSort);
-  }, [salePool, platformFilter, searchQuery, saleSort]);
+    return applyPreferenceFilter(sortDeals(filtered, saleSort));
+  }, [salePool, platformFilter, searchQuery, saleSort, applyPreferenceFilter]);
 
   const filteredCatalogo = useMemo(() => {
     const filtered = filterBySearch(filterByPlatform(catalogoSteam, platformFilter), searchQuery);
-    return sortDeals(filtered, saleSort);
-  }, [catalogoSteam, platformFilter, searchQuery, saleSort]);
+    return applyPreferenceFilter(sortDeals(filtered, saleSort));
+  }, [catalogoSteam, platformFilter, searchQuery, saleSort, applyPreferenceFilter]);
 
   const permanentSectionDefaultOpen = mainTemporarios.length === 0 && mainPermanentes.length > 0;
+
+  const gratisTabCount = useMemo(() => {
+    const pool = filterBySearch(filterByPlatform(allFreeDeals, platformFilter), searchQuery);
+    return applyPreferenceFilter(pool).length;
+  }, [allFreeDeals, platformFilter, searchQuery, applyPreferenceFilter]);
 
   const footerData = sources ? { sources, usdBrlRate, usdBrlRateFetchedAt } : null;
 
@@ -580,7 +604,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 <Gift className="h-4 w-4" />
                 Jogos de Graça
                 <span className="text-xs opacity-70">
-                  ({filterBySearch(filterByPlatform(allFreeDeals, platformFilter), searchQuery).length})
+                  ({gratisTabCount})
                 </span>
               </TabsTrigger>
               <TabsTrigger value="promocoes" className="gap-2 px-4 py-2">
@@ -613,6 +637,18 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 platformFilter={platformFilter}
                 onChange={setPlatformFilter}
               />
+
+              {isAuthenticated && hiddenOfferCount > 0 && (
+                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showHiddenOffers}
+                    onChange={(e) => setShowHiddenOffers(e.target.checked)}
+                    className="rounded border-border"
+                  />
+                  Mostrar jogos que já tenho ou sem interesse ({hiddenOfferCount})
+                </label>
+              )}
 
               <section className="space-y-4">
                 <div>
@@ -696,6 +732,18 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 platformFilter={platformFilter}
                 onChange={setPlatformFilter}
               />
+
+              {isAuthenticated && hiddenOfferCount > 0 && (
+                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showHiddenOffers}
+                    onChange={(e) => setShowHiddenOffers(e.target.checked)}
+                    className="rounded border-border"
+                  />
+                  Mostrar ofertas ocultas ({hiddenOfferCount})
+                </label>
+              )}
 
               {filteredCatalogo.length > 0 && (
                 <section className="space-y-4">

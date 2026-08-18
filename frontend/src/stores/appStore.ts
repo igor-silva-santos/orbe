@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Notification, Theme, Filme, Serie, Anime, Jogo, UserInteraction } from '@/types';
-import type { UnifiedDeal } from '@/types/deals';
+import type { DealPreference, UnifiedDeal } from '@/types/deals';
 import orbeNerdApi from '@/lib/api';
 
 interface AppState {
@@ -9,6 +9,7 @@ interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   userInteractions: UserInteraction[];
+  dealPreferences: DealPreference[];
   
   // Estado do tema
   theme: Theme;
@@ -57,6 +58,9 @@ interface AppState {
   logout: () => void;
   setInteractions: (interactions: UserInteraction[]) => void;
   upsertInteraction: (interaction: UserInteraction) => void;
+  setDealPreferences: (preferences: DealPreference[]) => void;
+  upsertDealPreference: (preference: DealPreference) => void;
+  removeDealPreference: (dealId: string) => void;
   
   // Ações do tema
   setTheme: (theme: Theme) => void;
@@ -95,6 +99,7 @@ export const useAppStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       userInteractions: [],
+      dealPreferences: [],
       theme: 'system',
       notifications: [],
       unreadCount: 0,
@@ -140,9 +145,25 @@ export const useAppStore = create<AppState>()(
         notifications: [],
         unreadCount: 0,
         userInteractions: [],
+        dealPreferences: [],
       }),
 
       setInteractions: (interactions) => set({ userInteractions: interactions }),
+
+      setDealPreferences: (preferences) => set({ dealPreferences: preferences }),
+
+      upsertDealPreference: (preference) => {
+        const { dealPreferences } = get();
+        const index = dealPreferences.findIndex((p) => p.deal_id === preference.deal_id);
+        const next = [...dealPreferences];
+        if (index > -1) next[index] = preference;
+        else next.push(preference);
+        set({ dealPreferences: next });
+      },
+
+      removeDealPreference: (dealId) => {
+        set({ dealPreferences: get().dealPreferences.filter((p) => p.deal_id !== dealId) });
+      },
 
       upsertInteraction: (interaction) => {
         const { userInteractions } = get();
