@@ -1,4 +1,5 @@
 import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
+import type { PreferenciasOrbe } from '@/types/perfil';
 import type { DealsOverview, DealsGratisResponse, DealsPromocoesResponse } from '@/types/deals';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
@@ -288,7 +289,13 @@ export const orbeNerdApi = {
     return apiClient.get('/users/me');
   },
 
-  updateUserProfile: async (data: { nome?: string; bio?: string; avatar?: string; preferencias?: any; perfil_publico?: boolean }) => {
+  updateUserProfile: async (data: {
+    nome?: string;
+    bio?: string;
+    avatar?: string;
+    preferencias?: Partial<PreferenciasOrbe> & Record<string, unknown>;
+    perfil_publico?: boolean;
+  }) => {
     return apiClient.patch('/users/me', data);
   },
 

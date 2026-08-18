@@ -211,19 +211,33 @@ export interface Preferencias {
   idioma: string;
 }
 
+export type {
+  PreferenciasOrbe,
+  TasteProfile,
+  OrbeCarouselConfig,
+  TipoMidiaPerfil,
+  CarouselId,
+  TituloReferencia,
+  PopupPersonalizacaoConfig,
+} from './perfil';
+
+export { getDefaultPreferenciasOrbe, getDefaultTasteProfile } from './perfil';
+
 // Tipos de mídia
 export type TipoMidia = 'filme' | 'serie' | 'anime' | 'jogo';
 
 // Interface para usuário
 export interface User {
   id: number;
-  nome: string;
+  nome: string | null;
   email: string;
+  bio?: string | null;
   avatar: string | null;
   role: 'user' | 'admin';
   quer_avaliar: boolean;
+  perfil_publico?: boolean;
   data_criacao: string;
-  preferencias?: Preferencias;
+  preferencias?: import('./perfil').PreferenciasOrbe & Record<string, unknown>;
 }
 
 // Interface para interações do usuário

@@ -4,6 +4,13 @@
 **Última atualização:** agosto de 2026  
 **Fonte da verdade:** decisões das conversas de planejamento (agosto/2026). A spec técnica v1.0 (PDF) é referência histórica apenas.
 
+### Processo de entrega (produção)
+
+- **Uma sprint por vez** — sem MVPs nem demos parciais.
+- Cada sprint: implementar → testes (BE + FE + build) → PR → validar em produção → próxima sprint.
+- Branch: `cursor/sprint-N-<nome>-07a0`
+- Critérios de aceite da sprint devem passar antes do merge.
+
 ---
 
 ## 1. Visão e princípios
@@ -171,26 +178,26 @@ model MatchSession {
 
 #### Entregáveis
 
-- [ ] Este documento versionado em `docs/PLANO_PERFIL.md`
-- [ ] Tipos TypeScript `PreferenciasOrbe`, `TasteProfile`, `CarouselConfig` em `frontend/src/types/`
-- [ ] Tipos espelhados no backend (`api/src/types/preferencias.ts`)
-- [ ] Defaults de `carrosseis` e `tasteProfile` vazios para usuários existentes
-- [ ] Atualizar `orbe-1/ESTADO_DO_PROJETO.md` com link para este plano
+- [x] Este documento versionado em `docs/PLANO_PERFIL.md`
+- [x] Tipos TypeScript `PreferenciasOrbe`, `TasteProfile`, `CarouselConfig` em `frontend/src/types/`
+- [x] Tipos espelhados no backend (`api/src/preferenciasOrbe.ts`)
+- [x] Defaults de `carrosseis` e `tasteProfile` vazios para usuários existentes
+- [x] Atualizar `orbe-1/ESTADO_DO_PROJETO.md` com link para este plano
 
 #### Tarefas
 
 | # | Tarefa | Arquivo(s) |
 |---|--------|------------|
 | 0.1 | Criar interfaces TS compartilhadas | `frontend/src/types/perfil.ts` |
-| 0.2 | Criar tipos no backend | `api/src/types/preferencias.ts` |
+| 0.2 | Criar tipos no backend | `api/src/preferenciasOrbe.ts` |
 | 0.3 | Função `getDefaultPreferenciasOrbe()` | ambos |
 | 0.4 | Migration opcional: garantir `preferencias` não null com defaults | `prisma/migrations/` |
 
 #### Critérios de aceite
 
-- Tipos compilam sem erro em FE e BE
-- `GET /api/users/me` retorna `preferencias` com shape documentado (mesmo que vazio)
-- Nenhuma regressão em login/perfil existente
+- [x] Tipos compilam sem erro em FE e BE
+- [x] `GET /api/users/me` retorna `preferencias` com shape documentado (mesmo que vazio)
+- [x] Nenhuma regressão em login/perfil existente
 
 #### Notas de contexto
 
@@ -735,6 +742,19 @@ Sprint 0  →  1  →  2  →  3
 **MVP mínimo para demo:** Sprints 0 + 1 + 4 + 5 + 6 (perfil + wizard + home filtrada básica).
 
 **MVP Match:** adicionar Sprints 7 + 8.
+
+---
+
+## 8.1 Entregas por sprint (produção)
+
+Cada sprint é entregue completa e validada em produção antes da próxima:
+
+| Sprint | Entrega em produção |
+|--------|---------------------|
+| 0 | ✅ Tipos + merge de preferências no GET/PATCH perfil |
+| 1 | Biblioteca + Desejos + Acompanhando (UI) |
+| 2 | Oculto filtra carrosséis |
+| … | (ver seções acima) |
 
 ---
 
