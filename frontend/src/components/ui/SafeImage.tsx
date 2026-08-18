@@ -73,6 +73,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
       ref={imageRef}
       src={resolvedSrc}
       alt={alt}
+      draggable={false}
       className={className}
       loading={loading}
       decoding={decoding}

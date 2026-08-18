@@ -4,6 +4,7 @@ import { Calendar, ExternalLink, Gamepad2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MidiaCard from '@/components/media/MidiaCard';
+import HorizontalScrollRow from '@/components/ui/HorizontalScrollRow';
 import type { Evento, UserAction, UserInteraction, Filme, Serie, Anime, Jogo, TipoMidia } from '@/types';
 
 const formatEventDate = (start?: string | null, end?: string | null) => {
@@ -58,13 +59,13 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ evento, userIntera
     </div>
 
     {evento.jogos.length > 0 && (
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      <HorizontalScrollRow scrollbar="hide">
         {evento.jogos.map((jogo) => (
           <div key={jogo.id} className="flex-shrink-0 w-[170px] sm:w-[190px]">
             <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={onInteraction} />
           </div>
         ))}
-      </div>
+      </HorizontalScrollRow>
     )}
   </section>
 );

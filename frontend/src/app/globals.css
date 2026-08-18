@@ -352,6 +352,29 @@ body {
   pointer-events: none;
 }
 
+/* Fileiras horizontais secundárias — evita arrastar/selecionar pôsteres ao rolar */
+.carousel-horizontal-row {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.carousel-horizontal-row img,
+.carousel-horizontal-row picture,
+.carousel-horizontal-row [data-nimg] {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Carrossel Embla em modais (elenco, screenshots) */
+[aria-roledescription='carousel'] img,
+[aria-roledescription='carousel'] picture,
+[aria-roledescription='carousel'] [data-nimg] {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .card-hover {
   transition: transform 0.2s ease-in-out;
 }

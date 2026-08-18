@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect, forwardRef, useCallback } from "react";
+import React, { forwardRef, useCallback, useRef } from "react";
 import MidiaCard from "./MidiaCard";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 
 import { Filme, Serie, Anime, Jogo, TipoMidia, UserAction, UserInteraction } from "@/types";
 
@@ -16,8 +17,6 @@ interface CarouselProps {
   onInteraction?: (action: UserAction, midia: Filme | Serie | Anime | Jogo) => void;
 }
 
-const DRAG_SENSITIVITY = 2.6;
-
 const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({ 
   items,
   className = "",
@@ -30,139 +29,24 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
   onInteraction,
 }, ref) => {
 
-  const localRef = useRef<HTMLDivElement | null>(null);
-  const isDownRef = useRef(false);
-  const startXRef = useRef(0);
-  const startYRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const hasDraggedRef = useRef(false); // Added hasDraggedRef
-  const [dragging, setDragging] = useState(false);
+  const { scrollRef: attachScrollRef, dragging, handlers } = useHorizontalDragScroll();
+  const localNodeRef = useRef<HTMLDivElement | null>(null);
 
-  const setRefs = useCallback((node: HTMLDivElement) => {
-    localRef.current = node;
+  const setRefs = useCallback((node: HTMLDivElement | null) => {
+    localNodeRef.current = node;
+    attachScrollRef(node);
     if (typeof ref === 'function') {
       ref(node);
     } else if (ref) {
       (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
     }
-  }, [ref]);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    const el = localRef.current;
-    if (!el) return;
-
-    isDownRef.current = true;
-    setDragging(true);
-    hasDraggedRef.current = false; // Reset hasDragged on pointer down
-    const rect = el.getBoundingClientRect();
-    startXRef.current = e.clientX - rect.left;
-    startYRef.current = e.clientY - rect.top;
-    scrollLeftRef.current = el.scrollLeft;
-
-    try {
-      el.setPointerCapture(e.pointerId);
-    } catch {}
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDownRef.current) return;
-    const el = localRef.current;
-    if (!el) return;
-
-    const currentX = e.clientX - el.getBoundingClientRect().left;
-    const currentY = e.clientY - el.getBoundingClientRect().top;
-    const deltaX = currentX - startXRef.current;
-    const deltaY = currentY - startYRef.current;
-
-    // Scroll vertical da página: não capturar o gesto no carrossel
-    if (!hasDraggedRef.current && Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 12) {
-      isDownRef.current = false;
-      setDragging(false);
-      try {
-        el.releasePointerCapture(e.pointerId);
-      } catch {}
-      return;
-    }
-
-    const distance = Math.abs(deltaX);
-
-    if (distance > 20) {
-      hasDraggedRef.current = true;
-    }
-
-    if (hasDraggedRef.current) {
-      e.preventDefault();
-      const walk = deltaX * DRAG_SENSITIVITY;
-      el.scrollLeft = scrollLeftRef.current - walk;
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    const wasDragged = hasDraggedRef.current; // Capture drag status before resetting
-
-    isDownRef.current = false;
-    setDragging(false);
-    hasDraggedRef.current = false; // Reset hasDragged on pointer up
-    const el = localRef.current;
-    if (!el) return;
-    try {
-      el.releasePointerCapture(e.pointerId);
-    } catch {}
-
-    // If it was not a drag, manually trigger the MidiaCard's click handler
-    if (!wasDragged) {
-      const elementUnderPointer = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement;
-      const clickableCardElement = elementUnderPointer?.closest('[data-clickable-card]') as HTMLElement;
-      if (clickableCardElement) {
-        clickableCardElement.click(); // Trigger the native click event on the clickable div
-      }
-    } else {
-      // If it was a drag, prevent any lingering click events
-      e.preventDefault();
-    }
-  };
-
-  useEffect(() => {
-    const el = localRef.current;
-    if (!el) return;
-    const onCancel = () => {
-      isDownRef.current = false;
-      setDragging(false);
-    };
-    el.addEventListener("pointercancel", onCancel);
-
-    return () => {
-      el.removeEventListener("pointercancel", onCancel);
-    };
-  }, [localRef]);
-
-  useEffect(() => {
-    const el = localRef.current;
-    if (!el) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      const isHorizontalGesture = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-      const shouldScrollHorizontally = e.ctrlKey || e.metaKey || isHorizontalGesture;
-
-      if (shouldScrollHorizontally) {
-        e.preventDefault();
-        el.scrollLeft += e.deltaX + ((e.ctrlKey || e.metaKey) ? e.deltaY : 0);
-      }
-    };
-
-    el.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      el.removeEventListener('wheel', handleWheel);
-    };
-  }, [localRef]);
+  }, [attachScrollRef, ref]);
 
   const handleArrowScroll = (direction: 'left' | 'right') => {
-    if (localRef.current) {
-      const { current } = localRef;
-      const scrollAmount = current.offsetWidth * 0.8;
-      current.scrollBy({
+    const el = localNodeRef.current;
+    if (el) {
+      const scrollAmount = el.offsetWidth * 0.8;
+      el.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
@@ -202,19 +86,16 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
 
       <div
         ref={setRefs}
+        className={`carousel-horizontal-row flex overflow-x-auto overflow-y-hidden scrollbar-hide gap-4 px-4 py-2 select-none ${
+          dragging ? 'carousel-dragging cursor-grabbing' : 'cursor-grab'
+        } ${className}`}
         style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
-        className={`flex overflow-x-auto scrollbar-hide gap-4 px-4 py-2 ${className} ${
-          dragging ? "cursor-grabbing select-none" : "cursor-grab"
-        }`}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        
+        {...handlers}
       >
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex-shrink-0 snap-center flex justify-center items-center" // Added flex centering
+            className="flex-shrink-0 snap-center flex justify-center items-center"
             style={{ willChange: "transform", minWidth: 200 }}
           >
             <MidiaCard midia={item} type={type} userInteractions={userInteractions} onInteraction={onInteraction} />
