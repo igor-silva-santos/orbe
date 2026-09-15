@@ -14,6 +14,9 @@ import urllib.request
 API_URL = os.environ.get("ORBE_API_URL", "https://orbe-7bu0.onrender.com").rstrip("/")
 ACTION = os.environ.get("ORBE_OPS_ACTION", "status").strip().lower()
 TIMEOUT_SECONDS = 150
+# GitLab.com free mata o job em ~60 min. O watch externo (Cloudflare) cobre o resto.
+WATCH_INTERVAL_SECONDS = int(os.environ.get("ORBE_WATCH_INTERVAL_SECONDS", "240"))
+WATCH_MAX_MINUTES = int(os.environ.get("ORBE_WATCH_MAX_MINUTES", "50"))
 
 
 def request_json(path: str, *, method: str = "GET", secret: str | None = None) -> dict:
@@ -54,9 +57,58 @@ def public_status() -> dict:
     return status
 
 
+def watch_until_idle(initial: dict) -> int:
+    deadline = time.monotonic() + WATCH_MAX_MINUTES * 60
+    status = initial
+    rounds = 0
+    while time.monotonic() < deadline:
+        if status.get("syncActive") is not True:
+            print("Sync inativo — ping encerrado.")
+            return 0
+        remaining = int(deadline - time.monotonic())
+        print(f"Watch #{rounds + 1}: ativo phase={status.get('phase')} pct={status.get('progressPercent')} restante={remaining}s")
+        time.sleep(WATCH_INTERVAL_SECONDS)
+        request_json("/api/health")
+        status = public_status()
+        rounds += 1
+    print(
+        f"Limite de {WATCH_MAX_MINUTES} min atingido com sync ainda ativo. "
+        "O Cloudflare Worker deve continuar o ping.",
+        file=sys.stderr,
+    )
+    return 0
+
+
+def maybe_resume() -> dict:
+    status = public_status()
+    if status.get("syncActive") is True:
+        print("Sync já está ativo; nenhuma chamada mutativa foi feita.")
+        return status
+
+    if not (status.get("resumeAvailable") is True or status.get("interrupted") is True):
+        print("Não há checkpoint interrompido retomável; nenhuma chamada mutativa foi feita.")
+        return status
+
+    secret = os.environ.get("SYNC_SECRET")
+    if not secret:
+        print("Variável protegida SYNC_SECRET não configurada.", file=sys.stderr)
+        raise RuntimeError("SYNC_SECRET ausente")
+
+    request_json("/api/run-sync-resume", method="POST", secret=secret)
+    print("Uma única retomada autorizada foi solicitada.")
+    for _ in range(4):
+        time.sleep(15)
+        status = public_status()
+        if status.get("syncActive") is True:
+            print("Retomada confirmada: sync ativo.")
+            return status
+    print("A API aceitou a retomada, mas syncActive não ficou true em 60 segundos.", file=sys.stderr)
+    raise RuntimeError("resume sem syncActive")
+
+
 def main() -> int:
-    if ACTION not in {"health", "status", "resume"}:
-        print("ORBE_OPS_ACTION deve ser health, status ou resume.", file=sys.stderr)
+    if ACTION not in {"health", "status", "resume", "watch"}:
+        print("ORBE_OPS_ACTION deve ser health, status, resume ou watch.", file=sys.stderr)
         return 2
 
     print(f"Ação operacional: {ACTION}")
@@ -66,36 +118,21 @@ def main() -> int:
     if ACTION == "health":
         return 0
 
-    status = public_status()
     if ACTION == "status":
+        public_status()
         return 0
 
-    if status.get("syncActive") is True:
-        print("Sync já está ativo; nenhuma chamada mutativa foi feita.")
+    try:
+        status = maybe_resume()
+    except RuntimeError as error:
+        if str(error) == "SYNC_SECRET ausente":
+            return 2
+        return 1
+
+    if ACTION == "resume":
         return 0
 
-    if not (status.get("resumeAvailable") is True and status.get("interrupted") is True):
-        print("Não há checkpoint interrompido retomável; nenhuma chamada mutativa foi feita.")
-        return 0
-
-    secret = os.environ.get("SYNC_SECRET")
-    if not secret:
-        print("Variável protegida SYNC_SECRET não configurada.", file=sys.stderr)
-        return 2
-
-    request_json("/api/run-sync-resume", method="POST", secret=secret)
-    print("Uma única retomada autorizada foi solicitada.")
-
-    # Confirma apenas a aceitação/início. O keepalive é responsabilidade separada.
-    for _ in range(4):
-        time.sleep(15)
-        status = public_status()
-        if status.get("syncActive") is True:
-            print("Retomada confirmada: sync ativo.")
-            return 0
-
-    print("A API aceitou a retomada, mas syncActive não ficou true em 60 segundos.", file=sys.stderr)
-    return 1
+    return watch_until_idle(status)
 
 
 if __name__ == "__main__":

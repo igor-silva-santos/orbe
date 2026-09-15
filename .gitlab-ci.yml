@@ -1,12 +1,12 @@
 # Pipeline exclusivamente operacional: não compila nem implanta o clone antigo.
 #
-# Schedule recomendado para retomada:
-#   cron: 0 */2 * * *
-#   variável: ORBE_OPS_ACTION=resume
+# Ping controlado (sem o PC): Cloudflare Worker ops/render_sync_watch_worker.js
+#   POST /start → resume + watching=1
+#   cron */5 → pinga /api/health só enquanto syncActive
+#   sync acaba → watching=0, Render pode hibernar
 #
-# O keepalive deve ser um monitor HTTP gratuito separado apontando somente para
-# GET https://orbe-7bu0.onrender.com/api/health a cada 5–10 minutos. Não coloque
-# SYNC_SECRET no monitor externo nem na URL.
+# GitLab (job curto): ORBE_OPS_ACTION=watch retoma e pinga até 50 min
+# (limite do runner free). O Worker cobre o resto da carga.
 
 workflow:
   rules:
@@ -20,7 +20,7 @@ stages:
 orbe-sync-guard:
   stage: operations
   image: python:3.12-alpine
-  timeout: 5 minutes
+  timeout: 55 minutes
   variables:
     ORBE_API_URL: "https://orbe-7bu0.onrender.com"
     ORBE_OPS_ACTION: "status"
@@ -30,4 +30,5 @@ orbe-sync-guard:
     - if: '$ORBE_OPS_ACTION == "health"'
     - if: '$ORBE_OPS_ACTION == "status"'
     - if: '$ORBE_OPS_ACTION == "resume"'
+    - if: '$ORBE_OPS_ACTION == "watch"'
     - when: never
