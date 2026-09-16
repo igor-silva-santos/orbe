@@ -85,6 +85,24 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(isCarouselOpenIndexReady(items, 2, today), true);
   });
 
+  it('after prepending the previous month, still opens on the next upcoming', () => {
+    const today = new Date(2026, 8, 16);
+    const september = [
+      mockMidia(10, '2026-09-03'),
+      mockMidia(11, '2026-09-16'),
+      mockMidia(12, '2026-09-17'),
+    ];
+    const august = [
+      mockMidia(1, '2026-08-01'),
+      mockMidia(2, '2026-08-05'),
+      mockMidia(3, '2026-08-20'),
+    ];
+    const merged = mergeMediaByDate(september, august);
+    const open = resolveCarouselOpenIndex(merged, today);
+    assert.equal(merged[open].id, 11);
+    assert.equal(monthKeyFromItem(merged[open]), '2026-09');
+  });
+
   it('does not skip the next upcoming in favor of a past title', () => {
     const items = [
       mockMidia(1, '2026-08-31'),

@@ -25,6 +25,7 @@ import {
   parseMonthKey,
   resolveCarouselOpenMonthKey,
   resolveCarouselOpenIndex,
+  isCarouselOpenIndexReady,
   currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
@@ -81,6 +82,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(seededItems.length > 0);
   const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
+  const [pendingOpenPosition, setPendingOpenPosition] = useState(true);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
@@ -175,10 +177,6 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     displaySlidesRef.current = displaySlides;
   }, [displaySlides]);
 
-  useEffect(() => {
-    mediaItemsRef.current = mediaItems;
-  }, [mediaItems]);
-
   const updateTitleFromIndex = useCallback((index: number, items: Midia[]) => {
     const item = items[index];
     const title = monthTitleFromItem(item);
@@ -199,8 +197,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     lastTitleMonthKey.current = targetMonthKey;
     setCurrentTitle(formatCarouselMonthTitle(new Date(year, month - 1, 1)));
 
-    const index = await resolveOpenPosition();
-    setPendingScrollIndex(index);
+    await resolveOpenPosition();
+    setPendingOpenPosition(true);
   }, [emAltaMode, applyDisplayFilters, resolveOpenPosition]);
 
   const loadEmAlta = useCallback(async () => {
@@ -246,9 +244,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
   useEffect(() => {
     if (!emblaApi || emAltaMode || !hasInitialPositioningRef.current) return;
+    if (filteredItems.length > 0) return;
     emblaApi.reInit();
     emblaApi.scrollTo(SKELETON_CENTER_INDEX, false);
-  }, [emblaApi, emAltaMode, hasInitialPositioning]);
+  }, [emblaApi, emAltaMode, hasInitialPositioning, filteredItems.length]);
 
   /** Bootstrap: mês atual + próximo em paralelo, depois reposiciona */
   useEffect(() => {
@@ -276,32 +275,45 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     setHasInitialPositioning(false);
   }, [hasCompletedInitialLoad, emAltaMode, filteredItems.length]);
 
-  /** Aplica scroll pendente só depois que o React renderizou os novos slides */
+  /** Aplica scroll no próximo lançamento (recalculado na lista atual, não num índice velho) */
   useEffect(() => {
-    if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
-    if (pendingScrollIndex >= filteredItems.length) {
-      setPendingScrollIndex(null);
-      hasInitialPositioningRef.current = false;
-      setHasInitialPositioning(false);
+    if (!emblaApi || emAltaMode) return;
+
+    let target: number | null = null;
+    if (pendingScrollIndex !== null) {
+      if (pendingScrollIndex >= filteredItems.length) return;
+      target = pendingScrollIndex;
+    } else if (pendingOpenPosition) {
+      if (filteredItems.length === 0) return;
+      const openIndex = resolveCarouselOpenIndex(filteredItems);
+      if (!isCarouselOpenIndexReady(filteredItems, openIndex)) return;
+      target = openIndex;
+    } else {
       return;
     }
 
     emblaApi.reInit();
 
+    const scrollTarget = target;
+    let cancelled = false;
     const applyScroll = () => {
-      emblaApi.scrollTo(pendingScrollIndex, false);
-      const displayIndex = pendingScrollIndex;
-      previousSelectedIndex.current = displayIndex;
-      setSelectedSnap(displayIndex);
-      updateTitleFromIndex(pendingScrollIndex, filteredItems);
+      if (cancelled) return;
+      emblaApi.scrollTo(scrollTarget, false);
+      previousSelectedIndex.current = scrollTarget;
+      setSelectedSnap(scrollTarget);
+      updateTitleFromIndex(scrollTarget, filteredItems);
 
-      const monthKey = monthKeyFromItem(filteredItems[pendingScrollIndex]);
+      const monthKey = monthKeyFromItem(filteredItems[scrollTarget]);
       if (monthKey) {
         lastVisibleMonthKeyRef.current = monthKey;
         ensureUpcomingMonthsLoaded(monthKey);
+        const { year, month } = parseMonthKey(monthKey);
+        const prev = addMonths(year, month, -1);
+        void loadMonth(prev.year, prev.month, 'backward');
       }
 
       setPendingScrollIndex(null);
+      setPendingOpenPosition(false);
       hasInitialPositioningRef.current = false;
       setHasInitialPositioning(false);
     };
@@ -309,7 +321,19 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     requestAnimationFrame(() => {
       requestAnimationFrame(applyScroll);
     });
-  }, [pendingScrollIndex, filteredItems, emblaApi, emAltaMode, updateTitleFromIndex, ensureUpcomingMonthsLoaded]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    pendingScrollIndex,
+    pendingOpenPosition,
+    filteredItems,
+    emblaApi,
+    emAltaMode,
+    updateTitleFromIndex,
+    ensureUpcomingMonthsLoaded,
+    loadMonth,
+  ]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -318,7 +342,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
       const selectedIndex = emblaApi.selectedScrollSnap();
       setSelectedSnap(selectedIndex);
       if (emAltaMode) return;
-      if (hasInitialPositioningRef.current || pendingScrollIndex !== null) return;
+      if (hasInitialPositioningRef.current || pendingScrollIndex !== null || pendingOpenPosition) return;
 
       const slide = displaySlidesRef.current[selectedIndex];
       if (slide?.kind === 'year-tbd-separator') {
@@ -377,10 +401,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
       emblaApi.off('select', onSelect);
       emblaApi.off('settle', onSettle);
     };
-  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded, loadYearTbd, pendingScrollIndex, monthEdgeBuffer]);
+  }, [emblaApi, prefetchMonthEdges, updateTitleFromIndex, emAltaMode, ensureUpcomingMonthsLoaded, loadYearTbd, pendingScrollIndex, pendingOpenPosition, monthEdgeBuffer]);
 
   useEffect(() => {
-    if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
+    if (!emblaApi || emAltaMode || pendingScrollIndex !== null || pendingOpenPosition) return;
 
     const prevLength = itemsLengthRef.current;
     const newLength = filteredItems.length;
@@ -396,7 +420,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     if (wasPrepend) {
       emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
-  }, [emblaApi, filteredItems, emAltaMode, pendingScrollIndex]);
+  }, [emblaApi, filteredItems, emAltaMode, pendingScrollIndex, pendingOpenPosition]);
 
   const yearTbdSlideCount = displaySlides.length - filteredItems.length;
   useEffect(() => {
@@ -491,7 +515,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, displaySlides.length);
-  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
+  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning && filteredItems.length === 0;
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
 
@@ -611,7 +635,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
       </div>
       <TooltipProvider delayDuration={300}>
         <div className="relative">
-          {isNavigating && (
+          {(isNavigating || (!emAltaMode && hasInitialPositioning && filteredItems.length > 0)) && (
             <LoadingOverlay message="Carregando novos títulos..." className="rounded-lg" />
           )}
         <div

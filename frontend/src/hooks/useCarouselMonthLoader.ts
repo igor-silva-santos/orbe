@@ -248,29 +248,24 @@ export function useCarouselMonthLoader({
   const resolveOpenPosition = useCallback(async (): Promise<number> => {
     let { year, month } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
 
-    const prev = addMonths(year, month, -1);
-    await Promise.all([
-      loadMonth(prev.year, prev.month, 'backward'),
-      loadMonth(year, month, 'visible'),
-    ]);
+    await loadMonth(year, month, 'visible');
 
-    const list = applyDisplayFilters(mediaItemsRef.current ?? []);
+    let list = applyDisplayFilters(mediaItemsRef.current ?? []);
     const nextIdx = calculateCarouselStartIndex(list);
     if (nextIdx >= 0 && isCarouselOpenIndexReady(list, nextIdx)) {
       return nextIdx;
     }
 
-    const lastReleased = calculateLastReleasedIndex(list);
-    if (lastReleased >= 0) return lastReleased;
-
     for (let attempt = 0; attempt < 6; attempt++) {
       ({ year, month } = addMonths(year, month, 1));
       await loadMonth(year, month, 'forward');
-      const updated = applyDisplayFilters(mediaItemsRef.current ?? []);
-      const upcoming = calculateCarouselStartIndex(updated);
+      list = applyDisplayFilters(mediaItemsRef.current ?? []);
+      const upcoming = calculateCarouselStartIndex(list);
       if (upcoming >= 0) return upcoming;
     }
 
+    const lastReleased = calculateLastReleasedIndex(list);
+    if (lastReleased >= 0) return lastReleased;
     return computeOpenIndex();
   }, [applyDisplayFilters, computeOpenIndex, loadMonth, mediaItemsRef]);
 
@@ -284,12 +279,12 @@ export function useCarouselMonthLoader({
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    const prev = addMonths(year, month, -1);
     const next = addMonths(year, month, 1);
     const next2 = addMonths(year, month, 2);
 
+    // Não carrega o mês anterior antes de abrir — senão o índice 0 vira agosto/julho
+    // e um scroll pendente velho mostra o começo da timeline em vez do próximo lançamento.
     await Promise.all([
-      loadMonth(prev.year, prev.month, 'backward', true),
       loadMonth(year, month, 'visible', true),
       loadMonth(next.year, next.month, 'forward', true),
       loadMonth(next2.year, next2.month, 'forward', true),
