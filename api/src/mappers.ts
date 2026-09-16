@@ -20,6 +20,15 @@ export const toCalendarDateString = (value: Date | string | null | undefined): s
   return `${year}-${month}-${day}`;
 };
 
+export const toCalendarDateParts = (
+  value: Date | string | null | undefined,
+): { year: number; month: number; day: number } | null => {
+  const iso = toCalendarDateString(value);
+  if (!iso) return null;
+  const [year, month, day] = iso.split('-').map(Number);
+  return { year, month, day };
+};
+
 type TmdbEpisodeStub = {
   air_date?: string | null;
   episode_number?: number | null;
@@ -546,12 +555,8 @@ export const mapAnimeToMidia = (anime: any) => {
     titleNative: anime.titleNative,
     sinopse: anime.description,
     poster_url_api: anime.coverImage,
-    data_lancamento_api: anime.startDate,
-    startDate: anime.startDate ? {
-      year: new Date(anime.startDate).getFullYear(),
-      month: new Date(anime.startDate).getMonth() + 1,
-      day: new Date(anime.startDate).getDate(),
-    } : null,
+    data_lancamento_api: toCalendarDateString(anime.startDate),
+    startDate: toCalendarDateParts(anime.startDate),
     numero_episodios: anime.episodes,
     numero_temporadas: anime.seasonYear ? 1 : null,
     season: anime.season,
@@ -720,11 +725,9 @@ export function resolveSerieCarouselReleaseDate(serie: {
   recentPast.setDate(recentPast.getDate() - 90);
 
   const parseDay = (value?: Date | string | null): Date | null => {
-    if (!value) return null;
-    const d = value instanceof Date ? new Date(value) : new Date(value);
-    if (Number.isNaN(d.getTime())) return null;
-    d.setHours(0, 0, 0, 0);
-    return d;
+    const parts = toCalendarDateParts(value);
+    if (!parts) return null;
+    return new Date(parts.year, parts.month - 1, parts.day);
   };
 
   const lastEpisode = parseDay(serie.lastAirDate);
@@ -741,13 +744,16 @@ export function resolveSerieCarouselReleaseDate(serie: {
     .filter((d): d is Date => d !== null)
     .sort((a, b) => a.getTime() - b.getTime());
 
+  const recentSeason = [...seasonDates].filter((d) => d >= recentPast && d <= today).pop();
+  if (recentSeason) return recentSeason;
+
   const upcomingSeason = seasonDates.find((d) => d >= today);
   if (upcomingSeason) return upcomingSeason;
 
   const first = parseDay(serie.firstAirDate);
-  if (first && first >= today) return first;
+  if (first && first >= recentPast) return first;
 
-  return first;
+  return nextEpisode ?? lastEpisode ?? null;
 }
 
 export function sortSeriesByCarouselDate<T extends {
@@ -815,12 +821,8 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     titleRomaji: anime.titleRomaji,
     titleEnglish: anime.titleEnglish,
     poster_url_api: anime.coverImage,
-    data_lancamento_api: anime.startDate,
-    startDate: anime.startDate ? {
-      year: new Date(anime.startDate).getFullYear(),
-      month: new Date(anime.startDate).getMonth() + 1,
-      day: new Date(anime.startDate).getDate(),
-    } : null,
+    data_lancamento_api: toCalendarDateString(anime.startDate),
+    startDate: toCalendarDateParts(anime.startDate),
     avaliacao: anime.averageScore,
     generos_api: safeGenreNames(anime.genres, 3).map((name) => translateAnimeGenre(name)),
     plataformas_api: streamingFromLinks.slice(0, 4),

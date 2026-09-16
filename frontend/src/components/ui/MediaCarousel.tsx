@@ -25,7 +25,6 @@ import {
   parseMonthKey,
   resolveCarouselOpenMonthKey,
   resolveCarouselOpenIndex,
-  isCarouselBootstrapReady,
   currentMonthCarouselTitle,
 } from '@/lib/carousel-utils';
 
@@ -81,9 +80,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(seededItems.length > 0);
   const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
-  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(
-    seededItems.length > 0 ? resolveCarouselOpenIndex(seededItems) : null,
-  );
+  const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaItems, setEmAltaItems] = useState<Midia[]>([]);
   const [emAltaDisponibilidade, setEmAltaDisponibilidade] = useState<FilmeDisponibilidade>('ambos');
@@ -494,7 +491,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
   };
 
   const virtualRange = useCarouselVirtualRange(emblaApi, displaySlides.length);
-  const showPositioningSkeleton = !emAltaMode && (hasInitialPositioning || !isCarouselBootstrapReady(filteredItems)) && filteredItems.length === 0;
+  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
 

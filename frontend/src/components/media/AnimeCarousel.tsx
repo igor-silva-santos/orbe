@@ -39,6 +39,16 @@ const SEASON_NAMES: Record<Season, string> = {
 };
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
+const animeTimelineDate = (anime: Anime): Date | null => {
+    if (anime.nextAiringEpisode?.airingAt) {
+        const airing = new Date(anime.nextAiringEpisode.airingAt);
+        airing.setHours(0, 0, 0, 0);
+        return airing;
+    }
+    if (!anime.startDate) return null;
+    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day);
+};
+
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
 /** Slides de placeholder durante posicionamento inicial — snap central para align:center do Embla */
 const SKELETON_SLIDE_COUNT = 10;
@@ -100,7 +110,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
   };
 
-  const loadedSeasons = useRef<Set<string>>(new Set([`${initialYear}-${initialSeason}`]));
+  const loadedSeasons = useRef<Set<string>>(new Set());
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
@@ -262,15 +272,18 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     });
   };
 
-  // Prefetch temporadas adjacentes em paralelo
+  // Prefetch temporada atual (completa) + adjacentes
   useEffect(() => {
     const seasonIdx = SEASONS.indexOf(initialSeason);
     const prevSeason = SEASONS[(seasonIdx - 1 + 4) % 4];
     const prevYear = seasonIdx === 0 ? initialYear - 1 : initialYear;
     const nextSeason = SEASONS[(seasonIdx + 1) % 4];
     const nextYear = seasonIdx === 3 ? initialYear + 1 : initialYear;
-    void fetchSeasonData(prevYear, prevSeason, 'prev');
-    void fetchSeasonData(nextYear, nextSeason, 'next');
+    void (async () => {
+      await fetchSeasonData(initialYear, initialSeason, 'current');
+      void fetchSeasonData(prevYear, prevSeason, 'prev');
+      void fetchSeasonData(nextYear, nextSeason, 'next');
+    })();
   }, [fetchSeasonData, initialSeason, initialYear]);
 
   useEffect(() => {
@@ -378,34 +391,38 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     if (emAltaMode) {
         newCarouselItems = filteredAnimes.map(anime => ({ type: 'media', data: anime }));
     } else if (viewMode === 'launch') {
-        const sortedAnimes = [...filteredAnimes].sort((a, b) => {
-            const dateA = a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime() : 0;
-            const dateB = b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime() : 0;
-            return dateA - dateB;
-        });
-        newCarouselItems = sortedAnimes.map(anime => ({ type: 'media', data: anime }));
-        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const currentSeasonObj = getSeason(today);
         const currentYearObj = today.getFullYear();
-        if (currentSeason === currentSeasonObj && currentYear === currentYearObj) {
-            let lastReleased = -1;
-            for (let i = 0; i < newCarouselItems.length; i++) {
-                const item = newCarouselItems[i];
-                if (item.type !== 'media' || !item.data.startDate) continue;
-                const release = new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day);
-                if (release <= today) lastReleased = i;
-            }
-            if (lastReleased >= 0) {
-                newStartIndex = lastReleased;
+        const useAiringDate = currentSeason === currentSeasonObj && currentYear === currentYearObj;
+
+        const sortedAnimes = [...filteredAnimes].sort((a, b) => {
+            const dateA = (useAiringDate ? animeTimelineDate(a) : null)
+                ?? (a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day) : null);
+            const dateB = (useAiringDate ? animeTimelineDate(b) : null)
+                ?? (b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day) : null);
+            return (dateA?.getTime() ?? 0) - (dateB?.getTime() ?? 0);
+        });
+        newCarouselItems = sortedAnimes.map(anime => ({ type: 'media', data: anime }));
+        
+        if (useAiringDate) {
+            const nextIdx = newCarouselItems.findIndex((item) => {
+                if (item.type !== 'media') return false;
+                const date = animeTimelineDate(item.data);
+                return date !== null && date >= today;
+            });
+            if (nextIdx >= 0) {
+                newStartIndex = nextIdx;
             } else {
-                const startIndexCandidate = newCarouselItems.findIndex(item =>
-                    item.type === 'media' &&
-                    item.data.startDate &&
-                    new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day) >= today
-                );
-                newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : Math.max(newCarouselItems.length - 1, 0);
+                let lastReleased = -1;
+                for (let i = 0; i < newCarouselItems.length; i++) {
+                    const item = newCarouselItems[i];
+                    if (item.type !== 'media') continue;
+                    const date = animeTimelineDate(item.data);
+                    if (date && date <= today) lastReleased = i;
+                }
+                newStartIndex = lastReleased >= 0 ? lastReleased : Math.max(newCarouselItems.length - 1, 0);
             }
         } else {
             const searchYear = currentYear;

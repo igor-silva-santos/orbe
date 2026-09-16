@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapAnimeToMidia, mapAnimeToCarouselCard } from '../mappers';
-import { fetchAnimeDetailsLive } from '../externalDetails';
+import { fetchAnimeDetailsLive, fetchVoiceActorCreditsLive } from '../externalDetails';
 import { animeQualityFilter, animeSeasonQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
@@ -370,7 +370,11 @@ router.get('/dubladores/:id/creditos', cacheMiddleware(TWELVE_HOURS), async (req
     });
 
     if (!dublador) {
-      return res.status(404).json({ error: 'Dublador não encontrado.' });
+      const live = await fetchVoiceActorCreditsLive(anilistId);
+      if (!live) {
+        return res.status(404).json({ error: 'Dublador não encontrado.' });
+      }
+      return res.status(200).json(live);
     }
 
     const seenAnime = new Set<string>();

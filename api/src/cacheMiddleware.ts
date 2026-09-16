@@ -27,7 +27,7 @@ end
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Incrementar ao mudar filtros de carrossel/listagem para invalidar Redis sem flush manual */
-const CACHE_KEY_VERSION = process.env.CACHE_KEY_VERSION || '2';
+const CACHE_KEY_VERSION = process.env.CACHE_KEY_VERSION || '3';
 
 const cacheMiddleware = (duration: number) => async (req: Request, res: Response, next: NextFunction) => {
   // Este middleware e generico e hoje so e usado em rotas GET publicas e nao

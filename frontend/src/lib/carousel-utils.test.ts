@@ -33,7 +33,7 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(resolveCarouselOpenIndex([]), 0);
   });
 
-  it('opens on the last released title, not the next upcoming', () => {
+  it('opens on the next upcoming title, not an older release', () => {
     const items = [
       mockMidia(1, '2026-07-01'),
       mockMidia(2, '2026-07-15'),
@@ -42,9 +42,9 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(5, '2026-09-01'),
       mockMidia(6, '2026-09-20'),
     ];
-    assert.equal(resolveCarouselOpenIndex(items, today), 4);
+    assert.equal(resolveCarouselOpenIndex(items, today), 5);
     assert.equal(resolveCarouselOpenMonthKey(items, today), '2026-09');
-    assert.equal(isCarouselOpenIndexReady(items, 4, today), true);
+    assert.equal(isCarouselOpenIndexReady(items, 5, today), true);
   });
 
   it('when all releases are past, opens on the most recent one', () => {
@@ -55,6 +55,15 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(4, '2026-09-10'),
     ];
     assert.equal(resolveCarouselOpenIndex(items, today), 3);
+  });
+
+  it('opens on a title released today', () => {
+    const items = [
+      mockMidia(1, '2026-09-10'),
+      mockMidia(2, '2026-09-15'),
+      mockMidia(3, '2026-09-20'),
+    ];
+    assert.equal(resolveCarouselOpenIndex(items, today), 1);
   });
 
   it('when only future releases exist, opens on the next upcoming', () => {
@@ -76,14 +85,14 @@ describe('resolveCarouselOpenIndex', () => {
     assert.equal(isCarouselOpenIndexReady(items, 2, today), true);
   });
 
-  it('does not skip the last released in favor of a future month', () => {
+  it('does not skip the next upcoming in favor of a past title', () => {
     const items = [
       mockMidia(1, '2026-08-31'),
       mockMidia(2, '2026-09-01'),
-      mockMidia(3, '2026-10-05'),
+      mockMidia(3, '2026-09-20'),
     ];
     assert.equal(resolveCarouselOpenMonthKey(items, today), '2026-09');
-    assert.equal(resolveCarouselOpenIndex(items, today), 1);
+    assert.equal(resolveCarouselOpenIndex(items, today), 2);
     assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items, today)]), '2026-09');
   });
 

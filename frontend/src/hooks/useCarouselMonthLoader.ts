@@ -255,13 +255,13 @@ export function useCarouselMonthLoader({
     ]);
 
     const list = applyDisplayFilters(mediaItemsRef.current ?? []);
-    const lastReleased = calculateLastReleasedIndex(list);
-    if (lastReleased >= 0) return lastReleased;
-
     const nextIdx = calculateCarouselStartIndex(list);
     if (nextIdx >= 0 && isCarouselOpenIndexReady(list, nextIdx)) {
       return nextIdx;
     }
+
+    const lastReleased = calculateLastReleasedIndex(list);
+    if (lastReleased >= 0) return lastReleased;
 
     for (let attempt = 0; attempt < 6; attempt++) {
       ({ year, month } = addMonths(year, month, 1));

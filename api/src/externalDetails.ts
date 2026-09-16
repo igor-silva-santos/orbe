@@ -575,3 +575,94 @@ export async function fetchJogoDetailsLive(igdbId: number) {
     throw error;
   }
 }
+
+const STAFF_CREDITS_QUERY = `
+  query ($id: Int) {
+    Staff(id: $id) {
+      id
+      name { full }
+      image { large }
+      languageV2
+      characterMedia(sort: START_DATE_DESC, page: 1, perPage: 50) {
+        edges {
+          characterName
+          node {
+            id
+            type
+            title { romaji english }
+            coverImage { extraLarge }
+            startDate { year month day }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type VoiceActorCredit = {
+  id: number;
+  mediaType: 'filme' | 'serie' | 'anime' | 'jogo';
+  title: string;
+  character: string | null;
+  posterPath: string | null;
+  releaseDate: string | null;
+};
+
+function anilistCalendarDate(value?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
+  if (!value?.year || !value?.month || !value?.day) return null;
+  return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`;
+}
+
+/** Créditos de dublador via AniList quando o staff ainda não está no banco */
+export async function fetchVoiceActorCreditsLive(anilistId: number): Promise<{
+  id: number;
+  name: string;
+  language: string | null;
+  profilePath: string | null;
+  filmography: VoiceActorCredit[];
+} | null> {
+  try {
+    const response = await anilistApi.post('', {
+      query: STAFF_CREDITS_QUERY,
+      variables: { id: anilistId },
+    });
+
+    if (response.data.errors?.length) {
+      logger.error(`Erro AniList para dublador ${anilistId}: ${response.data.errors[0].message}`);
+      return null;
+    }
+
+    const staff = response.data.data?.Staff;
+    if (!staff) return null;
+
+    const seen = new Set<string>();
+    const filmography: VoiceActorCredit[] = [];
+    for (const edge of staff.characterMedia?.edges ?? []) {
+      const media = edge?.node;
+      if (!media?.id || media.type !== 'ANIME') continue;
+      const character = edge.characterName || null;
+      const key = `${media.id}-${character ?? ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      filmography.push({
+        id: media.id,
+        mediaType: 'anime',
+        title: media.title?.english || media.title?.romaji || 'Sem título',
+        character,
+        posterPath: media.coverImage?.extraLarge || null,
+        releaseDate: anilistCalendarDate(media.startDate),
+      });
+    }
+
+    return {
+      id: staff.id,
+      name: staff.name?.full || 'Dublador',
+      language: staff.languageV2 || null,
+      profilePath: staff.image?.large || null,
+      filmography,
+    };
+  } catch (error) {
+    logger.error(`Erro ao buscar dublador ${anilistId} no AniList: ${error}`);
+    return null;
+  }
+}

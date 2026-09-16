@@ -156,13 +156,14 @@ export function calculateLastReleasedIndex(data: Midia[], reference?: Date): num
 }
 
 export function resolveCarouselStartIndex(data: Midia[], reference?: Date): number {
+  const next = calculateCarouselStartIndex(data, reference);
+  if (next >= 0) return next;
   const lastReleased = calculateLastReleasedIndex(data, reference);
   if (lastReleased >= 0) return lastReleased;
-  const next = calculateCarouselStartIndex(data, reference);
-  return next >= 0 ? next : 0;
+  return 0;
 }
 
-/** Mês (YYYY-MM) do último lançado, ou do próximo futuro, ou o mês atual */
+/** Mês (YYYY-MM) do próximo lançamento, ou do último já lançado, ou o mês atual */
 export function resolveCarouselOpenMonthKey(data: Midia[], reference?: Date): string {
   const today = startOfDay(reference);
 
@@ -179,28 +180,28 @@ export function resolveIndexForMonthKey(data: Midia[], monthKey: string): number
   return findIndexForMonth(data, year, month);
 }
 
-/** Índice de abertura: último título já lançado; senão o próximo futuro */
+/** Índice de abertura: próximo lançamento (>= hoje); senão o último já lançado */
 export function resolveCarouselOpenIndex(data: Midia[], reference?: Date): number {
   if (!data.length) return 0;
-
-  const lastReleased = calculateLastReleasedIndex(data, reference);
-  if (lastReleased >= 0) return lastReleased;
 
   const nextIdx = calculateCarouselStartIndex(data, reference);
   if (nextIdx >= 0) return nextIdx;
 
+  const lastReleased = calculateLastReleasedIndex(data, reference);
+  if (lastReleased >= 0) return lastReleased;
+
   return data.length - 1;
 }
 
-/** Indica se o índice de abertura aponta para o último lançado (ou o próximo, se nada saiu ainda) */
+/** Indica se o índice de abertura aponta para o próximo lançamento (ou o último, se nada vem pela frente) */
 export function isCarouselOpenIndexReady(data: Midia[], index: number, reference?: Date): boolean {
   if (!data.length) return false;
 
-  const lastReleased = calculateLastReleasedIndex(data, reference);
-  if (lastReleased >= 0) return index === lastReleased;
-
   const nextIdx = calculateCarouselStartIndex(data, reference);
   if (nextIdx >= 0) return index === nextIdx;
+
+  const lastReleased = calculateLastReleasedIndex(data, reference);
+  if (lastReleased >= 0) return index === lastReleased;
 
   return index >= 0 && index < data.length;
 }
