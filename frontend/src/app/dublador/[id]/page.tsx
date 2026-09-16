@@ -128,7 +128,7 @@ export default function DubladorPage({ params }: { params: { id: string } }) {
                   onClick={() => handleOpenCredit(credit)}
                   className="text-left group"
                 >
-                  <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted mb-2">
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-muted mb-2">
                     <SafeImage
                       src={credit.posterPath}
                       alt={credit.title}
@@ -138,12 +138,19 @@ export default function DubladorPage({ params }: { params: { id: string } }) {
                       className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
                       fallbackLabel="Sem imagem"
                     />
+                    {credit.character ? (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2 pb-2 pt-8">
+                        <p className="text-[11px] font-medium text-white line-clamp-2 leading-tight">
+                          {credit.character}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
                   <p className="text-sm font-semibold line-clamp-2 orbe-text-primary">{credit.title}</p>
+                  {credit.character ? (
+                    <p className="text-xs text-primary line-clamp-2 mt-0.5">como {credit.character}</p>
+                  ) : null}
                   <p className="text-[11px] text-muted-foreground">{MEDIA_LABEL[credit.mediaType]}</p>
-                  {credit.character && (
-                    <p className="text-xs text-muted-foreground line-clamp-1">{credit.character}</p>
-                  )}
                 </button>
               ))}
             </div>

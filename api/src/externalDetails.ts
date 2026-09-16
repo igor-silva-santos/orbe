@@ -583,9 +583,13 @@ const STAFF_CREDITS_QUERY = `
       name { full }
       image { large }
       languageV2
-      characterMedia(sort: START_DATE_DESC, page: 1, perPage: 50) {
+      characterMedia(sort: START_DATE_DESC, page: 1, perPage: 25) {
         edges {
           characterName
+          characters {
+            id
+            name { full native userPreferred }
+          }
           node {
             id
             type
@@ -611,6 +615,20 @@ type VoiceActorCredit = {
 function anilistCalendarDate(value?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
   if (!value?.year || !value?.month || !value?.day) return null;
   return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`;
+}
+
+function anilistVoiceCharacterName(edge: {
+  characterName?: string | null;
+  characters?: Array<{ name?: { full?: string | null; native?: string | null; userPreferred?: string | null } | null } | null> | null;
+}): string | null {
+  const names = (edge.characters ?? [])
+    .map((character) => character?.name?.userPreferred || character?.name?.full || character?.name?.native)
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0)
+    .map((name) => name.trim());
+  const unique = [...new Set(names)];
+  if (unique.length) return unique.join(', ');
+  const fallback = edge.characterName?.trim();
+  return fallback || null;
 }
 
 /** Créditos de dublador via AniList quando o staff ainda não está no banco */
@@ -640,7 +658,7 @@ export async function fetchVoiceActorCreditsLive(anilistId: number): Promise<{
     for (const edge of staff.characterMedia?.edges ?? []) {
       const media = edge?.node;
       if (!media?.id || media.type !== 'ANIME') continue;
-      const character = edge.characterName || null;
+      const character = anilistVoiceCharacterName(edge);
       const key = `${media.id}-${character ?? ''}`;
       if (seen.has(key)) continue;
       seen.add(key);
