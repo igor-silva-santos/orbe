@@ -110,13 +110,17 @@ export function findIndexForMonth(items: Midia[], year: number, month: number): 
   });
 }
 
+function startOfDay(reference?: Date): Date {
+  const today = reference ? new Date(reference) : new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 /** Posiciona o carrossel no próximo lançamento (primeiro com data >= hoje). Retorna -1 se não houver. */
-export function calculateCarouselStartIndex(data: Midia[]): number {
+export function calculateCarouselStartIndex(data: Midia[], reference?: Date): number {
   if (!data || data.length === 0) return 0;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minTimeline = getCarouselTimelineMinDate(today);
+  const today = startOfDay(reference);
 
   const nextRelease = data.findIndex((item) => {
     const releaseDate = parseMidiaReleaseDate(item);
@@ -131,21 +135,40 @@ export function calculateCarouselStartIndex(data: Midia[]): number {
   return -1;
 }
 
-export function resolveCarouselStartIndex(data: Midia[]): number {
-  const next = calculateCarouselStartIndex(data);
+/** Índice do último título já lançado (data <= hoje) na timeline. Retorna -1 se não houver. */
+export function calculateLastReleasedIndex(data: Midia[], reference?: Date): number {
+  if (!data?.length) return -1;
+
+  const today = startOfDay(reference);
+
+  for (let i = data.length - 1; i >= 0; i--) {
+    const releaseDate = parseMidiaReleaseDate(data[i]);
+    if (
+      releaseDate !== null &&
+      isCarouselTimelineDate(releaseDate, today) &&
+      releaseDate <= today
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+export function resolveCarouselStartIndex(data: Midia[], reference?: Date): number {
+  const lastReleased = calculateLastReleasedIndex(data, reference);
+  if (lastReleased >= 0) return lastReleased;
+  const next = calculateCarouselStartIndex(data, reference);
   return next >= 0 ? next : 0;
 }
 
-/** Mês (YYYY-MM) do próximo lançamento >= hoje presente nos dados, ou mês atual se nenhum futuro */
-export function resolveCarouselOpenMonthKey(data: Midia[]): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+/** Mês (YYYY-MM) do último lançado, ou do próximo futuro, ou o mês atual */
+export function resolveCarouselOpenMonthKey(data: Midia[], reference?: Date): string {
+  const today = startOfDay(reference);
 
-  const nextIdx = calculateCarouselStartIndex(data);
-  if (nextIdx >= 0) {
-    const monthKey = monthKeyFromItem(data[nextIdx]);
-    if (monthKey) return monthKey;
-  }
+  const openIdx = resolveCarouselOpenIndex(data, today);
+  const monthKey = monthKeyFromItem(data[openIdx]);
+  if (monthKey) return monthKey;
 
   return monthKeyFromDate(today);
 }
@@ -156,54 +179,30 @@ export function resolveIndexForMonthKey(data: Midia[], monthKey: string): number
   return findIndexForMonth(data, year, month);
 }
 
-/** Índice de abertura: próximo lançamento >= hoje; senão início do mês atual nos dados */
-export function resolveCarouselOpenIndex(data: Midia[]): number {
+/** Índice de abertura: último título já lançado; senão o próximo futuro */
+export function resolveCarouselOpenIndex(data: Midia[], reference?: Date): number {
   if (!data.length) return 0;
 
-  const nextIdx = calculateCarouselStartIndex(data);
+  const lastReleased = calculateLastReleasedIndex(data, reference);
+  if (lastReleased >= 0) return lastReleased;
+
+  const nextIdx = calculateCarouselStartIndex(data, reference);
   if (nextIdx >= 0) return nextIdx;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const currentMonthKey = monthKeyFromDate(today);
-  const openMonthKey = resolveCarouselOpenMonthKey(data);
-  const monthStartIdx = resolveIndexForMonthKey(data, openMonthKey);
-  if (monthStartIdx >= 0) return monthStartIdx;
-
-  for (let i = data.length - 1; i >= 0; i--) {
-    const releaseDate = parseMidiaReleaseDate(data[i]);
-    if (!releaseDate || !isCarouselTimelineDate(releaseDate, today)) continue;
-    if (monthKeyFromItem(data[i]) === currentMonthKey) return i;
-  }
-
-  for (let i = data.length - 1; i >= 0; i--) {
-    const releaseDate = parseMidiaReleaseDate(data[i]);
-    if (releaseDate && isCarouselTimelineDate(releaseDate, today)) return i;
-  }
 
   return data.length - 1;
 }
 
-/** Indica se o índice de abertura aponta para lançamento >= hoje (dados suficientes) */
-export function isCarouselOpenIndexReady(data: Midia[], index: number): boolean {
+/** Indica se o índice de abertura aponta para o último lançado (ou o próximo, se nada saiu ainda) */
+export function isCarouselOpenIndexReady(data: Midia[], index: number, reference?: Date): boolean {
   if (!data.length) return false;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const lastReleased = calculateLastReleasedIndex(data, reference);
+  if (lastReleased >= 0) return index === lastReleased;
 
-  const nextIdx = calculateCarouselStartIndex(data);
-  if (nextIdx >= 0) {
-    const release = parseMidiaReleaseDate(data[nextIdx]);
-    return release !== null && release >= today && index === nextIdx;
-  }
+  const nextIdx = calculateCarouselStartIndex(data, reference);
+  if (nextIdx >= 0) return index === nextIdx;
 
-  const item = data[index];
-  const itemMonth = monthKeyFromItem(item);
-  const currentMonthKey = monthKeyFromDate(today);
-  if (itemMonth === currentMonthKey) return true;
-
-  const release = parseMidiaReleaseDate(item);
-  return release !== null && release >= today;
+  return index >= 0 && index < data.length;
 }
 
 export function formatCarouselMonthTitle(date: Date): string {
@@ -240,16 +239,10 @@ export function hasCarouselMonthData(items: Midia[], monthKey: string): boolean 
   return items.some((item) => monthKeyFromItem(item) === monthKey);
 }
 
-/** Dados suficientes para revelar o carrossel após o bootstrap do mês atual. */
+/** Dados suficientes para revelar o carrossel: há último lançado ou próximo futuro na timeline. */
 export function isCarouselBootstrapReady(items: Midia[], reference = new Date()): boolean {
   if (!items.length) return false;
 
-  const today = new Date(reference);
-  today.setHours(0, 0, 0, 0);
-  const targetMonthKey = monthKeyFromDate(today);
-
-  if (!hasCarouselMonthData(items, targetMonthKey)) return false;
-
-  const index = resolveCarouselOpenIndex(items);
-  return isCarouselOpenIndexReady(items, index);
+  const index = resolveCarouselOpenIndex(items, reference);
+  return isCarouselOpenIndexReady(items, index, reference);
 }

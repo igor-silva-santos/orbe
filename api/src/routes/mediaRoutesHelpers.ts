@@ -107,13 +107,15 @@ export const serieCarouselLiteInclude = {
   },
 };
 
-/** Filtro por mês no carrossel: estreia original ou temporada com airDate no intervalo */
+/** Filtro por mês no carrossel: estreia, temporada, último ou próximo episódio no intervalo */
 export const serieCarouselDateInRange = (
   startDate: Date,
   endDate: Date,
 ): Prisma.SerieWhereInput => ({
   OR: [
     { firstAirDate: { gte: startDate, lte: endDate } },
+    { lastAirDate: { gte: startDate, lte: endDate } },
+    { nextEpisodeAirDate: { gte: startDate, lte: endDate } },
     {
       seasons: {
         some: {

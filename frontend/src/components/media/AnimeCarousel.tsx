@@ -386,15 +386,27 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         newCarouselItems = sortedAnimes.map(anime => ({ type: 'media', data: anime }));
         
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const currentSeasonObj = getSeason(today);
         const currentYearObj = today.getFullYear();
         if (currentSeason === currentSeasonObj && currentYear === currentYearObj) {
-            const startIndexCandidate = newCarouselItems.findIndex(item => 
-                item.type === 'media' && 
-                item.data.startDate &&
-                new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day) >= today
-            );
-            newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : newCarouselItems.length -1;
+            let lastReleased = -1;
+            for (let i = 0; i < newCarouselItems.length; i++) {
+                const item = newCarouselItems[i];
+                if (item.type !== 'media' || !item.data.startDate) continue;
+                const release = new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day);
+                if (release <= today) lastReleased = i;
+            }
+            if (lastReleased >= 0) {
+                newStartIndex = lastReleased;
+            } else {
+                const startIndexCandidate = newCarouselItems.findIndex(item =>
+                    item.type === 'media' &&
+                    item.data.startDate &&
+                    new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day) >= today
+                );
+                newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : Math.max(newCarouselItems.length - 1, 0);
+            }
         } else {
             const searchYear = currentYear;
             const searchSeason = currentSeason;

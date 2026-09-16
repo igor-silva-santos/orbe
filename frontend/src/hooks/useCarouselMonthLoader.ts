@@ -4,17 +4,13 @@ import { useCallback, useRef, useState, type MutableRefObject, type RefObject } 
 import {
   addMonths,
   findMonthBounds,
-  hasCarouselMonthData,
-  isCarouselBootstrapReady,
-  isCarouselOpenIndexReady,
   mergeMediaByDate,
-  monthKeyFromDate,
   monthKeyFromItem,
   parseMonthKey,
   resolveCarouselOpenIndex,
-  resolveCarouselOpenMonthKey,
-  resolveIndexForMonthKey,
   calculateCarouselStartIndex,
+  calculateLastReleasedIndex,
+  isCarouselOpenIndexReady,
 } from '@/lib/carousel-utils';
 import { API_BASE } from '@/lib/apiBase';
 import type { Midia } from '@/types';
@@ -250,39 +246,29 @@ export function useCarouselMonthLoader({
   );
 
   const resolveOpenPosition = useCallback(async (): Promise<number> => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const targetMonthKey = monthKeyFromDate(today);
+    let { year, month } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
 
-    let { year, month } = { year: today.getFullYear(), month: today.getMonth() + 1 };
+    const prev = addMonths(year, month, -1);
+    await Promise.all([
+      loadMonth(prev.year, prev.month, 'backward'),
+      loadMonth(year, month, 'visible'),
+    ]);
 
-    // Garante o mês atual antes de qualquer decisão de índice
-    await loadMonth(year, month, 'visible', true);
+    const list = applyDisplayFilters(mediaItemsRef.current ?? []);
+    const lastReleased = calculateLastReleasedIndex(list);
+    if (lastReleased >= 0) return lastReleased;
 
-    for (let attempt = 0; attempt < 14; attempt++) {
-      const list = applyDisplayFilters(mediaItemsRef.current ?? []);
+    const nextIdx = calculateCarouselStartIndex(list);
+    if (nextIdx >= 0 && isCarouselOpenIndexReady(list, nextIdx)) {
+      return nextIdx;
+    }
 
-      if (!hasCarouselMonthData(list, targetMonthKey)) {
-        await loadMonth(year, month, 'visible', true);
-        ({ year, month } = addMonths(year, month, 1));
-        continue;
-      }
-
-      const targetIndex = resolveCarouselOpenIndex(list);
-
-      if (targetIndex >= 0 && isCarouselOpenIndexReady(list, targetIndex)) {
-        return targetIndex;
-      }
-
-      const monthIndex = resolveIndexForMonthKey(list, targetMonthKey);
-      if (monthIndex >= 0 && monthKeyFromItem(list[monthIndex]) === targetMonthKey) {
-        const nextIdx = calculateCarouselStartIndex(list);
-        if (nextIdx >= 0) return nextIdx;
-        return monthIndex;
-      }
-
-      await loadMonth(year, month, 'visible', true);
+    for (let attempt = 0; attempt < 6; attempt++) {
       ({ year, month } = addMonths(year, month, 1));
+      await loadMonth(year, month, 'forward');
+      const updated = applyDisplayFilters(mediaItemsRef.current ?? []);
+      const upcoming = calculateCarouselStartIndex(updated);
+      if (upcoming >= 0) return upcoming;
     }
 
     return computeOpenIndex();

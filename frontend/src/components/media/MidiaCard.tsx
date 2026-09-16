@@ -30,7 +30,7 @@ import { resolveCardStatus, midiaHasReleased } from '@/lib/card-status';
 import { PLATFORM_ICON_SIZE_CARD } from '@/lib/platform-icon-sizes';
 import SteamPriceLabel from '@/components/ui/SteamPriceLabel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import type { MidiaCardProps, UserAction, Anime, Jogo, Filme } from '@/types';
+import type { MidiaCardProps, UserAction, Anime, Jogo, Filme, Serie } from '@/types';
 
 const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 const MINUTE_MS = 60 * 1000;
@@ -107,8 +107,10 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
-  const isAnime = type === 'anime';
-  const nextAiringEpisode = isAnime ? (midia as Anime | undefined)?.nextAiringEpisode : null;
+  const isEpisodeMedia = type === 'anime' || type === 'serie';
+  const nextAiringEpisode = isEpisodeMedia
+    ? (midia as Anime | Serie | undefined)?.nextAiringEpisode
+    : null;
   const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Precisa vir depois de todas as chamadas de hook acima — Rules of Hooks exige ordem
@@ -119,6 +121,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     return null;
   }
 
+  const isAnime = type === 'anime';
   const rating = formatRating(midia, type);
   const genres = Array.isArray(midia.generos_api) ? midia.generos_api : [];
   const providers = getStreamingProviders(midia);
@@ -130,12 +133,15 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   // Lógica para detectar novo episódio (lançado nas últimas 24h)
   const isNewEpisode = (() => {
-    if (!isAnime || !midia.data_lancamento_api) return false;
-    const releaseDate = new Date(midia.data_lancamento_api);
-    const now = new Date();
-    const diffInMs = now.getTime() - releaseDate.getTime();
-    const diffInHours = diffInMs / (1000 * 60 * 60);
-    // Se o anime já estreou e o lançamento foi há menos de 24h
+    const lastAired = isAnime
+      ? midia.data_lancamento_api
+      : type === 'serie'
+        ? (midia as Serie).lastAiredEpisode?.airingAt
+        : null;
+    if (!lastAired) return false;
+    const releaseDate = new Date(lastAired);
+    if (Number.isNaN(releaseDate.getTime())) return false;
+    const diffInHours = (Date.now() - releaseDate.getTime()) / (1000 * 60 * 60);
     return diffInHours > 0 && diffInHours <= 24;
   })();
 
@@ -159,7 +165,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAdultContent = (midia as any).isAdult === true;
   const filme = type === 'filme' ? (midia as Filme) : null;
-  const cardStatus = resolveCardStatus(type, midia, { isNewAnimeEpisode: isNewEpisode });
+  const cardStatus = resolveCardStatus(type, midia, { isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
   const hasStatusBadge = Boolean(cardStatus);
   const showListIndicator =
@@ -302,7 +308,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   )}
                 </div>
                 <div className="h-[22px] mb-1.5 flex items-center overflow-hidden">
-                {type === 'anime' ? (
+                {isEpisodeMedia ? (
                   isFutureRelease ? (
                     <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode && nextEpisodeCardLabel ? (

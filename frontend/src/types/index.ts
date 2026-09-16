@@ -32,19 +32,19 @@ export interface StaffMember {
   foto_url?: string;
 }
 
+export interface VoiceActor {
+  id?: number;
+  nome: string;
+  foto_url?: string;
+}
+
 export interface Character {
   id: number;
   nome: string;
   foto_url?: string;
   dubladores: {
-    jp?: {
-      nome: string;
-      foto_url?: string;
-    };
-    pt?: {
-      nome: string;
-      foto_url?: string;
-    };
+    jp?: VoiceActor;
+    pt?: VoiceActor;
   };
 }
 
@@ -135,6 +135,12 @@ export interface SerieStreamingProvider {
   url: string | null;
 }
 
+export interface NextAiringEpisode {
+  airingAt: string;
+  episode: number;
+  season?: number;
+}
+
 export interface Serie extends Midia {
   homepage?: string;
   numero_temporadas: number;
@@ -146,7 +152,9 @@ export interface Serie extends Midia {
   elenco: CastMember[];
   videos?: Video[];
   temporadas?: Temporada[];
-  streamingProviders?: SerieStreamingProvider[]; // Adicionado para consistência
+  streamingProviders?: SerieStreamingProvider[];
+  nextAiringEpisode?: NextAiringEpisode | null;
+  lastAiredEpisode?: NextAiringEpisode | null;
 }
 
 export interface Relation {
@@ -173,10 +181,7 @@ export interface Anime extends Serie {
   airingSchedule?: any[];
   format?: string;
   isAdult?: boolean;
-  nextAiringEpisode?: {
-    airingAt: string;
-    episode: number;
-  } | null;
+  nextAiringEpisode?: NextAiringEpisode | null;
   startDate?: {
       year: number;
       month: number;

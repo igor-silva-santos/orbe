@@ -13,6 +13,7 @@ import { resolveSyncContentOptions } from './syncOptions';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
+import { mapTmdbEpisodeFields } from './mappers';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -250,6 +251,7 @@ async function processSerieBatch(
         type: serieDetails.type,
         inProduction: serieDetails.in_production,
         tagline: serieDetails.tagline,
+        ...mapTmdbEpisodeFields(serieDetails.next_episode_to_air, serieDetails.last_episode_to_air),
       };
 
       const generoIds = await resolveTmdbGeneroIds(prisma.genero, serieDetails.genres);

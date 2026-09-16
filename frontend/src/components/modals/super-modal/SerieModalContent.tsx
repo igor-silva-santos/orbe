@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Serie, CalendarModalData } from '@/types';
 import SerieInfoBlock from './SerieInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -10,6 +11,7 @@ import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import { useAppStore } from '@/stores/appStore';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -19,6 +21,8 @@ interface SerieModalContentProps {
 const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().includes('tmdb');
 
 const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
+  const closeSuperModal = useAppStore((s) => s.closeSuperModal);
+
   if (!serie) {
     return <div>Carregando...</div>;
   }
@@ -127,24 +131,43 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
             <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
               <CarouselContent>
                 {serie.elenco.map(ator => (
-                  <CarouselItem key={ator.id} className="basis-auto">
+                  <CarouselItem key={`${ator.id}-${ator.personagem}`} className="basis-auto">
                     <Tooltip>
-                      <TooltipTrigger>
-                        <div className="flex flex-col items-center text-center w-24">
-                          <SafeImage
-                            src={ator.foto_url}
-                            alt={ator.nome}
-                            width={96}
-                            height={144}
-                            className="rounded-full object-cover h-24 w-24 mb-2"
-                            fallbackLabel="?"
-                          />
-                          <p className="font-semibold text-sm truncate w-full">{ator.nome}</p>
-                          <p className="text-xs text-gray-400 truncate w-full">{ator.personagem}</p>
-                        </div>
+                      <TooltipTrigger asChild>
+                        {ator.id ? (
+                          <Link
+                            href={`/pessoa/${ator.id}`}
+                            onClick={closeSuperModal}
+                            className="flex flex-col items-center text-center w-24"
+                          >
+                            <SafeImage
+                              src={ator.foto_url}
+                              alt={ator.nome}
+                              width={96}
+                              height={144}
+                              className="rounded-full object-cover h-24 w-24 mb-2"
+                              fallbackLabel="?"
+                            />
+                            <p className="font-semibold text-sm truncate w-full hover:text-primary transition-colors">{ator.nome}</p>
+                            <p className="text-xs text-gray-400 truncate w-full">{ator.personagem}</p>
+                          </Link>
+                        ) : (
+                          <div className="flex flex-col items-center text-center w-24">
+                            <SafeImage
+                              src={ator.foto_url}
+                              alt={ator.nome}
+                              width={96}
+                              height={144}
+                              className="rounded-full object-cover h-24 w-24 mb-2"
+                              fallbackLabel="?"
+                            />
+                            <p className="font-semibold text-sm truncate w-full">{ator.nome}</p>
+                            <p className="text-xs text-gray-400 truncate w-full">{ator.personagem}</p>
+                          </div>
+                        )}
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{ator.nome} como {ator.personagem}</p>
+                        <p>{ator.nome} como {ator.personagem}{ator.id ? ' — ver filmografia' : ''}</p>
                       </TooltipContent>
                     </Tooltip>
                   </CarouselItem>

@@ -1,6 +1,6 @@
 import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
-import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes } from './mappers';
+import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes, mapTmdbEpisodeFields } from './mappers';
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
 import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
@@ -142,6 +142,7 @@ function mapTmdbSerieToPrismaLike(serie: any) {
     originalName: serie.original_name,
     overview: serie.overview,
     firstAirDate: serie.first_air_date ? new Date(serie.first_air_date) : null,
+    lastAirDate: serie.last_air_date ? new Date(serie.last_air_date) : null,
     numberOfSeasons: serie.number_of_seasons,
     numberOfEpisodes: serie.number_of_episodes,
     status: serie.status,
@@ -150,6 +151,7 @@ function mapTmdbSerieToPrismaLike(serie: any) {
     voteAverage: serie.vote_average,
     voteCount: serie.vote_count,
     popularity: serie.popularity,
+    ...mapTmdbEpisodeFields(serie.next_episode_to_air, serie.last_episode_to_air),
     genres: (serie.genres ?? []).map((g: any) => ({ genero: { name: g.name } })),
     cast: (serie.credits?.cast ?? []).slice(0, 20).map((p: any) => ({
       character: p.character,

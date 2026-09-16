@@ -338,4 +338,123 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
   }
 });
 
+router.get('/dubladores/:id/creditos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const anilistId = parsePositiveIntId(req.params.id);
+  if (!anilistId) {
+    return res.status(400).json({ error: 'ID de dublador inválido.' });
+  }
+
+  try {
+    const dublador = await prisma.dublador.findUnique({
+      where: { anilistId },
+      include: {
+        personagens_dublados: {
+          include: {
+            animeCharacter: {
+              include: {
+                character: true,
+                anime: {
+                  select: {
+                    anilistId: true,
+                    titleRomaji: true,
+                    titleEnglish: true,
+                    coverImage: true,
+                    startDate: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!dublador) {
+      return res.status(404).json({ error: 'Dublador não encontrado.' });
+    }
+
+    const seenAnime = new Set<string>();
+    const animeCredits = dublador.personagens_dublados
+      .map((credit) => {
+        const anime = credit.animeCharacter.anime;
+        const character = credit.animeCharacter.character;
+        return {
+          id: anime.anilistId,
+          mediaType: 'anime' as const,
+          title: anime.titleEnglish || anime.titleRomaji,
+          character: character.name || null,
+          posterPath: anime.coverImage || null,
+          releaseDate: anime.startDate ? anime.startDate.toISOString().slice(0, 10) : null,
+        };
+      })
+      .filter((credit) => {
+        const key = `${credit.id}-${credit.character ?? ''}`;
+        if (seenAnime.has(key)) return false;
+        seenAnime.add(key);
+        return true;
+      });
+
+    const pessoas = await prisma.pessoa.findMany({
+      where: { name: { equals: dublador.name, mode: 'insensitive' } },
+      include: {
+        filmeCast: {
+          include: {
+            filme: { select: { tmdbId: true, title: true, posterPath: true, releaseDate: true } },
+          },
+          take: 40,
+        },
+        serieCast: {
+          include: {
+            serie: { select: { tmdbId: true, name: true, posterPath: true, firstAirDate: true } },
+          },
+          take: 40,
+        },
+      },
+      take: 5,
+    });
+
+    const seenOther = new Set<string>();
+    const otherCredits = (pessoas.length === 1 ? pessoas : []).flatMap((pessoa) => [
+      ...pessoa.filmeCast.map((credit) => ({
+        id: credit.filme.tmdbId,
+        mediaType: 'filme' as const,
+        title: credit.filme.title,
+        character: credit.character || null,
+        posterPath: credit.filme.posterPath || null,
+        releaseDate: credit.filme.releaseDate ? credit.filme.releaseDate.toISOString().slice(0, 10) : null,
+      })),
+      ...pessoa.serieCast.map((credit) => ({
+        id: credit.serie.tmdbId,
+        mediaType: 'serie' as const,
+        title: credit.serie.name,
+        character: credit.character || null,
+        posterPath: credit.serie.posterPath || null,
+        releaseDate: credit.serie.firstAirDate ? credit.serie.firstAirDate.toISOString().slice(0, 10) : null,
+      })),
+    ]).filter((credit) => {
+      const key = `${credit.mediaType}-${credit.id}`;
+      if (seenOther.has(key)) return false;
+      seenOther.add(key);
+      return true;
+    });
+
+    const filmography = [...animeCredits, ...otherCredits].sort((a, b) => {
+      const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+      const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    res.json({
+      id: dublador.anilistId,
+      name: dublador.name,
+      language: dublador.language,
+      profilePath: dublador.image ?? null,
+      filmography,
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar créditos do dublador ${anilistId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar créditos do dublador.' });
+  }
+});
+
 export default router;

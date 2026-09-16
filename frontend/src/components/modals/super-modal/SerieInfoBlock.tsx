@@ -1,6 +1,7 @@
 
 import { Serie } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
+import { formatNextEpisodeDetail } from '@/lib/media-helpers';
 
 interface SerieInfoBlockProps {
   serie: Serie;
@@ -48,6 +49,17 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
           <div className="flex col-span-2">
             <span className={`font-semibold ${labelColor} mr-2`}>Criadores:</span>
             <span>{creators}</span>
+          </div>
+        )}
+        {serie.nextAiringEpisode && (
+          <div className="flex col-span-2 items-center flex-wrap gap-2">
+            <span className={`font-semibold ${labelColor}`}>Próximo episódio:</span>
+            <span className="inline-flex items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-3 py-1 text-xs font-bold text-orange-700 dark:text-orange-300">
+              {formatNextEpisodeDetail(
+                serie.nextAiringEpisode.airingAt,
+                serie.nextAiringEpisode.episode
+              )}
+            </span>
           </div>
         )}
       </div>
