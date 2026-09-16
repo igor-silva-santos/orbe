@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker: pinga o Render SÓ enquanto o sync estiver ativo.
  *
- * - Cron */5 * * * *: se watching=1, consulta o status; se syncActive, pinga /api/health;
+ * - Cron a cada 5 min: se watching=1, consulta o status; se syncActive, pinga /api/health;
  *   se o sync acabou, zera watching (Render pode hibernar).
  * - POST /start (header x-sync-secret): liga watching, acorda a API e tenta resume.
  * - POST /stop: desliga watching na hora.
