@@ -10,6 +10,7 @@ import {
   resolveCarouselOpenMonthKey,
   filterMidiaForCarouselTimeline,
   isCarouselBootstrapReady,
+  parseMidiaReleaseDate,
 } from './carousel-utils';
 import type { Midia } from '@/types';
 
@@ -231,6 +232,23 @@ describe('isCarouselBootstrapReady', () => {
       mockMidia(3, '2026-08-20'),
     ];
     assert.equal(isCarouselBootstrapReady(items, new Date(2026, 7, 14)), true);
+  });
+});
+
+describe('parseMidiaReleaseDate', () => {
+  it('prefers a future nextAiringEpisode over an older carousel date', () => {
+    const item = {
+      ...mockMidia(1, '2026-09-10'),
+      nextAiringEpisode: {
+        airingAt: '2026-09-21T12:00:00.000Z',
+        episode: 5,
+        season: 2,
+      },
+    };
+    const date = parseMidiaReleaseDate(item);
+    assert.equal(date?.getFullYear(), 2026);
+    assert.equal(date?.getMonth(), 8);
+    assert.equal(date?.getDate(), 21);
   });
 });
 

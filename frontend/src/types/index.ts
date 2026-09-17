@@ -70,6 +70,12 @@ export interface Plataforma {
   logo_path?: string | null;
 }
 
+export interface NextAiringEpisode {
+  airingAt: string;
+  episode: number;
+  season?: number;
+}
+
 // Interface base para mídia
 export interface Midia {
   id: number;
@@ -100,6 +106,8 @@ export interface Midia {
   steam_app_id?: number | null;
   steam_price_cents?: number | null;
   steam_discount_percent?: number | null;
+  /** Próximo episódio (séries/animes) — usado no carrossel e countdown do card */
+  nextAiringEpisode?: NextAiringEpisode | null;
 }
 
 // Interfaces específicas por tipo de mídia
@@ -133,12 +141,6 @@ export interface Temporada {
 export interface SerieStreamingProvider {
   provider: StreamingProviderInfo;
   url: string | null;
-}
-
-export interface NextAiringEpisode {
-  airingAt: string;
-  episode: number;
-  season?: number;
 }
 
 export interface Serie extends Midia {

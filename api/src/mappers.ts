@@ -712,7 +712,7 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
 
 type SerieSeasonDate = { airDate?: Date | string | null; seasonNumber?: number | null };
 
-/** Data de exibição no carrossel: último episódio recente, senão próximo episódio, senão temporada/estreia */
+/** Data de exibição no carrossel: próximo episódio futuro, senão último recente, senão temporada/estreia */
 export function resolveSerieCarouselReleaseDate(serie: {
   firstAirDate?: Date | string | null;
   lastAirDate?: Date | string | null;
@@ -730,13 +730,14 @@ export function resolveSerieCarouselReleaseDate(serie: {
     return new Date(parts.year, parts.month - 1, parts.day);
   };
 
+  // Séries semanais: prioriza o próximo episódio para reentrar no carrossel a cada semana
+  const nextEpisode = parseDay(serie.nextEpisodeAirDate);
+  if (nextEpisode && nextEpisode >= today) return nextEpisode;
+
   const lastEpisode = parseDay(serie.lastAirDate);
   if (lastEpisode && lastEpisode >= recentPast && lastEpisode <= today) {
     return lastEpisode;
   }
-
-  const nextEpisode = parseDay(serie.nextEpisodeAirDate);
-  if (nextEpisode && nextEpisode >= today) return nextEpisode;
 
   const seasonDates = (serie.seasons ?? [])
     .filter((s) => (s.seasonNumber ?? 0) > 0 && s.airDate)
