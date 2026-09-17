@@ -11,7 +11,7 @@ import {
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
-export const CAROUSEL_ITEM_LIMIT = 500;
+export const CAROUSEL_ITEM_LIMIT = 120;
 export const DEFAULT_LIST_LIMIT = 48;
 export const MAX_LIST_LIMIT = 200;
 

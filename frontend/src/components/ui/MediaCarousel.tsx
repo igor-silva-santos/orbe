@@ -138,6 +138,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     applyDisplayFilters,
     onItemsMerged: setMediaItems,
     monthEdgeBuffer,
+    initialItems: seededItems,
   });
 
   const { loadYearTbd, getAppendSlides, slidesByYear } = useCarouselYearTbd({ mediaType });
@@ -259,13 +260,10 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Prefetch isolado de lançamentos só com ano — não entra na timeline mensal */
+  /** Prefetch só do ano corrente no mount — demais anos carregam ao rolar (onSelect) */
   useEffect(() => {
     if (emAltaMode) return;
-    const y = new Date().getFullYear();
-    for (let year = y; year <= y + 5; year++) {
-      void loadYearTbd(year);
-    }
+    void loadYearTbd(new Date().getFullYear());
   }, [emAltaMode, loadYearTbd]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */

@@ -9,7 +9,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 
-import orbeNerdApi, { apiClient } from '@/lib/api';
+import orbeNerdApi, { apiClient, DETAILS_TIMEOUT_MS } from '@/lib/api';
 import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import AwardsBlock from '@/components/ui/AwardsBlock';
 import PlatformIcon from '@/components/ui/PlatformIcons';
@@ -50,7 +50,9 @@ const SuperModal: React.FC = () => {
     loadInFlightRef.current = requestKey;
     setIsLoadingDetails(true);
     try {
-      const data = await apiClient.get(`/${type}s/${midia.id}/details`);
+      const data = await apiClient.get(`/${type}s/${midia.id}/details`, undefined, {
+        timeoutMs: DETAILS_TIMEOUT_MS,
+      });
       setDetails(data);
     } catch (error) {
       console.error('Erro ao carregar dados adicionais:', error);

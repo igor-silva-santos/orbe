@@ -14,6 +14,7 @@ import { LoadingOverlay } from '@/components/ui/LoadingIndicator';
 import DaySeparatorCard from './DaySeparatorCard';
 import { Anime } from '@/types';
 import { API_BASE } from '@/lib/apiBase';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
@@ -211,7 +212,19 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     beginBackgroundFetch();
 
     try {
-      const response = await fetch(`${API_BASE}/animes/by-season?year=${year}&season=${season}`);
+      const response = await fetchWithTimeout(
+        `${API_BASE}/animes/by-season?year=${year}&season=${season}`,
+        { cache: 'no-store' },
+      );
+      if (!response.ok) {
+        console.error(`Error fetching animes for season ${seasonId}: HTTP ${response.status}`);
+        return null;
+      }
+      const contentType = response.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        console.error(`Error fetching animes for season ${seasonId}: resposta não é JSON`);
+        return null;
+      }
       const animes: Anime[] = await response.json();
       const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
       const newAnimes = animes.filter(anime => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult);
@@ -250,7 +263,13 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     fetchingEmAltaRef.current = true;
     beginBackgroundFetch();
     try {
-      const response = await fetch(`${API_BASE}/animes?filtro=populares&limit=40`);
+      const response = await fetchWithTimeout(`${API_BASE}/animes?filtro=populares&limit=40`, {
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        console.error('Error fetching "em alta" animes: HTTP', response.status);
+        return;
+      }
       const data = await response.json();
       const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
       const results: Anime[] = Array.isArray(data?.results) ? data.results : [];
