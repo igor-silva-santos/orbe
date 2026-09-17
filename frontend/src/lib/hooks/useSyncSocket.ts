@@ -31,7 +31,9 @@ export function useSyncSocket() {
       socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
-        console.log('Conectado ao WebSocket de Sincronização');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Conectado ao WebSocket de Sincronização');
+        }
         reconnectAttempts = 0;
         setIsConnected(true);
       };
@@ -48,7 +50,9 @@ export function useSyncSocket() {
       socket.onclose = () => {
         setIsConnected(false);
         if (unmounted) return;
-        console.log('Desconectado do WebSocket, tentando reconectar...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Desconectado do WebSocket, tentando reconectar...');
+        }
         const delay = Math.min(
           INITIAL_RECONNECT_DELAY_MS * 2 ** reconnectAttempts,
           MAX_RECONNECT_DELAY_MS

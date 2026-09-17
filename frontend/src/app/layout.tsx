@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { ClientOnly } from "@/components/layout/ClientOnly";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getSiteUrl } from "@/lib/siteUrl";
+import JsonLd from "@/components/seo/JsonLd";
 
 const SearchOverlay = dynamic(() => import("@/components/modals/SearchOverlay"), { ssr: false });
 const SuperModal = dynamic(() => import("@/components/modals/SuperModal"), { ssr: false });
@@ -29,9 +30,28 @@ const russoOne = Russo_One({
 const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: "Orbe Nerd - Hub de Estreias",
-  description: "O seu hub de estreias nerd. Acompanhe lançamentos de filmes, séries, animes e jogos em um só lugar.",
-  keywords: "filmes, séries, animes, jogos, lançamentos, estreias, hub nerd",
+  title: {
+    default: "Orbe Nerd — Lançamentos de Filmes, Séries, Animes e Jogos",
+    template: "%s | Orbe Nerd",
+  },
+  description:
+    "Acompanhe lançamentos e estreias de filmes, séries, animes e jogos. Calendário por mês, o que estreia hoje, promoções e busca unificada — tudo num hub nerd em português.",
+  keywords: [
+    "lançamentos de filmes",
+    "estreias cinema",
+    "séries novas",
+    "animes da temporada",
+    "jogos que vão lançar",
+    "calendário de lançamentos",
+    "próximos lançamentos",
+    "o que estreia hoje",
+    "hub nerd",
+    "cultura pop",
+    "filmes",
+    "séries",
+    "animes",
+    "jogos",
+  ],
   authors: [{ name: "Orbe Nerd" }],
   creator: "Orbe Nerd",
   publisher: "Orbe Nerd",
@@ -46,8 +66,9 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL(siteUrl),
   openGraph: {
-    title: "Orbe Nerd - Hub de Estreias",
-    description: "O seu hub de estreias nerd para filmes, séries, animes e jogos.",
+    title: "Orbe Nerd — Lançamentos de Filmes, Séries, Animes e Jogos",
+    description:
+      "Calendário de estreias nerd: filmes no cinema e streaming, séries, animes da temporada e jogos por mês.",
     url: siteUrl,
     siteName: "Orbe Nerd",
     locale: "pt_BR",
@@ -55,8 +76,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Orbe Nerd - Hub de Estreias",
-    description: "O seu hub de estreias nerd para filmes, séries, animes e jogos.",
+    title: "Orbe Nerd — Lançamentos de Filmes, Séries, Animes e Jogos",
+    description:
+      "Acompanhe estreias e lançamentos nerd: calendário por mês, busca e promoções de games.",
+  },
+  alternates: {
+    canonical: siteUrl,
+    types: {
+      'text/markdown': `${siteUrl}/llms.txt`,
+    },
   },
   robots: {
     index: true,
@@ -78,6 +106,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <JsonLd />
+      </head>
       <body
         className={`${chakraPetch.variable} ${russoOne.variable} font-sans antialiased`}
       >
