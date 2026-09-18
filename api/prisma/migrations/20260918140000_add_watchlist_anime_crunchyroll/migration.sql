@@ -17,10 +17,16 @@ CREATE TABLE IF NOT EXISTS "WatchlistImportSession" (
 CREATE INDEX IF NOT EXISTS "WatchlistImportSession_userId_status_idx"
     ON "WatchlistImportSession"("userId", "status");
 
-ALTER TABLE "WatchlistImportSession"
-    ADD CONSTRAINT "WatchlistImportSession_userId_fkey"
-    FOREIGN KEY ("userId") REFERENCES "User"("id")
-    ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'WatchlistImportSession_userId_fkey'
+  ) THEN
+    ALTER TABLE "WatchlistImportSession"
+      ADD CONSTRAINT "WatchlistImportSession_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "User"("id")
+      ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS "WatchlistAnime" (
     "id" TEXT NOT NULL,
@@ -61,12 +67,24 @@ CREATE INDEX IF NOT EXISTS "WatchlistAnime_userId_isRemoved_idx"
 CREATE INDEX IF NOT EXISTS "WatchlistAnime_userId_updatedAt_idx"
     ON "WatchlistAnime"("userId", "updatedAt");
 
-ALTER TABLE "WatchlistAnime"
-    ADD CONSTRAINT "WatchlistAnime_userId_fkey"
-    FOREIGN KEY ("userId") REFERENCES "User"("id")
-    ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'WatchlistAnime_userId_fkey'
+  ) THEN
+    ALTER TABLE "WatchlistAnime"
+      ADD CONSTRAINT "WatchlistAnime_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "User"("id")
+      ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
-ALTER TABLE "WatchlistAnime"
-    ADD CONSTRAINT "WatchlistAnime_animeId_fkey"
-    FOREIGN KEY ("animeId") REFERENCES "Anime"("id")
-    ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'WatchlistAnime_animeId_fkey'
+  ) THEN
+    ALTER TABLE "WatchlistAnime"
+      ADD CONSTRAINT "WatchlistAnime_animeId_fkey"
+      FOREIGN KEY ("animeId") REFERENCES "Anime"("id")
+      ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
