@@ -8,11 +8,9 @@ import {
   monthKeyFromItem,
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
-  resolveDatedIndexForNavigation,
-  clampCarouselOpenIndex,
   filterMidiaForCarouselTimeline,
   isCarouselBootstrapReady,
-  formatCarouselMonthTitleShort,
+  parseMidiaReleaseDate,
 } from './carousel-utils';
 import type { Midia } from '@/types';
 
@@ -30,62 +28,70 @@ function mockMidia(id: number, date: string): Midia {
 }
 
 describe('resolveCarouselOpenIndex', () => {
+  const today = new Date(2026, 8, 15); // 15/09/2026
+
   it('returns 0 for empty list', () => {
     assert.equal(resolveCarouselOpenIndex([]), 0);
   });
 
-  it('returns next release >= today (not merely first item of that month)', () => {
+  it('opens on the next upcoming title, not an older release', () => {
     const items = [
       mockMidia(1, '2026-07-01'),
       mockMidia(2, '2026-07-15'),
       mockMidia(3, '2026-08-05'),
       mockMidia(4, '2026-08-20'),
       mockMidia(5, '2026-09-01'),
+      mockMidia(6, '2026-09-20'),
     ];
-    assert.equal(resolveCarouselOpenIndex(items), 3);
-    assert.equal(resolveCarouselOpenMonthKey(items), '2026-08');
-    assert.equal(isCarouselOpenIndexReady(items, 3), true);
+    assert.equal(resolveCarouselOpenIndex(items, today), 5);
+    assert.equal(resolveCarouselOpenMonthKey(items, today), '2026-09');
+    assert.equal(isCarouselOpenIndexReady(items, 5, today), true);
   });
 
-  it('when all releases are past, returns first item of current month', () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const prevMonth = today.getMonth() === 0 ? 12 : today.getMonth();
-    const prevYear = today.getMonth() === 0 ? year - 1 : year;
-    const prevMonthStr = String(prevMonth).padStart(2, '0');
-
+  it('when all releases are past, opens on the most recent one', () => {
     const items = [
-      mockMidia(1, `${prevYear}-${prevMonthStr}-01`),
-      mockMidia(2, `${prevYear}-${prevMonthStr}-15`),
-      mockMidia(3, `${year}-${month}-05`),
-      mockMidia(4, `${year}-${month}-10`),
+      mockMidia(1, '2026-08-01'),
+      mockMidia(2, '2026-08-15'),
+      mockMidia(3, '2026-09-05'),
+      mockMidia(4, '2026-09-10'),
     ];
-    assert.equal(resolveCarouselOpenIndex(items), 2);
+    assert.equal(resolveCarouselOpenIndex(items, today), 3);
   });
 
-  it('when data ends before current month, title matches last available month', () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;
-    const twoMonthsAgo = new Date(year, month - 3, 1);
-    const y = twoMonthsAgo.getFullYear();
-    const m = String(twoMonthsAgo.getMonth() + 1).padStart(2, '0');
-
+  it('opens on a title released today', () => {
     const items = [
-      mockMidia(1, `${y}-${m}-01`),
-      mockMidia(2, `${y}-${m}-15`),
-      mockMidia(3, `${y}-${m}-28`),
+      mockMidia(1, '2026-09-10'),
+      mockMidia(2, '2026-09-15'),
+      mockMidia(3, '2026-09-20'),
     ];
-    assert.equal(resolveCarouselOpenMonthKey(items), `${y}-${m}`);
-    assert.equal(isCarouselOpenIndexReady(items, 2), false);
+    assert.equal(resolveCarouselOpenIndex(items, today), 1);
+  });
+
+  it('when only future releases exist, opens on the next upcoming', () => {
+    const items = [
+      mockMidia(1, '2026-09-20'),
+      mockMidia(2, '2026-10-05'),
+    ];
+    assert.equal(resolveCarouselOpenIndex(items, today), 0);
+    assert.equal(isCarouselOpenIndexReady(items, 0, today), true);
+  });
+
+  it('when data ends before current month, still opens on last released', () => {
+    const items = [
+      mockMidia(1, '2026-07-01'),
+      mockMidia(2, '2026-07-15'),
+      mockMidia(3, '2026-07-28'),
+    ];
+    assert.equal(resolveCarouselOpenMonthKey(items, today), '2026-07');
+    assert.equal(isCarouselOpenIndexReady(items, 2, today), true);
   });
 
   it('after prepending the previous month, still opens on the next upcoming', () => {
+    const today = new Date(2026, 8, 16);
     const september = [
       mockMidia(10, '2026-09-03'),
       mockMidia(11, '2026-09-16'),
-      mockMidia(12, '2026-09-20'),
+      mockMidia(12, '2026-09-17'),
     ];
     const august = [
       mockMidia(1, '2026-08-01'),
@@ -93,32 +99,20 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(3, '2026-08-20'),
     ];
     const merged = mergeMediaByDate(september, august);
-    const open = resolveCarouselOpenIndex(merged);
-    assert.equal(merged[open].id, 12);
+    const open = resolveCarouselOpenIndex(merged, today);
+    assert.equal(merged[open].id, 11);
     assert.equal(monthKeyFromItem(merged[open]), '2026-09');
   });
 
-  it('does not show current month title when only past-month data is loaded', () => {
+  it('does not skip the next upcoming in favor of a past title', () => {
     const items = [
-      mockMidia(1, '2026-05-22'),
-      mockMidia(2, '2026-05-28'),
-      mockMidia(3, '2026-05-31'),
+      mockMidia(1, '2026-08-31'),
+      mockMidia(2, '2026-09-01'),
+      mockMidia(3, '2026-09-20'),
     ];
-    const index = resolveCarouselOpenIndex(items);
-    const monthKey = monthKeyFromItem(items[index]);
-    assert.equal(resolveCarouselOpenMonthKey(items), monthKey);
-    assert.equal(monthKey, '2026-05');
-  });
-
-  it('does not open July when the next release is in August (July vs August bug)', () => {
-    const items = [
-      mockMidia(1, '2026-07-01'),
-      mockMidia(2, '2026-07-31'),
-      mockMidia(3, '2026-08-05'),
-    ];
-    assert.equal(resolveCarouselOpenMonthKey(items), '2026-08');
-    assert.equal(resolveCarouselOpenIndex(items), 2);
-    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items)]), '2026-08');
+    assert.equal(resolveCarouselOpenMonthKey(items, today), '2026-09');
+    assert.equal(resolveCarouselOpenIndex(items, today), 2);
+    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items, today)]), '2026-09');
   });
 
   it('ignores historical re-releases when opening the carousel', () => {
@@ -128,17 +122,17 @@ describe('resolveCarouselOpenIndex', () => {
       mockMidia(3, '2026-07-01'),
       mockMidia(4, '2026-08-05'),
     ];
-    assert.equal(resolveCarouselOpenIndex(items), 3);
-    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items)]), '2026-08');
+    assert.equal(resolveCarouselOpenIndex(items, today), 3);
+    assert.equal(monthKeyFromItem(items[resolveCarouselOpenIndex(items, today)]), '2026-08');
   });
 
-  it('does not jump to index 0 when target month is missing from polluted bootstrap data', () => {
+  it('does not jump to index 0 when historical titles pollute the list', () => {
     const items = [
       mockMidia(1, '1943-09-17'),
       mockMidia(2, '2026-07-01'),
       mockMidia(3, '2026-07-15'),
     ];
-    const index = resolveCarouselOpenIndex(items);
+    const index = resolveCarouselOpenIndex(items, today);
     assert.notEqual(index, 0);
     assert.equal(monthKeyFromItem(items[index]), '2026-07');
   });
@@ -226,52 +220,35 @@ describe('filterMidiaForCarouselTimeline', () => {
 });
 
 describe('isCarouselBootstrapReady', () => {
-  it('returns false until current month data exists', () => {
+  it('returns true when last released is in a previous month', () => {
     const items = [mockMidia(1, '2026-07-01'), mockMidia(2, '2026-07-15')];
-    assert.equal(isCarouselBootstrapReady(items, new Date('2026-08-14')), false);
+    assert.equal(isCarouselBootstrapReady(items, new Date(2026, 7, 14)), true);
   });
 
-  it('returns true when current month has a future release', () => {
+  it('returns true when current month has a last released title', () => {
     const items = [
       mockMidia(1, '2026-07-01'),
       mockMidia(2, '2026-08-05'),
       mockMidia(3, '2026-08-20'),
     ];
-    assert.equal(isCarouselBootstrapReady(items, new Date('2026-08-14')), true);
+    assert.equal(isCarouselBootstrapReady(items, new Date(2026, 7, 14)), true);
   });
 });
 
-describe('resolveDatedIndexForNavigation', () => {
-  it('returns datedIndex for dated slides', () => {
-    assert.equal(resolveDatedIndexForNavigation({ kind: 'dated', datedIndex: 3 }, 10), 3);
-  });
-
-  it('returns last dated item when in year-tbd zone', () => {
-    assert.equal(resolveDatedIndexForNavigation({ kind: 'year-tbd-media' }, 5), 4);
-    assert.equal(resolveDatedIndexForNavigation({ kind: 'year-tbd-separator', year: 2028 }, 3), 2);
-  });
-});
-
-describe('clampCarouselOpenIndex', () => {
-  const items = [
-    mockMidia(1, '2026-08-01'),
-    mockMidia(2, '2026-08-20'),
-    mockMidia(3, '2026-09-01'),
-  ];
-
-  it('keeps valid index', () => {
-    assert.equal(clampCarouselOpenIndex(items, 1), 1);
-  });
-
-  it('falls back to open index when out of range', () => {
-    assert.equal(clampCarouselOpenIndex(items, 99), resolveCarouselOpenIndex(items));
-  });
-});
-
-describe('formatCarouselMonthTitleShort', () => {
-  it('omite o prefixo Lançamentos de para cabeçalhos compactos', () => {
-    const short = formatCarouselMonthTitleShort(new Date(2026, 8, 1));
-    assert.equal(short, 'Setembro de 2026');
+describe('parseMidiaReleaseDate', () => {
+  it('prefers a future nextAiringEpisode over an older carousel date', () => {
+    const item = {
+      ...mockMidia(1, '2026-09-10'),
+      nextAiringEpisode: {
+        airingAt: '2026-09-21T12:00:00.000Z',
+        episode: 5,
+        season: 2,
+      },
+    };
+    const date = parseMidiaReleaseDate(item);
+    assert.equal(date?.getFullYear(), 2026);
+    assert.equal(date?.getMonth(), 8);
+    assert.equal(date?.getDate(), 21);
   });
 });
 

@@ -4,7 +4,6 @@ import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTransla
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
 import { fetchTmdbPtOverview } from './tmdbOverview';
 import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
-import { isAnimeAdultContent } from './qualityFilters';
 import { logger } from './logger';
 
 const ANIME_DETAIL_QUERY = `
@@ -144,7 +143,6 @@ function mapTmdbSerieToPrismaLike(serie: any) {
     overview: serie.overview,
     firstAirDate: serie.first_air_date ? new Date(serie.first_air_date) : null,
     lastAirDate: serie.last_air_date ? new Date(serie.last_air_date) : null,
-    ...mapTmdbEpisodeFields(serie.next_episode_to_air, serie.last_episode_to_air),
     numberOfSeasons: serie.number_of_seasons,
     numberOfEpisodes: serie.number_of_episodes,
     status: serie.status,
@@ -153,6 +151,7 @@ function mapTmdbSerieToPrismaLike(serie: any) {
     voteAverage: serie.vote_average,
     voteCount: serie.vote_count,
     popularity: serie.popularity,
+    ...mapTmdbEpisodeFields(serie.next_episode_to_air, serie.last_episode_to_air),
     genres: (serie.genres ?? []).map((g: any) => ({ genero: { name: g.name } })),
     cast: (serie.credits?.cast ?? []).slice(0, 20).map((p: any) => ({
       character: p.character,
@@ -437,7 +436,6 @@ export async function fetchAnimeDetailsLive(anilistId: number) {
 
     const anime = response.data.data?.Media;
     if (!anime) return null;
-    if (isAnimeAdultContent(anime)) return null;
 
     const mapped = await withPortugueseTranslation(mapAnimeToMidia(mapAnilistToPrismaLike(anime)));
     return {
@@ -575,5 +573,114 @@ export async function fetchJogoDetailsLive(igdbId: number) {
   } catch (error) {
     logger.error(`Erro ao buscar jogo ${igdbId} no IGDB: ${error}`);
     throw error;
+  }
+}
+
+const STAFF_CREDITS_QUERY = `
+  query ($id: Int) {
+    Staff(id: $id) {
+      id
+      name { full }
+      image { large }
+      languageV2
+      characterMedia(sort: START_DATE_DESC, page: 1, perPage: 25) {
+        edges {
+          characterName
+          characters {
+            id
+            name { full native userPreferred }
+          }
+          node {
+            id
+            type
+            title { romaji english }
+            coverImage { extraLarge }
+            startDate { year month day }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type VoiceActorCredit = {
+  id: number;
+  mediaType: 'filme' | 'serie' | 'anime' | 'jogo';
+  title: string;
+  character: string | null;
+  posterPath: string | null;
+  releaseDate: string | null;
+};
+
+function anilistCalendarDate(value?: { year?: number | null; month?: number | null; day?: number | null } | null): string | null {
+  if (!value?.year || !value?.month || !value?.day) return null;
+  return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`;
+}
+
+function anilistVoiceCharacterName(edge: {
+  characterName?: string | null;
+  characters?: Array<{ name?: { full?: string | null; native?: string | null; userPreferred?: string | null } | null } | null> | null;
+}): string | null {
+  const names = (edge.characters ?? [])
+    .map((character) => character?.name?.userPreferred || character?.name?.full || character?.name?.native)
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0)
+    .map((name) => name.trim());
+  const unique = [...new Set(names)];
+  if (unique.length) return unique.join(', ');
+  const fallback = edge.characterName?.trim();
+  return fallback || null;
+}
+
+/** Créditos de dublador via AniList quando o staff ainda não está no banco */
+export async function fetchVoiceActorCreditsLive(anilistId: number): Promise<{
+  id: number;
+  name: string;
+  language: string | null;
+  profilePath: string | null;
+  filmography: VoiceActorCredit[];
+} | null> {
+  try {
+    const response = await anilistApi.post('', {
+      query: STAFF_CREDITS_QUERY,
+      variables: { id: anilistId },
+    });
+
+    if (response.data.errors?.length) {
+      logger.error(`Erro AniList para dublador ${anilistId}: ${response.data.errors[0].message}`);
+      return null;
+    }
+
+    const staff = response.data.data?.Staff;
+    if (!staff) return null;
+
+    const seen = new Set<string>();
+    const filmography: VoiceActorCredit[] = [];
+    for (const edge of staff.characterMedia?.edges ?? []) {
+      const media = edge?.node;
+      if (!media?.id || media.type !== 'ANIME') continue;
+      const character = anilistVoiceCharacterName(edge);
+      const key = `${media.id}-${character ?? ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      filmography.push({
+        id: media.id,
+        mediaType: 'anime',
+        title: media.title?.english || media.title?.romaji || 'Sem título',
+        character,
+        posterPath: media.coverImage?.extraLarge || null,
+        releaseDate: anilistCalendarDate(media.startDate),
+      });
+    }
+
+    return {
+      id: staff.id,
+      name: staff.name?.full || 'Dublador',
+      language: staff.languageV2 || null,
+      profilePath: staff.image?.large || null,
+      filmography,
+    };
+  } catch (error) {
+    logger.error(`Erro ao buscar dublador ${anilistId} no AniList: ${error}`);
+    return null;
   }
 }

@@ -131,6 +131,9 @@ export default function PessoaPage({ params }: { params: { id: string } }) {
                     />
                   </div>
                   <p className="text-sm font-semibold line-clamp-2 orbe-text-primary">{credit.title}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {credit.mediaType === 'filme' ? 'Filme' : 'Série'}
+                  </p>
                   {credit.character && (
                     <p className="text-xs text-muted-foreground line-clamp-1">{credit.character}</p>
                   )}

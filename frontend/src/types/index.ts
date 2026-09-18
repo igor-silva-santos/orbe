@@ -25,16 +25,16 @@ export interface CastMember {
   foto_url?: string;
 }
 
-export interface VoiceActor {
-  id?: number;
-  nome: string;
-  foto_url?: string;
-}
-
 export interface StaffMember {
   id: number;
   nome: string;
   funcao: string;
+  foto_url?: string;
+}
+
+export interface VoiceActor {
+  id?: number;
+  nome: string;
   foto_url?: string;
 }
 
@@ -70,6 +70,12 @@ export interface Plataforma {
   logo_path?: string | null;
 }
 
+export interface NextAiringEpisode {
+  airingAt: string;
+  episode: number;
+  season?: number;
+}
+
 // Interface base para mídia
 export interface Midia {
   id: number;
@@ -100,16 +106,8 @@ export interface Midia {
   steam_app_id?: number | null;
   steam_price_cents?: number | null;
   steam_discount_percent?: number | null;
-  nextAiringEpisode?: {
-    airingAt: string;
-    episode: number;
-    season?: number;
-  } | null;
-  lastAiredEpisode?: {
-    airingAt: string;
-    episode: number;
-    season?: number;
-  } | null;
+  /** Próximo episódio (séries/animes) — usado no carrossel e countdown do card */
+  nextAiringEpisode?: NextAiringEpisode | null;
 }
 
 // Interfaces específicas por tipo de mídia
@@ -156,7 +154,9 @@ export interface Serie extends Midia {
   elenco: CastMember[];
   videos?: Video[];
   temporadas?: Temporada[];
-  streamingProviders?: SerieStreamingProvider[]; // Adicionado para consistência
+  streamingProviders?: SerieStreamingProvider[];
+  nextAiringEpisode?: NextAiringEpisode | null;
+  lastAiredEpisode?: NextAiringEpisode | null;
 }
 
 export interface Relation {
@@ -183,10 +183,7 @@ export interface Anime extends Serie {
   airingSchedule?: any[];
   format?: string;
   isAdult?: boolean;
-  nextAiringEpisode?: {
-    airingAt: string;
-    episode: number;
-  } | null;
+  nextAiringEpisode?: NextAiringEpisode | null;
   startDate?: {
       year: number;
       month: number;
@@ -258,31 +255,6 @@ export interface Notification {
   createdAt: string;
 }
 
-export interface WatchlistAnime {
-  id: string;
-  crunchyrollId?: string | null;
-  crunchyrollUrl?: string | null;
-  malId?: number | null;
-  animeId?: number | null;
-  title: string;
-  titleAlt?: string | null;
-  posterUrl?: string | null;
-  genres?: string[];
-  season: number;
-  episode: number;
-  totalEpisodes?: number | null;
-  episodeDurationSec?: number | null;
-  remainingTimeSec?: number | null;
-  status: 'comecar' | 'continuar' | 'seguir' | 'novamente' | 'terminado';
-  lists?: string[];
-  hasDub: boolean;
-  note?: string | null;
-  source?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  lastSyncedAt?: string;
-}
-
 // Interface para eventos de games (IGDB)
 export interface Evento {
   id: number;
@@ -332,7 +304,6 @@ export interface MidiaCardProps {
   onClick?: () => void;
   isFocused?: boolean;
   priority?: boolean;
-  onPosterLoad?: () => void;
 }
 
 export interface HeaderProps {

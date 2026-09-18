@@ -1,5 +1,5 @@
-﻿#!/usr/bin/env python3
-"""Opera├º├úo segura do sync do Orbe, sem deploy e sem registrar segredos."""
+#!/usr/bin/env python3
+"""Operação segura do sync do Orbe, sem deploy e sem registrar segredos."""
 
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ def request_json(path: str, *, method: str = "GET", secret: str | None = None) -
                 raise RuntimeError(f"{path} respondeu HTTP {response.status}")
             return json.loads(body) if body else {}
     except urllib.error.HTTPError as error:
-        # N├úo imprime corpo ou cabe├ºalhos para evitar vazamento acidental.
+        # Não imprime corpo ou cabeçalhos para evitar vazamento acidental.
         raise RuntimeError(f"{path} respondeu HTTP {error.code}") from error
     except (urllib.error.URLError, TimeoutError) as error:
-        raise RuntimeError(f"{path} indispon├¡vel: {error.reason}") from error
+        raise RuntimeError(f"{path} indisponível: {error.reason}") from error
 
 
 def public_status() -> dict:
@@ -63,7 +63,7 @@ def watch_until_idle(initial: dict) -> int:
     rounds = 0
     while time.monotonic() < deadline:
         if status.get("syncActive") is not True:
-            print("Sync inativo ÔÇö ping encerrado.")
+            print("Sync inativo — ping encerrado.")
             return 0
         remaining = int(deadline - time.monotonic())
         print(f"Watch #{rounds + 1}: ativo phase={status.get('phase')} pct={status.get('progressPercent')} restante={remaining}s")
@@ -82,27 +82,27 @@ def watch_until_idle(initial: dict) -> int:
 def maybe_resume() -> dict:
     status = public_status()
     if status.get("syncActive") is True:
-        print("Sync j├í est├í ativo; nenhuma chamada mutativa foi feita.")
+        print("Sync já está ativo; nenhuma chamada mutativa foi feita.")
         return status
 
     if not (status.get("resumeAvailable") is True or status.get("interrupted") is True):
-        print("N├úo h├í checkpoint interrompido retom├ível; nenhuma chamada mutativa foi feita.")
+        print("Não há checkpoint interrompido retomável; nenhuma chamada mutativa foi feita.")
         return status
 
     secret = os.environ.get("SYNC_SECRET")
     if not secret:
-        print("Vari├ível protegida SYNC_SECRET n├úo configurada.", file=sys.stderr)
+        print("Variável protegida SYNC_SECRET não configurada.", file=sys.stderr)
         raise RuntimeError("SYNC_SECRET ausente")
 
     request_json("/api/run-sync-resume", method="POST", secret=secret)
-    print("Uma ├║nica retomada autorizada foi solicitada.")
+    print("Uma única retomada autorizada foi solicitada.")
     for _ in range(4):
         time.sleep(15)
         status = public_status()
         if status.get("syncActive") is True:
             print("Retomada confirmada: sync ativo.")
             return status
-    print("A API aceitou a retomada, mas syncActive n├úo ficou true em 60 segundos.", file=sys.stderr)
+    print("A API aceitou a retomada, mas syncActive não ficou true em 60 segundos.", file=sys.stderr)
     raise RuntimeError("resume sem syncActive")
 
 
@@ -111,7 +111,7 @@ def main() -> int:
         print("ORBE_OPS_ACTION deve ser health, status, resume ou watch.", file=sys.stderr)
         return 2
 
-    print(f"A├º├úo operacional: {ACTION}")
+    print(f"Ação operacional: {ACTION}")
     request_json("/api/health")
     print("API online.")
 

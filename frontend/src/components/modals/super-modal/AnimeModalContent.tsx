@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Anime, Character, StaffMember, CalendarModalData } from '@/types';
 import AnimeInfoBlock from './AnimeInfoBlock';
-import { useAppStore } from '@/stores/appStore';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -17,6 +16,7 @@ import {
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
+import { useAppStore } from '@/stores/appStore';
 import TrailerEmbed from '@/components/ui/TrailerEmbed';
 
 interface AnimeModalContentProps {

@@ -272,6 +272,7 @@ async function processSerieBatch(
         type: serieDetails.type,
         inProduction: serieDetails.in_production,
         tagline: serieDetails.tagline,
+        ...mapTmdbEpisodeFields(serieDetails.next_episode_to_air, serieDetails.last_episode_to_air),
       };
 
       const generoIds = await resolveTmdbGeneroIds(prisma.genero, serieDetails.genres);

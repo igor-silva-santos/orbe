@@ -60,10 +60,11 @@ export function midiaHasReleased(midia: Midia): boolean {
 export function resolveCardStatus(
   type: TipoMidia,
   midia: Midia,
-  options?: { isNewAnimeEpisode?: boolean },
+  options?: { isNewEpisode?: boolean; isNewAnimeEpisode?: boolean },
 ): CardStatus | null {
   const released = midiaHasReleased(midia);
   const hasStreaming = (midia.plataformas_api?.length ?? 0) > 0;
+  const isNewEpisode = Boolean(options?.isNewEpisode ?? options?.isNewAnimeEpisode);
 
   if (type === 'filme') {
     const filme = midia as Filme;
@@ -78,6 +79,7 @@ export function resolveCardStatus(
 
   if (type === 'serie') {
     const serie = midia as Serie;
+    if (isNewEpisode) return { label: 'NOVO EP', variant: 'novo_ep' };
     const status = (serie.status ?? '').toLowerCase();
     if (status.includes('returning') || status.includes('airing')) {
       return { label: 'EM EXIBIÇÃO', variant: 'em_exibicao' };
@@ -90,7 +92,7 @@ export function resolveCardStatus(
   }
 
   if (type === 'anime') {
-    if (options?.isNewAnimeEpisode) return { label: 'NOVO EP', variant: 'novo_ep' };
+    if (isNewEpisode) return { label: 'NOVO EP', variant: 'novo_ep' };
     const status = ((midia as { status_raw?: string }).status_raw ?? '').toUpperCase();
     if (status === 'RELEASING') return { label: 'EM EXIBIÇÃO', variant: 'em_exibicao' };
     if (!released || status === 'NOT_YET_RELEASED') {

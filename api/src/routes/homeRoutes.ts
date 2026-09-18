@@ -9,9 +9,11 @@ import {
   mapFilmeToCarouselCard,
   mapSerieToCarouselCard,
   sortSeriesByCarouselDate,
+  resolveSerieCarouselReleaseDate,
   mapAnimeToCarouselCard,
   mapJogoToCarouselCard,
   normalizeSearchText,
+  toCalendarDateParts,
 } from '../mappers';
 import {
   filmeQualityFilter,
@@ -20,7 +22,6 @@ import {
   serieQualityFilter,
   serieCarouselQualityFilter,
   animeQualityFilter,
-  animeSafeWhereFilter,
   jogoQualityFilter,
 } from '../qualityFilters';
 import { logger } from '../logger';
@@ -28,33 +29,23 @@ import cacheMiddleware from '../cacheMiddleware';
 import { searchRateLimiter, homepageRateLimiter } from '../securityMiddleware';
 import {
   TWELVE_HOURS,
+  CAROUSEL_ITEM_LIMIT,
   getCurrentSeason,
   fetchFilmesForCarousel,
-  carouselLiteInclude,
   serieCarouselLiteInclude,
   animeCarouselInclude,
   cardListInclude,
+  pickAroundToday,
 } from './mediaRoutesHelpers';
 
 const router = Router();
 
 /**
- * Cap por tipo na homepage. O carrossel do cliente já pré-carrega os meses
- * adjacentes automaticamente no mount (MediaCarousel/AnimeCarousel, via
- * rotas by-month) e só precisa de um punhado de itens antes disso terminar —
- * um valor bem menor que o antigo (200) já cobre isso sem inflar o payload
- * inicial do /homepage à toa (filmes é o único tipo que de fato batia no
- * limite antigo; séries/animes/jogos já retornavam bem menos que isso).
+ * Homepage do carrossel: ~40 títulos antes de hoje + ~40 a partir de hoje.
+ * Evita `take` nos mais antigos da janela de 90 dias, que escondia o mês atual.
  */
-const HOMEPAGE_ITEM_LIMIT = 80;
-
-/** Janela inicial SSR: mês atual (meses adjacentes carregam no cliente ao rolar) */
-const getHomepageDateWindow = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  return { start, end };
-};
+const HOMEPAGE_AROUND_PAST = 40;
+const HOMEPAGE_AROUND_FUTURE = 40;
 
 /** Lançamentos recentes no bootstrap do carrossel (análogo a em cartaz nos filmes) */
 const getRecentCarouselPastStart = (days = 90): Date => {
@@ -64,38 +55,33 @@ const getRecentCarouselPastStart = (days = 90): Date => {
   return d;
 };
 
-/** Filmes: passado recente (90d) até fim do mês seguinte — sem reestreias históricas */
-const carouselFilmeHomepageWindow = (
-  recentPastStart: Date,
-  windowEnd: Date,
-): Prisma.FilmeWhereInput => {
-  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
-  return {
-    releaseDate: { gte: recentPastStart, lte: nextMonthEnd },
-  };
+const startOfToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
 };
+
+const endOfNextMonth = (from: Date) =>
+  new Date(from.getFullYear(), from.getMonth() + 2, 0, 23, 59, 59, 999);
 
 const carouselSeriePriorityWindow = (
   windowStart: Date,
-  windowEnd: Date,
-): Prisma.SerieWhereInput => {
-  const nextMonthEnd = new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999);
-  return {
-    OR: [
-      { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
-      { lastAirDate: { gte: windowStart, lte: nextMonthEnd } },
-      { nextEpisodeAirDate: { gte: windowStart, lte: nextMonthEnd } },
-      {
-        seasons: {
-          some: {
-            seasonNumber: { gt: 0 },
-            airDate: { gte: windowStart, lte: nextMonthEnd },
-          },
+  nextMonthEnd: Date,
+): Prisma.SerieWhereInput => ({
+  OR: [
+    { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
+    { lastAirDate: { gte: windowStart, lte: nextMonthEnd } },
+    { nextEpisodeAirDate: { gte: windowStart, lte: nextMonthEnd } },
+    {
+      seasons: {
+        some: {
+          seasonNumber: { gt: 0 },
+          airDate: { gte: windowStart, lte: nextMonthEnd },
         },
       },
-    ],
-  };
-};
+    },
+  ],
+});
 
 const carouselSerieRecentPastWindow = (
   windowStart: Date,
@@ -116,56 +102,68 @@ const carouselSerieRecentPastWindow = (
   ],
 });
 
-// Homepage — payload leve: mês atual; carrossel carrega adjacentes sob demanda
+// Homepage — em torno de hoje (passado recente + próximo), não os 80 mais antigos da janela
 router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
-  const { start: windowStart, end: windowEnd } = getHomepageDateWindow();
+  const today = startOfToday();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const nextMonthEnd = endOfNextMonth(today);
   const recentPastStart = getRecentCarouselPastStart();
+  const airingHorizon = new Date(today);
+  airingHorizon.setDate(airingHorizon.getDate() + 21);
 
   try {
     const [
-      filmeCarousel,
+      filmePast,
+      filmeFuture,
       seriePriority,
       seriePast,
-      jogoCarousel,
+      jogoPast,
+      jogoFuture,
       animes,
     ] = await Promise.all([
-      fetchFilmesForCarousel(carouselFilmeHomepageWindow(recentPastStart, windowEnd), {
-        orderBy: { releaseDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
-        year,
-      }),
+      fetchFilmesForCarousel(
+        { releaseDate: { gte: recentPastStart, lt: today } },
+        { orderBy: { releaseDate: 'desc' }, take: HOMEPAGE_AROUND_PAST, year },
+      ),
+      fetchFilmesForCarousel(
+        { releaseDate: { gte: today, lte: nextMonthEnd } },
+        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_AROUND_FUTURE, year },
+      ),
       prisma.serie.findMany({
         where: {
-          AND: [serieCarouselQualityFilter, carouselSeriePriorityWindow(windowStart, windowEnd)],
+          AND: [serieCarouselQualityFilter, carouselSeriePriorityWindow(monthStart, nextMonthEnd)],
         },
         orderBy: { firstAirDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
+        take: CAROUSEL_ITEM_LIMIT,
         include: serieCarouselLiteInclude,
       }),
       prisma.serie.findMany({
         where: {
-          AND: [serieCarouselQualityFilter, carouselSerieRecentPastWindow(windowStart, recentPastStart)],
+          AND: [serieCarouselQualityFilter, carouselSerieRecentPastWindow(monthStart, recentPastStart)],
         },
         orderBy: { firstAirDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
+        take: CAROUSEL_ITEM_LIMIT,
         include: serieCarouselLiteInclude,
       }),
       prisma.jogo.findMany({
         where: {
-          AND: [
-            jogoQualityFilter,
-            {
-              firstReleaseDate: {
-                gte: recentPastStart,
-                lte: new Date(windowEnd.getFullYear(), windowEnd.getMonth() + 2, 0, 23, 59, 59, 999),
-              },
-            },
-          ],
+          AND: [jogoQualityFilter, { firstReleaseDate: { gte: recentPastStart, lt: today } }],
+        },
+        orderBy: { firstReleaseDate: 'desc' },
+        take: HOMEPAGE_AROUND_PAST,
+        include: {
+          genres: { include: { genero: true } },
+          platforms: { include: { plataforma: true }, take: 4 },
+        },
+      }),
+      prisma.jogo.findMany({
+        where: {
+          AND: [jogoQualityFilter, { firstReleaseDate: { gte: today, lte: nextMonthEnd } }],
         },
         orderBy: { firstReleaseDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
+        take: HOMEPAGE_AROUND_FUTURE,
         include: {
           genres: { include: { genero: true } },
           platforms: { include: { plataforma: true }, take: 4 },
@@ -174,29 +172,54 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       prisma.anime.findMany({
         where: {
           ...animeQualityFilter,
-          seasonYear: year,
-          season,
           format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] },
+          OR: [
+            { seasonYear: year, season },
+            { startDate: { gte: monthStart, lte: nextMonthEnd } },
+            { airingSchedule: { some: { airingAt: { gte: today, lte: airingHorizon } } } },
+          ],
         },
         orderBy: { startDate: 'asc' },
-        take: HOMEPAGE_ITEM_LIMIT,
+        take: CAROUSEL_ITEM_LIMIT,
         include: animeCarouselInclude,
       }),
     ]);
 
-    const filmesRaw = filmeCarousel;
+    const filmesRaw = [...filmePast].reverse().concat(filmeFuture);
     const seriesById = new Map<number, (typeof seriePriority)[number]>();
     for (const item of [...seriePriority, ...seriePast]) {
       seriesById.set(item.tmdbId, item);
     }
-    const series = sortSeriesByCarouselDate(Array.from(seriesById.values())).slice(0, HOMEPAGE_ITEM_LIMIT);
-    const jogos = jogoCarousel;
+    const series = pickAroundToday(
+      sortSeriesByCarouselDate(Array.from(seriesById.values())),
+      (serie) => resolveSerieCarouselReleaseDate(serie),
+      HOMEPAGE_AROUND_PAST,
+      HOMEPAGE_AROUND_FUTURE,
+      today,
+    );
+    const jogos = [...jogoPast].reverse().concat(jogoFuture);
+    const animesAround = pickAroundToday(
+      animes,
+      (anime) => {
+        const next = anime.airingSchedule?.[0]?.airingAt;
+        if (next) {
+          const date = new Date(next);
+          date.setHours(0, 0, 0, 0);
+          return date;
+        }
+        const parts = toCalendarDateParts(anime.startDate);
+        return parts ? new Date(parts.year, parts.month - 1, parts.day) : null;
+      },
+      HOMEPAGE_AROUND_PAST,
+      HOMEPAGE_AROUND_FUTURE,
+      today,
+    );
 
     res.json({
       filmes: filmesRaw.map(mapFilmeToCarouselCard),
       series: series.map(mapSerieToCarouselCard),
       jogos: jogos.map(mapJogoToCarouselCard),
-      animes: animes.map(mapAnimeToCarouselCard),
+      animes: animesAround.map(mapAnimeToCarouselCard),
     });
   } catch (error) {
     logger.error(`Erro ao buscar dados da homepage: ${error}`);
@@ -500,15 +523,10 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.anime.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            AND: [
-              animeSafeWhereFilter,
-              {
-                OR: [
-                  { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
-                  { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
-                  { titleNative: { contains: qTrim, mode: 'insensitive' } },
-                ],
-              },
+            OR: [
+              { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
+              { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
+              { titleNative: { contains: qTrim, mode: 'insensitive' } },
             ],
           },
           orderBy: { popularity: 'desc' },

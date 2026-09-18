@@ -112,7 +112,8 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
           <span className="inline-flex ml-2 mt-1 items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-3 py-1 text-xs font-bold text-orange-700 dark:text-orange-300">
             {formatNextEpisodeDetail(
               anime.nextAiringEpisode.airingAt,
-              anime.nextAiringEpisode.episode
+              anime.nextAiringEpisode.episode,
+              anime.nextAiringEpisode.season,
             )}
           </span>
         </div>

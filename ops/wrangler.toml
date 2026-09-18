@@ -1,12 +1,12 @@
-﻿name = "orbe-render-sync-watch"
+name = "orbe-render-sync-watch"
 main = "render_sync_watch_worker.js"
 compatibility_date = "2026-09-15"
 
 [triggers]
 crons = ["*/5 * * * *"]
 
-# Opcional: 03:00 Bras├¡lia (06:00 UTC) para ligar watching + resume.
-# S├│ dispara sync se ORBE_DAILY_START=true no Worker.
+# Opcional: 03:00 Brasília (06:00 UTC) para ligar watching + resume.
+# Só dispara sync se ORBE_DAILY_START=true no Worker.
 # crons = ["*/5 * * * *", "0 6 * * *"]
 
 [[kv_namespaces]]

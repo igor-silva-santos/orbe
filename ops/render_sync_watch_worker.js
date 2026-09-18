@@ -1,12 +1,12 @@
-﻿/**
- * Cloudflare Worker: pinga o Render S├ô enquanto o sync estiver ativo.
+/**
+ * Cloudflare Worker: pinga o Render SÓ enquanto o sync estiver ativo.
  *
  * - Cron a cada 5 min: se watching=1, consulta o status; se syncActive, pinga /api/health;
  *   se o sync acabou, zera watching (Render pode hibernar).
  * - POST /start (header x-sync-secret): liga watching, acorda a API e tenta resume.
  * - POST /stop: desliga watching na hora.
  *
- * Sem watching, o cron N├âO chama o Render ÔÇö o PC n├úo entra na jogada.
+ * Sem watching, o cron NÃO chama o Render — o PC não entra na jogada.
  */
 
 const API_DEFAULT = "https://orbe-7bu0.onrender.com";
@@ -59,7 +59,7 @@ async function isWatching(env) {
 
 async function setWatching(env, on) {
   if (!env.STATE) {
-    throw new Error("KV STATE n├úo configurado");
+    throw new Error("KV STATE não configurado");
   }
   await env.STATE.put("watching", on ? "1" : "0");
 }
@@ -96,7 +96,7 @@ async function kickSync(env) {
     await postJson(env, "/api/run-sync-resume");
     return { action: "resume" };
   }
-  return { action: "watch_only", message: "sem checkpoint; pinga se um sync come├ºar" };
+  return { action: "watch_only", message: "sem checkpoint; pinga se um sync começar" };
 }
 
 async function getJson(env, path) {

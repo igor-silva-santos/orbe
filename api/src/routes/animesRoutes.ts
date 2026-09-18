@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapAnimeToMidia, mapAnimeToCarouselCard } from '../mappers';
-import { fetchAnimeDetailsLive } from '../externalDetails';
-import { animeQualityFilter, animeSeasonQualityFilter, animeSafeWhereFilter } from '../qualityFilters';
+import { fetchAnimeDetailsLive, fetchVoiceActorCreditsLive } from '../externalDetails';
+import { animeQualityFilter, animeSeasonQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import adminMiddleware from '../adminMiddleware';
@@ -20,34 +20,52 @@ import {
   parsePositiveIntId,
   animeCarouselInclude,
 } from './mediaRoutesHelpers';
-import { getBrazilCalendarWeekBounds, getWeekdayInBrazil } from '../brazilTimezone';
 
 const router = Router();
 
+const blockedTags = ["Hentai", "Ecchi", "Yaoi", "Yuri", "Adult"];
+
 // Rota para Animes
 router.get('/animes', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
-  const { filtro, genero, ano, formato, fonte, status } = req.query;
+  const { filtro, genero, ano, formato, fonte, status, safeSearch, includeAdult } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const conditions: Prisma.AnimeWhereInput[] = [animeSafeWhereFilter];
+    const where: Prisma.AnimeWhereInput = {};
+    const showAdultContent = includeAdult === 'true';
+
+    if (!showAdultContent) {
+      where.isAdult = false;
+    }
 
     if (genero && genero !== 'todos') {
-      conditions.push({ genres: { some: { genero: { name: genero as string } } } });
+      where.genres = {
+        some: { genero: { name: genero as string } },
+      };
     }
     if (formato && formato !== 'todos') {
-      conditions.push({ format: formato as string });
+      where.format = formato as string;
     }
     if (fonte && fonte !== 'todos') {
-      conditions.push({ source: fonte as string });
+      where.source = fonte as string;
     }
     if (status && status !== 'todos') {
-      conditions.push({ status: status as string });
+      where.status = status as string;
     }
     if (ano && ano !== 'todos') {
-      conditions.push({ seasonYear: parseInt(ano as string) });
+      where.seasonYear = parseInt(ano as string);
     }
 
-    const where: Prisma.AnimeWhereInput = { AND: conditions };
+    if (safeSearch === 'true' || !showAdultContent) {
+      where.tags = {
+        none: {
+          tag: {
+            name: {
+              in: blockedTags,
+            },
+          },
+        },
+      };
+    }
 
     const orderBy: Prisma.AnimeOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { titleRomaji: 'asc' };
 
@@ -172,7 +190,15 @@ router.get('/animes/:id/next-episode', async (req, res) => {
 // Rota para Animes da Semana
 router.get('/animes/weekly-schedule', async (req, res) => {
   try {
-    const { start: startDate, end: endDate } = getBrazilCalendarWeekBounds(new Date());
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 (Dom) - 6 (Sáb)
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - dayOfWeek);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    endDate.setHours(23, 59, 59, 999);
 
     const schedule = await prisma.airingSchedule.findMany({
       where: {
@@ -180,7 +206,6 @@ router.get('/animes/weekly-schedule', async (req, res) => {
           gte: startDate,
           lte: endDate,
         },
-        anime: animeSafeWhereFilter,
       },
       include: {
         anime: true,
@@ -191,20 +216,13 @@ router.get('/animes/weekly-schedule', async (req, res) => {
     });
 
     const groupedByDay = schedule.reduce((acc, item) => {
-      const day = getWeekdayInBrazil(item.airingAt);
-      const mapped = {
-        ...mapAnimeToMidia(item.anime),
-        nextAiringEpisode: {
-          episode: item.episode,
-          airingAt: item.airingAt.toISOString(),
-        },
-      };
+      const day = item.airingAt.getDay();
       if (!acc[day]) {
         acc[day] = [];
       }
-      acc[day].push(mapped);
+      acc[day].push(mapAnimeToMidia(item.anime));
       return acc;
-    }, {} as Record<number, ReturnType<typeof mapAnimeToMidia>[]>);
+    }, {} as Record<number, any[]>);
 
     res.json(groupedByDay);
   } catch (error) {
@@ -317,6 +335,129 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
   } catch (error) {
     logger.error(`Erro ao buscar animes por temporada: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar animes por temporada.' });
+  }
+});
+
+router.get('/dubladores/:id/creditos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const anilistId = parsePositiveIntId(req.params.id);
+  if (!anilistId) {
+    return res.status(400).json({ error: 'ID de dublador inválido.' });
+  }
+
+  try {
+    const dublador = await prisma.dublador.findUnique({
+      where: { anilistId },
+      include: {
+        personagens_dublados: {
+          include: {
+            animeCharacter: {
+              include: {
+                character: true,
+                anime: {
+                  select: {
+                    anilistId: true,
+                    titleRomaji: true,
+                    titleEnglish: true,
+                    coverImage: true,
+                    startDate: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!dublador) {
+      const live = await fetchVoiceActorCreditsLive(anilistId);
+      if (!live) {
+        return res.status(404).json({ error: 'Dublador não encontrado.' });
+      }
+      return res.status(200).json(live);
+    }
+
+    const seenAnime = new Set<string>();
+    const animeCredits = dublador.personagens_dublados
+      .map((credit) => {
+        const anime = credit.animeCharacter.anime;
+        const character = credit.animeCharacter.character;
+        return {
+          id: anime.anilistId,
+          mediaType: 'anime' as const,
+          title: anime.titleEnglish || anime.titleRomaji,
+          character: character.name || null,
+          posterPath: anime.coverImage || null,
+          releaseDate: anime.startDate ? anime.startDate.toISOString().slice(0, 10) : null,
+        };
+      })
+      .filter((credit) => {
+        const key = `${credit.id}-${credit.character ?? ''}`;
+        if (seenAnime.has(key)) return false;
+        seenAnime.add(key);
+        return true;
+      });
+
+    const pessoas = await prisma.pessoa.findMany({
+      where: { name: { equals: dublador.name, mode: 'insensitive' } },
+      include: {
+        filmeCast: {
+          include: {
+            filme: { select: { tmdbId: true, title: true, posterPath: true, releaseDate: true } },
+          },
+          take: 40,
+        },
+        serieCast: {
+          include: {
+            serie: { select: { tmdbId: true, name: true, posterPath: true, firstAirDate: true } },
+          },
+          take: 40,
+        },
+      },
+      take: 5,
+    });
+
+    const seenOther = new Set<string>();
+    const otherCredits = (pessoas.length === 1 ? pessoas : []).flatMap((pessoa) => [
+      ...pessoa.filmeCast.map((credit) => ({
+        id: credit.filme.tmdbId,
+        mediaType: 'filme' as const,
+        title: credit.filme.title,
+        character: credit.character || null,
+        posterPath: credit.filme.posterPath || null,
+        releaseDate: credit.filme.releaseDate ? credit.filme.releaseDate.toISOString().slice(0, 10) : null,
+      })),
+      ...pessoa.serieCast.map((credit) => ({
+        id: credit.serie.tmdbId,
+        mediaType: 'serie' as const,
+        title: credit.serie.name,
+        character: credit.character || null,
+        posterPath: credit.serie.posterPath || null,
+        releaseDate: credit.serie.firstAirDate ? credit.serie.firstAirDate.toISOString().slice(0, 10) : null,
+      })),
+    ]).filter((credit) => {
+      const key = `${credit.mediaType}-${credit.id}`;
+      if (seenOther.has(key)) return false;
+      seenOther.add(key);
+      return true;
+    });
+
+    const filmography = [...animeCredits, ...otherCredits].sort((a, b) => {
+      const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+      const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    res.json({
+      id: dublador.anilistId,
+      name: dublador.name,
+      language: dublador.language,
+      profilePath: dublador.image ?? null,
+      filmography,
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar créditos do dublador ${anilistId}: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar créditos do dublador.' });
   }
 });
 

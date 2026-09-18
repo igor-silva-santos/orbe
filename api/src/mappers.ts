@@ -20,6 +20,80 @@ export const toCalendarDateString = (value: Date | string | null | undefined): s
   return `${year}-${month}-${day}`;
 };
 
+export const toCalendarDateParts = (
+  value: Date | string | null | undefined,
+): { year: number; month: number; day: number } | null => {
+  const iso = toCalendarDateString(value);
+  if (!iso) return null;
+  const [year, month, day] = iso.split('-').map(Number);
+  return { year, month, day };
+};
+
+type TmdbEpisodeStub = {
+  air_date?: string | null;
+  episode_number?: number | null;
+  season_number?: number | null;
+} | null | undefined;
+
+export function mapTmdbEpisodeFields(next: TmdbEpisodeStub, last: TmdbEpisodeStub) {
+  return {
+    nextEpisodeAirDate: next?.air_date ? new Date(next.air_date) : null,
+    nextEpisodeNumber: next?.episode_number ?? null,
+    nextEpisodeSeason: next?.season_number ?? null,
+    lastEpisodeNumber: last?.episode_number ?? null,
+    lastEpisodeSeason: last?.season_number ?? null,
+  };
+}
+
+function pessoaTmdbId(pessoa: { tmdbId?: number; id?: number } | null | undefined): number | null {
+  return pessoa?.tmdbId ?? pessoa?.id ?? null;
+}
+
+function toAiringIso(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    const datePart = value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
+    if (datePart) return `${datePart}T12:00:00.000Z`;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
+function mapNextAiringEpisode(serie: {
+  nextEpisodeAirDate?: Date | string | null;
+  nextEpisodeNumber?: number | null;
+  nextEpisodeSeason?: number | null;
+}): { airingAt: string; episode: number; season?: number } | null {
+  const airingAt = toAiringIso(serie.nextEpisodeAirDate);
+  const episode = serie.nextEpisodeNumber;
+  if (!airingAt || episode == null) return null;
+  const airDate = new Date(airingAt);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (Number.isNaN(airDate.getTime()) || airDate < today) return null;
+  return {
+    airingAt,
+    episode,
+    season: serie.nextEpisodeSeason ?? undefined,
+  };
+}
+
+function mapLastAiredEpisode(serie: {
+  lastAirDate?: Date | string | null;
+  lastEpisodeNumber?: number | null;
+  lastEpisodeSeason?: number | null;
+}): { airingAt: string; episode: number; season?: number } | null {
+  const airingAt = toAiringIso(serie.lastAirDate);
+  const episode = serie.lastEpisodeNumber;
+  if (!airingAt || episode == null) return null;
+  return {
+    airingAt,
+    episode,
+    season: serie.lastEpisodeSeason ?? undefined,
+  };
+}
+
 /** Evita 500 quando joins de gênero/provedor estão órfãos no banco */
 const safeGenreNames = (genres?: { genero?: { name: string } | null }[], limit?: number) => {
   const names = genres?.map((g) => g.genero?.name).filter((n): n is string => Boolean(n)) ?? [];
@@ -362,7 +436,7 @@ export const mapFilmeToMidia = (filme: any) => {
     })) ?? [],
     streamingProviders: mapStreamingProviders(filme.streamingProviders),
     elenco: filme.cast?.map((c: any) => ({
-      id: c.pessoa.tmdbId,
+      id: pessoaTmdbId(c.pessoa) ?? 0,
       nome: c.pessoa.name,
       personagem: c.character,
       foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
@@ -392,84 +466,6 @@ function mapFilmeSaga(filme: { collection?: { id: number; name: string } | null;
   return { id: filme.collection.id, nome: filme.collection.name };
 }
 
-type TmdbEpisodeStub = {
-  air_date?: string | null;
-  episode_number?: number | null;
-  season_number?: number | null;
-} | null | undefined;
-
-export function mapTmdbEpisodeFields(next: TmdbEpisodeStub, last: TmdbEpisodeStub) {
-  return {
-    nextEpisodeAirDate: next?.air_date ? new Date(next.air_date) : null,
-    nextEpisodeNumber: next?.episode_number ?? null,
-    nextEpisodeSeason: next?.season_number ?? null,
-    lastEpisodeNumber: last?.episode_number ?? null,
-    lastEpisodeSeason: last?.season_number ?? null,
-  };
-}
-
-function toAiringIso(value: Date | string | null | undefined): string | null {
-  if (!value) return null;
-  if (typeof value === 'string') {
-    const datePart = value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
-    if (datePart) return `${datePart}T12:00:00.000Z`;
-  }
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
-}
-
-function mapNextAiringEpisode(serie: {
-  nextEpisodeAirDate?: Date | string | null;
-  nextEpisodeNumber?: number | null;
-  nextEpisodeSeason?: number | null;
-  lastEpisodeNumber?: number | null;
-  lastAirDate?: Date | string | null;
-  firstAirDate?: Date | string | null;
-  seasons?: SerieSeasonDate[] | null;
-}): { airingAt: string; episode: number; season?: number } | null {
-  let airingAt = toAiringIso(serie.nextEpisodeAirDate);
-  if (!airingAt) {
-    const carouselDate = resolveSerieCarouselReleaseDate(serie);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (carouselDate && carouselDate >= today) {
-      airingAt = toAiringIso(carouselDate);
-    }
-  }
-
-  let episode = serie.nextEpisodeNumber;
-  if (episode == null && serie.lastEpisodeNumber != null) {
-    episode = serie.lastEpisodeNumber + 1;
-  }
-
-  if (!airingAt || episode == null) return null;
-  const airDate = new Date(airingAt);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (Number.isNaN(airDate.getTime()) || airDate < today) return null;
-  return {
-    airingAt,
-    episode,
-    season: serie.nextEpisodeSeason ?? undefined,
-  };
-}
-
-function mapLastAiredEpisode(serie: {
-  lastAirDate?: Date | string | null;
-  lastEpisodeNumber?: number | null;
-  lastEpisodeSeason?: number | null;
-}): { airingAt: string; episode: number; season?: number } | null {
-  const airingAt = toAiringIso(serie.lastAirDate);
-  const episode = serie.lastEpisodeNumber;
-  if (!airingAt || episode == null) return null;
-  return {
-    airingAt,
-    episode,
-    season: serie.lastEpisodeSeason ?? undefined,
-  };
-}
-
 export const mapSerieToMidia = (serie: any) => {
   return {
     type: 'serie',
@@ -492,12 +488,12 @@ export const mapSerieToMidia = (serie: any) => {
     })) ?? [],
     streamingProviders: mapStreamingProviders(serie.streamingProviders),
     criadores: serie.createdBy?.map((c: any) => ({
-      id: c.pessoa.tmdbId,
+      id: pessoaTmdbId(c.pessoa) ?? 0,
       nome: c.pessoa.name,
       foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
     })) ?? [],
     elenco: serie.cast?.map((c: any) => ({
-      id: c.pessoa.tmdbId,
+      id: pessoaTmdbId(c.pessoa) ?? 0,
       nome: c.pessoa.name,
       personagem: c.character,
       foto_url: c.pessoa.profilePath ? `${TMDB_IMAGE_BASE_URL}${c.pessoa.profilePath}` : null,
@@ -559,12 +555,8 @@ export const mapAnimeToMidia = (anime: any) => {
     titleNative: anime.titleNative,
     sinopse: anime.description,
     poster_url_api: anime.coverImage,
-    data_lancamento_api: anime.startDate,
-    startDate: anime.startDate ? {
-      year: new Date(anime.startDate).getFullYear(),
-      month: new Date(anime.startDate).getMonth() + 1,
-      day: new Date(anime.startDate).getDate(),
-    } : null,
+    data_lancamento_api: toCalendarDateString(anime.startDate),
+    startDate: toCalendarDateParts(anime.startDate),
     numero_episodios: anime.episodes,
     numero_temporadas: anime.seasonYear ? 1 : null,
     season: anime.season,
@@ -733,11 +725,9 @@ export function resolveSerieCarouselReleaseDate(serie: {
   recentPast.setDate(recentPast.getDate() - 90);
 
   const parseDay = (value?: Date | string | null): Date | null => {
-    if (!value) return null;
-    const d = value instanceof Date ? new Date(value) : new Date(value);
-    if (Number.isNaN(d.getTime())) return null;
-    d.setHours(0, 0, 0, 0);
-    return d;
+    const parts = toCalendarDateParts(value);
+    if (!parts) return null;
+    return new Date(parts.year, parts.month - 1, parts.day);
   };
 
   // Séries semanais: prioriza o próximo episódio para reentrar no carrossel a cada semana
@@ -755,15 +745,16 @@ export function resolveSerieCarouselReleaseDate(serie: {
     .filter((d): d is Date => d !== null)
     .sort((a, b) => a.getTime() - b.getTime());
 
+  const recentSeason = [...seasonDates].filter((d) => d >= recentPast && d <= today).pop();
+  if (recentSeason) return recentSeason;
+
   const upcomingSeason = seasonDates.find((d) => d >= today);
   if (upcomingSeason) return upcomingSeason;
 
-  if (serie.firstAirDate) {
-    const first = parseDay(serie.firstAirDate);
-    if (first && first >= today) return first;
-  }
+  const first = parseDay(serie.firstAirDate);
+  if (first && first >= recentPast) return first;
 
-  return parseDay(serie.firstAirDate) ?? parseDay(serie.lastAirDate);
+  return nextEpisode ?? lastEpisode ?? null;
 }
 
 export function sortSeriesByCarouselDate<T extends {
@@ -831,12 +822,8 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     titleRomaji: anime.titleRomaji,
     titleEnglish: anime.titleEnglish,
     poster_url_api: anime.coverImage,
-    data_lancamento_api: anime.startDate,
-    startDate: anime.startDate ? {
-      year: new Date(anime.startDate).getFullYear(),
-      month: new Date(anime.startDate).getMonth() + 1,
-      day: new Date(anime.startDate).getDate(),
-    } : null,
+    data_lancamento_api: toCalendarDateString(anime.startDate),
+    startDate: toCalendarDateParts(anime.startDate),
     avaliacao: anime.averageScore,
     generos_api: safeGenreNames(anime.genres, 3).map((name) => translateAnimeGenre(name)),
     plataformas_api: streamingFromLinks.slice(0, 4),

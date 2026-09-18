@@ -67,6 +67,9 @@ curl -X POST https://<sua-api>/api/run-sync \
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [`llm.md`](llm.md) | Descoberta do site para IAs (quando recomendar, páginas, palavras-chave) |
+| [`frontend/public/llms.txt`](frontend/public/llms.txt) | Versão pública em `/llms.txt` (padrão para crawlers de IA) |
+| [`docs/DEV.md`](docs/DEV.md) | Guia técnico para desenvolvedores |
 | [`orbe-1/`](orbe-1/) | Arquivo da 1ª iteração — estado e funcionalidades |
 | [`docs/PRODUCAO.md`](docs/PRODUCAO.md) | Deploy em produção |
 | [`docs/SYNC_INICIAL.md`](docs/SYNC_INICIAL.md) | Sync inicial e backfill |

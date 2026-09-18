@@ -1,28 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { CAROUSEL_VIEWPORT_TOUCH_ACTION } from '@/lib/carousel-touch';
 import { useCtrlWheelCarousel } from '@/hooks/useCtrlWheelCarousel';
-import { useCarouselDragClickGuard } from '@/hooks/useCarouselDragClickGuard';
 import { useCarouselVirtualRange } from '@/hooks/useCarouselVirtualRange';
 import { ChevronLeft, ChevronRight, CalendarDays, ListOrdered, Filter, Zap, TrendingUp } from 'lucide-react';
 import { useOrbeCarousel, FAST_CAROUSEL_DURATION } from '@/hooks/useOrbeCarousel';
-import { useCarouselInfiniteLoop } from '@/hooks/useCarouselInfiniteLoop';
-import { useCarouselInitialPosterReveal } from '@/hooks/useCarouselInitialPosterReveal';
-import { getCarouselNavWrapIndex } from '@/lib/carousel-loop';
-import {
-  ANIME_AGENDA_UNSCHEDULED_LABEL,
-  buildWeeklyItemsFromSchedule,
-  filterWeeklyAgendaByGenre,
-  getAnimeAgendaDate,
-  resolveWeeklyAgendaStartIndex,
-  type AnimeAgendaItem,
-} from '@/lib/carousel-anime-agenda';
-import { getWeekdayInBrazil } from '@/lib/brazil-timezone';
 import { useFanCarouselSlides } from '@/hooks/useFanCarouselSlides';
-import CarouselPosterRevealOverlay from '@/components/ui/CarouselPosterRevealOverlay';
-import CarouselScrollbar from '@/components/ui/CarouselScrollbar';
-import CarouselSectionHeading from '@/components/ui/CarouselSectionHeading';
 
 import MidiaCard from './MidiaCard';
 import MidiaCardSkeleton from './MidiaCardSkeleton';
@@ -36,15 +20,15 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
 
-type CarouselItem = AnimeAgendaItem;
+type CarouselItem = 
+  | { type: 'media'; data: Anime }
+  | { type: 'separator'; dayName: string };
 
 type Season = 'WINTER' | 'SPRING' | 'SUMMER' | 'FALL';
 type ViewMode = 'launch' | 'weekly';
 
 interface AnimeCarouselProps {
     initialData: Anime[];
-    /** When false, defers season bootstrap/prefetch until section is near viewport */
-    bootstrapEnabled?: boolean;
 }
 
 const SEASONS: Season[] = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
@@ -56,33 +40,20 @@ const SEASON_NAMES: Record<Season, string> = {
 };
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
+const animeTimelineDate = (anime: Anime): Date | null => {
+    if (anime.nextAiringEpisode?.airingAt) {
+        const airing = new Date(anime.nextAiringEpisode.airingAt);
+        airing.setHours(0, 0, 0, 0);
+        return airing;
+    }
+    if (!anime.startDate) return null;
+    return new Date(anime.startDate.year, anime.startDate.month - 1, anime.startDate.day);
+};
+
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
 /** Slides de placeholder durante posicionamento inicial — snap central para align:center do Embla */
 const SKELETON_SLIDE_COUNT = 10;
 const SKELETON_CENTER_INDEX = Math.floor(SKELETON_SLIDE_COUNT / 2);
-
-const RELEVANT_ANIME_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
-
-const mergeAnimesByStartDate = (existing: Anime[], incoming: Anime[]): Anime[] => {
-  const byId = new Map(existing.map((anime) => [anime.id, anime]));
-  for (const anime of incoming) {
-    byId.set(anime.id, anime);
-  }
-  return Array.from(byId.values()).sort((a, b) => {
-    const dateA = a.startDate
-      ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime()
-      : 0;
-    const dateB = b.startDate
-      ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime()
-      : 0;
-    return dateA - dateB;
-  });
-};
-
-const filterRelevantAnimes = (animes: Anime[]): Anime[] =>
-  animes.filter(
-    (anime) => anime.format && RELEVANT_ANIME_FORMATS.includes(anime.format) && !anime.isAdult,
-  );
 
 const getSeason = (date: Date): Season => {
   const month = date.getMonth();
@@ -103,22 +74,7 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
     return { startDate, endDate };
 };
 
-const findSeasonStartIndex = (
-  items: CarouselItem[],
-  year: number,
-  season: Season,
-): number =>
-  items.findIndex(
-    (item) =>
-      item.type === 'media' &&
-      item.data.startDate &&
-      item.data.startDate.year === year &&
-      getSeason(
-        new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day),
-      ) === season,
-  );
-
-const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEnabled = true }) => {
+const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
     const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
@@ -139,11 +95,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasSettledInitialView, setHasSettledInitialView] = useState(false);
-  const [hasInitialPositioning, setHasInitialPositioning] = useState(initialData.length === 0);
+  const [hasInitialPositioning, setHasInitialPositioning] = useState(true);
   const [pendingScrollIndex, setPendingScrollIndex] = useState<number | null>(null);
   const [emAltaMode, setEmAltaMode] = useState(false);
   const [emAltaAnimes, setEmAltaAnimes] = useState<Anime[]>([]);
-  const [weeklyLoading, setWeeklyLoading] = useState(false);
   const activeFetchesRef = useRef(0);
   const emAltaLoadedRef = useRef(false);
   const fetchingEmAltaRef = useRef(false);
@@ -156,9 +111,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     activeFetchesRef.current = Math.max(0, activeFetchesRef.current - 1);
   };
 
-  const loadedSeasons = useRef<Set<string>>(
-    initialData.length > 0 ? new Set([`${initialYear}-${initialSeason}`]) : new Set(),
-  );
+  const loadedSeasons = useRef<Set<string>>(new Set());
   const fetchingSeasons = useRef(new Set<string>());
   const previousSelectedIndex = useRef<number>(0);
   const itemsLengthRef = useRef(initialData.length);
@@ -167,12 +120,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   const viewModeRef = useRef<ViewMode>('launch');
   const initialViewModeApplied = useRef(false);
   const lastTitleKeyRef = useRef('');
-  const hasInitialPositioningRef = useRef(initialData.length === 0);
-  const initialScrollDoneRef = useRef(false);
+  const hasInitialPositioningRef = useRef(true);
   const prevStartIndexRef = useRef(0);
   const firstMediaIdRef = useRef<number | undefined>(initialData[0]?.id);
-  const seasonBootstrapRanRef = useRef(false);
-  const seasonNavDirectionRef = useRef<'next' | 'prev'>('next');
 
   const buildLaunchTitle = useCallback((season: Season, year: number) => {
     const today = new Date();
@@ -196,16 +146,12 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     if (viewModeRef.current === 'weekly') {
       if (item.type === 'separator') {
         titleKey = `day-${item.dayName}`;
-        title = item.dayName === ANIME_AGENDA_UNSCHEDULED_LABEL
-          ? 'Agenda: Sem episódio agendado'
-          : `Agenda: ${item.dayName}`;
-      } else if (item.type === 'media') {
-        const agendaDate = getAnimeAgendaDate(item.data);
-        if (agendaDate) {
-          const dayName = DAY_NAMES[getWeekdayInBrazil(agendaDate)];
-          titleKey = `day-${dayName}`;
-          title = `Agenda: ${dayName}`;
-        }
+        title = `Agenda: ${item.dayName}`;
+      } else if (item.data.nextAiringEpisode) {
+        const airingDate = new Date(item.data.nextAiringEpisode.airingAt);
+        const dayName = DAY_NAMES[airingDate.getDay()];
+        titleKey = `day-${dayName}`;
+        title = `Agenda: ${dayName}`;
       }
     } else if (item.type === 'media' && item.data.startDate) {
       const itemDate = new Date(
@@ -239,42 +185,8 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     [emblaRef]
   );
 
-  const getLoopBounds = useCallback(() => {
-    const last = Math.max(0, carouselItemsRef.current.length - 1);
-    return { start: 0, end: last };
-  }, []);
-
-  const loopEnabled =
-    viewMode === 'weekly' &&
-    !emAltaMode &&
-    !hasInitialPositioning &&
-    pendingScrollIndex === null &&
-    carouselItems.length > 0;
-
-  const infiniteLoopConfig = useMemo(
-    () => ({ enabled: loopEnabled, getBounds: getLoopBounds }),
-    [loopEnabled, getLoopBounds],
-  );
-
-  const handleLoopWrap = useCallback(
-    (targetIndex: number) => {
-      previousSelectedIndex.current = targetIndex;
-      setSelectedSnap(targetIndex);
-      updateTitleFromIndex(targetIndex, carouselItemsRef.current);
-    },
-    [updateTitleFromIndex],
-  );
-
-  useCarouselInfiniteLoop({
-    emblaApi,
-    enabled: loopEnabled,
-    getBounds: getLoopBounds,
-    onWrap: handleLoopWrap,
-  });
-
   useFanCarouselSlides(emblaApi);
-  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled, infiniteLoopConfig);
-  useCarouselDragClickGuard(viewportRef);
+  useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
   useEffect(() => {
@@ -290,16 +202,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
   useEffect(() => {
     fetchedAnimesRef.current = fetchedAnimes;
   }, [fetchedAnimes]);
-
-  /** Atualiza dados após sync sem remontar o carrossel */
-  useEffect(() => {
-    if (!initialData.length) return;
-    setFetchedAnimes((prev) => {
-      const merged = mergeAnimesByStartDate(prev, initialData);
-      fetchedAnimesRef.current = merged;
-      return merged;
-    });
-  }, [initialData]);
 
   const fetchSeasonData = useCallback(async (year: number, season: Season, direction: 'next' | 'prev' | 'current' = 'current') => {
     const seasonId = `${year}-${season}`;
@@ -324,28 +226,26 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         return null;
       }
       const animes: Anime[] = await response.json();
-      const newAnimes = filterRelevantAnimes(animes);
-
-      if (newAnimes.length > 0) {
-        loadedSeasons.current.add(seasonId);
-      }
+      const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
+      const newAnimes = animes.filter(anime => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult);
+      
+      loadedSeasons.current.add(seasonId);
 
       if (direction === 'next') {
         setFetchedAnimes((prev) => {
-          const merged = mergeAnimesByStartDate(prev, newAnimes);
+          const merged = [...prev, ...newAnimes];
           fetchedAnimesRef.current = merged;
           return merged;
         });
       } else if (direction === 'prev') {
         setFetchedAnimes((prev) => {
-          const merged = mergeAnimesByStartDate(newAnimes, prev);
+          const merged = [...newAnimes, ...prev];
           fetchedAnimesRef.current = merged;
           return merged;
         });
       } else {
-        const merged = mergeAnimesByStartDate([], newAnimes);
-        fetchedAnimesRef.current = merged;
-        setFetchedAnimes(merged);
+        fetchedAnimesRef.current = newAnimes;
+        setFetchedAnimes(newAnimes);
       }
       
       return newAnimes;
@@ -373,7 +273,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       const data = await response.json();
       const RELEVANT_FORMATS = ['TV', 'TV_SHORT', 'MOVIE', 'ONA'];
       const results: Anime[] = Array.isArray(data?.results) ? data.results : [];
-      setEmAltaAnimes(filterRelevantAnimes(results));
+      setEmAltaAnimes(results.filter((anime) => anime.format && RELEVANT_FORMATS.includes(anime.format) && !anime.isAdult));
       emAltaLoadedRef.current = true;
     } catch (error) {
       console.error('Error fetching "em alta" animes:', error);
@@ -391,31 +291,19 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     });
   };
 
+  // Prefetch temporada atual (completa) + adjacentes
   useEffect(() => {
-    if (!emblaApi || !emAltaMode) return;
-    itemsLengthRef.current = carouselItems.length;
-    emblaApi.reInit();
-    emblaApi.scrollTo(0, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [emblaApi, emAltaMode, emAltaAnimes]);
-
-  // Busca temporada atual se o SSR não trouxe dados; prefetch adjacentes quando visível
-  useEffect(() => {
-    if (!bootstrapEnabled || seasonBootstrapRanRef.current) return;
-    seasonBootstrapRanRef.current = true;
-
-    if (initialData.length === 0) {
-      void fetchSeasonData(initialYear, initialSeason, 'current');
-    }
-
     const seasonIdx = SEASONS.indexOf(initialSeason);
     const prevSeason = SEASONS[(seasonIdx - 1 + 4) % 4];
     const prevYear = seasonIdx === 0 ? initialYear - 1 : initialYear;
     const nextSeason = SEASONS[(seasonIdx + 1) % 4];
     const nextYear = seasonIdx === 3 ? initialYear + 1 : initialYear;
-    void fetchSeasonData(prevYear, prevSeason, 'prev');
-    void fetchSeasonData(nextYear, nextSeason, 'next');
-  }, [bootstrapEnabled, fetchSeasonData, initialData.length, initialSeason, initialYear]);
+    void (async () => {
+      await fetchSeasonData(initialYear, initialSeason, 'current');
+      void fetchSeasonData(prevYear, prevSeason, 'prev');
+      void fetchSeasonData(nextYear, nextSeason, 'next');
+    })();
+  }, [fetchSeasonData, initialSeason, initialYear]);
 
   useEffect(() => {
     viewModeRef.current = viewMode;
@@ -522,31 +410,39 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     if (emAltaMode) {
         newCarouselItems = filteredAnimes.map(anime => ({ type: 'media', data: anime }));
     } else if (viewMode === 'launch') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const currentSeasonObj = getSeason(today);
+        const currentYearObj = today.getFullYear();
+        const useAiringDate = currentSeason === currentSeasonObj && currentYear === currentYearObj;
+
         const sortedAnimes = [...filteredAnimes].sort((a, b) => {
-            const dateA = a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime() : 0;
-            const dateB = b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime() : 0;
-            return dateA - dateB;
+            const dateA = (useAiringDate ? animeTimelineDate(a) : null)
+                ?? (a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day) : null);
+            const dateB = (useAiringDate ? animeTimelineDate(b) : null)
+                ?? (b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day) : null);
+            return (dateA?.getTime() ?? 0) - (dateB?.getTime() ?? 0);
         });
         newCarouselItems = sortedAnimes.map(anime => ({ type: 'media', data: anime }));
         
-        const today = new Date();
-        const currentSeasonObj = getSeason(today);
-        const currentYearObj = today.getFullYear();
-        if (currentSeason === currentSeasonObj && currentYear === currentYearObj) {
-            const startIndexCandidate = newCarouselItems.findIndex(item => 
-                item.type === 'media' && 
-                item.data.startDate &&
-                new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day) >= today
-            );
-            const seasonStartCandidate = newCarouselItems.findIndex(item =>
-                item.type === 'media' &&
-                item.data.startDate &&
-                item.data.startDate.year === currentYearObj &&
-                getSeason(new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day)) === currentSeasonObj
-            );
-            newStartIndex = startIndexCandidate > -1
-              ? startIndexCandidate
-              : (seasonStartCandidate > -1 ? seasonStartCandidate : 0);
+        if (useAiringDate) {
+            const nextIdx = newCarouselItems.findIndex((item) => {
+                if (item.type !== 'media') return false;
+                const date = animeTimelineDate(item.data);
+                return date !== null && date >= today;
+            });
+            if (nextIdx >= 0) {
+                newStartIndex = nextIdx;
+            } else {
+                let lastReleased = -1;
+                for (let i = 0; i < newCarouselItems.length; i++) {
+                    const item = newCarouselItems[i];
+                    if (item.type !== 'media') continue;
+                    const date = animeTimelineDate(item.data);
+                    if (date && date <= today) lastReleased = i;
+                }
+                newStartIndex = lastReleased >= 0 ? lastReleased : Math.max(newCarouselItems.length - 1, 0);
+            }
         } else {
             const searchYear = currentYear;
             const searchSeason = currentSeason;
@@ -556,22 +452,33 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                 item.data.startDate.year === searchYear &&
                 getSeason(new Date(item.data.startDate.year, item.data.startDate.month - 1, item.data.startDate.day)) === searchSeason
             );
-            if (startIndexCandidate > -1) {
-              newStartIndex = startIndexCandidate;
-            } else {
-              const mediaItems = newCarouselItems.filter((item): item is { type: 'media'; data: Anime } => item.type === 'media');
-              if (mediaItems.length > 0) {
-                const wrapMediaIndex = getCarouselNavWrapIndex(seasonNavDirectionRef.current, mediaItems.length);
-                const wrapItem = mediaItems[wrapMediaIndex];
-                newStartIndex = newCarouselItems.findIndex(
-                  (item) => item.type === 'media' && item.data.id === wrapItem.data.id,
-                );
-              }
-            }
+            newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
         }
 
     } else {
-        return;
+        const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+        filteredAnimes.forEach(anime => {
+            if (anime.nextAiringEpisode) {
+                const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
+                const dayIndex = localAiringDate.getDay();
+                animesByDay[dayIndex].push(anime);
+            }
+        });
+
+        const processedItems: CarouselItem[] = [];
+        for (let dayIndex = 0; dayIndex <= 6; dayIndex++) {
+            const animesForDay = animesByDay[dayIndex];
+            if (animesForDay.length > 0) {
+                processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
+                animesForDay.sort((a, b) => new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime());
+                animesForDay.forEach(anime => processedItems.push({ type: 'media', data: anime }));
+            }
+        }
+        
+        newCarouselItems = processedItems;
+        const currentDayIndex = new Date().getDay();
+        const startIndexCandidate = newCarouselItems.findIndex(item => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex]);
+        newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
     }
     
     setCarouselItems(newCarouselItems);
@@ -583,8 +490,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     firstMediaIdRef.current = firstMedia?.type === 'media' ? firstMedia.data.id : undefined;
 
     if (emAltaMode) return;
-    if (!initialScrollDoneRef.current && newCarouselItems.length > 0) {
-      initialScrollDoneRef.current = true;
+    if (hasInitialPositioningRef.current && newCarouselItems.length > 0) {
       setPendingScrollIndex(newStartIndex);
     } else if (startIndexChanged) {
       lastTitleKeyRef.current = '';
@@ -593,53 +499,6 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
 
   }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason, emAltaMode, emAltaAnimes]);
 
-  /** Agenda semanal: dados do cronograma real (airingSchedule) via API */
-  useEffect(() => {
-    if (emAltaMode || viewMode !== 'weekly') return;
-
-    let cancelled = false;
-    setWeeklyLoading(true);
-
-    void (async () => {
-      try {
-        const response = await fetchWithTimeout(`${API_BASE}/animes/weekly-schedule`, {
-          cache: 'no-store',
-        });
-        if (!response.ok) throw new Error('weekly-schedule failed');
-        const grouped = (await response.json()) as Record<string | number, Anime[]>;
-        if (cancelled) return;
-
-        let items = buildWeeklyItemsFromSchedule(grouped, DAY_NAMES);
-        if (selectedGenre) {
-          items = filterWeeklyAgendaByGenre(items, selectedGenre);
-        }
-
-        const startIndex = resolveWeeklyAgendaStartIndex(items, DAY_NAMES);
-        setCarouselItems(items);
-        setStartIndex(startIndex);
-        prevStartIndexRef.current = startIndex;
-        lastTitleKeyRef.current = '';
-        setPendingScrollIndex(items.length > 0 ? startIndex : null);
-        if (items.length === 0) {
-          hasInitialPositioningRef.current = false;
-          setHasInitialPositioning(false);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar agenda semanal:', error);
-        if (!cancelled) {
-          setCarouselItems([]);
-          setPendingScrollIndex(null);
-        }
-      } finally {
-        if (!cancelled) setWeeklyLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [viewMode, emAltaMode, selectedGenre]);
-
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {
     if (!hasSettledInitialView || emAltaMode || carouselItems.length > 0) return;
@@ -647,37 +506,29 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     setHasInitialPositioning(false);
   }, [hasSettledInitialView, emAltaMode, carouselItems.length]);
 
-  /** Aplica scroll pendente só com slides reais no DOM (nunca sobre skeletons) */
+  /** Aplica scroll pendente só depois que o React renderizou os novos slides */
   useEffect(() => {
     if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
-    if (carouselItems.length === 0) {
+    if (pendingScrollIndex >= carouselItems.length) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
       setHasInitialPositioning(false);
       return;
     }
 
-    const targetIndex = Math.min(Math.max(0, pendingScrollIndex), carouselItems.length - 1);
     emblaApi.reInit();
+    emblaApi.scrollTo(pendingScrollIndex, false);
+    previousSelectedIndex.current = pendingScrollIndex;
+    setSelectedSnap(pendingScrollIndex);
+    updateTitleFromIndex(pendingScrollIndex, carouselItems);
 
-    const applyScroll = () => {
-      emblaApi.scrollTo(targetIndex, false);
-      previousSelectedIndex.current = targetIndex;
-      setSelectedSnap(targetIndex);
-      updateTitleFromIndex(targetIndex, carouselItems);
-
-      setPendingScrollIndex(null);
-      hasInitialPositioningRef.current = false;
-      setHasInitialPositioning(false);
-    };
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(applyScroll);
-    });
+    setPendingScrollIndex(null);
+    hasInitialPositioningRef.current = false;
+    setHasInitialPositioning(false);
   }, [pendingScrollIndex, carouselItems, emblaApi, emAltaMode, updateTitleFromIndex]);
 
   useEffect(() => {
-    if (!emblaApi || emAltaMode) return;
+    if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
 
     const prevLength = itemsLengthRef.current;
     const newLength = carouselItems.length;
@@ -693,21 +544,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       firstMediaIdRef.current = firstMedia.data.id;
     }
 
-    emblaApi.reInit();
-
     if (wasPrepend) {
-      const shiftedIndex = previousSelectedIndex.current + added;
-      if (hasInitialPositioningRef.current) {
-        setPendingScrollIndex(shiftedIndex);
-      } else {
-        emblaApi.scrollTo(shiftedIndex, true);
-      }
+      emblaApi.reInit();
+      emblaApi.scrollTo(previousSelectedIndex.current + added, true);
     }
-  }, [emblaApi, carouselItems, emAltaMode]);
+  }, [emblaApi, carouselItems, emAltaMode, pendingScrollIndex]);
 
   const navigateSeason = async (direction: 'next' | 'prev') => {
     if (isNavigating) return;
-    seasonNavDirectionRef.current = direction;
     const seasonIndex = SEASONS.indexOf(currentSeason);
     let newSeason: Season;
     let newYear = currentYear;
@@ -729,123 +573,33 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         await fetchSeasonData(newYear, newSeason, direction);
       }
 
-      const sortedAnimes = [...fetchedAnimesRef.current].sort((a, b) => {
-        const dateA = a.startDate ? new Date(a.startDate.year, a.startDate.month - 1, a.startDate.day).getTime() : 0;
-        const dateB = b.startDate ? new Date(b.startDate.year, b.startDate.month - 1, b.startDate.day).getTime() : 0;
-        return dateA - dateB;
-      });
-      const launchItems: CarouselItem[] = sortedAnimes.map((anime) => ({ type: 'media', data: anime }));
-      let targetYear = newYear;
-      let targetSeason = newSeason;
-
-      if (findSeasonStartIndex(launchItems, targetYear, targetSeason) === -1 && launchItems.length > 0) {
-        const mediaItems = launchItems.filter((item): item is { type: 'media'; data: Anime } => item.type === 'media');
-        const wrapMediaIndex = getCarouselNavWrapIndex(direction, mediaItems.length);
-        const wrapAnime = mediaItems[wrapMediaIndex].data;
-        if (wrapAnime.startDate) {
-          const wrapDate = new Date(
-            wrapAnime.startDate.year,
-            wrapAnime.startDate.month - 1,
-            wrapAnime.startDate.day,
-          );
-          targetYear = wrapDate.getFullYear();
-          targetSeason = getSeason(wrapDate);
-        }
-      }
-
-      setCurrentSeason(targetSeason);
-      setCurrentYear(targetYear);
+      setCurrentSeason(newSeason);
+      setCurrentYear(newYear);
       lastTitleKeyRef.current = '';
     } finally {
       setIsNavigating(false);
     }
   };
 
-  const scrollToToday = useCallback(async () => {
-    if (!emblaApi || isNavigating) return;
-
-    if (emAltaMode) {
-      emblaApi.scrollTo(0, true);
-      return;
-    }
-
-    setIsNavigating(true);
-    try {
-      if (viewModeRef.current === 'weekly') {
-        setPendingScrollIndex(resolveWeeklyAgendaStartIndex(carouselItemsRef.current, DAY_NAMES));
-        return;
-      }
-
-      const today = new Date();
-      setCurrentSeason(getSeason(today));
-      setCurrentYear(today.getFullYear());
-      lastTitleKeyRef.current = '';
-    } finally {
-      setIsNavigating(false);
-    }
-  }, [emblaApi, emAltaMode, isNavigating]);
-
-  const wasEmAltaMode = useRef(false);
-  useEffect(() => {
-    if (!emblaApi) return;
-    if (!wasEmAltaMode.current || emAltaMode) {
-      wasEmAltaMode.current = emAltaMode;
-      return;
-    }
-    wasEmAltaMode.current = emAltaMode;
-    itemsLengthRef.current = carouselItems.length;
-    emblaApi.reInit();
-    void scrollToToday();
-  }, [emAltaMode, emblaApi, carouselItems.length, scrollToToday]);
-
   const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
-  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning && carouselItems.length === 0;
-  const isPositioningOverlay = !emAltaMode && hasInitialPositioning && carouselItems.length > 0;
-
-  const centerHasPoster = useMemo(() => {
-    if (showPositioningSkeleton || carouselItems.length === 0) return false;
-    const item = carouselItems[selectedSnap];
-    return item?.type === 'media' ? Boolean(item.data.poster_url_api) : false;
-  }, [carouselItems, selectedSnap, showPositioningSkeleton]);
-
-  const { isWaitingForCenterPoster, handleCenterPosterLoad } = useCarouselInitialPosterReveal({
-    hasInitialPositioning,
-    emAltaMode,
-    centerHasPoster,
-  });
-
-  const resolvedTitle = emAltaMode
-    ? 'Em Alta'
-    : isNavigating || weeklyLoading
-      ? 'Carregando animes...'
-      : showPositioningSkeleton
-        ? 'Carregando...'
-        : currentTitle || 'Carregando...';
-
-  const resolvedShortTitle = useMemo(() => {
-    if (emAltaMode) return 'Em Alta';
-    if (viewMode === 'weekly') {
-      if (resolvedTitle.startsWith('Agenda: ')) {
-        return resolvedTitle.replace('Agenda: ', '');
-      }
-      return resolvedTitle;
-    }
-    if (resolvedTitle.startsWith('Temporada de ')) {
-      return resolvedTitle.replace('Temporada de ', '');
-    }
-    return resolvedTitle;
-  }, [emAltaMode, viewMode, resolvedTitle]);
+  const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
 
   return (
     <div className="overflow-hidden max-w-full">
-      <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
-        <CarouselSectionHeading
-          title={resolvedTitle}
-          shortTitle={resolvedShortTitle}
-          onClick={() => void scrollToToday()}
-          hint={emAltaMode ? 'Voltar ao início da lista' : viewMode === 'weekly' ? 'Ir para o dia de hoje' : 'Ir para a temporada atual'}
-        />
-        <div className="flex justify-between items-center w-full md:mt-0 md:w-auto md:gap-4 shrink-0">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
+        <h3
+          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
+          onClick={() => emblaApi?.scrollTo(startIndex)}
+        >
+          {emAltaMode
+            ? 'Em Alta'
+            : isNavigating
+              ? 'Carregando animes...'
+              : showPositioningSkeleton
+                ? 'Carregando...'
+                : currentTitle || 'Carregando...'}
+        </h3>
+        <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
                 <button
                   onClick={toggleEmAlta}
@@ -881,7 +635,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {!emAltaMode && viewMode === 'launch' && (
+                {!emAltaMode && (
                   <>
                     <button
                       onClick={() => navigateSeason('prev')}
@@ -900,14 +654,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                   </>
                 )}
             </div>
-            {!emAltaMode && fetchedAnimes.length > 0 && (
+            {!emAltaMode && initialData.length > 0 && (
               <button
                   onClick={() => {
                     setViewMode((prev) => (prev === 'launch' ? 'weekly' : 'launch'));
                     lastTitleKeyRef.current = '';
-                    setPendingScrollIndex(null);
-                    hasInitialPositioningRef.current = true;
-                    setHasInitialPositioning(true);
                   }}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
                   title={viewMode === 'launch' ? 'Lançamento Semanal' : 'Lançamento Mensal'}
@@ -922,10 +673,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       <TooltipProvider delayDuration={300}>
       <div className="relative">
         {isNavigating && (
-          <LoadingOverlay message={viewMode === 'weekly' ? 'Carregando agenda...' : 'Carregando temporada...'} className="rounded-lg" />
+          <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating || weeklyLoading || isPositioningOverlay ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >
@@ -968,18 +719,14 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                       midia={item.data}
                       type="anime"
                       priority={isPriority}
-                      isFocused={index === selectedSnap}
                       userInteractions={userInteractions}
                       onInteraction={handleInteraction}
-                      onPosterLoad={index === selectedSnap ? handleCenterPosterLoad : undefined}
                     />
                   )}
                 </div>
               );})}
         </div>
       </div>
-      <CarouselScrollbar emblaApi={emblaApi} />
-      <CarouselPosterRevealOverlay visible={isWaitingForCenterPoster || isPositioningOverlay} />
       </div>
       </TooltipProvider>
     </div>

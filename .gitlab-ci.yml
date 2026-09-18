@@ -1,0 +1,34 @@
+# Pipeline exclusivamente operacional: não compila nem implanta o clone antigo.
+#
+# Ping controlado (sem o PC): Cloudflare Worker ops/render_sync_watch_worker.js
+#   POST /start → resume + watching=1
+#   cron */5 → pinga /api/health só enquanto syncActive
+#   sync acaba → watching=0, Render pode hibernar
+#
+# GitLab (job curto): ORBE_OPS_ACTION=watch retoma e pinga até 50 min
+# (limite do runner free). O Worker cobre o resto da carga.
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - when: never
+
+stages:
+  - operations
+
+orbe-sync-guard:
+  stage: operations
+  image: python:3.12-alpine
+  timeout: 55 minutes
+  variables:
+    ORBE_API_URL: "https://orbe-7bu0.onrender.com"
+    ORBE_OPS_ACTION: "status"
+  script:
+    - python ops/orbe_sync_guard.py
+  rules:
+    - if: '$ORBE_OPS_ACTION == "health"'
+    - if: '$ORBE_OPS_ACTION == "status"'
+    - if: '$ORBE_OPS_ACTION == "resume"'
+    - if: '$ORBE_OPS_ACTION == "watch"'
+    - when: never

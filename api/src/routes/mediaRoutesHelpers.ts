@@ -218,6 +218,27 @@ export function mergeCarouselRowsByFirstReleaseDateAsc<T extends { igdbId: numbe
     });
 }
 
+/** Recorta a lista ordenada por data: N itens antes de hoje + N a partir de hoje. */
+export function pickAroundToday<T>(
+  items: T[],
+  getDate: (item: T) => Date | null,
+  pastTake: number,
+  futureTake: number,
+  reference = new Date(),
+): T[] {
+  const today = new Date(reference);
+  today.setHours(0, 0, 0, 0);
+
+  const dated = items
+    .map((item) => ({ item, date: getDate(item) }))
+    .filter((row): row is { item: T; date: Date } => row.date != null)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const past = dated.filter((row) => row.date < today).slice(-pastTake);
+  const future = dated.filter((row) => row.date >= today).slice(0, futureTake);
+  return [...past, ...future].map((row) => row.item);
+}
+
 export const animeCarouselInclude = {
   genres: { include: { genero: true } },
   streamingLinks: { take: 5 },

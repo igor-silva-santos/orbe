@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -62,11 +62,11 @@ export default function DubladorPage({ params }: { params: { id: string } }) {
     const stub = {
       id: credit.id,
       titulo_api: credit.title,
-      titulo_curado: credit.title,
-      poster_url_api: credit.posterPath ?? '',
-      poster_curado: credit.posterPath,
+      titulo_curado: null,
+      poster_url_api: credit.posterPath,
+      poster_curado: null,
       data_lancamento_api: credit.releaseDate,
-      data_lancamento_curada: credit.releaseDate,
+      data_lancamento_curada: null,
       generos_api: [],
       avaliacao: null,
       plataformas_api: [],
