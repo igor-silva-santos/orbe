@@ -3,8 +3,18 @@ import { prisma } from './clients';
 import { logger } from './logger';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import type { Notification } from '@prisma/client';
+import { getVapidPublicKey } from './notificationService';
+import { isPrismaSchemaError } from './prismaErrors';
 
 const router = Router();
+
+router.get('/notifications/vapid-public-key', (_req, res) => {
+  const key = getVapidPublicKey();
+  if (!key) {
+    return res.status(503).json({ error: 'Push não configurado no servidor.' });
+  }
+  res.json({ publicKey: key });
+});
 
 function mapNotification(n: Notification) {
   return {
@@ -62,6 +72,61 @@ router.put('/notifications/read-all', authMiddleware, async (req: AuthRequest, r
   } catch (error) {
     logger.error(`Erro ao marcar todas notificações como lidas (usuário ${userId}):`, error);
     res.status(500).json({ error: 'Erro ao atualizar notificações.' });
+  }
+});
+
+router.post('/notifications/subscribe', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const { endpoint, keys } = req.body as {
+    endpoint?: string;
+    keys?: { p256dh?: string; auth?: string };
+  };
+
+  if (!endpoint || !keys?.p256dh || !keys?.auth) {
+    return res.status(400).json({ error: 'Subscription inválida.' });
+  }
+
+  try {
+    await prisma.pushSubscription.upsert({
+      where: { endpoint },
+      create: {
+        userId: req.user!.userId,
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+      update: {
+        userId: req.user!.userId,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      },
+    });
+    res.status(201).json({ success: true });
+  } catch (error) {
+    if (isPrismaSchemaError(error)) {
+      return res.status(503).json({ error: 'Push indisponível — migração pendente.' });
+    }
+    logger.error('Erro ao salvar push subscription:', error);
+    res.status(500).json({ error: 'Erro ao salvar subscription.' });
+  }
+});
+
+router.post('/notifications/unsubscribe', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const endpoint = req.body?.endpoint as string | undefined;
+  if (!endpoint) {
+    return res.status(400).json({ error: 'Endpoint obrigatório.' });
+  }
+
+  try {
+    await prisma.pushSubscription.deleteMany({
+      where: { endpoint, userId: req.user!.userId },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    if (isPrismaSchemaError(error)) {
+      return res.status(503).json({ error: 'Push indisponível — migração pendente.' });
+    }
+    logger.error('Erro ao remover push subscription:', error);
+    res.status(500).json({ error: 'Erro ao remover subscription.' });
   }
 });
 

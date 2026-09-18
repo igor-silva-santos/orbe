@@ -381,7 +381,34 @@ export const orbeNerdApi = {
   getUniverso: async (universeId: string) => apiClient.get(`/continuacoes/universos/${universeId}`),
   getContinuacoesFilme: async (tmdbId: number) => apiClient.get(`/continuacoes/filmes/${tmdbId}`),
   getContinuacoesSerie: async (tmdbId: number) => apiClient.get(`/continuacoes/series/${tmdbId}`),
+
+  // Minha Lista (watchlist de animes)
+  getWatchlistAnimes: () => apiClient.get('/minha-lista/animes'),
+  getContinuarAnimes: () => apiClient.get('/minha-lista/animes/continuar'),
+  importWatchlistAnime: (payload: Record<string, unknown>) =>
+    apiClient.post('/minha-lista/animes/import', payload),
+  syncWatchlistAnimes: (items: Record<string, unknown>[]) =>
+    apiClient.post('/minha-lista/animes/sync', { items }),
+  updateWatchlistAnime: (id: string, payload: Record<string, unknown>) =>
+    apiClient.patch(`/minha-lista/animes/${id}`, payload),
+  deleteWatchlistAnime: (id: string) => apiClient.delete(`/minha-lista/animes/${id}`),
+  addAnimeFromCatalog: (animeId: number, status?: string) =>
+    apiClient.post('/minha-lista/animes/from-catalog', { animeId, status }),
+
+  // Push notifications
+  getVapidPublicKey: () => apiClient.get('/notifications/vapid-public-key'),
+  subscribePush: (subscription: PushSubscriptionJSON) =>
+    apiClient.post('/notifications/subscribe', subscription as Record<string, unknown>),
+  unsubscribePush: (endpoint: string) =>
+    apiClient.post('/notifications/unsubscribe', { endpoint }),
 };
+
+export interface WatchlistSyncResponse {
+  success: boolean;
+  imported: number;
+  updated: number;
+  skipped: number;
+}
 
 export default orbeNerdApi;
 

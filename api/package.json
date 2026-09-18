@@ -42,9 +42,11 @@
     "prisma": "^5.14.0",
     "puppeteer": "^24.23.1",
     "string-similarity": "^4.0.4",
+    "web-push": "^3.6.7",
     "ws": "^8.18.1"
   },
   "devDependencies": {
+    "@types/web-push": "^3.6.4",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

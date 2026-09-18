@@ -889,9 +889,10 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                     setHasInitialPositioning(true);
                   }}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
+                  title={viewMode === 'launch' ? 'Lançamento Semanal' : 'Lançamento Mensal'}
               >
                   {viewMode === 'launch' ? <CalendarDays size={20} /> : <ListOrdered size={20} />}
-                  <span className="hidden sm:inline">{viewMode === 'launch' ? 'Ver Agenda' : 'Ver Lançamentos'}</span>
+                  <span className="hidden sm:inline">{viewMode === 'launch' ? 'Lançamento Semanal' : 'Lançamento Mensal'}</span>
               </button>
             )}
         </div>

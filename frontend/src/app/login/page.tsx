@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
-import { realApi } from '@/data/realApi';
+import { loginWithCredentials } from '@/lib/auth/session';
+import { getToken } from '@/lib/auth/token';
 import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
 
 export default function LoginPage() {
@@ -22,17 +23,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await realApi.login({ email: formData.email, password: formData.password });
-      if (response?.token && response?.user) {
-        localStorage.setItem('token', response.token);
-        await establishBrowserSession(response.token);
-        login(response.user);
-        const params = new URLSearchParams(window.location.search);
-        window.location.href = safeRedirectPath(params.get('redirect'));
-      } else {
-        console.error('Login failed: Invalid credentials or API error');
-        toast.error('Email ou senha inválidos.');
-      }
+      const user = await loginWithCredentials(formData.email, formData.password);
+      const token = getToken();
+      if (token) await establishBrowserSession(token);
+      login(user);
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = safeRedirectPath(params.get('redirect'));
     } catch (error) {
       console.error('Login API call failed:', error);
       toast.error('Ocorreu um erro ao tentar fazer login. Tente novamente.');

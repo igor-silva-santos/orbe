@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Orbe — Sync Crunchyroll",
+  "version": "1.0.0",
+  "description": "Sincroniza sua fila de animes da Crunchyroll com o Orbe Nerd.",
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "https://*.crunchyroll.com/*",
+    "http://localhost:5000/*",
+    "http://localhost:3000/*",
+    "https://orbenerd.com/*",
+    "https://*.orbenerd.com/*",
+    "https://orbe-seven.vercel.app/*",
+    "https://orbe-7bu0.onrender.com/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Orbe Sync"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:3000/*",
+      "https://orbenerd.com/*",
+      "https://*.orbenerd.com/*",
+      "https://orbe-seven.vercel.app/*"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.crunchyroll.com/*"],
+      "js": ["content/crunchyroll-queue.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "https://orbenerd.com/*",
+        "https://*.orbenerd.com/*",
+        "https://orbe-seven.vercel.app/*"
+      ],
+      "js": ["content/orbe-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options/options.html"
+}

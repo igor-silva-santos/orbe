@@ -328,12 +328,12 @@ export function useCarouselMonthLoader({
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    const prev = addMonths(year, month, -1);
     const next = addMonths(year, month, 1);
     const next2 = addMonths(year, month, 2);
 
+    // Não carrega o mês anterior antes de abrir — senão o índice 0 vira o mês passado
+    // e um scroll pendente velho mostra o começo da timeline em vez do próximo lançamento.
     await Promise.all([
-      loadMonth(prev.year, prev.month, 'backward', true),
       loadMonth(year, month, 'visible', true),
       loadMonth(next.year, next.month, 'forward', true),
       loadMonth(next2.year, next2.month, 'forward', true),

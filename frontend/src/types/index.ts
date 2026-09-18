@@ -25,6 +25,12 @@ export interface CastMember {
   foto_url?: string;
 }
 
+export interface VoiceActor {
+  id?: number;
+  nome: string;
+  foto_url?: string;
+}
+
 export interface StaffMember {
   id: number;
   nome: string;
@@ -37,14 +43,8 @@ export interface Character {
   nome: string;
   foto_url?: string;
   dubladores: {
-    jp?: {
-      nome: string;
-      foto_url?: string;
-    };
-    pt?: {
-      nome: string;
-      foto_url?: string;
-    };
+    jp?: VoiceActor;
+    pt?: VoiceActor;
   };
 }
 
@@ -246,6 +246,31 @@ export interface Notification {
   type: string;
   foi_visualizada: boolean;
   createdAt: string;
+}
+
+export interface WatchlistAnime {
+  id: string;
+  crunchyrollId?: string | null;
+  crunchyrollUrl?: string | null;
+  malId?: number | null;
+  animeId?: number | null;
+  title: string;
+  titleAlt?: string | null;
+  posterUrl?: string | null;
+  genres?: string[];
+  season: number;
+  episode: number;
+  totalEpisodes?: number | null;
+  episodeDurationSec?: number | null;
+  remainingTimeSec?: number | null;
+  status: 'comecar' | 'continuar' | 'seguir' | 'novamente' | 'terminado';
+  lists?: string[];
+  hasDub: boolean;
+  note?: string | null;
+  source?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  lastSyncedAt?: string;
 }
 
 // Interface para eventos de games (IGDB)

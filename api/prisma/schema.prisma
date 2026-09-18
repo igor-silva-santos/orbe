@@ -157,6 +157,7 @@ model Anime {
   characters     AnimeCharacter[]
   staff          AnimeStaff[]
   streamingLinks AnimeStreamingLink[]
+  watchlistAnimes WatchlistAnime[]
   tags           AnimeOnTag[]
   ranks          AnimeRank[]
   externalLinks  AnimeExternalLink[]
@@ -829,9 +830,12 @@ model User {
 
   // Relacionamento com as preferências do usuário
   interacoes      preferencias_usuario_midia[]
-  notifications   Notification[]
-  watchlistItems  WatchlistItem[]
-  calendarEvents  UserCalendarEvent[]
+  notifications           Notification[]
+  watchlistItems          WatchlistItem[]
+  watchlistAnimes         WatchlistAnime[]
+  watchlistImportSessions WatchlistImportSession[]
+  pushSubscriptions       PushSubscription[]
+  calendarEvents          UserCalendarEvent[]
 }
 
 model WatchlistItem {
@@ -866,6 +870,68 @@ model Notification {
   relatedMediaId   Int?
   relatedMediaType String?
   createdAt        DateTime @default(now())
+}
+
+/// Watchlist pessoal de animes (Crunchyroll / catálogo Orbe).
+model WatchlistAnime {
+  id                 String   @id
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  crunchyrollId      String?
+  crunchyrollUrl     String?  @db.VarChar(500)
+  malId              Int?
+  animeId            Int?
+  anime              Anime?   @relation(fields: [animeId], references: [id])
+  title              String   @db.VarChar(500)
+  titleAlt           String?  @db.VarChar(500)
+  posterUrl          String?  @db.VarChar(500)
+  genres             String[]
+  season             Int      @default(1)
+  episode            Int      @default(0)
+  totalEpisodes      Int?
+  episodeDurationSec Int?
+  remainingTimeSec   Int?
+  status             String   @default("comecar") @db.VarChar(50)
+  lists              String[]
+  hasDub             Boolean  @default(false)
+  note               String?  @db.Text
+  source             String   @default("manual") @db.VarChar(50)
+  importSessionId    String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  lastSyncedAt       DateTime @default(now())
+  isRemoved          Boolean  @default(false)
+
+  @@unique([userId, crunchyrollId])
+  @@index([userId, isRemoved])
+  @@index([userId, updatedAt])
+}
+
+model WatchlistImportSession {
+  id            String    @id @default(cuid())
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source        String    @default("crunchyroll_extension") @db.VarChar(50)
+  status        String    @default("running") @db.VarChar(50)
+  totalExpected Int?
+  importedCount Int       @default(0)
+  errorMessage  String?   @db.Text
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+
+  @@index([userId, status])
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique @db.VarChar(500)
+  p256dh    String   @db.VarChar(255)
+  auth      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model UserCalendarEvent {

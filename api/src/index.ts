@@ -20,6 +20,8 @@ import notificationRoutes from './notificationRoutes';
 import calendarRoutes from './calendarRoutes';
 import contactRoutes, { isValidEmail } from './contactRoutes';
 import dealsRoutes from './dealsRoutes';
+import minhaListaAnimesRoutes from './minhaListaAnimesRoutes';
+import dubladoresRoutes from './dubladoresRoutes';
 import { verifyBearerToken, MissingTokenError } from './authMiddleware';
 import {
   applySecurityMiddleware,
@@ -61,6 +63,8 @@ app.use('/api', notificationRoutes);
 app.use('/api', calendarRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', dealsRoutes);
+app.use('/api', minhaListaAnimesRoutes);
+app.use('/api', dubladoresRoutes);
 
 function timingSafeEqualStrings(a: string, b: string): boolean {
   const bufA = Buffer.from(a);

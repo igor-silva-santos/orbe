@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
-import orbeNerdApi from '@/lib/api';
+import { registerWithCredentials } from '@/lib/auth/session';
+import { getToken } from '@/lib/auth/token';
 import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -36,20 +37,12 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await orbeNerdApi.register({
-        nome: formData.nome,
-        email: formData.email,
-        password: formData.password,
-      });
-      if (response?.token && response?.user) {
-        localStorage.setItem('token', response.token);
-        await establishBrowserSession(response.token);
-        login(response.user);
-        const params = new URLSearchParams(window.location.search);
-        window.location.href = safeRedirectPath(params.get('redirect'));
-      } else {
-        toast.error('Não foi possível criar sua conta. Tente novamente.');
-      }
+      const user = await registerWithCredentials(formData.nome, formData.email, formData.password);
+      const token = getToken();
+      if (token) await establishBrowserSession(token);
+      login(user);
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = safeRedirectPath(params.get('redirect'));
     } catch (error) {
       console.error('Register API call failed:', error);
       toast.error(error instanceof Error ? error.message : 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.');

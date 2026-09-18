@@ -133,11 +133,28 @@ export function assertIgdbWebhookSecretConfigured(): void {
   }
 }
 
+type CorsOriginCallback = (
+  origin: string | undefined,
+  callback: (err: Error | null, allow?: boolean) => void
+) => void;
+
 export function resolveCorsOptions(): {
-  origin: string | string[] | boolean;
+  origin: string | string[] | boolean | CorsOriginCallback;
   credentials: boolean;
 } {
   const corsOrigin = process.env.CORS_ORIGIN?.trim();
+  const extensionOrigin = process.env.EXTENSION_ORIGIN?.trim();
+
+  const isAllowedOrigin = (origin: string | undefined): boolean => {
+    if (!origin) return true;
+    if (origin.startsWith('chrome-extension://') || origin.startsWith('moz-extension://')) {
+      return true;
+    }
+    if (extensionOrigin && origin === extensionOrigin) return true;
+    if (!corsOrigin || corsOrigin === '*') return !isProduction;
+    const allowed = corsOrigin.split(',').map((o) => o.trim()).filter(Boolean);
+    return allowed.includes(origin);
+  };
 
   if (isProduction) {
     if (!corsOrigin || corsOrigin === '*') {
@@ -145,18 +162,12 @@ export function resolveCorsOptions(): {
         'CORS_ORIGIN deve ser uma lista explícita de origens em produção (não use *).'
       );
     }
-    return {
-      origin: corsOrigin.split(',').map((o) => o.trim()).filter(Boolean),
-      credentials: true,
-    };
-  }
-
-  if (!corsOrigin || corsOrigin === '*') {
-    return { origin: true, credentials: true };
   }
 
   return {
-    origin: corsOrigin.split(',').map((o) => o.trim()).filter(Boolean),
+    origin: (origin, callback) => {
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true,
   };
 }

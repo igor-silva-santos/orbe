@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAppStore } from '@/stores/appStore';
-import { removeToken } from '@/lib/api';
 import type { HeaderProps } from '@/types';
 
 type NavLink = { href: string; label: string };
@@ -36,6 +35,8 @@ const moreLinks: NavLink[] = [
   { href: '/eventos', label: 'Eventos' },
   { href: '/promocoes?tab=em-alta', label: 'Jogos em Alta' },
   { href: '/premios', label: 'Premiações' },
+  { href: '/minha-lista/animes', label: 'Minha Lista' },
+  { href: '/extensao/crunchyroll', label: 'Extensão CR' },
 ];
 
 const Header: React.FC<HeaderProps> = ({
@@ -85,7 +86,6 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleLogout = () => {
-    removeToken();
     logout();
     setIsUserMenuOpen(false);
     setIsMobileMenuOpen(false);
@@ -199,6 +199,14 @@ const Header: React.FC<HeaderProps> = ({
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg py-1 z-50">
+                    <Link
+                      href="/minha-lista/animes"
+                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Minha Lista
+                    </Link>
                     <Link
                       href="/perfil"
                       className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"

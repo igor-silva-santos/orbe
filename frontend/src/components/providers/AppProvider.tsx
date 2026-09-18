@@ -3,8 +3,9 @@ import React, { useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/hooks/useTheme';
+import { bootstrapSession } from '@/lib/auth/session';
+import { mapNotifications, type ApiNotification } from '@/lib/notifications';
 import { realApi } from '@/data/realApi';
-import orbeNerdApi from '@/lib/api';
 import SyncRefreshListener from '@/components/providers/SyncRefreshListener';
 
 interface AppProviderProps {
@@ -12,30 +13,22 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const { 
-    setNotifications,
-    setUser,
-    setInteractions,
-  } = useAppStore();
-  
+  const { setNotifications, login, setUser, setInteractions } = useAppStore();
   const { isDark } = useTheme();
 
   useEffect(() => {
     const initializeApp = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      try {
-        const userData = await orbeNerdApi.getCurrentUser();
-        setUser(userData);
-      } catch (error) {
-        console.error('Erro ao carregar usuário atual:', error);
+      const user = await bootstrapSession();
+      if (!user) {
+        setUser(null);
         return;
       }
 
+      login(user);
+
       try {
         const notifications = await realApi.getNotifications();
-        setNotifications(notifications);
+        setNotifications(mapNotifications(notifications as ApiNotification[]));
       } catch (error) {
         console.error('Erro ao carregar notificações:', error);
       }
@@ -49,7 +42,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     };
 
     initializeApp();
-  }, [setUser, setNotifications, setInteractions]);
+  }, [login, setUser, setNotifications, setInteractions]);
 
   return (
     <>
@@ -58,4 +51,4 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       <Toaster theme={isDark ? 'dark' : 'light'} richColors closeButton position="bottom-right" />
     </>
   );
-}
+};

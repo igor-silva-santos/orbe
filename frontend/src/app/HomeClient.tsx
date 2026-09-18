@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
+import ContinuarAssistindoSection from '@/components/watchlist/ContinuarAssistindoSection';
 import type { Midia, Anime } from '@/types';
 import { resolveCarouselOpenIndex, filterMidiaForCarouselTimeline } from '@/lib/carousel-utils';
 import orbeNerdApi from '@/lib/api';
@@ -94,6 +95,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
       </section>
 
       <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4 overflow-x-hidden">
+        <ContinuarAssistindoSection />
         <section ref={filmesRef} id="filmes" className="overflow-hidden">
           <SectionHeading title="Filmes" href="/filmes" />
           <MediaCarousel

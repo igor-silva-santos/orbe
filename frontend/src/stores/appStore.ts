@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, Notification, Theme, Filme, Serie, Anime, Jogo, UserInteraction } from '@/types';
 import orbeNerdApi from '@/lib/api';
+import { clearSession } from '@/lib/auth/session';
 
 interface AppState {
   // Estado do usuário
@@ -127,13 +128,16 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: true 
       }),
       
-      logout: () => set({ 
-        user: null, 
-        isAuthenticated: false,
-        notifications: [],
-        unreadCount: 0,
-        userInteractions: [],
-      }),
+      logout: () => {
+        clearSession();
+        set({
+          user: null,
+          isAuthenticated: false,
+          notifications: [],
+          unreadCount: 0,
+          userInteractions: [],
+        });
+      },
 
       setInteractions: (interactions) => set({ userInteractions: interactions }),
 
@@ -292,7 +296,9 @@ export const useAppStore = create<AppState>()(
         userInteractions: state.userInteractions,
         fastScrollEnabled: state.fastScrollEnabled,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.user) state.isAuthenticated = true;
+      },
     }
   )
 );
-

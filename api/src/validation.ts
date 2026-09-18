@@ -41,3 +41,26 @@ export function isValidHttpUrl(value: unknown): boolean {
 export function isStringWithMaxLength(value: unknown, maxLength: number): boolean {
   return typeof value === 'string' && value.length <= maxLength;
 }
+
+export const VALID_WATCHLIST_STATUSES = [
+  'comecar',
+  'continuar',
+  'seguir',
+  'assistido',
+  'pausado',
+  'dropado',
+] as const;
+
+export type WatchlistStatus = (typeof VALID_WATCHLIST_STATUSES)[number];
+
+export function isNonNegativeInt(value: unknown): value is number {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 0;
+}
+
+export function isValidWatchlistStatus(value: unknown): value is WatchlistStatus {
+  return (
+    typeof value === 'string' &&
+    (VALID_WATCHLIST_STATUSES as readonly string[]).includes(value)
+  );
+}

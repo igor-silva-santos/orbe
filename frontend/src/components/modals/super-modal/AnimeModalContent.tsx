@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Anime, Character, StaffMember, CalendarModalData } from '@/types';
 import AnimeInfoBlock from './AnimeInfoBlock';
+import { useAppStore } from '@/stores/appStore';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -36,7 +38,10 @@ const dedupePlatforms = (platforms: { nome?: string; url?: string }[]) => {
 };
 
 const CharacterCard = ({ character }: { character: Character }) => {
-  const [selectedDubbing, setSelectedDubbing] = useState<'jp' | 'pt'>('jp');
+  const [selectedDubbing, setSelectedDubbing] = useState<'jp' | 'pt'>(
+    character.dubladores?.pt ? 'pt' : 'jp',
+  );
+  const closeSuperModal = useAppStore((s) => s.closeSuperModal);
   const voiceActor = character.dubladores?.[selectedDubbing];
 
   return (
@@ -73,19 +78,39 @@ const CharacterCard = ({ character }: { character: Character }) => {
 
           <div className="h-28">
             {voiceActor ? (
-              <>
-                <div className="w-16 h-16 bg-muted rounded-full mb-1 overflow-hidden mx-auto">
-                  <SafeImage
-                    src={voiceActor.foto_url}
-                    alt={voiceActor.nome}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                    fallbackLabel="?"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground line-clamp-2 h-8">{voiceActor.nome}</p>
-              </>
+              voiceActor.id ? (
+                <Link
+                  href={`/dublador/${voiceActor.id}`}
+                  onClick={closeSuperModal}
+                  className="block hover:opacity-90"
+                >
+                  <div className="w-16 h-16 bg-muted rounded-full mb-1 overflow-hidden mx-auto">
+                    <SafeImage
+                      src={voiceActor.foto_url}
+                      alt={voiceActor.nome}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                      fallbackLabel="?"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2 h-8 hover:text-primary transition-colors">{voiceActor.nome}</p>
+                </Link>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-muted rounded-full mb-1 overflow-hidden mx-auto">
+                    <SafeImage
+                      src={voiceActor.foto_url}
+                      alt={voiceActor.nome}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                      fallbackLabel="?"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2 h-8">{voiceActor.nome}</p>
+                </>
+              )
             ) : (
               <p className="text-xs text-muted-foreground">(não informado)</p>
             )}
@@ -93,7 +118,7 @@ const CharacterCard = ({ character }: { character: Character }) => {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{character.nome} ({voiceActor ? `Dub: ${voiceActor.nome}` : 'Dublador não informado'})</p>
+        <p>{character.nome} ({voiceActor ? `Dub: ${voiceActor.nome}` : 'Dublador não informado'}{voiceActor?.id ? ' — ver trabalhos' : ''})</p>
       </TooltipContent>
       </Tooltip>
     </TooltipProvider>

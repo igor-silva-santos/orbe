@@ -1,88 +1,62 @@
-'use client';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { HelpCircle, PlugZap } from 'lucide-react';
+import { AJUDA_FAQ } from '@/content/ajuda-faq';
+import { Button } from '@/components/ui/button';
+import { getSiteUrl } from '@/lib/siteUrl';
 
-import { HelpCircle, Mail, MessageCircle, Book } from 'lucide-react';
+export const metadata: Metadata = {
+  title: 'Ajuda — Orbe Nerd',
+  description: 'FAQ sobre login, extensão Crunchyroll, sync da watchlist e notificações.',
+  alternates: { canonical: `${getSiteUrl()}/ajuda` },
+};
 
 export default function AjudaPage() {
-  const faqItems = [
-    {
-      question: "Como posso adicionar filmes à minha lista?",
-      answer: "Clique no ícone de menu (três pontos) em qualquer card de filme e selecione 'Quero Assistir' ou 'Favoritar'."
-    },
-    {
-      question: "Como funciona o sistema de notificações?",
-      answer: "Você receberá notificações sobre lançamentos de filmes, séries e animes que estão em suas listas."
-    },
-    {
-      question: "Posso usar o Orbe Nerd offline?",
-      answer: "Algumas funcionalidades básicas funcionam offline, mas é necessária conexão para atualizações de conteúdo."
-    },
-    {
-      question: "Como alterar o tema da interface?",
-      answer: "Use o botão de alternância de tema no header para alternar entre claro, escuro ou automático."
-    }
-  ];
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <HelpCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-4xl font-bold orbe-text-primary mb-4">Central de Ajuda</h1>
-          <p className="text-lg text-muted-foreground">
-            Encontre respostas para suas dúvidas sobre o Orbe Nerd
+    <div className="min-h-screen">
+      <section className="border-b-4 border-primary bg-gradient-to-b from-accent/60 to-background">
+        <div className="container mx-auto px-4 py-16 max-w-3xl">
+          <div className="flex items-center gap-3 mb-4">
+            <HelpCircle className="h-10 w-10 text-primary" />
+            <span className="text-sm font-semibold uppercase tracking-wider text-primary">Suporte</span>
+          </div>
+          <h1 className="text-4xl font-extrabold mb-4">Central de Ajuda</h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            Respostas rápidas sobre conta, extensão e Minha Lista.
           </p>
+          <Button asChild variant="outline">
+            <Link href="/extensao/crunchyroll" className="inline-flex items-center gap-2">
+              <PlugZap className="h-4 w-4" />
+              Guia da extensão Crunchyroll
+            </Link>
+          </Button>
         </div>
+      </section>
 
-        {/* Links Rápidos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-muted/50 rounded-lg p-6 text-center">
-            <Book className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold orbe-text-primary mb-2">Guia do Usuário</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Aprenda a usar todas as funcionalidades
-            </p>
-            <button className="text-primary hover:text-primary/80 text-sm font-medium">
-              Ver Guia
-            </button>
-          </div>
+      <div className="container mx-auto px-4 py-12 max-w-3xl space-y-4">
+        {AJUDA_FAQ.map((item) => (
+          <details
+            key={item.question}
+            className="group rounded-xl border bg-card p-5 open:border-primary/30"
+          >
+            <summary className="cursor-pointer font-semibold list-none flex justify-between items-center">
+              {item.question}
+              <span className="text-muted-foreground text-sm group-open:rotate-45 transition-transform">
+                +
+              </span>
+            </summary>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.answer}</p>
+          </details>
+        ))}
 
-          <div className="bg-muted/50 rounded-lg p-6 text-center">
-            <MessageCircle className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold orbe-text-primary mb-2">Chat ao Vivo</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Fale conosco em tempo real
-            </p>
-            <button className="text-primary hover:text-primary/80 text-sm font-medium">
-              Iniciar Chat
-            </button>
-          </div>
-
-          <div className="bg-muted/50 rounded-lg p-6 text-center">
-            <Mail className="h-8 w-8 text-primary mx-auto mb-3" />
-            <h3 className="font-semibold orbe-text-primary mb-2">Contato</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Envie sua dúvida por email
-            </p>
-            <button className="text-primary hover:text-primary/80 text-sm font-medium">
-              Enviar Email
-            </button>
-          </div>
-        </div>
-
-        {/* FAQ */}
-        <div>
-          <h2 className="text-2xl font-bold orbe-text-primary mb-6">Perguntas Frequentes</h2>
-          <div className="space-y-4">
-            {faqItems.map((item, index) => (
-              <div key={index} className="bg-muted/50 rounded-lg p-6">
-                <h3 className="font-semibold orbe-text-primary mb-3">{item.question}</h3>
-                <p className="text-muted-foreground">{item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground pt-8 border-t">
+          Ainda com dúvida?{' '}
+          <Link href="/apoie" className="text-primary font-semibold hover:underline">
+            Apoie o projeto
+          </Link>{' '}
+          e nos ajude a melhorar o suporte.
+        </p>
       </div>
     </div>
   );
 }
-
