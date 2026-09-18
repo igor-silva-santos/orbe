@@ -423,9 +423,26 @@ function mapNextAiringEpisode(serie: {
   nextEpisodeAirDate?: Date | string | null;
   nextEpisodeNumber?: number | null;
   nextEpisodeSeason?: number | null;
+  lastEpisodeNumber?: number | null;
+  lastAirDate?: Date | string | null;
+  firstAirDate?: Date | string | null;
+  seasons?: SerieSeasonDate[] | null;
 }): { airingAt: string; episode: number; season?: number } | null {
-  const airingAt = toAiringIso(serie.nextEpisodeAirDate);
-  const episode = serie.nextEpisodeNumber;
+  let airingAt = toAiringIso(serie.nextEpisodeAirDate);
+  if (!airingAt) {
+    const carouselDate = resolveSerieCarouselReleaseDate(serie);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (carouselDate && carouselDate >= today) {
+      airingAt = toAiringIso(carouselDate);
+    }
+  }
+
+  let episode = serie.nextEpisodeNumber;
+  if (episode == null && serie.lastEpisodeNumber != null) {
+    episode = serie.lastEpisodeNumber + 1;
+  }
+
   if (!airingAt || episode == null) return null;
   const airDate = new Date(airingAt);
   const today = new Date();
