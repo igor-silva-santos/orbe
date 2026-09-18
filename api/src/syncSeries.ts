@@ -14,6 +14,7 @@ import { resolveSyncContentOptions } from './syncOptions';
 import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
+import { mapTmdbEpisodeFields } from './mappers';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -258,6 +259,7 @@ async function processSerieBatch(
         firstAirDate: firstAirDate,
         releaseYear: releaseYear,
         lastAirDate: serieDetails.last_air_date ? new Date(serieDetails.last_air_date) : null,
+        ...mapTmdbEpisodeFields(serieDetails.next_episode_to_air, serieDetails.last_episode_to_air),
         numberOfEpisodes: serieDetails.number_of_episodes,
         numberOfSeasons: serieDetails.number_of_seasons,
         status: serieDetails.status,

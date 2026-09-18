@@ -1,6 +1,9 @@
 
 import { Serie } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { formatNextEpisodeDetail } from '@/lib/media-helpers';
 
 interface SerieInfoBlockProps {
   serie: Serie;
@@ -12,7 +15,16 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
   const labelColor = isDark ? 'text-blue-400' : 'text-yellow-500';
 
   const creators = serie.criadores?.map((creator) => creator.nome).join(', ');
-  const releaseYear = serie.data_lancamento_api ? new Date(serie.data_lancamento_api).getFullYear() : 'N/A';
+  const releaseLabel = (() => {
+    if (!serie.data_lancamento_api) return 'N/A';
+    try {
+      const raw = String(serie.data_lancamento_api);
+      const date = raw.includes('T') ? parseISO(raw) : new Date(raw);
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+    } catch {
+      return 'N/A';
+    }
+  })();
   const rating = serie.avaliacao ? (serie.avaliacao / 10).toFixed(1) : null;
 
   return (
@@ -22,7 +34,7 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4 text-sm md:text-base">
         <div className="flex">
           <span className={`font-semibold ${labelColor} mr-2`}>Lançamento:</span>
-          <span>{releaseYear}</span>
+          <span>{releaseLabel}</span>
         </div>
         {serie.status && (
           <div className="flex">
@@ -51,6 +63,21 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
           </div>
         )}
       </div>
+
+      {serie.nextAiringEpisode && (
+        <div className="mt-4">
+          <span className={`font-semibold ${labelColor}`}>Próximo episódio:</span>
+          <div className="mt-2">
+            <span className="inline-flex items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-3 py-1 text-xs font-bold text-orange-700 dark:text-orange-300">
+              {formatNextEpisodeDetail(
+                serie.nextAiringEpisode.airingAt,
+                serie.nextAiringEpisode.episode,
+                serie.nextAiringEpisode.season,
+              )}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="mt-4">
         <span className={`font-semibold ${labelColor}`}>Gêneros:</span>

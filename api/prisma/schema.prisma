@@ -81,6 +81,11 @@ model Serie {
   overview         String?   @db.Text
   firstAirDate     DateTime?
   lastAirDate      DateTime?
+  nextEpisodeAirDate  DateTime?
+  nextEpisodeNumber   Int?
+  nextEpisodeSeason   Int?
+  lastEpisodeNumber   Int?
+  lastEpisodeSeason   Int?
   // Ano de estreia quando não há data de calendário (TBA). Exige firstAirDate null.
   releaseYear      Int?
   numberOfSeasons  Int?
@@ -113,6 +118,8 @@ model Serie {
   premiacoes         Json?
 
   @@index([firstAirDate])
+  @@index([lastAirDate])
+  @@index([nextEpisodeAirDate])
   @@index([releaseYear])
 }
 

@@ -100,11 +100,14 @@ router.get('/minha-lista/animes/continuar', authMiddleware, async (req: AuthRequ
 });
 
 router.post('/minha-lista/animes/from-catalog', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { animeId, status } = req.body ?? {};
+  const { animeId, anilistId, status } = req.body ?? {};
   const userId = req.user!.userId;
 
-  if (!isPositiveInt(animeId)) {
-    return res.status(400).json({ error: 'animeId inv├ílido.' });
+  const internalId = isPositiveInt(animeId) ? Number(animeId) : null;
+  const anilistIdNum = isPositiveInt(anilistId) ? Number(anilistId) : null;
+
+  if (!internalId && !anilistIdNum) {
+    return res.status(400).json({ error: 'Informe animeId ou anilistId.' });
   }
 
   if (status != null && !isValidWatchlistStatus(status)) {
@@ -112,7 +115,9 @@ router.post('/minha-lista/animes/from-catalog', authMiddleware, async (req: Auth
   }
 
   try {
-    const anime = await prisma.anime.findUnique({ where: { id: Number(animeId) } });
+    const anime = internalId
+      ? await prisma.anime.findUnique({ where: { id: internalId } })
+      : await prisma.anime.findUnique({ where: { anilistId: anilistIdNum! } });
     if (!anime) {
       return res.status(404).json({ error: 'Anime n├úo encontrado no cat├ílogo.' });
     }

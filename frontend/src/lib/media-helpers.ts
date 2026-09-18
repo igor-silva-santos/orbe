@@ -461,20 +461,33 @@ export const formatNextEpisodeWeekday = (airingAt: string): string => {
   }
 };
 
-/** Modal — ex.: "Ep. 8 em 16/08/2026 - Domingo" */
+/** TMDB envia só data (meio-dia UTC); AniList traz horário real */
+export const hasMeaningfulAiringTime = (airingAt: string): boolean => {
+  const date = new Date(airingAt);
+  if (Number.isNaN(date.getTime())) return false;
+  return !/T12:00:00(\.000)?Z$/.test(date.toISOString());
+};
+
+/** Modal — ex.: "T2 · Ep. 8 em 16/08/2026 - Domingo às 22:00" */
 export const formatNextEpisodeDetail = (
   airingAt: string,
   episode: number,
+  season?: number,
 ): string => {
   try {
     const date = new Date(airingAt);
     const dateLabel = format(date, 'dd/MM/yyyy', { locale: ptBR });
     const weekday = formatNextEpisodeWeekday(airingAt);
-    return weekday
-      ? `Ep. ${episode} em ${dateLabel} - ${weekday}`
-      : `Ep. ${episode} em ${dateLabel}`;
+    const timeLabel = hasMeaningfulAiringTime(airingAt)
+      ? format(date, 'HH:mm', { locale: ptBR })
+      : null;
+    const seasonPrefix = season ? `T${season} · ` : '';
+    const base = `${seasonPrefix}Ep. ${episode} em ${dateLabel}`;
+    const weekdayPart = weekday ? ` - ${weekday}` : '';
+    const timePart = timeLabel ? ` às ${timeLabel}` : '';
+    return `${base}${weekdayPart}${timePart}`;
   } catch {
-    return `Ep. ${episode}`;
+    return season ? `T${season} · Ep. ${episode}` : `Ep. ${episode}`;
   }
 };
 

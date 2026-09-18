@@ -83,6 +83,8 @@ const carouselSeriePriorityWindow = (
   return {
     OR: [
       { firstAirDate: { gte: windowStart, lte: nextMonthEnd } },
+      { lastAirDate: { gte: windowStart, lte: nextMonthEnd } },
+      { nextEpisodeAirDate: { gte: windowStart, lte: nextMonthEnd } },
       {
         seasons: {
           some: {
@@ -101,6 +103,8 @@ const carouselSerieRecentPastWindow = (
 ): Prisma.SerieWhereInput => ({
   OR: [
     { firstAirDate: { gte: recentPastStart, lt: windowStart } },
+    { lastAirDate: { gte: recentPastStart, lt: windowStart } },
+    { nextEpisodeAirDate: { gte: recentPastStart, lt: windowStart } },
     {
       seasons: {
         some: {

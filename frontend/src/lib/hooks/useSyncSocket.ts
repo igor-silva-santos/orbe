@@ -13,6 +13,9 @@ export interface SyncMessage {
 
 const INITIAL_RECONNECT_DELAY_MS = 1000;
 const MAX_RECONNECT_DELAY_MS = 30000;
+const QUICK_DISCONNECT_MS = 2500;
+const MAX_QUICK_DISCONNECTS = 4;
+const PAUSE_AFTER_FAILURES_MS = 5 * 60 * 1000;
 
 export function useSyncSocket() {
   const [lastMessage, setLastMessage] = useState<SyncMessage | null>(null);
@@ -25,13 +28,22 @@ export function useSyncSocket() {
     let socket: WebSocket | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let reconnectAttempts = 0;
+    let quickDisconnects = 0;
+    let openedAt = 0;
     let unmounted = false;
+    const isDev = process.env.NODE_ENV === 'development';
+
+    const scheduleReconnect = (delay: number) => {
+      if (unmounted) return;
+      reconnectTimer = setTimeout(connect, delay);
+    };
 
     const connect = () => {
       socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
-        console.log('Conectado ao WebSocket de Sincronização');
+        if (isDev) console.log('Conectado ao WebSocket de Sincronização');
+        openedAt = Date.now();
         reconnectAttempts = 0;
         setIsConnected(true);
       };
@@ -41,20 +53,37 @@ export function useSyncSocket() {
           const data = JSON.parse(event.data);
           setLastMessage(data);
         } catch (err) {
-          console.error('Erro ao processar mensagem WS:', err);
+          if (isDev) console.error('Erro ao processar mensagem WS:', err);
         }
       };
 
       socket.onclose = () => {
         setIsConnected(false);
         if (unmounted) return;
-        console.log('Desconectado do WebSocket, tentando reconectar...');
+
+        const livedMs = Date.now() - openedAt;
+        if (openedAt > 0 && livedMs < QUICK_DISCONNECT_MS) {
+          quickDisconnects += 1;
+        } else {
+          quickDisconnects = 0;
+        }
+
+        if (quickDisconnects >= MAX_QUICK_DISCONNECTS) {
+          if (isDev) {
+            console.warn('WebSocket instável — pausando reconexões por alguns minutos.');
+          }
+          quickDisconnects = 0;
+          scheduleReconnect(PAUSE_AFTER_FAILURES_MS);
+          return;
+        }
+
+        if (isDev) console.log('Desconectado do WebSocket, tentando reconectar...');
         const delay = Math.min(
           INITIAL_RECONNECT_DELAY_MS * 2 ** reconnectAttempts,
-          MAX_RECONNECT_DELAY_MS
+          MAX_RECONNECT_DELAY_MS,
         );
         reconnectAttempts += 1;
-        reconnectTimer = setTimeout(connect, delay);
+        scheduleReconnect(delay);
       };
 
       socket.onerror = () => {

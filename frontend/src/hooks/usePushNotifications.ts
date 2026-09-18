@@ -27,7 +27,21 @@ export function usePushNotifications() {
 
     setStatus('loading');
     try {
-      const { publicKey } = await orbeNerdApi.getVapidPublicKey();
+      let publicKey: string;
+      try {
+        const keyResponse = await orbeNerdApi.getVapidPublicKey();
+        publicKey = keyResponse.publicKey;
+      } catch {
+        setStatus('unsupported');
+        setError('Push ainda não configurado no servidor. Tente novamente após o próximo deploy.');
+        return;
+      }
+
+      if (!publicKey) {
+        setStatus('unsupported');
+        setError('Push não disponível neste ambiente.');
+        return;
+      }
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         setStatus('denied');

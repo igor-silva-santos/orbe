@@ -109,7 +109,9 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   }, [isMenuOpen]);
 
   const isAnime = type === 'anime';
-  const nextAiringEpisode = isAnime ? (midia as Anime | undefined)?.nextAiringEpisode : null;
+  const isSerie = type === 'serie';
+  const nextAiringEpisode =
+    isAnime || isSerie ? midia.nextAiringEpisode ?? null : null;
   const countdown = useCountdown(nextAiringEpisode?.airingAt);
 
   // Precisa vir depois de todas as chamadas de hook acima — Rules of Hooks exige ordem
@@ -146,7 +148,9 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const isFutureRelease = animeReleaseDate ? animeReleaseDate > new Date() : false;
   const hasNextEpisode = !!nextAiringEpisode;
   const nextEpisodeNumber =
-    nextAiringEpisode?.episode ?? (midia as Anime).numero_episodio_atual ?? null;
+    nextAiringEpisode?.episode ??
+    (isAnime ? (midia as Anime).numero_episodio_atual : null) ??
+    null;
   const nextEpisodeCardLabel =
     nextAiringEpisode && nextEpisodeNumber
       ? formatNextEpisodeCard(nextAiringEpisode.airingAt, nextEpisodeNumber, countdown)
@@ -304,8 +308,8 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   )}
                 </div>
                 <div className="h-[22px] mb-1.5 flex items-center overflow-hidden">
-                {type === 'anime' ? (
-                  isFutureRelease ? (
+                {type === 'anime' || type === 'serie' ? (
+                  type === 'anime' && isFutureRelease ? (
                     <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode && nextEpisodeCardLabel ? (
                     <span className="inline-flex max-w-full items-center rounded-full border border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-orange-700 dark:text-orange-300 sm:text-[10px] whitespace-nowrap truncate">

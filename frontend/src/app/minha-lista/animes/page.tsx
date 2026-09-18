@@ -15,6 +15,9 @@ import EditProgressModal, {
   ExtensionPanel,
   ImportBackupModal,
 } from '@/components/watchlist/WatchlistModals';
+import AddAnimeFromCatalog from '@/components/watchlist/AddAnimeFromCatalog';
+import { QA_DEMO_WATCHLIST_ITEMS } from '@/lib/watchlist-qa-mock';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import OfflineBanner from '@/components/ui/OfflineBanner';
@@ -118,8 +121,23 @@ export default function MinhaListaAnimesPage() {
           <Button variant="outline" onClick={() => setBackupOpen(true)}>
             <Upload className="h-4 w-4 mr-2" /> Importar backup
           </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                await syncItems(QA_DEMO_WATCHLIST_ITEMS);
+                toast.success('Lista de demonstração importada para testes.');
+              } catch {
+                toast.error('Não foi possível importar a lista de demonstração.');
+              }
+            }}
+          >
+            Importar demo QA
+          </Button>
         </div>
       </div>
+
+      <AddAnimeFromCatalog onAdded={() => fetchItems()} />
 
       {syncFeedback && (
         <div

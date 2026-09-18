@@ -398,8 +398,8 @@ export const orbeNerdApi = {
   updateWatchlistAnime: (id: string, payload: Record<string, unknown>) =>
     apiClient.patch(`/minha-lista/animes/${id}`, payload),
   deleteWatchlistAnime: (id: string) => apiClient.delete(`/minha-lista/animes/${id}`),
-  addAnimeFromCatalog: (animeId: number, status?: string) =>
-    apiClient.post('/minha-lista/animes/from-catalog', { animeId, status }),
+  addAnimeFromCatalog: (payload: { animeId?: number; anilistId?: number; status?: string }) =>
+    apiClient.post('/minha-lista/animes/from-catalog', payload),
 
   // Push notifications
   getVapidPublicKey: () => apiClient.get('/notifications/vapid-public-key'),

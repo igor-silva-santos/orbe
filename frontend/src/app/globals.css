@@ -350,6 +350,9 @@ body {
 
 .carousel-dragging * {
   pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .card-hover {

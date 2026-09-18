@@ -392,6 +392,67 @@ function mapFilmeSaga(filme: { collection?: { id: number; name: string } | null;
   return { id: filme.collection.id, nome: filme.collection.name };
 }
 
+type TmdbEpisodeStub = {
+  air_date?: string | null;
+  episode_number?: number | null;
+  season_number?: number | null;
+} | null | undefined;
+
+export function mapTmdbEpisodeFields(next: TmdbEpisodeStub, last: TmdbEpisodeStub) {
+  return {
+    nextEpisodeAirDate: next?.air_date ? new Date(next.air_date) : null,
+    nextEpisodeNumber: next?.episode_number ?? null,
+    nextEpisodeSeason: next?.season_number ?? null,
+    lastEpisodeNumber: last?.episode_number ?? null,
+    lastEpisodeSeason: last?.season_number ?? null,
+  };
+}
+
+function toAiringIso(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    const datePart = value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
+    if (datePart) return `${datePart}T12:00:00.000Z`;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
+function mapNextAiringEpisode(serie: {
+  nextEpisodeAirDate?: Date | string | null;
+  nextEpisodeNumber?: number | null;
+  nextEpisodeSeason?: number | null;
+}): { airingAt: string; episode: number; season?: number } | null {
+  const airingAt = toAiringIso(serie.nextEpisodeAirDate);
+  const episode = serie.nextEpisodeNumber;
+  if (!airingAt || episode == null) return null;
+  const airDate = new Date(airingAt);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (Number.isNaN(airDate.getTime()) || airDate < today) return null;
+  return {
+    airingAt,
+    episode,
+    season: serie.nextEpisodeSeason ?? undefined,
+  };
+}
+
+function mapLastAiredEpisode(serie: {
+  lastAirDate?: Date | string | null;
+  lastEpisodeNumber?: number | null;
+  lastEpisodeSeason?: number | null;
+}): { airingAt: string; episode: number; season?: number } | null {
+  const airingAt = toAiringIso(serie.lastAirDate);
+  const episode = serie.lastEpisodeNumber;
+  if (!airingAt || episode == null) return null;
+  return {
+    airingAt,
+    episode,
+    season: serie.lastEpisodeSeason ?? undefined,
+  };
+}
+
 export const mapSerieToMidia = (serie: any) => {
   return {
     type: 'serie',
@@ -432,6 +493,8 @@ export const mapSerieToMidia = (serie: any) => {
       nome: s.name,
       poster_url: s.posterPath ? `${TMDB_IMAGE_BASE_URL}${s.posterPath}` : null,
     })) ?? [],
+    nextAiringEpisode: mapNextAiringEpisode(serie),
+    lastAiredEpisode: mapLastAiredEpisode(serie),
     premiacoes: parsePremiacoes(serie.premiacoes),
   };
 };
@@ -640,39 +703,58 @@ export const mapFilmeToCarouselCard = (filme: any) => ({
 
 type SerieSeasonDate = { airDate?: Date | string | null; seasonNumber?: number | null };
 
-/** Data de exibição no carrossel: próxima temporada futura, senão estreia original */
+/** Data de exibição no carrossel: próximo episódio futuro, senão último recente, senão temporada/estreia */
 export function resolveSerieCarouselReleaseDate(serie: {
   firstAirDate?: Date | string | null;
+  lastAirDate?: Date | string | null;
+  nextEpisodeAirDate?: Date | string | null;
   seasons?: SerieSeasonDate[] | null;
 }): Date | null {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const recentPast = new Date(today);
+  recentPast.setDate(recentPast.getDate() - 90);
+
+  const parseDay = (value?: Date | string | null): Date | null => {
+    if (!value) return null;
+    const d = value instanceof Date ? new Date(value) : new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  // Séries semanais: prioriza o próximo episódio para reentrar no carrossel a cada semana
+  const nextEpisode = parseDay(serie.nextEpisodeAirDate);
+  if (nextEpisode && nextEpisode >= today) return nextEpisode;
+
+  const lastEpisode = parseDay(serie.lastAirDate);
+  if (lastEpisode && lastEpisode >= recentPast && lastEpisode <= today) {
+    return lastEpisode;
+  }
 
   const seasonDates = (serie.seasons ?? [])
     .filter((s) => (s.seasonNumber ?? 0) > 0 && s.airDate)
-    .map((s) => {
-      const d = s.airDate instanceof Date ? s.airDate : new Date(s.airDate!);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    })
-    .filter((d) => !Number.isNaN(d.getTime()))
+    .map((s) => parseDay(s.airDate))
+    .filter((d): d is Date => d !== null)
     .sort((a, b) => a.getTime() - b.getTime());
 
   const upcomingSeason = seasonDates.find((d) => d >= today);
   if (upcomingSeason) return upcomingSeason;
 
   if (serie.firstAirDate) {
-    const first = serie.firstAirDate instanceof Date ? new Date(serie.firstAirDate) : new Date(serie.firstAirDate);
-    first.setHours(0, 0, 0, 0);
-    if (!Number.isNaN(first.getTime()) && first >= today) return first;
+    const first = parseDay(serie.firstAirDate);
+    if (first && first >= today) return first;
   }
 
-  return serie.firstAirDate
-    ? (serie.firstAirDate instanceof Date ? serie.firstAirDate : new Date(serie.firstAirDate))
-    : null;
+  return parseDay(serie.firstAirDate) ?? parseDay(serie.lastAirDate);
 }
 
-export function sortSeriesByCarouselDate<T extends { firstAirDate?: Date | string | null; seasons?: SerieSeasonDate[] | null }>(
+export function sortSeriesByCarouselDate<T extends {
+  firstAirDate?: Date | string | null;
+  lastAirDate?: Date | string | null;
+  nextEpisodeAirDate?: Date | string | null;
+  seasons?: SerieSeasonDate[] | null;
+}>(
   series: T[],
 ): T[] {
   return [...series].sort((a, b) => {
@@ -696,6 +778,9 @@ export const mapSerieToCarouselCard = (serie: any) => {
     avaliacao: serie.voteAverage ? serie.voteAverage * 10 : null,
     generos_api: safeGenreNames(serie.genres, 3),
     plataformas_api: safeStreamingProviders(serie.streamingProviders),
+    nextAiringEpisode: mapNextAiringEpisode(serie),
+    lastAiredEpisode: mapLastAiredEpisode(serie),
+    status: serie.status,
   };
 };
 

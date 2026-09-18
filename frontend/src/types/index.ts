@@ -100,6 +100,16 @@ export interface Midia {
   steam_app_id?: number | null;
   steam_price_cents?: number | null;
   steam_discount_percent?: number | null;
+  nextAiringEpisode?: {
+    airingAt: string;
+    episode: number;
+    season?: number;
+  } | null;
+  lastAiredEpisode?: {
+    airingAt: string;
+    episode: number;
+    season?: number;
+  } | null;
 }
 
 // Interfaces específicas por tipo de mídia

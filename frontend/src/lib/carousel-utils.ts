@@ -22,8 +22,22 @@ export function parseReleaseDate(value: string | null | undefined): Date | null 
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 export function parseMidiaReleaseDate(midia: Midia | undefined): Date | null {
-  if (!midia?.data_lancamento_api) return null;
+  if (!midia) return null;
+
+  const nextAiring = midia.nextAiringEpisode?.airingAt;
+  if (nextAiring) {
+    const nextDate = parseReleaseDate(nextAiring);
+    if (nextDate && nextDate >= startOfToday()) return nextDate;
+  }
+
+  if (!midia.data_lancamento_api) return null;
   return parseReleaseDate(releaseDateInput(midia.data_lancamento_api));
 }
 

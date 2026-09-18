@@ -868,7 +868,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
             <LoadingOverlay message="Carregando novos títulos..." className="rounded-lg" />
           )}
         <div
-          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing ${isNavigating || isPositioningOverlay ? 'pointer-events-none' : ''}`}
+          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 cursor-grab active:cursor-grabbing select-none ${isNavigating || isPositioningOverlay ? 'pointer-events-none' : ''}`}
           ref={setViewportRef}
           style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >

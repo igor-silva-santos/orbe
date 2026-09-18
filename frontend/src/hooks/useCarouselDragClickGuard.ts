@@ -26,16 +26,18 @@ export function useCarouselDragClickGuard(viewportRef: RefObject<HTMLElement | n
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (!pointerDownRef.current || blockClickRef.current) return;
+      if (!pointerDownRef.current) return;
       const dx = Math.abs(e.clientX - startXRef.current);
       const dy = Math.abs(e.clientY - startYRef.current);
       if (dx > DRAG_THRESHOLD_PX || dy > DRAG_THRESHOLD_PX) {
         blockClickRef.current = true;
+        node.classList.add('carousel-dragging');
       }
     };
 
     const onPointerUp = () => {
       pointerDownRef.current = false;
+      node.classList.remove('carousel-dragging');
       if (blockClickRef.current) {
         window.setTimeout(() => {
           blockClickRef.current = false;
