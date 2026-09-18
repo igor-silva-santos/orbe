@@ -61,25 +61,25 @@ export default function ExtensaoPage() {
   const connectExtension = useCallback(() => {
     const token = getToken();
     if (!token) {
-      setMessage('Fa├ºa login no Orbe antes de conectar a extens├úo.');
+      setMessage('Faça login no Orbe antes de conectar a extensão.');
       return;
     }
 
     if (extensionStatus === 'missing') {
-      setMessage('Extens├úo n├úo detectada. Instale primeiro em /extensao/crunchyroll.');
+      setMessage('Extensão não detectada. Instale primeiro em /extensao/crunchyroll.');
       return;
     }
 
     const apiUrl = getAbsoluteApiUrl(window.location.origin);
     const requestId = crypto.randomUUID();
     setConnecting(true);
-    setMessage('Aguardando confirma├º├úo da extens├úo...');
+    setMessage('Aguardando confirmação da extensão...');
 
     const timeoutId = setTimeout(() => {
       setConnecting(false);
       setConnected(false);
       setMessage(
-        'N├úo recebemos confirma├º├úo da extens├úo. Verifique se ela est├í instalada e recarregue esta p├ígina.'
+        'Não recebemos confirmação da extensão. Verifique se ela está instalada e recarregue esta página.',
       );
     }, 5000);
 
@@ -93,10 +93,10 @@ export default function ExtensaoPage() {
 
       if (event.data.ok) {
         setConnected(true);
-        setMessage('Extens├úo conectada com sucesso. Abra a fila na Crunchyroll e sincronize.');
+        setMessage('Extensão conectada com sucesso. Abra a fila na Crunchyroll e sincronize.');
       } else {
         setConnected(false);
-        setMessage(event.data.error || 'Falha ao conectar a extens├úo.');
+        setMessage(event.data.error || 'Falha ao conectar a extensão.');
       }
     };
 
@@ -104,19 +104,17 @@ export default function ExtensaoPage() {
 
     const payload = { type: ORBE_CONNECT_EVENT, token, apiUrl, requestId };
     window.postMessage(payload, window.location.origin);
-    document.dispatchEvent(
-      new CustomEvent('orbe-extension-connect', { detail: payload })
-    );
+    document.dispatchEvent(new CustomEvent('orbe-extension-connect', { detail: payload }));
   }, [extensionStatus]);
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="flex items-center gap-3 mb-2">
         <PlugZap className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-extrabold">Conectar extens├úo Crunchyroll</h1>
+        <h1 className="text-3xl font-extrabold">Conectar extensão Crunchyroll</h1>
       </div>
       <p className="text-muted-foreground mb-4">
-        Autorize a extens├úo Orbe Sync a usar sua conta ÔÇö sem copiar token manualmente.
+        Autorize a extensão Orbe Sync a usar sua conta — sem copiar token manualmente.
       </p>
 
       {user?.email && (
@@ -126,7 +124,7 @@ export default function ExtensaoPage() {
       )}
 
       {extensionStatus === 'checking' && (
-        <p className="text-sm text-muted-foreground mb-4">Verificando extens├úo instalada...</p>
+        <p className="text-sm text-muted-foreground mb-4">Verificando extensão instalada...</p>
       )}
 
       {extensionStatus === 'missing' && (
@@ -134,10 +132,10 @@ export default function ExtensaoPage() {
           <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-semibold text-amber-800 dark:text-amber-200">
-              Extens├úo n├úo detectada
+              Extensão não detectada
             </p>
             <p className="text-amber-700 dark:text-amber-300 mt-1">
-              Instale a extens├úo open source antes de conectar. Veja o passo a passo em{' '}
+              Instale a extensão open source antes de conectar. Veja o passo a passo em{' '}
               <Link href="/extensao/crunchyroll" className="underline font-medium">
                 /extensao/crunchyroll
               </Link>
@@ -151,7 +149,7 @@ export default function ExtensaoPage() {
         <div className="rounded-lg border border-green-300 bg-green-50 dark:bg-green-950/30 p-4 mb-6 flex gap-3">
           <ShieldCheck className="h-5 w-5 text-green-600 shrink-0" />
           <p className="text-sm text-green-800 dark:text-green-200">
-            Extens├úo detectada. C├│digo aberto ÔÇö voc├¬ pode auditar tudo em{' '}
+            Extensão detectada. Código aberto — você pode auditar tudo em{' '}
             <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">extension/</code>.
           </p>
         </div>
@@ -160,13 +158,13 @@ export default function ExtensaoPage() {
       <div className="rounded-xl border border-primary/30 bg-accent p-6 space-y-4">
         <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
           <li>
-            Instale a extens├úo (guia em{' '}
+            Instale a extensão (guia em{' '}
             <Link href="/extensao/crunchyroll" className="text-primary underline">
               /extensao/crunchyroll
             </Link>
             )
           </li>
-          <li>Clique no bot├úo abaixo para enviar seu login para a extens├úo</li>
+          <li>Clique no botão abaixo para enviar seu login para a extensão</li>
           <li>Abra sua fila na Crunchyroll e use &quot;Sincronizar fila agora&quot; no popup</li>
         </ol>
 
@@ -178,12 +176,12 @@ export default function ExtensaoPage() {
           {connected ? (
             <>
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Extens├úo conectada
+              Extensão conectada
             </>
           ) : connecting ? (
             'Conectando...'
           ) : (
-            'Conectar extens├úo agora'
+            'Conectar extensão agora'
           )}
         </Button>
 
@@ -192,7 +190,7 @@ export default function ExtensaoPage() {
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
             <Link href="/extensao/crunchyroll">
-              Como instalar e c├│digo aberto
+              Como instalar e código aberto
               <ExternalLink className="h-3 w-3 ml-2 opacity-60" />
             </Link>
           </Button>

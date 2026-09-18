@@ -181,7 +181,14 @@ export const realApi = {
       return await orbeNerdApi.getHoje();
     } catch (error) {
       console.error('Erro ao buscar conteúdo de hoje:', error);
-      return { data: '', cinema: [], streamingFilmes: [], streamingSeries: [], destaquesJogos: [] };
+      return {
+        data: '',
+        cinema: [],
+        streamingFilmes: [],
+        streamingSeries: [],
+        streamingAnimes: [],
+        destaquesJogos: [],
+      };
     }
   },
   getNotifications: orbeNerdApi.getNotifications,

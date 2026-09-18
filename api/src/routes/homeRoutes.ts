@@ -218,8 +218,16 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   ];
 
   try {
-    const [cinema, streamingFilmesWeek, streamingFilmesFallback, streamingSeriesWeek, streamingSeriesFallback, destaquesJogos] =
-      await Promise.all([
+    const [
+      cinema,
+      streamingFilmesWeek,
+      streamingFilmesFallback,
+      streamingSeriesWeek,
+      streamingSeriesFallback,
+      streamingAnimesWeek,
+      streamingAnimesFallback,
+      destaquesJogos,
+    ] = await Promise.all([
       prisma.filme.findMany({
         where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
         orderBy: { popularity: 'desc' },
@@ -265,6 +273,30 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         take: 12,
         include: { streamingProviders: { include: { provider: true } } },
       }),
+      prisma.anime.findMany({
+        where: {
+          AND: [
+            animeQualityFilter,
+            { status: 'RELEASING' },
+            {
+              airingSchedule: {
+                some: { airingAt: { gte: weekAgo, lte: now } },
+              },
+            },
+          ],
+        },
+        orderBy: [{ popularity: 'desc' }, { averageScore: 'desc' }],
+        take: 12,
+        include: animeCarouselInclude,
+      }),
+      prisma.anime.findMany({
+        where: {
+          AND: [animeQualityFilter, { status: { in: ['RELEASING', 'NOT_YET_RELEASED'] } }],
+        },
+        orderBy: [{ popularity: 'desc' }, { averageScore: 'desc' }],
+        take: 12,
+        include: animeCarouselInclude,
+      }),
       prisma.jogo.findMany({
         where: jogoQualityFilter,
         orderBy: [{ hypes: 'desc' }, { rating: 'desc' }],
@@ -285,8 +317,18 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
       });
     };
 
+    const dedupeAnimes = <T extends { anilistId: number }>(items: T[]) => {
+      const seen = new Set<number>();
+      return items.filter((item) => {
+        if (seen.has(item.anilistId)) return false;
+        seen.add(item.anilistId);
+        return true;
+      });
+    };
+
     const streamingFilmes = dedupeFilmes([...streamingFilmesWeek, ...streamingFilmesFallback]).slice(0, 12);
     const streamingSeries = dedupeFilmes([...streamingSeriesWeek, ...streamingSeriesFallback]).slice(0, 12);
+    const streamingAnimes = dedupeAnimes([...streamingAnimesWeek, ...streamingAnimesFallback]).slice(0, 12);
 
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
@@ -295,6 +337,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
       cinema: cinema.map((f) => mapFilmeToMidia(f)),
       streamingFilmes: streamingFilmes.map((f) => mapFilmeToMidia(f)),
       streamingSeries: streamingSeries.map((s) => mapSerieToMidia(s)),
+      streamingAnimes: streamingAnimes.map((a) => mapAnimeToMidia(a)),
       destaquesJogos: destaquesJogos.map((j) => mapJogoToMidia(j)),
     });
   } catch (error) {

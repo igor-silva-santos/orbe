@@ -238,7 +238,13 @@ export const orbeNerdApi = {
   },
 
   // Premiações
-  getAwards: async (params?: { awardName?: string; year?: number; page?: number; limit?: number }) => {
+  getAwards: async (params?: {
+    awardName?: string;
+    year?: number;
+    mediaType?: 'filme' | 'serie' | 'anime' | 'jogo';
+    page?: number;
+    limit?: number;
+  }) => {
     return apiClient.get('/premios', params);
   },
 
@@ -246,12 +252,16 @@ export const orbeNerdApi = {
     return apiClient.get('/premios/filtros');
   },
 
+  getAwardHighlights: async () => {
+    return apiClient.get('/premios/destaques');
+  },
+
   getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
     return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
   },
 
-  getEventosResumo: async (): Promise<EventoResumo> => {
-    return apiClient.get('/eventos/resumo');
+  getEventosResumo: async (year?: number): Promise<EventoResumo> => {
+    return apiClient.get('/eventos/resumo', year ? { year } : undefined);
   },
 
   // Pesquisa

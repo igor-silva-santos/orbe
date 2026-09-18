@@ -260,29 +260,32 @@ function SourceFooter({
 }: {
   data: Pick<DealsOverview, 'sources' | 'usdBrlRate' | 'usdBrlRateFetchedAt'>;
 }) {
+  const sources = data.sources;
+  if (!sources?.epic || !sources.gamerpower || !sources.cheapshark) return null;
+
   return (
     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground border-t border-border pt-4">
       <span>Fontes:</span>
-      <span className={data.sources.epic.ok ? 'text-emerald-600' : 'text-destructive'}>
-        Epic ({data.sources.epic.count})
+      <span className={sources.epic.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Epic ({sources.epic.count})
       </span>
-      <span className={data.sources.gamerpower.ok ? 'text-emerald-600' : 'text-destructive'}>
-        GamerPower ({data.sources.gamerpower.count})
+      <span className={sources.gamerpower.ok ? 'text-emerald-600' : 'text-destructive'}>
+        GamerPower ({sources.gamerpower.count})
       </span>
-      <span className={data.sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
-        CheapShark ({data.sources.cheapshark.count})
+      <span className={sources.cheapshark.ok ? 'text-emerald-600' : 'text-destructive'}>
+        CheapShark ({sources.cheapshark.count})
       </span>
-      <span className={data.sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        itch.io ({data.sources.itch?.count ?? 0})
+      <span className={sources.itch?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        itch.io ({sources.itch?.count ?? 0})
       </span>
-      <span className={data.sources.itad?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        ITAD ({data.sources.itad?.count ?? 0})
+      <span className={sources.itad?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        ITAD ({sources.itad?.count ?? 0})
       </span>
-      <span className={data.sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        Steam ({data.sources.steam?.count ?? 0})
+      <span className={sources.steam?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Steam ({sources.steam?.count ?? 0})
       </span>
-      <span className={data.sources.orbe?.ok ? 'text-emerald-600' : 'text-destructive'}>
-        Orbe ({data.sources.orbe?.count ?? 0})
+      <span className={sources.orbe?.ok ? 'text-emerald-600' : 'text-destructive'}>
+        Orbe ({sources.orbe?.count ?? 0})
       </span>
       {data.usdBrlRate != null && (
         <span className="text-muted-foreground/80">
@@ -343,32 +346,29 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     return response;
   }, []);
 
-  const loadActiveTab = useCallback(
-    async (silent = false, tab: PromocoesTab = activeTab) => {
-      if (tab === 'em-alta') {
-        setIsLoading(false);
-        setIsRefreshing(false);
-        return;
+  const loadActiveTab = useCallback(async (silent = false, tab: PromocoesTab) => {
+    if (tab === 'em-alta') {
+      setIsLoading(false);
+      setIsRefreshing(false);
+      return;
+    }
+    if (!silent) setIsLoading(true);
+    else setIsRefreshing(true);
+    setError(null);
+    try {
+      if (tab === 'gratis') {
+        await loadGratis();
+      } else {
+        await loadPromocoes(1, false);
       }
-      if (!silent) setIsLoading(true);
-      else setIsRefreshing(true);
-      setError(null);
-      try {
-        if (tab === 'gratis') {
-          await loadGratis();
-        } else {
-          await loadPromocoes(1, false);
-        }
-      } catch (err) {
-        console.error(err);
-        setError('Não foi possível carregar promoções e jogos grátis.');
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [activeTab, loadGratis, loadPromocoes],
-  );
+    } catch (err) {
+      console.error(err);
+      setError('Não foi possível carregar promoções e jogos grátis.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [loadGratis, loadPromocoes]);
 
   useEffect(() => {
     void loadActiveTab(false, initialTab);
@@ -538,7 +538,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
 
             <button
               type="button"
-              onClick={() => void loadActiveTab(true)}
+              onClick={() => void loadActiveTab(true, activeTab)}
               disabled={isRefreshing}
               className="inline-flex items-center gap-2 self-start md:self-auto bg-primary text-primary-foreground font-medium text-sm px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
@@ -561,7 +561,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
             <p className="text-muted-foreground font-medium">{error}</p>
             <button
               type="button"
-              onClick={() => void loadActiveTab()}
+              onClick={() => void loadActiveTab(false, activeTab)}
               className="mt-4 bg-primary text-primary-foreground font-medium text-sm px-6 py-3 rounded-lg"
             >
               Tentar novamente
@@ -686,6 +686,14 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
             </TabsContent>
 
             <TabsContent value="promocoes" className="space-y-6 mt-0">
+              <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-sm">
+                <p className="font-medium orbe-text-primary">Lista de desejos Steam (em breve)</p>
+                <p className="text-muted-foreground text-xs mt-1 max-w-2xl">
+                  Vamos permitir conectar sua conta Steam para cruzar a wishlist com promoções ativas.
+                  Isso exige login OpenID da Steam e chave de API — estamos preparando essa integração.
+                </p>
+              </div>
+
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <SearchInput value={searchQuery} onChange={setSearchQuery} />
                 <SortSelect value={saleSort} onChange={setSaleSort} tab="promocoes" />

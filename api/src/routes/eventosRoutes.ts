@@ -37,13 +37,41 @@ const getProximosWindow = () => {
   return { now, threeMonthsAhead };
 };
 
+const parseEventYear = (value: unknown, fallback: number): number => {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 2000 || parsed > 2100) return fallback;
+  return parsed;
+};
+
+const eventYearWindow = (year: number) => ({
+  start: new Date(year, 0, 1),
+  end: new Date(year, 11, 31, 23, 59, 59, 999),
+});
+
+const eventOverlapsYear = (year: number): Prisma.EventWhereInput => {
+  const { start, end } = eventYearWindow(year);
+  return {
+    AND: [
+      { start_time: { lte: end } },
+      {
+        OR: [
+          { end_time: { gte: start } },
+          { end_time: null, start_time: { gte: start } },
+        ],
+      },
+      { games: { some: {} } },
+    ],
+  };
+};
+
 // Resumo agregado para a página de Eventos (relatório)
-router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const now = new Date();
   const { threeMonthsAhead } = getProximosWindow();
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const year = now.getFullYear();
+  const selectedYear = parseEventYear(req.query.year, now.getFullYear());
+  const { start: yearStart, end: yearEnd } = eventYearWindow(selectedYear);
   const season = getCurrentSeason();
 
   try {
@@ -57,15 +85,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
       eventosRecentes,
     ] = await Promise.all([
       prisma.event.findMany({
-        where: {
-          OR: [
-            { start_time: { gte: now } },
-            {
-              start_time: { lte: now },
-              OR: [{ end_time: { gte: now } }, { end_time: null }],
-            },
-          ],
-        },
+        where: eventOverlapsYear(selectedYear),
         include: eventInclude,
         orderBy: { start_time: 'asc' },
       }),
@@ -74,7 +94,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
           AND: [
             filmeQualityFilter,
             { emBreve: true },
-            { releaseDate: { gte: now, lte: threeMonthsAhead } },
+            { releaseDate: { gte: yearStart, lte: yearEnd } },
           ],
         },
         orderBy: { releaseDate: 'asc' },
@@ -85,7 +105,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
         where: {
           AND: [
             serieQualityFilter,
-            { firstAirDate: { gte: now, lte: threeMonthsAhead } },
+            { firstAirDate: { gte: yearStart, lte: yearEnd } },
           ],
         },
         orderBy: { firstAirDate: 'asc' },
@@ -112,7 +132,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
         where: {
           AND: [
             jogoQualityFilter,
-            { firstReleaseDate: { gte: now, lte: threeMonthsAhead } },
+            { firstReleaseDate: { gte: yearStart, lte: yearEnd } },
           ],
         },
         orderBy: { firstReleaseDate: 'asc' },
@@ -147,6 +167,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
     // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
     // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     res.json({
+      year: selectedYear,
       eventos_games: eventosGames.map(mapEventToResponse),
       proximos: {
         filmes: filmesProximos.map((f) => mapFilmeToMidia(f)),
@@ -169,18 +190,26 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (_req, res) =
 router.get('/eventos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const status = typeof req.query.status === 'string' ? req.query.status : 'all';
   const now = new Date();
+  const selectedYear = parseEventYear(req.query.year, now.getFullYear());
 
   try {
-    let where: Prisma.EventWhereInput = {};
+    let where: Prisma.EventWhereInput = {
+      AND: [eventOverlapsYear(selectedYear)],
+    };
     if (status === 'upcoming') {
-      where = { start_time: { gte: now } };
+      where = { AND: [where, { start_time: { gte: now } }] };
     } else if (status === 'ongoing') {
       where = {
-        start_time: { lte: now },
-        OR: [{ end_time: { gte: now } }, { end_time: null }],
+        AND: [
+          where,
+          {
+            start_time: { lte: now },
+            OR: [{ end_time: { gte: now } }, { end_time: null }],
+          },
+        ],
       };
     } else if (status === 'past') {
-      where = { end_time: { lt: now } };
+      where = { AND: [where, { end_time: { lt: now } }] };
     }
 
     const events = await prisma.event.findMany({

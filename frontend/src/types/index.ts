@@ -309,6 +309,7 @@ export interface EventoDestaquesRecentes {
 }
 
 export interface EventoResumo {
+  year?: number;
   eventos_games: Evento[];
   proximos: EventoProximos;
   destaques_recentes: EventoDestaquesRecentes;

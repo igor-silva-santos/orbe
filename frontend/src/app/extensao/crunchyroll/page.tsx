@@ -12,45 +12,45 @@ import {
 import { Button } from '@/components/ui/button';
 
 const SOURCE_FILES = [
-  { path: 'extension/manifest.json', desc: 'Permiss├Áes e configura├º├úo MV3' },
-  { path: 'extension/content/crunchyroll-queue.js', desc: 'Leitura da fila na p├ígina CR (s├│ DOM local)' },
+  { path: 'extension/manifest.json', desc: 'Permissões e configuração MV3' },
+  { path: 'extension/content/crunchyroll-queue.js', desc: 'Leitura da fila na página CR (só DOM local)' },
   { path: 'extension/content/orbe-bridge.js', desc: 'Ponte de login com o Orbe' },
-  { path: 'extension/background/service-worker.js', desc: 'Orquestra sync ÔåÆ API Orbe' },
+  { path: 'extension/background/service-worker.js', desc: 'Orquestra sync → API Orbe' },
   { path: 'extension/popup/popup.js', desc: 'Interface do popup' },
 ];
 
 const PERMISSIONS = [
   {
     name: 'crunchyroll.com',
-    why: 'Ler t├¡tulo, epis├│dio e progresso dos cards vis├¡veis na sua fila aberta.',
+    why: 'Ler título, episódio e progresso dos cards visíveis na sua fila aberta.',
   },
   {
     name: 'orbenerd.com / localhost:3000',
-    why: 'Receber seu token de login do Orbe ap├│s voc├¬ clicar em Conectar.',
+    why: 'Receber seu token de login do Orbe após você clicar em Conectar.',
   },
   {
-    name: 'API Orbe (localhost:5000 ou produ├º├úo)',
+    name: 'API Orbe (localhost:5000 ou produção)',
     why: 'Enviar os animes parseados para a sua Minha Lista.',
   },
   {
     name: 'storage',
-    why: 'Guardar token e URL da API localmente no Chrome (n├úo enviamos para terceiros).',
+    why: 'Guardar token e URL da API localmente no Chrome (não enviamos para terceiros).',
   },
 ];
 
 const SENDS = [
-  'T├¡tulo do anime',
-  'ID da s├®rie na Crunchyroll',
-  'Temporada, epis├│dio e tempo restante',
-  'Poster (URL p├║blica) e se tem dublagem',
+  'Título do anime',
+  'ID da série na Crunchyroll',
+  'Temporada, episódio e tempo restante',
+  'Poster (URL pública) e se tem dublagem',
 ];
 
 const NOT_SENDS = [
   'Senha da Crunchyroll ou do Orbe',
-  'Hist├│rico de navega├º├úo fora da fila aberta',
-  'Cookies ou sess├úo da Crunchyroll',
+  'Histórico de navegação fora da fila aberta',
+  'Cookies ou sessão da Crunchyroll',
   'Dados para analytics ou publicidade',
-  'Arquivos execut├íveis ou downloads ocultos',
+  'Arquivos executáveis ou downloads ocultos',
 ];
 
 export default function ExtensaoCrunchyrollPage() {
@@ -61,22 +61,22 @@ export default function ExtensaoCrunchyrollPage() {
           <div className="flex items-center gap-3 mb-4">
             <PlugZap className="h-10 w-10 text-primary" />
             <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-              C├│digo aberto ┬À Orbe Nerd
+              Código aberto · Orbe Nerd
             </span>
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-            Extens├úo Orbe Sync ÔÇö Crunchyroll
+            Extensão Orbe Sync — Crunchyroll
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mb-4">
-            Sincronize sua fila de animes com a Minha Lista do Orbe. C├│digo 100% audit├ível ÔÇö
-            nada escondido, nada que roube dados ou instale v├¡rus.
+            Sincronize sua fila de animes com a Minha Lista do Orbe. Código 100% auditável —
+            nada escondido, nada que roube dados ou instale vírus.
           </p>
           <div className="rounded-lg border border-primary/20 bg-background/80 p-4 max-w-2xl mb-8">
             <p className="text-sm text-muted-foreground">
               <strong className="text-foreground">Instala uma vez, usa para sempre.</strong> Depois de
-              instalar, a extens├úo fica no Chrome como qualquer outra ÔÇö voc├¬ n├úo precisa repetir o
-              processo a cada sync. Em produ├º├úo, a instala├º├úo ser├í pela Chrome Web Store (um clique).
-              O modo desenvolvedor abaixo ├® s├│ para quem testa a vers├úo beta localmente.
+              instalar, a extensão fica no Chrome como qualquer outra — você não precisa repetir o
+              processo a cada sync. Em produção, a instalação será pela Chrome Web Store (um clique).
+              O modo desenvolvedor abaixo é só para quem testa a versão beta localmente.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -93,36 +93,36 @@ export default function ExtensaoCrunchyrollPage() {
       <section id="instalar" className="container mx-auto px-4 py-16 max-w-4xl">
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <Download className="h-6 w-6 text-primary" />
-          Como instalar (Chrome) ÔÇö uma ├║nica vez
+          Como instalar (Chrome) — uma única vez
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          Open source significa que voc├¬ <em>pode</em> ler o c├│digo antes de confiar ÔÇö n├úo que precise
-          reinstalar manualmente toda vez. Ap├│s o passo abaixo, a extens├úo permanece instalada at├® voc├¬
-          remov├¬-la.
+          Open source significa que você <em>pode</em> ler o código antes de confiar — não que precise
+          reinstalar manualmente toda vez. Após o passo abaixo, a extensão permanece instalada até você
+          removê-la.
         </p>
         <ol className="space-y-4 text-muted-foreground mb-10">
           <li className="flex gap-4">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
-              ╬▓
+              β
             </span>
             <div>
-              <p className="font-semibold text-foreground">Vers├úo beta (desenvolvimento local)</p>
+              <p className="font-semibold text-foreground">Versão beta (desenvolvimento local)</p>
               <p className="text-sm mt-1">
-                Enquanto a extens├úo n├úo estiver na Chrome Web Store, quem desenvolve ou testa usa{' '}
-                <strong>Carregar sem compacta├º├úo</strong> uma vez. Isso n├úo ├® o fluxo final para
-                usu├írios finais ÔÇö ├® s├│ para validar antes da publica├º├úo oficial.
+                Enquanto a extensão não estiver na Chrome Web Store, quem desenvolve ou testa usa{' '}
+                <strong>Carregar sem compactação</strong> uma vez. Isso não é o fluxo final para
+                usuários finais — é só para validar antes da publicação oficial.
               </p>
             </div>
           </li>
           <li className="flex gap-4">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
-              Ôÿà
+              ★
             </span>
             <div>
-              <p className="font-semibold text-foreground">Vers├úo oficial (em breve)</p>
+              <p className="font-semibold text-foreground">Versão oficial (em breve)</p>
               <p className="text-sm mt-1">
-                Na Chrome Web Store: <strong>Adicionar ao Chrome</strong> ÔåÆ pronto. Mesma extens├úo
-                open source, instalada como Netflix, uBlock ou qualquer extens├úo confi├ível ÔÇö sem pasta
+                Na Chrome Web Store: <strong>Adicionar ao Chrome</strong> → pronto. Mesma extensão
+                open source, instalada como Netflix, uBlock ou qualquer extensão confiável — sem pasta
                 manual, sem modo desenvolvedor.
               </p>
             </div>
@@ -138,8 +138,8 @@ export default function ExtensaoCrunchyrollPage() {
             <div>
               <p className="font-semibold text-foreground">Baixe ou clone o projeto Orbe</p>
               <p className="text-sm mt-1">
-                A extens├úo est├í na pasta <code className="bg-muted px-1.5 py-0.5 rounded text-xs">extension/</code>{' '}
-                deste reposit├│rio. Voc├¬ pode inspecionar todo o c├│digo antes de instalar.
+                A extensão está na pasta <code className="bg-muted px-1.5 py-0.5 rounded text-xs">extension/</code>{' '}
+                deste repositório. Você pode inspecionar todo o código antes de instalar.
               </p>
             </div>
           </li>
@@ -157,7 +157,7 @@ export default function ExtensaoCrunchyrollPage() {
               3
             </span>
             <div>
-              <p className="font-semibold text-foreground">Carregar sem compacta├º├úo</p>
+              <p className="font-semibold text-foreground">Carregar sem compactação</p>
               <p className="text-sm mt-1">
                 Selecione a pasta <code className="bg-muted px-1.5 py-0.5 rounded text-xs">extension/</code> do projeto.
               </p>
@@ -170,11 +170,11 @@ export default function ExtensaoCrunchyrollPage() {
             <div>
               <p className="font-semibold text-foreground">Conecte sua conta Orbe</p>
               <p className="text-sm mt-1">
-                Fa├ºa login no Orbe e acesse{' '}
+                Faça login no Orbe e acesse{' '}
                 <Link href="/extensao" className="text-primary underline">
                   /extensao
                 </Link>{' '}
-                ÔåÆ <strong>Conectar extens├úo</strong>.
+                → <strong>Conectar extensão</strong>.
               </p>
             </div>
           </li>
@@ -185,7 +185,7 @@ export default function ExtensaoCrunchyrollPage() {
             <div>
               <p className="font-semibold text-foreground">Sincronize</p>
               <p className="text-sm mt-1">
-                Abra sua fila em crunchyroll.com (watchlist/queue), clique no ├¡cone Orbe Sync e em{' '}
+                Abra sua fila em crunchyroll.com (watchlist/queue), clique no ícone Orbe Sync e em{' '}
                 <strong>Sincronizar fila agora</strong>.
               </p>
             </div>
@@ -203,22 +203,22 @@ export default function ExtensaoCrunchyrollPage() {
             <div className="rounded-xl border bg-background p-5">
               <p className="font-bold mb-2">1. Leitura local</p>
               <p className="text-muted-foreground">
-                O content script l├¬ apenas os cards vis├¡veis na p├ígina da Crunchyroll que voc├¬ abriu.
+                O content script lê apenas os cards visíveis na página da Crunchyroll que você abriu.
                 Nada roda em segundo plano em outros sites.
               </p>
             </div>
             <div className="rounded-xl border bg-background p-5">
               <p className="font-bold mb-2">2. Envio para o Orbe</p>
               <p className="text-muted-foreground">
-                Cada anime vai para a API do Orbe com seu JWT. S├│ endpoints de Minha Lista ÔÇö
+                Cada anime vai para a API do Orbe com seu JWT. Só endpoints de Minha Lista —
                 nenhum servidor de terceiros.
               </p>
             </div>
             <div className="rounded-xl border bg-background p-5">
               <p className="font-bold mb-2">3. Espelhamento seguro</p>
               <p className="text-muted-foreground">
-                Se todos os itens importarem com sucesso, a lista CR no Orbe ├® espelhada. Se houver
-                falhas, entra em modo seguro (merge) ÔÇö nada ├® apagado.
+                Se todos os itens importarem com sucesso, a lista CR no Orbe é espelhada. Se houver
+                falhas, entra em modo seguro (merge) — nada é apagado.
               </p>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function ExtensaoCrunchyrollPage() {
       <section className="container mx-auto px-4 py-16 max-w-4xl">
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <ShieldCheck className="h-6 w-6 text-primary" />
-          Privacidade e transpar├¬ncia
+          Privacidade e transparência
         </h2>
         <div className="grid md:grid-cols-2 gap-8">
           <div>
@@ -238,27 +238,27 @@ export default function ExtensaoCrunchyrollPage() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {SENDS.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-green-600">Ô£ô</span> {item}
+                  <span className="text-green-600">✓</span> {item}
                 </li>
               ))}
             </ul>
           </div>
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2 text-red-700 dark:text-red-400">
-              <Lock className="h-4 w-4" /> O que N├âO enviamos
+              <Lock className="h-4 w-4" /> O que NÃO enviamos
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {NOT_SENDS.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-red-500">Ô£ù</span> {item}
+                  <span className="text-red-500">✗</span> {item}
                 </li>
               ))}
             </ul>
           </div>
         </div>
         <p className="mt-8 text-sm text-muted-foreground border-l-4 border-primary pl-4">
-          A extens├úo n├úo cont├®m c├│digo ofuscado, n├úo faz download de execut├íveis e n├úo se comunica
-          com dom├¡nios al├®m de Crunchyroll, Orbe e a API configurada por voc├¬. Voc├¬ pode ler cada
+          A extensão não contém código ofuscado, não faz download de executáveis e não se comunica
+          com domínios além de Crunchyroll, Orbe e a API configurada por você. Você pode ler cada
           linha antes de instalar.
         </p>
       </section>
@@ -267,7 +267,7 @@ export default function ExtensaoCrunchyrollPage() {
         <div className="container mx-auto px-4 py-16 max-w-4xl">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            Permiss├Áes explicadas
+            Permissões explicadas
           </h2>
           <div className="space-y-4">
             {PERMISSIONS.map((perm) => (
@@ -283,20 +283,20 @@ export default function ExtensaoCrunchyrollPage() {
       <section className="container mx-auto px-4 py-16 max-w-4xl">
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <Code2 className="h-6 w-6 text-primary" />
-          C├│digo aberto ÔÇö audite voc├¬ mesmo
+          Código aberto — audite você mesmo
         </h2>
         <p className="text-muted-foreground mb-6">
-          Todos os arquivos da extens├úo est├úo no reposit├│rio do Orbe. Abra no editor, busque por{' '}
+          Todos os arquivos da extensão estão no repositório do Orbe. Abra no editor, busque por{' '}
           <code className="bg-muted px-1 rounded">fetch(</code>,{' '}
-          <code className="bg-muted px-1 rounded">eval(</code> ou dom├¡nios suspeitos ÔÇö voc├¬ n├úo
-          encontrar├í nada escondido.
+          <code className="bg-muted px-1 rounded">eval(</code> ou domínios suspeitos — você não
+          encontrará nada escondido.
         </p>
         <div className="rounded-xl border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted">
               <tr>
                 <th className="text-left p-3 font-semibold">Arquivo</th>
-                <th className="text-left p-3 font-semibold">Fun├º├úo</th>
+                <th className="text-left p-3 font-semibold">Função</th>
               </tr>
             </thead>
             <tbody>
@@ -310,7 +310,7 @@ export default function ExtensaoCrunchyrollPage() {
           </table>
         </div>
         <p className="text-xs text-muted-foreground mt-4">
-          Manifest V3 ┬À sem remote code ┬À sem analytics ┬À sem minifica├º├úo ofuscada
+          Manifest V3 · sem remote code · sem analytics · sem minificação ofuscada
         </p>
       </section>
 
@@ -319,7 +319,7 @@ export default function ExtensaoCrunchyrollPage() {
           <h2 className="text-xl font-bold mb-4">Pronto para usar?</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild className="bg-primary hover:bg-primary/90">
-              <Link href="/extensao">Conectar extens├úo</Link>
+              <Link href="/extensao">Conectar extensão</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/minha-lista/animes?recheck=1">Voltar para Minha Lista</Link>
