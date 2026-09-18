@@ -320,6 +320,9 @@ model Temporada {
   seasonNumber Int
   serie        Serie     @relation(fields: [serieId], references: [id])
   serieId      Int
+
+  @@index([airDate])
+  @@index([serieId, airDate])
 }
 
 model StreamingProvider {

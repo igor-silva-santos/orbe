@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { X, Edit, Calendar, Clock, Star, Tv, BookOpen, Gamepad2, Heart, Bookmark, Check, EyeOff, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 
-import orbeNerdApi, { apiClient } from '@/lib/api';
+import orbeNerdApi, { apiClient, DETAILS_TIMEOUT_MS } from '@/lib/api';
 import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import AwardsBlock from '@/components/ui/AwardsBlock';
 import PlatformIcon from '@/components/ui/PlatformIcons';
@@ -38,8 +39,25 @@ const SuperModal: React.FC = () => {
   const historyPushedRef = useRef(false);
   const isClosingRef = useRef(false);
   const loadInFlightRef = useRef<string | null>(null);
+  const pathname = usePathname();
+  const openPathRef = useRef<string | null>(null);
 
   const { midia, type } = superModalData;
+
+  /** Fecha o modal ao mudar de rota (ex.: Voltar do dublador) sem history.back() */
+  useEffect(() => {
+    if (isSuperModalOpen) {
+      if (openPathRef.current === null) {
+        openPathRef.current = pathname;
+      } else if (openPathRef.current !== pathname) {
+        historyPushedRef.current = false;
+        closeSuperModal();
+        openPathRef.current = null;
+      }
+    } else {
+      openPathRef.current = null;
+    }
+  }, [pathname, isSuperModalOpen, closeSuperModal]);
 
   const loadAdditionalData = useCallback(async () => {
     if (!midia || !type) return;
@@ -50,7 +68,9 @@ const SuperModal: React.FC = () => {
     loadInFlightRef.current = requestKey;
     setIsLoadingDetails(true);
     try {
-      const data = await apiClient.get(`/${type}s/${midia.id}/details`);
+      const data = await apiClient.get(`/${type}s/${midia.id}/details`, undefined, {
+        timeoutMs: DETAILS_TIMEOUT_MS,
+      });
       setDetails(data);
     } catch (error) {
       console.error('Erro ao carregar dados adicionais:', error);

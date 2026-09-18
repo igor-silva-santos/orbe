@@ -11,6 +11,7 @@ const API_BASE_URL = API_BASE;
 // de mais tempo (ex.: sync/detalhes ao vivo) ja documentam seus proprios
 // timeouts nos arquivos correspondentes da API e devem tratar isso lá, nao aqui.
 const DEFAULT_TIMEOUT_MS = 30000;
+export const DETAILS_TIMEOUT_MS = 90_000;
 
 // NOTA (duplicacao intencional do token — cookie httpOnly + localStorage):
 // O login/registro grava o JWT tanto no cookie httpOnly de sessao
@@ -97,6 +98,7 @@ const request = async (
   options?: {
     params?: Record<string, string | number | boolean | undefined | null>;
     body?: any;
+    timeoutMs?: number;
   }
 ): Promise<any> => {
   const urlString = buildUrl(endpoint, options?.params);
@@ -114,7 +116,7 @@ const request = async (
     method,
     headers,
     body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
-    signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+    signal: AbortSignal.timeout(options?.timeoutMs ?? DEFAULT_TIMEOUT_MS),
   });
 
   if (response.status === 401) {
@@ -138,8 +140,12 @@ const request = async (
 
 // Cliente HTTP centralizado
 export const apiClient = {
-  get: async (endpoint: string, params?: Record<string, string | number | boolean | undefined | null>) => {
-    return request('GET', endpoint, { params });
+  get: async (
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined | null>,
+    options?: { timeoutMs?: number },
+  ) => {
+    return request('GET', endpoint, { params, timeoutMs: options?.timeoutMs });
   },
 
   post: async (endpoint: string, data: Record<string, unknown>) => {

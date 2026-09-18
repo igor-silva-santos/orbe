@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 import { API_BASE } from '@/lib/apiBase';
 import type { Midia } from '@/types';
 
@@ -39,10 +40,16 @@ export function useCarouselYearTbd({ mediaType, enabled = true }: UseCarouselYea
 
       fetchingYearsRef.current.add(year);
       try {
-        const response = await fetch(`${API_BASE}/${mediaType}/year-tbd?year=${year}`, {
-          cache: 'no-store',
-        });
+        const response = await fetchWithTimeout(
+          `${API_BASE}/${mediaType}/year-tbd?year=${year}`,
+          { cache: 'no-store' },
+        );
         if (!response.ok) {
+          loadedYearsRef.current.add(year);
+          return [];
+        }
+        const contentType = response.headers.get('content-type') ?? '';
+        if (!contentType.includes('application/json')) {
           loadedYearsRef.current.add(year);
           return [];
         }

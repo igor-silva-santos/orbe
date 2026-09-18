@@ -166,6 +166,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     applyDisplayFilters: applyTimelineFilters,
     onItemsMerged: setMediaItems,
     monthEdgeBuffer,
+    initialItems: timelineFromSsr,
   });
 
   const { loadYearTbd, getAppendSlides, slidesByYear } = useCarouselYearTbd({ mediaType });

@@ -10,6 +10,7 @@ import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import TrailerEmbed from '@/components/ui/TrailerEmbed';
 
 interface SerieModalContentProps {
   serie: Serie;
@@ -105,17 +106,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       {trailerKey && (
         <section>
           <h2 className="text-xl font-bold mb-2 text-yellow-500 dark:text-blue-400">Trailer</h2>
-          <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${trailerKey}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              className="absolute top-0 left-0 w-full h-full"
-            ></iframe>
-          </div>
+          <TrailerEmbed trailerKey={trailerKey} />
         </section>
       )}
 

@@ -10,8 +10,8 @@ const LOCK_TTL_SECONDS = 30;
 
 // Quantas vezes (e com que intervalo) um request "seguidor" espera o lider
 // terminar de recalcular antes de desistir e computar por conta propria.
-const POLL_ATTEMPTS = 3;
-const POLL_INTERVAL_MS = 300;
+const POLL_ATTEMPTS = 20;
+const POLL_INTERVAL_MS = 500;
 
 // So libera o lock se ele ainda pertencer a este request (compara o token antes
 // de apagar). Evita que um request derrube o lock de outro processo que ja pegou

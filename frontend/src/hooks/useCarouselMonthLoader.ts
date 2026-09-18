@@ -16,6 +16,7 @@ import {
   resolveIndexForMonthKey,
   calculateCarouselStartIndex,
 } from '@/lib/carousel-utils';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 import { API_BASE } from '@/lib/apiBase';
 import type { Midia } from '@/types';
 
@@ -42,6 +43,8 @@ interface UseCarouselMonthLoaderOptions {
   applyDisplayFilters: (items: Midia[]) => Midia[];
   onItemsMerged: (items: Midia[]) => void;
   monthEdgeBuffer?: number;
+  /** Itens já vindos do SSR (/homepage) — evita refetch dos mesmos meses no bootstrap */
+  initialItems?: Midia[];
 }
 
 function monthKey(year: number, month: number): string {
@@ -54,6 +57,7 @@ export function useCarouselMonthLoader({
   applyDisplayFilters,
   onItemsMerged,
   monthEdgeBuffer = 4,
+  initialItems = [],
 }: UseCarouselMonthLoaderOptions) {
   const [monthStates, setMonthStates] = useState<Record<string, MonthLoadState>>({});
   const [adjacentPrefetchCount, setAdjacentPrefetchCount] = useState(0);
@@ -63,6 +67,17 @@ export function useCarouselMonthLoader({
   const fetchQueueRef = useRef<QueuedMonthFetch[]>([]);
   const queueProcessingRef = useRef(false);
   const initialBootstrapDoneRef = useRef(false);
+
+  const initialMonthsSeededRef = useRef(false);
+  if (!initialMonthsSeededRef.current && initialItems.length > 0) {
+    initialMonthsSeededRef.current = true;
+    for (const item of initialItems) {
+      const key = monthKeyFromItem(item);
+      if (key) {
+        loadedMonthsRef.current.add(key);
+      }
+    }
+  }
 
   const setMonthState = useCallback((key: string, state: MonthLoadState) => {
     setMonthStates((prev) => (prev[key] === state ? prev : { ...prev, [key]: state }));
@@ -92,7 +107,7 @@ export function useCarouselMonthLoader({
       setMonthState(key, 'loading');
 
       try {
-        const response = await fetch(
+        const response = await fetchWithTimeout(
           `${API_BASE}/${mediaType}/by-month?year=${year}&month=${month}`,
           { cache: 'no-store' },
         );
@@ -325,6 +340,14 @@ export function useCarouselMonthLoader({
     }
     initialBootstrapDoneRef.current = true;
 
+    const seeded = applyDisplayFilters(mediaItemsRef.current ?? []);
+    if (seeded.length > 0) {
+      const openIdx = resolveCarouselOpenIndex(seeded);
+      if (openIdx >= 0 && isCarouselOpenIndexReady(seeded, openIdx)) {
+        return openIdx;
+      }
+    }
+
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
@@ -333,14 +356,13 @@ export function useCarouselMonthLoader({
 
     // Não carrega o mês anterior antes de abrir — senão o índice 0 vira o mês passado
     // e um scroll pendente velho mostra o começo da timeline em vez do próximo lançamento.
-    await Promise.all([
-      loadMonth(year, month, 'visible', true),
-      loadMonth(next.year, next.month, 'forward', true),
-      loadMonth(next2.year, next2.month, 'forward', true),
-    ]);
+    // Sequencial em vez de paralelo para não saturar a API free no cold start.
+    await loadMonth(year, month, 'visible', true);
+    await loadMonth(next.year, next.month, 'forward', true);
+    await loadMonth(next2.year, next2.month, 'forward', true);
 
     return resolveOpenPosition();
-  }, [loadMonth, resolveOpenPosition]);
+  }, [applyDisplayFilters, loadMonth, mediaItemsRef, resolveOpenPosition]);
 
   const loadMonthsForNavigation = useCallback(
     async (year: number, month: number, direction: 'next' | 'prev', limit: number) => {

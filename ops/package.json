@@ -1,0 +1,5 @@
+﻿{
+  "name": "orbe-render-sync-watch",
+  "private": true,
+  "description": "Cloudflare Worker: pinga o Render s├│ enquanto o sync estiver ativo."
+}
