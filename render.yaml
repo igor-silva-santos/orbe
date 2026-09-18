@@ -11,7 +11,8 @@ services:
     plan: free
     region: oregon
     buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npx prisma migrate deploy && npm start
+    # Migrate manual no Shell com DIRECT_URL — evita P3009 no boot
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV

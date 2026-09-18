@@ -12,6 +12,12 @@ CREATE TABLE IF NOT EXISTS "PushSubscription" (
 CREATE UNIQUE INDEX IF NOT EXISTS "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
 CREATE INDEX IF NOT EXISTS "PushSubscription_userId_idx" ON "PushSubscription"("userId");
 
-ALTER TABLE "PushSubscription"
-  ADD CONSTRAINT "PushSubscription_userId_fkey"
-  FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'PushSubscription_userId_fkey'
+  ) THEN
+    ALTER TABLE "PushSubscription"
+      ADD CONSTRAINT "PushSubscription_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;

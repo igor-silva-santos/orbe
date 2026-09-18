@@ -1,30 +1,39 @@
-# Build context: api/ (docker-compose, Railway, Render com rootDir=api)
-# Debian slim (not Alpine) — Prisma needs OpenSSL 3.x; Puppeteer uses system Chromium.
-# Cache bust: 2026-08-10-render-openssl-v3 — force Render to rebuild (not use stale layers)
-FROM node:20-slim AS builder
+# Render Docker — contexto = api/ (Root Directory no Render)
+# Sem migrate no boot (P3009/pooler). Migrate manual no Shell com DIRECT_URL.
+# Cache bust: 2026-09-18-stable-boot-v2
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
-    libssl3 \
     ca-certificates \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-RUN npm install
-COPY . .
+RUN npm ci
+
+COPY prisma ./prisma
 RUN npx prisma generate
+
+COPY tsconfig.json ./
+COPY src ./src
 RUN npm run build
 
-FROM node:20-slim
+FROM node:20-bookworm-slim
 WORKDIR /app
 
-# ARG before apt-get invalidates Docker layer cache when bumped
-ARG RENDER_CACHE_BUST=2026-08-10-openssl-v3
-RUN echo "Render cache bust: ${RENDER_CACHE_BUST}" \
-    && apt-get update && apt-get install -y --no-install-recommends \
+ENV NODE_ENV=production
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
-    libssl3 \
     ca-certificates \
     chromium \
     fonts-liberation \
@@ -33,18 +42,13 @@ RUN echo "Render cache bust: ${RENDER_CACHE_BUST}" \
     libharfbuzz0b \
     && rm -rf /var/lib/apt/lists/*
 
-ENV NODE_ENV=production
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
-
-# Regenerate Prisma client with runtime OpenSSL present (fixes engine detection)
+COPY prisma ./prisma
 RUN npx prisma generate
 
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+CMD ["node", "dist/index.js"]
