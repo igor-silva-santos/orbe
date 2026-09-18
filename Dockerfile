@@ -1,8 +1,11 @@
 # Render Docker — build context = repo root (api/ lives in subdirectory)
 # Debian slim (not Alpine) — Prisma needs OpenSSL 3.x; Puppeteer uses system Chromium.
-# Cache bust: 2026-08-10-render-openssl-v3 — force Render to rebuild (not use stale layers)
+# Cache bust: 2026-09-18-puppeteer-skip — force Render to rebuild (not use stale layers)
 FROM node:20-slim AS builder
 WORKDIR /app
+
+# Evita download do Chromium no npm ci (detetive usa o do sistema no estágio final)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
@@ -23,6 +26,8 @@ RUN npm run build
 FROM node:20-slim AS prod-deps
 WORKDIR /app
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 COPY api/package*.json ./
 RUN npm ci --omit=dev
 
@@ -30,7 +35,7 @@ FROM node:20-slim
 WORKDIR /app
 
 # ARG before apt-get invalidates Docker layer cache when bumped
-ARG RENDER_CACHE_BUST=2026-08-10-openssl-v3
+ARG RENDER_CACHE_BUST=2026-09-18-puppeteer-skip
 RUN echo "Render cache bust: ${RENDER_CACHE_BUST}" \
     && apt-get update && apt-get install -y --no-install-recommends \
     openssl \
