@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import orbeNerdApi from '@/lib/api';
 import { useAppStore } from '@/stores/appStore';
+import { toggleAnimeWeeklyPin } from '@/lib/animeWeeklyPinActions';
 
 export function useAnimeWeeklyPin(anilistId: number) {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
@@ -21,18 +21,11 @@ export function useAnimeWeeklyPin(anilistId: number) {
     }
     setLoading(true);
     try {
-      if (isPinned) {
-        await orbeNerdApi.unpinAnimeWeekly(anilistId);
-        setAnimeWeeklyPinIds(pinIds.filter((id) => id !== anilistId));
-        toast.success('Removido da sua semana.');
-      } else {
-        await orbeNerdApi.pinAnimeWeekly(anilistId);
-        setAnimeWeeklyPinIds([anilistId, ...pinIds.filter((id) => id !== anilistId)]);
-        const refreshed = await orbeNerdApi.getAnimeWeeklyPins();
-        setAnimeWeeklyPinIds(refreshed.anilistIds ?? []);
-        mergePinnedAnimes(refreshed.animes ?? []);
-        toast.success('Adicionado à sua semana.');
-      }
+      await toggleAnimeWeeklyPin(anilistId, {
+        animeWeeklyPinIds: pinIds,
+        setAnimeWeeklyPinIds,
+        mergePinnedAnimes,
+      });
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'message' in err

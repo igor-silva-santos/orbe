@@ -425,6 +425,7 @@ export type UserAction =
   | 'favoritar'
   | 'quero_assistir'
   | 'acompanhando'
+  | 'toggle_semana_anime'
   | 'ja_assisti'
   | 'ja_joguei'
   | 'nao_me_interessa';

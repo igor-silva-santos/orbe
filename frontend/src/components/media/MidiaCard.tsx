@@ -9,6 +9,7 @@ import {
   Star,
   Check,
   EyeOff,
+  Pin,
 } from 'lucide-react';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import AwardIcon from '@/components/ui/AwardIcons';
@@ -91,6 +92,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const openSuperModal = useAppStore((s) => s.openSuperModal);
   const openRatingModal = useAppStore((s) => s.openRatingModal);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -171,6 +173,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const hasStatusBadge = Boolean(cardStatus);
   const listHighlight =
     isAuthenticated ? getListHighlight(userInteraction?.status) : null;
+  const isWeeklyPinned = isAnime && isAuthenticated && animeWeeklyPinIds.includes(midia.id);
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
@@ -196,6 +199,16 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     { icon: Heart, label: 'Favoritar', action: 'favoritar' as UserAction, active: userInteraction?.status === 'favorito' },
     { icon: Bookmark, label: 'Quero Assistir', action: 'quero_assistir' as UserAction, active: userInteraction?.status === 'quero_assistir' },
     ...(type === 'anime' || type === 'serie' ? [{ icon: Star, label: 'Acompanhando', action: 'acompanhando' as UserAction, active: userInteraction?.status === 'acompanhando' }] : []),
+    ...(isAnime && isAuthenticated
+      ? [
+          {
+            icon: Pin,
+            label: isWeeklyPinned ? 'Remover da semana' : 'Fixar na semana',
+            action: 'toggle_semana_anime' as UserAction,
+            active: isWeeklyPinned,
+          },
+        ]
+      : []),
     { icon: Check, label: type === 'jogo' ? 'Já Joguei' : 'Já Assisti', action: (type === 'jogo' ? 'ja_joguei' : 'ja_assisti') as UserAction, active: userInteraction?.status === 'assistido', disabled: !hasReleased },
     { icon: EyeOff, label: 'Não me Interessa', action: 'nao_me_interessa' as UserAction, active: userInteraction?.status === 'oculto' }
   ];
@@ -256,6 +269,15 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   </div>
                 )}
                 {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
+                {isWeeklyPinned && !listHighlight && (
+                  <span
+                    className="absolute top-2 left-2 z-20 rounded-full bg-violet-600/95 text-white p-1.5 shadow-sm"
+                    title="Na sua semana"
+                    aria-label="Na sua semana"
+                  >
+                    <Pin className="h-3 w-3" />
+                  </span>
+                )}
                 {topAward && (
                   <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${listHighlight ? 'top-10' : ''}`}>
                     <AwardIcon

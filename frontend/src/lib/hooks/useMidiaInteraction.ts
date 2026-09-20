@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { orbeNerdApi } from '@/lib/api';
+import { toggleAnimeWeeklyPin } from '@/lib/animeWeeklyPinActions';
 import type { Filme, Serie, Anime, Jogo, TipoMidia, UserAction, UserInteraction } from '@/types';
 
 const ACTION_TO_STATUS: Partial<Record<UserAction, UserInteraction['status']>> = {
@@ -25,6 +26,9 @@ const ACTION_TO_STATUS: Partial<Record<UserAction, UserInteraction['status']>> =
 export function useMidiaInteraction() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const upsertInteraction = useAppStore((s) => s.upsertInteraction);
+  const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
+  const setAnimeWeeklyPinIds = useAppStore((s) => s.setAnimeWeeklyPinIds);
+  const mergePinnedAnimes = useAppStore((s) => s.mergePinnedAnimes);
 
   // useCallback com identidade estável entre renders — sem isso, toda renderização de
   // MediaCarousel criava uma nova função aqui, que descia como prop `onInteraction` pra
@@ -34,6 +38,21 @@ export function useMidiaInteraction() {
     async (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => {
       if (!isAuthenticated) {
         toast.error('Você precisa estar logado para fazer isso.');
+        return;
+      }
+
+      if (action === 'toggle_semana_anime') {
+        if (type !== 'anime') return;
+        try {
+          await toggleAnimeWeeklyPin(midia.id, {
+            animeWeeklyPinIds,
+            setAnimeWeeklyPinIds,
+            mergePinnedAnimes,
+          });
+        } catch (error) {
+          console.error('Erro ao atualizar anime da semana:', error);
+          toast.error('Não foi possível atualizar sua semana.');
+        }
         return;
       }
 
@@ -52,6 +71,12 @@ export function useMidiaInteraction() {
         toast.error('Não foi possível salvar. Tente novamente.');
       }
     },
-    [isAuthenticated, upsertInteraction]
+    [
+      isAuthenticated,
+      upsertInteraction,
+      animeWeeklyPinIds,
+      setAnimeWeeklyPinIds,
+      mergePinnedAnimes,
+    ]
   );
 }
