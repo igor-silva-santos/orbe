@@ -206,13 +206,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
     if (fetchingEmAltaRef.current || emAltaLoadedKeyRef.current === key) return;
     fetchingEmAltaRef.current = true;
     try {
-      const params = new URLSearchParams({ filtro: 'populares', limit: '40' });
-      if (mediaType === 'filmes' && emAltaDisponibilidade !== 'ambos') {
-        params.set('disponibilidade', emAltaDisponibilidade);
-      }
-      const response = await fetch(`${API_BASE}/${mediaType}?${params.toString()}`);
+      const url =
+        mediaType === 'filmes'
+          ? `${API_BASE}/filmes/mais-esperados?limit=40`
+          : `${API_BASE}/trending?type=${mediaType === 'series' ? 'series' : mediaType}&limit=40`;
+      const response = await fetch(url);
       const data = await response.json();
-      setEmAltaItems(Array.isArray(data?.results) ? data.results : []);
+      const items = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
+      setEmAltaItems(items);
       emAltaLoadedKeyRef.current = key;
     } catch (error) {
       console.error(`Error fetching "em alta" ${mediaType}:`, error);
@@ -528,7 +529,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
           title={emAltaMode ? undefined : 'Ir para o mês atual'}
         >
           {emAltaMode
-            ? 'Em Alta'
+            ? 'Mais esperados'
             : isNavigating
               ? 'Carregando conteúdo...'
               : showPositioningSkeleton
@@ -550,7 +551,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
             <button
               onClick={toggleEmAlta}
               className={`${CONTROL_BTN} ${emAltaMode ? 'bg-primary text-primary-foreground border-primary' : ''}`}
-              title={emAltaMode ? 'Ver por data de lançamento' : 'Ver o que está em alta agora'}
+              title={emAltaMode ? 'Ver por data de lançamento' : 'Ver mais esperados'}
               aria-pressed={emAltaMode}
             >
               <TrendingUp className="h-4 w-4" />
@@ -639,7 +640,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
             <LoadingOverlay message="Carregando novos títulos..." className="rounded-lg" />
           )}
         <div
-          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
+          className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 select-none ${isNavigating ? 'pointer-events-none' : ''}`}
           ref={setViewportRef}
           style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
         >

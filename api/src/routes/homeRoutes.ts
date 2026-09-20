@@ -27,6 +27,7 @@ import {
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import { searchRateLimiter, homepageRateLimiter } from '../securityMiddleware';
+import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
 import {
   TWELVE_HOURS,
   CAROUSEL_ITEM_LIMIT,
@@ -337,12 +338,16 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
     // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
     // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     if (type === 'filmes') {
-      const popularFilmes = await prisma.filme.findMany({
-        where: filmeQualityFilter,
-        orderBy: { popularity: 'desc' },
-        take,
-      });
-      results = popularFilmes.map((f) => mapFilmeToMidia(f));
+      const now = new Date();
+      const horizon = new Date(now);
+      horizon.setDate(horizon.getDate() + 120);
+      const filmes = await fetchFilmesForCarousel(
+        { releaseDate: { gte: now, lte: horizon } },
+        { take: Math.max(take, 80), homeLaunch: true },
+      );
+      results = sortFilmesByAntecipacaoScore(filmes, now)
+        .slice(0, take)
+        .map((f) => mapFilmeToMidia(f));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
@@ -415,7 +420,8 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
-const SEARCH_RESULT_LIMIT = 50;
+const SEARCH_RESULT_LIMIT = 24;
+const SEARCH_MIN_LENGTH = 2;
 
 const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
   const { q, category } = req.query;
@@ -424,18 +430,13 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     return res.status(400).json({ error: "O parâmetro de pesquisa 'q' é obrigatório." });
   }
 
+  const qTrim = q.trim();
+  if (qTrim.length < SEARCH_MIN_LENGTH) {
+    return res.json({ filmes: [], series: [], animes: [], jogos: [] });
+  }
+
   try {
-    const normalizedQ = normalizeSearchText(q);
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
-    const qTrim = q.trim();
-
-    const matchesQuery = (text: string | null | undefined) =>
-      !!text && normalizeSearchText(text).includes(normalizedQ);
-
-    const accentFilter = <T>(
-      items: T[],
-      fields: ((item: T) => string | null | undefined)[],
-    ): T[] => items.filter((item) => fields.some((f) => matchesQuery(f(item))));
 
     const promises = [];
 
@@ -444,14 +445,19 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.filme.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { title: { contains: qTrim, mode: 'insensitive' } },
-              { originalTitle: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              filmeQualityFilter,
+              {
+                OR: [
+                  { title: { contains: qTrim, mode: 'insensitive' } },
+                  { originalTitle: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
           include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => accentFilter(items, [(f) => f.title, (f) => f.originalTitle]))
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -462,14 +468,19 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.serie.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { name: { contains: qTrim, mode: 'insensitive' } },
-              { originalName: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              serieQualityFilter,
+              {
+                OR: [
+                  { name: { contains: qTrim, mode: 'insensitive' } },
+                  { originalName: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
           include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => accentFilter(items, [(s) => s.name, (s) => s.originalName]))
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -480,16 +491,19 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.anime.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
-              { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
-              { titleNative: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              animeQualityFilter,
+              {
+                OR: [
+                  { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
+                  { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
+                  { titleNative: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
-        }).then((items) =>
-          accentFilter(items, [(a) => a.titleRomaji, (a) => a.titleEnglish, (a) => a.titleNative])
-        )
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -499,9 +513,14 @@ const searchHandler = async (req: import('express').Request, res: import('expres
       promises.push(
         prisma.jogo.findMany({
           take: SEARCH_RESULT_LIMIT,
-          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          where: {
+            AND: [
+              jogoQualityFilter,
+              { name: { contains: qTrim, mode: 'insensitive' } },
+            ],
+          },
           orderBy: { rating: 'desc' },
-        }).then((items) => accentFilter(items, [(j) => j.name]))
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));

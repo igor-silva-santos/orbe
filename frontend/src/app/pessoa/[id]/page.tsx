@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import SafeImage from '@/components/ui/SafeImage';
 import { apiClient } from '@/lib/api';
@@ -26,7 +26,9 @@ interface PersonCredits {
 }
 
 export default function PessoaPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const openSuperModal = useAppStore((s) => s.openSuperModal);
+  const openSearch = useAppStore((s) => s.openSearch);
   const [data, setData] = useState<PersonCredits | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -68,14 +70,30 @@ export default function PessoaPage({ params }: { params: { id: string } }) {
     openSuperModal(stub, credit.mediaType);
   };
 
+  const handleBack = useCallback(() => {
+    const returnTo = sessionStorage.getItem('orbe:returnTo');
+    sessionStorage.removeItem('orbe:returnTo');
+    if (returnTo === 'search') {
+      openSearch();
+      router.back();
+      return;
+    }
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push('/');
+  }, [openSearch, router]);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <Link
-        href="/"
+      <button
+        type="button"
+        onClick={handleBack}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
       >
         <ArrowLeft className="h-4 w-4" /> Voltar
-      </Link>
+      </button>
 
       {isLoading && <p className="text-muted-foreground">Carregando...</p>}
       {!isLoading && hasError && (

@@ -657,7 +657,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
           <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 select-none ${isNavigating ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >

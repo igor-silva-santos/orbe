@@ -11,6 +11,7 @@ import { invalidateMediaCaches } from '../cacheInvalidation';
 import { translateTmdbStatus } from '../statusLabels';
 import { detailsRateLimiter } from '../securityMiddleware';
 import { mapFilmeAdminUpdate } from '../adminUpdateMappers';
+import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
 import { yearOnlyFilmeWhere } from '../yearOnlyRelease';
 import {
   TWELVE_HOURS,
@@ -263,6 +264,25 @@ router.get('/filmes/filtros', cacheMiddleware(TWENTY_FOUR_HOURS), async (req, re
   }
 });
 
+router.get('/filmes/mais-esperados', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
+  const limit = Math.min(parseInt(String(req.query.limit ?? '40'), 10) || 40, 100);
+  const now = new Date();
+  const horizon = new Date(now);
+  horizon.setDate(horizon.getDate() + 120);
+
+  try {
+    const filmes = await fetchFilmesForCarousel(
+      { releaseDate: { gte: now, lte: horizon } },
+      { take: CAROUSEL_ITEM_LIMIT, homeLaunch: true },
+    );
+    const ranked = sortFilmesByAntecipacaoScore(filmes, now).slice(0, limit);
+    res.json(ranked.map(mapFilmeToCarouselCard));
+  } catch (error) {
+    logger.error(`Erro ao buscar filmes mais esperados: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar filmes mais esperados.' });
+  }
+});
+
 // Rota para o Carrossel da Homepage de Filmes
 router.get('/filmes/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   try {
@@ -275,7 +295,7 @@ router.get('/filmes/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (re
 
     const filmes = await fetchFilmesForCarousel(
       { releaseDate: { gte: startDate, lte: endDate } },
-      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: currentYear },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: currentYear, homeLaunch: true },
     );
     res.json(filmes.map(mapFilmeToMidia));
   } catch (error) {

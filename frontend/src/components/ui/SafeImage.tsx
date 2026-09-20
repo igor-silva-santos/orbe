@@ -51,6 +51,7 @@ const SafeImage: React.FC<SafeImageProps> = ({
   return (
     <Image
       {...props}
+      draggable={false}
       src={resolvedSrc}
       alt={alt}
       className={className}

@@ -196,12 +196,9 @@ router.get('/series/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (re
         firstAirDate: 'asc',
       },
       take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
+      include: serieCarouselLiteInclude,
     });
-    res.json(series.map(mapSerieToMidia));
+    res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar séries para o carrossel da homepage: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries para o carrossel da homepage.' });

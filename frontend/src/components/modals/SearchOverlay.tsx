@@ -102,7 +102,15 @@ const SearchOverlay: React.FC = () => {
   }, [isSearchOpen, trendingContent.length]);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    const trimmed = searchQuery.trim();
+    if (trimmed === '') {
+      searchRequestIdRef.current += 1;
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    if (trimmed.length < 2) {
       searchRequestIdRef.current += 1;
       setSearchResults([]);
       setIsLoading(false);
@@ -113,7 +121,7 @@ const SearchOverlay: React.FC = () => {
     setIsLoading(true);
     const debounceTimer = setTimeout(async () => {
       try {
-        const results = await realApi.search(searchQuery);
+        const results = await realApi.search(trimmed);
         if (searchRequestIdRef.current !== requestId) return; // resposta obsoleta, ignora
         const allResults = [
           ...results.filmes,
