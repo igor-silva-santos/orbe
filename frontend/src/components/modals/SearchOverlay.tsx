@@ -127,7 +127,13 @@ const SearchOverlay: React.FC = () => {
     setIsLoading(true);
     const debounceTimer = setTimeout(async () => {
       try {
-        const results = await realApi.search(trimmed);
+        const apiCategory =
+          selectedCategory === 'todos' || selectedCategory === 'pessoas'
+            ? selectedCategory === 'pessoas'
+              ? 'pessoas'
+              : undefined
+            : selectedCategory;
+        const results = await realApi.search(trimmed, apiCategory);
         if (searchRequestIdRef.current !== requestId) return; // resposta obsoleta, ignora
         const allResults = [
           ...results.filmes,
@@ -164,7 +170,7 @@ const SearchOverlay: React.FC = () => {
     }, 350);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   const displayContent = useMemo(() => {
     if (searchQuery.trim()) return searchResults;

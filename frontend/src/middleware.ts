@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME } from '@/lib/session';
 import { isValidSessionToken } from '@/lib/jwt';
 
-const PROTECTED_PREFIXES = ['/perfil', '/configuracoes'];
+const PROTECTED_PREFIXES = ['/perfil', '/configuracoes', '/minha-lista'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,5 +29,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/perfil/:path*', '/configuracoes/:path*'],
+  matcher: ['/perfil/:path*', '/configuracoes/:path*', '/minha-lista/:path*'],
 };

@@ -36,7 +36,7 @@ const JogoPlatformLinks: React.FC<JogoPlatformLinksProps> = ({
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90"
+                className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90 cursor-pointer"
                 aria-label={`Abrir ${item.name}`}
               >
                 {icon}

@@ -14,8 +14,8 @@ const DEFAULT_TIMEOUT_MS = 30000;
 
 // NOTA (duplicacao intencional do token — cookie httpOnly + localStorage):
 // O login/registro grava o JWT tanto no cookie httpOnly de sessao
-// (ver lib/session.ts, usado só pelo middleware pra gate de UX em /perfil
-// e /configuracoes) quanto aqui no localStorage, de onde o apiClient le pra
+// (ver lib/session.ts, usado só pelo middleware pra gate de UX em /perfil,
+// /minha-lista e /configuracoes) quanto aqui no localStorage, de onde o apiClient le pra
 // montar o header Authorization em toda chamada à API.
 // Por que a duplicacao existe: o cookie httpOnly nao pode ser lido por
 // JavaScript (é o ponto dele), entao o cliente HTTP nao teria como montar o

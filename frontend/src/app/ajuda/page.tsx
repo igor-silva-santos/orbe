@@ -6,7 +6,7 @@ export default function AjudaPage() {
   const faqItems = [
     {
       question: "Como posso adicionar filmes à minha lista?",
-      answer: "Clique no ícone de menu (três pontos) em qualquer card de filme e selecione 'Quero Assistir' ou 'Favoritar'."
+      answer: "Clique no menu (⋮) em qualquer card e escolha Quero assistir, Favoritar ou Acompanhando. Tudo aparece em Minha lista no menu do seu perfil."
     },
     {
       question: "Como funciona o sistema de notificações?",

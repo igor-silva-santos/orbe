@@ -239,7 +239,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
       <TooltipTrigger asChild>
         <div className="relative group" ref={ref}>
             <div
-              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col transition-colors ${
+              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors ${
                 isFocused
                   ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
                   : listHighlight?.borderClass ?? ''

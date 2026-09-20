@@ -50,10 +50,11 @@ const FIXTURE: Row[] = [
 ];
 
 describe('mais esperados — limiar fixo vs adaptativo', () => {
-  it('DISPLAY estrito perde estreias sem voto', () => {
+  it('DISPLAY legado (pop ou votos) ainda perde estreias só com emBreve e pop baixa', () => {
     const display = FIXTURE.filter(passesDisplay);
-    assert.ok(!display.some((f) => f.title === 'Vingadores: Doomsday'));
+    assert.ok(display.some((f) => f.title === 'Vingadores: Doomsday'));
     assert.ok(!display.some((f) => f.title === 'Filme BR estreia'));
+    assert.ok(!display.some((f) => f.title === 'Indie festival'));
   });
 
   it('ranking adaptativo mantém hype sem vote_average e corta lixo', () => {

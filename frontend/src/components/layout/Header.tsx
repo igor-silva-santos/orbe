@@ -297,24 +297,43 @@ const Header: React.FC<HeaderProps> = ({
                 </Link>
               ))}
 
-              {!isAuthenticated && (
-                <div className="flex flex-col space-y-2 pt-4 border-t border-border mt-4">
-                  <Link
-                    href="/login"
-                    className="text-base font-medium orbe-text-primary hover:orbe-text-secondary transition-colors px-3 py-2 rounded-md hover:bg-muted"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Entrar
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors px-3 py-2 rounded-md text-center"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Inscreva-se
-                  </Link>
-                </div>
-              )}
+              <div className="flex flex-col space-y-2 pt-4 border-t border-border mt-4">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/minha-lista"
+                      className="text-base font-medium orbe-text-primary hover:orbe-text-secondary transition-colors px-3 py-2 rounded-md hover:bg-muted"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Minha lista
+                    </Link>
+                    <Link
+                      href="/perfil"
+                      className="text-base font-medium orbe-text-primary hover:orbe-text-secondary transition-colors px-3 py-2 rounded-md hover:bg-muted"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Meu perfil
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="text-base font-medium orbe-text-primary hover:orbe-text-secondary transition-colors px-3 py-2 rounded-md hover:bg-muted"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Entrar
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors px-3 py-2 rounded-md text-center"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Inscreva-se
+                    </Link>
+                  </>
+                )}
+              </div>
             </nav>
           </div>
         )}

@@ -457,7 +457,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: { streamingProviders: { include: { provider: true } } },
+          include: cardListInclude,
         }),
       );
     } else {
@@ -480,7 +480,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: { streamingProviders: { include: { provider: true } } },
+          include: cardListInclude,
         }),
       );
     } else {
@@ -504,6 +504,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { popularity: 'desc' },
+          include: animeCarouselInclude,
         }),
       );
     } else {
@@ -521,6 +522,10 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { rating: 'desc' },
+          include: {
+            genres: { include: { genero: true }, take: 3 },
+            platforms: { include: { plataforma: true }, take: 4 },
+          },
         }),
       );
     } else {
@@ -528,13 +533,15 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     }
 
     const includePeople =
-      !categoryFilter || categoryFilter === 'pessoas' || categoryFilter === 'todos';
+      (!categoryFilter || categoryFilter === 'pessoas' || categoryFilter === 'todos') &&
+      qTrim.length >= 2;
 
     const peoplePromise = includePeople
       ? prisma.pessoa.findMany({
           take: SEARCH_PEOPLE_LIMIT,
           where: { name: { contains: qTrim, mode: 'insensitive' } },
           orderBy: { name: 'asc' },
+          select: { tmdbId: true, name: true, profilePath: true },
         })
       : Promise.resolve([]);
 
@@ -543,6 +550,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
           take: SEARCH_PEOPLE_LIMIT,
           where: { name: { contains: qTrim, mode: 'insensitive' } },
           orderBy: { name: 'asc' },
+          select: { anilistId: true, name: true, image: true },
         })
       : Promise.resolve([]);
 
@@ -578,7 +586,9 @@ const searchHandler = async (req: import('express').Request, res: import('expres
   }
 };
 
-router.get('/pesquisa', searchRateLimiter, searchHandler);
-router.get('/search', searchRateLimiter, searchHandler);
+const SEARCH_CACHE_SECONDS = 90;
+
+router.get('/pesquisa', searchRateLimiter, cacheMiddleware(SEARCH_CACHE_SECONDS), searchHandler);
+router.get('/search', searchRateLimiter, cacheMiddleware(SEARCH_CACHE_SECONDS), searchHandler);
 
 export default router;
