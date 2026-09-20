@@ -147,7 +147,10 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                           <Link
                             href={`/pessoa/${ator.id}`}
                             onClick={() => {
-                              sessionStorage.setItem('orbe:returnTo', 'supermodal:serie');
+                              sessionStorage.setItem(
+                                'orbe:superModalReturn',
+                                JSON.stringify({ type: 'serie', id: serie.id }),
+                              );
                               closeSuperModal();
                             }}
                             className="flex flex-col items-center text-center w-24"

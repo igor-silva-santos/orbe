@@ -18,6 +18,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
+import {
+  airingYmdFromIso,
+  formatWeeklyCarouselTitle,
+  getWeekBoundsBr,
+  isYmdInRange,
+  ymdInBr,
+} from '@/lib/week-br';
 
 type CarouselItem = 
   | { type: 'media'; data: Anime }
@@ -145,12 +152,12 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     if (viewModeRef.current === 'weekly') {
       if (item.type === 'separator') {
         titleKey = `day-${item.dayName}`;
-        title = `Agenda: ${item.dayName}`;
+        title = formatWeeklyCarouselTitle(item.dayName);
       } else if (item.data.nextAiringEpisode) {
         const airingDate = new Date(item.data.nextAiringEpisode.airingAt);
         const dayName = DAY_NAMES[airingDate.getDay()];
         titleKey = `day-${dayName}`;
-        title = `Agenda: ${dayName}`;
+        title = formatWeeklyCarouselTitle(dayName);
       }
     } else if (item.type === 'media' && item.data.startDate) {
       const itemDate = new Date(
@@ -174,6 +181,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     // Posicionamento real vem via pendingScrollIndex; skeletons usam snap central.
     startIndex: SKELETON_CENTER_INDEX,
     duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
+    loop: viewMode === 'weekly' && !emAltaMode,
   });
 
   const setViewportRef = useCallback(
@@ -186,6 +194,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit({ loop: viewMode === 'weekly' && !emAltaMode });
+  }, [emblaApi, viewMode, emAltaMode]);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
   useEffect(() => {
@@ -437,13 +450,15 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         }
 
     } else {
+        const { startYmd, endYmd } = getWeekBoundsBr();
         const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
         filteredAnimes.forEach(anime => {
-            if (anime.nextAiringEpisode) {
-                const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
-                const dayIndex = localAiringDate.getDay();
-                animesByDay[dayIndex].push(anime);
-            }
+            if (!anime.nextAiringEpisode) return;
+            const ymd = airingYmdFromIso(anime.nextAiringEpisode.airingAt);
+            if (!isYmdInRange(ymd, startYmd, endYmd)) return;
+            const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
+            const dayIndex = localAiringDate.getDay();
+            animesByDay[dayIndex].push(anime);
         });
 
         const processedItems: CarouselItem[] = [];
@@ -451,13 +466,20 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             const animesForDay = animesByDay[dayIndex];
             if (animesForDay.length > 0) {
                 processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
-                animesForDay.sort((a, b) => new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime());
+                animesForDay.sort((a, b) => {
+                    const popA = (a as Anime & { popularity?: number }).popularity ?? a.avaliacao ?? 0;
+                    const popB = (b as Anime & { popularity?: number }).popularity ?? b.avaliacao ?? 0;
+                    if (popB !== popA) return popB - popA;
+                    return new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime();
+                });
                 animesForDay.forEach(anime => processedItems.push({ type: 'media', data: anime }));
             }
         }
         
         newCarouselItems = processedItems;
-        const currentDayIndex = new Date().getDay();
+        const todayYmd = ymdInBr();
+        const todayDate = new Date(`${todayYmd}T12:00:00`);
+        const currentDayIndex = todayDate.getDay();
         const startIndexCandidate = newCarouselItems.findIndex(item => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex]);
         newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
     }

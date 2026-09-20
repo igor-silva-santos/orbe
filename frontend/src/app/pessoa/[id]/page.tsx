@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import SafeImage from '@/components/ui/SafeImage';
 import { apiClient } from '@/lib/api';
+import realApi from '@/data/realApi';
 import { useAppStore } from '@/stores/appStore';
 import type { Filme, Serie } from '@/types';
 
@@ -70,7 +71,7 @@ export default function PessoaPage({ params }: { params: { id: string } }) {
     openSuperModal(stub, credit.mediaType);
   };
 
-  const handleBack = useCallback(() => {
+  const handleBack = useCallback(async () => {
     const returnTo = sessionStorage.getItem('orbe:returnTo');
     sessionStorage.removeItem('orbe:returnTo');
     if (returnTo === 'search') {
@@ -78,12 +79,33 @@ export default function PessoaPage({ params }: { params: { id: string } }) {
       router.back();
       return;
     }
+
+    const superRaw = sessionStorage.getItem('orbe:superModalReturn');
+    if (superRaw) {
+      sessionStorage.removeItem('orbe:superModalReturn');
+      try {
+        const parsed = JSON.parse(superRaw) as { type: 'serie' | 'filme' | 'anime' | 'jogo'; id: number };
+        const reopen = async () => {
+          if (parsed.type === 'serie') {
+            const serie = await realApi.getSerieDetails(parsed.id);
+            openSuperModal(serie as Serie, 'serie');
+          }
+        };
+        if (window.history.length > 1) router.back();
+        else router.push('/');
+        await reopen();
+        return;
+      } catch {
+        /* ignora payload inválido */
+      }
+    }
+
     if (window.history.length > 1) {
       router.back();
       return;
     }
     router.push('/');
-  }, [openSearch, router]);
+  }, [openSearch, openSuperModal, router]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
