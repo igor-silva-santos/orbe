@@ -189,8 +189,11 @@ export interface Anime extends Serie {
   };
 }
 
+export type JogoEmpresaRef = { igdbId: number; nome: string };
+
 export interface Jogo extends Midia {
   desenvolvedores: string[];
+  desenvolvedoras?: JogoEmpresaRef[];
   publicadoras: string[];
   plataformas_jogo: GamePlatform[];
   modos_jogo?: string[];

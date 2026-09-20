@@ -14,7 +14,8 @@ import PlatformIcon from '@/components/ui/PlatformIcons';
 import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
 import CardStatusBadge from '@/components/media/CardStatusBadge';
-import CardListIndicator from '@/components/media/CardListIndicator';
+import CardListHighlightPill from '@/components/media/CardListHighlightPill';
+import { getListHighlight } from '@/lib/list-highlight';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
@@ -168,10 +169,8 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const cardStatus = resolveCardStatus(type, midia, { isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
   const hasStatusBadge = Boolean(cardStatus);
-  const showListIndicator =
-    isAuthenticated &&
-    userInteraction?.status &&
-    ['favorito', 'quero_assistir', 'acompanhando'].includes(userInteraction.status);
+  const listHighlight =
+    isAuthenticated ? getListHighlight(userInteraction?.status) : null;
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
@@ -227,7 +226,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
       <TooltipTrigger asChild>
         <div className="relative group" ref={ref}>
             <div
-              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
+              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col transition-colors ${
+                isFocused
+                  ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                  : listHighlight?.borderClass ?? ''
+              }`}
               onClick={onClick || handleCardClick}
             >
               <div className="relative w-full aspect-[206/290] rounded-lg overflow-hidden shrink-0">
@@ -252,8 +255,9 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     <CardStatusBadge status={cardStatus} />
                   </div>
                 )}
+                {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
                 {topAward && (
-                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${showListIndicator ? 'top-10' : ''}`}>
+                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${listHighlight ? 'top-10' : ''}`}>
                     <AwardIcon
                       award={topAward.nome}
                       status={topAward.status}
@@ -263,7 +267,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     />
                   </div>
                 )}
-                {showListIndicator && <CardListIndicator interaction={userInteraction} />}
                 {showSteamPrice && (
                   <div className="absolute bottom-2 left-2 right-2 z-10">
                     <SteamPriceLabel item={midia} variant="card" />

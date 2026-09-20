@@ -283,11 +283,12 @@ function mapIgdbToPrismaLike(game: any) {
     ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`
     : null;
 
-  const companies: { role: string; company: { name: string } }[] = [];
+  const companies: { role: string; company: { igdbId: number; name: string } }[] = [];
   (game.involved_companies ?? []).forEach((inv: any) => {
-    if (!inv.company) return;
-    if (inv.developer) companies.push({ role: 'developer', company: inv.company });
-    if (inv.publisher) companies.push({ role: 'publisher', company: inv.company });
+    if (!inv.company?.id) return;
+    const company = { igdbId: inv.company.id, name: inv.company.name as string };
+    if (inv.developer) companies.push({ role: 'developer', company });
+    if (inv.publisher) companies.push({ role: 'publisher', company });
   });
 
   return {
@@ -683,6 +684,53 @@ export async function fetchVoiceActorCreditsLive(anilistId: number): Promise<{
     logger.error(`Erro ao buscar dublador ${anilistId} no AniList: ${error}`);
     return null;
   }
+}
+
+export async function fetchIgdbCompanyBrief(companyId: number): Promise<{ id: number; name: string } | null> {
+  if (!Number.isInteger(companyId) || companyId <= 0) return null;
+  await getIgdbAccessToken();
+  const query = `fields name; where id = ${companyId}; limit 1;`;
+  const response = await igdbApi.post('/companies', query);
+  const row = response.data?.[0];
+  if (!row?.name) return null;
+  return { id: companyId, name: row.name as string };
+}
+
+export async function fetchDeveloperGamesFromIgdb(
+  companyId: number,
+  offset: number,
+  limit: number,
+): Promise<{ id: number; name: string; coverUrl: string | null; firstReleaseDate: string | null; rating: number | null }[]> {
+  if (!Number.isInteger(companyId) || companyId <= 0) return [];
+  const safeLimit = Math.min(Math.max(limit, 1), 48);
+  const safeOffset = Math.max(offset, 0);
+  await getIgdbAccessToken();
+  const query = `
+    fields name, cover.url, first_release_date, rating;
+    where involved_companies.company = ${companyId} & involved_companies.developer = true;
+    sort first_release_date desc;
+    limit ${safeLimit};
+    offset ${safeOffset};
+  `;
+  const response = await igdbApi.post('/games', query);
+  const games = (response.data ?? []) as Array<{
+    id: number;
+    name: string;
+    cover?: { url?: string };
+    first_release_date?: number;
+    rating?: number;
+  }>;
+  return games.map((game) => ({
+    id: game.id,
+    name: game.name,
+    coverUrl: game.cover?.url
+      ? `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`
+      : null,
+    firstReleaseDate: game.first_release_date
+      ? new Date(game.first_release_date * 1000).toISOString().split('T')[0]
+      : null,
+    rating: game.rating ?? null,
+  }));
 }
 
 export type SerieSeasonEpisodeDto = {

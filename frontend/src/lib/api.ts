@@ -221,6 +221,10 @@ export const orbeNerdApi = {
     return apiClient.get(`/jogos/${id}/details`);
   },
 
+  getDeveloperGames: async (companyId: number, page = 1, limit = 24) => {
+    return apiClient.get(`/jogos/desenvolvedoras/${companyId}/jogos`, { page, limit });
+  },
+
   getJogoFilters: async () => {
     return apiClient.get('/jogos/filtros');
   },

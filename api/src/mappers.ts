@@ -633,6 +633,10 @@ export const mapJogoToMidia = (jogo: any) => {
     generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)) ?? [],
     plataformas_api: jogo.platforms?.map((p: any) => ({ nome: p.plataforma.name })) ?? [],
     desenvolvedores: jogo.companies?.filter((c: any) => c.role === 'developer').map((c: any) => c.company.name) ?? [],
+    desenvolvedoras:
+      jogo.companies
+        ?.filter((c: any) => c.role === 'developer' && c.company?.igdbId)
+        .map((c: any) => ({ igdbId: c.company.igdbId as number, nome: c.company.name as string })) ?? [],
     publicadoras: jogo.companies?.filter((c: any) => c.role === 'publisher').map((c: any) => c.company.name) ?? [],
     temas: jogo.themes?.map((t: any) => translateGameTheme(t.theme.name)) ?? [],
     modos_jogo: jogo.gameModes?.map((m: any) => translateGameMode(m.gameMode.name)) ?? [],

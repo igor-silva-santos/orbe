@@ -1,6 +1,7 @@
 'use client';
 
-import { Jogo } from '@/types'; // Assuming this type
+import Link from 'next/link';
+import { Jogo } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
 import { NOT_INFORMED, hasSteamAppId, hasSteamPriceDisplay } from '@/lib/media-helpers';
 import { formatIgdbHypesHint, formatIgdbHypesLabel } from '@/lib/engagement-labels';
@@ -62,7 +63,24 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
             <span className="text-muted-foreground">{steamPlayers.toLocaleString('pt-BR')}</span>
           </div>
         )}
-        {jogo.desenvolvedores && jogo.desenvolvedores.length > 0 ? (
+        {jogo.desenvolvedoras && jogo.desenvolvedoras.length > 0 ? (
+          <div>
+            <span className={`font-semibold ${labelColor} mr-2`}>Desenvolvedores:</span>
+            <span className="text-muted-foreground">
+              {jogo.desenvolvedoras.map((dev, index) => (
+                <span key={dev.igdbId}>
+                  {index > 0 ? ', ' : ''}
+                  <Link
+                    href={`/desenvolvedora/${dev.igdbId}`}
+                    className="text-primary underline underline-offset-2 cursor-pointer hover:text-primary/80"
+                  >
+                    {dev.nome}
+                  </Link>
+                </span>
+              ))}
+            </span>
+          </div>
+        ) : jogo.desenvolvedores && jogo.desenvolvedores.length > 0 ? (
           <div>
             <span className={`font-semibold ${labelColor} mr-2`}>Desenvolvedores:</span>
             <span className="text-muted-foreground">{jogo.desenvolvedores.join(', ')}</span>
