@@ -11,7 +11,8 @@ import PlatformIcon from '@/components/ui/PlatformIcons';
 import IngressoButton from '@/components/ui/IngressoButton';
 import { resolveFilmeTitle, resolveFilmePoster, sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
-import { ExternalLink } from 'lucide-react';
+import ModalExternalButton from '@/components/modals/super-modal/ModalExternalButton';
+import ModalPlatformLink from '@/components/modals/super-modal/ModalPlatformLink';
 import { useAppStore } from '@/stores/appStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
@@ -96,16 +97,9 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
               />
             )}
 
-            <Button variant="outline" asChild>
-              <a
-                href={`https://www.themoviedb.org/movie/${filme.tmdbId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2"
-              >
-                TMDB <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
+            <ModalExternalButton href={`https://www.themoviedb.org/movie/${filme.tmdbId}`}>
+              TMDB
+            </ModalExternalButton>
           </div>
         </div>
       </div>
@@ -134,25 +128,22 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
             {hasStreamingInfo && streamingProviders.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">Streaming</h3>
-                <div className="flex flex-wrap gap-4 sm:gap-6">
+                <div className="flex flex-wrap gap-3">
                   {streamingProviders.map((p) => (
-                    <a
+                    <ModalPlatformLink
                       key={p.provider.name}
                       href={p.url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-1.5 w-20 transition-opacity hover:opacity-90"
-                      aria-label={`Abrir ${p.provider.name}`}
-                    >
-                      <PlatformIcon
-                        platform={p.provider.name}
-                        logoPath={p.provider.logoPath}
-                        size={PLATFORM_ICON_SIZE_MODAL}
-                        variant="circle"
-                        title={p.provider.name}
-                      />
-                      <span className="text-xs text-center text-muted-foreground leading-tight">{p.provider.name}</span>
-                    </a>
+                      label={p.provider.name}
+                      icon={
+                        <PlatformIcon
+                          platform={p.provider.name}
+                          logoPath={p.provider.logoPath}
+                          size={PLATFORM_ICON_SIZE_MODAL}
+                          variant="circle"
+                          title={p.provider.name}
+                        />
+                      }
+                    />
                   ))}
                 </div>
               </div>
@@ -208,7 +199,13 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
                       <TooltipTrigger asChild>
                         <Link
                           href={`/pessoa/${ator.pessoa.id}`}
-                          onClick={closeSuperModal}
+                          onClick={() => {
+                            sessionStorage.setItem(
+                              'orbe:superModalReturn',
+                              JSON.stringify({ type: 'filme', id: filme.tmdbId }),
+                            );
+                            closeSuperModal();
+                          }}
                           className="block text-center w-20 sm:w-24 cursor-pointer"
                         >
                           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-full mb-2 overflow-hidden mx-auto">

@@ -8,12 +8,13 @@ import MidiaCard from '@/components/media/MidiaCard';
 import { LoadingIndicator } from '@/components/ui/LoadingIndicator';
 import type { SearchResultItem } from '@/types';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
+import PersonSearchCard, { type PersonSearchItem } from '@/components/search/PersonSearchCard';
 
 const SearchOverlay: React.FC = () => {
   const { isSearchOpen, closeSearch, userInteractions } = useAppStore();
   const handleInteraction = useMidiaInteraction();
 
-  type CategoryID = 'todos' | 'filmes' | 'series' | 'animes' | 'jogos';
+  type CategoryID = 'todos' | 'filmes' | 'series' | 'animes' | 'jogos' | 'pessoas';
 
   const categories: { id: CategoryID; label: string }[] = [
     { id: 'todos', label: 'Todos' },
@@ -21,11 +22,13 @@ const SearchOverlay: React.FC = () => {
     { id: 'series', label: 'Séries' },
     { id: 'animes', label: 'Animes' },
     { id: 'jogos', label: 'Jogos' },
+    { id: 'pessoas', label: 'Pessoas' },
   ];
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'todos' | 'filmes' | 'series' | 'animes' | 'jogos'>('todos');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryID>('todos');
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [peopleResults, setPeopleResults] = useState<PersonSearchItem[]>([]);
   const [trendingContent, setTrendingContent] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -44,6 +47,7 @@ const SearchOverlay: React.FC = () => {
     setSearchQuery('');
     setSelectedCategory('todos');
     setSearchResults([]);
+    setPeopleResults([]);
     closeSearch();
 
     if (shouldGoBack) {
@@ -106,6 +110,7 @@ const SearchOverlay: React.FC = () => {
     if (trimmed === '') {
       searchRequestIdRef.current += 1;
       setSearchResults([]);
+      setPeopleResults([]);
       setIsLoading(false);
       return;
     }
@@ -113,6 +118,7 @@ const SearchOverlay: React.FC = () => {
     if (trimmed.length < 2) {
       searchRequestIdRef.current += 1;
       setSearchResults([]);
+      setPeopleResults([]);
       setIsLoading(false);
       return;
     }
@@ -130,10 +136,26 @@ const SearchOverlay: React.FC = () => {
           ...results.jogos
         ];
         setSearchResults(allResults);
+        const people: PersonSearchItem[] = [
+          ...(results.pessoas ?? []).map((p: { id: number; name: string; profilePath: string | null }) => ({
+            kind: 'pessoa' as const,
+            id: p.id,
+            name: p.name,
+            profilePath: p.profilePath,
+          })),
+          ...(results.dubladores ?? []).map((d: { id: number; name: string; profilePath: string | null }) => ({
+            kind: 'dublador' as const,
+            id: d.id,
+            name: d.name,
+            profilePath: d.profilePath,
+          })),
+        ];
+        setPeopleResults(people);
       } catch (error) {
         if (searchRequestIdRef.current !== requestId) return;
         console.error('Erro ao buscar:', error);
         setSearchResults([]);
+        setPeopleResults([]);
       } finally {
         if (searchRequestIdRef.current === requestId) {
           setIsLoading(false);
@@ -157,8 +179,11 @@ const SearchOverlay: React.FC = () => {
       jogos: displayContent.filter(item => item.type === 'jogo'),
     };
 
+    if (selectedCategory === 'pessoas') {
+      return { filmes: [], series: [], animes: [], jogos: [] };
+    }
     if (selectedCategory === 'todos') return groups;
-    
+
     return {
       filmes: selectedCategory === 'filmes' ? groups.filmes : [],
       series: selectedCategory === 'series' ? groups.series : [],
@@ -168,7 +193,14 @@ const SearchOverlay: React.FC = () => {
 
   }, [displayContent, selectedCategory]);
 
-  const totalResults = Object.values(groupedContent).reduce((acc, group) => acc + group.length, 0);
+  const showPeople =
+    searchQuery.trim().length >= 2 &&
+    (selectedCategory === 'todos' || selectedCategory === 'pessoas') &&
+    peopleResults.length > 0;
+
+  const totalResults =
+    Object.values(groupedContent).reduce((acc, group) => acc + group.length, 0) +
+    (showPeople ? peopleResults.length : 0);
 
   if (!isSearchOpen) return null;
 
@@ -217,7 +249,7 @@ const SearchOverlay: React.FC = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Filme, série, anime ou jogo..."
+                placeholder="Filme, série, anime, jogo ou pessoa..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-12 py-3.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
@@ -265,10 +297,34 @@ const SearchOverlay: React.FC = () => {
               </div>
             ) : totalResults > 0 ? (
               <div className="space-y-8 pb-4">
-                {renderGroup('Filmes', groupedContent.filmes, 0)}
-                {renderGroup('Séries', groupedContent.series, groupedContent.filmes.length)}
-                {renderGroup('Animes', groupedContent.animes, groupedContent.filmes.length + groupedContent.series.length)}
-                {renderGroup('Jogos', groupedContent.jogos, groupedContent.filmes.length + groupedContent.series.length + groupedContent.animes.length)}
+                {selectedCategory !== 'pessoas' && renderGroup('Filmes', groupedContent.filmes, 0)}
+                {selectedCategory !== 'pessoas' &&
+                  renderGroup('Séries', groupedContent.series, groupedContent.filmes.length)}
+                {selectedCategory !== 'pessoas' &&
+                  renderGroup(
+                    'Animes',
+                    groupedContent.animes,
+                    groupedContent.filmes.length + groupedContent.series.length,
+                  )}
+                {selectedCategory !== 'pessoas' &&
+                  renderGroup(
+                    'Jogos',
+                    groupedContent.jogos,
+                    groupedContent.filmes.length + groupedContent.series.length + groupedContent.animes.length,
+                  )}
+                {showPeople && (
+                  <div className="space-y-4 border-t border-border pt-6">
+                    <h3 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                      <span className="w-1.5 h-5 bg-primary rounded-full" />
+                      Pessoas
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {peopleResults.map((person) => (
+                        <PersonSearchCard key={`${person.kind}-${person.id}`} person={person} />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : searchQuery.trim() ? (
               <div className="text-center py-16 bg-muted rounded-lg border border-border">

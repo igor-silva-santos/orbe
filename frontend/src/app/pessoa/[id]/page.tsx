@@ -7,7 +7,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import { apiClient } from '@/lib/api';
 import realApi from '@/data/realApi';
 import { useAppStore } from '@/stores/appStore';
-import type { Filme, Serie } from '@/types';
+import type { Filme, Serie, FilmeDetalhes } from '@/types';
 
 interface PersonCredit {
   id: number;
@@ -89,6 +89,9 @@ export default function PessoaPage({ params }: { params: { id: string } }) {
           if (parsed.type === 'serie') {
             const serie = await realApi.getSerieDetails(parsed.id);
             openSuperModal(serie as Serie, 'serie');
+          } else if (parsed.type === 'filme') {
+            const filme = await realApi.getFilmeDetails(parsed.id);
+            openSuperModal(filme as FilmeDetalhes, 'filme');
           }
         };
         if (window.history.length > 1) router.back();

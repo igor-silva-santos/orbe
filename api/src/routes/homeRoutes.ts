@@ -421,6 +421,7 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 
 // Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
 const SEARCH_RESULT_LIMIT = 24;
+const SEARCH_PEOPLE_LIMIT = 12;
 const SEARCH_MIN_LENGTH = 2;
 
 const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
@@ -432,7 +433,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
 
   const qTrim = q.trim();
   if (qTrim.length < SEARCH_MIN_LENGTH) {
-    return res.json({ filmes: [], series: [], animes: [], jogos: [] });
+    return res.json({ filmes: [], series: [], animes: [], jogos: [], pessoas: [], dubladores: [] });
   }
 
   try {
@@ -526,13 +527,49 @@ const searchHandler = async (req: import('express').Request, res: import('expres
       promises.push(Promise.resolve([]));
     }
 
-    const [filmes, series, animes, jogos] = await Promise.all(promises);
+    const includePeople =
+      !categoryFilter || categoryFilter === 'pessoas' || categoryFilter === 'todos';
+
+    const peoplePromise = includePeople
+      ? prisma.pessoa.findMany({
+          take: SEARCH_PEOPLE_LIMIT,
+          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          orderBy: { name: 'asc' },
+        })
+      : Promise.resolve([]);
+
+    const dubladoresPromise = includePeople
+      ? prisma.dublador.findMany({
+          take: SEARCH_PEOPLE_LIMIT,
+          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          orderBy: { name: 'asc' },
+        })
+      : Promise.resolve([]);
+
+    const [filmes, series, animes, jogos, pessoas, dubladores] = await Promise.all([
+      ...promises,
+      peoplePromise,
+      dubladoresPromise,
+    ]);
+
+    const profileUrl = (path: string | null | undefined) =>
+      path ? (path.startsWith('http') ? path : `https://image.tmdb.org/t/p/w185${path}`) : null;
 
     res.json({
       filmes: filmes.map((f) => mapFilmeToMidia(f)),
       series: series.map((s) => mapSerieToMidia(s)),
       animes: animes.map((a) => mapAnimeToMidia(a)),
       jogos: jogos.map((j) => mapJogoToMidia(j)),
+      pessoas: pessoas.map((p) => ({
+        id: p.tmdbId,
+        name: p.name,
+        profilePath: profileUrl(p.profilePath),
+      })),
+      dubladores: dubladores.map((d) => ({
+        id: d.anilistId,
+        name: d.name,
+        profilePath: d.image ?? null,
+      })),
     });
 
   } catch (error) {

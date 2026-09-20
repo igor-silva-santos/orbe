@@ -13,6 +13,7 @@ import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
+import ModalPlatformLink from '@/components/modals/super-modal/ModalPlatformLink';
 import SerieSeasonDrawer from '@/components/modals/super-modal/SerieSeasonDrawer';
 import { useAppStore } from '@/stores/appStore';
 
@@ -92,25 +93,20 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-4 mt-2">
             {streamingLinks.map((p) => (
-              <a
+              <ModalPlatformLink
                 key={`${p.name}-${p.url}`}
                 href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer"
-              >
-                <PlatformIcon platform={p.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
-                <span>{p.name}</span>
-              </a>
+                label={p.name}
+                icon={
+                  <PlatformIcon platform={p.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
+                }
+              />
             ))}
-            <a
+            <ModalPlatformLink
               href={tmdbSerieUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 border border-primary/40 text-primary font-semibold px-4 py-2 rounded-lg transition-colors hover:bg-primary/10 cursor-pointer"
-            >
-              TMDB
-            </a>
+              label="TMDB"
+              className="border border-primary/40 text-primary hover:bg-primary/10 bg-transparent"
+            />
           </div>
         </section>
       )}
