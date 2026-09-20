@@ -29,6 +29,12 @@ import cacheMiddleware from '../cacheMiddleware';
 import { searchRateLimiter, homepageRateLimiter } from '../securityMiddleware';
 import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
 import {
+  buildMaisEsperadoTmdbIdSet,
+  loadEstreiasSemanaFilmes,
+  loadMaisEsperadoTmdbIds,
+  resolveFilmeDestaqueFields,
+} from '../filmeLancamentoTags';
+import {
   TWELVE_HOURS,
   CAROUSEL_ITEM_LIMIT,
   getCurrentSeason,
@@ -216,8 +222,17 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       today,
     );
 
+    const maisEsperadoIds = buildMaisEsperadoTmdbIdSet(filmesRaw, today);
+    const filmes = filmesRaw.map((filme) => ({
+      ...mapFilmeToCarouselCard(filme),
+      ...resolveFilmeDestaqueFields(
+        { tmdbId: filme.tmdbId, releaseDate: filme.releaseDate },
+        { maisEsperadoIds, allowEstreiaSemana: false, now: today },
+      ),
+    }));
+
     res.json({
-      filmes: filmesRaw.map(mapFilmeToCarouselCard),
+      filmes,
       series: series.map(mapSerieToCarouselCard),
       jogos: jogos.map(mapJogoToCarouselCard),
       animes: animesAround.map(mapAnimeToCarouselCard),
@@ -242,7 +257,8 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   ];
 
   try {
-    const [cinema, streamingFilmesWeek, streamingFilmesFallback, streamingSeriesWeek, streamingSeriesFallback, destaquesJogos] =
+    const maisEsperadoIds = await loadMaisEsperadoTmdbIds(now);
+    const [cinema, estreiasSemanaRaw, streamingFilmesWeek, streamingFilmesFallback, streamingSeriesWeek, streamingSeriesFallback, destaquesJogos] =
       await Promise.all([
       prisma.filme.findMany({
         where: { AND: [filmeCarouselQualityFilter, filmeCarouselLocalizationFilter, { emCartaz: true }] },
@@ -250,6 +266,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         take: 12,
         include: cardListInclude,
       }),
+      loadEstreiasSemanaFilmes(now),
       prisma.filme.findMany({
         where: {
           AND: [...streamingFilmeFilters, { releaseDate: { gte: weekAgo, lte: now } }],
@@ -312,12 +329,24 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
     const streamingFilmes = dedupeFilmes([...streamingFilmesWeek, ...streamingFilmesFallback]).slice(0, 12);
     const streamingSeries = dedupeFilmes([...streamingSeriesWeek, ...streamingSeriesFallback]).slice(0, 12);
 
+    const mapFilmeHoje = (
+      filme: (typeof cinema)[number],
+      allowEstreiaSemana: boolean,
+    ) => ({
+      ...mapFilmeToMidia(filme),
+      ...resolveFilmeDestaqueFields(
+        { tmdbId: filme.tmdbId, releaseDate: filme.releaseDate },
+        { maisEsperadoIds, allowEstreiaSemana, now },
+      ),
+    });
+
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
       // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
       // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
-      cinema: cinema.map((f) => mapFilmeToMidia(f)),
-      streamingFilmes: streamingFilmes.map((f) => mapFilmeToMidia(f)),
+      estreiasSemana: estreiasSemanaRaw.map((f) => mapFilmeHoje(f, true)),
+      cinema: cinema.map((f) => mapFilmeHoje(f, false)),
+      streamingFilmes: streamingFilmes.map((f) => mapFilmeHoje(f, false)),
       streamingSeries: streamingSeries.map((s) => mapSerieToMidia(s)),
       destaquesJogos: destaquesJogos.map((j) => mapJogoToMidia(j)),
     });

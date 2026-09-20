@@ -12,6 +12,7 @@ import { useAppStore } from '@/stores/appStore';
 
 interface HojeData {
   data: string;
+  estreiasSemana?: Filme[];
   cinema: Filme[];
   streamingFilmes: Filme[];
   streamingSeries: Serie[];
@@ -92,6 +93,16 @@ export default function HojeClient() {
       ) : data ? (
         <div className="space-y-10">
           <MediaRow title="Em cartaz nos cinemas" icon={Clapperboard} items={data.cinema} type="filme" userInteractions={userInteractions} onInteraction={handleInteraction} />
+          {data.estreiasSemana && data.estreiasSemana.length > 0 && (
+            <MediaRow
+              title="Estreias da semana"
+              icon={Calendar}
+              items={data.estreiasSemana}
+              type="filme"
+              userInteractions={userInteractions}
+              onInteraction={handleInteraction}
+            />
+          )}
           <MediaRow title="Filmes populares no streaming esta semana" icon={Film} items={data.streamingFilmes} type="filme" userInteractions={userInteractions} onInteraction={handleInteraction} />
           <MediaRow title="Séries populares no streaming esta semana" icon={Tv} items={data.streamingSeries} type="serie" userInteractions={userInteractions} onInteraction={handleInteraction} />
           <MediaRow title="Jogos em destaque" icon={Gamepad2} items={data.destaquesJogos} type="jogo" userInteractions={userInteractions} onInteraction={handleInteraction} />

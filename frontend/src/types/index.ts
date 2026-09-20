@@ -122,6 +122,9 @@ export interface Filme extends Midia {
   videos?: Video[];
   status?: string;
   status_label?: string;
+  estreia_semana?: boolean;
+  mais_esperado?: boolean;
+  destaque_pill?: 'estreia_semana' | 'mais_esperado' | null;
 }
 
 export interface Temporada {

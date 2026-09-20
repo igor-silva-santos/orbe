@@ -12,6 +12,7 @@ import { translateTmdbStatus } from '../statusLabels';
 import { detailsRateLimiter } from '../securityMiddleware';
 import { mapFilmeAdminUpdate } from '../adminUpdateMappers';
 import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
+import { resolveFilmeDestaqueFields, loadMaisEsperadoTmdbIds } from '../filmeLancamentoTags';
 import { yearOnlyFilmeWhere } from '../yearOnlyRelease';
 import {
   TWELVE_HOURS,
@@ -132,7 +133,18 @@ router.get('/filmes/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CA
       return res.status(404).json({ error: 'Filme não encontrado.' });
     }
 
-    res.json(filme);
+    const maisEsperadoIds = await loadMaisEsperadoTmdbIds();
+    const destaques = resolveFilmeDestaqueFields(
+      {
+        tmdbId: (filme as { tmdbId?: number; id?: number }).tmdbId ?? (filme as { id: number }).id,
+        releaseDate:
+          (filme as { releaseDate?: string }).releaseDate ??
+          (filme as { data_lancamento_api?: string }).data_lancamento_api,
+      },
+      { maisEsperadoIds, allowEstreiaSemana: true },
+    );
+
+    res.json({ ...filme, ...destaques });
   } catch (error) {
     logger.error(`Erro ao buscar detalhes do filme: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar detalhes do filme.' });
@@ -276,7 +288,14 @@ router.get('/filmes/mais-esperados', cacheMiddleware(TWELVE_HOURS), async (req, 
       { take: CAROUSEL_ITEM_LIMIT, homeLaunch: true },
     );
     const ranked = sortFilmesByAntecipacaoScore(filmes, now).slice(0, limit);
-    res.json(ranked.map(mapFilmeToCarouselCard));
+    res.json(
+      ranked.map((filme) => ({
+        ...mapFilmeToCarouselCard(filme),
+        estreia_semana: false,
+        mais_esperado: true,
+        destaque_pill: 'mais_esperado' as const,
+      })),
+    );
   } catch (error) {
     logger.error(`Erro ao buscar filmes mais esperados: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar filmes mais esperados.' });

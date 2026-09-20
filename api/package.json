@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "start:dev": "ts-node src/index.ts",
     "build": "tsc",
-    "test": "node --require ts-node/register --test src/continuacoes.test.ts src/filmeAntecipacao.test.ts src/calendarBr.test.ts src/listaService.test.ts scripts/test-mais-esperados.fixture.test.ts scripts/streaming-providers.test.ts",
+    "test": "node --require ts-node/register --test src/continuacoes.test.ts src/filmeAntecipacao.test.ts src/calendarBr.test.ts src/filmeLancamentoTags.test.ts src/listaService.test.ts scripts/test-mais-esperados.fixture.test.ts scripts/streaming-providers.test.ts",
     "dev": "nodemon src/index.ts",
     "prisma:generate": "npx prisma generate",
     "prisma:deploy": "node scripts/prisma-deploy.js",

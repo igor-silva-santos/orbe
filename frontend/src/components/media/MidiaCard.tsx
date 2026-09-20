@@ -16,6 +16,7 @@ import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
 import CardStatusBadge from '@/components/media/CardStatusBadge';
 import CardListHighlightPill from '@/components/media/CardListHighlightPill';
+import FilmeDestaquePill from '@/components/media/FilmeDestaquePill';
 import { getListHighlight } from '@/lib/list-highlight';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -168,6 +169,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAdultContent = (midia as any).isAdult === true;
   const filme = type === 'filme' ? (midia as Filme) : null;
+  const filmeDestaquePill = filme?.destaque_pill ?? null;
   const cardStatus = resolveCardStatus(type, midia, { isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
   const hasStatusBadge = Boolean(cardStatus);
@@ -266,6 +268,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     }`}
                   >
                     <CardStatusBadge status={cardStatus} />
+                  </div>
+                )}
+                {filmeDestaquePill && (
+                  <div className={`absolute z-20 left-2 max-w-[calc(100%-3rem)] ${hasStatusBadge ? 'top-10' : 'top-2'}`}>
+                    <FilmeDestaquePill pill={filmeDestaquePill} />
                   </div>
                 )}
                 {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
