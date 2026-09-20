@@ -14,7 +14,7 @@ import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { ExternalLink } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
 
 interface FilmeModalContentProps {
   filme: FilmeDetalhes;
@@ -113,7 +113,6 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
       <Tabs defaultValue="detalhes" className="w-full">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
-          <TabsTrigger value="continuacao">Continuação</TabsTrigger>
         </TabsList>
 
         <TabsContent value="detalhes" className="space-y-6 mt-4">
@@ -239,11 +238,9 @@ const FilmeModalContent: React.FC<FilmeModalContentProps> = ({ filme, openCalend
         </section>
       )}
         </TabsContent>
-
-        <TabsContent value="continuacao" className="mt-4">
-          <ContinuacaoTabContent tipo="filme" tmdbId={filme.tmdbId} />
-        </TabsContent>
       </Tabs>
+
+      <ContinuacoesSuperModalTabs tipo="filme" tmdbId={filme.tmdbId} />
     </div>
   );
 };

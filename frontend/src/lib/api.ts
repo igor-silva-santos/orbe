@@ -183,6 +183,10 @@ export const orbeNerdApi = {
     return apiClient.get(`/series/${id}/details`);
   },
 
+  getSerieSeasonEpisodes: async (id: number, seasonNumber: number) => {
+    return apiClient.get(`/series/${id}/season/${seasonNumber}/episodes`);
+  },
+
   getSerieFilters: async () => {
     return apiClient.get('/series/filtros');
   },

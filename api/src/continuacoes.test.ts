@@ -2,7 +2,11 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { parsePositiveIntId } from './routes/mediaRoutesHelpers';
 import { parseSagasLimit, DEFAULT_SAGAS_LIMIT, MAX_SAGAS_LIMIT, parseUniverseId } from './continuacoesValidation';
-import { relacaoPorData, sortContinuacaoItemsChronologically } from './continuacoesService';
+import {
+  relacaoPorData,
+  sortContinuacaoItemsChronologically,
+  filterContinuacaoDireta,
+} from './continuacoesService';
 
 describe('parsePositiveIntId', () => {
   it('aceita inteiros positivos', () => {
@@ -54,6 +58,36 @@ describe('relacaoPorData', () => {
 
   it('fora da saga vira recomendado', () => {
     assert.equal(relacaoPorData(newer, older, false), 'recomendado');
+  });
+});
+
+describe('filterContinuacaoDireta', () => {
+  it('mantém só relações de continuação direta', () => {
+    const itens = [
+      {
+        tipo: 'filme' as const,
+        tmdbId: 1,
+        titulo: 'A',
+        posterUrl: null,
+        releaseDate: '2020-01-01',
+        relacao: 'sequencia' as const,
+        ordem: 0,
+        noOrbe: true,
+      },
+      {
+        tipo: 'filme' as const,
+        tmdbId: 2,
+        titulo: 'B',
+        posterUrl: null,
+        releaseDate: '2021-01-01',
+        relacao: 'recomendado' as const,
+        ordem: 0,
+        noOrbe: true,
+      },
+    ];
+    const filtered = filterContinuacaoDireta(itens);
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0].tmdbId, 1);
   });
 });
 

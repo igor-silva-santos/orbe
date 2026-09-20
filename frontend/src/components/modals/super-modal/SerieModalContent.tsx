@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Serie, CalendarModalData } from '@/types';
 import { dedupeStreamingProviders } from '@/lib/streaming-providers';
@@ -12,7 +12,8 @@ import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
+import SerieSeasonDrawer from '@/components/modals/super-modal/SerieSeasonDrawer';
 import { useAppStore } from '@/stores/appStore';
 
 interface SerieModalContentProps {
@@ -24,6 +25,7 @@ const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().incl
 
 const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
   const closeSuperModal = useAppStore((s) => s.closeSuperModal);
+  const [seasonDrawer, setSeasonDrawer] = useState<number | null>(null);
 
   if (!serie) {
     return <div>Carregando...</div>;
@@ -72,7 +74,6 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       <Tabs defaultValue="detalhes" className="w-full">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
-          <TabsTrigger value="continuacao">Continuação</TabsTrigger>
         </TabsList>
 
         <TabsContent value="detalhes" className="space-y-6 mt-4">
@@ -199,20 +200,36 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Temporadas</h2>
           <div className="space-y-2">
             {serie.temporadas.map(season => (
-              <div key={season.numero} className="flex justify-between items-center bg-muted p-2 rounded-lg">
+              <button
+                key={season.numero}
+                type="button"
+                onClick={() => setSeasonDrawer(season.numero)}
+                className="flex w-full justify-between items-center bg-muted hover:bg-muted/80 p-2 rounded-lg text-left cursor-pointer transition-colors"
+              >
                 <span className="font-medium">{season.nome || `Temporada ${season.numero}`}</span>
                 <span className="text-muted-foreground">{season.episodios} episódios</span>
-              </div>
+              </button>
             ))}
           </div>
         </section>
       )}
         </TabsContent>
 
-        <TabsContent value="continuacao" className="mt-4">
-          <ContinuacaoTabContent tipo="serie" tmdbId={serie.id} showSagaLink={false} />
-        </TabsContent>
       </Tabs>
+
+      <ContinuacoesSuperModalTabs tipo="serie" tmdbId={serie.id} showSagaLink={false} />
+
+      {seasonDrawer !== null && (
+        <SerieSeasonDrawer
+          tmdbId={serie.id}
+          seasonNumber={seasonDrawer}
+          seasonLabel={
+            serie.temporadas?.find((s) => s.numero === seasonDrawer)?.nome ||
+            `Temporada ${seasonDrawer}`
+          }
+          onClose={() => setSeasonDrawer(null)}
+        />
+      )}
     </div>
   );
 };

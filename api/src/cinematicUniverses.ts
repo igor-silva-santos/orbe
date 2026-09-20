@@ -184,6 +184,17 @@ export function getUniverseById(id: string): CinematicUniverseConfig | undefined
   return CINEMATIC_UNIVERSES.find((u) => u.id === id);
 }
 
+export function findUniverseForTitles(
+  ...texts: (string | null | undefined)[]
+): CinematicUniverseConfig | undefined {
+  for (const universe of CINEMATIC_UNIVERSES) {
+    if (texts.some((text) => matchesUniversePatterns(text, universe.titlePatterns))) {
+      return universe;
+    }
+  }
+  return undefined;
+}
+
 export function matchesUniversePatterns(text: string | null | undefined, patterns: RegExp[]): boolean {
   if (!text) return false;
   return patterns.some((pattern) => pattern.test(text));

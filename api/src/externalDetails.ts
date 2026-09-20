@@ -1,4 +1,4 @@
-import { tmdb, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
+import { tmdb, tmdbApi, igdbApi, anilistApi, getIgdbAccessToken } from './clients';
 import { prisma } from './clients';
 import { mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia, withPortugueseTranslation, parsePremiacoes, mapTmdbEpisodeFields } from './mappers';
 import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish } from './translation';
@@ -683,4 +683,36 @@ export async function fetchVoiceActorCreditsLive(anilistId: number): Promise<{
     logger.error(`Erro ao buscar dublador ${anilistId} no AniList: ${error}`);
     return null;
   }
+}
+
+export type SerieSeasonEpisodeDto = {
+  episodeNumber: number;
+  name: string;
+  overview: string;
+  runtime: number | null;
+  stillUrl: string | null;
+  airDate: string | null;
+};
+
+export async function fetchSerieSeasonEpisodes(
+  tmdbId: number,
+  seasonNumber: number,
+): Promise<SerieSeasonEpisodeDto[]> {
+  const { data } = await tmdbApi.get(`/tv/${tmdbId}/season/${seasonNumber}`);
+  const episodes = (data?.episodes ?? []) as Array<{
+    episode_number: number;
+    name: string;
+    overview: string;
+    runtime: number | null;
+    still_path: string | null;
+    air_date: string | null;
+  }>;
+  return episodes.map((ep) => ({
+    episodeNumber: ep.episode_number,
+    name: ep.name ?? '',
+    overview: ep.overview ?? '',
+    runtime: ep.runtime ?? null,
+    stillUrl: ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null,
+    airDate: ep.air_date ?? null,
+  }));
 }
