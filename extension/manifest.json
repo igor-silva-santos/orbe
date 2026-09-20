@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Orbe Nerd",
+  "version": "0.1.0",
+  "description": "Sincronização com a Minha Lista do Orbe (em desenvolvimento).",
+  "action": {
+    "default_title": "Orbe Nerd",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage"]
+}

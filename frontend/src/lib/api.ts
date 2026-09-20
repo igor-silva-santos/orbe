@@ -317,6 +317,14 @@ export const orbeNerdApi = {
     return apiClient.get('/me/interactions');
   },
 
+  getMinhaLista: async (params?: { status?: string; tipo?: string }) => {
+    const search = new URLSearchParams();
+    if (params?.status) search.set('status', params.status);
+    if (params?.tipo) search.set('tipo', params.tipo);
+    const qs = search.toString();
+    return apiClient.get(`/me/lista${qs ? `?${qs}` : ''}`);
+  },
+
   upsertInteraction: async (data: { midia_id: number; tipo_midia: string; status: string }) => {
     return apiClient.post('/me/interactions', data);
   },
