@@ -16,6 +16,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setNotifications,
     setUser,
     setInteractions,
+    setAnimeWeeklyPinIds,
+    setAnimeWeeklyPinned,
   } = useAppStore();
   
   const { isDark } = useTheme();
@@ -46,10 +48,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('Erro ao carregar interações do usuário:', error);
       }
+
+      try {
+        const weekly = await orbeNerdApi.getAnimeWeeklyPins();
+        setAnimeWeeklyPinIds(weekly.anilistIds ?? []);
+        setAnimeWeeklyPinned(weekly.animes ?? []);
+      } catch (error) {
+        console.error('Erro ao carregar animes da semana:', error);
+      }
     };
 
     initializeApp();
-  }, [setUser, setNotifications, setInteractions]);
+  }, [setUser, setNotifications, setInteractions, setAnimeWeeklyPinIds, setAnimeWeeklyPinned]);
 
   return (
     <>

@@ -17,6 +17,9 @@ import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import { useAppStore } from '@/stores/appStore';
+import { Button } from '@/components/ui/button';
+import { Pin } from 'lucide-react';
+import { useAnimeWeeklyPin } from '@/lib/hooks/useAnimeWeeklyPin';
 
 interface AnimeModalContentProps {
   anime: Anime;
@@ -126,6 +129,8 @@ const CharacterCard = ({ character }: { character: Character }) => {
 };
 
 const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
+  const { isPinned, toggle, loading: pinLoading, isAuthenticated } = useAnimeWeeklyPin(anime?.id ?? 0);
+
   if (!anime) {
     return <div>Carregando...</div>;
   }
@@ -151,6 +156,20 @@ const AnimeModalContent: React.FC<AnimeModalContentProps> = ({ anime }) => {
         </div>
         <div className="flex-1">
           <AnimeInfoBlock anime={anime} />
+          {isAuthenticated && (
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Button
+                type="button"
+                variant={isPinned ? 'default' : 'outline'}
+                disabled={pinLoading}
+                onClick={() => void toggle()}
+                className="inline-flex items-center gap-2"
+              >
+                <Pin className="h-4 w-4" />
+                {isPinned ? 'Na sua semana' : 'Fixar na semana'}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

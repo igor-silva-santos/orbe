@@ -212,6 +212,14 @@ export const orbeNerdApi = {
     return apiClient.get(`/animes/${id}/next-episode`);
   },
 
+  getAnimeWeeklyPins: async () => apiClient.get('/animes/weekly-pins'),
+
+  pinAnimeWeekly: async (anilistId: number) =>
+    apiClient.put(`/animes/weekly-pins/${anilistId}`, {}),
+
+  unpinAnimeWeekly: async (anilistId: number) =>
+    apiClient.delete(`/animes/weekly-pins/${anilistId}`),
+
   // Jogos
   getJogos: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; plataforma?: string; modo?: string; ano?: string; mes?: string }) => {
     return apiClient.get('/jogos', params);

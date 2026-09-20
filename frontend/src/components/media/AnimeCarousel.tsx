@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
+import orbeNerdApi from '@/lib/api';
 import {
   airingYmdFromIso,
   formatWeeklyCarouselTitle,
@@ -83,6 +84,11 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
+    const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+    const animeWeeklyPinned = useAppStore((s) => s.animeWeeklyPinned);
+    const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
+    const setAnimeWeeklyPinIds = useAppStore((s) => s.setAnimeWeeklyPinIds);
+    const setAnimeWeeklyPinned = useAppStore((s) => s.setAnimeWeeklyPinned);
     const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
     const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [fetchedAnimes, setFetchedAnimes] = useState<Anime[]>(initialData);
@@ -303,6 +309,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     viewModeRef.current = viewMode;
   }, [viewMode]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAnimeWeeklyPinIds([]);
+      setAnimeWeeklyPinned([]);
+      return;
+    }
+    orbeNerdApi
+      .getAnimeWeeklyPins()
+      .then((res) => {
+        setAnimeWeeklyPinIds(res.anilistIds ?? []);
+        setAnimeWeeklyPinned((res.animes ?? []) as Anime[]);
+      })
+      .catch(() => {});
+  }, [isAuthenticated, setAnimeWeeklyPinIds, setAnimeWeeklyPinned]);
+
   // Define modo inicial apenas uma vez — não sobrescreve escolha do usuário ao rolar
   useEffect(() => {
     if (initialViewModeApplied.current) return;
@@ -450,9 +471,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         }
 
     } else {
+        const pinSet = new Set(animeWeeklyPinIds);
+        const weeklyAnimes = new Map<number, Anime>();
+        filteredAnimes.forEach((a) => weeklyAnimes.set(a.id, a));
+        animeWeeklyPinned.forEach((a) => {
+          if (!weeklyAnimes.has(a.id)) weeklyAnimes.set(a.id, a);
+        });
+        const mergedWeeklyList = Array.from(weeklyAnimes.values());
+
         const { startYmd, endYmd } = getWeekBoundsBr();
         const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-        filteredAnimes.forEach(anime => {
+        mergedWeeklyList.forEach(anime => {
             if (!anime.nextAiringEpisode) return;
             const ymd = airingYmdFromIso(anime.nextAiringEpisode.airingAt);
             if (!isYmdInRange(ymd, startYmd, endYmd)) return;
@@ -467,6 +496,9 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             if (animesForDay.length > 0) {
                 processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
                 animesForDay.sort((a, b) => {
+                    const pinA = pinSet.has(a.id) ? 1 : 0;
+                    const pinB = pinSet.has(b.id) ? 1 : 0;
+                    if (pinB !== pinA) return pinB - pinA;
                     const popA = (a as Anime & { popularity?: number }).popularity ?? a.avaliacao ?? 0;
                     const popB = (b as Anime & { popularity?: number }).popularity ?? b.avaliacao ?? 0;
                     if (popB !== popA) return popB - popA;
@@ -500,7 +532,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       setPendingScrollIndex(newStartIndex);
     }
 
-  }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason, emAltaMode, emAltaAnimes]);
+  }, [
+    fetchedAnimes,
+    selectedGenre,
+    viewMode,
+    currentYear,
+    currentSeason,
+    emAltaMode,
+    emAltaAnimes,
+    animeWeeklyPinned,
+    animeWeeklyPinIds,
+  ]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {

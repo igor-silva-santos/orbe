@@ -8,7 +8,9 @@ interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   userInteractions: UserInteraction[];
-  
+  animeWeeklyPinIds: number[];
+  animeWeeklyPinned: Anime[];
+
   // Estado do tema
   theme: Theme;
   
@@ -54,7 +56,10 @@ interface AppState {
   logout: () => void;
   setInteractions: (interactions: UserInteraction[]) => void;
   upsertInteraction: (interaction: UserInteraction) => void;
-  
+  setAnimeWeeklyPinIds: (ids: number[]) => void;
+  setAnimeWeeklyPinned: (animes: Anime[]) => void;
+  mergePinnedAnimes: (animes: Anime[]) => void;
+
   // Ações do tema
   setTheme: (theme: Theme) => void;
   
@@ -90,6 +95,8 @@ export const useAppStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       userInteractions: [],
+      animeWeeklyPinIds: [],
+      animeWeeklyPinned: [],
       theme: 'system',
       notifications: [],
       unreadCount: 0,
@@ -133,9 +140,22 @@ export const useAppStore = create<AppState>()(
         notifications: [],
         unreadCount: 0,
         userInteractions: [],
+        animeWeeklyPinIds: [],
+        animeWeeklyPinned: [],
       }),
 
       setInteractions: (interactions) => set({ userInteractions: interactions }),
+
+      setAnimeWeeklyPinIds: (ids) => set({ animeWeeklyPinIds: ids }),
+
+      setAnimeWeeklyPinned: (animes) => set({ animeWeeklyPinned: animes }),
+
+      mergePinnedAnimes: (animes) => {
+        const { animeWeeklyPinned } = get();
+        const byId = new Map(animeWeeklyPinned.map((a) => [a.id, a]));
+        animes.forEach((a) => byId.set(a.id, a));
+        set({ animeWeeklyPinned: Array.from(byId.values()) });
+      },
 
       upsertInteraction: (interaction) => {
         const { userInteractions } = get();
