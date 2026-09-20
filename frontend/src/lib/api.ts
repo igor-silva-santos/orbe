@@ -325,6 +325,8 @@ export const orbeNerdApi = {
     return apiClient.get(`/me/lista${qs ? `?${qs}` : ''}`);
   },
 
+  getFilaAnimes: async () => apiClient.get('/watchlist/fila-animes'),
+
   upsertInteraction: async (data: { midia_id: number; tipo_midia: string; status: string }) => {
     return apiClient.post('/me/interactions', data);
   },

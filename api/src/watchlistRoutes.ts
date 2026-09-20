@@ -3,6 +3,13 @@ import { prisma } from './clients';
 import { logger } from './logger';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import { isStringWithMaxLength } from './validation';
+import {
+  buildWatchlistPayloadFromCrunchyroll,
+  type CrunchyrollScrapedItem,
+} from './crunchyrollWatchlistService';
+import { compareQueueStatus, type WatchlistQueueStatus } from './crunchyrollStatus';
+import { mapAnimeToMidia } from './mappers';
+import { animeCarouselInclude } from './routes/mediaRoutesHelpers';
 
 const router = Router();
 const WATCHLIST_SYNC_MAX_ITEMS = 500;
@@ -24,6 +31,44 @@ function isValidWatchlistItem(item: any): boolean {
     if (!item.lists.every((l: unknown) => typeof l === 'string' && l.length <= MAX_FIELD_LENGTH)) return false;
   }
   return true;
+}
+
+function mapItemToWatchlistData(userId: number, item: any) {
+  return {
+    userId,
+    id: item.id,
+    malId: item.malId ?? null,
+    anilistId: item.anilistId ?? null,
+    tmdbId: item.tmdbId ?? null,
+    crunchyrollId: item.crunchyrollId ?? null,
+    title: item.title || item.q || null,
+    ep: item.ep ?? 0,
+    season: item.s ?? item.season ?? 1,
+    dub: item.dub ?? 0,
+    st: item.st || item.status || 'comecar',
+    lists: item.lists || [],
+    note: item.note ?? null,
+    badge: item.badge ?? null,
+    badgeLabel: item.badgeLabel ?? null,
+    updatedAt: new Date(item.updatedAt || Date.now()),
+    isRemoved: item._rm || false,
+  };
+}
+
+async function upsertWatchlistItems(userId: number, items: any[]) {
+  const operations = items.map((item) => {
+    const data = mapItemToWatchlistData(userId, item);
+    return prisma.watchlistItem.upsert({
+      where: { userId_id: { userId, id: item.id } },
+      update: data,
+      create: data,
+    });
+  });
+
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < operations.length; i += BATCH_SIZE) {
+    await prisma.$transaction(operations.slice(i, i + BATCH_SIZE));
+  }
 }
 
 // Sincronizar itens do Watchlist (Bulk Upsert)
@@ -48,46 +93,89 @@ router.post('/watchlist/sync', authMiddleware, async (req: AuthRequest, res: Res
   try {
     logger.info(`Sincronizando ${items.length} itens para o usuário ${userId}`);
 
-    const operations = items.map((item: any) => {
-      const data = {
-        userId,
-        id: item.id,
-        malId: item.malId || null,
-        tmdbId: item.tmdbId || null,
-        title: item.title || item.q || null,
-        ep: item.ep || 0,
-        season: item.s || item.season || 1,
-        dub: item.dub || 0,
-        st: item.st || item.status || 'comecar',
-        lists: item.lists || [],
-        note: item.note || null,
-        badge: item.badge || null,
-        badgeLabel: item.badgeLabel || null,
-        updatedAt: new Date(item.updatedAt || Date.now()),
-        isRemoved: item._rm || false,
-      };
-
-      return prisma.watchlistItem.upsert({
-        where: {
-          userId_id: { userId, id: item.id }
-        },
-        update: data,
-        create: data,
-      });
-    });
-
-    // Transação de verdade (Promise.all só disparava tudo em paralelo, sem atomicidade
-    // nem controle de concorrência) -- em lotes de 50 pra não segurar uma transação
-    // gigante contra o pool do Supabase free quando o sync chega perto do limite de 500.
-    const BATCH_SIZE = 50;
-    for (let i = 0; i < operations.length; i += BATCH_SIZE) {
-      await prisma.$transaction(operations.slice(i, i + BATCH_SIZE));
-    }
+    await upsertWatchlistItems(userId, items);
 
     res.json({ success: true, count: items.length });
   } catch (error) {
     logger.error(`Erro ao sincronizar watchlist: ${error}`);
     res.status(500).json({ error: 'Erro interno ao sincronizar' });
+  }
+});
+
+router.post('/watchlist/crunchyroll/sync', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+  const { items, trackPtBrDub } = req.body as {
+    items?: CrunchyrollScrapedItem[];
+    trackPtBrDub?: boolean;
+  };
+
+  if (!Array.isArray(items)) {
+    return res.status(400).json({ error: 'items deve ser um array' });
+  }
+  if (items.length > WATCHLIST_SYNC_MAX_ITEMS) {
+    return res.status(400).json({ error: `Limite de ${WATCHLIST_SYNC_MAX_ITEMS} itens.` });
+  }
+
+  try {
+    const payloads = await buildWatchlistPayloadFromCrunchyroll(items, {
+      trackPtBrDub: Boolean(trackPtBrDub),
+    });
+    await upsertWatchlistItems(userId, payloads);
+    res.json({ success: true, count: payloads.length, skipped: items.length - payloads.length });
+  } catch (error) {
+    logger.error(`Erro ao sincronizar fila Crunchyroll: ${error}`);
+    res.status(500).json({ error: 'Erro ao sincronizar fila Crunchyroll.' });
+  }
+});
+
+const FILA_STATUS_LABEL: Record<string, string> = {
+  continuar: 'Continuar',
+  a_seguir: 'A seguir',
+  comecar: 'Começar',
+  assistir_de_novo: 'Assistir de novo',
+  concluido: 'Concluído',
+  esperando_dublagem: 'Aguardando dublagem PT-BR',
+  esperando_episodio: 'Aguardando novo episódio',
+};
+
+router.get('/watchlist/fila-animes', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+  try {
+    const rows = await prisma.watchlistItem.findMany({
+      where: {
+        userId,
+        isRemoved: false,
+        lists: { has: 'crunchyroll' },
+      },
+    });
+
+    const sorted = [...rows].sort((a, b) => {
+      const sa = (a.st as WatchlistQueueStatus) || 'comecar';
+      const sb = (b.st as WatchlistQueueStatus) || 'comecar';
+      const byStatus = compareQueueStatus(sa, sb);
+      if (byStatus !== 0) return byStatus;
+      return b.updatedAt.getTime() - a.updatedAt.getTime();
+    });
+
+    const anilistIds = sorted.map((r) => r.anilistId).filter((id): id is number => typeof id === 'number');
+    const animes = anilistIds.length
+      ? await prisma.anime.findMany({
+          where: { anilistId: { in: anilistIds } },
+          include: animeCarouselInclude,
+        })
+      : [];
+    const animeById = new Map(animes.map((a) => [a.anilistId, mapAnimeToMidia(a)]));
+
+    res.json({
+      items: sorted.map((row) => ({
+        ...row,
+        statusLabel: FILA_STATUS_LABEL[row.st] ?? row.st,
+        anime: row.anilistId ? animeById.get(row.anilistId) ?? null : null,
+      })),
+    });
+  } catch (error) {
+    logger.error(`Erro ao buscar fila de animes: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar fila de animes.' });
   }
 });
 

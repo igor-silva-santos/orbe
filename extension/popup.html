@@ -2,32 +2,82 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>Orbe Nerd</title>
+    <title>Orbe · Crunchyroll</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
         margin: 0;
-        padding: 16px;
-        width: 280px;
+        padding: 14px;
+        width: 320px;
         color: #1a1a1a;
       }
       h1 {
-        font-size: 16px;
-        margin: 0 0 8px;
+        font-size: 15px;
+        margin: 0 0 10px;
       }
-      p {
-        font-size: 13px;
-        line-height: 1.45;
+      label {
+        display: block;
+        font-size: 12px;
+        margin: 8px 0 4px;
         color: #555;
-        margin: 0;
+      }
+      input[type='text'],
+      input[type='password'] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      button {
+        margin-top: 10px;
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      #save {
+        background: #eee;
+        color: #111;
+      }
+      #sync {
+        background: #f47521;
+        color: #fff;
+      }
+      #status {
+        font-size: 12px;
+        margin-top: 10px;
+        min-height: 2.5em;
+      }
+      p.hint {
+        font-size: 11px;
+        color: #666;
+        line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <h1>Orbe Nerd</h1>
-    <p>
-      Extensão em construção. Use o site para gerenciar sua lista em
-      <strong>/minha-lista</strong> enquanto o sync da extensão não estiver disponível.
-    </p>
+    <h1>Orbe · Fila Crunchyroll</h1>
+    <p class="hint">Abra <strong>/pt-br/watchlist</strong>, faça login no Orbe e cole o JWT (localStorage <code>token</code>).</p>
+    <label for="apiBase">API Orbe</label>
+    <input id="apiBase" type="text" autocomplete="off" />
+    <label for="token">Token JWT</label>
+    <input id="token" type="password" autocomplete="off" />
+    <div class="row">
+      <input id="trackPtBrDub" type="checkbox" />
+      <label for="trackPtBrDub" style="margin: 0">Sincronizar só dublagem PT-BR</label>
+    </div>
+    <button id="save" type="button">Salvar</button>
+    <button id="sync" type="button">Sincronizar aba atual</button>
+    <p id="status"></p>
+    <script src="popup.js"></script>
   </body>
 </html>

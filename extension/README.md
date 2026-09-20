@@ -1,22 +1,21 @@
-# Extensão Chrome Orbe (rascunho)
+# Extensão Orbe · Crunchyroll
 
-Pasta reservada para a extensão que sincronizará listas externas com a conta Orbe.
+Sincroniza a [watchlist pt-BR](https://www.crunchyroll.com/pt-br/watchlist) com a **Fila de animes** no Orbe (`/minha-lista/fila`).
 
-## Estado atual
+Regras de depara: [REGRAS-CRUNCHYROLL.md](./REGRAS-CRUNCHYROLL.md)
 
-- Manifest V3 mínimo com popup placeholder.
-- A API já expõe `POST /api/watchlist/sync` para itens no formato legado (IndexedDB da extensão antiga).
-- A lista “oficial” do app usa `preferencias_usuario_midia` e a página `/minha-lista` (`GET /api/me/lista`).
+## Instalação (dev)
 
-## Próximos passos (quando as regras de produto estiverem fechadas)
+1. `chrome://extensions` → Modo desenvolvedor → **Carregar sem compactação** → pasta `extension/`.
+2. No popup: URL da API (ex. `http://localhost:3001/api` ou produção), JWT do Orbe (`localStorage.token` no site).
+3. Opcional: **Sincronizar só dublagem PT-BR**.
+4. Abra a watchlist da Crunchyroll → botão flutuante **Sync Orbe** ou sync pelo popup.
 
-1. Autenticação OAuth ou token copiado do Orbe (definir com segurança).
-2. Mapear status da extensão → `status` da API (`quero_assistir`, `acompanhando`, etc.).
-3. Resolver `tmdbId` / `anilistId` / `igdbId` antes do sync.
-4. Publicar na Chrome Web Store com ícones e permissões mínimas.
+## API
 
-## Desenvolvimento local
+- `POST /api/watchlist/crunchyroll/sync` — corpo `{ items, trackPtBrDub }`
+- `GET /api/watchlist/fila-animes` — fila ordenada para o app
 
-1. Abra `chrome://extensions`.
-2. Ative **Modo do desenvolvedor**.
-3. **Carregar sem compactação** → selecione esta pasta `extension/`.
+## Banco
+
+Rodar `api/scripts/supabase-watchlist-crunchyroll.sql` no Supabase se ainda não aplicou a migration Prisma.

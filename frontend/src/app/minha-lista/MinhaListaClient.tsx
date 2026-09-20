@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PageHeader from '@/components/layout/PageHeader';
+import MinhaListaNav from '@/components/minha-lista/MinhaListaNav';
 import MidiaCard from '@/components/media/MidiaCard';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
@@ -113,6 +114,7 @@ export default function MinhaListaClient() {
         title="Minha lista"
         description="Filmes, séries, animes e jogos que você salvou no Orbe — sincronizado com sua conta."
       />
+      <MinhaListaNav />
 
       <div className="flex flex-wrap gap-2 mb-4">
         {STATUS_TABS.map((tab) => (

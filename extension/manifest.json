@@ -1,11 +1,30 @@
 {
   "manifest_version": 3,
-  "name": "Orbe Nerd",
-  "version": "0.1.0",
-  "description": "Sincronização com a Minha Lista do Orbe (em desenvolvimento).",
+  "name": "Orbe Nerd · Crunchyroll",
+  "version": "0.2.0",
+  "description": "Sincroniza a fila da Crunchyroll com o Orbe (organizador do que assistir a seguir).",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://www.crunchyroll.com/*",
+    "https://*.crunchyroll.com/*",
+    "http://localhost:3001/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
-    "default_title": "Orbe Nerd",
+    "default_title": "Orbe · Crunchyroll",
     "default_popup": "popup.html"
   },
-  "permissions": ["storage"]
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.crunchyroll.com/*/watchlist*",
+        "https://www.crunchyroll.com/watchlist*"
+      ],
+      "js": ["content/crunchyroll-watchlist.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
