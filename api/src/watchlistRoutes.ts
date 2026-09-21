@@ -5,6 +5,7 @@ import { authMiddleware, type AuthRequest } from './authMiddleware';
 import { isStringWithMaxLength } from './validation';
 import {
   buildWatchlistPayloadFromCrunchyroll,
+  recomputeQueueStatusFromRow,
   type CrunchyrollScrapedItem,
 } from './crunchyrollWatchlistService';
 import { compareQueueStatus, type WatchlistQueueStatus } from './crunchyrollStatus';
@@ -50,6 +51,7 @@ function mapItemToWatchlistData(userId: number, item: any) {
     note: item.note ?? null,
     badge: item.badge ?? null,
     badgeLabel: item.badgeLabel ?? null,
+    crMeta: item.crMeta ?? null,
     updatedAt: new Date(item.updatedAt || Date.now()),
     isRemoved: item._rm || false,
   };
@@ -149,7 +151,30 @@ router.get('/watchlist/fila-animes', authMiddleware, async (req: AuthRequest, re
       },
     });
 
-    const sorted = [...rows].sort((a, b) => {
+    const animeEpisodesByAnilist = new Map<number, number | null>();
+    const anilistIdsForEp = rows.map((r) => r.anilistId).filter((id): id is number => typeof id === 'number');
+    if (anilistIdsForEp.length) {
+      const epsRows = await prisma.anime.findMany({
+        where: { anilistId: { in: anilistIdsForEp } },
+        select: { anilistId: true, episodes: true },
+      });
+      for (const row of epsRows) animeEpisodesByAnilist.set(row.anilistId, row.episodes);
+    }
+
+    const enriched = rows.map((row) => {
+      const st = recomputeQueueStatusFromRow({
+        st: row.st,
+        season: row.season,
+        ep: row.ep,
+        dub: row.dub,
+        badgeLabel: row.badgeLabel,
+        crMeta: row.crMeta,
+        anilistEpisodes: row.anilistId ? animeEpisodesByAnilist.get(row.anilistId) ?? null : null,
+      });
+      return { ...row, st };
+    });
+
+    const sorted = [...enriched].sort((a, b) => {
       const sa = (a.st as WatchlistQueueStatus) || 'comecar';
       const sb = (b.st as WatchlistQueueStatus) || 'comecar';
       const byStatus = compareQueueStatus(sa, sb);

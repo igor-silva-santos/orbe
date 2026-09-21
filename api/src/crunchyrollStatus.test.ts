@@ -5,6 +5,13 @@ import {
   mapCrunchyrollToQueueStatus,
 } from './crunchyrollStatus';
 
+const catalog = {
+  subFrontier: { season: 2, episode: 10 },
+  dubPtBrFrontier: { season: 2, episode: 8 },
+  episodesSubCount: 22,
+  episodesDubPtBrCount: 20,
+};
+
 describe('parseCrunchyrollStatusLine', () => {
   it('parseia exemplos da fila pt-BR', () => {
     assert.deepEqual(parseCrunchyrollStatusLine('Continuar: E5'), {
@@ -20,38 +27,55 @@ describe('parseCrunchyrollStatusLine', () => {
 });
 
 describe('mapCrunchyrollToQueueStatus', () => {
-  it('assistir de novo com ep igual ao total vira concluido', () => {
+  it('sub à frente da dub → esperando_dublagem (trilha PT-BR)', () => {
     assert.equal(
       mapCrunchyrollToQueueStatus({
         kind: 'assistir_de_novo',
-        episode: 12,
-        season: 1,
-        catalogEpisodes: 12,
+        season: 2,
+        episode: 8,
+        preferredAudio: 'pt-BR',
+        catalogEpisodes: 24,
+        catalog,
       }),
-      'concluido',
+      'esperando_dublagem',
     );
   });
 
-  it('assistir de novo com ep menor que total vira esperando episódio ou dublagem', () => {
+  it('sub e dub alinhados mas faltam eps no ar → esperando_episodio', () => {
     assert.equal(
       mapCrunchyrollToQueueStatus({
         kind: 'assistir_de_novo',
-        episode: 7,
-        season: 1,
+        season: 2,
+        episode: 10,
+        preferredAudio: 'sub',
         catalogEpisodes: 24,
-        trackPtBrDub: false,
+        catalog: {
+          subFrontier: { season: 2, episode: 10 },
+          dubPtBrFrontier: { season: 2, episode: 10 },
+          episodesSubCount: 22,
+          episodesDubPtBrCount: 22,
+        },
       }),
       'esperando_episodio',
     );
+  });
+
+  it('sub em dia e catálogo completo → concluido', () => {
     assert.equal(
       mapCrunchyrollToQueueStatus({
         kind: 'assistir_de_novo',
-        episode: 7,
         season: 1,
-        catalogEpisodes: 24,
-        trackPtBrDub: true,
+        episode: 12,
+        preferredAudio: 'sub',
+        catalogEpisodes: 12,
+        catalog: {
+          subFrontier: { season: 1, episode: 12 },
+          dubPtBrFrontier: { season: 1, episode: 12 },
+          episodesSubCount: 12,
+          episodesDubPtBrCount: 12,
+        },
       }),
-      'esperando_dublagem',
+      'concluido',
     );
   });
 });

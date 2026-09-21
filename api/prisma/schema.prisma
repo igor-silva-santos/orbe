@@ -870,6 +870,7 @@ model WatchlistItem {
   note            String?
   badge           String?
   badgeLabel      String?  // Texto bruto da Crunchyroll (ex.: Continuar: E5)
+  crMeta          Json?    // Catálogo CMS, trilha de áudio, match score
   updatedAt       DateTime @default(now())
   createdAt       DateTime @default(now())
   isRemoved       Boolean  @default(false)

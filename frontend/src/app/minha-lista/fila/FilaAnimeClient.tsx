@@ -9,6 +9,13 @@ import orbeNerdApi from '@/lib/api';
 import { useAppStore } from '@/stores/appStore';
 import type { Anime } from '@/types';
 
+type CrCatalog = {
+  episodesSubCount?: number | null;
+  episodesDubPtBrCount?: number | null;
+  subFrontier?: { season: number; episode: number } | null;
+  dubPtBrFrontier?: { season: number; episode: number } | null;
+};
+
 type FilaItem = {
   id: string;
   title: string | null;
@@ -19,7 +26,26 @@ type FilaItem = {
   season: number | null;
   dub: number | null;
   anime: Anime | null;
+  crMeta?: { preferredAudio?: string; catalog?: CrCatalog | null } | null;
 };
+
+function formatTe(pos: { season: number; episode: number } | null | undefined): string | null {
+  if (!pos) return null;
+  return `T${pos.season}E${pos.episode}`;
+}
+
+function catalogHint(row: FilaItem): string | null {
+  const cat = row.crMeta?.catalog;
+  if (!cat) return null;
+  const parts: string[] = [];
+  if (cat.episodesSubCount != null) parts.push(`${cat.episodesSubCount} eps no ar`);
+  if (cat.episodesDubPtBrCount != null) parts.push(`${cat.episodesDubPtBrCount} dublados PT-BR`);
+  const sub = formatTe(cat.subFrontier);
+  const dub = formatTe(cat.dubPtBrFrontier);
+  if (sub) parts.push(`sub até ${sub}`);
+  if (dub) parts.push(`dub até ${dub}`);
+  return parts.length ? parts.join(' · ') : null;
+}
 
 export default function FilaAnimeClient() {
   const router = useRouter();
@@ -47,7 +73,7 @@ export default function FilaAnimeClient() {
     <div className="container mx-auto px-4 py-8 md:py-10">
       <PageHeader
         title="Fila de animes"
-        description="Organizador do que assistir a seguir — sincronizado da Crunchyroll (watchlist). Prioridade: Continuar → A seguir → Começar."
+        description="Sincronizado da Crunchyroll. Prioridade: Continuar → A seguir → Começar. “Aguardando dublagem” = sub à frente da dublagem BR; “Aguardando novo episódio” = falta ep no ar."
       />
       <MinhaListaNav />
 
@@ -100,13 +126,24 @@ export default function FilaAnimeClient() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold orbe-text-primary truncate">{row.title}</p>
-                  <p className="text-sm text-primary font-medium">{row.statusLabel}</p>
+                  <p
+                    className={`text-sm font-medium ${
+                      row.st === 'esperando_dublagem' || row.st === 'esperando_episodio'
+                        ? 'text-amber-600 dark:text-amber-500'
+                        : 'text-primary'
+                    }`}
+                  >
+                    {row.statusLabel}
+                  </p>
                   {row.badgeLabel && (
                     <p className="text-xs text-muted-foreground truncate">{row.badgeLabel}</p>
                   )}
+                  {catalogHint(row) && (
+                    <p className="text-xs text-muted-foreground truncate">{catalogHint(row)}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     T{row.season ?? 1} · E{row.ep ?? '?'}
-                    {row.dub ? ' · Dublagem PT-BR' : ''}
+                    {row.dub || row.crMeta?.preferredAudio === 'pt-BR' ? ' · Trilha PT-BR' : ' · Leg/sub'}
                   </p>
                 </div>
               </button>

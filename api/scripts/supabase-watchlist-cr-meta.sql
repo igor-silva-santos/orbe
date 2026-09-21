@@ -1,0 +1,1 @@
+ALTER TABLE "WatchlistItem" ADD COLUMN IF NOT EXISTS "crMeta" JSONB;

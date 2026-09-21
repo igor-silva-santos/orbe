@@ -1,9 +1,11 @@
-import { prisma } from './clients';
 import {
   mapCrunchyrollToQueueStatus,
   parseCrunchyrollStatusLine,
+  type PreferredAudio,
   type WatchlistQueueStatus,
 } from './crunchyrollStatus';
+import type { CrunchyrollCatalogSnapshot } from './crunchyrollCms';
+import { resolveAnimeByTitleSmart } from './animeTitleMatch';
 
 export type CrunchyrollScrapedItem = {
   crunchyrollId: string;
@@ -11,6 +13,14 @@ export type CrunchyrollScrapedItem = {
   statusLine: string;
   href: string;
   isPtBrDub?: boolean;
+  catalog?: CrunchyrollCatalogSnapshot | null;
+};
+
+export type WatchlistCrMeta = {
+  lineKind: string;
+  preferredAudio: PreferredAudio;
+  matchScore?: number;
+  catalog?: CrunchyrollCatalogSnapshot | null;
 };
 
 export type CrunchyrollSyncItemPayload = {
@@ -26,25 +36,35 @@ export type CrunchyrollSyncItemPayload = {
   anilistId?: number | null;
   crunchyrollId?: string;
   note?: string | null;
+  crMeta?: WatchlistCrMeta;
   updatedAt?: number;
   _rm?: boolean;
 };
 
-async function resolveAnimeByTitle(title: string) {
-  const trimmed = title.trim();
-  if (!trimmed) return null;
-  return prisma.anime.findFirst({
-    where: {
-      OR: [
-        { titleRomaji: { equals: trimmed, mode: 'insensitive' } },
-        { titleEnglish: { equals: trimmed, mode: 'insensitive' } },
-        { titleNative: { equals: trimmed, mode: 'insensitive' } },
-        { titleRomaji: { contains: trimmed, mode: 'insensitive' } },
-        { titleEnglish: { contains: trimmed, mode: 'insensitive' } },
-      ],
-    },
-    select: { anilistId: true, malId: true, episodes: true, titleRomaji: true },
-    orderBy: { popularity: 'desc' },
+export function recomputeQueueStatusFromRow(row: {
+  st: string;
+  season: number | null;
+  ep: number | null;
+  dub: number | null;
+  badgeLabel: string | null;
+  crMeta: unknown;
+  anilistEpisodes?: number | null;
+}): WatchlistQueueStatus {
+  const meta = (row.crMeta ?? null) as WatchlistCrMeta | null;
+  const parsed = row.badgeLabel ? parseCrunchyrollStatusLine(row.badgeLabel) : null;
+  const kind = parsed?.kind ?? (meta?.lineKind as WatchlistQueueStatus) ?? 'comecar';
+  const season = parsed?.season ?? row.season ?? 1;
+  const episode = parsed?.episode ?? row.ep ?? 1;
+  const preferredAudio: PreferredAudio =
+    meta?.preferredAudio ?? (row.dub ? 'pt-BR' : 'sub');
+
+  return mapCrunchyrollToQueueStatus({
+    kind: kind as 'comecar' | 'continuar' | 'a_seguir' | 'assistir_de_novo',
+    season,
+    episode,
+    catalogEpisodes: row.anilistEpisodes ?? null,
+    preferredAudio,
+    catalog: meta?.catalog ?? null,
   });
 }
 
@@ -59,20 +79,34 @@ export async function buildWatchlistPayloadFromCrunchyroll(
     if (!row.crunchyrollId || seen.has(row.crunchyrollId)) continue;
     seen.add(row.crunchyrollId);
 
-    if (options.trackPtBrDub && !row.isPtBrDub) continue;
-
     const parsed = parseCrunchyrollStatusLine(row.statusLine);
     if (!parsed) continue;
 
-    const anime = await resolveAnimeByTitle(row.title);
+    const preferredAudio: PreferredAudio =
+      options.trackPtBrDub || row.isPtBrDub ? 'pt-BR' : 'sub';
+
+    if (options.trackPtBrDub && !row.isPtBrDub && preferredAudio === 'pt-BR') {
+      continue;
+    }
+
+    const match = await resolveAnimeByTitleSmart(row.title);
+    const catalog = row.catalog ?? null;
+
     const queueStatus: WatchlistQueueStatus = mapCrunchyrollToQueueStatus({
       kind: parsed.kind,
       episode: parsed.episode,
       season: parsed.season,
-      catalogEpisodes: anime?.episodes ?? null,
-      trackPtBrDub: options.trackPtBrDub,
-      dubbedEpisodesAvailable: null,
+      catalogEpisodes: match?.episodes ?? null,
+      preferredAudio,
+      catalog,
     });
+
+    const crMeta: WatchlistCrMeta = {
+      lineKind: parsed.kind,
+      preferredAudio,
+      matchScore: match?.score,
+      catalog,
+    };
 
     out.push({
       id: `cr:${row.crunchyrollId}`,
@@ -80,13 +114,14 @@ export async function buildWatchlistPayloadFromCrunchyroll(
       st: queueStatus,
       ep: parsed.episode,
       season: parsed.season,
-      dub: options.trackPtBrDub || row.isPtBrDub ? 1 : 0,
-      lists: ['crunchyroll', ...(options.trackPtBrDub ? ['dub-pt-br'] : [])],
+      dub: preferredAudio === 'pt-BR' ? 1 : 0,
+      lists: ['crunchyroll', ...(preferredAudio === 'pt-BR' ? ['dub-pt-br'] : ['sub'])],
       badgeLabel: parsed.label,
-      malId: anime?.malId ?? null,
-      anilistId: anime?.anilistId ?? null,
+      malId: match?.malId ?? null,
+      anilistId: match?.anilistId ?? null,
       crunchyrollId: row.crunchyrollId,
-      note: anime ? `match:${anime.titleRomaji}` : 'match:pending',
+      note: match ? `match:${match.titleRomaji}@${match.score.toFixed(2)}` : 'match:pending',
+      crMeta,
       updatedAt: Date.now(),
     });
   }

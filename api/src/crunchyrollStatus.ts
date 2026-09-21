@@ -3,6 +3,9 @@
  * @see extension/REGRAS-CRUNCHYROLL.md
  */
 
+import { isAtOrPastPosition, subAheadOfDub, type SeasonEpisode } from './animeFrontier';
+import type { CrunchyrollCatalogSnapshot } from './crunchyrollCms';
+
 export type CrunchyrollLineKind =
   | 'comecar'
   | 'continuar'
@@ -49,48 +52,77 @@ export function parseCrunchyrollStatusLine(raw: string): {
   return null;
 }
 
+export type PreferredAudio = 'sub' | 'pt-BR';
+
 export type RefineProgressInput = {
   kind: CrunchyrollLineKind;
-  episode: number;
   season: number;
-  /** Total de episódios no catálogo Orbe (Anilist), quando conhecido */
+  episode: number;
   catalogEpisodes?: number | null;
-  /** Usuário sincroniza só trilha dublada PT-BR */
-  trackPtBrDub?: boolean;
-  /**
-   * Episódios disponíveis em dublagem PT-BR (quando conhecido).
-   * Se ausente, inferimos apenas pelo total do catálogo.
-   */
-  dubbedEpisodesAvailable?: number | null;
+  preferredAudio: PreferredAudio;
+  catalog?: CrunchyrollCatalogSnapshot | null;
 };
 
+function resolveAssistirDeNovo(input: RefineProgressInput): WatchlistQueueStatus {
+  const pos: SeasonEpisode = { season: input.season, episode: input.episode };
+  const catalog = input.catalog;
+  const catalogTotal = input.catalogEpisodes ?? null;
+  const preferDub = input.preferredAudio === 'pt-BR';
+
+  const subF = catalog?.subFrontier ?? null;
+  const dubF = catalog?.dubPtBrFrontier ?? null;
+  const subCount = catalog?.episodesSubCount ?? null;
+  const dubCount = catalog?.episodesDubPtBrCount ?? null;
+
+  if (catalog && preferDub && dubF) {
+    if (!isAtOrPastPosition(pos, dubF)) {
+      return 'assistir_de_novo';
+    }
+    if (subAheadOfDub(subF, dubF)) {
+      return 'esperando_dublagem';
+    }
+    if (catalogTotal != null && subCount != null && subCount < catalogTotal) {
+      return 'esperando_episodio';
+    }
+    if (catalogTotal != null && dubCount != null && dubCount >= catalogTotal) {
+      return 'concluido';
+    }
+    return 'esperando_episodio';
+  }
+
+  if (catalog && subF) {
+    if (!isAtOrPastPosition(pos, subF)) {
+      return 'assistir_de_novo';
+    }
+    if (catalogTotal != null && subCount != null && subCount < catalogTotal) {
+      return 'esperando_episodio';
+    }
+    if (preferDub && dubF && subAheadOfDub(subF, dubF)) {
+      return 'esperando_dublagem';
+    }
+    return catalogTotal != null && subCount != null && subCount >= catalogTotal ? 'concluido' : 'esperando_episodio';
+  }
+
+  // Fallback sem CMS
+  if (catalogTotal != null && catalogTotal > 0) {
+    if (input.episode >= catalogTotal) return 'concluido';
+    return preferDub ? 'esperando_dublagem' : 'esperando_episodio';
+  }
+
+  return 'assistir_de_novo';
+}
+
 /**
- * Converte o texto da Crunchyroll + metadados do catálogo em status da fila Orbe.
+ * Converte o texto da Crunchyroll + catálogo CMS + Anilist em status da fila Orbe.
  */
 export function mapCrunchyrollToQueueStatus(input: RefineProgressInput): WatchlistQueueStatus {
-  const { kind, episode, catalogEpisodes, trackPtBrDub, dubbedEpisodesAvailable } = input;
+  const { kind } = input;
 
   if (kind === 'comecar') return 'comecar';
   if (kind === 'continuar') return 'continuar';
   if (kind === 'a_seguir') return 'a_seguir';
 
-  // Assistir de Novo — pode ser “vi tudo” ou “vi tudo que tem dublado / disponível”
-  const total = catalogEpisodes ?? null;
-  const dubbed = dubbedEpisodesAvailable ?? null;
-
-  if (trackPtBrDub && dubbed != null && dubbed > 0) {
-    if (episode >= dubbed) {
-      return total != null && dubbed >= total ? 'concluido' : 'esperando_dublagem';
-    }
-    return 'assistir_de_novo';
-  }
-
-  if (total != null && total > 0) {
-    if (episode >= total) return 'concluido';
-    return trackPtBrDub ? 'esperando_dublagem' : 'esperando_episodio';
-  }
-
-  return 'assistir_de_novo';
+  return resolveAssistirDeNovo(input);
 }
 
 /** Ordem de prioridade na fila “o que assistir agora” */
@@ -106,4 +138,9 @@ export const QUEUE_STATUS_SORT: Record<WatchlistQueueStatus, number> = {
 
 export function compareQueueStatus(a: WatchlistQueueStatus, b: WatchlistQueueStatus): number {
   return QUEUE_STATUS_SORT[a] - QUEUE_STATUS_SORT[b];
+}
+
+export function formatSeasonEpisode(pos: SeasonEpisode | null | undefined): string | null {
+  if (!pos) return null;
+  return `T${pos.season}E${pos.episode}`;
 }
