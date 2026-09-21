@@ -37,6 +37,7 @@ type ViewMode = 'launch' | 'weekly';
 
 interface AnimeCarouselProps {
     initialData: Anime[];
+    bootstrapEnabled?: boolean;
 }
 
 const SEASONS: Season[] = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
@@ -82,7 +83,7 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
     return { startDate, endDate };
 };
 
-const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
+const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEnabled = true }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
     const isAuthenticated = useAppStore((s) => s.isAuthenticated);
@@ -312,6 +313,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
   // Prefetch temporada atual (completa) + adjacentes
   useEffect(() => {
+    if (!bootstrapEnabled) return;
     const seasonIdx = SEASONS.indexOf(initialSeason);
     const prevSeason = SEASONS[(seasonIdx - 1 + 4) % 4];
     const prevYear = seasonIdx === 0 ? initialYear - 1 : initialYear;
@@ -322,7 +324,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       void fetchSeasonData(prevYear, prevSeason, 'prev');
       void fetchSeasonData(nextYear, nextSeason, 'next');
     })();
-  }, [fetchSeasonData, initialSeason, initialYear]);
+  }, [bootstrapEnabled, fetchSeasonData, initialSeason, initialYear]);
 
   useEffect(() => {
     viewModeRef.current = viewMode;
