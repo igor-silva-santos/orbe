@@ -15,6 +15,7 @@ import { getSyncRunProgress } from './syncProgress';
 import { addSkipReasons, updateSyncProgress } from './syncState';
 import { dedupeBy, resolveTmdbGeneroIds } from './syncUtils';
 import { mapTmdbEpisodeFields } from './mappers';
+import { dedupeTmdbWatchProviders, normalizeStreamingProviderName } from './streamingProviders';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -312,9 +313,9 @@ async function processSerieBatch(
             create: dedupeBy(serieDetails.videos?.results?.filter((v: any) => v.site === 'YouTube'), (video: any) => video.id).map((video: any) => ({ tmdbId: video.id, key: video.key, name: video.name, site: video.site, type: video.type, official: video.official }))
         },
         streamingProviders: {
-            create: dedupeBy(brProviders.flatrate, (provider: any) => provider.provider_id).map((provider: any) => ({
+            create: dedupeTmdbWatchProviders(brProviders.flatrate ?? []).map((provider: any) => ({
                 url: brProviders.link, // Adiciona a URL da página "Onde Assistir"
-                provider: { connectOrCreate: { where: { tmdbId: provider.provider_id }, create: { tmdbId: provider.provider_id, name: provider.provider_name, logoPath: provider.logo_path } } }
+                provider: { connectOrCreate: { where: { tmdbId: provider.provider_id }, create: { tmdbId: provider.provider_id, name: normalizeStreamingProviderName(provider.provider_name), logoPath: provider.logo_path } } }
             }))
         }
       };

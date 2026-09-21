@@ -3,13 +3,12 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Serie, CalendarModalData } from '@/types';
-import { dedupeStreamingProviders } from '@/lib/streaming-providers';
 import SerieInfoBlock from './SerieInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SafeImage from '@/components/ui/SafeImage';
 import PlatformIcon from '@/components/ui/PlatformIcons';
-import { sanitizeTranslatedText } from '@/lib/media-helpers';
+import { sanitizeTranslatedText, dedupeStreamingProvidersForDisplay } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
@@ -35,24 +34,26 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
 
   const trailerKey = serie.trailer_key || serie.videos?.find(v => v.type === 'Trailer')?.key;
 
-  const streamingLinks = useMemo(() => {
-    const raw = [
-      ...(serie.streamingProviders || [])
-        .filter((p: any) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name))
-        .map((p: any) => ({
-          name: p.provider.name as string,
-          url: p.url as string,
-          providerTmdbId: p.provider?.tmdbId ?? null,
-        })),
-      ...(serie.plataformas_api || [])
-        .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome))
-        .map((p) => ({ name: p.nome, url: p.url, providerTmdbId: null })),
-    ];
-    return dedupeStreamingProviders(raw);
-  }, [serie.streamingProviders, serie.plataformas_api]);
-
   const tmdbSerieUrl = `https://www.themoviedb.org/tv/${serie.id}`;
-  const hasStreaming = streamingLinks.length > 0;
+
+  const streamingProviders = useMemo(
+    () =>
+      dedupeStreamingProvidersForDisplay([
+        ...(serie.streamingProviders || []).filter(
+          (p: { url?: string | null; provider?: { name?: string | null; logoPath?: string | null } }) =>
+            p.url && p.provider?.name && !isTmdbProvider(p.provider.name),
+        ),
+        ...(serie.plataformas_api || [])
+          .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome))
+          .map((p) => ({
+            url: p.url,
+            provider: { name: p.nome, logoPath: p.logo_path ?? null },
+          })),
+      ]),
+    [serie.streamingProviders, serie.plataformas_api],
+  );
+
+  const hasStreaming = streamingProviders.length > 0;
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -93,13 +94,19 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-4 mt-2">
-            {streamingLinks.map((p) => (
+            {streamingProviders.map((p) => (
               <ModalPlatformLink
-                key={`${p.name}-${p.url}`}
-                href={p.url}
-                label={p.name}
+                key={`${p.provider?.name}-${p.url}`}
+                href={p.url!}
+                label={p.provider?.name ?? ''}
                 icon={
-                  <PlatformIcon platform={p.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
+                  <PlatformIcon
+                    platform={p.provider?.name ?? ''}
+                    logoPath={p.provider?.logoPath}
+                    size={PLATFORM_ICON_SIZE_MODAL}
+                    className="h-8 w-8"
+                    variant="circle"
+                  />
                 }
               />
             ))}

@@ -47,6 +47,55 @@ export const normalizeProviderName = (name?: string | null): string => {
   return name;
 };
 
+export function isAdsStreamingVariantName(name?: string | null): boolean {
+  if (!name) return false;
+  const lower = name.toLowerCase();
+  return (
+    lower.includes('with ads') ||
+    lower.includes('basic with') ||
+    lower.includes('ad-supported') ||
+    /\bads\b/.test(lower)
+  );
+};
+
+type StreamingProviderRow = {
+  url?: string | null;
+  provider?: { name?: string | null; logoPath?: string | null };
+};
+
+/** Agrupa variantes TMDB (Netflix + Netflix with Ads, Prime 9 + 119) para exibição. */
+export function dedupeStreamingProvidersForDisplay<T extends StreamingProviderRow>(providers: T[]): T[] {
+  const byBrand = new Map<string, T>();
+
+  for (const row of providers) {
+    const rawName = row.provider?.name ?? '';
+    const brand = normalizeProviderName(rawName);
+    if (brand === 'Desconhecido' || !row.url) continue;
+
+    const existing = byBrand.get(brand);
+    if (!existing) {
+      byBrand.set(brand, row);
+      continue;
+    }
+
+    const existingAds = isAdsStreamingVariantName(existing.provider?.name);
+    const currentAds = isAdsStreamingVariantName(rawName);
+    if (existingAds && !currentAds) {
+      byBrand.set(brand, row);
+    }
+  }
+
+  return Array.from(byBrand.values()).map((row) => ({
+    ...row,
+    provider: row.provider
+      ? {
+          ...row.provider,
+          name: normalizeProviderName(row.provider.name),
+        }
+      : row.provider,
+  }));
+};
+
 export const inferProviderFromUrl = (url?: string | null): string | null => {
   if (!url) return null;
   const lower = url.toLowerCase();
@@ -80,7 +129,19 @@ export const getStreamingProviders = (item: Midia): { name: string; icon: string
     } else if (inferredFromUrl && name === provider.nome) {
       name = inferredFromUrl;
     }
-    if (name === 'Desconhecido' || seen.has(name)) continue;
+    if (name === 'Desconhecido' || seen.has(name)) {
+      const existing = seen.get(name);
+      if (existing && isAdsStreamingVariantName(provider.nome) && !isAdsStreamingVariantName(existing.name)) {
+        // mantém entrada sem ads já registrada
+      } else if (existing && isAdsStreamingVariantName(existing.name) && !isAdsStreamingVariantName(provider.nome)) {
+        seen.set(name, {
+          name,
+          icon: name.toLowerCase().replace('+', 'plus').replace(/ /g, '-'),
+          logo_path: provider.logo_path ?? existing.logo_path ?? null,
+        });
+      }
+      continue;
+    }
     seen.set(name, {
       name,
       icon: name.toLowerCase().replace('+', 'plus').replace(/ /g, '-'),

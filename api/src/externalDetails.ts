@@ -5,6 +5,23 @@ import { resolvePortugueseSynopsis, translateSynopsisForStorage, isLikelyEnglish
 import { fetchTmdbPtOverview } from './tmdbOverview';
 import { fetchSteamAppDetails, extractSteamAppId, isPlausibleBrlSteamPriceCents } from './steamClient';
 import { logger } from './logger';
+import { dedupeTmdbWatchProviders, normalizeStreamingProviderName } from './streamingProviders';
+
+function mapBrFlatrateProviders(
+  brProviders: { link?: string; flatrate?: unknown[] } | undefined,
+  idField: 'id' | 'tmdbId' = 'id',
+) {
+  return dedupeTmdbWatchProviders((brProviders?.flatrate ?? []) as Parameters<typeof dedupeTmdbWatchProviders>[0]).map(
+    (provider) => ({
+      url: brProviders?.link ?? null,
+      provider: {
+        [idField]: provider.provider_id,
+        name: normalizeStreamingProviderName(provider.provider_name),
+        logoPath: provider.logo_path,
+      },
+    }),
+  );
+}
 
 const ANIME_DETAIL_QUERY = `
   query ($id: Int) {
@@ -113,14 +130,7 @@ function mapTmdbMovieToDetails(
       order: p.order,
       pessoa: { id: p.id, name: p.name, profilePath: p.profile_path },
     })),
-    streamingProviders: (brProviders?.flatrate ?? []).map((provider: any) => ({
-      url: brProviders?.link ?? null,
-      provider: {
-        id: provider.provider_id,
-        name: provider.provider_name,
-        logoPath: provider.logo_path,
-      },
-    })),
+    streamingProviders: mapBrFlatrateProviders(brProviders),
     videos: (movie.videos?.results ?? [])
       .filter((v: any) => v.site === 'YouTube')
       .map((v: any) => ({
@@ -179,14 +189,7 @@ function mapTmdbSerieToPrismaLike(serie: any) {
       name: s.name,
       posterPath: s.poster_path,
     })),
-    streamingProviders: (brProviders?.flatrate ?? []).map((provider: any) => ({
-      url: brProviders?.link ?? null,
-      provider: {
-        tmdbId: provider.provider_id,
-        name: provider.provider_name,
-        logoPath: provider.logo_path,
-      },
-    })),
+    streamingProviders: mapBrFlatrateProviders(brProviders, 'tmdbId'),
   };
 }
 

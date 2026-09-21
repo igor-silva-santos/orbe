@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
-import { dedupeBy } from './syncUtils';
+import { dedupeTmdbWatchProviders, normalizeStreamingProviderName } from './streamingProviders';
 
 const THEATRICAL_RELEASE_TYPES = new Set([2, 3]);
 const DIGITAL_RELEASE_TYPES = new Set([4]);
@@ -34,20 +34,20 @@ export function parseFilmeTmdbDisponibilidade(movieDetails: any): FilmeTmdbDispo
 
 export function buildStreamingProvidersCreate(movieDetails: any): Prisma.FilmeOnStreamingProviderCreateWithoutFilmeInput[] {
   const br = movieDetails['watch/providers']?.results?.BR;
-  const providers = [
+  const providers = dedupeTmdbWatchProviders([
     ...(br?.flatrate ?? []),
     ...(br?.rent ?? []),
     ...(br?.buy ?? []),
-  ];
+  ]);
 
-  return dedupeBy(providers, (provider: any) => provider.provider_id).map((provider: any) => ({
+  return providers.map((provider: any) => ({
     url: br?.link ?? null,
     provider: {
       connectOrCreate: {
         where: { tmdbId: provider.provider_id },
         create: {
           tmdbId: provider.provider_id,
-          name: provider.provider_name,
+          name: normalizeStreamingProviderName(provider.provider_name),
           logoPath: provider.logo_path,
         },
       },
