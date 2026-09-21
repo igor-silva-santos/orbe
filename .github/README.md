@@ -1,8 +1,7 @@
 # GitHub Actions neste repositório
 
-Os workflows aqui são **operacionais** (sync de catálogo, keep-alive da API no Render, invalidar cache).
+Os workflows aqui são **legado/auxiliar** (sync, keep-alive, cache).
 
-Eles **não** substituem o deploy de produção.
-
-- **Fonte de verdade para subir ambiente:** GitLab `master` → ver [`docs/DEPLOY_GITLAB.md`](../docs/DEPLOY_GITLAB.md).
-- Configure Vercel e Render para **não** publicarem automaticamente a partir deste remote GitHub.
+- **Deploy e sync oficiais:** GitLab → [`docs/DEPLOY_GITLAB.md`](../docs/DEPLOY_GITLAB.md) (`ORBE_OPS_ACTION=resume` no pipeline manual).
+- **Não** dispare **Sync All** aqui se o processo do projeto é GitLab-first.
+- Vercel/Render **não** devem publicar por push neste remote GitHub.

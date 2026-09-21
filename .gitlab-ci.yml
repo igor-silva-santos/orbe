@@ -22,11 +22,14 @@ stages:
 
 variables:
   NODE_VERSION: "20"
+  # Até configurar RENDER_DEPLOY_HOOK + VERCEL_DEPLOY_HOOK no GitLab, não falha o pipeline
+  # (deploy nativo: Vercel/Render conectados só ao repo GitLab).
+  ORBE_NATIVE_GITLAB_DEPLOY: "true"
 
 .test_api:
   image: node:${NODE_VERSION}-bookworm-slim
   before_script:
-    - cd api && npm ci
+    - cd api && npm ci && npx prisma generate
   script:
     - npm test
 
@@ -78,6 +81,8 @@ deploy:production:
         exit 1
       fi
 
+# Sync / keep-alive: use GitLab (não GitHub Actions). Pipeline manual → variável ORBE_OPS_ACTION.
+# resume | watch | status | health — exige SYNC_SECRET em CI/CD (masked).
 orbe-sync-guard:
   stage: operations
   image: python:3.12-alpine

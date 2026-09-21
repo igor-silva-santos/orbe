@@ -9,9 +9,27 @@ O GitHub (`igor-silva-santos/orbe`) pode existir como espelho (sync, Actions de 
 ## Fluxo recomendado
 
 1. Desenvolver e commitar na `master` (ou MR → merge na `master`).
-2. `git push origin master` (GitLab).
-3. Pipeline GitLab: **test:api** → **deploy:production** (hooks) **ou** auto-deploy nativo GitLab nos hosts.
-4. Espelhar no GitHub só se precisar: `git push github master` (sem deploy).
+2. **Commits com sua identidade** (não “Cursor Agent”):
+
+```bash
+git config user.name "igordasilvasantos38"
+git config user.email "igordasilvasantos38@gmail.com"
+# commit pelo terminal, ou: git commit --amend --reset-author
+```
+
+3. `git push origin master` (GitLab).
+4. Pipeline GitLab: **test:api** → **deploy:production** (hooks) **ou** auto-deploy nativo GitLab nos hosts.
+5. Espelhar no GitHub só se precisar: `git push github master` (sem deploy).
+
+## Sync de catálogo (use GitLab, não GitHub Actions)
+
+1. GitLab → **Build** → **Pipelines** → **Run pipeline** (branch `master`).
+2. Variáveis:
+   - `ORBE_OPS_ACTION` = `resume` (retomar checkpoint) ou `watch` (resume + ping até 50 min)
+   - `SYNC_SECRET` = mesmo valor do Render (variável **masked** no GitLab CI/CD).
+3. Job **orbe-sync-guard** chama `/api/run-sync-resume` na API.
+
+Não use **Sync All** no GitHub Actions para o fluxo oficial — o GitHub é espelho/sync auxiliar.
 
 ## 1. Desligar deploy pelo GitHub
 
