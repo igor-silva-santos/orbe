@@ -142,7 +142,14 @@ const fetchPremioResults = async (
   awardName?: string,
   year?: number,
   limit = 24,
-): Promise<Array<ReturnType<typeof mapFilmeToMidia>>> => {
+): Promise<
+  Array<
+    | ReturnType<typeof mapFilmeToMidia>
+    | ReturnType<typeof mapSerieToMidia>
+    | ReturnType<typeof mapAnimeToMidia>
+    | ReturnType<typeof mapJogoToMidia>
+  >
+> => {
   const premioInclude = {
     genres: { include: { genero: true } },
     streamingProviders: { include: { provider: true }, take: 3 },

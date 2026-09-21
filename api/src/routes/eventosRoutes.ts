@@ -119,7 +119,7 @@ router.get('/eventos/resumo', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
         where: {
           AND: [
             animeSeasonQualityFilter,
-            { seasonYear: year, season },
+            { seasonYear: selectedYear, season },
             { status: { in: ['NOT_YET_RELEASED', 'RELEASING'] } },
             { format: { in: ['TV', 'TV_SHORT', 'MOVIE', 'ONA'] } },
           ],

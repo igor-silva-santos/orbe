@@ -627,11 +627,12 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         })
       : Promise.resolve([]);
 
-    const [filmes, series, animes, jogos, pessoas, dubladores] = await Promise.all([
-      ...promises,
+    const [mediaResults, pessoas, dubladores] = await Promise.all([
+      Promise.all(promises),
       peoplePromise,
       dubladoresPromise,
     ]);
+    const [filmes, series, animes, jogos] = mediaResults;
 
     const profileUrl = (path: string | null | undefined) =>
       path ? (path.startsWith('http') ? path : `https://image.tmdb.org/t/p/w185${path}`) : null;
