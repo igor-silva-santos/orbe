@@ -104,11 +104,6 @@ model Serie {
   type             String?
   tagline          String?
   episodeRunTime   Int[]
-  nextEpisodeAirDate DateTime?
-  nextEpisodeNumber  Int?
-  nextEpisodeSeason  Int?
-  lastEpisodeNumber  Int?
-  lastEpisodeSeason  Int?
 
   // Relacionamentos
   genres           SerieGenero[]
@@ -126,8 +121,6 @@ model Serie {
   @@index([lastAirDate])
   @@index([nextEpisodeAirDate])
   @@index([releaseYear])
-  @@index([lastAirDate])
-  @@index([nextEpisodeAirDate])
 }
 
 model Anime {

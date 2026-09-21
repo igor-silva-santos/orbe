@@ -2,7 +2,7 @@
 import { FilmeDetalhes } from '@/types';
 import { NOT_INFORMED, resolveFilmeTitle } from '@/lib/media-helpers';
 import { formatTmdbPopularityHint, formatTmdbPopularityLabel } from '@/lib/engagement-labels';
-import { filmeDestaqueLabels } from '@/lib/filme-destaque';
+import { filmeDestaqueLabels, type FilmeDestaqueFields } from '@/lib/filme-destaque';
 
 const formatRuntime = (minutes: number | null | undefined) => {
   if (!minutes) return NOT_INFORMED;
@@ -19,7 +19,7 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
   const popularity = filme.popularity;
   const tagline = (filme as { tagline?: string | null }).tagline;
   const filmeTitle = resolveFilmeTitle(filme);
-  const destaqueLabels = filmeDestaqueLabels(filme);
+  const destaqueLabels = filmeDestaqueLabels(filme as FilmeDestaqueFields);
 
   return (
     <div className="flex flex-col space-y-4">

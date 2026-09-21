@@ -4,7 +4,7 @@ import { Serie } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { formatNextEpisodeCard } from '@/lib/media-helpers';
+import { formatNextEpisodeCard, formatNextEpisodeDetail } from '@/lib/media-helpers';
 import { useSharedTick } from '@/hooks/useSharedTick';
 
 interface SerieInfoBlockProps {

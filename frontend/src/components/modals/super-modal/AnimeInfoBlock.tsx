@@ -126,8 +126,8 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
             MyAnimeList
           </ModalExternalButton>
         )}
-        {(anime as { anilist_link?: string }).anilist_link && (
-          <ModalExternalButton href={(anime as { anilist_link: string }).anilist_link} variant="outline">
+        {anime.anilist_link && (
+          <ModalExternalButton href={anime.anilist_link} variant="outline">
             AniList
           </ModalExternalButton>
         )}

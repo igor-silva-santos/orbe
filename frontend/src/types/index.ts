@@ -172,6 +172,7 @@ export interface Anime extends Serie {
   titleEnglish?: string;
   titleNative?: string;
   mal_link?: string;
+  anilist_link?: string;
   fonte: string;
   estudio: string;
   dublagem_info: boolean;
@@ -583,5 +584,37 @@ export interface FilmeDetalhes {
 
 }
 
+/** Item da minha lista de animes (API /minha-lista/animes). */
+export type WatchlistAnimeStatus =
+  | 'comecar'
+  | 'continuar'
+  | 'seguir'
+  | 'novamente'
+  | 'terminado';
 
+export interface WatchlistAnime {
+  id: string;
+  crunchyrollId: string | null;
+  crunchyrollUrl: string | null;
+  malId: number | null;
+  animeId: number | null;
+  title: string;
+  titleAlt: string | null;
+  posterUrl: string | null;
+  genres: string[];
+  season: number;
+  episode: number;
+  totalEpisodes: number | null;
+  episodeDurationSec: number | null;
+  remainingTimeSec: number | null;
+  status: WatchlistAnimeStatus;
+  lists: string[];
+  hasDub: boolean;
+  note: string | null;
+  source: string;
+  importSessionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  lastSyncedAt: string;
+}
 
