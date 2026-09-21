@@ -132,11 +132,11 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
     ] = await Promise.all([
       fetchFilmesForCarousel(
         { releaseDate: { gte: recentPastStart, lt: today } },
-        { orderBy: { releaseDate: 'desc' }, take: HOMEPAGE_AROUND_PAST, year },
+        { orderBy: { releaseDate: 'desc' }, take: HOMEPAGE_AROUND_PAST, year, homeLaunch: true },
       ),
       fetchFilmesForCarousel(
         { releaseDate: { gte: today, lte: nextMonthEnd } },
-        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_AROUND_FUTURE, year },
+        { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_AROUND_FUTURE, year, homeLaunch: true },
       ),
       prisma.serie.findMany({
         where: {

@@ -8,7 +8,10 @@ import {
   filmeCarouselBalancedWhereInput,
   filterFilmesForCarouselBalanced,
 } from '../qualityFilters';
-import { filterFilmesHomeLaunchCarousel } from '../filmeAntecipacao';
+import {
+  filterFilmesHomeLaunchCarousel,
+  HOME_LAUNCH_MIN_RUNTIME_MINUTES,
+} from '../filmeAntecipacao';
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
@@ -153,9 +156,19 @@ export async function fetchFilmesForCarousel(
     ? { ...carouselLiteInclude, videos: { where: { type: 'Trailer' }, take: 1, select: { type: true } } }
     : carouselLiteInclude;
 
+  const homeLaunchRuntimeWhere: Prisma.FilmeWhereInput | null = options.homeLaunch
+    ? {
+        OR: [{ runtime: null }, { runtime: { gte: HOME_LAUNCH_MIN_RUNTIME_MINUTES } }],
+      }
+    : null;
+
   const filmes = await prisma.filme.findMany({
     where: {
-      AND: [filmeCarouselBalancedWhereInput, extraWhere],
+      AND: [
+        filmeCarouselBalancedWhereInput,
+        extraWhere,
+        ...(homeLaunchRuntimeWhere ? [homeLaunchRuntimeWhere] : []),
+      ],
     },
     orderBy: options.orderBy ?? { releaseDate: 'asc' },
     take: options.take,

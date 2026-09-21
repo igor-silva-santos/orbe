@@ -336,7 +336,7 @@ router.get('/filmes/by-year', cacheMiddleware(TWELVE_HOURS), async (req, res) =>
   try {
     const filmes = await fetchFilmesForCarousel(
       { releaseDate: { gte: startDate, lte: endDate } },
-      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsedYear },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsedYear, homeLaunch: true },
     );
     res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {
@@ -356,7 +356,7 @@ router.get('/filmes/by-month', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   try {
     const filmes = await fetchFilmesForCarousel(
       { releaseDate: { gte: startDate, lte: endDate } },
-      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsed.year },
+      { orderBy: { releaseDate: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsed.year, homeLaunch: true },
     );
     res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {
