@@ -1,5 +1,8 @@
 # Setup produção — passos manuais restantes
 
+> **Regra:** ambiente de produção só deve atualizar quando o **GitLab** (`igordasilvasantos38/orbe`, branch `master`) for atualizado. Passo a passo: [`DEPLOY_GITLAB.md`](DEPLOY_GITLAB.md).
+
+
 ## Status automático (2026-08-09)
 
 | Item | Status |

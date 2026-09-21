@@ -6,7 +6,8 @@ Hub de descoberta e acompanhamento de filmes, séries, animes e jogos.
 
 - **Produção:** https://orbe-seven.vercel.app
 - **API:** https://orbe-7bu0.onrender.com
-- **Repo:** https://gitlab.com/igordasilvasantos38/orbe.git
+- **Repo (produção):** https://gitlab.com/igordasilvasantos38/orbe.git — deploy só após push na `master` do GitLab ([`DEPLOY_GITLAB.md`](DEPLOY_GITLAB.md))
+- **Espelho GitHub:** `igor-silva-santos/orbe` (sync/Actions; não deve disparar Vercel/Render)
 
 ## Stack
 
@@ -30,4 +31,5 @@ cd frontend && npm install && npm run dev
 
 - [`README.md`](../README.md) — visão geral
 - [`docs/PRODUCAO.md`](PRODUCAO.md) — deploy
+- [`docs/DEPLOY_GITLAB.md`](DEPLOY_GITLAB.md) — GitLab como gate de produção
 - [`docs/SYNC_INICIAL.md`](SYNC_INICIAL.md) — sync

@@ -1,21 +1,82 @@
-# Pipeline exclusivamente operacional: não compila nem implanta o clone antigo.
+# Orbe — GitLab é a fonte de verdade para produção.
+# Push na master do GitLab → testes + deploy (hooks). GitHub não deve disparar Vercel/Render.
 #
-# Ping controlado (sem o PC): Cloudflare Worker ops/render_sync_watch_worker.js
-#   POST /start → resume + watching=1
-#   cron */5 → pinga /api/health só enquanto syncActive
-#   sync acaba → watching=0, Render pode hibernar
+# Ops (sync guard): schedule / pipeline manual (web) com ORBE_OPS_ACTION.
+# Ping longo: Cloudflare Worker ops/render_sync_watch_worker.js
 #
-# GitLab (job curto): ORBE_OPS_ACTION=watch retoma e pinga até 50 min
-# (limite do runner free). O Worker cobre o resto da carga.
+# Variáveis CI/CD (Settings → CI/CD → Variables, masked):
+#   RENDER_DEPLOY_HOOK  — Render → Service → Settings → Deploy Hook
+#   VERCEL_DEPLOY_HOOK  — Vercel → Project → Settings → Git → Deploy Hooks (branch master)
 
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 stages:
+  - test
+  - deploy
   - operations
+
+variables:
+  NODE_VERSION: "20"
+
+.test_api:
+  image: node:${NODE_VERSION}-bookworm-slim
+  before_script:
+    - cd api && npm ci
+  script:
+    - npm test
+
+test:api:
+  stage: test
+  extends: .test_api
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+deploy:production:
+  stage: deploy
+  image: curlimages/curl:8.12.1
+  needs:
+    - test:api
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+  environment:
+    name: production
+    url: https://orbe-seven.vercel.app
+  script:
+    - |
+      set -e
+      if [ "${ORBE_NATIVE_GITLAB_DEPLOY:-}" = "true" ]; then
+        echo "ORBE_NATIVE_GITLAB_DEPLOY=true — Vercel/Render devem estar conectados só ao GitLab (sem hooks)."
+        exit 0
+      fi
+      missing=0
+      if [ -z "${RENDER_DEPLOY_HOOK:-}" ]; then
+        echo "⚠️  RENDER_DEPLOY_HOOK não definido — configure em GitLab CI/CD ou use Render conectado só ao GitLab."
+        missing=1
+      else
+        echo "▶ Disparando deploy da API (Render)..."
+        curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+        echo "OK Render"
+      fi
+      if [ -z "${VERCEL_DEPLOY_HOOK:-}" ]; then
+        echo "⚠️  VERCEL_DEPLOY_HOOK não definido — configure em GitLab CI/CD ou use Vercel conectado só ao GitLab."
+        missing=1
+      else
+        echo "▶ Disparando deploy do frontend (Vercel)..."
+        curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"
+        echo "OK Vercel"
+      fi
+      if [ "$missing" -eq 1 ]; then
+        echo ""
+        echo "Nenhum hook configurado: produção só sobe se Vercel/Render estiverem ligados ao repo GitLab (não ao GitHub)."
+        echo "Veja docs/DEPLOY_GITLAB.md"
+        exit 1
+      fi
 
 orbe-sync-guard:
   stage: operations
@@ -27,8 +88,8 @@ orbe-sync-guard:
   script:
     - python ops/orbe_sync_guard.py
   rules:
-    - if: '$ORBE_OPS_ACTION == "health"'
-    - if: '$ORBE_OPS_ACTION == "status"'
-    - if: '$ORBE_OPS_ACTION == "resume"'
-    - if: '$ORBE_OPS_ACTION == "watch"'
-    - when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "health"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "status"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "resume"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "watch"'
