@@ -4,6 +4,7 @@ import { logger } from './logger';
 import { interactionRateLimiter } from './securityMiddleware';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import { isPositiveInt, isValidInteractionStatus, isValidMediaType, isValidRating, isStringWithMaxLength } from './validation';
+import { getUserListaEnriched } from './listaService';
 
 const router = Router();
 
@@ -24,6 +25,32 @@ router.get('/me/interactions', authMiddleware, async (req: AuthRequest, res: Res
     } catch (error) {
         logger.error(`Erro ao buscar interações para o usuário ID ${userId}:`, error);
         res.status(500).json({ error: 'Erro ao buscar interações.' });
+    }
+});
+
+// Lista do usuário com cards enriquecidos (catálogo Orbe)
+router.get('/me/lista', authMiddleware, async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.userId;
+    if (!userId) {
+        return res.status(403).json({ error: 'Usuário não autenticado.' });
+    }
+
+    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const tipo = typeof req.query.tipo === 'string' ? req.query.tipo : undefined;
+
+    if (status && !isValidInteractionStatus(status)) {
+        return res.status(400).json({ error: 'status inválido.' });
+    }
+    if (tipo && !isValidMediaType(tipo)) {
+        return res.status(400).json({ error: 'tipo inválido.' });
+    }
+
+    try {
+        const data = await getUserListaEnriched(userId, { status, tipo });
+        res.json(data);
+    } catch (error) {
+        logger.error(`Erro ao buscar lista para o usuário ID ${userId}:`, error);
+        res.status(500).json({ error: 'Erro ao buscar lista.' });
     }
 });
 

@@ -18,6 +18,7 @@ import {
 
 interface HojeData {
   data: string;
+  estreiasSemana?: Filme[];
   cinema: Filme[];
   streamingFilmes: Filme[];
   streamingSeries: Serie[];
@@ -101,6 +102,13 @@ export default function HojeClient() {
           title: 'Em cartaz nos cinemas',
           icon: Clapperboard,
           items: data?.cinema ?? [],
+          type: 'filme' as const,
+        },
+        {
+          key: 'estreiasSemana' as const,
+          title: 'Estreias da semana',
+          icon: Calendar,
+          items: data?.estreiasSemana ?? [],
           type: 'filme' as const,
         },
         {

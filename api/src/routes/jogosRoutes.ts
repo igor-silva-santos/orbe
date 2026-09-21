@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapJogoToMidia, mapJogoToCarouselCard } from '../mappers';
-import { fetchJogoDetailsLive } from '../externalDetails';
+import { fetchDeveloperGamesFromIgdb, fetchIgdbCompanyBrief, fetchJogoDetailsLive } from '../externalDetails';
 import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents, isPlausibleSteamDiscountPercent } from '../steamClient';
 import { jogoQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
@@ -154,6 +154,48 @@ router.get('/jogos/:id/steam-price', cacheMiddleware(60 * 15), async (req, res) 
     res.status(500).json({ error: 'Erro ao buscar preço na Steam.' });
   }
 });
+
+router.get(
+  '/jogos/desenvolvedoras/:companyId/jogos',
+  detailsRateLimiter,
+  cacheMiddleware(TWELVE_HOURS),
+  async (req, res) => {
+    const companyId = parsePositiveIntId(req.params.companyId);
+    if (!companyId) {
+      return res.status(400).json({ error: 'ID de desenvolvedora inválido.' });
+    }
+    const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
+    try {
+      const [company, games] = await Promise.all([
+        fetchIgdbCompanyBrief(companyId),
+        fetchDeveloperGamesFromIgdb(companyId, skip, limit),
+      ]);
+      if (!company) {
+        return res.status(404).json({ error: 'Desenvolvedora não encontrada.' });
+      }
+      res.json({
+        company,
+        results: games.map((g) => ({
+          type: 'jogo',
+          id: g.id,
+          titulo_api: g.name,
+          titulo_curado: null,
+          poster_url_api: g.coverUrl,
+          data_lancamento_api: g.firstReleaseDate,
+          avaliacao: g.rating,
+          generos_api: [],
+          plataformas_api: [],
+        })),
+        page,
+        limit,
+        hasMore: games.length >= limit,
+      });
+    } catch (error) {
+      logger.error(`Erro ao buscar jogos da desenvolvedora ${companyId}: ${error}`);
+      res.status(500).json({ error: 'Erro ao buscar jogos da desenvolvedora.' });
+    }
+  },
+);
 
 // Rota de Detalhes do Jogo (dados ao vivo do IGDB)
 router.get('/jogos/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CACHE_SECONDS), async (req, res) => {

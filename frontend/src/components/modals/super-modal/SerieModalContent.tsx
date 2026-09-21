@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Serie, CalendarModalData } from '@/types';
+import { dedupeStreamingProviders } from '@/lib/streaming-providers';
 import SerieInfoBlock from './SerieInfoBlock';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,7 +12,9 @@ import PlatformIcon from '@/components/ui/PlatformIcons';
 import { sanitizeTranslatedText } from '@/lib/media-helpers';
 import { PLATFORM_ICON_SIZE_MODAL } from '@/lib/platform-icon-sizes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ContinuacaoTabContent from '@/components/continuacoes/ContinuacaoTabContent';
+import ContinuacoesSuperModalTabs from '@/components/continuacoes/ContinuacoesSuperModalTabs';
+import ModalPlatformLink from '@/components/modals/super-modal/ModalPlatformLink';
+import SerieSeasonDrawer from '@/components/modals/super-modal/SerieSeasonDrawer';
 import { useAppStore } from '@/stores/appStore';
 import TrailerEmbed from '@/components/ui/TrailerEmbed';
 
@@ -23,6 +27,7 @@ const isTmdbProvider = (name?: string | null) => (name ?? '').toLowerCase().incl
 
 const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
   const closeSuperModal = useAppStore((s) => s.closeSuperModal);
+  const [seasonDrawer, setSeasonDrawer] = useState<number | null>(null);
 
   if (!serie) {
     return <div>Carregando...</div>;
@@ -30,13 +35,24 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
 
   const trailerKey = serie.trailer_key || serie.videos?.find(v => v.type === 'Trailer')?.key;
 
-  const streamingProviders = (serie.streamingProviders || [])
-    .filter((p: any) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name));
+  const streamingLinks = useMemo(() => {
+    const raw = [
+      ...(serie.streamingProviders || [])
+        .filter((p: any) => p.url && p.provider?.name && !isTmdbProvider(p.provider.name))
+        .map((p: any) => ({
+          name: p.provider.name as string,
+          url: p.url as string,
+          providerTmdbId: p.provider?.tmdbId ?? null,
+        })),
+      ...(serie.plataformas_api || [])
+        .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome))
+        .map((p) => ({ name: p.nome, url: p.url, providerTmdbId: null })),
+    ];
+    return dedupeStreamingProviders(raw);
+  }, [serie.streamingProviders, serie.plataformas_api]);
 
-  const fallbackPlatforms = (serie.plataformas_api || [])
-    .filter((p) => p.url && p.nome && !isTmdbProvider(p.nome));
-
-  const hasStreaming = streamingProviders.length > 0 || fallbackPlatforms.length > 0;
+  const tmdbSerieUrl = `https://www.themoviedb.org/tv/${serie.id}`;
+  const hasStreaming = streamingLinks.length > 0;
 
   return (
     <div className="p-4 md:p-8 space-y-6">
@@ -60,7 +76,6 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       <Tabs defaultValue="detalhes" className="w-full">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
-          <TabsTrigger value="continuacao">Continuação</TabsTrigger>
         </TabsList>
 
         <TabsContent value="detalhes" className="space-y-6 mt-4">
@@ -74,34 +89,25 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
       )}
 
       {/* Disponível Em */}
-      {hasStreaming && (
+      {(hasStreaming || serie.id) && (
         <section>
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Disponível em</h2>
           <div className="flex flex-wrap gap-4 mt-2">
-            {streamingProviders.map((p: any) => (
-              <a
-                key={p.provider.name}
+            {streamingLinks.map((p) => (
+              <ModalPlatformLink
+                key={`${p.name}-${p.url}`}
                 href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
-              >
-                <PlatformIcon platform={p.provider.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
-                <span>{p.provider.name}</span>
-              </a>
+                label={p.name}
+                icon={
+                  <PlatformIcon platform={p.name} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
+                }
+              />
             ))}
-            {fallbackPlatforms.map((p) => (
-              <a
-                key={p.nome}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground font-semibold px-4 py-2 rounded-lg transition-colors"
-              >
-                <PlatformIcon platform={p.nome} size={PLATFORM_ICON_SIZE_MODAL} className="h-8 w-8" variant="circle" />
-                <span>{p.nome}</span>
-              </a>
-            ))}
+            <ModalPlatformLink
+              href={tmdbSerieUrl}
+              label="TMDB"
+              className="border border-primary/40 text-primary hover:bg-primary/10 bg-transparent"
+            />
           </div>
         </section>
       )}
@@ -128,7 +134,13 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
                         {ator.id ? (
                           <Link
                             href={`/pessoa/${ator.id}`}
-                            onClick={closeSuperModal}
+                            onClick={() => {
+                              sessionStorage.setItem(
+                                'orbe:superModalReturn',
+                                JSON.stringify({ type: 'serie', id: serie.id }),
+                              );
+                              closeSuperModal();
+                            }}
                             className="flex flex-col items-center text-center w-24"
                           >
                             <SafeImage
@@ -175,20 +187,36 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
           <h2 className="text-xl font-bold mb-4 text-yellow-500 dark:text-blue-400">Temporadas</h2>
           <div className="space-y-2">
             {serie.temporadas.map(season => (
-              <div key={season.numero} className="flex justify-between items-center bg-muted p-2 rounded-lg">
+              <button
+                key={season.numero}
+                type="button"
+                onClick={() => setSeasonDrawer(season.numero)}
+                className="flex w-full justify-between items-center bg-muted hover:bg-muted/80 p-2 rounded-lg text-left cursor-pointer transition-colors"
+              >
                 <span className="font-medium">{season.nome || `Temporada ${season.numero}`}</span>
                 <span className="text-muted-foreground">{season.episodios} episódios</span>
-              </div>
+              </button>
             ))}
           </div>
         </section>
       )}
         </TabsContent>
 
-        <TabsContent value="continuacao" className="mt-4">
-          <ContinuacaoTabContent tipo="serie" tmdbId={serie.id} showSagaLink={false} />
-        </TabsContent>
       </Tabs>
+
+      <ContinuacoesSuperModalTabs tipo="serie" tmdbId={serie.id} showSagaLink={false} />
+
+      {seasonDrawer !== null && (
+        <SerieSeasonDrawer
+          tmdbId={serie.id}
+          seasonNumber={seasonDrawer}
+          seasonLabel={
+            serie.temporadas?.find((s) => s.numero === seasonDrawer)?.nome ||
+            `Temporada ${seasonDrawer}`
+          }
+          onClose={() => setSeasonDrawer(null)}
+        />
+      )}
     </div>
   );
 };

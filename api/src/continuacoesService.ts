@@ -8,6 +8,7 @@ import {
   CINEMATIC_UNIVERSES,
   buildKeywordOrFilter,
   getUniverseById,
+  findUniverseForTitles,
   matchesUniversePatterns,
   type CinematicUniverseConfig,
 } from './cinematicUniverses';
@@ -61,12 +62,55 @@ export type UniversoPayload = {
   itens: ContinuacaoItem[];
 };
 
+export type UniversoCinematicoBloco = {
+  id: string;
+  nome: string;
+  descricao: string;
+  itens: ContinuacaoItem[];
+};
+
 export type ContinuacoesPayload = {
   saga: { id: number; nome: string; posterUrl: string | null; overview: string | null } | null;
+  /** Legado — todas as relações; preferir `continuacao` + `universoCinematico` */
   itens: ContinuacaoItem[];
+  continuacao: ContinuacaoItem[];
+  universoCinematico: UniversoCinematicoBloco | null;
   filmeAtualTmdbId?: number;
   serieAtualTmdbId?: number;
 };
+
+const RELACOES_CONTINUACAO_DIRETA: ContinuacaoRelacao[] = [
+  'precuela',
+  'sequencia',
+  'mesma_saga',
+  'spin_off',
+];
+
+export function filterContinuacaoDireta(itens: ContinuacaoItem[]): ContinuacaoItem[] {
+  return itens.filter((item) => RELACOES_CONTINUACAO_DIRETA.includes(item.relacao));
+}
+
+async function buildUniversoBloco(
+  universe: CinematicUniverseConfig,
+  exclude: { tipo: 'filme' | 'serie'; tmdbId: number },
+  continuacaoIds: Set<string>,
+): Promise<UniversoCinematicoBloco | null> {
+  const itens = (await collectUniversoItens(universe))
+    .filter((item) => {
+      if (item.tipo === exclude.tipo && item.tmdbId === exclude.tmdbId) return false;
+      return !continuacaoIds.has(`${item.tipo}:${item.tmdbId}`);
+    })
+    .map((item) => ({ ...item, relacao: 'mesma_saga' as ContinuacaoRelacao }));
+
+  if (itens.length === 0) return null;
+
+  return {
+    id: universe.id,
+    nome: universe.nome,
+    descricao: universe.descricao,
+    itens: sortContinuacaoItemsChronologically(itens),
+  };
+}
 
 const posterUrl = (path: string | null | undefined) =>
   path ? `https://image.tmdb.org/t/p/w342${path}` : null;
@@ -392,10 +436,27 @@ export async function getSagaById(collectionId: number): Promise<ContinuacoesPay
     })),
   );
 
+  const continuacao = filterContinuacaoDireta(itens);
   return {
     saga: { id: collectionId, nome, posterUrl: posterUrl(poster), overview },
     itens,
+    continuacao,
+    universoCinematico: null,
   };
+}
+
+async function enrichContinuacoesPayload(
+  payload: Omit<ContinuacoesPayload, 'continuacao' | 'universoCinematico'> & { itens: ContinuacaoItem[] },
+  exclude: { tipo: 'filme' | 'serie'; tmdbId: number },
+  titles: (string | null | undefined)[],
+): Promise<ContinuacoesPayload> {
+  const continuacao = filterContinuacaoDireta(payload.itens);
+  const continuacaoIds = new Set(continuacao.map((item) => `${item.tipo}:${item.tmdbId}`));
+  const universe = findUniverseForTitles(...titles);
+  const universoCinematico = universe
+    ? await buildUniversoBloco(universe, exclude, continuacaoIds)
+    : null;
+  return { ...payload, continuacao, universoCinematico };
 }
 
 export async function getContinuacoesFilme(tmdbId: number): Promise<ContinuacoesPayload> {
@@ -420,7 +481,11 @@ export async function getContinuacoesFilme(tmdbId: number): Promise<Continuacoes
             true,
           ),
         }));
-      return { ...saga, itens, filmeAtualTmdbId: tmdbId };
+      return enrichContinuacoesPayload(
+        { ...saga, itens, filmeAtualTmdbId: tmdbId },
+        { tipo: 'filme', tmdbId },
+        [filme?.title, filme?.originalTitle],
+      );
     }
   }
 
@@ -442,11 +507,11 @@ export async function getContinuacoesFilme(tmdbId: number): Promise<Continuacoes
     noOrbe: inDb.has(rec.id),
   }));
 
-  return {
-    saga: belongs,
-    itens,
-    filmeAtualTmdbId: tmdbId,
-  };
+  return enrichContinuacoesPayload(
+    { saga: belongs, itens, filmeAtualTmdbId: tmdbId },
+    { tipo: 'filme', tmdbId },
+    [filme?.title, filme?.originalTitle],
+  );
 }
 
 export async function getContinuacoesSerie(tmdbId: number): Promise<ContinuacoesPayload> {
@@ -468,9 +533,9 @@ export async function getContinuacoesSerie(tmdbId: number): Promise<Continuacoes
     noOrbe: inDbSeries.has(rec.id),
   }));
 
-  return {
-    saga: null,
-    itens,
-    serieAtualTmdbId: tmdbId,
-  };
+  return enrichContinuacoesPayload(
+    { saga: null, itens, serieAtualTmdbId: tmdbId },
+    { tipo: 'serie', tmdbId },
+    [serie?.name, serie?.originalName],
+  );
 }

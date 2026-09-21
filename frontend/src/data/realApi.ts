@@ -142,7 +142,7 @@ export const realApi = {
       const response = await orbeNerdApi.search(query, category, page);
       
       if (!response) {
-        return { filmes: [], series: [], animes: [], jogos: [], total: 0 };
+        return { filmes: [], series: [], animes: [], jogos: [], pessoas: [], dubladores: [], total: 0 };
       }
 
       return {
@@ -150,11 +150,13 @@ export const realApi = {
         series: (response.series || []).map((item: Serie) => ({ ...item, type: 'serie' as const })),
         animes: (response.animes || []).map((item: Anime) => ({ ...item, type: 'anime' as const })),
         jogos: (response.jogos || []).map((item: Jogo) => ({ ...item, type: 'jogo' as const })),
+        pessoas: response.pessoas ?? [],
+        dubladores: response.dubladores ?? [],
       };
 
     } catch (error) {
       console.error('Erro na pesquisa:', error);
-      return { filmes: [], series: [], animes: [], jogos: [], total: 0 };
+      return { filmes: [], series: [], animes: [], jogos: [], pessoas: [], dubladores: [], total: 0 };
     }
   },
   getTrending: async (type?: string, limit: number = 10) => {

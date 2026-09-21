@@ -13,6 +13,8 @@ type Props = {
   tipo: 'filme' | 'serie';
   tmdbId: number;
   showSagaLink?: boolean;
+  section?: 'all' | 'continuacao' | 'universo';
+  prefetched?: ContinuacoesPayload | null;
 };
 
 function stubMidia(item: ContinuacoesPayload['itens'][0]): Filme | Serie {
@@ -42,13 +44,24 @@ function stubMidia(item: ContinuacoesPayload['itens'][0]): Filme | Serie {
   return base as unknown as Filme;
 }
 
-export default function ContinuacaoTabContent({ tipo, tmdbId, showSagaLink = true }: Props) {
+export default function ContinuacaoTabContent({
+  tipo,
+  tmdbId,
+  showSagaLink = true,
+  section = 'all',
+  prefetched,
+}: Props) {
   const openSuperModal = useAppStore((s) => s.openSuperModal);
-  const [data, setData] = useState<ContinuacoesPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<ContinuacoesPayload | null>(prefetched ?? null);
+  const [loading, setLoading] = useState(!prefetched);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (prefetched) {
+      setData(prefetched);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -72,7 +85,7 @@ export default function ContinuacaoTabContent({ tipo, tmdbId, showSagaLink = tru
     return () => {
       cancelled = true;
     };
-  }, [tipo, tmdbId]);
+  }, [tipo, tmdbId, prefetched]);
 
   if (loading) {
     return (
@@ -87,17 +100,33 @@ export default function ContinuacaoTabContent({ tipo, tmdbId, showSagaLink = tru
     return <p className="text-sm text-muted-foreground py-6">{error}</p>;
   }
 
-  if (!data || data.itens.length === 0) {
+  const itens =
+    section === 'continuacao'
+      ? data?.continuacao ?? []
+      : section === 'universo'
+        ? data?.universoCinematico?.itens ?? []
+        : data?.itens ?? [];
+
+  if (!data || itens.length === 0) {
     return (
       <p className="text-sm text-muted-foreground py-6">
-        Nenhuma continuação encontrada para esta obra no momento.
+        {section === 'universo'
+          ? 'Nenhum título do mesmo universo encontrado.'
+          : 'Nenhuma continuação encontrada para esta obra no momento.'}
       </p>
     );
   }
 
   return (
     <div className="space-y-4">
-      {data.saga && showSagaLink && (
+      {section === 'universo' && data.universoCinematico && (
+        <div className="rounded-lg border border-border bg-muted/40 p-4">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Universo</p>
+          <p className="font-semibold text-lg">{data.universoCinematico.nome}</p>
+          <p className="text-sm text-muted-foreground mt-1">{data.universoCinematico.descricao}</p>
+        </div>
+      )}
+      {data.saga && showSagaLink && section !== 'universo' && (
         <div className="rounded-lg border border-border bg-muted/40 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Saga</p>
@@ -116,7 +145,7 @@ export default function ContinuacaoTabContent({ tipo, tmdbId, showSagaLink = tru
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {data.itens.map((item) => (
+        {itens.map((item) => (
           <ContinuacaoCard
             key={`${item.tipo}-${item.tmdbId}`}
             item={item}

@@ -1,6 +1,7 @@
 import { translateTmdbStatus } from './statusLabels';
 import { filterGamesForEvent } from './eventGameFilters';
 import { resolveIgdbImageUrl } from './igdbImageUrl';
+import { calendarDateKeyFromValue, isCalendarDateTodayOrFutureBr } from './calendarBr';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
@@ -51,13 +52,9 @@ function pessoaTmdbId(pessoa: { tmdbId?: number; id?: number } | null | undefine
 
 function toAiringIso(value: Date | string | null | undefined): string | null {
   if (!value) return null;
-  if (typeof value === 'string') {
-    const datePart = value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
-    if (datePart) return `${datePart}T12:00:00.000Z`;
-  }
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
+  const calendar = calendarDateKeyFromValue(value) ?? toCalendarDateString(value);
+  if (!calendar) return null;
+  return `${calendar}T12:00:00.000Z`;
 }
 
 function mapNextAiringEpisode(serie: {
@@ -68,10 +65,7 @@ function mapNextAiringEpisode(serie: {
   const airingAt = toAiringIso(serie.nextEpisodeAirDate);
   const episode = serie.nextEpisodeNumber;
   if (!airingAt || episode == null) return null;
-  const airDate = new Date(airingAt);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (Number.isNaN(airDate.getTime()) || airDate < today) return null;
+  if (!isCalendarDateTodayOrFutureBr(serie.nextEpisodeAirDate)) return null;
   return {
     airingAt,
     episode,
@@ -639,6 +633,10 @@ export const mapJogoToMidia = (jogo: any) => {
     generos_api: jogo.genres?.map((g: any) => translateGameGenre(g.genero.name)) ?? [],
     plataformas_api: jogo.platforms?.map((p: any) => ({ nome: p.plataforma.name })) ?? [],
     desenvolvedores: jogo.companies?.filter((c: any) => c.role === 'developer').map((c: any) => c.company.name) ?? [],
+    desenvolvedoras:
+      jogo.companies
+        ?.filter((c: any) => c.role === 'developer' && c.company?.igdbId)
+        .map((c: any) => ({ igdbId: c.company.igdbId as number, nome: c.company.name as string })) ?? [],
     publicadoras: jogo.companies?.filter((c: any) => c.role === 'publisher').map((c: any) => c.company.name) ?? [],
     temas: jogo.themes?.map((t: any) => translateGameTheme(t.theme.name)) ?? [],
     modos_jogo: jogo.gameModes?.map((m: any) => translateGameMode(m.gameMode.name)) ?? [],

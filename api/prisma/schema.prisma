@@ -853,28 +853,44 @@ model User {
   watchlistImportSessions WatchlistImportSession[]
   pushSubscriptions       PushSubscription[]
   calendarEvents          UserCalendarEvent[]
+  animeWeeklyPins         AnimeWeeklyPin[]
+}
+
+model AnimeWeeklyPin {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anilistId Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, anilistId])
+  @@index([userId])
 }
 
 model WatchlistItem {
-  id          String   @id // UID vindo do frontend
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-  malId       Int?
-  tmdbId      Int?
-  title       String?
-  ep          Int?
-  season      Int?
-  dub         Int?     @default(0) // 0: No, 1: Yes
-  st          String   // Status (continuar, comecar, etc.)
-  lists       String[] // Tags/Listas
-  note        String?
-  badge       String?
-  badgeLabel  String?
-  updatedAt   DateTime @default(now())
-  createdAt   DateTime @default(now())
-  isRemoved   Boolean  @default(false)
+  id              String   @id // UID vindo do frontend (ex.: cr:GY...)
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  malId           Int?
+  anilistId       Int?
+  tmdbId          Int?
+  crunchyrollId   String?
+  title           String?
+  ep              Int?
+  season          Int?
+  dub             Int?     @default(0) // 0: sub/leg, 1: trilha PT-BR
+  st              String   // Status da fila (continuar, a_seguir, esperando_dublagem, ...)
+  lists           String[] // Tags (crunchyroll, dub-pt-br, ...)
+  note            String?
+  badge           String?
+  badgeLabel      String?  // Texto bruto da Crunchyroll (ex.: Continuar: E5)
+  crMeta          Json?    // Catálogo CMS, trilha de áudio, match score
+  updatedAt       DateTime @default(now())
+  createdAt       DateTime @default(now())
+  isRemoved       Boolean  @default(false)
 
   @@unique([userId, id])
+  @@index([userId, crunchyrollId])
 }
 
 model Notification {

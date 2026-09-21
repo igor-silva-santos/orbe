@@ -2,7 +2,8 @@
 
 import { Anime } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
-import { ExternalLink, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
+import ModalExternalButton from '@/components/modals/super-modal/ModalExternalButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NOT_INFORMED, translateAnimeGenre, formatNextEpisodeDetail } from '@/lib/media-helpers';
@@ -119,26 +120,16 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-3">
         {anime.mal_link && (
-          <a
-            href={anime.mal_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`inline-flex items-center gap-2 text-sm font-semibold ${labelColor} hover:underline`}
-          >
-            MyAnimeList <ExternalLink size={16} />
-          </a>
+          <ModalExternalButton href={anime.mal_link} variant="outline">
+            MyAnimeList
+          </ModalExternalButton>
         )}
-        {(anime as any).anilist_link && (
-          <a
-            href={(anime as any).anilist_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`inline-flex items-center gap-2 text-sm font-semibold ${labelColor} hover:underline`}
-          >
-            AniList <ExternalLink size={16} />
-          </a>
+        {(anime as { anilist_link?: string }).anilist_link && (
+          <ModalExternalButton href={(anime as { anilist_link: string }).anilist_link} variant="outline">
+            AniList
+          </ModalExternalButton>
         )}
       </div>
     </div>

@@ -19,6 +19,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
+import orbeNerdApi from '@/lib/api';
+import {
+  airingYmdFromIso,
+  formatWeeklyCarouselTitle,
+  getWeekBoundsBr,
+  isYmdInRange,
+  ymdInBr,
+} from '@/lib/week-br';
 
 type CarouselItem = 
   | { type: 'media'; data: Anime }
@@ -77,6 +85,11 @@ const getSeasonDateRange = (year: number, season: Season): { startDate: Date, en
 const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     const handleInteraction = useMidiaInteraction();
     const userInteractions = useAppStore((s) => s.userInteractions);
+    const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+    const animeWeeklyPinned = useAppStore((s) => s.animeWeeklyPinned);
+    const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
+    const setAnimeWeeklyPinIds = useAppStore((s) => s.setAnimeWeeklyPinIds);
+    const setAnimeWeeklyPinned = useAppStore((s) => s.setAnimeWeeklyPinned);
     const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
     const toggleFastScroll = useAppStore((s) => s.toggleFastScroll);
   const [fetchedAnimes, setFetchedAnimes] = useState<Anime[]>(initialData);
@@ -146,12 +159,12 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     if (viewModeRef.current === 'weekly') {
       if (item.type === 'separator') {
         titleKey = `day-${item.dayName}`;
-        title = `Agenda: ${item.dayName}`;
+        title = formatWeeklyCarouselTitle(item.dayName);
       } else if (item.data.nextAiringEpisode) {
         const airingDate = new Date(item.data.nextAiringEpisode.airingAt);
         const dayName = DAY_NAMES[airingDate.getDay()];
         titleKey = `day-${dayName}`;
-        title = `Agenda: ${dayName}`;
+        title = formatWeeklyCarouselTitle(dayName);
       }
     } else if (item.type === 'media' && item.data.startDate) {
       const itemDate = new Date(
@@ -175,6 +188,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
     // Posicionamento real vem via pendingScrollIndex; skeletons usam snap central.
     startIndex: SKELETON_CENTER_INDEX,
     duration: fastScrollEnabled ? FAST_CAROUSEL_DURATION : undefined,
+    loop: viewMode === 'weekly' && !emAltaMode,
   });
 
   const setViewportRef = useCallback(
@@ -187,6 +201,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
 
   useFanCarouselSlides(emblaApi);
   useCtrlWheelCarousel(emblaApi, viewportRef, fastScrollEnabled);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit({ loop: viewMode === 'weekly' && !emAltaMode });
+  }, [emblaApi, viewMode, emAltaMode]);
 
   /** Mantém skeletons centralizados no viewport (align:center) até o scroll real */
   useEffect(() => {
@@ -308,6 +327,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
   useEffect(() => {
     viewModeRef.current = viewMode;
   }, [viewMode]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAnimeWeeklyPinIds([]);
+      setAnimeWeeklyPinned([]);
+      return;
+    }
+    orbeNerdApi
+      .getAnimeWeeklyPins()
+      .then((res) => {
+        setAnimeWeeklyPinIds(res.anilistIds ?? []);
+        setAnimeWeeklyPinned((res.animes ?? []) as Anime[]);
+      })
+      .catch(() => {});
+  }, [isAuthenticated, setAnimeWeeklyPinIds, setAnimeWeeklyPinned]);
 
   // Define modo inicial apenas uma vez — não sobrescreve escolha do usuário ao rolar
   useEffect(() => {
@@ -456,13 +490,23 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
         }
 
     } else {
+        const pinSet = new Set(animeWeeklyPinIds);
+        const weeklyAnimes = new Map<number, Anime>();
+        filteredAnimes.forEach((a) => weeklyAnimes.set(a.id, a));
+        animeWeeklyPinned.forEach((a) => {
+          if (!weeklyAnimes.has(a.id)) weeklyAnimes.set(a.id, a);
+        });
+        const mergedWeeklyList = Array.from(weeklyAnimes.values());
+
+        const { startYmd, endYmd } = getWeekBoundsBr();
         const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-        filteredAnimes.forEach(anime => {
-            if (anime.nextAiringEpisode) {
-                const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
-                const dayIndex = localAiringDate.getDay();
-                animesByDay[dayIndex].push(anime);
-            }
+        mergedWeeklyList.forEach(anime => {
+            if (!anime.nextAiringEpisode) return;
+            const ymd = airingYmdFromIso(anime.nextAiringEpisode.airingAt);
+            if (!isYmdInRange(ymd, startYmd, endYmd)) return;
+            const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
+            const dayIndex = localAiringDate.getDay();
+            animesByDay[dayIndex].push(anime);
         });
 
         const processedItems: CarouselItem[] = [];
@@ -470,13 +514,23 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
             const animesForDay = animesByDay[dayIndex];
             if (animesForDay.length > 0) {
                 processedItems.push({ type: 'separator', dayName: DAY_NAMES[dayIndex] });
-                animesForDay.sort((a, b) => new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime());
+                animesForDay.sort((a, b) => {
+                    const pinA = pinSet.has(a.id) ? 1 : 0;
+                    const pinB = pinSet.has(b.id) ? 1 : 0;
+                    if (pinB !== pinA) return pinB - pinA;
+                    const popA = (a as Anime & { popularity?: number }).popularity ?? a.avaliacao ?? 0;
+                    const popB = (b as Anime & { popularity?: number }).popularity ?? b.avaliacao ?? 0;
+                    if (popB !== popA) return popB - popA;
+                    return new Date(a.nextAiringEpisode!.airingAt).getTime() - new Date(b.nextAiringEpisode!.airingAt).getTime();
+                });
                 animesForDay.forEach(anime => processedItems.push({ type: 'media', data: anime }));
             }
         }
         
         newCarouselItems = processedItems;
-        const currentDayIndex = new Date().getDay();
+        const todayYmd = ymdInBr();
+        const todayDate = new Date(`${todayYmd}T12:00:00`);
+        const currentDayIndex = todayDate.getDay();
         const startIndexCandidate = newCarouselItems.findIndex(item => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex]);
         newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
     }
@@ -497,7 +551,17 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
       setPendingScrollIndex(newStartIndex);
     }
 
-  }, [fetchedAnimes, selectedGenre, viewMode, currentYear, currentSeason, emAltaMode, emAltaAnimes]);
+  }, [
+    fetchedAnimes,
+    selectedGenre,
+    viewMode,
+    currentYear,
+    currentSeason,
+    emAltaMode,
+    emAltaAnimes,
+    animeWeeklyPinned,
+    animeWeeklyPinIds,
+  ]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
   useEffect(() => {
@@ -676,7 +740,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData }) => {
           <LoadingOverlay message="Carregando temporada..." className="rounded-lg" />
         )}
       <div
-        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 ${isNavigating ? 'pointer-events-none' : ''}`}
+        className={`overflow-hidden max-w-full py-2 px-1 sm:px-2 select-none ${isNavigating ? 'pointer-events-none' : ''}`}
         ref={setViewportRef}
         style={{ touchAction: CAROUSEL_VIEWPORT_TOUCH_ACTION }}
       >

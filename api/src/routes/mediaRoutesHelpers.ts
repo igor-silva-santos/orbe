@@ -8,6 +8,7 @@ import {
   filmeCarouselBalancedWhereInput,
   filterFilmesForCarouselBalanced,
 } from '../qualityFilters';
+import { filterFilmesHomeLaunchCarousel } from '../filmeAntecipacao';
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
@@ -144,17 +145,28 @@ export async function fetchFilmesForCarousel(
     take?: number;
     /** Mantido por compatibilidade — o filtro equilibrado não depende do ano */
     year?: number;
+    /** Carrossel de lançamento da home: gate de antecipação + runtime mínimo */
+    homeLaunch?: boolean;
   } = {},
 ) {
+  const include = options.homeLaunch
+    ? { ...carouselLiteInclude, videos: { where: { type: 'Trailer' }, take: 1, select: { type: true } } }
+    : carouselLiteInclude;
+
   const filmes = await prisma.filme.findMany({
     where: {
       AND: [filmeCarouselBalancedWhereInput, extraWhere],
     },
     orderBy: options.orderBy ?? { releaseDate: 'asc' },
     take: options.take,
-    include: carouselLiteInclude,
+    include,
   });
-  return filterFilmesForCarouselBalanced(filmes);
+
+  let result = filterFilmesForCarouselBalanced(filmes);
+  if (options.homeLaunch) {
+    result = filterFilmesHomeLaunchCarousel(result);
+  }
+  return result;
 }
 
 /** Mescla listas de carrossel por data ascendente, deduplicando por tmdbId */

@@ -15,8 +15,8 @@ export const DETAILS_TIMEOUT_MS = 90_000;
 
 // NOTA (duplicacao intencional do token — cookie httpOnly + localStorage):
 // O login/registro grava o JWT tanto no cookie httpOnly de sessao
-// (ver lib/session.ts, usado só pelo middleware pra gate de UX em /perfil
-// e /configuracoes) quanto aqui no localStorage, de onde o apiClient le pra
+// (ver lib/session.ts, usado só pelo middleware pra gate de UX em /perfil,
+// /minha-lista e /configuracoes) quanto aqui no localStorage, de onde o apiClient le pra
 // montar o header Authorization em toda chamada à API.
 // Por que a duplicacao existe: o cookie httpOnly nao pode ser lido por
 // JavaScript (é o ponto dele), entao o cliente HTTP nao teria como montar o
@@ -189,6 +189,10 @@ export const orbeNerdApi = {
     return apiClient.get(`/series/${id}/details`);
   },
 
+  getSerieSeasonEpisodes: async (id: number, seasonNumber: number) => {
+    return apiClient.get(`/series/${id}/season/${seasonNumber}/episodes`);
+  },
+
   getSerieFilters: async () => {
     return apiClient.get('/series/filtros');
   },
@@ -210,6 +214,14 @@ export const orbeNerdApi = {
     return apiClient.get(`/animes/${id}/next-episode`);
   },
 
+  getAnimeWeeklyPins: async () => apiClient.get('/animes/weekly-pins'),
+
+  pinAnimeWeekly: async (anilistId: number) =>
+    apiClient.put(`/animes/weekly-pins/${anilistId}`, {}),
+
+  unpinAnimeWeekly: async (anilistId: number) =>
+    apiClient.delete(`/animes/weekly-pins/${anilistId}`),
+
   // Jogos
   getJogos: async (params?: { page?: number; limit?: number; filtro?: string; genero?: string; plataforma?: string; modo?: string; ano?: string; mes?: string }) => {
     return apiClient.get('/jogos', params);
@@ -217,6 +229,10 @@ export const orbeNerdApi = {
 
   getJogoDetails: async (id: number) => {
     return apiClient.get(`/jogos/${id}/details`);
+  },
+
+  getDeveloperGames: async (companyId: number, page = 1, limit = 24) => {
+    return apiClient.get(`/jogos/desenvolvedoras/${companyId}/jogos`, { page, limit });
   },
 
   getJogoFilters: async () => {
@@ -312,6 +328,16 @@ export const orbeNerdApi = {
   getInteractions: async () => {
     return apiClient.get('/me/interactions');
   },
+
+  getMinhaLista: async (params?: { status?: string; tipo?: string }) => {
+    const search = new URLSearchParams();
+    if (params?.status) search.set('status', params.status);
+    if (params?.tipo) search.set('tipo', params.tipo);
+    const qs = search.toString();
+    return apiClient.get(`/me/lista${qs ? `?${qs}` : ''}`);
+  },
+
+  getFilaAnimes: async () => apiClient.get('/watchlist/fila-animes'),
 
   upsertInteraction: async (data: { midia_id: number; tipo_midia: string; status: string }) => {
     return apiClient.post('/me/interactions', data);

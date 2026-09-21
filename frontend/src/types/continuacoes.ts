@@ -24,6 +24,13 @@ export type SagaSummary = {
   preview: ContinuacaoItem[];
 };
 
+export type UniversoCinematicoBloco = {
+  id: string;
+  nome: string;
+  descricao: string;
+  itens: ContinuacaoItem[];
+};
+
 export type ContinuacoesPayload = {
   saga: {
     id: number;
@@ -32,6 +39,8 @@ export type ContinuacoesPayload = {
     overview?: string | null;
   } | null;
   itens: ContinuacaoItem[];
+  continuacao: ContinuacaoItem[];
+  universoCinematico: UniversoCinematicoBloco | null;
   filmeAtualTmdbId?: number;
   serieAtualTmdbId?: number;
 };

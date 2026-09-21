@@ -1,16 +1,31 @@
+'use client';
 
 import { Serie } from '@/types';
 import { useTheme } from '@/hooks/useTheme';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { formatNextEpisodeDetail } from '@/lib/media-helpers';
+import { formatNextEpisodeCard } from '@/lib/media-helpers';
+import { useSharedTick } from '@/hooks/useSharedTick';
 
 interface SerieInfoBlockProps {
   serie: Serie;
 }
 
+function formatCountdownLabel(airingAt: string, now: number): string {
+  const target = new Date(airingAt).getTime();
+  const diff = target - now;
+  if (diff <= 0) return 'Já disponível';
+  const days = Math.floor(diff / 86_400_000);
+  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((diff % 3_600_000) / 60_000);
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  const seconds = Math.floor((diff % 60_000) / 1000);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
   const { isDark } = useTheme();
+  const now = useSharedTick(serie.nextAiringEpisode?.airingAt ? 1000 : 60_000);
 
   const labelColor = isDark ? 'text-blue-400' : 'text-yellow-500';
 
@@ -62,14 +77,14 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
             <span>{creators}</span>
           </div>
         )}
-        {serie.nextAiringEpisode && (
+        {serie.nextAiringEpisode && now !== null && (
           <div className="flex col-span-2 items-center flex-wrap gap-2">
             <span className={`font-semibold ${labelColor}`}>Próximo episódio:</span>
             <span className="inline-flex items-center rounded-full border-2 border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-3 py-1 text-xs font-bold text-orange-700 dark:text-orange-300">
-              {formatNextEpisodeDetail(
+              {formatNextEpisodeCard(
                 serie.nextAiringEpisode.airingAt,
                 serie.nextAiringEpisode.episode,
-                serie.nextAiringEpisode.season,
+                formatCountdownLabel(serie.nextAiringEpisode.airingAt, now),
               )}
             </span>
           </div>

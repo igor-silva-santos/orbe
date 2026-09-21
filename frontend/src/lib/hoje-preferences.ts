@@ -1,5 +1,6 @@
 export type HojeSectionKey =
   | 'cinema'
+  | 'estreiasSemana'
   | 'streamingFilmes'
   | 'streamingSeries'
   | 'streamingAnimes'
@@ -7,6 +8,7 @@ export type HojeSectionKey =
 
 export const HOJE_SECTION_OPTIONS: { id: HojeSectionKey; label: string }[] = [
   { id: 'cinema', label: 'Cinema (em cartaz)' },
+  { id: 'estreiasSemana', label: 'Estreias da semana' },
   { id: 'streamingFilmes', label: 'Filmes no streaming' },
   { id: 'streamingSeries', label: 'Séries no streaming' },
   { id: 'streamingAnimes', label: 'Animes em exibição' },

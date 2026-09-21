@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapSerieToMidia, mapSerieToCarouselCard, sortSeriesByCarouselDate } from '../mappers';
-import { fetchSerieDetailsLive } from '../externalDetails';
+import { fetchSerieDetailsLive, fetchSerieSeasonEpisodes } from '../externalDetails';
 import { serieQualityFilter, serieCarouselQualityFilter } from '../qualityFilters';
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
@@ -106,6 +106,26 @@ router.get('/series/:id/details', detailsRateLimiter, cacheMiddleware(DETAILS_CA
   }
 });
 
+router.get(
+  '/series/:id/season/:seasonNumber/episodes',
+  detailsRateLimiter,
+  cacheMiddleware(DETAILS_CACHE_SECONDS),
+  async (req, res) => {
+    const tmdbId = parsePositiveIntId(req.params.id);
+    const seasonNumber = parseInt(req.params.seasonNumber, 10);
+    if (!tmdbId || !Number.isFinite(seasonNumber) || seasonNumber < 0) {
+      return res.status(400).json({ error: 'Parâmetros inválidos.' });
+    }
+    try {
+      const episodes = await fetchSerieSeasonEpisodes(tmdbId, seasonNumber);
+      res.json({ episodes });
+    } catch (error) {
+      logger.error(`Erro ao buscar episódios da temporada: ${error}`);
+      res.status(500).json({ error: 'Erro ao buscar episódios da temporada.' });
+    }
+  },
+);
+
 // Rota de Edição da Série (Admin)
 router.put('/series/:id', adminMiddleware, async (req, res) => {
   const tmdbId = parsePositiveIntId(req.params.id);
@@ -196,12 +216,9 @@ router.get('/series/homepage-carousel', cacheMiddleware(TWELVE_HOURS), async (re
         firstAirDate: 'asc',
       },
       take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingProviders: { include: { provider: true } },
-      },
+      include: serieCarouselLiteInclude,
     });
-    res.json(series.map(mapSerieToMidia));
+    res.json(series.map(mapSerieToCarouselCard));
   } catch (error) {
     logger.error(`Erro ao buscar séries para o carrossel da homepage: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar séries para o carrossel da homepage.' });

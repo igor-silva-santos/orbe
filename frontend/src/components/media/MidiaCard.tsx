@@ -9,12 +9,15 @@ import {
   Star,
   Check,
   EyeOff,
+  Pin,
 } from 'lucide-react';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
 import CardStatusBadge from '@/components/media/CardStatusBadge';
-import CardListIndicator from '@/components/media/CardListIndicator';
+import CardListHighlightPill from '@/components/media/CardListHighlightPill';
+import FilmeDestaquePill from '@/components/media/FilmeDestaquePill';
+import { getListHighlight } from '@/lib/list-highlight';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAppStore } from '@/stores/appStore';
@@ -90,6 +93,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const openSuperModal = useAppStore((s) => s.openSuperModal);
   const openRatingModal = useAppStore((s) => s.openRatingModal);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -165,13 +169,13 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const isAdultContent = (midia as any).isAdult === true;
   const filme = type === 'filme' ? (midia as Filme) : null;
+  const filmeDestaquePill = filme?.destaque_pill ?? null;
   const cardStatus = resolveCardStatus(type, midia, { isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
   const hasStatusBadge = Boolean(cardStatus);
-  const showListIndicator =
-    isAuthenticated &&
-    userInteraction?.status &&
-    ['favorito', 'quero_assistir', 'acompanhando'].includes(userInteraction.status);
+  const listHighlight =
+    isAuthenticated ? getListHighlight(userInteraction?.status) : null;
+  const isWeeklyPinned = isAnime && isAuthenticated && animeWeeklyPinIds.includes(midia.id);
 
   const topAward = midia.premiacoes?.find((a) => a.status === 'vencedor') ?? midia.premiacoes?.[0];
   const showSteamPrice = type === 'jogo' && (hasSteamPriceDisplay(midia) || hasSteamAppId(midia));
@@ -197,6 +201,16 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
     { icon: Heart, label: 'Favoritar', action: 'favoritar' as UserAction, active: userInteraction?.status === 'favorito' },
     { icon: Bookmark, label: 'Quero Assistir', action: 'quero_assistir' as UserAction, active: userInteraction?.status === 'quero_assistir' },
     ...(type === 'anime' || type === 'serie' ? [{ icon: Star, label: 'Acompanhando', action: 'acompanhando' as UserAction, active: userInteraction?.status === 'acompanhando' }] : []),
+    ...(isAnime && isAuthenticated
+      ? [
+          {
+            icon: Pin,
+            label: isWeeklyPinned ? 'Remover da semana' : 'Fixar na semana',
+            action: 'toggle_semana_anime' as UserAction,
+            active: isWeeklyPinned,
+          },
+        ]
+      : []),
     { icon: Check, label: type === 'jogo' ? 'Já Joguei' : 'Já Assisti', action: (type === 'jogo' ? 'ja_joguei' : 'ja_assisti') as UserAction, active: userInteraction?.status === 'assistido', disabled: !hasReleased },
     { icon: EyeOff, label: 'Não me Interessa', action: 'nao_me_interessa' as UserAction, active: userInteraction?.status === 'oculto' }
   ];
@@ -227,7 +241,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
       <TooltipTrigger asChild>
         <div className="relative group" ref={ref}>
             <div
-              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer w-full max-w-[210px] mx-auto flex flex-col ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} transition-colors`}
+              className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors ${
+                isFocused
+                  ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                  : listHighlight?.borderClass ?? ''
+              }`}
               onClick={onClick || handleCardClick}
             >
               <div className="relative w-full aspect-[206/290] rounded-lg overflow-hidden shrink-0">
@@ -252,8 +270,23 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     <CardStatusBadge status={cardStatus} />
                   </div>
                 )}
+                {filmeDestaquePill && (
+                  <div className={`absolute z-20 left-2 max-w-[calc(100%-3rem)] ${hasStatusBadge ? 'top-10' : 'top-2'}`}>
+                    <FilmeDestaquePill pill={filmeDestaquePill} />
+                  </div>
+                )}
+                {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
+                {isWeeklyPinned && !listHighlight && (
+                  <span
+                    className="absolute top-2 left-2 z-20 rounded-full bg-violet-600/95 text-white p-1.5 shadow-sm"
+                    title="Na sua semana"
+                    aria-label="Na sua semana"
+                  >
+                    <Pin className="h-3 w-3" />
+                  </span>
+                )}
                 {topAward && (
-                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${showListIndicator ? 'top-10' : ''}`}>
+                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${listHighlight ? 'top-10' : ''}`}>
                     <AwardIcon
                       award={topAward.nome}
                       status={topAward.status}
@@ -263,7 +296,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     />
                   </div>
                 )}
-                {showListIndicator && <CardListIndicator interaction={userInteraction} />}
                 {showSteamPrice && (
                   <div className="absolute bottom-2 left-2 right-2 z-10">
                     <SteamPriceLabel item={midia} variant="card" />

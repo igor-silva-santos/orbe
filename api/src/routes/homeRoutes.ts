@@ -27,6 +27,13 @@ import {
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import { searchRateLimiter, homepageRateLimiter } from '../securityMiddleware';
+import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
+import {
+  buildMaisEsperadoTmdbIdSet,
+  loadEstreiasSemanaFilmes,
+  loadMaisEsperadoTmdbIds,
+  resolveFilmeDestaqueFields,
+} from '../filmeLancamentoTags';
 import {
   TWELVE_HOURS,
   CAROUSEL_ITEM_LIMIT,
@@ -215,8 +222,17 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
       today,
     );
 
+    const maisEsperadoIds = buildMaisEsperadoTmdbIdSet(filmesRaw, today);
+    const filmes = filmesRaw.map((filme) => ({
+      ...mapFilmeToCarouselCard(filme),
+      ...resolveFilmeDestaqueFields(
+        { tmdbId: filme.tmdbId, releaseDate: filme.releaseDate },
+        { maisEsperadoIds, allowEstreiaSemana: false, now: today },
+      ),
+    }));
+
     res.json({
-      filmes: filmesRaw.map(mapFilmeToCarouselCard),
+      filmes,
       series: series.map(mapSerieToCarouselCard),
       jogos: jogos.map(mapJogoToCarouselCard),
       animes: animesAround.map(mapAnimeToCarouselCard),
@@ -241,8 +257,10 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
   ];
 
   try {
+    const maisEsperadoIds = await loadMaisEsperadoTmdbIds(now);
     const [
       cinema,
+      estreiasSemanaRaw,
       streamingFilmesWeek,
       streamingFilmesFallback,
       streamingSeriesWeek,
@@ -257,6 +275,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         take: 12,
         include: cardListInclude,
       }),
+      loadEstreiasSemanaFilmes(now),
       prisma.filme.findMany({
         where: {
           AND: [...streamingFilmeFilters, { releaseDate: { gte: weekAgo, lte: now } }],
@@ -353,12 +372,24 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
     const streamingSeries = dedupeFilmes([...streamingSeriesWeek, ...streamingSeriesFallback]).slice(0, 12);
     const streamingAnimes = dedupeAnimes([...streamingAnimesWeek, ...streamingAnimesFallback]).slice(0, 12);
 
+    const mapFilmeHoje = (
+      filme: (typeof cinema)[number],
+      allowEstreiaSemana: boolean,
+    ) => ({
+      ...mapFilmeToMidia(filme),
+      ...resolveFilmeDestaqueFields(
+        { tmdbId: filme.tmdbId, releaseDate: filme.releaseDate },
+        { maisEsperadoIds, allowEstreiaSemana, now },
+      ),
+    });
+
     res.json({
       data: now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
       // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
       // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
-      cinema: cinema.map((f) => mapFilmeToMidia(f)),
-      streamingFilmes: streamingFilmes.map((f) => mapFilmeToMidia(f)),
+      estreiasSemana: estreiasSemanaRaw.map((f) => mapFilmeHoje(f, true)),
+      cinema: cinema.map((f) => mapFilmeHoje(f, false)),
+      streamingFilmes: streamingFilmes.map((f) => mapFilmeHoje(f, false)),
       streamingSeries: streamingSeries.map((s) => mapSerieToMidia(s)),
       streamingAnimes: streamingAnimes.map((a) => mapAnimeToMidia(a)),
       destaquesJogos: destaquesJogos.map((j) => mapJogoToMidia(j)),
@@ -380,12 +411,16 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
     // Sinopse ja vem traduzida do banco (preenchida pelo sync via translateSynopsisForStorage) —
     // nao precisa de traducao ao vivo aqui, mesmo padrao das rotas /filmes, /series, /animes, /jogos.
     if (type === 'filmes') {
-      const popularFilmes = await prisma.filme.findMany({
-        where: filmeQualityFilter,
-        orderBy: { popularity: 'desc' },
-        take,
-      });
-      results = popularFilmes.map((f) => mapFilmeToMidia(f));
+      const now = new Date();
+      const horizon = new Date(now);
+      horizon.setDate(horizon.getDate() + 120);
+      const filmes = await fetchFilmesForCarousel(
+        { releaseDate: { gte: now, lte: horizon } },
+        { take: Math.max(take, 80), homeLaunch: true },
+      );
+      results = sortFilmesByAntecipacaoScore(filmes, now)
+        .slice(0, take)
+        .map((f) => mapFilmeToMidia(f));
     } else if (type === 'series') {
       const popularSeries = await prisma.serie.findMany({
         where: serieQualityFilter,
@@ -458,7 +493,9 @@ router.get('/trending', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
 });
 
 // Pesquisa global (alias /search para compatibilidade com auditoria e crawlers)
-const SEARCH_RESULT_LIMIT = 50;
+const SEARCH_RESULT_LIMIT = 24;
+const SEARCH_PEOPLE_LIMIT = 12;
+const SEARCH_MIN_LENGTH = 2;
 
 const searchHandler = async (req: import('express').Request, res: import('express').Response) => {
   const { q, category } = req.query;
@@ -467,18 +504,13 @@ const searchHandler = async (req: import('express').Request, res: import('expres
     return res.status(400).json({ error: "O parâmetro de pesquisa 'q' é obrigatório." });
   }
 
+  const qTrim = q.trim();
+  if (qTrim.length < SEARCH_MIN_LENGTH) {
+    return res.json({ filmes: [], series: [], animes: [], jogos: [], pessoas: [], dubladores: [] });
+  }
+
   try {
-    const normalizedQ = normalizeSearchText(q);
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
-    const qTrim = q.trim();
-
-    const matchesQuery = (text: string | null | undefined) =>
-      !!text && normalizeSearchText(text).includes(normalizedQ);
-
-    const accentFilter = <T>(
-      items: T[],
-      fields: ((item: T) => string | null | undefined)[],
-    ): T[] => items.filter((item) => fields.some((f) => matchesQuery(f(item))));
 
     const promises = [];
 
@@ -487,14 +519,19 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.filme.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { title: { contains: qTrim, mode: 'insensitive' } },
-              { originalTitle: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              filmeQualityFilter,
+              {
+                OR: [
+                  { title: { contains: qTrim, mode: 'insensitive' } },
+                  { originalTitle: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => accentFilter(items, [(f) => f.title, (f) => f.originalTitle]))
+          include: cardListInclude,
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -505,14 +542,19 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.serie.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { name: { contains: qTrim, mode: 'insensitive' } },
-              { originalName: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              serieQualityFilter,
+              {
+                OR: [
+                  { name: { contains: qTrim, mode: 'insensitive' } },
+                  { originalName: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: { streamingProviders: { include: { provider: true } } },
-        }).then((items) => accentFilter(items, [(s) => s.name, (s) => s.originalName]))
+          include: cardListInclude,
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -523,16 +565,20 @@ const searchHandler = async (req: import('express').Request, res: import('expres
         prisma.anime.findMany({
           take: SEARCH_RESULT_LIMIT,
           where: {
-            OR: [
-              { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
-              { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
-              { titleNative: { contains: qTrim, mode: 'insensitive' } },
+            AND: [
+              animeQualityFilter,
+              {
+                OR: [
+                  { titleRomaji: { contains: qTrim, mode: 'insensitive' } },
+                  { titleEnglish: { contains: qTrim, mode: 'insensitive' } },
+                  { titleNative: { contains: qTrim, mode: 'insensitive' } },
+                ],
+              },
             ],
           },
           orderBy: { popularity: 'desc' },
-        }).then((items) =>
-          accentFilter(items, [(a) => a.titleRomaji, (a) => a.titleEnglish, (a) => a.titleNative])
-        )
+          include: animeCarouselInclude,
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
@@ -542,21 +588,69 @@ const searchHandler = async (req: import('express').Request, res: import('expres
       promises.push(
         prisma.jogo.findMany({
           take: SEARCH_RESULT_LIMIT,
-          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          where: {
+            AND: [
+              jogoQualityFilter,
+              { name: { contains: qTrim, mode: 'insensitive' } },
+            ],
+          },
           orderBy: { rating: 'desc' },
-        }).then((items) => accentFilter(items, [(j) => j.name]))
+          include: {
+            genres: { include: { genero: true }, take: 3 },
+            platforms: { include: { plataforma: true }, take: 4 },
+          },
+        }),
       );
     } else {
       promises.push(Promise.resolve([]));
     }
 
-    const [filmes, series, animes, jogos] = await Promise.all(promises);
+    const includePeople =
+      (!categoryFilter || categoryFilter === 'pessoas' || categoryFilter === 'todos') &&
+      qTrim.length >= 2;
+
+    const peoplePromise = includePeople
+      ? prisma.pessoa.findMany({
+          take: SEARCH_PEOPLE_LIMIT,
+          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          orderBy: { name: 'asc' },
+          select: { tmdbId: true, name: true, profilePath: true },
+        })
+      : Promise.resolve([]);
+
+    const dubladoresPromise = includePeople
+      ? prisma.dublador.findMany({
+          take: SEARCH_PEOPLE_LIMIT,
+          where: { name: { contains: qTrim, mode: 'insensitive' } },
+          orderBy: { name: 'asc' },
+          select: { anilistId: true, name: true, image: true },
+        })
+      : Promise.resolve([]);
+
+    const [filmes, series, animes, jogos, pessoas, dubladores] = await Promise.all([
+      ...promises,
+      peoplePromise,
+      dubladoresPromise,
+    ]);
+
+    const profileUrl = (path: string | null | undefined) =>
+      path ? (path.startsWith('http') ? path : `https://image.tmdb.org/t/p/w185${path}`) : null;
 
     res.json({
       filmes: filmes.map((f) => mapFilmeToMidia(f)),
       series: series.map((s) => mapSerieToMidia(s)),
       animes: animes.map((a) => mapAnimeToMidia(a)),
       jogos: jogos.map((j) => mapJogoToMidia(j)),
+      pessoas: pessoas.map((p) => ({
+        id: p.tmdbId,
+        name: p.name,
+        profilePath: profileUrl(p.profilePath),
+      })),
+      dubladores: dubladores.map((d) => ({
+        id: d.anilistId,
+        name: d.name,
+        profilePath: d.image ?? null,
+      })),
     });
 
   } catch (error) {
@@ -565,7 +659,9 @@ const searchHandler = async (req: import('express').Request, res: import('expres
   }
 };
 
-router.get('/pesquisa', searchRateLimiter, searchHandler);
-router.get('/search', searchRateLimiter, searchHandler);
+const SEARCH_CACHE_SECONDS = 90;
+
+router.get('/pesquisa', searchRateLimiter, cacheMiddleware(SEARCH_CACHE_SECONDS), searchHandler);
+router.get('/search', searchRateLimiter, cacheMiddleware(SEARCH_CACHE_SECONDS), searchHandler);
 
 export default router;

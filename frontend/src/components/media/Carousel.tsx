@@ -203,8 +203,8 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
       <div
         ref={setRefs}
         style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
-        className={`flex overflow-x-auto scrollbar-hide gap-4 px-4 py-2 ${className} ${
-          dragging ? "cursor-grabbing select-none" : "cursor-grab"
+        className={`flex overflow-x-auto scrollbar-hide gap-4 px-4 py-2 select-none ${className} ${
+          dragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

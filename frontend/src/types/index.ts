@@ -130,6 +130,9 @@ export interface Filme extends Midia {
   videos?: Video[];
   status?: string;
   status_label?: string;
+  estreia_semana?: boolean;
+  mais_esperado?: boolean;
+  destaque_pill?: 'estreia_semana' | 'mais_esperado' | null;
 }
 
 export interface Temporada {
@@ -191,8 +194,11 @@ export interface Anime extends Serie {
   };
 }
 
+export type JogoEmpresaRef = { igdbId: number; nome: string };
+
 export interface Jogo extends Midia {
   desenvolvedores: string[];
+  desenvolvedoras?: JogoEmpresaRef[];
   publicadoras: string[];
   plataformas_jogo: GamePlatform[];
   modos_jogo?: string[];
@@ -425,6 +431,7 @@ export type UserAction =
   | 'favoritar'
   | 'quero_assistir'
   | 'acompanhando'
+  | 'toggle_semana_anime'
   | 'ja_assisti'
   | 'ja_joguei'
   | 'nao_me_interessa';

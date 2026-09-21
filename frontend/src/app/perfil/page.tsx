@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText } from 'lucide-react';
+import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText, List } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
@@ -100,6 +101,13 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col gap-2">
+            <Link
+              href="/minha-lista"
+              className="flex items-center w-full px-4 py-2 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/15 transition-colors text-sm font-medium"
+            >
+              <List className="mr-2 h-4 w-4" />
+              Minha lista
+            </Link>
             <button 
               onClick={() => router.push('/configuracoes')} 
               className="flex items-center w-full px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors text-sm font-medium"
