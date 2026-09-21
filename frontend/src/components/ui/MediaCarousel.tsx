@@ -49,6 +49,8 @@ interface MediaCarouselProps {
   initialData: Midia[];
   startIndex: number;
   className?: string;
+  /** Quando false, adia fetch de meses até a seção ficar visível (home). */
+  bootstrapEnabled?: boolean;
 }
 
 const SLIDE_CLASS = 'relative flex-[0_0_170px] sm:flex-[0_0_190px] md:flex-[0_0_210px] min-w-0 pl-3 sm:pl-4 carousel-slide';
@@ -66,7 +68,12 @@ type DisplaySlide =
   | { kind: 'dated'; item: Midia; datedIndex: number }
   | YearTbdSlide;
 
-const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = [], className }) => {
+const MediaCarousel: React.FC<MediaCarouselProps> = ({
+  mediaType,
+  initialData = [],
+  className,
+  bootstrapEnabled = true,
+}) => {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
   const fastScrollEnabled = useAppStore((s) => s.fastScrollEnabled);
@@ -253,13 +260,14 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({ mediaType, initialData = 
 
   /** Bootstrap: mês atual + próximo em paralelo, depois reposiciona */
   useEffect(() => {
+    if (!bootstrapEnabled) return;
     void (async () => {
       await bootstrapInitialMonths();
       setHasCompletedInitialLoad(true);
       await requestScrollToOpenPosition();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bootstrapEnabled]);
 
   /** Prefetch só do ano corrente no mount — demais anos carregam ao rolar (onSelect) */
   useEffect(() => {
