@@ -280,6 +280,10 @@ export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
  * Não reutiliza filmeCarouselQualityFilter — o bloco de engajamento dele exige pop 30/votos 100
  * e descarta estreias futuras sem hype ainda.
  */
+/** Engajamento mínimo no carrossel equilibrado (abaixo do DISPLAY global) */
+export const CAROUSEL_BALANCED_MIN_VOTE_COUNT = 10;
+export const CAROUSEL_BALANCED_MIN_POPULARITY = 10;
+
 export const filmeCarouselBalancedWhereInput: Prisma.FilmeWhereInput = {
   AND: [
     { posterPath: { not: null } },
@@ -293,14 +297,15 @@ export const filmeCarouselBalancedWhereInput: Prisma.FilmeWhereInput = {
         { emBreve: true },
         { em_prevenda: true },
         { releaseDate: { gte: new Date() } },
-        { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
-        { voteCount: { gte: 20 } },
+        { popularity: { gte: CAROUSEL_BALANCED_MIN_POPULARITY } },
+        { voteCount: { gte: CAROUSEL_BALANCED_MIN_VOTE_COUNT } },
+        { localizacaoPtBr: true },
       ],
     },
     {
       OR: [
-        { popularity: { gte: CAROUSEL_BYPASS_MIN_POPULARITY } },
-        { voteCount: { gte: 20 } },
+        { popularity: { gte: CAROUSEL_BALANCED_MIN_POPULARITY } },
+        { voteCount: { gte: CAROUSEL_BALANCED_MIN_VOTE_COUNT } },
         { emCartaz: true },
         { emBreve: true },
         { em_prevenda: true },

@@ -42,12 +42,13 @@ describe('filmeAntecipacao', () => {
 
   it('runtime null passa no carrossel home', () => {
     assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: null }), true);
-    assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: 39 }), false);
-    assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: 40 }), true);
+    assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: 34 }), false);
+    assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: 35 }), true);
+    assert.equal(passesHomeLaunchRuntime({ title: 'x', runtime: 20, emCartaz: true }), true);
   });
 
-  it('computeAdaptivePopularityFloor fica entre 8 e 22', () => {
+  it('computeAdaptivePopularityFloor fica entre 5 e 18', () => {
     const floor = computeAdaptivePopularityFloor([5, 10, 20, 40, 80]);
-    assert.ok(floor >= 8 && floor <= 22);
+    assert.ok(floor >= 5 && floor <= 18);
   });
 });

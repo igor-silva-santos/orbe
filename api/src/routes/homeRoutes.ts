@@ -27,7 +27,7 @@ import {
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import { searchRateLimiter, homepageRateLimiter } from '../securityMiddleware';
-import { sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
+import { ANTECIPACAO_HORIZON_DAYS, sortFilmesByAntecipacaoScore } from '../filmeAntecipacao';
 import {
   buildMaisEsperadoTmdbIdSet,
   loadEstreiasSemanaFilmes,
@@ -52,7 +52,8 @@ const router = Router();
  * Evita `take` nos mais antigos da janela de 90 dias, que escondia o mês atual.
  */
 const HOMEPAGE_AROUND_PAST = 40;
-const HOMEPAGE_AROUND_FUTURE = 40;
+/** Futuro: horizonte 120d — precisa de take maior que a janela de 1 mês antiga */
+const HOMEPAGE_AROUND_FUTURE = 55;
 
 /** Lançamentos recentes no bootstrap do carrossel (análogo a em cartaz nos filmes) */
 const getRecentCarouselPastStart = (days = 90): Date => {
@@ -116,6 +117,8 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
   const today = startOfToday();
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const nextMonthEnd = endOfNextMonth(today);
+  const filmeFutureHorizon = new Date(today);
+  filmeFutureHorizon.setDate(filmeFutureHorizon.getDate() + ANTECIPACAO_HORIZON_DAYS);
   const recentPastStart = getRecentCarouselPastStart();
   const airingHorizon = new Date(today);
   airingHorizon.setDate(airingHorizon.getDate() + 21);
@@ -135,7 +138,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
         { orderBy: { releaseDate: 'desc' }, take: HOMEPAGE_AROUND_PAST, year, homeLaunch: true },
       ),
       fetchFilmesForCarousel(
-        { releaseDate: { gte: today, lte: nextMonthEnd } },
+        { releaseDate: { gte: today, lte: filmeFutureHorizon } },
         { orderBy: { releaseDate: 'asc' }, take: HOMEPAGE_AROUND_FUTURE, year, homeLaunch: true },
       ),
       prisma.serie.findMany({
