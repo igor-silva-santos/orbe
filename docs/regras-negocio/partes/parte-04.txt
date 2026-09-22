@@ -1,0 +1,687 @@
+========== 259/511 — RN-HOME-EA-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Gênero em Em alta
+Descrição: Filtro de gênero continua disponível e lista só títulos em alta daquele gênero.
+Pré-condições: Em alta com vários gêneros.
+Resultado na tela: Dropdown coerente com cards visíveis.
+Como testar: Filtrar gênero em Em alta.
+
+========== 260/511 — RN-HOME-HERO-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Botão “Começar agora”
+Descrição: O botão principal leva o usuário à faixa de filmes na mesma página.
+Pré-condições: Página inicial no topo.
+Resultado na tela: Ao clicar, a página rola suavemente até a seção Filmes; o endereço do navegador **não** precisa mudar de página.
+Como testar: Clicar “Começar agora” e verificar scroll até Filmes.
+
+========== 261/511 — RN-HOME-HERO-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Link “Ver jogos em alta”
+Descrição: O segundo botão abre a área de promoções com foco em jogos em destaque.
+Pré-condições: Página inicial no topo.
+Resultado na tela: Abre a página de promoções já na aba/visualização de jogos em alta.
+Como testar: Clicar no link e conferir aba/conteúdo de em alta.
+
+========== 262/511 — RN-HOME-SHELL-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Menu superior e busca
+Descrição: Cabeçalho do site (busca, conta, tema) está presente na home e funciona igual às outras páginas.
+Pré-condições: Qualquer estado de login.
+Resultado na tela: Busca abre overlay; login leva à entrada.
+Como testar: Usar busca e menu no topo.
+
+========== 263/511 — RN-HOME-SHELL-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Sem popup de “consentimento +18”
+Descrição: Conteúdo adulto é tratado com blur e exclusão de alguns títulos; **não** há janela modal pedindo aceite de conteúdo adulto só na home.
+Pré-condições: Título adulto permitido.
+Resultado na tela: Apenas blur/exclusão, sem popup dedicado.
+Como testar: Navegar home com título adulto.
+
+========== 264/511 — RN-HOME-TBD-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Separador de ano sem dia
+Descrição: Após os títulos com dia definido, o carrossel pode mostrar bloco “Lançamentos de [ano] — sem data confirmada”.
+Pré-condições: Existem títulos com ano mas sem dia/mês confirmado.
+Resultado na tela: Cartão separador + cards desses títulos **depois** da parte datada.
+Como testar: Rolar até o fim da timeline datada em Filmes.
+
+========== 265/511 — RN-HOME-TBD-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Título ao focar TBD
+Descrição: Ao parar em um separador ou card “só ano”, o título superior usa a frase de ano sem data confirmada.
+Pré-condições: Usuário focou slide TBD.
+Resultado na tela: Texto “sem data confirmada” no cabeçalho do carrossel.
+Como testar: Focar separador de ano.
+
+========== 266/511 — RN-HOME-TBD-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Anos futuros na fila
+Descrição: São reservados espaços para anos do ano corrente até alguns anos à frente (blocos podem ir enchendo ao rolar).
+Pré-condições: Carrossel em modo timeline (não “Em alta”).
+Resultado na tela: Ao avançar meses/anos, aparecem novos blocos TBD conforme o ano.
+Como testar: Rolar até virada de ano no carrossel.
+
+========== 267/511 — RN-HOME-TL-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Título do mês no carrossel
+Descrição: Acima dos cards de Filmes/Séries/Jogos aparece um título do tipo “Lançamentos de [mês] de [ano]” conforme o card central/focado.
+Pré-condições: Carrossel carregado com pelo menos um título datado.
+Resultado na tela: Texto em português com mês por extenso.
+Como testar: Abrir faixa Filmes e ler o título superior.
+
+========== 268/511 — RN-HOME-TL-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Abrir no próximo lançamento
+Descrição: Ao carregar, o carrossel posiciona o foco no **primeiro título com data hoje ou futura** dentro da janela de 90 dias.
+Pré-condições: Existe estreia futura na faixa.
+Resultado na tela: Card central (ou focado) é o próximo lançamento, não o primeiro da lista histórica.
+Como testar: Abrir home em dia com estreias futuras; ver qual card está ao centro.
+
+========== 269/511 — RN-HOME-TL-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Sem futuro: último lançado
+Descrição: Se não há mais nenhuma data futura na lista carregada, o foco vai para o **último título já lançado** (ainda dentro dos 90 dias).
+Pré-condições: Só passado recente na faixa.
+Resultado na tela: Foco no lançamento mais recente já ocorrido.
+Como testar: Testar em dia sem estreias futuras carregadas.
+
+========== 270/511 — RN-HOME-TL-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Série/anime: data do episódio
+Descrição: Para séries (e posicionamento equivalente quando o card traz “próximo episódio”), a data usada na timeline é a do **próximo episódio**, se for hoje ou futuro.
+Pré-condições: Card com “próximo episódio” visível.
+Resultado na tela: Posição no carrossel coerente com a data do episódio, não só estreia da série.
+Como testar: Série com nova temporada distante mas ep semanal próximo.
+
+========== 271/511 — RN-HOME-TL-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Placeholders no início
+Descrição: Antes de calcular a posição, o usuário pode ver cartões cinza/esqueleto centralizados.
+Pré-condições: Primeiro acesso ou rede lenta.
+Resultado na tela: Até ~10 placeholders; depois substituídos por cards reais na posição correta.
+Como testar: Recarregar com rede lenta na faixa Filmes.
+
+========== 272/511 — RN-HOME-TL-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Rolagem horizontal
+Descrição: O usuário desliza ou usa setas para ver títulos anteriores e posteriores no tempo.
+Pré-condições: Faixa com vários cards.
+Resultado na tela: Movimento horizontal; card central em destaque (anel/foco).
+Como testar: Arrastar carrossel e usar setas laterais.
+
+========== 273/511 — RN-HOME-TL-007 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Ctrl + roda do mouse
+Descrição: Com tecla Ctrl pressionada, a roda do mouse no carrossel avança/volta slides (em desktop).
+Pré-condições: Desktop, foco na faixa.
+Resultado na tela: Carrossel muda de slide com Ctrl+scroll.
+Como testar: Testar em navegador desktop.
+
+========== 274/511 — RN-HOME-TL-008 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Carregar meses ao navegar
+Descrição: Ao chegar perto do fim ou início de um mês no carrossel, o sistema busca títulos do mês seguinte ou anterior.
+Pré-condições: Usuário rola vários meses para frente ou para trás.
+Resultado na tela: Novos cards aparecem; título do mês no topo atualiza.
+Como testar: Rolar rapidamente 3–4 meses à frente.
+
+========== 275/511 — RN-HOME-TL-009 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Não “pular” ao puxar o passado
+Descrição: Ao incluir meses mais antigos no início da lista, a posição visual do card que o usuário estava vendo se mantém.
+Pré-condições: Usuário no meio do carrossel; sistema carrega mês anterior.
+Resultado na tela: O mesmo título permanece em foco (sem salto brusco).
+Como testar: Rolar para trás até disparar carga de mês anterior.
+
+========== 276/511 — RN-HOME-TL-010 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Setas de mudança de mês
+Descrição: Controles permitem saltar para o próximo/anterior **mês** com títulos (até um limite de meses vazios seguidos).
+Pré-condições: Carrossel com navegação por mês habilitada.
+Resultado na tela: Avanço/retrocesso por mês; após vários meses sem título, para de avançar em vazio.
+Como testar: Clicar setas de mês repetidamente.
+
+========== 277/511 — RN-HOME-TL-011 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Filtro por gênero
+Descrição: Menu de filtro na faixa restringe os cards ao gênero escolhido.
+Pré-condições: Vários gêneros na faixa.
+Resultado na tela: Só cards daquele gênero; lista de gêneros reflete o que existe nos cards carregados.
+Como testar: Abrir filtro, escolher um gênero.
+
+========== 278/511 — RN-HOME-TL-012 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Troca de gênero reposiciona
+Descrição: Ao mudar o gênero, o carrossel recalcula e volta a focar no “próximo lançamento” **dentro do filtro**.
+Pré-condições: Filtro alterado com resultados.
+Resultado na tela: Posição inicial coerente com o subconjunto filtrado.
+Como testar: Filtrar gênero raro e observar card central.
+
+========== 279/511 — RN-HOME-TL-013 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Scroll rápido (ícone raio)
+Descrição: Opção global de “scroll rápido” acelera a animação do carrossel e antecipa carregamento ao se aproximar da borda do mês.
+Pré-condições: Usuário ativa ícone de raio/Zap no controle da faixa (se visível).
+Resultado na tela: Transições mais rápidas; mais cards pré-carregados ao rolar forte.
+Como testar: Ligar/desligar e comparar velocidade.
+
+========== 280/511 — RN-HOME-UPD-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Atualizar após sincronização do catálogo
+Descrição: Quando o site recebe atualização em massa de títulos (em segundo plano), as faixas da home podem **atualizar sozinhas** sem o usuário recarregar a página.
+Pré-condições: Ambiente onde sync/disparo de atualização ocorre.
+Resultado na tela: Cards novos ou datas alteradas após evento.
+Como testar: Após sync, manter home aberta e observar.
+
+========== 281/511 — RN-HOME-UPD-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Falha na atualização silenciosa
+Descrição: Se a atualização automática falhar, a home mantém o que já estava na tela.
+Pré-condições: Falha de rede na atualização.
+Resultado na tela: Sem mensagem obrigatória; conteúdo antigo permanece.
+Como testar: Cortar rede após sync.
+
+========== 282/511 — RN-JOGOS-001 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Conteúdo na abertura
+Descrição: Grade e filtros já vêm na abertura.
+Pré-condições: Catálogo OK.
+Resultado na tela: Cards e selects visíveis.
+Como testar: Abrir Jogos.
+
+========== 283/511 — RN-JOGOS-002 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Falha na abertura
+Descrição: Indisponibilidade não quebra a página.
+Pré-condições: Catálogo down.
+Resultado na tela: Grade vazia; filtros vazios possíveis.
+Como testar: Simular falha inicial.
+
+========== 284/511 — RN-JOGOS-003 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Sem recarga duplicada na abertura
+Descrição: Abrir Jogos não dispara loading extra imediato após a primeira pintura.
+Pré-condições: Primeira visita OK.
+Resultado na tela: Estável até mudar filtro.
+Como testar: Abrir e aguardar.
+
+========== 285/511 — RN-JOGOS-004 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Filtros aplicados
+Descrição: Gênero, plataforma, modo de jogo, ano e mês restringem a grade.
+Pré-condições: Valores específicos selecionados.
+Resultado na tela: Lista coerente (ex.: só PlayStation).
+Como testar: Alterar cada filtro.
+
+========== 286/511 — RN-JOGOS-005 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Mês sem ano explícito
+Descrição: Só mês selecionado usa o **ano corrente** para lançamentos daquele mês.
+Pré-condições: Março + todos os anos.
+Resultado na tela: Jogos lançados em março do ano atual.
+Como testar: Filtrar mês atual.
+
+========== 287/511 — RN-JOGOS-006 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Mês com ano
+Descrição: Mês + ano restringem ao intervalo daquele mês/ano.
+Pré-condições: Junho 2023.
+Resultado na tela: Só lançamentos de jun/2023.
+Como testar: Combinar mês e ano.
+
+========== 288/511 — RN-JOGOS-007 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Ordem alfabética
+Descrição: Sem controle “populares” na UI, ordem por nome do jogo.
+Pré-condições: Filtros em todos.
+Resultado na tela: A–Z nos primeiros cards.
+Como testar: Ler primeiros títulos.
+
+========== 289/511 — RN-JOGOS-008 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Popularidade (catálogo interno)
+Descrição: Modo “populares” existe no catálogo, **sem** botão nesta página.
+Pré-condições: —
+Resultado na tela: Usuário só vê ordem alfabética aqui.
+Como testar: Confirmar ausência de atalho Populares.
+
+========== 290/511 — RN-JOGOS-009 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Listagem mais permissiva que destaques
+Descrição: Jogos “fracos” (pouco hype/nota) podem aparecer em Jogos mas **não** em **Em Alta** ou algumas faixas da home.
+Pré-condições: Jogo obscuro.
+Resultado na tela: Visível em Jogos; ausente em Em Alta.
+Como testar: Comparar mesma busca.
+
+========== 291/511 — RN-JOGOS-010 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Lote inicial na grade
+Descrição: ~dezenas de cards visíveis; sem “carregar mais”.
+Pré-condições: Catálogo grande.
+Resultado na tela: Até ~48 cards; contador segue cards visíveis (como Animes).
+Como testar: Contar cards vs contador.
+
+========== 292/511 — RN-JOGOS-011 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Gaveta O que vem aí
+Descrição: Próximos lançamentos de jogos em carrossel.
+Pré-condições: Resumo com **próximos jogos**.
+Resultado na tela: Seção **O que vem aí** acima dos filtros.
+Como testar: Ambiente com jogos futuros.
+
+========== 293/511 — RN-JOGOS-012 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Gaveta Eventos recentes
+Descrição: Destaques de eventos de games (ex.: State of Play, Nintendo Direct).
+Pré-condições: Resumo com **eventos recentes**.
+Resultado na tela: Seção **Eventos recentes** com cards de evento empilhados.
+Como testar: Ambiente com eventos no resumo.
+
+========== 294/511 — RN-JOGOS-013 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Loading, contador e vazio
+Descrição: Spinner ao filtrar; contador = quantidade na grade; empty **Nenhum jogo encontrado**.
+Pré-condições: Filtro vazio ou OK.
+Resultado na tela: Comportamento igual padrão Animes.
+Como testar: Filtro impossível e amplo.
+
+========== 295/511 — RN-JOGOS-014 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Atualização após sync
+Descrição: Sync pode atualizar grade com página aberta.
+Pré-condições: Sync em andamento.
+Resultado na tela: Cards mudam sem F5.
+Como testar: Manter Jogos aberta.
+
+========== 296/511 — RN-JOGOS-015 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Opções de filtro
+Descrição: Gêneros, plataformas, modos e anos refletem jogos cadastrados; anos decrescentes.
+Pré-condições: Catálogo variado.
+Resultado na tela: Menus populados coerentemente.
+Como testar: Abrir cada select.
+
+========== 297/511 — RN-JOGOS-016 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Preço Steam no detalhe/card
+Descrição: Quando o jogo tem página na Steam, preço em reais pode aparecer após carregar (não instantâneo na grade).
+Pré-condições: Jogo com Steam cadastrado.
+Resultado na tela: Preço BRL ou indicador de carregamento no detalhe/card conforme produto.
+Como testar: Abrir jogo Steam conhecido.
+
+========== 298/511 — RN-JOGOS-017 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Redirect para Promoções
+Descrição: URL antiga não tem conteúdo próprio.
+Pré-condições: Usuário acessa **/jogos-em-alta**.
+Resultado na tela: Navegador vai para **Promoções**, aba **Em Alta**.
+Como testar: Digitar URL legada.
+
+========== 299/511 — RN-JOGOS-018 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Menu do site
+Descrição: Atalho **Jogos em Alta** no cabeçalho/rodapé aponta para o mesmo destino.
+Pré-condições: Menu visível.
+Resultado na tela: Clique abre Promoções na aba Em Alta.
+Como testar: Clicar item de menu.
+
+========== 300/511 — RN-JOGOS-019 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Quem entra no ranking
+Descrição: Destaques semanais priorizam jogos recentes ou com hype/nota mínima; jogos antigos sem interesse ficam de fora.
+Pré-condições: Jogo lançado há meses sem destaque.
+Resultado na tela: Ausente do **Top da Semana**.
+Como testar: Comparar jogo antigo vs lançamento recente.
+
+========== 301/511 — RN-JOGOS-020 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Top da Semana
+Descrição: Até **12** jogos em grade; os **três primeiros** com badge **#1**, **#2**, **#3**.
+Pré-condições: Pool de destaques não vazio.
+Resultado na tela: Seção **Top da Semana** aberta por padrão.
+Como testar: Contar cards e badges.
+
+========== 302/511 — RN-JOGOS-021 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Mais jogados na Steam
+Descrição: Faixa horizontal só se houver dados de jogadores simultâneos.
+Pré-condições: Jogos Steam com pico de jogadores.
+Resultado na tela: Seção **Mais jogados na Steam** com carrossel.
+Como testar: Ambiente com dados Steam.
+
+========== 303/511 — RN-JOGOS-022 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Promoções Steam (dados)
+Descrição: Descontos Steam fortes entram no pacote de dados de Em Alta; **não** há seção separada dedicada na UI atual (ofertas Steam aparecem principalmente na aba Promoções).
+Pré-condições: Jogos com desconto alto na Steam.
+Resultado na tela: Verificar ofertas na aba **Promoções** / carrossel catálogo Steam.
+Como testar: Comparar jogo em promo Steam entre abas.
+
+========== 304/511 — RN-JOGOS-023 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Por plataforma
+Descrição: Blocos PC → Xbox → PlayStation → Nintendo; até **8** jogos por bloco; bloco vazio mostra mensagem amigável.
+Pré-condições: Jogos multiplataforma.
+Resultado na tela: Switch só no bloco Nintendo, etc.
+Como testar: Ler seções por plataforma.
+
+========== 305/511 — RN-JOGOS-024 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Por modo de jogo
+Descrição: Multijogador, cooperativo, um jogador — até 8 jogos; bloco vazio com texto explicativo.
+Pré-condições: Jogos co-op.
+Resultado na tela: Título listado em **Cooperativo** quando aplicável.
+Como testar: Achar jogo co-op conhecido.
+
+========== 306/511 — RN-JOGOS-025 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Por categoria (gênero)
+Descrição: Até **6** gêneros com **pelo menos 2** jogos; até 8 jogos por gênero.
+Pré-condições: Gênero com 1 só jogo.
+Resultado na tela: Gênero singleton **não** vira seção.
+Como testar: Contar seções de gênero.
+
+========== 307/511 — RN-JOGOS-026 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Semana e métrica (modo completo)
+Descrição: Fora do modo compacto da aba Promoções, texto indica semana corrente e fontes (Steam + IGDB ou só IGDB).
+Pré-condições: Abrir Em Alta em contexto que mostra cabeçalho longo (se existir rota dedicada futura).
+Resultado na tela: Na aba Promoções (**compact**), semana/métrica longa **oculta**; banner de promoções visível.
+Como testar: Abrir `/promocoes?tab=em-alta`.
+
+========== 308/511 — RN-JOGOS-027 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Modo compacto na aba Promoções
+Descrição: Dentro de Promoções, Em Alta usa layout resumido: skeleton de 6 cards, banner para **Promoções ao vivo**, sem bloco grande de semana/métrica.
+Pré-condições: Aba **Em Alta** em Promoções.
+Resultado na tela: Banner “Ofertas ao vivo…” + link **Ver promoções ao vivo**; grade compacta.
+Como testar: Abrir aba Em Alta.
+
+========== 309/511 — RN-JOGOS-028 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Erro ao carregar
+Descrição: Falha ao montar Em Alta.
+Pré-condições: Catálogo/indisponibilidade simulada.
+Resultado na tela: Mensagem **Não foi possível carregar os jogos em alta.**
+Como testar: Simular falha.
+
+========== 310/511 — RN-JOGOS-029 ==========
+Tela: - **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+Nome: Conteúdo estável por sessão
+Descrição: Lista Em Alta não muda a cada segundo; atualiza ao reabrir aba/página.
+Pré-condições: Aba aberta.
+Resultado na tela: Mesmos blocos durante navegação curta; recarregar pode atualizar.
+Como testar: Ficar na aba; depois F5.
+
+========== 311/511 — RN-LISTA-001 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Rotas exigem login
+Descrição: Qualquer área sob Minha Lista.
+Pré-condições: Visitante não autenticado.
+Resultado na tela: Redirecionamento para tela de **Entrar**, com retorno para a página que tentou abrir após login bem-sucedido.
+Como testar: Anônimo tenta abrir lista de animes pelo menu.
+
+========== 312/511 — RN-LISTA-002 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Camada de UX
+Descrição: O site barra acesso visual cedo; ações sensíveis ainda dependem da sessão válida.
+Pré-condições: Visitante vs logado.
+Resultado na tela: Sem login não vê conteúdo da lista; logado vê dados pessoais.
+Como testar: Comparar anônimo (redirect) vs logado.
+
+========== 313/511 — RN-LISTA-010 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Quatro tipos de mídia
+Descrição: Página inicial da Minha Lista.
+Pré-condições: Usuário logado.
+Resultado na tela: Cards: Animes, Filmes, Séries, Jogos; **somente Animes** leva a uma lista ativa hoje.
+Como testar: Clicar Animes vs Filmes.
+
+========== 314/511 — RN-LISTA-011 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: “Em breve”
+Descrição: Tipos ainda não disponíveis.
+Pré-condições: Hub aberto.
+Resultado na tela: Filmes, Séries e Jogos aparecem esmaecidos, sem link, com selo “Em breve”.
+Como testar: Tentar clicar Filmes no hub.
+
+========== 315/511 — RN-LISTA-012 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Mensagem orientadora
+Descrição: Copy da página.
+Pré-condições: Hub aberto.
+Resultado na tela: Texto explicando que a organização começa pelos animes.
+Como testar: Ler texto introdutório.
+
+========== 316/511 — RN-LISTA-020 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Abas Catálogo vs Fila
+Descrição: Barra local em subpáginas.
+Pré-condições: Logado em Minha Lista.
+Resultado na tela: Links “Catálogo Orbe” (hub) e “Fila Crunchyroll”; aba atual destacada.
+Como testar: Alternar entre hub e fila.
+
+========== 317/511 — RN-LISTA-021 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Animes fora da barra
+Descrição: Acesso à lista de animes.
+Pré-condições: Logado.
+Resultado na tela: A lista de animes não aparece na barra lateral; acesso via hub, header “Mais” ou atalhos.
+Como testar: Confirmar links da nav vs entrada por animes.
+
+========== 318/511 — RN-LISTA-030 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Exige login na tela
+Descrição: Renderização client-side.
+Pré-condições: Sessão expirada na página.
+Resultado na tela: Redireciona para Entrar; nada da lista é mostrado.
+Como testar: Abrir rota futura sem cookie.
+
+========== 319/511 — RN-LISTA-031 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Carregar lista pessoal
+Descrição: Dados do usuário.
+Pré-condições: Logado.
+Resultado na tela: Grid de obras conforme filtros; falha de permissão → Entrar.
+Como testar: Aplicar filtros e recarregar.
+
+========== 320/511 — RN-LISTA-032 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Filtro por status
+Descrição: Abas de estado.
+Pré-condições: Lista com itens variados.
+Resultado na tela: Abas: Tudo, Quero assistir, Acompanhando, Favoritos, Assistidos/jogados.
+Como testar: Clicar cada aba.
+
+========== 321/511 — RN-LISTA-033 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Filtro por tipo
+Descrição: Chips de mídia.
+Pré-condições: Lista mista.
+Resultado na tela: Chips: todos, filme, série, anime, jogo restringem o grid.
+Como testar: Filtrar só jogos.
+
+========== 322/511 — RN-LISTA-034 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Itens ocultos
+Descrição: Status “oculto” / não me interessa.
+Pré-condições: Itens marcados como ocultos.
+Resultado na tela: Não aparecem na lista visível.
+Como testar: Marcar “não me interessa” e voltar à lista.
+
+========== 323/511 — RN-LISTA-035 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Status ao vivo
+Descrição: Alterações recentes nos cards.
+Pré-condições: Mudar status em outra tela sem recarregar.
+Resultado na tela: Lista reflete ação mais recente do usuário sobre o card.
+Como testar: Favoritar na home → abrir minha lista.
+
+========== 324/511 — RN-LISTA-036 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Aviso de itens faltantes
+Descrição: Obras salvas fora do catálogo atual.
+Pré-condições: Conta com referências antigas.
+Resultado na tela: Mensagem com quantidade de itens não encontrados no catálogo.
+Como testar: Conta de teste com `missingCount` se existir.
+
+========== 325/511 — RN-LISTA-037 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Listas vazias
+Descrição: Sem itens ou filtro sem match.
+Pré-condições: Lista vazia vs filtros restritivos.
+Resultado na tela: Mensagens diferentes para “nada na lista” vs “nenhum item neste filtro”.
+Como testar: Zerar filtros vs filtro impossível.
+
+========== 326/511 — RN-LISTA-040 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Visitante
+Descrição: Fallback se a página carregar sem sessão.
+Pré-condições: Usuário não logado (cenário raro nesta rota).
+Resultado na tela: CTA “Entrar no Orbe”; em fluxo normal o redirect de RN-LISTA-001 ocorre antes.
+Como testar: Validar RN-LISTA-001; esta regra cobre mensagem na página se aplicável.
+
+========== 327/511 — RN-LISTA-041 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Carregar ao abrir
+Descrição: Lista de animes pessoal.
+Pré-condições: Logado.
+Resultado na tela: Ao entrar na página, lista e estados carregam automaticamente.
+Como testar: Abrir animes logado.
+
+========== 328/511 — RN-LISTA-042 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Última sincronização
+Descrição: Informação de frescor dos dados.
+Pré-condições: Conta com/sem sync prévia.
+Resultado na tela: Data/hora da última sync ou texto de nunca sincronizado.
+Como testar: Conta nova vs conta com extensão.
+
+========== 329/511 — RN-LISTA-043 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Ações da barra
+Descrição: Ferramentas no topo.
+Pré-condições: Página animes.
+Resultado na tela: Botões: atualizar lista, importar backup de arquivo, importar demo (ambiente QA).
+Como testar: Clicar atualizar; importar arquivo demo se disponível.
+
+========== 330/511 — RN-LISTA-044 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Banners informativos
+Descrição: Topo da página.
+Pré-condições: Página carregada.
+Resultado na tela: Banners de offline e opt-in de notificações push quando aplicável.
+Como testar: Simular offline; ver banner.
+
+========== 331/511 — RN-LISTA-045 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Painel da extensão
+Descrição: Integração Crunchyroll.
+Pré-condições: Página animes.
+Resultado na tela: Bloco com status da extensão do navegador e opção de verificar de novo.
+Como testar: Com/sem extensão instalada.
+
+========== 332/511 — RN-LISTA-046 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Filtros da watchlist
+Descrição: Abas locais.
+Pré-condições: Lista com vários estados.
+Resultado na tela: Abas: todos, em andamento (continuar/seguir), começar, terminado, dublagem PT-BR; contagens por aba.
+Como testar: Alternar abas e contar itens.
+
+========== 333/511 — RN-LISTA-047 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Lista vazia orientada
+Descrição: Sem animes na lista.
+Pré-condições: Zero itens.
+Resultado na tela: Mensagem e CTAs diferentes se extensão instalada (conectar) vs não instalada (instalar).
+Como testar: Conta vazia com/sem extensão.
+
+========== 334/511 — RN-LISTA-048 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Remover item
+Descrição: Exclusão de um anime.
+Pré-condições: Item na lista.
+Resultado na tela: Diálogo de confirmação do navegador antes de remover.
+Como testar: Remover um título → cancelar e confirmar.
+
+========== 335/511 — RN-LISTA-049 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Editar progresso
+Descrição: Temporada/episódio assistido.
+Pré-condições: Item com progresso.
+Resultado na tela: Modal de edição; salvar atualiza card.
+Como testar: Editar S2 E5 → salvar.
+
+========== 336/511 — RN-LISTA-050 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Feedback de sync/import
+Descrição: Após atualizar ou importar.
+Pré-condições: Operação concluída.
+Resultado na tela: Banner verde ou vermelho com opção fechar.
+Como testar: Sync com sucesso e com erro.
+
+========== 337/511 — RN-LISTA-051 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Modo offline
+Descrição: Sem rede após já ter dados.
+Pré-condições: Lista já carregada uma vez.
+Resultado na tela: Itens anteriores permanecem visíveis offline quando possível.
+Como testar: Carregar → offline → recarregar.
+
+========== 338/511 — RN-LISTA-052 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Backup antigo
+Descrição: Import de arquivo legado.
+Pré-condições: Arquivo backup formato antigo.
+Resultado na tela: Campos normalizados (identificadores e status antigos mapeados) após import.
+Como testar: Importar backup legado de QA.
+
+========== 339/511 — RN-LISTA-053 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Adicionar do catálogo
+Descrição: Inclusão manual.
+Pré-condições: Logado.
+Resultado na tela: Fluxo “adicionar do catálogo Orbe” refresca a lista após incluir.
+Como testar: Adicionar anime pelo catálogo interno.
+
+========== 340/511 — RN-LISTA-060 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Exige login
+Descrição: Mesmo padrão das demais rotas.
+Pré-condições: Anônimo.
+Resultado na tela: Redirect para Entrar.
+Como testar: Abrir fila sem login.
+
+========== 341/511 — RN-LISTA-061 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Ordem da fila
+Descrição: Prioridade de assistir.
+Pré-condições: Logado com fila populada.
+Resultado na tela: Ordem: **Continuar** → **A seguir** → **Começar** (conforme descrição no cabeçalho da página).
+Como testar: Validar ordem dos blocos/linhas.
+
+========== 342/511 — RN-LISTA-062 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Estados especiais
+Descrição: Espera de dublagem ou episódio.
+Pré-condições: Itens nesses estados.
+Resultado na tela: Rótulos em destaque âmbar para “esperando dublagem” e “esperando episódio”.
+Como testar: Itens de teste nesses estados.
+
+========== 343/511 — RN-LISTA-063 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Dicas de catálogo CR
+Descrição: Texto auxiliar por linha.
+Pré-condições: Item na fila.
+Resultado na tela: Resumo de episódios no ar, dublados PT-BR e fronteira sub/dub quando existir.
+Como testar: Ler hint sob um anime.
+
+========== 344/511 — RN-LISTA-064 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Trilha de áudio
+Descrição: Informação de legenda vs dublagem.
+Pré-condições: Item com metadados.
+Resultado na tela: Linha com temporada/ep e “Trilha PT-BR” ou “Leg/sub”.
+Como testar: Comparar anime dub vs sub.

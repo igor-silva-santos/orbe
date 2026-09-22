@@ -1,0 +1,687 @@
+========== 1/511 — RN-ANIMES-001 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Conteúdo na abertura
+Descrição: Lista e filtros já aparecem ao entrar (com possível segunda atualização logo após).
+Pré-condições: Catálogo acessível.
+Resultado na tela: Cards e selects visíveis após carregar.
+Como testar: Abrir Animes.
+
+========== 2/511 — RN-ANIMES-002 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Falha na abertura
+Descrição: Catálogo indisponível no primeiro momento não quebra a página.
+Pré-condições: Falha simulada.
+Resultado na tela: Grade vazia; filtros vazios; página utilizável.
+Como testar: Ambiente com catálogo indisponível na abertura.
+
+========== 3/511 — RN-ANIMES-003 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Texto do cabeçalho
+Descrição: Título e descrição fixos.
+Pré-condições: Usuário em Animes.
+Resultado na tela: **Animes** + texto sobre temporadas e clássicos.
+Como testar: Ler cabeçalho.
+
+========== 4/511 — RN-ANIMES-004 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Gaveta O que vem aí
+Descrição: Animes futuros em carrossel horizontal.
+Pré-condições: Resumo com **próximos animes**.
+Resultado na tela: Seção **O que vem aí** acima dos filtros.
+Como testar: Ambiente com estreias futuras.
+
+========== 5/511 — RN-ANIMES-005 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Opções dos filtros
+Descrição: Gêneros, anos, formatos, fontes e status vêm do catálogo disponível.
+Pré-condições: Catálogo populado.
+Resultado na tela: Dropdowns preenchidos; gêneros em ordem alfabética; anos do mais recente ao mais antigo; status com rótulo em português quando aplicável.
+Como testar: Abrir cada select e comparar com títulos conhecidos.
+
+========== 6/511 — RN-ANIMES-006 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Valor “Todos”
+Descrição: Cada filtro em “Todos os …” não restringe aquele critério.
+Pré-condições: Todos em todos os selects.
+Resultado na tela: Grade ampla.
+Como testar: Resetar filtros.
+
+========== 7/511 — RN-ANIMES-007 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Recarga ao mudar filtro e na hidratação
+Descrição: A grade recarrega quando a página termina de abrir **e** sempre que um filtro muda (pode haver um loading extra logo após a primeira pintura).
+Pré-condições: Página recém-aberta ou filtro alterado.
+Resultado na tela: Spinner possível logo após abrir; novo spinner ao mudar filtro.
+Como testar: Abrir Animes observando loading; depois trocar gênero.
+
+========== 8/511 — RN-ANIMES-008 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Atualização após sync
+Descrição: Sync do catálogo pode atualizar a grade com a página aberta.
+Pré-condições: Sync disparada.
+Resultado na tela: Lista muda sem F5.
+Como testar: Manter Animes aberta durante sync.
+
+========== 9/511 — RN-ANIMES-009 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Contador = cards da página atual
+Descrição: O texto “X animes encontrados” conta os cards **mostrados**, não necessariamente o total de animes que existem para o filtro no catálogo.
+Pré-condições: Mais de ~48 animes para o filtro.
+Resultado na tela: Contador pode mostrar até ~48 enquanto existem mais no catálogo.
+Como testar: Filtro amplo; comparar contador com total esperado manualmente.
+
+========== 10/511 — RN-ANIMES-010 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Grade, loading e vazio
+Descrição: Spinner central durante busca; grid responsivo; empty state amigável.
+Pré-condições: Filtro impossível ou resultados OK.
+Resultado na tela: **Nenhum anime encontrado** + dica; ou 2–5 colunas de cards ~210px.
+Como testar: Testar filtro vazio e filtro amplo.
+
+========== 11/511 — RN-ANIMES-011 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Lote inicial sem “carregar mais”
+Descrição: A grade mostra um lote inicial (~dezenas); não há botão para próxima página nesta tela.
+Pré-condições: Catálogo grande.
+Resultado na tela: ~48 cards visíveis; sem paginação na UI.
+Como testar: Contar cards com filtros abertos.
+
+========== 12/511 — RN-ANIMES-012 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Exclusão de adulto explícito
+Descrição: Animes marcados como conteúdo adulto não entram na listagem pública desta página.
+Pré-condições: Anime adulto no catálogo.
+Resultado na tela: Ausente em Animes.
+Como testar: Buscar título adulto conhecido.
+
+========== 13/511 — RN-ANIMES-013 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Tags sensíveis ocultas
+Descrição: Títulos com tags como conteúdo adulto explícito (ex.: hentai, ecchi pesado) ficam de fora da listagem padrão.
+Pré-condições: Anime com tag bloqueada.
+Resultado na tela: Não aparece na grade pública.
+Como testar: Validar título de teste com tag sensível.
+
+========== 14/511 — RN-ANIMES-014 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Filtros combinados
+Descrição: Gênero, ano (temporada), formato, fonte e status restringem juntos.
+Pré-condições: Vários filtros ativos.
+Resultado na tela: Só animes que atendem **todos** os critérios.
+Como testar: Combinar gênero + ano + formato.
+
+========== 15/511 — RN-ANIMES-015 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Ordem alfabética padrão
+Descrição: Sem controle “populares” na UI, ordem por título (romaji/título exibido).
+Pré-condições: Filtros em todos.
+Resultado na tela: Ordem A–Z aproximada pelos primeiros cards.
+Como testar: Ler primeiros títulos.
+
+========== 16/511 — RN-ANIMES-016 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Listagem vs home / Hoje
+Descrição: A página Animes é **mais permissiva** que o carrossel Animes da home e que algumas seções da página Hoje (que exigem qualidade mínima).
+Pré-condições: Anime marginal (baixa popularidade, fora de temporada).
+Resultado na tela: Pode aparecer em Animes e faltar na home/Hoje streaming.
+Como testar: Comparar mesmo anime nas três áreas.
+
+========== 17/511 — RN-ANIMES-017 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Conteúdo pode demorar a atualizar
+Descrição: Após mudanças no catálogo, aguardar e recarregar para ver efeito (mesma lógica das outras listagens).
+Pré-condições: Cadastro alterado.
+Resultado na tela: Novidades após reload.
+Como testar: Alterar anime de teste; recarregar.
+
+========== 18/511 — RN-ANIMES-018 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Metadados de filtro completos
+Descrição: Formatos e fontes listam valores realmente usados por algum anime.
+Pré-condições: Catálogo variado.
+Resultado na tela: Sem opções “fantasma” no menu.
+Como testar: Percorrer formatos/fontes.
+
+========== 19/511 — RN-ANIMES-019 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Detalhe ao vivo
+Descrição: Clique no card abre detalhe que pode buscar informações atualizadas (sinopse, episódios, links).
+Pré-condições: Card qualquer.
+Resultado na tela: Modal/página de detalhe; id inválido não abre conteúdo quebrado.
+Como testar: Clicar card; testar título removido.
+
+========== 20/511 — RN-ANIMES-020 ==========
+Tela: página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
+Nome: Próximo episódio (detalhe/agenda)
+Descrição: Informação de próximo episódio aparece no detalhe/card quando existir agenda futura; não é filtro da grade.
+Pré-condições: Anime em exibição semanal.
+Resultado na tela: Contagem ou data de próximo ep no card/detalhe.
+Como testar: Anime em temporada corrente.
+
+========== 21/511 — RN-AUTH-001 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Campos obrigatórios
+Descrição: Formulário de login.
+Pré-condições: Página Entrar aberta.
+Resultado na tela: Email e senha exigidos pelo navegador antes de enviar.
+Como testar: Enviar vazio → validação nativa.
+
+========== 22/511 — RN-AUTH-002 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Sucesso
+Descrição: Credenciais válidas.
+Pré-condições: Conta existente.
+Resultado na tela: Usuário entra; redireciona para página anterior segura ou home; nome aparece no header.
+Como testar: Login OK vindo de Minha Lista.
+
+========== 23/511 — RN-AUTH-003 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Erro genérico
+Descrição: Credenciais inválidas ou falha de rede.
+Pré-condições: Login falha.
+Resultado na tela: Toast “Ocorreu um erro ao tentar fazer login” (ou equivalente).
+Como testar: Senha errada.
+
+========== 24/511 — RN-AUTH-004 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Redirect seguro
+Descrição: Parâmetro de retorno na URL após login.
+Pré-condições: Link de Entrar vindo de página protegida.
+Resultado na tela: Só redireciona para páginas internas do site; não envia o usuário para sites externos.
+Como testar: Após login, confirmar retorno à Minha Lista; tentar manipular URL de retorno externo se QA tiver cenário.
+
+========== 25/511 — RN-AUTH-005 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Mostrar senha
+Descrição: Acessibilidade.
+Pré-condições: Campo senha.
+Resultado na tela: Ícone alterna texto visível/oculto.
+Como testar: Clicar olho no campo senha.
+
+========== 26/511 — RN-AUTH-006 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Ir para cadastro
+Descrição: Rodapé.
+Pré-condições: Página login.
+Resultado na tela: Link para Inscreva-se.
+Como testar: Clicar cadastro.
+
+========== 27/511 — RN-AUTH-010 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Senha mínima
+Descrição: Regra de segurança.
+Pré-condições: Cadastro novo.
+Resultado na tela: Senha com menos de **8** caracteres bloqueada com aviso antes de enviar.
+Como testar: Senha de 7 chars.
+
+========== 28/511 — RN-AUTH-011 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Confirmar senha
+Descrição: Dois campos devem coincidir.
+Pré-condições: Senhas diferentes.
+Resultado na tela: Toast de erro; formulário não envia.
+Como testar: Senha ≠ confirmar.
+
+========== 29/511 — RN-AUTH-012 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Campos obrigatórios
+Descrição: Nome, email, senhas.
+Pré-condições: Formulário.
+Resultado na tela: Nome, email e senhas required.
+Como testar: Enviar incompleto.
+
+========== 30/511 — RN-AUTH-013 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Sucesso
+Descrição: Cadastro aceito.
+Pré-condições: Email novo.
+Resultado na tela: Mesmo fluxo pós-login: sessão ativa + redirect seguro.
+Como testar: Registrar conta QA.
+
+========== 31/511 — RN-AUTH-014 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Erro do servidor
+Descrição: Email duplicado etc.
+Pré-condições: Cadastro recusado.
+Resultado na tela: Toast com mensagem retornada ou genérica.
+Como testar: Registrar email já usado.
+
+========== 32/511 — RN-AUTH-020 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Restaurar ao abrir o site
+Descrição: Usuário já logou antes.
+Pré-condições: Fechar aba e reabrir.
+Resultado na tela: Continua logado se sessão válida; senão volta anônimo.
+Como testar: Login → fechar browser → reabrir.
+
+========== 33/511 — RN-AUTH-021 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Dados após login
+Descrição: Conteúdo personalizado.
+Pré-condições: Login bem-sucedido.
+Resultado na tela: Notificações, interações nos cards e pins de anime da semana carregam.
+Como testar: Ver badge notificação e favoritos.
+
+========== 34/511 — RN-AUTH-022 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Preferências lembradas
+Descrição: Tema e interações locais.
+Pré-condições: Usuário alterou tema ou favoritos.
+Resultado na tela: Tema, favoritos e opção de scroll rápido persistem entre visitas no mesmo navegador.
+Como testar: Mudar tema → F5.
+
+========== 35/511 — RN-AUTH-023 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Sair
+Descrição: Logout pelo menu.
+Pré-condições: Logado.
+Resultado na tela: Limpa usuário, notificações, interações e pins; volta estado de visitante.
+Como testar: Sair → header sem avatar.
+
+========== 36/511 — RN-AUTH-024 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Sessão no navegador
+Descrição: Cookie de sessão.
+Pré-condições: Login em produção.
+Resultado na tela: Sessão mantida por vários dias no mesmo dispositivo (comportamento de “permanecer logado”).
+Como testar: Permanecer logado overnight (QA).
+
+========== 37/511 — RN-AUTH-025 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Tipo de conta
+Descrição: Papel do usuário.
+Pré-condições: Admin vs explorador.
+Resultado na tela: Admin vê ferramentas extras (ex. edição no modal, links no perfil); demais usuários não.
+Como testar: Comparar contas.
+
+========== 38/511 — RN-AUTH-030 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Só para logados
+Descrição: Proteção da rota.
+Pré-condições: Anônimo ou sessão inválida.
+Resultado na tela: Redirect para Entrar; falha ao carregar perfil também redireciona.
+Como testar: Abrir Meu perfil sem login.
+
+========== 39/511 — RN-AUTH-031 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Dados básicos
+Descrição: Identidade na página.
+Pré-condições: Perfil carregado.
+Resultado na tela: Nome, email, papel (Administrador / Explorador); foto só se URL de avatar for de origem permitida.
+Como testar: Perfil com avatar externo válido/inválido.
+
+========== 40/511 — RN-AUTH-032 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Bio
+Descrição: Texto sobre o usuário.
+Pré-condições: Com/sem bio salva.
+Resultado na tela: Bio visível ou placeholder convidando a editar em Configurações.
+Como testar: Conta sem bio.
+
+========== 41/511 — RN-AUTH-033 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Bloco conta
+Descrição: Metadados.
+Pré-condições: Perfil OK.
+Resultado na tela: Email, “membro desde” em pt-BR, visibilidade Público/Privado.
+Como testar: Ler seção conta.
+
+========== 42/511 — RN-AUTH-034 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Atalhos
+Descrição: Navegação rápida.
+Pré-condições: Perfil aberto.
+Resultado na tela: Links para Minha lista e Configurações.
+Como testar: Clicar atalhos.
+
+========== 43/511 — RN-AUTH-035 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Ferramentas admin
+Descrição: Conta administrador.
+Pré-condições: Role admin.
+Resultado na tela: Link para logs de sincronização e ação para baixar log de sync (ferramenta temporária de QA/operações).
+Como testar: Logar admin; usuário comum não vê.
+
+========== 44/511 — RN-AUTH-040 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Só para logados
+Descrição: Mesmo padrão do perfil.
+Pré-condições: Anônimo.
+Resultado na tela: Redirect Entrar se perfil não carrega.
+Como testar: Abrir Configurações sem login.
+
+========== 45/511 — RN-AUTH-041 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Campos editáveis
+Descrição: Formulário.
+Pré-condições: Logado.
+Resultado na tela: Nome, URL do avatar, bio, interruptor perfil público (padrão público se nunca definido).
+Como testar: Alterar nome e salvar.
+
+========== 46/511 — RN-AUTH-042 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Salvar perfil
+Descrição: Envio do formulário.
+Pré-condições: Dados válidos.
+Resultado na tela: Mensagem inline de sucesso ou erro; perfil reflete mudanças.
+Como testar: Salvar bio nova → ver perfil.
+
+========== 47/511 — RN-AUTH-043 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Texto de privacidade
+Descrição: Toggle perfil público.
+Pré-condições: Configurações abertas.
+Resultado na tela: Explica que perfil público afeta visibilidade de lista/favoritos para outros.
+Como testar: Ler copy do toggle.
+
+========== 48/511 — RN-AUTH-044 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Sem troca de senha aqui
+Descrição: Escopo da página.
+Pré-condições: Configurações.
+Resultado na tela: Não há campos de senha ou email nesta tela.
+Como testar: Confirmar ausência de “alterar senha”.
+
+========== 49/511 — RN-AUTH-050 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Minha lista no menu
+Descrição: Usuário logado.
+Pré-condições: Header desktop/mobile.
+Resultado na tela: Entrada para Minha lista no menu do usuário e no mobile.
+Como testar: Abrir menu avatar.
+
+========== 50/511 — RN-AUTH-051 ==========
+Tela: telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
+Nome: Perfil e configurações
+Descrição: Navegação.
+Pré-condições: Logado.
+Resultado na tela: Perfil no menu; Configurações via perfil ou botão dedicado.
+Como testar: Ir perfil → configurações.
+
+========== 51/511 — RN-BUSCA-001 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Abrir e fechar
+Descrição: A busca só aparece quando acionada pelo header.
+Pré-condições: Site carregado.
+Resultado na tela: Ícone de busca abre overlay; fechar remove overlay.
+Como testar: Clicar lupa → fechar com X/Esc/clique fora.
+
+========== 52/511 — RN-BUSCA-002 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Histórico do navegador
+Descrição: Comportamento alinhado ao modal de detalhe.
+Pré-condições: Busca aberta.
+Resultado na tela: Botão voltar do navegador pode fechar a busca; Esc fecha.
+Como testar: Abrir busca → voltar do browser.
+
+========== 53/511 — RN-BUSCA-003 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Limpar ao fechar
+Descrição: Ao sair da busca.
+Pré-condições: Busca usada com texto e filtro.
+Resultado na tela: Campo vazio, categoria “todos”, resultados zerados na próxima abertura.
+Como testar: Buscar algo → fechar → reabrir.
+
+========== 54/511 — RN-BUSCA-004 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Em alta sem digitar
+Descrição: Overlay aberto e campo vazio.
+Pré-condições: Primeira abertura ou após limpar.
+Resultado na tela: Até ~20 títulos “em alta” exibidos como sugestão.
+Como testar: Abrir busca sem digitar.
+
+========== 55/511 — RN-BUSCA-005 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Mínimo de caracteres
+Descrição: Busca efetiva por texto.
+Pré-condições: Digitar 0 ou 1 caractere.
+Resultado na tela: Sem busca remota; resultados de mídia zerados (permanece em alta se vazio).
+Como testar: Digitar “a” e parar.
+
+========== 56/511 — RN-BUSCA-006 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Espera antes de buscar
+Descrição: Evita buscar a cada tecla.
+Pré-condições: Digitar termo com 2+ caracteres.
+Resultado na tela: Resultados atualizam ~350 ms após parar de digitar; buscas antigas não “piscam” por cima das novas.
+Como testar: Digitar rápido “star wars”.
+
+========== 57/511 — RN-BUSCA-007 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Filtro por tipo
+Descrição: Chips ou abas de categoria.
+Pré-condições: Query válida.
+Resultado na tela: Opções: todos, filmes, séries, animes, jogos, pessoas; restringe o que é buscado/exibido.
+Como testar: Buscar termo comum; alternar chips.
+
+========== 58/511 — RN-BUSCA-008 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Resultados de mídia
+Descrição: Várias mídias na mesma busca.
+Pré-condições: Categoria “todos” ou tipo específico.
+Resultado na tela: Filmes, séries, animes e jogos aparecem em grupos conforme filtro.
+Como testar: Termo que existe em mais de um tipo.
+
+========== 59/511 — RN-BUSCA-009 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Pessoas e dubladores
+Descrição: Resultados de elenco.
+Pré-condições: Termo com 2+ chars; categoria todos ou pessoas.
+Resultado na tela: Cards de ator/equipe vs dublador com rótulos distintos.
+Como testar: Buscar nome de ator e de dublador.
+
+========== 60/511 — RN-BUSCA-010 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: O que mostra por categoria
+Descrição: Com texto digitado.
+Pré-condições: Query ≥ 2; chip selecionado.
+Resultado na tela: Chip “pessoas” esconde grids de mídia; demais chips focam o tipo escolhido.
+Como testar: Mesmo termo em “todos” vs “filmes” vs “pessoas”.
+
+========== 61/511 — RN-BUSCA-011 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Seção pessoas
+Descrição: Grid dedicado.
+Pré-condições: Query ≥ 2; todos ou pessoas; há matches.
+Resultado na tela: Bloco de pessoas visível só nessas condições.
+Como testar: Buscar sobrenome comum.
+
+========== 62/511 — RN-BUSCA-012 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Contagem de resultados
+Descrição: Total exibido ao usuário.
+Pré-condições: Busca com resultados.
+Resultado na tela: Número reflete mídias visíveis + pessoas quando a seção pessoas está ativa.
+Como testar: Comparar total ao mudar chip.
+
+========== 63/511 — RN-BUSCA-013 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Ações nos cards
+Descrição: Favoritar e listas na busca.
+Pré-condições: Logado ou anônimo.
+Resultado na tela: Mesmas regras dos cards nas listagens (login exigido onde aplicável).
+Como testar: Favoritar da busca logado.
+
+========== 64/511 — RN-BUSCA-014 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Destaque de foco
+Descrição: Preparado para navegação por teclado.
+Pré-condições: Busca com vários resultados.
+Resultado na tela: Um item pode receber estado visual de foco (navegação completa por teclado pode ser limitada).
+Como testar: Observar foco ao interagir.
+
+========== 65/511 — RN-BUSCA-015 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Estados vazios
+Descrição: Sem sugestões e sem match.
+Pré-condições: Sem trending e sem query; ou query sem resultado.
+Resultado na tela: “Nenhum conteúdo em alta” ou mensagem citando o termo buscado.
+Como testar: Termo inventado “zzzxxyy”.
+
+========== 66/511 — RN-BUSCA-020 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Destino do clique
+Descrição: Ator vs dublador.
+Pré-condições: Resultado de pessoa na busca.
+Resultado na tela: Ator/equipe → página da pessoa; dublador → página do dublador.
+Como testar: Clicar cada tipo.
+
+========== 67/511 — RN-BUSCA-021 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Voltar à busca
+Descrição: Após abrir perfil a partir da busca.
+Pré-condições: Veio da overlay de busca.
+Resultado na tela: Ao voltar da página de pessoa/dublador, a busca pode reabrir (fluxo de retorno).
+Como testar: Busca → pessoa → voltar.
+
+========== 68/511 — RN-BUSCA-022 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Subtítulo do card
+Descrição: Identificação rápida.
+Pré-condições: Cards na grid de pessoas.
+Resultado na tela: “Ator / equipe” ou “Dublador” conforme o caso.
+Como testar: Ler subtítulos na busca.
+
+========== 69/511 — RN-CONT-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Lista inicial
+Descrição: Página aberta sem detalhe selecionado.
+Pré-condições: Acesso pelo menu Continuações.
+Resultado na tela: Carrega listas de **Sagas** e **Universos**; falha de rede → listas vazias sem quebrar a página.
+Como testar: Abrir Continuações offline após visita anterior.
+
+========== 70/511 — RN-CONT-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Detalhe de saga
+Descrição: Saga selecionada na navegação.
+Pré-condições: Saga válida no catálogo.
+Resultado na tela: Mostra timeline da saga; limpa seleção de universo.
+Como testar: Clicar card de saga.
+
+========== 71/511 — RN-CONT-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Detalhe de universo
+Descrição: Universo selecionado.
+Pré-condições: Universo válido.
+Resultado na tela: Mostra universo; força visualização de universos; limpa saga.
+Como testar: Link de universo cinematográfico.
+
+========== 72/511 — RN-CONT-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Abas na listagem
+Descrição: Sem detalhe aberto.
+Pré-condições: Lista carregada.
+Resultado na tela: Alternar “Sagas” vs “Universos cinematográficos”.
+Como testar: Clicar abas.
+
+========== 73/511 — RN-CONT-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Card de saga
+Descrição: Preview na grade.
+Pré-condições: Várias sagas.
+Resultado na tela: Link para detalhe; mostra quantidade de filmes e preview de títulos.
+Como testar: Ler card antes de entrar.
+
+========== 74/511 — RN-CONT-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Card de universo
+Descrição: Preview na grade.
+Pré-condições: Universos com ordem.
+Resultado na tela: Link para detalhe; preview numérico quando há ordem de obras.
+Como testar: Universo com filmes numerados.
+
+========== 75/511 — RN-CONT-007 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Timeline da saga
+Descrição: Detalhe aberto.
+Pré-condições: Saga com filmes.
+Resultado na tela: Linha do tempo cronológica; texto introdutório da saga se existir.
+Como testar: Abrir saga longa (ex. franquia).
+
+========== 76/511 — RN-CONT-008 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Detalhe do universo
+Descrição: Visão mista.
+Pré-condições: Universo com filmes e séries.
+Resultado na tela: Contagens, faixa de anos, descrição, timeline filme+série.
+Como testar: Universo compartilhado conhecido.
+
+========== 77/511 — RN-CONT-009 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Abrir obra
+Descrição: Clique em item da timeline.
+Pré-condições: Item filme ou série.
+Resultado na tela: Abre modal de detalhe com informações mínimas até carregar o restante.
+Como testar: Clicar filme na timeline.
+
+========== 78/511 — RN-CONT-010 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Sem conteúdo
+Descrição: Catálogo vazio.
+Pré-condições: Zero sagas/universos.
+Resultado na tela: Mensagem orientando que dados podem depender de sincronização do catálogo.
+Como testar: Ambiente vazio.
+
+========== 79/511 — RN-CONT-011 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Voltar à lista
+Descrição: Do detalhe.
+Pré-condições: Detalhe de saga ou universo.
+Resultado na tela: Link “Todas as sagas” / “Todos os universos” retorna à listagem geral.
+Como testar: Voltar pelo link.
+
+========== 80/511 — RN-CONT-020 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Abas no modal
+Descrição: Detalhe de filme/série com franquia.
+Pré-condições: Modal aberto.
+Resultado na tela: Mesmas regras das abas RN-MODAL-090 a RN-MODAL-092 (continuação/universo sob demanda).
+Como testar: Abrir filme de saga → abas.
+
+========== 81/511 — RN-DEV-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Empresa inválida
+Descrição: Endereço ou identificador incorreto.
+Pré-condições: Link quebrado ou id inexistente.
+Resultado na tela: Mensagem de erro sem carregamento infinito.
+Como testar: Abrir link de desenvolvedora inválido.
+
+========== 82/511 — RN-DEV-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Lista paginada
+Descrição: Catálogo de jogos da empresa.
+Pré-condições: Empresa com muitos jogos.
+Resultado na tela: Primeira leva (~24 jogos); indicador de mais páginas.
+Como testar: Empresa grande (Nintendo etc.).
+
+========== 83/511 — RN-DEV-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Scroll infinito
+Descrição: Usuário rola até o fim.
+Pré-condições: `hasMore` verdadeiro.
+Resultado na tela: Próxima página carrega automaticamente ao aproximar do fim (~200px).
+Como testar: Rolar até carregar 2ª página.
+
+========== 84/511 — RN-DEV-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Título da página
+Descrição: Nome da empresa.
+Pré-condições: Resposta com nome.
+Resultado na tela: Cabeçalho com nome da desenvolvedora ou fallback “Desenvolvedora”.
+Como testar: Empresa sem nome na resposta.
+
+========== 85/511 — RN-DEV-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Texto informativo
+Descrição: Origem dos dados.
+Pré-condições: Página aberta.
+Resultado na tela: Copy informa a fonte do catálogo de jogos e que rolar carrega mais títulos.
+Como testar: Ler subtítulo.
+
+========== 86/511 — RN-DEV-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Grid de jogos
+Descrição: Cards na página.
+Pré-condições: Jogos listados.
+Resultado na tela: Cada jogo é card padrão com ações de lista/favorito.
+Como testar: Favoritar jogo da grid.
