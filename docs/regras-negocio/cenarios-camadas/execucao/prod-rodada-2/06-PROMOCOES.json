@@ -1,0 +1,252 @@
+{
+  "arquivo": "06-PROMOCOES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior multitask rodada 2 pós-deploy front+back",
+  "cenarios": [
+    {
+      "id": "CT-RN-PROMO-001-F",
+      "regra": "RN-PROMO-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-002-F",
+      "regra": "RN-PROMO-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-003-F",
+      "regra": "RN-PROMO-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-004-F",
+      "regra": "RN-PROMO-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-005-F",
+      "regra": "RN-PROMO-005",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Promoções carrega ao selecionar aba, Grátis pode  ter sido buscado ainda",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-006-F",
+      "regra": "RN-PROMO-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-007-F",
+      "regra": "RN-PROMO-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-008-F",
+      "regra": "RN-PROMO-008",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-009-F",
+      "regra": "RN-PROMO-009",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-010-F",
+      "regra": "RN-PROMO-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-011-F",
+      "regra": "RN-PROMO-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-012-F",
+      "regra": "RN-PROMO-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-013-F",
+      "regra": "RN-PROMO-013",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-014-F",
+      "regra": "RN-PROMO-014",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-015-F",
+      "regra": "RN-PROMO-015",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-016-F",
+      "regra": "RN-PROMO-016",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-017-F",
+      "regra": "RN-PROMO-017",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-018-F",
+      "regra": "RN-PROMO-018",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-019-F",
+      "regra": "RN-PROMO-019",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-020-F",
+      "regra": "RN-PROMO-020",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-021-F",
+      "regra": "RN-PROMO-021",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-022-F",
+      "regra": "RN-PROMO-022",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-023-F",
+      "regra": "RN-PROMO-023",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-024-F",
+      "regra": "RN-PROMO-024",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-025-F",
+      "regra": "RN-PROMO-025",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-026-F",
+      "regra": "RN-PROMO-026",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-027-F",
+      "regra": "RN-PROMO-027",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-028-F",
+      "regra": "RN-PROMO-028",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-029-F",
+      "regra": "RN-PROMO-029",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-030-F",
+      "regra": "RN-PROMO-030",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-031-F",
+      "regra": "RN-PROMO-031",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Não foi possível carregar promoções e jogos grátis, + Tentar novamente",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-032-F",
+      "regra": "RN-PROMO-032",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-033-F",
+      "regra": "RN-PROMO-033",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-034-F",
+      "regra": "RN-PROMO-034",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    },
+    {
+      "id": "CT-RN-PROMO-035-F",
+      "regra": "RN-PROMO-035",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:21Z"
+    }
+  ]
+}
