@@ -40,6 +40,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   /** Filmes e jogos bootstraps quando o hero ou a própria seção estão perto do viewport */
   const filmesBootstrapEnabled = heroVisible || filmesVisible;
   const jogosBootstrapEnabled = heroVisible || jogosVisible;
+  const animesBootstrapEnabled = heroVisible || animesVisible;
 
   useEffect(() => {
     setData(initialData);
@@ -120,7 +121,7 @@ export default function HomeClient({ initialData }: HomeClientProps) {
           <SectionHeading title="Animes" href="/animes" />
           <AnimeCarousel
             initialData={data.animes}
-            bootstrapEnabled={animesVisible}
+            bootstrapEnabled={animesBootstrapEnabled}
           />
         </section>
 

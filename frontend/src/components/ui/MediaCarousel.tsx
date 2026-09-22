@@ -535,7 +535,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
           title={emAltaMode ? undefined : 'Ir para o mês atual'}
         >
           {emAltaMode
-            ? 'Mais esperados'
+            ? 'Em alta'
             : isNavigating
               ? 'Carregando conteúdo...'
               : showPositioningSkeleton
@@ -557,7 +557,8 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
             <button
               onClick={toggleEmAlta}
               className={`${CONTROL_BTN} ${emAltaMode ? 'bg-primary text-primary-foreground border-primary' : ''}`}
-              title={emAltaMode ? 'Ver por data de lançamento' : 'Ver mais esperados'}
+              title={emAltaMode ? 'Ver por data de lançamento' : 'Ver o que está em alta agora'}
+              aria-label={emAltaMode ? 'Ver por data de lançamento' : 'Ver o que está em alta agora'}
               aria-pressed={emAltaMode}
             >
               <TrendingUp className="h-4 w-4" />

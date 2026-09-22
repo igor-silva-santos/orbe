@@ -345,10 +345,23 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
       .catch(() => {});
   }, [isAuthenticated, setAnimeWeeklyPinIds, setAnimeWeeklyPinned]);
 
+  const ANIME_HOME_VIEW_MODE_KEY = 'orbe-anime-home-view-mode';
+
   // Define modo inicial apenas uma vez — não sobrescreve escolha do usuário ao rolar
   useEffect(() => {
     if (initialViewModeApplied.current) return;
     initialViewModeApplied.current = true;
+
+    try {
+      const saved = localStorage.getItem(ANIME_HOME_VIEW_MODE_KEY);
+      if (saved === 'launch' || saved === 'weekly') {
+        setViewMode(saved);
+        setHasSettledInitialView(true);
+        return;
+      }
+    } catch {
+      /* localStorage indisponível */
+    }
 
     const today = new Date();
     const season = getSeason(today);
@@ -671,6 +684,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                   onClick={toggleEmAlta}
                   className={`p-2 rounded-lg border border-border bg-card orbe-text-primary hover:bg-muted transition-colors ${emAltaMode ? 'bg-primary text-primary-foreground border-primary' : ''}`}
                   title={emAltaMode ? 'Ver por temporada' : 'Ver o que está em alta agora'}
+                  aria-label={emAltaMode ? 'Ver por temporada' : 'Ver o que está em alta agora'}
                   aria-pressed={emAltaMode}
                 >
                   <TrendingUp className="h-4 w-4" />
@@ -720,10 +734,18 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                   </>
                 )}
             </div>
-            {!emAltaMode && initialData.length > 0 && (
+            {!emAltaMode && (fetchedAnimes.length > 0 || carouselItems.length > 0) && (
               <button
                   onClick={() => {
-                    setViewMode((prev) => (prev === 'launch' ? 'weekly' : 'launch'));
+                    setViewMode((prev) => {
+                      const next = prev === 'launch' ? 'weekly' : 'launch';
+                      try {
+                        localStorage.setItem(ANIME_HOME_VIEW_MODE_KEY, next);
+                      } catch {
+                        /* ignore */
+                      }
+                      return next;
+                    });
                     lastTitleKeyRef.current = '';
                   }}
                   className="flex items-center gap-2 bg-primary text-primary-foreground font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
