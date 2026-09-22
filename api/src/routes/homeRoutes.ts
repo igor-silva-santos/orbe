@@ -52,7 +52,8 @@ const router = Router();
  * Evita `take` nos mais antigos da janela de 90 dias, que escondia o mês atual.
  */
 const HOMEPAGE_AROUND_PAST = 40;
-const HOMEPAGE_AROUND_FUTURE = 40;
+/** Futuro: horizonte 120d — precisa de take maior que a janela de 1 mês antiga */
+const HOMEPAGE_AROUND_FUTURE = 55;
 
 /** Lançamentos recentes no bootstrap do carrossel (análogo a em cartaz nos filmes) */
 const getRecentCarouselPastStart = (days = 90): Date => {
