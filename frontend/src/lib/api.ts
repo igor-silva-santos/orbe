@@ -160,8 +160,8 @@ export const apiClient = {
     return request('PUT', endpoint, { body: data });
   },
 
-  delete: async (endpoint: string) => {
-    return request('DELETE', endpoint);
+  delete: async (endpoint: string, data?: Record<string, unknown>) => {
+    return request('DELETE', endpoint, { body: data });
   },
 };
 
@@ -322,6 +322,10 @@ export const orbeNerdApi = {
 
   updateUserProfile: async (data: { nome?: string; bio?: string; avatar?: string; preferencias?: any; perfil_publico?: boolean }) => {
     return apiClient.patch('/users/me', data);
+  },
+
+  deleteAccount: async (password: string) => {
+    return apiClient.delete('/users/me', { password });
   },
 
   // Interações do Usuário
