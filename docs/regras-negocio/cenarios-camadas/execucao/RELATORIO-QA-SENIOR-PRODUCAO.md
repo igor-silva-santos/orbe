@@ -18,7 +18,7 @@ Consulte números atualizados em [`relatorio-feliz-producao.html`](./relatorio-f
 
 | Lote | Arquivo | PASS | FAIL | BLOQUEADO |
 | --- | --- | ---: | ---: | ---: |
-| L1 | 01-HOME | 22 | 37 | 18 |
+| L1 | 01-HOME | 22 | 55 | 0 |
 | L2 | 02-FILMES | 16 | 29 | 23 |
 | L3 | 03-SERIES | 3 | 38 | 21 |
 | L4 | 04-ANIMES | 4 | 12 | 4 |
@@ -30,9 +30,9 @@ Consulte números atualizados em [`relatorio-feliz-producao.html`](./relatorio-f
 | L10 | 10-MINHA-LISTA | 14 | 12 | 13 |
 | L11 | 11-AUTH-PERFIL | 11 | 7 | 12 |
 | L12 | 12-OUTRAS-TELAS | 15 | 28 | 6 |
-| | **Total** | **128** | **253** | **130** |
+| | **Total** | **128** | **271** | **112** |
 
-*(Totais desta rodada; validar soma 511 no CSV consolidado.)*
+**511 / 511** cenários Feliz registrados no CSV consolidado.
 
 ## Próximas ações do QA
 
