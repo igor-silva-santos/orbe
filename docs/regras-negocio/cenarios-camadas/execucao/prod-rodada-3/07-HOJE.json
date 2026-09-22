@@ -1,0 +1,175 @@
+{
+  "arquivo": "07-HOJE.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-HOJE-001-F",
+      "regra": "RN-HOJE-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-002-F",
+      "regra": "RN-HOJE-002",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-003-F",
+      "regra": "RN-HOJE-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-004-F",
+      "regra": "RN-HOJE-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-005-F",
+      "regra": "RN-HOJE-005",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-006-F",
+      "regra": "RN-HOJE-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-007-F",
+      "regra": "RN-HOJE-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-008-F",
+      "regra": "RN-HOJE-008",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-009-F",
+      "regra": "RN-HOJE-009",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-010-F",
+      "regra": "RN-HOJE-010",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-011-F",
+      "regra": "RN-HOJE-011",
+      "resultado": "FAIL",
+      "evidencia": "Ausência esperada; termos monitorados: esta semana, pode aparecer só se faltar conteúdo recente",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-012-F",
+      "regra": "RN-HOJE-012",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-013-F",
+      "regra": "RN-HOJE-013",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-014-F",
+      "regra": "RN-HOJE-014",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-015-F",
+      "regra": "RN-HOJE-015",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-016-F",
+      "regra": "RN-HOJE-016",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-017-F",
+      "regra": "RN-HOJE-017",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-018-F",
+      "regra": "RN-HOJE-018",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-019-F",
+      "regra": "RN-HOJE-019",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-020-F",
+      "regra": "RN-HOJE-020",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-021-F",
+      "regra": "RN-HOJE-021",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-022-F",
+      "regra": "RN-HOJE-022",
+      "resultado": "PASS",
+      "evidencia": "Keywords (1/1): ['hoje']",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-023-F",
+      "regra": "RN-HOJE-023",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Mesma mensagem de erro de RN-HOJE-008, quebradas, usuário  vê faixas parciais “quebradas”",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-HOJE-024-F",
+      "regra": "RN-HOJE-024",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    }
+  ]
+}
