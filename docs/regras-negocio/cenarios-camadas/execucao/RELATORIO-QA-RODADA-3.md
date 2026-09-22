@@ -12,7 +12,9 @@
 | FAIL | 253 | 253 | 0 |
 | BLOQUEADO | 130 | 130 | 0 |
 
-O runner heurístico **não mudou** os totais após o deploy do front #143 (esperado: ganhos reais vêm do **QA manual** de carrosséis/mídias e conta logada).
+O runner heurístico **não mudou** os totais após o deploy do front #143 — **0 cenários** diferem da rodada 2 (ver parecer TL).
+
+**TL:** analisar commits e expectativa do PO em [`TL-PARECER-RODADA-2-VS-3-E-COMMITS.md`](./TL-PARECER-RODADA-2-VS-3-E-COMMITS.md).
 
 ## Artefatos
 
