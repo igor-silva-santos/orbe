@@ -18,6 +18,7 @@ Cada documento descreve **uma página ou fluxo visível** do site. As tabelas li
 | [`QA-PROCESSO-CENARIOS.md`](./QA-PROCESSO-CENARIOS.md) | Fluxo: elaboração → revisão par → auditoria TL → cobertura 511/511 |
 | [`cenarios-teste.csv`](./cenarios-teste.csv) | Planilha oficial (1 linha mínima por regra, campos para passos e TL) |
 | [`cenarios-teste.md`](./cenarios-teste.md) | **511 cenários** em Markdown (mesmo conteúdo da planilha) |
+| [`cenarios-camadas/`](./cenarios-camadas/) | **Pacote novo:** 1533 cenários (Feliz + Negativo + Exploratório por regra) |
 | [`cenarios/generated/`](./cenarios/generated/) | Cenários por tela (lotes para multitask) |
 | [`cenarios/EXECUCAO-ROTEIRO.md`](./cenarios/EXECUCAO-ROTEIRO.md) | Ordem de execução e lotes |
 | [`cenarios/EXECUCAO-LOG-20250922.md`](./cenarios/EXECUCAO-LOG-20250922.md) | Log da 1ª rodada de automação/smoke |
