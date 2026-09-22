@@ -8,7 +8,7 @@ Cada documento descreve **uma página ou fluxo visível** do site. As tabelas li
 ## Como usar
 
 1. Leia [`00-CONVENCOES.md`](./00-CONVENCOES.md) (colunas e IDs).
-2. Abra o arquivo da **tela** que você vai testar **ou** importe a planilha [`regras-negocio-qa.csv`](./regras-negocio-qa.csv) (511 regras, UTF-8 com BOM para Excel).
+2. Abra o arquivo da **tela** em [`telas/`](./telas/), o **documento único** [`regras-negocio-qa.md`](./regras-negocio-qa.md) (511 regras em Markdown) **ou** a planilha [`regras-negocio-qa.csv`](./regras-negocio-qa.csv) (UTF-8 com BOM para Excel).
 3. Execute a coluna **Como testar**; confira **Resultado na tela**.
 
 ## Telas documentadas
