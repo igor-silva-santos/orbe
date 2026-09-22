@@ -1,8 +1,8 @@
 # Playbook QA sênior — execução em equipe (antes do teste manual do PO)
 
-**Versão:** 1.0 · **2026-09-22  
+**Versão:** 1.1 · **2026-09-22**  
 **Produção:** https://orbe-seven.vercel.app  
-**Ordem de gate:** QA time (cenários Feliz + carrossel) → **só então** teste manual do Igor / PO.
+**Ordem de gate:** QA time (cenários + **carrosséis e mídias nos carrosséis**) → **só então** teste manual do Igor / PO.
 
 ---
 
@@ -10,81 +10,89 @@
 
 O produto **não envia e-mail de confirmação** no cadastro. Cada QA sênior:
 
-1. Cria **a própria conta** em produção (Inscreva-se) com e-mail que o QA controla (pode ser alias do time).
-2. **Não** commitar senhas no repositório; registrar só “conta QA-N criada em DATA” no canal interno do time.
-3. Usar a mesma conta para cenários **Feliz** que exigem login (`10-MINHA-LISTA`, `11-AUTH-PERFIL`, pins, continuar assistindo, etc.).
-4. Atualizar execução: onde o runner marcou `BLOQUEADO` por “sessão anônima”, reexecutar **manual** ou com script após login.
-
-Isso destrava a maior parte dos **~24 BLOQUEADO** por auth e vários FAIL de interação em conta.
+1. Cria **a própria conta** em produção (Inscreva-se) com e-mail que o QA controla.
+2. **Não** commitar senhas no repositório.
+3. Usar a conta nos cenários Feliz que exigem login e ao validar carrosséis logado (continuar assistindo, pins de anime, etc.).
+4. Reexecutar manualmente o que o runner marcou `BLOQUEADO` por sessão anônima.
 
 ---
 
-## 2. Auditoria obrigatória — 1 mês do carrossel (Filmes)
+## 2. Responsabilidade do QA: carrosséis **e** mídias exibidas
 
-Além dos `CT-*-F` da planilha, **cada QA** que pegar a tela **Filmes** (home e/ou `/filmes`) deve:
+**Quem testa carrossel e cada mídia que aparece nele é o próprio time QA** — não o runner automático, não o PO nesta fase.
 
-### Escopo mínimo
+### 2.1 O que é “testar o carrossel”
 
-| Item | O quê |
+Para cada faixa na **home** (e equivalentes em `/filmes`, `/series`, `/animes`, `/jogos` quando a regra mandar):
+
+| Verificação | Exemplos de regra |
 | --- | --- |
-| **Janela** | **Pelo menos 1 mês civil** visível no carrossel da home (faixa Filmes) — ex.: rolar até fixar um mês (ex. “Março 2026”) e listar **todos os títulos** exibidos naquele mês. |
-| **Registro** | Planilha ou bloco no relatório da tela: `Título` · `Data no card` · `Deve estar? (S/N)` · `Motivo (regra RN-*)` · `Evidência (print ou ID)` |
-| **Critério “deve estar?”** | Usar inventário `regras-negocio-qa.md` / CSV — curadoria, em cartaz, duração na home, nota com muitos votos, etc. |
-| **Fora do lugar** | Se o título **não** deveria aparecer → marcar **FAIL de produto** com `ID_Regra` (ex. `RN-FILMES-041`); se **deveria** e não está → idem. |
+| Controles (botões, em alta, calendário/lista em animes, rolagem rápida, filtros) | `RN-HOME-EA-*`, `RN-HOME-AC-*`, `RN-HOME-TL-*` |
+| Título do bloco / mês / temporada | `RN-HOME-AC-003`, posicionamento inicial |
+| Navegação (setas, loop, ir ao “hoje”) | `RN-HOME-TL-*` |
+| Link do título da faixa → listagem | `RN-HOME-002` |
+| Comportamento com e sem login | `RN-HOME-CA-*` |
 
-### Repetir por mídia (divisão do time)
+Registrar **PASS/FAIL** por comportamento observado (print ou passo curto), citando `RN-*`.
 
-| QA (preencher nome) | Faixa / rota | Mês auditado |
-| --- | --- | --- |
-| | Home — carrossel **Filmes** | |
-| | Home — **Séries** (1 mês) | |
-| | Home — **Animes** (1 temporada ou mês, conforme modo) | |
-| | Home — **Jogos** (1 mês ou “em alta”, conforme regra) | |
+### 2.2 O que é “testar as mídias no carrossel”
 
-**Mínimo do time:** pelo menos **1 mês de Filmes** auditado por **cada** QA que tiver lote Filmes/Home; TL consolida sem duplicar o mesmo mês.
+Para **cada card visível** no período auditado (mínimo **1 mês** por faixa de Filmes que o QA assumir; demais faixas conforme divisão do time):
 
-### Modelo de linha (copiar para Excel/Notion)
+| Verificação | O quê anotar |
+| --- | --- |
+| Identificação | Título (e data no card, se houver) |
+| **Deve estar aqui? (S/N)** | Confrontar `regras-negocio-qa.md` / CSV (curadoria, nota, cartaz, duração home, etc.) |
+| Se **N** | Qual `RN-*` explica a exclusão esperada; se ainda aparece → **bug** |
+| Se **S** mas sumiu noutra área | Comparar home vs listagem quando a regra exige (`RN-FILMES-053`, `RN-ANIMES-016`, …) |
+| Card íntegro | Pôster, texto legível, clique abre modal (amostra por faixa) |
+
+**Planilha:** [`QA-AUDITORIA-CARROSSEL-TEMPLATE.csv`](./QA-AUDITORIA-CARROSSEL-TEMPLATE.csv) — uma linha por **mídia** (e linhas extras para comportamento do carrossel se preferir aba separada).
+
+### 2.3 Divisão sugerida entre QAs
+
+| Faixa / carrossel | QA (nome) | Mês ou janela auditada | Arquivo inventário |
+| --- | --- | --- | --- |
+| Home — **Filmes** | | ≥ 1 mês civil | `01-HOME` + `02-FILMES` |
+| Home — **Séries** | | ≥ 1 mês | `01-HOME` + `03-SERIES` |
+| Home — **Animes** | | 1 temporada ou agenda semanal (modo atual) | `01-HOME` + `04-ANIMES` |
+| Home — **Jogos** | | ≥ 1 mês ou modo em alta | `01-HOME` + `05-JOGOS` |
+
+TL evita dois QAs no mesmo mês da mesma faixa sem combinar; consolida CSVs em um relatório por faixa.
+
+### 2.4 Modelo de linha (mídia)
 
 ```
-Mês: 2026-03 | Tela: Home > Filmes | Título: Exemplo | Data card: 2026-03-15 | Deve estar: N | Regra: RN-FILMES-041 | Notas: nota baixa com muitos votos | Print: ...
+Faixa: Filmes | Mês: 2026-03 | Título: … | Data card: … | Deve estar: N | RN-FILMES-041 | Carrossel OK: S | Notas: …
 ```
 
 ---
 
 ## 3. Ordem de execução (time QA)
 
-```mermaid
-flowchart TD
-  A[Criar conta QA em prod] --> B[Executar CT-*-F da divisão de tela]
-  B --> C[Auditoria 1 mês carrossel na sua área]
-  C --> D[Preencher backlog / log PASS FAIL]
-  D --> E[Revisor par QA]
-  E --> F[TL audita ruído vs bug]
-  F --> G{Time QA verde?}
-  G -->|Sim| H[Teste manual Igor / PO]
-  G -->|Não| B
-```
+1. Criar conta em prod.
+2. Cenários **Feliz** (`CT-*-F`) da divisão de tela.
+3. **Carrossel da faixa** (comportamento §2.1).
+4. **Listagem das mídias** na janela acordada (§2.2).
+5. Camadas Negativo / Exploratório na mesma área.
+6. Revisor par → TL ([`QA-TL-RUIDO-VS-BUG.md`](./QA-TL-RUIDO-VS-BUG.md)) → liberar PO.
 
-1. **Feliz** por `ID_Cenario` (`cenarios-teste-camadas.csv`, camada Feliz).
-2. **Auditoria de carrossel** (§2) — não substitui o Feliz; complementa regras de curadoria.
-3. **Negativo + Exploratório** conforme pacote camadas, após Feliz da mesma área.
-4. Só com **consenso TL** “rodada do time OK” → avisar PO para teste manual.
+O runner (`executar-feliz-multitask.py`) é **apoio**; **não** substitui §2.1 e §2.2.
 
 ---
 
 ## 4. O que registrar
 
-| Artefato | Quem |
+| Artefato | Conteúdo |
 | --- | --- |
-| `relatorio-feliz-prod-rodada-*.csv` / JSON em `execucao/` | Runner + complemento manual |
-| `DEV-BACKLOG-FAIL-RODADA-2.csv` — colunas `Status_DEV`, evidência | QA marca; DEV só entra em bug confirmado |
-| **Anexo:** `QA-AUDITORIA-CARROSSEL-<TELA>-<MES>.csv`** (criar por QA) | Lista de títulos do mês |
-| TL: [`QA-TL-RUIDO-VS-BUG.md`](./QA-TL-RUIDO-VS-BUG.md) | Separação oficial |
+| `QA-AUDITORIA-CARROSSEL-<faixa>-<mes>.csv` | Mídias + deve estar S/N |
+| Log opcional `QA-CARROSSEL-COMPORTAMENTO-<faixa>.md` | Botões, em alta, scroll, mês |
+| `DEV-BACKLOG-FAIL-RODADA-2.csv` | Só FAIL **confirmados** pelo QA (TL filtra ruído) |
 
 ---
 
 ## 5. Referências
 
-- Cenários: `cenarios-teste-camadas.csv` · `generated/*.md`
-- Retorno DEV: [`DEV-RETORNO-QA-FAIL.md`](./DEV-RETORNO-QA-FAIL.md)
-- Processo geral: `../QA-PROCESSO-CENARIOS.md` (pasta `regras-negocio`)
+- Regras: `regras-negocio-qa.md` · `telas/01-HOME.md`
+- Cenários: `cenarios-teste-camadas.csv`
+- DEV: [`DEV-RETORNO-QA-FAIL.md`](./DEV-RETORNO-QA-FAIL.md)

@@ -3,6 +3,8 @@
 **Público:** TL sênior QA (auditoria antes do teste manual do PO).  
 **Princípio:** só escala **bug de produto** para DEV com reprodução humana e `ID_Regra` citada.
 
+**Carrosséis e mídias nos carrosséis** são validados **pelo QA humano** (playbook §2) — o runner não substitui essa etapa. FAIL de keyword sem auditoria de card/mês = ruído até o QA registrar S/N na planilha de carrossel.
+
 ---
 
 ## 1. Matriz de decisão
