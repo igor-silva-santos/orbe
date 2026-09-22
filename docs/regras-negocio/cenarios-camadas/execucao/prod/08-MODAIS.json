@@ -1,0 +1,343 @@
+{
+  "arquivo": "08-MODAIS.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA multitask sequencial",
+  "cenarios": [
+    {
+      "id": "CT-RN-MODAL-001-F",
+      "regra": "RN-MODAL-001",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Overlay e conteúdo aparecem, tipos  suportados  abrem modal",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-002-F",
+      "regra": "RN-MODAL-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-003-F",
+      "regra": "RN-MODAL-003",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-004-F",
+      "regra": "RN-MODAL-004",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: raramente tela de erro se  houver nenhum dado",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-005-F",
+      "regra": "RN-MODAL-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-006-F",
+      "regra": "RN-MODAL-006",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: A página atrás  rola (scroll bloqueado)",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-007-F",
+      "regra": "RN-MODAL-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-008-F",
+      "regra": "RN-MODAL-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-009-F",
+      "regra": "RN-MODAL-009",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-010-F",
+      "regra": "RN-MODAL-010",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Botão de editar visível, alterna para formulários de curadoria, visitante/usuário comum  vê editar",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-011-F",
+      "regra": "RN-MODAL-011",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-012-F",
+      "regra": "RN-MODAL-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-013-F",
+      "regra": "RN-MODAL-013",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-020-F",
+      "regra": "RN-MODAL-020",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-021-F",
+      "regra": "RN-MODAL-021",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-022-F",
+      "regra": "RN-MODAL-022",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-023-F",
+      "regra": "RN-MODAL-023",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-024-F",
+      "regra": "RN-MODAL-024",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-025-F",
+      "regra": "RN-MODAL-025",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-026-F",
+      "regra": "RN-MODAL-026",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Botão visível só enquanto a estreia ainda  passou",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-030-F",
+      "regra": "RN-MODAL-030",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Abre modal de avaliação, desabilitado se a obra ainda  lançou",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-031-F",
+      "regra": "RN-MODAL-031",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-032-F",
+      "regra": "RN-MODAL-032",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Opções do tipo gostei / amei /  gostei, campo de texto opcional",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-033-F",
+      "regra": "RN-MODAL-033",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-040-F",
+      "regra": "RN-MODAL-040",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-041-F",
+      "regra": "RN-MODAL-041",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-042-F",
+      "regra": "RN-MODAL-042",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-043-F",
+      "regra": "RN-MODAL-043",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Prioriza trailer oficial, se primeiro trailer, se outro vídeo",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-044-F",
+      "regra": "RN-MODAL-044",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-045-F",
+      "regra": "RN-MODAL-045",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-050-F",
+      "regra": "RN-MODAL-050",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-051-F",
+      "regra": "RN-MODAL-051",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-052-F",
+      "regra": "RN-MODAL-052",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: calendário pode existir por outros fluxos conforme produto",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-053-F",
+      "regra": "RN-MODAL-053",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-060-F",
+      "regra": "RN-MODAL-060",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Texto limpo, ( informado), se ausente, “( informado)”",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-061-F",
+      "regra": "RN-MODAL-061",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-062-F",
+      "regra": "RN-MODAL-062",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-063-F",
+      "regra": "RN-MODAL-063",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-064-F",
+      "regra": "RN-MODAL-064",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-070-F",
+      "regra": "RN-MODAL-070",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-071-F",
+      "regra": "RN-MODAL-071",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-072-F",
+      "regra": "RN-MODAL-072",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-080-F",
+      "regra": "RN-MODAL-080",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-081-F",
+      "regra": "RN-MODAL-081",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-082-F",
+      "regra": "RN-MODAL-082",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-090-F",
+      "regra": "RN-MODAL-090",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-091-F",
+      "regra": "RN-MODAL-091",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T18:43:45Z"
+    },
+    {
+      "id": "CT-RN-MODAL-092-F",
+      "regra": "RN-MODAL-092",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Continuação, Aba padrão “Continuação” se houver sequência, Universo",
+      "testado_em": "2026-09-22T18:43:45Z"
+    }
+  ]
+}

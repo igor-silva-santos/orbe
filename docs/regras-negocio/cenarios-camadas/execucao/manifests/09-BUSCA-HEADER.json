@@ -1,0 +1,277 @@
+{
+  "arquivo": "09-BUSCA-HEADER.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 30,
+  "cenarios": [
+    {
+      "id": "CT-RN-BUSCA-001-F",
+      "regra": "RN-BUSCA-001",
+      "titulo": "Feliz: Abrir e fechar",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Clicar lupa → fechar com X/Esc/clique fora.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ícone de busca abre overlay; fechar remove overlay.",
+      "pre": "Site carregado.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-002-F",
+      "regra": "RN-BUSCA-002",
+      "titulo": "Feliz: Histórico do navegador",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Abrir busca → voltar do browser.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão voltar do navegador pode fechar a busca; Esc fecha.",
+      "pre": "Busca aberta.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-003-F",
+      "regra": "RN-BUSCA-003",
+      "titulo": "Feliz: Limpar ao fechar",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Buscar algo → fechar → reabrir.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Campo vazio, categoria “todos”, resultados zerados na próxima abertura.",
+      "pre": "Busca usada com texto e filtro.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-004-F",
+      "regra": "RN-BUSCA-004",
+      "titulo": "Feliz: Em alta sem digitar",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Abrir busca sem digitar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até ~20 títulos “em alta” exibidos como sugestão.",
+      "pre": "Primeira abertura ou após limpar.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-005-F",
+      "regra": "RN-BUSCA-005",
+      "titulo": "Feliz: Mínimo de caracteres",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Digitar “a” e parar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem busca remota; resultados de mídia zerados (permanece em alta se vazio).",
+      "pre": "Digitar 0 ou 1 caractere.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-006-F",
+      "regra": "RN-BUSCA-006",
+      "titulo": "Feliz: Espera antes de buscar",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Digitar rápido “star wars”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Resultados atualizam ~350 ms após parar de digitar; buscas antigas não “piscam” por cima das novas.",
+      "pre": "Digitar termo com 2+ caracteres.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-007-F",
+      "regra": "RN-BUSCA-007",
+      "titulo": "Feliz: Filtro por tipo",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Buscar termo comum.\n3. Alternar chips.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Opções: todos, filmes, séries, animes, jogos, pessoas; restringe o que é buscado/exibido.",
+      "pre": "Query válida.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-008-F",
+      "regra": "RN-BUSCA-008",
+      "titulo": "Feliz: Resultados de mídia",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Termo que existe em mais de um tipo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filmes, séries, animes e jogos aparecem em grupos conforme filtro.",
+      "pre": "Categoria “todos” ou tipo específico.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-009-F",
+      "regra": "RN-BUSCA-009",
+      "titulo": "Feliz: Pessoas e dubladores",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Buscar nome de ator e de dublador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards de ator/equipe vs dublador com rótulos distintos.",
+      "pre": "Termo com 2+ chars; categoria todos ou pessoas.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-010-F",
+      "regra": "RN-BUSCA-010",
+      "titulo": "Feliz: O que mostra por categoria",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Mesmo termo em “todos” vs “filmes” vs “pessoas”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Chip “pessoas” esconde grids de mídia; demais chips focam o tipo escolhido.",
+      "pre": "Query ≥ 2; chip selecionado.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-011-F",
+      "regra": "RN-BUSCA-011",
+      "titulo": "Feliz: Seção pessoas",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Buscar sobrenome comum.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Bloco de pessoas visível só nessas condições.",
+      "pre": "Query ≥ 2; todos ou pessoas; há matches.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-012-F",
+      "regra": "RN-BUSCA-012",
+      "titulo": "Feliz: Contagem de resultados",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Comparar total ao mudar chip.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Número reflete mídias visíveis + pessoas quando a seção pessoas está ativa.",
+      "pre": "Busca com resultados.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-013-F",
+      "regra": "RN-BUSCA-013",
+      "titulo": "Feliz: Ações nos cards",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Favoritar da busca logado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesmas regras dos cards nas listagens (login exigido onde aplicável).",
+      "pre": "Logado ou anônimo.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-014-F",
+      "regra": "RN-BUSCA-014",
+      "titulo": "Feliz: Destaque de foco",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Observar foco ao interagir.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Um item pode receber estado visual de foco (navegação completa por teclado pode ser limitada).",
+      "pre": "Busca com vários resultados.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-015-F",
+      "regra": "RN-BUSCA-015",
+      "titulo": "Feliz: Estados vazios",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Termo inventado “zzzxxyy”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "“Nenhum conteúdo em alta” ou mensagem citando o termo buscado.",
+      "pre": "Sem trending e sem query; ou query sem resultado.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-020-F",
+      "regra": "RN-BUSCA-020",
+      "titulo": "Feliz: Destino do clique",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Clicar cada tipo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ator/equipe → página da pessoa; dublador → página do dublador.",
+      "pre": "Resultado de pessoa na busca.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-021-F",
+      "regra": "RN-BUSCA-021",
+      "titulo": "Feliz: Voltar à busca",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Busca → pessoa → voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao voltar da página de pessoa/dublador, a busca pode reabrir (fluxo de retorno).",
+      "pre": "Veio da overlay de busca.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-BUSCA-022-F",
+      "regra": "RN-BUSCA-022",
+      "titulo": "Feliz: Subtítulo do card",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Ler subtítulos na busca.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "“Ator / equipe” ou “Dublador” conforme o caso.",
+      "pre": "Cards na grid de pessoas.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-001-F",
+      "regra": "RN-HEADER-001",
+      "titulo": "Feliz: Links principais (desktop)",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Redimensionar janela.\n3. Clicar cada link.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Links visíveis: Filmes, Séries, Animes, Jogos, Continuações, Hoje.",
+      "pre": "Janela larga (layout desktop).",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-002-F",
+      "regra": "RN-HEADER-002",
+      "titulo": "Feliz: Menu “Mais”",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Abrir “Mais” e seguir um item.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Dropdown: Promoções, Eventos, Jogos em Alta, Premiações, Minha Lista (animes), Extensão CR.",
+      "pre": "Desktop.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-003-F",
+      "regra": "RN-HEADER-003",
+      "titulo": "Feliz: Item ativo",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Estar em Promoções e olhar o header.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link da rota atual com estilo primário/negrito; “Mais” destaca se algum sublink está ativo.",
+      "pre": "Navegar entre seções.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-004-F",
+      "regra": "RN-HEADER-004",
+      "titulo": "Feliz: Abrir busca",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Mobile: abrir menu → busca.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre overlay; fecha menu mobile se estiver aberto.",
+      "pre": "Qualquer página.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-005-F",
+      "regra": "RN-HEADER-005",
+      "titulo": "Feliz: Tema claro/escuro",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Clicar sol/lua.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ícone alterna tema; cores do site mudam.",
+      "pre": "Header visível.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-006-F",
+      "regra": "RN-HEADER-006",
+      "titulo": "Feliz: Notificações",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Conta com notificações pendentes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre painel/modal de notificações; badge com contagem (máx. exibição “9+”).",
+      "pre": "Conta com ou sem notificações.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-007-F",
+      "regra": "RN-HEADER-007",
+      "titulo": "Feliz: Menu do usuário logado",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Logar → menu avatar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Opções: Minha lista, Meu perfil, Sair (volta à home após sair).",
+      "pre": "Sessão ativa.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-008-F",
+      "regra": "RN-HEADER-008",
+      "titulo": "Feliz: Visitante (desktop)",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Anônimo desktop.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Links Entrar e Inscreva-se visíveis.",
+      "pre": "Anônimo; layout desktop/tablet largo.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-009-F",
+      "regra": "RN-HEADER-009",
+      "titulo": "Feliz: Menu mobile",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Testar em viewport mobile.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Hambúrguer com catálogo, “descobrir” (itens do Mais) e bloco login/lista/perfil.",
+      "pre": "Layout mobile.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-010-F",
+      "regra": "RN-HEADER-010",
+      "titulo": "Feliz: Fechar menus",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Abrir dropdown → clicar página.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Fecha ao clicar fora; overlay escuro fecha menu do usuário.",
+      "pre": "Dropdown “Mais” ou menu usuário aberto.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-020-F",
+      "regra": "RN-HEADER-020",
+      "titulo": "Feliz: Resultado abre detalhe",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Buscar filme → abrir card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Clicar card abre modal de detalhe e fecha a busca.",
+      "pre": "Busca aberta com resultados.",
+      "tela": "Busca e cabeçalho"
+    },
+    {
+      "id": "CT-RN-HEADER-021-F",
+      "regra": "RN-HEADER-021",
+      "titulo": "Feliz: Retorno da página pessoa",
+      "passos": "1. Abrir o site e navegar até **Busca e cabeçalho**.\n2. Executar RN-BUSCA-021 + voltar do browser ou link voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Busca reabre quando o site guardou “voltar para busca”.",
+      "pre": "Fluxo busca → página pessoa → voltar.",
+      "tela": "Busca e cabeçalho"
+    }
+  ]
+}

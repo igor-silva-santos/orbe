@@ -1,0 +1,619 @@
+{
+  "arquivo": "02-FILMES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 68,
+  "cenarios": [
+    {
+      "id": "CT-RN-FILMES-001-F",
+      "regra": "RN-FILMES-001",
+      "titulo": "Feliz: Conteúdo na primeira abertura",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir a página Filmes em aba nova.\n3. Observar grade e selects antes de interagir.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao entrar em Filmes, cards e menus de filtro aparecem (ou estado vazio amigável se não houver dados).",
+      "pre": "Site acessível; catálogo com filmes.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-002-F",
+      "regra": "RN-FILMES-002",
+      "titulo": "Feliz: Atualização gradual do catálogo",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Registrar um filme de teste.\n3. Aguardar ~5 min.\n4. Recarregar Filmes.\n5. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Após aguardar alguns minutos e recarregar Filmes, novos títulos ou datas podem surgir.",
+      "pre": "Catálogo alterado recentemente no ambiente de teste.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-003-F",
+      "regra": "RN-FILMES-003",
+      "titulo": "Feliz: Falha no carregamento inicial",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Ambiente com catálogo indisponível no primeiro acesso.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Página abre sem erro do navegador; grade vazia; filtros sem opções ou vazios; mensagem de “nenhum filme” se aplicável.",
+      "pre": "Simular indisponibilidade temporária do catálogo na abertura.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-004-F",
+      "regra": "RN-FILMES-004",
+      "titulo": "Feliz: Texto do cabeçalho",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Ler o cabeçalho da página.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título **Filmes** e texto sobre cartaz, lançamentos e clássicos no topo.",
+      "pre": "Usuário na página Filmes.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-005-F",
+      "regra": "RN-FILMES-005",
+      "titulo": "Feliz: Gaveta O que vem aí",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Ambiente com lançamentos futuros.\n3. Abrir Filmes.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção colapsável **O que vem aí** com carrossel horizontal de cards de filme.",
+      "pre": "Resumo de eventos do site inclui filmes em **próximos lançamentos**.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-006-F",
+      "regra": "RN-FILMES-006",
+      "titulo": "Feliz: Ações nos cards da gaveta",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Favoritar um filme na gaveta.\n3. Recarregar logado.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Menu e estados de lista refletem na conta quando logado.",
+      "pre": "Gaveta visível; usuário logado ou visitante conforme regra do card.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-007-F",
+      "regra": "RN-FILMES-007",
+      "titulo": "Feliz: Gaveta Em cartaz",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Ambiente com destaques em cartaz.\n3. Abrir Filmes.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **Em cartaz** com ícone de claquete e carrossel horizontal.",
+      "pre": "Resumo de eventos traz filmes em **destaques recentes / em cartaz**.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-008-F",
+      "regra": "RN-FILMES-008",
+      "titulo": "Feliz: Gavetas carregam após a página",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir Filmes e observar ordem de aparecimento dos blocos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Primeiro aparecem filtros e grade; em seguida as gavetas (se houver conteúdo).",
+      "pre": "Página Filmes recém-aberta.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-009-F",
+      "regra": "RN-FILMES-009",
+      "titulo": "Feliz: Atalho Todos os Filmes",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Clicar **Todos os Filmes**.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão **Todos os Filmes** destacado; grade ampla (ordenada por título).",
+      "pre": "Qualquer outro atalho ativo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-010-F",
+      "regra": "RN-FILMES-010",
+      "titulo": "Feliz: Atalho Em Cartaz",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Clicar **Em Cartaz**.\n3. Conferir etiquetas nos cards.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade restrita a títulos em cartaz; contador atualizado.",
+      "pre": "Catálogo com filmes em cartaz e outros.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-011-F",
+      "regra": "RN-FILMES-011",
+      "titulo": "Feliz: Atalho Em Breve",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Clicar **Em Breve**.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só filmes em breve na grade.",
+      "pre": "Filmes em breve e já lançados no catálogo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-012-F",
+      "regra": "RN-FILMES-012",
+      "titulo": "Feliz: Atalho Populares",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Alternar **Todos** e **Populares** e comparar ordem.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ordem diferente de **Todos**; títulos mais populares no topo.",
+      "pre": "Vários filmes com popularidade distinta.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-013-F",
+      "regra": "RN-FILMES-013",
+      "titulo": "Feliz: Destaque visual do atalho",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Clicar cada atalho e observar estilo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão ativo com cor primária; demais em fundo neutro.",
+      "pre": "Dois ou mais atalhos disponíveis.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-014-F",
+      "regra": "RN-FILMES-014",
+      "titulo": "Feliz: Gênero “Todos”",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Escolher todos os gêneros após filtrar um gênero específico.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade ampla dentro do atalho ativo.",
+      "pre": "Select em **Todos os Gêneros**.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-015-F",
+      "regra": "RN-FILMES-015",
+      "titulo": "Feliz: Nome do gênero no menu",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir select de gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ex.: “action” exibido como “Action”.",
+      "pre": "Lista de gêneros populada.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-016-F",
+      "regra": "RN-FILMES-016",
+      "titulo": "Feliz: Ano “Todos”",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Resetar ano para todos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filmes de vários anos na grade.",
+      "pre": "**Todos os Anos** selecionado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-017-F",
+      "regra": "RN-FILMES-017",
+      "titulo": "Feliz: Anos no dropdown",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar anos do menu com filmes conhecidos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Select de ano sem duplicatas; ordem decrescente.",
+      "pre": "Catálogo com vários anos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-018-F",
+      "regra": "RN-FILMES-018",
+      "titulo": "Feliz: Meses em português",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir filtro de mês.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Doze meses nomeados corretamente.",
+      "pre": "Select de mês aberto.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-019-F",
+      "regra": "RN-FILMES-019",
+      "titulo": "Feliz: Mês “Todos”",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Selecionar todos os meses.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Qualquer mês dentro dos demais filtros.",
+      "pre": "**Todos os Meses**.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-020-F",
+      "regra": "RN-FILMES-020",
+      "titulo": "Feliz: Status traduzido",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir filtro de status.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Labels legíveis (ex.: lançado, em produção).",
+      "pre": "Select de status populado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-021-F",
+      "regra": "RN-FILMES-021",
+      "titulo": "Feliz: Filtro por plataforma",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar Netflix.\n3. Abrir detalhe de um card.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só cards com aquela plataforma nos metadados visíveis.",
+      "pre": "Netflix (ou outra) selecionada.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-022-F",
+      "regra": "RN-FILMES-022",
+      "titulo": "Feliz: Plataformas ordenadas",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir **Todas as Plataformas**.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista A–Z no dropdown.",
+      "pre": "Várias plataformas no catálogo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-023-F",
+      "regra": "RN-FILMES-023",
+      "titulo": "Feliz: Filtros sempre clicáveis",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Usar todos os filtros em sequência.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Selects não ficam permanentemente desabilitados.",
+      "pre": "Página Filmes estável.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-024-F",
+      "regra": "RN-FILMES-024",
+      "titulo": "Feliz: Primeira visita sem “piscar” desnecessário",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir Filmes e aguardar sem tocar filtros.\n3. Observar spinner.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Conteúdo estável logo após abrir; novo carregamento só ao mudar filtro/atalho.",
+      "pre": "Primeira visita com catálogo OK.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-025-F",
+      "regra": "RN-FILMES-025",
+      "titulo": "Feliz: Mudança de filtro recarrega",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Trocar gênero ou ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner breve; nova lista e contador.",
+      "pre": "Filtro ou atalho alterado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-026-F",
+      "regra": "RN-FILMES-026",
+      "titulo": "Feliz: Atualização após sync do site",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Manter Filmes aberta durante sync no ambiente de teste.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards ou contagem mudam sem F5 manual.",
+      "pre": "Sync disparada com Filmes aberta.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-027-F",
+      "regra": "RN-FILMES-027",
+      "titulo": "Feliz: Spinner ao filtrar",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Trocar filtro e observar loading.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner no lugar do grid até concluir.",
+      "pre": "Filtro alterado com rede normal.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-028-F",
+      "regra": "RN-FILMES-028",
+      "titulo": "Feliz: Contador com total global",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtro amplo.\n3. Ler contador vs cards na tela.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contador alto (ex.: 200) com grade mostrando um subconjunto inicial.",
+      "pre": "Mais de ~48 filmes para o filtro atual.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-029-F",
+      "regra": "RN-FILMES-029",
+      "titulo": "Feliz: Contador em carregamento",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Trocar filtro e ler linha acima da grade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto **Carregando...**.",
+      "pre": "Filtro recém-alterado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-030-F",
+      "regra": "RN-FILMES-030",
+      "titulo": "Feliz: Grade responsiva",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Redimensionar janela do navegador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "2 a 5 colunas; cards com largura máxima ~210px.",
+      "pre": "Resultados > 0; não loading.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-031-F",
+      "regra": "RN-FILMES-031",
+      "titulo": "Feliz: Nenhum resultado",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Aplicar filtro impossível.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ícone de filtro, título **Nenhum filme encontrado**, sugestão de ajustar filtros.",
+      "pre": "Filtros restritivos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-032-F",
+      "regra": "RN-FILMES-032",
+      "titulo": "Feliz: Falha ao recarregar no cliente",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Desligar rede ao trocar filtro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Página continua; grade pode zerar; sem crash.",
+      "pre": "Rede cortada ao mudar filtro.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-033-F",
+      "regra": "RN-FILMES-033",
+      "titulo": "Feliz: Limite inicial de cards na tela",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Contar cards com filtro **Todos**.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até ~48 cards visíveis na grade por vez (sem botão “carregar mais” nesta página).",
+      "pre": "Filtro amplo com centenas de títulos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-034-F",
+      "regra": "RN-FILMES-034",
+      "titulo": "Feliz: Cards com informação de streaming",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Inspecionar card de filme em streaming.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ícones ou pills de plataforma no card.",
+      "pre": "Filme com Netflix/Disney+ etc.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-035-F",
+      "regra": "RN-FILMES-035",
+      "titulo": "Feliz: Saga e coleção no card",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Card de filme conhecido em saga.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Atalho de saga visível no card (detalhe em modais).",
+      "pre": "Filme com saga cadastrada.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-036-F",
+      "regra": "RN-FILMES-036",
+      "titulo": "Feliz: Curadoria de exibição padrão",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar filme rascunho vs filme em cartaz.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título sem pôster tende a **não** aparecer; em cartaz pode aparecer mesmo com pouca popularidade.",
+      "pre": "Filme incompleto no catálogo vs filme em cartaz.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-037-F",
+      "regra": "RN-FILMES-037",
+      "titulo": "Feliz: Sem pôster",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Buscar título sem pôster na busca global.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente em Filmes com filtros abertos.",
+      "pre": "Filme de teste sem pôster.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-038-F",
+      "regra": "RN-FILMES-038",
+      "titulo": "Feliz: Sem sinopse",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Validar com dado de teste.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na listagem geral.",
+      "pre": "Filme sem overview.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-039-F",
+      "regra": "RN-FILMES-039",
+      "titulo": "Feliz: Conteúdo adulto explícito",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Buscar título adulto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente em Filmes.",
+      "pre": "Filme adulto no catálogo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-040-F",
+      "regra": "RN-FILMES-040",
+      "titulo": "Feliz: Exceção em cartaz ou em breve",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Testar título em cartaz marginal.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Presente ao usar atalho **Em Cartaz** ou **Em Breve**.",
+      "pre": "Filme em cartaz com poucos votos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-041-F",
+      "regra": "RN-FILMES-041",
+      "titulo": "Feliz: Nota mínima com muitos votos",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar com filme bem avaliado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na listagem geral.",
+      "pre": "Filme nota ~5,5 com centenas de votos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-042-F",
+      "regra": "RN-FILMES-042",
+      "titulo": "Feliz: Ano corrente ou futuro mais permissivo",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar ano corrente.\n3. Procurar estreia futura.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estreia futura do ano aparece na grade.",
+      "pre": "Ano = ano corrente no select.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-043-F",
+      "regra": "RN-FILMES-043",
+      "titulo": "Feliz: Filtro por ano civil",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar 2020 e abrir detalhes de cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só filmes com data de estreia em 2020.",
+      "pre": "Ano 2020 selecionado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-044-F",
+      "regra": "RN-FILMES-044",
+      "titulo": "Feliz: Filtro por mês",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Combinar mês e ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só estreias de março/2025.",
+      "pre": "Março + ano 2025.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-045-F",
+      "regra": "RN-FILMES-045",
+      "titulo": "Feliz: Mês sem ano usa ano atual",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Em setembro, filtrar setembro com todos os anos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estreias daquele mês no ano corrente.",
+      "pre": "Mês = mês atual; ano = todos.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-046-F",
+      "regra": "RN-FILMES-046",
+      "titulo": "Feliz: Filtro por gênero",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar um gênero raro e validar cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só filmes daquele gênero.",
+      "pre": "Gênero Action.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-047-F",
+      "regra": "RN-FILMES-047",
+      "titulo": "Feliz: Filtro por status",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar status e conferir detalhe.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade coerente com status nos detalhes.",
+      "pre": "Status específico.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-048-F",
+      "regra": "RN-FILMES-048",
+      "titulo": "Feliz: Só já lançados (catálogo)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Estreia futura só em **Em Breve**, não como lançado antigo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filme futuro não entra em conjuntos que exigem “já lançado” (ex.: comparar com atalho **Em Breve**).",
+      "pre": "Filme futuro vs passado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-049-F",
+      "regra": "RN-FILMES-049",
+      "titulo": "Feliz: Só futuros (catálogo)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar atalhos **Todos** vs **Em Breve**.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Em Breve** alinhado a futuros curados.",
+      "pre": "Filme passado e futuro.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-050-F",
+      "regra": "RN-FILMES-050",
+      "titulo": "Feliz: Disponibilidade cinema (catálogo)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Validar filme em cartaz nos atalhos/gaveta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Em Cartaz** e gaveta **Em cartaz** concentram títulos de cinema.",
+      "pre": "Filme só streaming vs em cartaz.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-051-F",
+      "regra": "RN-FILMES-051",
+      "titulo": "Feliz: Disponibilidade streaming (catálogo)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar plataforma + ler etiqueta do card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aparece ao filtrar plataforma; etiqueta **No streaming** no card quando aplicável.",
+      "pre": "Filme com plataforma.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-052-F",
+      "regra": "RN-FILMES-052",
+      "titulo": "Feliz: Ordem alfabética em “Todos”",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Ler primeiros títulos da grade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Primeiros cards em ordem A–Z por título.",
+      "pre": "**Todos os Filmes** ativo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-053-F",
+      "regra": "RN-FILMES-053",
+      "titulo": "Feliz: Listagem mais ampla que a home",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar mesmo título home vs Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode aparecer em Filmes e **não** no carrossel da home.",
+      "pre": "Concerto/gravação ao vivo cadastrada.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-054-F",
+      "regra": "RN-FILMES-054",
+      "titulo": "Feliz: Opções de filtro só com filmes",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir todos os gêneros e buscar um raro inexistente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Gênero sem filme **não** aparece no select.",
+      "pre": "Gênero órfão no cadastro interno.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-055-F",
+      "regra": "RN-FILMES-055",
+      "titulo": "Feliz: Anos sem duplicata",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir filtro de ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ano único no dropdown.",
+      "pre": "Vários filmes no mesmo ano.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-056-F",
+      "regra": "RN-FILMES-056",
+      "titulo": "Feliz: Janela temporal da home",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filme clássico: Filmes vs home.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Presente em Filmes com filtros; pode faltar na home.",
+      "pre": "Filme muito antigo fora da janela da home.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-057-F",
+      "regra": "RN-FILMES-057",
+      "titulo": "Feliz: Concertos na listagem",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Buscar concerto na página Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card visível em Filmes; pode faltar no carrossel da home.",
+      "pre": "Título tipo “Live from…”.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-058-F",
+      "regra": "RN-FILMES-058",
+      "titulo": "Feliz: Curta-metragem futuro na home",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar home vs Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode aparecer em Filmes filtrando ano/mês; pode faltar na home.",
+      "pre": "Curta com duração conhecida e estreia futura.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-059-F",
+      "regra": "RN-FILMES-059",
+      "titulo": "Feliz: Duração mínima só na home",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Mesmo título home vs Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Visível em Filmes se passar curadoria da listagem.",
+      "pre": "Filme futuro curto.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-060-F",
+      "regra": "RN-FILMES-060",
+      "titulo": "Feliz: Abrir detalhe pelo card",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Clicar poster/título.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal com sinopse, datas, links.",
+      "pre": "Card na grade ou gaveta.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-061-F",
+      "regra": "RN-FILMES-061",
+      "titulo": "Feliz: Destaques no detalhe",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Abrir detalhe de estreia aguardada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pills no modal além do status normal.",
+      "pre": "Filme elegível a destaque editorial.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-062-F",
+      "regra": "RN-FILMES-062",
+      "titulo": "Feliz: Edição administrativa",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Confirmar ausência de controles de admin na página Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Comportamento da listagem reflete catálogo já publicado; sem UI de edição aqui.",
+      "pre": "Conta visitante ou usuário comum.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-063-F",
+      "regra": "RN-FILMES-063",
+      "titulo": "Feliz: Ranking “mais esperados”",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Comparar filme “mais esperado” na home vs Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filmes pode mostrar pills nos cards/detalhe; ranking completo não é seção fixa aqui.",
+      "pre": "Estreias próximas no catálogo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-064-F",
+      "regra": "RN-FILMES-064",
+      "titulo": "Feliz: Timeline por ano (outras telas)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Confirmar ausência de carrossel mensal contínuo em Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filmes usa grade + filtros ano/mês, não carrossel temporal contínuo.",
+      "pre": "Usuário em Filmes.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-065-F",
+      "regra": "RN-FILMES-065",
+      "titulo": "Feliz: Timeline por mês (outras telas)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filtrar mês e rolar grade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade estática filtrada, não slide por slide de timeline.",
+      "pre": "Mês selecionado.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-066-F",
+      "regra": "RN-FILMES-066",
+      "titulo": "Feliz: Só ano confirmado (outras telas)",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Filme “2027 — data a confirmar” em Filmes vs home.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode listar com data incompleta nos detalhes; sem separador TBD como na home.",
+      "pre": "Filme TBA só com ano.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-067-F",
+      "regra": "RN-FILMES-067",
+      "titulo": "Feliz: Contador alinhado ao total filtrado",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Anotar contador e amostrar busca por título.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contador = quantidade lógica do filtro.",
+      "pre": "Filtro restritivo.",
+      "tela": "Filmes"
+    },
+    {
+      "id": "CT-RN-FILMES-068-F",
+      "regra": "RN-FILMES-068",
+      "titulo": "Feliz: Coerência após recarregar",
+      "passos": "1. Abrir o site e navegar até **Filmes**.\n2. Alterar filtros e recarregar navegador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Atalho **Todos** e selects voltam ao padrão; nova carga inicial.",
+      "pre": "Filtros alterados; F5.",
+      "tela": "Filmes"
+    }
+  ]
+}

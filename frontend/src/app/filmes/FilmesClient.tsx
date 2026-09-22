@@ -95,34 +95,18 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
     loadFilmes();
   }, [loadFilmes]);
 
+  useEffect(() => {
+    if (initialData.results.length === 0 && initialData.total === 0) {
+      void loadFilmes();
+    }
+  }, [initialData.results.length, initialData.total, loadFilmes]);
+
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
       <PageHeader
         title="Filmes"
         description="Descubra os melhores filmes em cartaz, lançamentos e clássicos do cinema"
       />
-
-      {resumo && resumo.proximos.filmes.length > 0 && (
-        <CollapsibleSection id="filmes-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8">
-          <HorizontalMediaRow
-            items={resumo.proximos.filmes}
-            type="filme"
-            userInteractions={userInteractions}
-            onInteraction={handleInteraction}
-          />
-        </CollapsibleSection>
-      )}
-
-      {resumo && resumo.destaques_recentes.filmes.length > 0 && (
-        <CollapsibleSection id="filmes-em-cartaz-destaque" title="Em cartaz" icon={Clapperboard} className="mb-8">
-          <HorizontalMediaRow
-            items={resumo.destaques_recentes.filmes}
-            type="filme"
-            userInteractions={userInteractions}
-            onInteraction={handleInteraction}
-          />
-        </CollapsibleSection>
-      )}
 
       <div className="mb-6 md:mb-8 space-y-4">
         <div className="flex flex-wrap gap-2">
@@ -265,6 +249,28 @@ export default function FilmesClient({ initialData }: FilmesClientProps) {
             Tente ajustar os filtros para encontrar mais resultados
           </p>
         </div>
+      )}
+
+      {resumo && resumo.proximos.filmes.length > 0 && (
+        <CollapsibleSection id="filmes-o-que-vem-ai" title="O que vem aí" icon={Sparkles} className="mb-8 mt-10">
+          <HorizontalMediaRow
+            items={resumo.proximos.filmes}
+            type="filme"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
+      )}
+
+      {resumo && resumo.destaques_recentes.filmes.length > 0 && (
+        <CollapsibleSection id="filmes-em-cartaz-destaque" title="Em cartaz" icon={Clapperboard} className="mb-8">
+          <HorizontalMediaRow
+            items={resumo.destaques_recentes.filmes}
+            type="filme"
+            userInteractions={userInteractions}
+            onInteraction={handleInteraction}
+          />
+        </CollapsibleSection>
       )}
     </div>
   );

@@ -1,0 +1,223 @@
+{
+  "arquivo": "07-HOJE.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 24,
+  "cenarios": [
+    {
+      "id": "CT-RN-HOJE-001-F",
+      "regra": "RN-HOJE-001",
+      "titulo": "Feliz: Conteúdo após abrir a página",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Abrir Hoje com rede normal.\n3. Observar transição skeleton → conteúdo.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Breve estado de carregamento (esqueletos/cards cinza) e, em seguida, faixas preenchidas ou mensagens de vazio/erro.",
+      "pre": "Acesso normal à página Hoje.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-002-F",
+      "regra": "RN-HOJE-002",
+      "titulo": "Feliz: Data do dia",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Comparar data exibida com o relógio do sistema.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Linha com ícone de calendário e data por extenso (pt-BR), coerente com o dia de teste.",
+      "pre": "Página carregada com sucesso.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-003-F",
+      "regra": "RN-HOJE-003",
+      "titulo": "Feliz: Ligar/desligar blocos",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Desmarcar “Em cartaz nos cinemas”.\n3. F5 → faixa não aparece.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Interruptores ou checkboxes por seção; ao recarregar, as seções desmarcadas continuam ocultas.",
+      "pre": "Mesmo navegador/dispositivo.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-004-F",
+      "regra": "RN-HOJE-004",
+      "titulo": "Feliz: Pelo menos uma seção",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Desmarcar cinco seções.\n3. Na sexta tentativa, a última permanece ligada.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Tentativa de desmarcar a última é ignorada; continua uma seção ativa.",
+      "pre": "Resta apenas uma seção marcada.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-005-F",
+      "regra": "RN-HOJE-005",
+      "titulo": "Feliz: Ordem fixa das faixas",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Habilitar todas.\n3. Rolar e conferir ordem dos títulos das faixas.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sempre, de cima para baixo: cinema → estreias da semana → filmes no streaming → séries no streaming → animes em exibição → jogos em destaque (só as habilitadas e com itens).",
+      "pre": "Várias seções habilitadas com conteúdo.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-006-F",
+      "regra": "RN-HOJE-006",
+      "titulo": "Feliz: Faixa sem itens some",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Ambiente ou dia em que uma faixa específica vem vazia.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nenhum título de faixa vazio; bloco inteiro ausente.",
+      "pre": "Seção habilitada sem destaques naquele dia.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-007-F",
+      "regra": "RN-HOJE-007",
+      "titulo": "Feliz: Nada para mostrar",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Desmarcar seções que tinham conteúdo até só restarem vazias ou desligar todas as que exibem cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem “Nenhum destaque disponível para os filtros selecionados.”",
+      "pre": "Filtros de seção deixam zero cards visíveis.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-008-F",
+      "regra": "RN-HOJE-008",
+      "titulo": "Feliz: Erro ao carregar",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Bloquear rede após abrir a página ou usar ambiente offline.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem do tipo “Não foi possível carregar o conteúdo de hoje.”",
+      "pre": "Simular falha de rede ou indisponibilidade do serviço.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-009-F",
+      "regra": "RN-HOJE-009",
+      "titulo": "Feliz: Esqueletos no carregamento",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Throttle de rede e recarregar Hoje.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade com vários placeholders de card (cerca de oito).",
+      "pre": "Primeiro acesso ou rede lenta.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-010-F",
+      "regra": "RN-HOJE-010",
+      "titulo": "Feliz: Cards iguais ao resto do site",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Logar.\n3. Favoritar um filme em “Em cartaz” e conferir em outra tela.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Favoritar, listas e demais ações do card funcionam como em Filmes/Séries/Animes/Jogos.",
+      "pre": "Usuário logado; itens visíveis em uma faixa.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-011-F",
+      "regra": "RN-HOJE-011",
+      "titulo": "Feliz: Janela “esta semana”",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Comparar filme estreando há 8 dias vs filme estreando ontem na faixa de streaming.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Obra lançada há mais de uma semana tende a não liderar o pool “esta semana”; pode aparecer só se faltar conteúdo recente.",
+      "pre": "Títulos com datas conhecidas (estreia ou episódio).",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-012-F",
+      "regra": "RN-HOJE-012",
+      "titulo": "Feliz: Em cartaz nos cinemas",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Contar cards na faixa cinema.\n3. Validar que só entram “em cartaz”.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **12** filmes; foco em popularidade entre os em cartaz; obras de baixa qualidade editorial ou mal localizadas tendem a ficar de fora.",
+      "pre": "Catálogo com filme em cartaz e filme só em streaming.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-013-F",
+      "regra": "RN-HOJE-013",
+      "titulo": "Feliz: Estreias da semana",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Cruzar com calendário de estreias BR.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **24** títulos; cards de estreia da semana podem exibir etiqueta de destaque de estreia.",
+      "pre": "Filme com estreia BR na semana vs fora da semana.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-014-F",
+      "regra": "RN-HOJE-014",
+      "titulo": "Feliz: Etiquetas em filmes",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Inspecionar pills nos cards de estreias e estreias futuras.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estreia da semana tem prioridade sobre “mais esperado” no mesmo card.",
+      "pre": "Filme estreando na semana vs filme futuro aguardado.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-015-F",
+      "regra": "RN-HOJE-015",
+      "titulo": "Feliz: Filmes no streaming esta semana",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Dia com poucos lançamentos streaming.\n3. Ver se lista completa até 12.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **12** filmes; se faltarem lançamentos recentes, entram títulos populares em streaming para completar, sem duplicar o mesmo filme.",
+      "pre": "Pool semanal com menos de 12 títulos.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-016-F",
+      "regra": "RN-HOJE-016",
+      "titulo": "Feliz: Séries no streaming esta semana",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Série semanal com ep ontem vs série parada há meses.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **12** séries; mescla recentes + fallback.",
+      "pre": "Série sem episódio na semana mas popular.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-017-F",
+      "regra": "RN-HOJE-017",
+      "titulo": "Feliz: Animes em exibição (prioridade)",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Anime com ep recente vs anime em hiato.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Preferência por quem teve episódio nos últimos 7 dias; ordenação por popularidade e nota.",
+      "pre": "Anime em exibição sem ep na semana.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-018-F",
+      "regra": "RN-HOJE-018",
+      "titulo": "Feliz: Animes — completar lista",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Conferir contagem máxima em dia “fraco” de episódios.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **12** animes no total, sem repetir o mesmo título.",
+      "pre": "Poucos episódios recentes no catálogo.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-019-F",
+      "regra": "RN-HOJE-019",
+      "titulo": "Feliz: Jogos em destaque",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Contar faixa.\n3. Comparar com página Jogos.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **8** jogos; jogos sem sinal de qualidade tendem a ficar de fora.",
+      "pre": "Catálogo com jogos fracos e fortes.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-020-F",
+      "regra": "RN-HOJE-020",
+      "titulo": "Feliz: Animes mais exigentes que a listagem",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Mesmo título em Animes vs Hoje.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na faixa de animes de Hoje; pode existir na página Animes do menu.",
+      "pre": "Anime com nota/popularidade baixa.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-021-F",
+      "regra": "RN-HOJE-021",
+      "titulo": "Feliz: Textos de sinopse",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Abrir modal do filme em Hoje e na listagem Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesmo texto de sinopse para a mesma obra.",
+      "pre": "Abrir detalhe do mesmo título em Hoje e em Filmes.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-022-F",
+      "regra": "RN-HOJE-022",
+      "titulo": "Feliz: Atualização dos destaques",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Comparar Hoje de manhã e tarde (mesmo dia).\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Listas podem permanecer estáveis por várias horas até o site atualizar o pacote de “hoje”.",
+      "pre": "Duas visitas no mesmo dia.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-023-F",
+      "regra": "RN-HOJE-023",
+      "titulo": "Feliz: Falha grave no servidor",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Ambiente de teste com serviço fora.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesma mensagem de erro de RN-HOJE-008; usuário não vê faixas parciais “quebradas”.",
+      "pre": "Serviço indisponível.",
+      "tela": "Hoje"
+    },
+    {
+      "id": "CT-RN-HOJE-024-F",
+      "regra": "RN-HOJE-024",
+      "titulo": "Feliz: Seções batem com a tela",
+      "passos": "1. Abrir o site e navegar até **Hoje**.\n2. Conferir títulos das faixas com a tabela abaixo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seis tipos possíveis: data, estreias da semana, cinema, três faixas streaming (filmes/séries/animes), jogos — conforme preferências e conteúdo.",
+      "pre": "Página carregada com sucesso.",
+      "tela": "Hoje"
+    }
+  ]
+}

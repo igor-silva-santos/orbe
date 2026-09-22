@@ -1,0 +1,439 @@
+{
+  "arquivo": "08-MODAIS.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 48,
+  "cenarios": [
+    {
+      "id": "CT-RN-MODAL-001-F",
+      "regra": "RN-MODAL-001",
+      "titulo": "Feliz: Só abre com mídia válida",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir filme, série, anime e jogo a partir de cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Overlay e conteúdo aparecem; tipos não suportados não abrem modal.",
+      "pre": "Clique em card de mídia suportada.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-002-F",
+      "regra": "RN-MODAL-002",
+      "titulo": "Feliz: Fechar ao mudar de página",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Com modal aberto, ir para Filmes pelo header.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal fecha; a nova página carrega normalmente (sem “voltar” extra inesperado).",
+      "pre": "Modal aberto; clicar link do menu ou digitar outra URL interna.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-003-F",
+      "regra": "RN-MODAL-003",
+      "titulo": "Feliz: Detalhes ao abrir",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir modal e comparar dados com o card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Breve loading; depois sinopse, elenco, links etc. mais completos que no card.",
+      "pre": "Abrir modal pela primeira vez para um título.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-004-F",
+      "regra": "RN-MODAL-004",
+      "titulo": "Feliz: Falha ao buscar detalhes",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Simular offline após abrir modal.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal ainda mostra o que já vinha do card; raramente tela de erro se não houver nenhum dado.",
+      "pre": "Rede instável ou título problemático.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-005-F",
+      "regra": "RN-MODAL-005",
+      "titulo": "Feliz: Botão voltar do navegador",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir modal → botão voltar do navegador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Fechar pelo X, clique fora ou Esc pode voltar uma entrada no histórico; botão “voltar” do browser fecha o modal.",
+      "pre": "Modal aberto em desktop/mobile.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-006-F",
+      "regra": "RN-MODAL-006",
+      "titulo": "Feliz: Rolagem da página de fundo",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Tentar rolar a listagem com modal aberto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "A página atrás não rola (scroll bloqueado); ao fechar, rolagem normal volta.",
+      "pre": "Modal visível.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-007-F",
+      "regra": "RN-MODAL-007",
+      "titulo": "Feliz: Clique fora fecha",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Clicar no backdrop.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal fecha.",
+      "pre": "Modal aberto.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-008-F",
+      "regra": "RN-MODAL-008",
+      "titulo": "Feliz: Tecla Esc fecha",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Pressionar Esc.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Esc fecha o modal.",
+      "pre": "Modal aberto (desktop).",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-009-F",
+      "regra": "RN-MODAL-009",
+      "titulo": "Feliz: Premiações no topo",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir título premiado conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Bloco de prêmios acima do restante do conteúdo.",
+      "pre": "Filme/série/etc. com lista de premiações.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-010-F",
+      "regra": "RN-MODAL-010",
+      "titulo": "Feliz: Modo edição (administrador)",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Logar como admin vs usuário normal.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão de editar visível; alterna para formulários de curadoria; visitante/usuário comum não vê editar.",
+      "pre": "Usuário admin; modal aberto.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-011-F",
+      "regra": "RN-MODAL-011",
+      "titulo": "Feliz: Conteúdo por tipo",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Quatro modais distintos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filme, série, anime e jogo mostram blocos adequados (streaming, temporadas, plataformas, etc.).",
+      "pre": "Abrir os quatro tipos.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-012-F",
+      "regra": "RN-MODAL-012",
+      "titulo": "Feliz: Carregando detalhes",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Throttle ao abrir modal.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Indicador de carregamento com mensagem fixa.",
+      "pre": "Rede lenta.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-013-F",
+      "regra": "RN-MODAL-013",
+      "titulo": "Feliz: Busca fecha ao abrir detalhe",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Buscar título → clicar resultado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Busca fecha; modal de detalhe fica por cima.",
+      "pre": "Overlay de busca visível.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-020-F",
+      "regra": "RN-MODAL-020",
+      "titulo": "Feliz: Exige login",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Anônimo → tentar adicionar evento.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem de erro (toast); submodal de calendário fecha.",
+      "pre": "Usuário **não** logado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-021-F",
+      "regra": "RN-MODAL-021",
+      "titulo": "Feliz: Opções por tipo",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Percorrer fluxo calendário em filme e anime.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filme: estreia e/ou sessão de cinema (data, hora, local). Anime: estreia e/ou lembretes semanais. Série e jogo: estreia única.",
+      "pre": "Logado; modal de cada tipo.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-022-F",
+      "regra": "RN-MODAL-022",
+      "titulo": "Feliz: Lembretes semanais (anime/série)",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Criar série de lembretes e conferir quantidade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Vários eventos espaçados (~7 dias), conforme quantidade de episódios informada ou padrão (~12).",
+      "pre": "Logado; escolher recorrência semanal.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-023-F",
+      "regra": "RN-MODAL-023",
+      "titulo": "Feliz: Estreia sem data",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Título sem data → “lançamento”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aviso; nada é salvo; modal fecha.",
+      "pre": "Obra sem data de estreia.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-024-F",
+      "regra": "RN-MODAL-024",
+      "titulo": "Feliz: Ingresso de cinema",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Preencher e salvar sessão.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Evento com data, hora e local informados.",
+      "pre": "Filme com formulário de cinema preenchido.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-025-F",
+      "regra": "RN-MODAL-025",
+      "titulo": "Feliz: Confirmação de salvamento",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Salvar evento válido e inválido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast de sucesso ou erro após tentativa de salvar.",
+      "pre": "Logado; dados completos.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-026-F",
+      "regra": "RN-MODAL-026",
+      "titulo": "Feliz: Botão calendário em filme futuro",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Filme futuro vs lançado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão visível só enquanto a estreia ainda não passou.",
+      "pre": "Filme com estreia **futura** vs já lançado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-030-F",
+      "regra": "RN-MODAL-030",
+      "titulo": "Feliz: Abrir pelo card",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Título futuro vs lançado → botão “Já assisti/joguei”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre modal de avaliação; desabilitado se a obra ainda não lançou.",
+      "pre": "Card de mídia já lançada.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-031-F",
+      "regra": "RN-MODAL-031",
+      "titulo": "Feliz: Marca como assistido/jogado",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Avaliar jogo e conferir status na lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Status passa a “assistido” (inclusive para jogos).",
+      "pre": "Logado; modal de rating aberto.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-032-F",
+      "regra": "RN-MODAL-032",
+      "titulo": "Feliz: Campos da avaliação",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Enviar com e sem comentário.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Opções do tipo gostei / amei / não gostei; campo de texto opcional.",
+      "pre": "Modal aberto.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-033-F",
+      "regra": "RN-MODAL-033",
+      "titulo": "Feliz: Login obrigatório",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Anônimo → avaliar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast de aviso; modal fecha sem salvar.",
+      "pre": "Não logado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-040-F",
+      "regra": "RN-MODAL-040",
+      "titulo": "Feliz: Título e pôster",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Comparar com listagem.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título e arte coerentes com curadoria do site.",
+      "pre": "Filme com título/pôster alternativos no catálogo.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-041-F",
+      "regra": "RN-MODAL-041",
+      "titulo": "Feliz: Onde assistir",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Filme só cinema vs só streaming.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista de serviços (sem duplicatas óbvias); se nada conhecido, texto “Desconhecido”.",
+      "pre": "Filme com e sem provedores.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-042-F",
+      "regra": "RN-MODAL-042",
+      "titulo": "Feliz: Ingresso",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Filme em cartaz com/sem sessões.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão de ingresso conforme disponibilidade; compra habilitada só quando há sessões confirmadas.",
+      "pre": "Filme em cartaz, pré-venda ou com sessões.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-043-F",
+      "regra": "RN-MODAL-043",
+      "titulo": "Feliz: Trailer",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir filme com vários vídeos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Prioriza trailer oficial; senão primeiro trailer; senão outro vídeo.",
+      "pre": "Filme com trailer oficial e alternativos.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-044-F",
+      "regra": "RN-MODAL-044",
+      "titulo": "Feliz: Elenco → página da pessoa",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Clicar nome no elenco → voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Vai para página da pessoa; modal de filme fecha; ao voltar, fluxo de retorno pode reabrir o filme (quando aplicável).",
+      "pre": "Elenco listado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-045-F",
+      "regra": "RN-MODAL-045",
+      "titulo": "Feliz: Continuações no filme",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Filme de franquia conhecida.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aba “Continuação” e/ou “Universo” com obras relacionadas.",
+      "pre": "Filme com sequências ou universo.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-050-F",
+      "regra": "RN-MODAL-050",
+      "titulo": "Feliz: Onde assistir",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Inspecionar bloco streaming.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista deduplicada de serviços.",
+      "pre": "Série com vários provedores.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-051-F",
+      "regra": "RN-MODAL-051",
+      "titulo": "Feliz: Elenco → pessoa",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Clicar ator.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Navega para a página da pessoa; ao voltar, o modal da série pode reabrir quando o site guardou esse retorno.",
+      "pre": "Elenco presente.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-052-F",
+      "regra": "RN-MODAL-052",
+      "titulo": "Feliz: Calendário na série",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Procurar botão calendário na série.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não há botão dedicado igual ao de filme futuro; calendário pode existir por outros fluxos conforme produto.",
+      "pre": "Modal de série aberto.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-053-F",
+      "regra": "RN-MODAL-053",
+      "titulo": "Feliz: Continuações",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Série MCU/DCEU etc.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abas de continuação/universo como no filme.",
+      "pre": "Série ligada a universo compartilhado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-060-F",
+      "regra": "RN-MODAL-060",
+      "titulo": "Feliz: Sinopse legível",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir anime cuja sinopse venha com formatação na origem.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto limpo; se ausente, “(não informado)”.",
+      "pre": "Anime com sinopse rica ou vazia.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-061-F",
+      "regra": "RN-MODAL-061",
+      "titulo": "Feliz: Fixar na semana",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Logar.\n3. Fixar e desfixar.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão “Fixar na semana” / “Na sua semana” alterna destaque pessoal da semana.",
+      "pre": "Conta autenticada.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-062-F",
+      "regra": "RN-MODAL-062",
+      "titulo": "Feliz: Plataformas",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Card de anime multi-plataforma.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista por nome; Crunchyroll pode mostrar só ícone.",
+      "pre": "Várias plataformas incl. Crunchyroll.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-063-F",
+      "regra": "RN-MODAL-063",
+      "titulo": "Feliz: Personagem e dublador",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Anime dublado → link dublador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Alternar JP/PT-BR; link para página do dublador fecha o modal.",
+      "pre": "Anime com dublagem BR.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-064-F",
+      "regra": "RN-MODAL-064",
+      "titulo": "Feliz: Rankings",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Anime popular em várias listas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até **6** entradas visíveis, com rótulos traduzidos.",
+      "pre": "Anime com muitos rankings.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-070-F",
+      "regra": "RN-MODAL-070",
+      "titulo": "Feliz: Requisitos de PC",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Jogo Steam vs exclusivo console.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Drawer ou bloco de requisitos mínimos/recomendados só quando aplicável.",
+      "pre": "Jogo PC com requisitos vs console-only.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-071-F",
+      "regra": "RN-MODAL-071",
+      "titulo": "Feliz: Desenvolvedora",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Clicar link da empresa.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para página da desenvolvedora.",
+      "pre": "Jogo com empresa cadastrada.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-072-F",
+      "regra": "RN-MODAL-072",
+      "titulo": "Feliz: Preço Steam",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Jogo com página Steam ativa.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Exibe preço Steam no bloco de informações quando houver dado.",
+      "pre": "Jogo com ID Steam ou preço.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-080-F",
+      "regra": "RN-MODAL-080",
+      "titulo": "Feliz: Salvar alterações de filme",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Admin edita título curado → salvar → reabrir.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Salvar persiste título, sinopse, pôster etc.; usuário vê dados atualizados ao reabrir.",
+      "pre": "Campos curados editados.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-081-F",
+      "regra": "RN-MODAL-081",
+      "titulo": "Feliz: Cancelar edição",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Editar → cancelar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Volta à visualização; dados na tela permanecem os anteriores ao save.",
+      "pre": "Modo edição ativo.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-082-F",
+      "regra": "RN-MODAL-082",
+      "titulo": "Feliz: Tipos editáveis",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Alternar tipos em modo edição.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Formulários para filme, série, anime e jogo; outros tipos mostram indisponível.",
+      "pre": "Conta admin.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-090-F",
+      "regra": "RN-MODAL-090",
+      "titulo": "Feliz: Carregar sob demanda",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Abrir aba Continuação em filme de saga.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Conteúdo das abas carrega ao exibir (pode haver loading breve).",
+      "pre": "Filme/série com franquia.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-091-F",
+      "regra": "RN-MODAL-091",
+      "titulo": "Feliz: Ocultar se vazio",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Filme standalone.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nenhuma aba extra de continuações.",
+      "pre": "Título isolado.",
+      "tela": "Modais"
+    },
+    {
+      "id": "CT-RN-MODAL-092-F",
+      "regra": "RN-MODAL-092",
+      "titulo": "Feliz: Abas dinâmicas",
+      "passos": "1. Abrir o site e navegar até **Modais**.\n2. Comparar filme sequel vs spin-off universo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aba padrão “Continuação” se houver sequência; senão “Universo”; só abas com conteúdo.",
+      "pre": "Só sequência, só universo, ou ambos.",
+      "tela": "Modais"
+    }
+  ]
+}
