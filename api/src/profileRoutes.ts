@@ -3,6 +3,7 @@ import { prisma } from './clients';
 import { logger } from './logger';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import { isStringWithMaxLength, isValidHttpUrl } from './validation';
+import { AccountDeletionError, deleteUserAccount } from './deleteUserAccount';
 
 const router = Router();
 
@@ -78,6 +79,27 @@ router.patch('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
     } catch (error) {
         logger.error(`Erro ao atualizar perfil ID ${userId}:`, error);
         res.status(500).json({ error: 'Erro ao atualizar perfil.' });
+    }
+});
+
+// Excluir conta logada (confirmação por senha)
+router.delete('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const { password } = req.body ?? {};
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Não autenticado.' });
+    }
+
+    try {
+        await deleteUserAccount(userId, password);
+        return res.status(204).send();
+    } catch (error) {
+        if (error instanceof AccountDeletionError) {
+            return res.status(error.status).json({ error: error.message });
+        }
+        logger.error(`Erro ao excluir conta ID ${userId}:`, error);
+        return res.status(500).json({ error: 'Erro ao excluir conta.' });
     }
 });
 

@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, User, Bell, Lock, Eye, Check } from 'lucide-react';
+import { Save, User, Bell, Lock, Eye, Check, Trash2 } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
+import { deleteAccountWithPassword } from '@/lib/auth/session';
+import { useAppStore } from '@/stores/appStore';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
@@ -11,6 +13,11 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const router = useRouter();
+  const { logout } = useAppStore();
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   // Estados dos campos
   const [nome, setNome] = useState('');
@@ -37,6 +44,28 @@ export default function SettingsPage() {
 
     fetchProfile();
   }, [router]);
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      setMessage({ type: 'error', text: 'Digite sua senha para confirmar a exclusão.' });
+      return;
+    }
+    setDeleting(true);
+    setMessage(null);
+    try {
+      await deleteAccountWithPassword(deletePassword);
+      logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Erro ao excluir conta:', error);
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Não foi possível excluir a conta.',
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -143,6 +172,64 @@ export default function SettingsPage() {
                 <span className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${perfilPublico ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Excluir conta */}
+        <div className="bg-card rounded-xl border border-destructive/40 overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-border">
+            <h2 className="text-xl font-bold flex items-center text-destructive">
+              <Trash2 className="mr-2 h-5 w-5" />
+              Excluir conta
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Remove permanentemente sua conta, lista e preferências. Contas de teste QA devem usar este fluxo ao encerrar a rodada.
+            </p>
+          </div>
+          <div className="p-6 space-y-4">
+            {!deleteOpen ? (
+              <button
+                type="button"
+                onClick={() => setDeleteOpen(true)}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-destructive text-destructive hover:bg-destructive/10 h-10 px-4"
+              >
+                Quero excluir minha conta
+              </button>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Digite sua senha para confirmar. Esta ação não pode ser desfeita.
+                </p>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="Sua senha"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                />
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 disabled:opacity-50"
+                  >
+                    {deleting ? 'Excluindo...' : 'Confirmar exclusão'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteOpen(false);
+                      setDeletePassword('');
+                    }}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input h-10 px-4"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
