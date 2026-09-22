@@ -79,10 +79,21 @@ python3 docs/regras-negocio/scripts/gerar-planilha-execucao-humana.py
 
 ---
 
-## 5. Papel do runner automático (secundário)
+## 5. Métricas reais (passo a passo — usar esta)
 
-- `executar-feliz-multitask.py` = **triagem inicial**, não laudo final.
-- Rodadas 2 e 3 iguais **não liberam** PO — ver [`TL-PARECER-RODADA-2-VS-3-E-COMMITS.md`](./TL-PARECER-RODADA-2-VS-3-E-COMMITS.md).
+```bash
+python3 docs/regras-negocio/scripts/executar-feliz-excelencia-todos.py
+```
+
+Saída: [`METRICAS-REAIS-LEIA-ME.md`](./METRICAS-REAIS-LEIA-ME.md) · `metricas-reais-511/`
+
+| Veredito | Ação QA |
+| --- | --- |
+| PASS | TL pode amostrar; opcional reconfirmar |
+| FAIL | TL → DEV se confirmado |
+| PENDENTE_QA_HUMANO | **QA executa manualmente** e preenche planilha humana |
+
+O runner `executar-feliz-multitask.py` (128/253/130) está **obsoleto** como métrica de conclusão.
 
 ---
 
