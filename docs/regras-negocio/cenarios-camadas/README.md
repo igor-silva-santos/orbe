@@ -33,6 +33,13 @@ python3 docs/regras-negocio/scripts/validar-cobertura-camadas.py
 
 Linhas geradas automaticamente são **rascunho** (`Status_Elaboracao = Rascunho camadas`). QA sênior deve refinar negativos e charters antes da auditoria TL — especialmente regras de auth, busca e modais.
 
+## Retorno QA → DEV (FAIL em produção)
+
+| Documento | Uso |
+| --- | --- |
+| [`execucao/DEV-RETORNO-QA-FAIL.md`](./execucao/DEV-RETORNO-QA-FAIL.md) | Handoff para DEV analisar e corrigir erros |
+| [`execucao/DEV-BACKLOG-FAIL-RODADA-2.csv`](./execucao/DEV-BACKLOG-FAIL-RODADA-2.csv) | 253 FAIL com prioridade e colunas de status/PR |
+
 ## Relação com o baseline 511
 
 - **Baseline:** cobertura mínima auditável (1 cenário por regra).
