@@ -11,6 +11,16 @@ Cada documento descreve **uma página ou fluxo visível** do site. As tabelas li
 2. Abra o arquivo da **tela** em [`telas/`](./telas/), o **documento único** [`regras-negocio-qa.md`](./regras-negocio-qa.md) (511 regras em Markdown) **ou** a planilha [`regras-negocio-qa.csv`](./regras-negocio-qa.csv) (UTF-8 com BOM para Excel).
 3. Execute a coluna **Como testar**; confira **Resultado na tela**.
 
+## Cenários de teste (time QA sênior + auditoria TL)
+
+| Documento | Função |
+| --- | --- |
+| [`QA-PROCESSO-CENARIOS.md`](./QA-PROCESSO-CENARIOS.md) | Fluxo: elaboração → revisão par → auditoria TL → cobertura 511/511 |
+| [`cenarios-teste.csv`](./cenarios-teste.csv) | Planilha oficial (1 linha mínima por regra, campos para passos e TL) |
+| [`QA-TL-AUDITORIA.md`](./QA-TL-AUDITORIA.md) | Checklist cenário a cenário para TL sênior |
+| [`QA-CENARIOS-EXEMPLO.md`](./QA-CENARIOS-EXEMPLO.md) | Referência de qualidade |
+| [`scripts/validar-cobertura-cenarios.py`](./scripts/validar-cobertura-cenarios.py) | Valida se todas as regras têm cenário |
+
 ## Telas documentadas
 
 | Arquivo | O que o usuário abre no site |
