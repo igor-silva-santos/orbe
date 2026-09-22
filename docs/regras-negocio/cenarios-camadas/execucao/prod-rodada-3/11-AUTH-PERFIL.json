@@ -1,0 +1,217 @@
+{
+  "arquivo": "11-AUTH-PERFIL.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-AUTH-001-F",
+      "regra": "RN-AUTH-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-002-F",
+      "regra": "RN-AUTH-002",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-003-F",
+      "regra": "RN-AUTH-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-004-F",
+      "regra": "RN-AUTH-004",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Só redireciona para páginas internas do site, envia o usuário para sites externos",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-005-F",
+      "regra": "RN-AUTH-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-006-F",
+      "regra": "RN-AUTH-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-010-F",
+      "regra": "RN-AUTH-010",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-011-F",
+      "regra": "RN-AUTH-011",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Toast de erro, formulário  envia",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-012-F",
+      "regra": "RN-AUTH-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-013-F",
+      "regra": "RN-AUTH-013",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-014-F",
+      "regra": "RN-AUTH-014",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-020-F",
+      "regra": "RN-AUTH-020",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Continua logado se sessão válida, se volta anônimo",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-021-F",
+      "regra": "RN-AUTH-021",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-022-F",
+      "regra": "RN-AUTH-022",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-023-F",
+      "regra": "RN-AUTH-023",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-024-F",
+      "regra": "RN-AUTH-024",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-025-F",
+      "regra": "RN-AUTH-025",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-030-F",
+      "regra": "RN-AUTH-030",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-031-F",
+      "regra": "RN-AUTH-031",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-032-F",
+      "regra": "RN-AUTH-032",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-033-F",
+      "regra": "RN-AUTH-033",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-034-F",
+      "regra": "RN-AUTH-034",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-035-F",
+      "regra": "RN-AUTH-035",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-040-F",
+      "regra": "RN-AUTH-040",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Redirect Entrar se perfil  carrega",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-041-F",
+      "regra": "RN-AUTH-041",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-042-F",
+      "regra": "RN-AUTH-042",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-043-F",
+      "regra": "RN-AUTH-043",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-044-F",
+      "regra": "RN-AUTH-044",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-050-F",
+      "regra": "RN-AUTH-050",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    },
+    {
+      "id": "CT-RN-AUTH-051-F",
+      "regra": "RN-AUTH-051",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:06Z"
+    }
+  ]
+}

@@ -1,0 +1,512 @@
+﻿Arquivo,ID_Cenario,ID_Regra,Resultado,Evidencia,Executor,Testado_Em
+04-ANIMES.md,CT-RN-ANIMES-001-F,RN-ANIMES-001,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-002-F,RN-ANIMES-002,FAIL,Keywords (0/3): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-003-F,RN-ANIMES-003,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-004-F,RN-ANIMES-004,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-005-F,RN-ANIMES-005,FAIL,Keywords (0/4): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-006-F,RN-ANIMES-006,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-007-F,RN-ANIMES-007,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-008-F,RN-ANIMES-008,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-009-F,RN-ANIMES-009,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-010-F,RN-ANIMES-010,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-011-F,RN-ANIMES-011,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-012-F,RN-ANIMES-012,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-013-F,RN-ANIMES-013,PASS,Ausência esperada; termos monitorados: Não aparece na grade pública,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-014-F,RN-ANIMES-014,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-015-F,RN-ANIMES-015,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-016-F,RN-ANIMES-016,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-017-F,RN-ANIMES-017,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-018-F,RN-ANIMES-018,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-019-F,RN-ANIMES-019,PASS,"Ausência esperada; termos monitorados: Modal/página de detalhe, id inválido  abre conteúdo quebrado",,2026-09-22T19:43:50Z
+04-ANIMES.md,CT-RN-ANIMES-020-F,RN-ANIMES-020,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-001-F,RN-AUTH-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-002-F,RN-AUTH-002,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-003-F,RN-AUTH-003,FAIL,Keywords (0/1): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-004-F,RN-AUTH-004,PASS,"Ausência esperada; termos monitorados: Só redireciona para páginas internas do site, envia o usuário para sites externos",,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-005-F,RN-AUTH-005,FAIL,Keywords (0/1): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-006-F,RN-AUTH-006,FAIL,Keywords (0/1): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-010-F,RN-AUTH-010,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-011-F,RN-AUTH-011,PASS,"Ausência esperada; termos monitorados: Toast de erro, formulário  envia",,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-012-F,RN-AUTH-012,FAIL,Keywords (0/1): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-013-F,RN-AUTH-013,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-014-F,RN-AUTH-014,FAIL,Keywords (0/1): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-020-F,RN-AUTH-020,PASS,"Ausência esperada; termos monitorados: Continua logado se sessão válida, se volta anônimo",,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-021-F,RN-AUTH-021,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-022-F,RN-AUTH-022,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-023-F,RN-AUTH-023,FAIL,Keywords (0/2): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-024-F,RN-AUTH-024,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-025-F,RN-AUTH-025,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-030-F,RN-AUTH-030,FAIL,Keywords (0/2): [],,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-031-F,RN-AUTH-031,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-032-F,RN-AUTH-032,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-033-F,RN-AUTH-033,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-034-F,RN-AUTH-034,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-035-F,RN-AUTH-035,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-040-F,RN-AUTH-040,PASS,Ausência esperada; termos monitorados: Redirect Entrar se perfil  carrega,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-041-F,RN-AUTH-041,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-042-F,RN-AUTH-042,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-043-F,RN-AUTH-043,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-044-F,RN-AUTH-044,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-050-F,RN-AUTH-050,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+11-AUTH-PERFIL.md,CT-RN-AUTH-051-F,RN-AUTH-051,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:06Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-001-F,RN-BUSCA-001,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-002-F,RN-BUSCA-002,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-003-F,RN-BUSCA-003,PASS,Keywords (1/1): ['todos'],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-004-F,RN-BUSCA-004,PASS,Keywords (1/2): ['em alta'],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-005-F,RN-BUSCA-005,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-006-F,RN-BUSCA-006,PASS,"Ausência esperada; termos monitorados: Resultados atualizam ~350 ms após parar de digitar, piscam, buscas antigas  “piscam” por cima das novas",,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-007-F,RN-BUSCA-007,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-008-F,RN-BUSCA-008,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-009-F,RN-BUSCA-009,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-010-F,RN-BUSCA-010,FAIL,Keywords (0/3): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-011-F,RN-BUSCA-011,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-012-F,RN-BUSCA-012,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-013-F,RN-BUSCA-013,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-014-F,RN-BUSCA-014,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-015-F,RN-BUSCA-015,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-020-F,RN-BUSCA-020,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-021-F,RN-BUSCA-021,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-BUSCA-022-F,RN-BUSCA-022,FAIL,Keywords (0/3): [],,2026-09-22T19:44:10Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-001-F,RN-CONT-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-002-F,RN-CONT-002,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-003-F,RN-CONT-003,FAIL,Keywords (0/3): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-004-F,RN-CONT-004,PASS,"Keywords (2/3): ['Sagas', 'Universos cinematográficos']",,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-005-F,RN-CONT-005,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-006-F,RN-CONT-006,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-007-F,RN-CONT-007,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-008-F,RN-CONT-008,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-009-F,RN-CONT-009,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-010-F,RN-CONT-010,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-011-F,RN-CONT-011,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-CONT-020-F,RN-CONT-020,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-001-F,RN-DEV-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-002-F,RN-DEV-002,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-003-F,RN-DEV-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-004-F,RN-DEV-004,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-005-F,RN-DEV-005,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-006-F,RN-DEV-006,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DEV-007-F,RN-DEV-007,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-001-F,RN-DUB-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-002-F,RN-DUB-002,FAIL,Keywords (0/5): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-003-F,RN-DUB-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-004-F,RN-DUB-004,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-005-F,RN-DUB-005,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-DUB-006-F,RN-DUB-006,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-001-F,RN-EVT-001,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-002-F,RN-EVT-002,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-003-F,RN-EVT-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-004-F,RN-EVT-004,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-005-F,RN-EVT-005,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-006-F,RN-EVT-006,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-EVT-007-F,RN-EVT-007,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+02-FILMES.md,CT-RN-FILMES-001-F,RN-FILMES-001,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-002-F,RN-FILMES-002,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-003-F,RN-FILMES-003,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-004-F,RN-FILMES-004,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-005-F,RN-FILMES-005,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-006-F,RN-FILMES-006,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-007-F,RN-FILMES-007,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-008-F,RN-FILMES-008,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-009-F,RN-FILMES-009,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-010-F,RN-FILMES-010,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-011-F,RN-FILMES-011,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-012-F,RN-FILMES-012,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-013-F,RN-FILMES-013,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-014-F,RN-FILMES-014,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-015-F,RN-FILMES-015,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-016-F,RN-FILMES-016,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-017-F,RN-FILMES-017,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-018-F,RN-FILMES-018,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-019-F,RN-FILMES-019,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-020-F,RN-FILMES-020,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-021-F,RN-FILMES-021,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-022-F,RN-FILMES-022,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-023-F,RN-FILMES-023,PASS,Ausência esperada; termos monitorados: Selects  ficam permanentemente desabilitados,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-024-F,RN-FILMES-024,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-025-F,RN-FILMES-025,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-026-F,RN-FILMES-026,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-027-F,RN-FILMES-027,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-028-F,RN-FILMES-028,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-029-F,RN-FILMES-029,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-030-F,RN-FILMES-030,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-031-F,RN-FILMES-031,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-032-F,RN-FILMES-032,FAIL,Keywords (0/3): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-033-F,RN-FILMES-033,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-034-F,RN-FILMES-034,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-035-F,RN-FILMES-035,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-036-F,RN-FILMES-036,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-037-F,RN-FILMES-037,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-038-F,RN-FILMES-038,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-039-F,RN-FILMES-039,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-040-F,RN-FILMES-040,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-041-F,RN-FILMES-041,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-042-F,RN-FILMES-042,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-043-F,RN-FILMES-043,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-044-F,RN-FILMES-044,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-045-F,RN-FILMES-045,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-046-F,RN-FILMES-046,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-047-F,RN-FILMES-047,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-048-F,RN-FILMES-048,PASS,"Ausência esperada; termos monitorados: já lançado, : comparar com atalho Em Breve)",,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-049-F,RN-FILMES-049,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-050-F,RN-FILMES-050,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-051-F,RN-FILMES-051,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-052-F,RN-FILMES-052,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-053-F,RN-FILMES-053,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-054-F,RN-FILMES-054,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-055-F,RN-FILMES-055,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-056-F,RN-FILMES-056,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-057-F,RN-FILMES-057,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-058-F,RN-FILMES-058,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-059-F,RN-FILMES-059,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-060-F,RN-FILMES-060,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-061-F,RN-FILMES-061,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-062-F,RN-FILMES-062,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-063-F,RN-FILMES-063,PASS,"Ausência esperada; termos monitorados: Filmes pode mostrar pills nos cards/detalhe, ranking completo  é seção fixa aqui",,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-064-F,RN-FILMES-064,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-065-F,RN-FILMES-065,PASS,"Ausência esperada; termos monitorados: Grade estática filtrada,  slide por slide de timeline",,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-066-F,RN-FILMES-066,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-067-F,RN-FILMES-067,FAIL,Keywords (0/1): [],,2026-09-22T19:43:49Z
+02-FILMES.md,CT-RN-FILMES-068-F,RN-FILMES-068,FAIL,Keywords (0/2): [],,2026-09-22T19:43:49Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-001-F,RN-HEADER-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-002-F,RN-HEADER-002,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-003-F,RN-HEADER-003,FAIL,Keywords (1/3): ['Mais'],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-004-F,RN-HEADER-004,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-005-F,RN-HEADER-005,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-006-F,RN-HEADER-006,FAIL,Keywords (0/3): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-007-F,RN-HEADER-007,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-008-F,RN-HEADER-008,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-009-F,RN-HEADER-009,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-010-F,RN-HEADER-010,FAIL,Keywords (0/2): [],,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-020-F,RN-HEADER-020,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:10Z
+09-BUSCA-HEADER.md,CT-RN-HEADER-021-F,RN-HEADER-021,FAIL,Keywords (0/1): [],,2026-09-22T19:44:10Z
+07-HOJE.md,CT-RN-HOJE-001-F,RN-HOJE-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-002-F,RN-HOJE-002,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-003-F,RN-HOJE-003,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-004-F,RN-HOJE-004,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-005-F,RN-HOJE-005,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-006-F,RN-HOJE-006,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-007-F,RN-HOJE-007,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-008-F,RN-HOJE-008,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-009-F,RN-HOJE-009,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-010-F,RN-HOJE-010,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-011-F,RN-HOJE-011,FAIL,"Ausência esperada; termos monitorados: esta semana, pode aparecer só se faltar conteúdo recente",,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-012-F,RN-HOJE-012,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-013-F,RN-HOJE-013,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-014-F,RN-HOJE-014,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-015-F,RN-HOJE-015,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-016-F,RN-HOJE-016,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-017-F,RN-HOJE-017,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-018-F,RN-HOJE-018,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-019-F,RN-HOJE-019,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-020-F,RN-HOJE-020,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-021-F,RN-HOJE-021,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-022-F,RN-HOJE-022,PASS,Keywords (1/1): ['hoje'],,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-023-F,RN-HOJE-023,PASS,"Ausência esperada; termos monitorados: Mesma mensagem de erro de RN-HOJE-008, quebradas, usuário  vê faixas parciais “quebradas”",,2026-09-22T19:44:00Z
+07-HOJE.md,CT-RN-HOJE-024-F,RN-HOJE-024,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+01-HOME.md,CT-RN-HOME-001-F,RN-HOME-001,PASS,"Posições no texto: [10, 17, 24, 31]",,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-002-F,RN-HOME-002,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-003-F,RN-HOME-003,PASS,"Ausência esperada; termos monitorados: Não aparece tela de erro do navegador, faixas e controles continuam",,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-004-F,RN-HOME-004,PASS,Ausência esperada; termos monitorados: é obrigatório tudo carregar antes de rolar,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-001-F,RN-HOME-AC-001,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-002-F,RN-HOME-AC-002,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-003-F,RN-HOME-AC-003,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-004-F,RN-HOME-AC-004,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-005-F,RN-HOME-AC-005,FAIL,Keywords (1/4): ['Terça'],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-006-F,RN-HOME-AC-006,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-007-F,RN-HOME-AC-007,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-008-F,RN-HOME-AC-008,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-009-F,RN-HOME-AC-009,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-AC-010-F,RN-HOME-AC-010,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-001-F,RN-HOME-CA-001,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-002-F,RN-HOME-CA-002,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-003-F,RN-HOME-CA-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-004-F,RN-HOME-CA-004,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-005-F,RN-HOME-CA-005,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-006-F,RN-HOME-CA-006,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-007-F,RN-HOME-CA-007,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CA-008-F,RN-HOME-CA-008,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-001-F,RN-HOME-CARD-001,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-002-F,RN-HOME-CARD-002,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-003-F,RN-HOME-CARD-003,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-004-F,RN-HOME-CARD-004,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-005-F,RN-HOME-CARD-005,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-006-F,RN-HOME-CARD-006,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-007-F,RN-HOME-CARD-007,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-008-F,RN-HOME-CARD-008,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-009-F,RN-HOME-CARD-009,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-010-F,RN-HOME-CARD-010,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-011-F,RN-HOME-CARD-011,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-012-F,RN-HOME-CARD-012,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-013-F,RN-HOME-CARD-013,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-014-F,RN-HOME-CARD-014,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-015-F,RN-HOME-CARD-015,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-016-F,RN-HOME-CARD-016,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CARD-017-F,RN-HOME-CARD-017,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-001-F,RN-HOME-CON-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-002-F,RN-HOME-CON-002,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-003-F,RN-HOME-CON-003,PASS,Ausência esperada; termos monitorados: Não aparece no carrossel inicial de filmes,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-004-F,RN-HOME-CON-004,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-005-F,RN-HOME-CON-005,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-006-F,RN-HOME-CON-006,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-007-F,RN-HOME-CON-007,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-008-F,RN-HOME-CON-008,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-009-F,RN-HOME-CON-009,PASS,Ausência esperada; termos monitorados: Ausente na home,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-CON-010-F,RN-HOME-CON-010,PASS,Ausência esperada; termos monitorados: Pode  aparecer no carregamento inicial,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-001-F,RN-HOME-EA-001,FAIL,Keywords (1/4): ['em alta'],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-002-F,RN-HOME-EA-002,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-003-F,RN-HOME-EA-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-004-F,RN-HOME-EA-004,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-005-F,RN-HOME-EA-005,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-EA-006-F,RN-HOME-EA-006,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-HERO-001-F,RN-HOME-HERO-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-HERO-002-F,RN-HOME-HERO-002,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-SHELL-001-F,RN-HOME-SHELL-001,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-SHELL-002-F,RN-HOME-SHELL-002,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TBD-001-F,RN-HOME-TBD-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TBD-002-F,RN-HOME-TBD-002,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TBD-003-F,RN-HOME-TBD-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-001-F,RN-HOME-TL-001,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-002-F,RN-HOME-TL-002,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-003-F,RN-HOME-TL-003,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-004-F,RN-HOME-TL-004,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-005-F,RN-HOME-TL-005,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-006-F,RN-HOME-TL-006,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-007-F,RN-HOME-TL-007,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-008-F,RN-HOME-TL-008,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-009-F,RN-HOME-TL-009,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-010-F,RN-HOME-TL-010,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-011-F,RN-HOME-TL-011,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-012-F,RN-HOME-TL-012,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-TL-013-F,RN-HOME-TL-013,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-UPD-001-F,RN-HOME-UPD-001,FAIL,Keywords (0/1): [],,2026-09-22T19:43:54Z
+01-HOME.md,CT-RN-HOME-UPD-002-F,RN-HOME-UPD-002,FAIL,Keywords (0/2): [],,2026-09-22T19:43:54Z
+05-JOGOS.md,CT-RN-JOGOS-001-F,RN-JOGOS-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-002-F,RN-JOGOS-002,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-003-F,RN-JOGOS-003,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-004-F,RN-JOGOS-004,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-005-F,RN-JOGOS-005,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-006-F,RN-JOGOS-006,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-007-F,RN-JOGOS-007,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-008-F,RN-JOGOS-008,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-009-F,RN-JOGOS-009,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-010-F,RN-JOGOS-010,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-011-F,RN-JOGOS-011,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-012-F,RN-JOGOS-012,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-013-F,RN-JOGOS-013,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-014-F,RN-JOGOS-014,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-015-F,RN-JOGOS-015,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-016-F,RN-JOGOS-016,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-017-F,RN-JOGOS-017,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-018-F,RN-JOGOS-018,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-019-F,RN-JOGOS-019,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-020-F,RN-JOGOS-020,FAIL,Keywords (0/1): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-021-F,RN-JOGOS-021,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-022-F,RN-JOGOS-022,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-023-F,RN-JOGOS-023,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-024-F,RN-JOGOS-024,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-025-F,RN-JOGOS-025,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-026-F,RN-JOGOS-026,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-027-F,RN-JOGOS-027,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-028-F,RN-JOGOS-028,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:44:00Z
+05-JOGOS.md,CT-RN-JOGOS-029-F,RN-JOGOS-029,FAIL,Keywords (0/2): [],,2026-09-22T19:44:00Z
+10-MINHA-LISTA.md,CT-RN-LISTA-001-F,RN-LISTA-001,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-002-F,RN-LISTA-002,PASS,"Ausência esperada; termos monitorados: Sem login  vê conteúdo da lista, logado vê dados pessoais",,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-010-F,RN-LISTA-010,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-011-F,RN-LISTA-011,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-012-F,RN-LISTA-012,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-020-F,RN-LISTA-020,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-021-F,RN-LISTA-021,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-030-F,RN-LISTA-030,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-031-F,RN-LISTA-031,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-032-F,RN-LISTA-032,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-033-F,RN-LISTA-033,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-034-F,RN-LISTA-034,PASS,Ausência esperada; termos monitorados: Não aparecem na lista visível,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-035-F,RN-LISTA-035,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-036-F,RN-LISTA-036,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-037-F,RN-LISTA-037,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-040-F,RN-LISTA-040,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-041-F,RN-LISTA-041,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-042-F,RN-LISTA-042,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-043-F,RN-LISTA-043,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-044-F,RN-LISTA-044,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-045-F,RN-LISTA-045,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-046-F,RN-LISTA-046,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-047-F,RN-LISTA-047,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-048-F,RN-LISTA-048,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-049-F,RN-LISTA-049,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-050-F,RN-LISTA-050,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-051-F,RN-LISTA-051,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-052-F,RN-LISTA-052,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-053-F,RN-LISTA-053,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-060-F,RN-LISTA-060,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-061-F,RN-LISTA-061,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-062-F,RN-LISTA-062,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-063-F,RN-LISTA-063,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-064-F,RN-LISTA-064,FAIL,Keywords (0/3): [],,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-065-F,RN-LISTA-065,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-066-F,RN-LISTA-066,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-070-F,RN-LISTA-070,PASS,"Ausência esperada; termos monitorados: Toast pedindo login, ação  conclui",,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-071-F,RN-LISTA-071,BLOQUEADO,Requer sessão autenticada; runner anônimo em produção.,,2026-09-22T19:44:07Z
+10-MINHA-LISTA.md,CT-RN-LISTA-072-F,RN-LISTA-072,PASS,"Ausência esperada; termos monitorados: Acompanhando, “Acompanhando” oferecido para anime e série, para filme/jogo da mesma forma",,2026-09-22T19:44:07Z
+08-MODAIS.md,CT-RN-MODAL-001-F,RN-MODAL-001,PASS,"Ausência esperada; termos monitorados: Overlay e conteúdo aparecem, tipos  suportados  abrem modal",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-002-F,RN-MODAL-002,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-003-F,RN-MODAL-003,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-004-F,RN-MODAL-004,PASS,Ausência esperada; termos monitorados: raramente tela de erro se  houver nenhum dado,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-005-F,RN-MODAL-005,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-006-F,RN-MODAL-006,PASS,Ausência esperada; termos monitorados: A página atrás  rola (scroll bloqueado),,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-007-F,RN-MODAL-007,FAIL,Keywords (0/1): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-008-F,RN-MODAL-008,FAIL,Keywords (0/1): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-009-F,RN-MODAL-009,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-010-F,RN-MODAL-010,PASS,"Ausência esperada; termos monitorados: Botão de editar visível, alterna para formulários de curadoria, visitante/usuário comum  vê editar",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-011-F,RN-MODAL-011,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-012-F,RN-MODAL-012,FAIL,Keywords (0/1): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-013-F,RN-MODAL-013,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-020-F,RN-MODAL-020,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-021-F,RN-MODAL-021,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-022-F,RN-MODAL-022,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-023-F,RN-MODAL-023,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-024-F,RN-MODAL-024,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-025-F,RN-MODAL-025,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-026-F,RN-MODAL-026,PASS,Ausência esperada; termos monitorados: Botão visível só enquanto a estreia ainda  passou,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-030-F,RN-MODAL-030,PASS,"Ausência esperada; termos monitorados: Abre modal de avaliação, desabilitado se a obra ainda  lançou",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-031-F,RN-MODAL-031,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-032-F,RN-MODAL-032,PASS,"Ausência esperada; termos monitorados: Opções do tipo gostei / amei /  gostei, campo de texto opcional",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-033-F,RN-MODAL-033,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-040-F,RN-MODAL-040,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-041-F,RN-MODAL-041,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-042-F,RN-MODAL-042,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-043-F,RN-MODAL-043,PASS,"Ausência esperada; termos monitorados: Prioriza trailer oficial, se primeiro trailer, se outro vídeo",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-044-F,RN-MODAL-044,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-045-F,RN-MODAL-045,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-050-F,RN-MODAL-050,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-051-F,RN-MODAL-051,FAIL,Keywords (0/1): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-052-F,RN-MODAL-052,PASS,Ausência esperada; termos monitorados: calendário pode existir por outros fluxos conforme produto,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-053-F,RN-MODAL-053,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-060-F,RN-MODAL-060,PASS,"Ausência esperada; termos monitorados: Texto limpo, ( informado), se ausente, “( informado)”",,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-061-F,RN-MODAL-061,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-062-F,RN-MODAL-062,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-063-F,RN-MODAL-063,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-064-F,RN-MODAL-064,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-070-F,RN-MODAL-070,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-071-F,RN-MODAL-071,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-072-F,RN-MODAL-072,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-080-F,RN-MODAL-080,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-081-F,RN-MODAL-081,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-082-F,RN-MODAL-082,FAIL,Keywords (0/2): [],,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-090-F,RN-MODAL-090,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-091-F,RN-MODAL-091,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:02Z
+08-MODAIS.md,CT-RN-MODAL-092-F,RN-MODAL-092,PASS,"Ausência esperada; termos monitorados: Continuação, Aba padrão “Continuação” se houver sequência, Universo",,2026-09-22T19:44:02Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-001-F,RN-PERS-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-002-F,RN-PERS-002,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-003-F,RN-PERS-003,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-004-F,RN-PERS-004,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-005-F,RN-PERS-005,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-006-F,RN-PERS-006,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-007-F,RN-PERS-007,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PERS-008-F,RN-PERS-008,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-001-F,RN-PREM-001,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-002-F,RN-PREM-002,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-003-F,RN-PREM-003,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-004-F,RN-PREM-004,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-005-F,RN-PREM-005,FAIL,Keywords (0/2): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-006-F,RN-PREM-006,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-007-F,RN-PREM-007,FAIL,Keywords (0/3): [],,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-008-F,RN-PREM-008,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:44:07Z
+12-OUTRAS-TELAS.md,CT-RN-PREM-009-F,RN-PREM-009,FAIL,Keywords (0/1): [],,2026-09-22T19:44:07Z
+06-PROMOCOES.md,CT-RN-PROMO-001-F,RN-PROMO-001,FAIL,Keywords (0/3): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-002-F,RN-PROMO-002,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-003-F,RN-PROMO-003,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-004-F,RN-PROMO-004,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-005-F,RN-PROMO-005,PASS,"Ausência esperada; termos monitorados: Promoções carrega ao selecionar aba, Grátis pode  ter sido buscado ainda",,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-006-F,RN-PROMO-006,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-007-F,RN-PROMO-007,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-008-F,RN-PROMO-008,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-009-F,RN-PROMO-009,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-010-F,RN-PROMO-010,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-011-F,RN-PROMO-011,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-012-F,RN-PROMO-012,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-013-F,RN-PROMO-013,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-014-F,RN-PROMO-014,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-015-F,RN-PROMO-015,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-016-F,RN-PROMO-016,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-017-F,RN-PROMO-017,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-018-F,RN-PROMO-018,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-019-F,RN-PROMO-019,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-020-F,RN-PROMO-020,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-021-F,RN-PROMO-021,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-022-F,RN-PROMO-022,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-023-F,RN-PROMO-023,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-024-F,RN-PROMO-024,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-025-F,RN-PROMO-025,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-026-F,RN-PROMO-026,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-027-F,RN-PROMO-027,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-028-F,RN-PROMO-028,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-029-F,RN-PROMO-029,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-030-F,RN-PROMO-030,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-031-F,RN-PROMO-031,PASS,"Ausência esperada; termos monitorados: Não foi possível carregar promoções e jogos grátis, + Tentar novamente",,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-032-F,RN-PROMO-032,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-033-F,RN-PROMO-033,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-034-F,RN-PROMO-034,FAIL,Keywords (0/1): [],,2026-09-22T19:43:59Z
+06-PROMOCOES.md,CT-RN-PROMO-035-F,RN-PROMO-035,FAIL,Keywords (0/2): [],,2026-09-22T19:43:59Z
+03-SERIES.md,CT-RN-SERIES-001-F,RN-SERIES-001,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-002-F,RN-SERIES-002,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-003-F,RN-SERIES-003,FAIL,Keywords (0/3): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-004-F,RN-SERIES-004,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-005-F,RN-SERIES-005,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-006-F,RN-SERIES-006,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-007-F,RN-SERIES-007,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-008-F,RN-SERIES-008,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-009-F,RN-SERIES-009,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-010-F,RN-SERIES-010,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-011-F,RN-SERIES-011,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-012-F,RN-SERIES-012,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-013-F,RN-SERIES-013,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-014-F,RN-SERIES-014,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-015-F,RN-SERIES-015,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-016-F,RN-SERIES-016,PASS,Smoke: página renderizada; sem keywords — validação superficial.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-017-F,RN-SERIES-017,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-018-F,RN-SERIES-018,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-019-F,RN-SERIES-019,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-020-F,RN-SERIES-020,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-021-F,RN-SERIES-021,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-022-F,RN-SERIES-022,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-023-F,RN-SERIES-023,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-024-F,RN-SERIES-024,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-025-F,RN-SERIES-025,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-026-F,RN-SERIES-026,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-027-F,RN-SERIES-027,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-028-F,RN-SERIES-028,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-029-F,RN-SERIES-029,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-030-F,RN-SERIES-030,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-031-F,RN-SERIES-031,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-032-F,RN-SERIES-032,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-033-F,RN-SERIES-033,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-034-F,RN-SERIES-034,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-035-F,RN-SERIES-035,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-036-F,RN-SERIES-036,PASS,Ausência esperada; termos monitorados: ,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-037-F,RN-SERIES-037,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-038-F,RN-SERIES-038,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-039-F,RN-SERIES-039,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-040-F,RN-SERIES-040,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-041-F,RN-SERIES-041,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-042-F,RN-SERIES-042,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-043-F,RN-SERIES-043,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-044-F,RN-SERIES-044,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-045-F,RN-SERIES-045,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-046-F,RN-SERIES-046,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-047-F,RN-SERIES-047,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-048-F,RN-SERIES-048,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-049-F,RN-SERIES-049,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-050-F,RN-SERIES-050,PASS,"Ausência esperada; termos monitorados: Home  lista tudo, Séries lista muito mais via filtros",,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-051-F,RN-SERIES-051,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-052-F,RN-SERIES-052,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-053-F,RN-SERIES-053,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-054-F,RN-SERIES-054,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-055-F,RN-SERIES-055,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-056-F,RN-SERIES-056,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-057-F,RN-SERIES-057,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-058-F,RN-SERIES-058,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-059-F,RN-SERIES-059,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-060-F,RN-SERIES-060,FAIL,Keywords (0/2): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-061-F,RN-SERIES-061,FAIL,Keywords (0/1): [],,2026-09-22T19:43:50Z
+03-SERIES.md,CT-RN-SERIES-062-F,RN-SERIES-062,BLOQUEADO,Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.,,2026-09-22T19:43:50Z

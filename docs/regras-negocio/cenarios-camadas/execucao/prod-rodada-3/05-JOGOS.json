@@ -1,0 +1,210 @@
+{
+  "arquivo": "05-JOGOS.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-JOGOS-001-F",
+      "regra": "RN-JOGOS-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-002-F",
+      "regra": "RN-JOGOS-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-003-F",
+      "regra": "RN-JOGOS-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-004-F",
+      "regra": "RN-JOGOS-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-005-F",
+      "regra": "RN-JOGOS-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-006-F",
+      "regra": "RN-JOGOS-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-007-F",
+      "regra": "RN-JOGOS-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-008-F",
+      "regra": "RN-JOGOS-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-009-F",
+      "regra": "RN-JOGOS-009",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-010-F",
+      "regra": "RN-JOGOS-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-011-F",
+      "regra": "RN-JOGOS-011",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-012-F",
+      "regra": "RN-JOGOS-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-013-F",
+      "regra": "RN-JOGOS-013",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-014-F",
+      "regra": "RN-JOGOS-014",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-015-F",
+      "regra": "RN-JOGOS-015",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-016-F",
+      "regra": "RN-JOGOS-016",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-017-F",
+      "regra": "RN-JOGOS-017",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-018-F",
+      "regra": "RN-JOGOS-018",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-019-F",
+      "regra": "RN-JOGOS-019",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-020-F",
+      "regra": "RN-JOGOS-020",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-021-F",
+      "regra": "RN-JOGOS-021",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-022-F",
+      "regra": "RN-JOGOS-022",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-023-F",
+      "regra": "RN-JOGOS-023",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-024-F",
+      "regra": "RN-JOGOS-024",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-025-F",
+      "regra": "RN-JOGOS-025",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-026-F",
+      "regra": "RN-JOGOS-026",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-027-F",
+      "regra": "RN-JOGOS-027",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-028-F",
+      "regra": "RN-JOGOS-028",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:44:00Z"
+    },
+    {
+      "id": "CT-RN-JOGOS-029-F",
+      "regra": "RN-JOGOS-029",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:00Z"
+    }
+  ]
+}

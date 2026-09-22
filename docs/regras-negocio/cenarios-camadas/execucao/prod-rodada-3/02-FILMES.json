@@ -1,0 +1,483 @@
+{
+  "arquivo": "02-FILMES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-FILMES-001-F",
+      "regra": "RN-FILMES-001",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-002-F",
+      "regra": "RN-FILMES-002",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-003-F",
+      "regra": "RN-FILMES-003",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-004-F",
+      "regra": "RN-FILMES-004",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-005-F",
+      "regra": "RN-FILMES-005",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-006-F",
+      "regra": "RN-FILMES-006",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-007-F",
+      "regra": "RN-FILMES-007",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-008-F",
+      "regra": "RN-FILMES-008",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-009-F",
+      "regra": "RN-FILMES-009",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-010-F",
+      "regra": "RN-FILMES-010",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-011-F",
+      "regra": "RN-FILMES-011",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-012-F",
+      "regra": "RN-FILMES-012",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-013-F",
+      "regra": "RN-FILMES-013",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-014-F",
+      "regra": "RN-FILMES-014",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-015-F",
+      "regra": "RN-FILMES-015",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-016-F",
+      "regra": "RN-FILMES-016",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-017-F",
+      "regra": "RN-FILMES-017",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-018-F",
+      "regra": "RN-FILMES-018",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-019-F",
+      "regra": "RN-FILMES-019",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-020-F",
+      "regra": "RN-FILMES-020",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-021-F",
+      "regra": "RN-FILMES-021",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-022-F",
+      "regra": "RN-FILMES-022",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-023-F",
+      "regra": "RN-FILMES-023",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Selects  ficam permanentemente desabilitados",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-024-F",
+      "regra": "RN-FILMES-024",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-025-F",
+      "regra": "RN-FILMES-025",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-026-F",
+      "regra": "RN-FILMES-026",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-027-F",
+      "regra": "RN-FILMES-027",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-028-F",
+      "regra": "RN-FILMES-028",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-029-F",
+      "regra": "RN-FILMES-029",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-030-F",
+      "regra": "RN-FILMES-030",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-031-F",
+      "regra": "RN-FILMES-031",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-032-F",
+      "regra": "RN-FILMES-032",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-033-F",
+      "regra": "RN-FILMES-033",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-034-F",
+      "regra": "RN-FILMES-034",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-035-F",
+      "regra": "RN-FILMES-035",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-036-F",
+      "regra": "RN-FILMES-036",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-037-F",
+      "regra": "RN-FILMES-037",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-038-F",
+      "regra": "RN-FILMES-038",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-039-F",
+      "regra": "RN-FILMES-039",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-040-F",
+      "regra": "RN-FILMES-040",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-041-F",
+      "regra": "RN-FILMES-041",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-042-F",
+      "regra": "RN-FILMES-042",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-043-F",
+      "regra": "RN-FILMES-043",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-044-F",
+      "regra": "RN-FILMES-044",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-045-F",
+      "regra": "RN-FILMES-045",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-046-F",
+      "regra": "RN-FILMES-046",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-047-F",
+      "regra": "RN-FILMES-047",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-048-F",
+      "regra": "RN-FILMES-048",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: já lançado, : comparar com atalho Em Breve)",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-049-F",
+      "regra": "RN-FILMES-049",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-050-F",
+      "regra": "RN-FILMES-050",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-051-F",
+      "regra": "RN-FILMES-051",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-052-F",
+      "regra": "RN-FILMES-052",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-053-F",
+      "regra": "RN-FILMES-053",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-054-F",
+      "regra": "RN-FILMES-054",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-055-F",
+      "regra": "RN-FILMES-055",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-056-F",
+      "regra": "RN-FILMES-056",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-057-F",
+      "regra": "RN-FILMES-057",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-058-F",
+      "regra": "RN-FILMES-058",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-059-F",
+      "regra": "RN-FILMES-059",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-060-F",
+      "regra": "RN-FILMES-060",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-061-F",
+      "regra": "RN-FILMES-061",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-062-F",
+      "regra": "RN-FILMES-062",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-063-F",
+      "regra": "RN-FILMES-063",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Filmes pode mostrar pills nos cards/detalhe, ranking completo  é seção fixa aqui",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-064-F",
+      "regra": "RN-FILMES-064",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-065-F",
+      "regra": "RN-FILMES-065",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Grade estática filtrada,  slide por slide de timeline",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-066-F",
+      "regra": "RN-FILMES-066",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-067-F",
+      "regra": "RN-FILMES-067",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    },
+    {
+      "id": "CT-RN-FILMES-068-F",
+      "regra": "RN-FILMES-068",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:43:49Z"
+    }
+  ]
+}
