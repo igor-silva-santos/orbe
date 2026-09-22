@@ -9,13 +9,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXEC_DIR = ROOT / "cenarios-camadas" / "execucao" / "prod"
-OUT_CSV = ROOT / "cenarios-camadas" / "execucao" / "relatorio-feliz-producao.csv"
-OUT_HTML = ROOT / "cenarios-camadas" / "execucao" / "relatorio-feliz-producao.html"
+EXEC_BASE = ROOT / "cenarios-camadas" / "execucao"
 EXPECTED = 511
 
 
 def main() -> None:
+    import sys
+
+    subdir = sys.argv[1] if len(sys.argv) > 1 else "prod"
+    slug = subdir.replace("/", "-")
+    EXEC_DIR = EXEC_BASE / subdir
+    OUT_CSV = EXEC_BASE / f"relatorio-feliz-{slug}.csv"
+    OUT_HTML = EXEC_BASE / f"relatorio-feliz-{slug}.html"
     rows: list[dict] = []
     for path in sorted(EXEC_DIR.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
