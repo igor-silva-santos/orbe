@@ -1,0 +1,322 @@
+{
+  "arquivo": "06-PROMOCOES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 35,
+  "cenarios": [
+    {
+      "id": "CT-RN-PROMO-001-F",
+      "regra": "RN-PROMO-001",
+      "titulo": "Feliz: Aba pela URL",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir cada URL.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Padrão **Jogos de Graça**; `promocoes` → aba Promoções; `em-alta` → Em Alta.",
+      "pre": "`/promocoes`, `/promocoes?tab=promocoes`, `/promocoes?tab=em-alta`.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-002-F",
+      "regra": "RN-PROMO-002",
+      "titulo": "Feliz: Shell da página",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir Promoções com rede lenta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Layout visível; conteúdo das abas grátis/promo preenche depois.",
+      "pre": "Primeira visita.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-003-F",
+      "regra": "RN-PROMO-003",
+      "titulo": "Feliz: Três abas",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Clicar cada aba.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Alternar abas muda conteúdo principal.",
+      "pre": "Página carregada.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-004-F",
+      "regra": "RN-PROMO-004",
+      "titulo": "Feliz: Em Alta sem ofertas de loja",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir Em Alta.\n3. Observar ausência de grids de oferta.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só blocos de jogos em alta; sem skeleton de 12 cards de deal (salvo loading interno de Em Alta).",
+      "pre": "Aba **Em Alta** ativa.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-005-F",
+      "regra": "RN-PROMO-005",
+      "titulo": "Feliz: Carregar sob demanda",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Entrar direto `?tab=promocoes`.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Promoções carrega ao selecionar aba; Grátis pode não ter sido buscado ainda.",
+      "pre": "Abrir direto em Promoções sem passar por Grátis.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-006-F",
+      "regra": "RN-PROMO-006",
+      "titulo": "Feliz: Várias lojas — grátis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ler rodapé após load.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards de lojas diferentes; rodapé lista fontes com contagem.",
+      "pre": "Aba Grátis carregada.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-007-F",
+      "regra": "RN-PROMO-007",
+      "titulo": "Feliz: Várias lojas — promo pagas",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir aba Promoções.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ofertas misturadas; ordenação **Popularidade** por padrão.",
+      "pre": "Aba Promoções.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-008-F",
+      "regra": "RN-PROMO-008",
+      "titulo": "Feliz: Catálogo Orbe na Steam",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Aba Promoções com catálogo populado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **Promoções na Steam (catálogo)** com carrossel horizontal.",
+      "pre": "Jogos Orbe em promo Steam.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-009-F",
+      "regra": "RN-PROMO-009",
+      "titulo": "Feliz: Atualização periódica",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Clicar **Atualizar agora** duas vezes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Horário **Última atualização** muda após atualizar.",
+      "pre": "Aba grátis ou promo.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-010-F",
+      "regra": "RN-PROMO-010",
+      "titulo": "Feliz: Alerta de fontes indisponíveis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Simular/induzir falha de fonte.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Banner listando lojas com falha.",
+      "pre": "Fonte externa down no ambiente.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-011-F",
+      "regra": "RN-PROMO-011",
+      "titulo": "Feliz: Sem detalhes técnicos internos",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Inspecionar UI.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nenhum painel “debug” na interface.",
+      "pre": "Qualquer aba de oferta.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-012-F",
+      "regra": "RN-PROMO-012",
+      "titulo": "Feliz: Conteúdo da aba Grátis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Percorrer aba Grátis.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seções **Estão de graça** e **São de graça**; chips de plataforma.",
+      "pre": "Grátis carregado.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-013-F",
+      "regra": "RN-PROMO-013",
+      "titulo": "Feliz: Paginação de promoções pagas",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Clicar até sumir botão.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão **Carregar mais promoções** aumenta grid.",
+      "pre": "Muitas promoções ao vivo.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-014-F",
+      "regra": "RN-PROMO-014",
+      "titulo": "Feliz: Preços em reais",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ler rodapé e cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Preço BRL nos cards; linha USD/BRL no rodapé.",
+      "pre": "Ofertas em dólar.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-015-F",
+      "regra": "RN-PROMO-015",
+      "titulo": "Feliz: Temporário vs permanente",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ler subtítulos das seções.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Duas seções com textos explicativos diferentes.",
+      "pre": "Deals de ambos tipos.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-016-F",
+      "regra": "RN-PROMO-016",
+      "titulo": "Feliz: Ordenação padrão grátis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Trocar ordenação.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Select de ordenação; mudar reordena temporários.",
+      "pre": "Aba Grátis.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-017-F",
+      "regra": "RN-PROMO-017",
+      "titulo": "Feliz: Filtro por plataforma/loja",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Filtrar Steam.\n3. Atualizar se vazio.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Chip some ou volta para **Todas**.",
+      "pre": "Filtrar e atualizar.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-018-F",
+      "regra": "RN-PROMO-018",
+      "titulo": "Feliz: Busca por título",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Buscar substring.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grid reduzido.",
+      "pre": "Texto parcial do título.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-019-F",
+      "regra": "RN-PROMO-019",
+      "titulo": "Feliz: Destaques itch.io e EA App",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Confirmar que itch não repete no grid principal.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seções **Grátis na itch.io** / **Grátis na EA** (ou equivalente).",
+      "pre": "Deals nessas lojas.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-020-F",
+      "regra": "RN-PROMO-020",
+      "titulo": "Feliz: Agrupamento por loja",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ver aba Grátis com muitas fontes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Subtítulos EPIC, STEAM, etc., cada um com grid.",
+      "pre": "Várias lojas.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-021-F",
+      "regra": "RN-PROMO-021",
+      "titulo": "Feliz: Contador na aba Grátis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Buscar título raro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Badge diminui.",
+      "pre": "Busca ativa.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-022-F",
+      "regra": "RN-PROMO-022",
+      "titulo": "Feliz: Vazio grátis",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Filtrar loja sem giveaways.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagens específicas por seção.",
+      "pre": "Lista filtrada vazia.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-023-F",
+      "regra": "RN-PROMO-023",
+      "titulo": "Feliz: Ordenação padrão promo",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Usar select de ordenação.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Trocar para **Maior desconto** reordena grid.",
+      "pre": "Aba Promoções.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-024-F",
+      "regra": "RN-PROMO-024",
+      "titulo": "Feliz: Faixa catálogo Steam",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir Promoções com catálogo em promo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção com link **Ver aba Em Alta →**.",
+      "pre": "Pelo menos um jogo Orbe em promo na Steam.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-025-F",
+      "regra": "RN-PROMO-025",
+      "titulo": "Feliz: Carregar mais",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Buscar título → botão ausente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Carregar mais promoções** append cards; com busca o botão some.",
+      "pre": ">48 promoções.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-026-F",
+      "regra": "RN-PROMO-026",
+      "titulo": "Feliz: Contador aba Promoções",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Filtrar Epic.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Número atualiza.",
+      "pre": "Filtro plataforma.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-027-F",
+      "regra": "RN-PROMO-027",
+      "titulo": "Feliz: Wishlist Steam (em breve)",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ler bloco no topo da aba.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto **Lista de desejos Steam (em breve)**.",
+      "pre": "Aba Promoções visível.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-028-F",
+      "regra": "RN-PROMO-028",
+      "titulo": "Feliz: Em Alta embutido",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Abrir aba Em Alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ver regras RN-JOGOS-019–029 em `05-JOGOS.md`.",
+      "pre": "Tab `em-alta`.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-029-F",
+      "regra": "RN-PROMO-029",
+      "titulo": "Feliz: Bookmark antigo",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Acessar URL antiga.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Endereço final `?tab=em-alta`.",
+      "pre": "URL legada.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-030-F",
+      "regra": "RN-PROMO-030",
+      "titulo": "Feliz: Atualizar agora",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Clicar em Grátis vs Em Alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner no ícone; horário atualiza (abas de deal).",
+      "pre": "Botão no hero.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-031-F",
+      "regra": "RN-PROMO-031",
+      "titulo": "Feliz: Erro global de ofertas",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Simular falha.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Não foi possível carregar promoções e jogos grátis.** + **Tentar novamente**.",
+      "pre": "Indisponibilidade.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-032-F",
+      "regra": "RN-PROMO-032",
+      "titulo": "Feliz: Skeleton inicial",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Throttle + abrir Promoções.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Skeleton antes dos cards reais.",
+      "pre": "Rede lenta, aba ≠ Em Alta.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-033-F",
+      "regra": "RN-PROMO-033",
+      "titulo": "Feliz: Banner de degradação",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Ambiente degradado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Banner âmbar/vermelho.",
+      "pre": "Fontes parciais down.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-034-F",
+      "regra": "RN-PROMO-034",
+      "titulo": "Feliz: Rodapé de fontes",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Comparar com quantidade visível.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Linha **Fontes:** Epic (n), Steam (n)…",
+      "pre": "Após load grátis/promo.",
+      "tela": "Promoções"
+    },
+    {
+      "id": "CT-RN-PROMO-035-F",
+      "regra": "RN-PROMO-035",
+      "titulo": "Feliz: Tamanho da primeira página promo",
+      "passos": "1. Abrir o site e navegar até **Promoções**.\n2. Contar antes de carregar mais.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grid inicial ~48; botão carrega resto.",
+      "pre": "Muitas ofertas.",
+      "tela": "Promoções"
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "arquivo": "04-ANIMES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 20,
+  "cenarios": [
+    {
+      "id": "CT-RN-ANIMES-001-F",
+      "regra": "RN-ANIMES-001",
+      "titulo": "Feliz: Conteúdo na abertura",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Abrir Animes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards e selects visíveis após carregar.",
+      "pre": "Catálogo acessível.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-002-F",
+      "regra": "RN-ANIMES-002",
+      "titulo": "Feliz: Falha na abertura",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Ambiente com catálogo indisponível na abertura.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade vazia; filtros vazios; página utilizável.",
+      "pre": "Falha simulada.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-003-F",
+      "regra": "RN-ANIMES-003",
+      "titulo": "Feliz: Texto do cabeçalho",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Ler cabeçalho.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Animes** + texto sobre temporadas e clássicos.",
+      "pre": "Usuário em Animes.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-004-F",
+      "regra": "RN-ANIMES-004",
+      "titulo": "Feliz: Gaveta O que vem aí",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Ambiente com estreias futuras.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **O que vem aí** acima dos filtros.",
+      "pre": "Resumo com **próximos animes**.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-005-F",
+      "regra": "RN-ANIMES-005",
+      "titulo": "Feliz: Opções dos filtros",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Abrir cada select e comparar com títulos conhecidos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Dropdowns preenchidos; gêneros em ordem alfabética; anos do mais recente ao mais antigo; status com rótulo em português quando aplicável.",
+      "pre": "Catálogo populado.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-006-F",
+      "regra": "RN-ANIMES-006",
+      "titulo": "Feliz: Valor “Todos”",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Resetar filtros.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade ampla.",
+      "pre": "Todos em todos os selects.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-007-F",
+      "regra": "RN-ANIMES-007",
+      "titulo": "Feliz: Recarga ao mudar filtro e na hidratação",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Abrir Animes observando loading.\n3. Depois trocar gênero.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner possível logo após abrir; novo spinner ao mudar filtro.",
+      "pre": "Página recém-aberta ou filtro alterado.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-008-F",
+      "regra": "RN-ANIMES-008",
+      "titulo": "Feliz: Atualização após sync",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Manter Animes aberta durante sync.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista muda sem F5.",
+      "pre": "Sync disparada.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-009-F",
+      "regra": "RN-ANIMES-009",
+      "titulo": "Feliz: Contador = cards da página atual",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Filtro amplo.\n3. Comparar contador com total esperado manualmente.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contador pode mostrar até ~48 enquanto existem mais no catálogo.",
+      "pre": "Mais de ~48 animes para o filtro.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-010-F",
+      "regra": "RN-ANIMES-010",
+      "titulo": "Feliz: Grade, loading e vazio",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Testar filtro vazio e filtro amplo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Nenhum anime encontrado** + dica; ou 2–5 colunas de cards ~210px.",
+      "pre": "Filtro impossível ou resultados OK.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-011-F",
+      "regra": "RN-ANIMES-011",
+      "titulo": "Feliz: Lote inicial sem “carregar mais”",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Contar cards com filtros abertos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "~48 cards visíveis; sem paginação na UI.",
+      "pre": "Catálogo grande.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-012-F",
+      "regra": "RN-ANIMES-012",
+      "titulo": "Feliz: Exclusão de adulto explícito",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Buscar título adulto conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente em Animes.",
+      "pre": "Anime adulto no catálogo.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-013-F",
+      "regra": "RN-ANIMES-013",
+      "titulo": "Feliz: Tags sensíveis ocultas",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Validar título de teste com tag sensível.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não aparece na grade pública.",
+      "pre": "Anime com tag bloqueada.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-014-F",
+      "regra": "RN-ANIMES-014",
+      "titulo": "Feliz: Filtros combinados",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Combinar gênero + ano + formato.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só animes que atendem **todos** os critérios.",
+      "pre": "Vários filtros ativos.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-015-F",
+      "regra": "RN-ANIMES-015",
+      "titulo": "Feliz: Ordem alfabética padrão",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Ler primeiros títulos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ordem A–Z aproximada pelos primeiros cards.",
+      "pre": "Filtros em todos.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-016-F",
+      "regra": "RN-ANIMES-016",
+      "titulo": "Feliz: Listagem vs home / Hoje",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Comparar mesmo anime nas três áreas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode aparecer em Animes e faltar na home/Hoje streaming.",
+      "pre": "Anime marginal (baixa popularidade, fora de temporada).",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-017-F",
+      "regra": "RN-ANIMES-017",
+      "titulo": "Feliz: Conteúdo pode demorar a atualizar",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Alterar anime de teste.\n3. Recarregar.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Novidades após reload.",
+      "pre": "Cadastro alterado.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-018-F",
+      "regra": "RN-ANIMES-018",
+      "titulo": "Feliz: Metadados de filtro completos",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Percorrer formatos/fontes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem opções “fantasma” no menu.",
+      "pre": "Catálogo variado.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-019-F",
+      "regra": "RN-ANIMES-019",
+      "titulo": "Feliz: Detalhe ao vivo",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Clicar card.\n3. Testar título removido.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal/página de detalhe; id inválido não abre conteúdo quebrado.",
+      "pre": "Card qualquer.",
+      "tela": "Animes"
+    },
+    {
+      "id": "CT-RN-ANIMES-020-F",
+      "regra": "RN-ANIMES-020",
+      "titulo": "Feliz: Próximo episódio (detalhe/agenda)",
+      "passos": "1. Abrir o site e navegar até **Animes**.\n2. Anime em temporada corrente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contagem ou data de próximo ep no card/detalhe.",
+      "pre": "Anime em exibição semanal.",
+      "tela": "Animes"
+    }
+  ]
+}
