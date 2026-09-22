@@ -17,6 +17,11 @@ Cada documento descreve **uma página ou fluxo visível** do site. As tabelas li
 | --- | --- |
 | [`QA-PROCESSO-CENARIOS.md`](./QA-PROCESSO-CENARIOS.md) | Fluxo: elaboração → revisão par → auditoria TL → cobertura 511/511 |
 | [`cenarios-teste.csv`](./cenarios-teste.csv) | Planilha oficial (1 linha mínima por regra, campos para passos e TL) |
+| [`cenarios-teste.md`](./cenarios-teste.md) | **511 cenários** em Markdown (mesmo conteúdo da planilha) |
+| [`cenarios/generated/`](./cenarios/generated/) | Cenários por tela (lotes para multitask) |
+| [`cenarios/EXECUCAO-ROTEIRO.md`](./cenarios/EXECUCAO-ROTEIRO.md) | Ordem de execução e lotes |
+| [`cenarios/EXECUCAO-LOG-20250922.md`](./cenarios/EXECUCAO-LOG-20250922.md) | Log da 1ª rodada de automação/smoke |
+| [`scripts/gerar-cenarios-de-regras.py`](./scripts/gerar-cenarios-de-regras.py) | Regenera CSV + MD a partir do inventário |
 | [`QA-TL-AUDITORIA.md`](./QA-TL-AUDITORIA.md) | Checklist cenário a cenário para TL sênior |
 | [`QA-CENARIOS-EXEMPLO.md`](./QA-CENARIOS-EXEMPLO.md) | Referência de qualidade |
 | [`scripts/validar-cobertura-cenarios.py`](./scripts/validar-cobertura-cenarios.py) | Valida se todas as regras têm cenário |
