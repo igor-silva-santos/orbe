@@ -34,6 +34,10 @@ Consulte números atualizados em [`relatorio-feliz-producao.html`](./relatorio-f
 
 **511 / 511** cenários Feliz registrados no CSV consolidado.
 
+### Amostra TL — 15 primeiros FAIL (HOME)
+
+Auditoria detalhada em [`AUDITORIA-AMOSTRA-FAIL.md`](./AUDITORIA-AMOSTRA-FAIL.md): **15/15** classificados como **falso-positivo provável do runner** (sem cliques, login ou asserção de ausência); **0** falha real confirmada nessa amostra. Próxima amostra sugerida: FAIL em `02-FILMES` e `10-MINHA-LISTA`.
+
 ## Próximas ações do QA
 
 1. Reexecutar manualmente todos os **BLOQUEADO** com contas e dados de teste.
