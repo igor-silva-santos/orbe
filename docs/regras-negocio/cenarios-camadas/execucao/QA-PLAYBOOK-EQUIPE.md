@@ -2,7 +2,8 @@
 
 **Versão:** 1.1 · **2026-09-22**  
 **Produção:** https://orbe-seven.vercel.app  
-**Ordem de gate:** QA time (cenários + **carrosséis e mídias nos carrosséis**) → **só então** teste manual do Igor / PO.
+**Ordem de gate:** QA time executa **511 Feliz com excelência humana** ([`QA-META-511-EXCELENCIA.md`](./QA-META-511-EXCELENCIA.md)) + carrosséis/mídias → TL assina → **só então** teste manual do Igor / PO.  
+**Não encerrar** na rodada automática (128 PASS do runner).
 
 ---
 
