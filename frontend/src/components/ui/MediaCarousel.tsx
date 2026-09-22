@@ -27,6 +27,8 @@ import {
   resolveCarouselOpenIndex,
   isCarouselOpenIndexReady,
   currentMonthCarouselTitle,
+  getCarouselAppendYears,
+  indexOfYearTbdSeparator,
 } from '@/lib/carousel-utils';
 
 import MidiaCard from '../media/MidiaCard';
@@ -171,9 +173,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       item,
       datedIndex,
     }));
-    const nowYear = new Date().getFullYear();
-    const appendYears = Array.from({ length: 6 }, (_, i) => nowYear + i);
-    return [...dated, ...getAppendSlides(appendYears)];
+    return [...dated, ...getAppendSlides(getCarouselAppendYears())];
   }, [emAltaMode, filteredItems, getAppendSlides, slidesByYear]);
 
   const filteredItemsRef = useRef(filteredItems);
@@ -272,7 +272,9 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
   /** Prefetch só do ano corrente no mount — demais anos carregam ao rolar (onSelect) */
   useEffect(() => {
     if (emAltaMode) return;
-    void loadYearTbd(new Date().getFullYear());
+    for (const y of getCarouselAppendYears()) {
+      void loadYearTbd(y);
+    }
   }, [emAltaMode, loadYearTbd]);
 
   /** Marca posicionamento inicial concluído quando não há itens para exibir */
@@ -515,6 +517,20 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
       }
 
       const lastTarget = candidates[candidates.length - 1];
+      const tbdSlides = await loadYearTbd(lastTarget.year);
+      const listAfter = applyDisplayFilters(mediaItemsRef.current);
+      const sepIndex = indexOfYearTbdSeparator(
+        lastTarget.year,
+        listAfter.length,
+        { ...slidesByYear, [lastTarget.year]: tbdSlides },
+      );
+      if (sepIndex >= 0) {
+        lastTitleMonthKey.current = `year-tbd-${lastTarget.year}`;
+        lastVisibleMonthKeyRef.current = lastTitleMonthKey.current;
+        setCurrentTitle(formatYearTbdTitle(lastTarget.year));
+        setPendingScrollIndex(sepIndex);
+        return;
+      }
       setCurrentTitle(formatCarouselMonthTitle(new Date(lastTarget.year, lastTarget.month - 1, 1)));
     } finally {
       setIsNavigating(false);
