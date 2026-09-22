@@ -1,96 +1,116 @@
-# Regras de negócio — Modais (SuperModal e subcomponentes)
+# Modais de detalhe — Regras de negócio (visão de tela)
 
-Documentação derivada do código em `frontend/src/components/modals/` e subpastas. Cada regra referencia o arquivo e trecho que a implementa.
+**Onde o usuário está:** sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
 
-## SuperModal (`SuperModal.tsx`)
+**O que existe neste fluxo:** painel escurecido; card central com pôster, sinopse, botões de ação; possível indicador de carregamento; submodais (calendário, avaliação, requisitos de PC).
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-001 | Abertura condicional | O overlay só renderiza quando `isSuperModalOpen` é verdadeiro e existem `midia` e `type` em `superModalData`. | `frontend/src/components/modals/SuperModal.tsx` (linhas 317–317) |
-| RN-MODAL-002 | Fechamento por rota | Se o usuário navega para outra rota enquanto o modal está aberto, o modal fecha sem chamar `history.back()`. | `frontend/src/components/modals/SuperModal.tsx` (linhas 47–60) |
-| RN-MODAL-003 | Carregamento de detalhes | Ao abrir, o modal zera modo edição, limpa `details` e busca `GET /{type}s/{id}/details` com timeout `DETAILS_TIMEOUT_MS`. Requisições duplicadas para o mesmo par `type-id` são ignoradas. | `frontend/src/components/modals/SuperModal.tsx` (linhas 62–93); `frontend/src/lib/api.ts` |
-| RN-MODAL-004 | Fallback em erro de API | Se a busca de detalhes falha, `details` recebe o stub `midia` já conhecido; a UI de erro só aparece se `details` permanecer nulo após o fluxo (cenário atípico). | `frontend/src/components/modals/SuperModal.tsx` (linhas 75–77, 279–284) |
-| RN-MODAL-005 | Histórico do navegador | Com o modal aberto, empilha `history.pushState({ modal: 'super' })` uma vez; fechar com botão/overlay/Escape chama `history.back()` apenas se esse estado foi empilhado. `popstate` fecha o modal sem voltar de novo. | `frontend/src/components/modals/SuperModal.tsx` (linhas 97–146) |
-| RN-MODAL-006 | Scroll do body | `document.body.style.overflow = 'hidden'` enquanto aberto; restaura `auto` ao fechar ou no cleanup do effect. | `frontend/src/components/modals/SuperModal.tsx` (linhas 129–143) |
-| RN-MODAL-007 | Fechar por overlay | Clique no backdrop (fora do card) fecha o modal (`e.target === e.currentTarget`). | `frontend/src/components/modals/SuperModal.tsx` (linha 323) |
-| RN-MODAL-008 | Escape fecha | Tecla Escape previne default e chama `handleClose`. | `frontend/src/components/modals/SuperModal.tsx` (linhas 115–118) |
-| RN-MODAL-009 | Premiações no topo | Se houver `premiacoes` em `details` ou no stub `midia`, exibe `AwardsBlock` acima do conteúdo. | `frontend/src/components/modals/SuperModal.tsx` (linhas 319–341) |
-| RN-MODAL-010 | Modo edição admin | Botão de edição visível apenas se `user.role === 'admin'`. Alterna `isEditMode` e renderiza formulários por tipo. | `frontend/src/components/modals/SuperModal.tsx` (linhas 328–331, 287–299) |
-| RN-MODAL-011 | Conteúdo por tipo | Em visualização: `AnimeModalContent`, `FilmeModalContent`, `SerieModalContent` ou `JogoModalContent`. Tipos desconhecidos retornam `null`. | `frontend/src/components/modals/SuperModal.tsx` (linhas 302–314) |
-| RN-MODAL-012 | Loading de detalhes | Enquanto `isLoadingDetails`, mostra `LoadingIndicator` com mensagem fixa. | `frontend/src/components/modals/SuperModal.tsx` (linhas 268–273) |
-| RN-MODAL-013 | Abertura fecha busca | `openSuperModal` no store define `isSearchOpen: false` para o detalhe não ficar atrás da busca. | `frontend/src/stores/appStore.ts` (linhas 257–263) |
+---
 
-## Calendário (`CalendarModal.tsx` + `handleCalendarAction` em SuperModal)
+## 1 — Abrir, fechar e navegação
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-020 | Autenticação obrigatória | Adicionar eventos ao calendário exige `isAuthenticated`; caso contrário toast de erro e fecha o submodal. | `frontend/src/components/modals/SuperModal.tsx` (linhas 171–175) |
-| RN-MODAL-021 | Opções por tipo de mídia | Filme: lançamento ou ingresso (formulário data/hora/local). Anime: lançamento ou eventos recorrentes semanais. Série e jogo: apenas lançamento único. | `frontend/src/components/modals/CalendarModal.tsx` (linhas 43–109) |
-| RN-MODAL-022 | Recorrência anime/série | Com `recurring: true` e tipo `anime` ou `serie`, gera um evento por episódio (contagem `episodes` ou `numberOfEpisodes` ou default 12), espaçados 7 dias. | `frontend/src/components/modals/SuperModal.tsx` (linhas 187–205) |
-| RN-MODAL-023 | Lançamento sem data | Evento de estreia (`release`) sem `baseDate` encerra com warn e fecha modal, sem persistir. | `frontend/src/components/modals/SuperModal.tsx` (linhas 178–184) |
-| RN-MODAL-024 | Ingresso cinema | Tipo `ticket` monta evento `cinema` com data, hora e local do formulário. | `frontend/src/components/modals/SuperModal.tsx` (linhas 217–228) |
-| RN-MODAL-025 | Persistência API | Eventos válidos são enviados via `orbeNerdApi.addCalendarEvents`; sucesso/erro via toast. | `frontend/src/components/modals/SuperModal.tsx` (linhas 236–244) |
-| RN-MODAL-026 | Botão calendário no filme | Em `FilmeModalContent`, botão “Adicionar ao Calendário” só aparece se a data de lançamento é futura (`releaseDate > now`). | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 39–42, 88–92) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-001 | Só abre com mídia válida | O modal de detalhe exige tipo e obra reconhecidos. | Clique em card de mídia suportada. | Overlay e conteúdo aparecem; tipos não suportados não abrem modal. | Abrir filme, série, anime e jogo a partir de cards. |
+| RN-MODAL-002 | Fechar ao mudar de página | Se o usuário vai para outra página do site com o modal aberto. | Modal aberto; clicar link do menu ou digitar outra URL interna. | Modal fecha; a nova página carrega normalmente (sem “voltar” extra inesperado). | Com modal aberto, ir para Filmes pelo header. |
+| RN-MODAL-003 | Detalhes ao abrir | Ao abrir, a tela busca informações completas da obra. | Abrir modal pela primeira vez para um título. | Breve loading; depois sinopse, elenco, links etc. mais completos que no card. | Abrir modal e comparar dados com o card. |
+| RN-MODAL-004 | Falha ao buscar detalhes | Se a busca de detalhes falhar. | Rede instável ou título problemático. | Modal ainda mostra o que já vinha do card; raramente tela de erro se não houver nenhum dado. | Simular offline após abrir modal. |
+| RN-MODAL-005 | Botão voltar do navegador | O modal participa do histórico do navegador. | Modal aberto em desktop/mobile. | Fechar pelo X, clique fora ou Esc pode voltar uma entrada no histórico; botão “voltar” do browser fecha o modal. | Abrir modal → botão voltar do navegador. |
+| RN-MODAL-006 | Rolagem da página de fundo | Enquanto o modal está aberto. | Modal visível. | A página atrás não rola (scroll bloqueado); ao fechar, rolagem normal volta. | Tentar rolar a listagem com modal aberto. |
+| RN-MODAL-007 | Clique fora fecha | Clicar na área escura fora do card. | Modal aberto. | Modal fecha. | Clicar no backdrop. |
+| RN-MODAL-008 | Tecla Esc fecha | Teclado com foco na página. | Modal aberto (desktop). | Esc fecha o modal. | Pressionar Esc. |
+| RN-MODAL-009 | Premiações no topo | Obra com prêmios cadastrados. | Filme/série/etc. com lista de premiações. | Bloco de prêmios acima do restante do conteúdo. | Abrir título premiado conhecido. |
+| RN-MODAL-010 | Modo edição (administrador) | Conta com perfil administrador. | Usuário admin; modal aberto. | Botão de editar visível; alterna para formulários de curadoria; visitante/usuário comum não vê editar. | Logar como admin vs usuário normal. |
+| RN-MODAL-011 | Conteúdo por tipo | Cada tipo de mídia tem layout próprio. | Abrir os quatro tipos. | Filme, série, anime e jogo mostram blocos adequados (streaming, temporadas, plataformas, etc.). | Quatro modais distintos. |
+| RN-MODAL-012 | Carregando detalhes | Entre abrir e receber dados completos. | Rede lenta. | Indicador de carregamento com mensagem fixa. | Throttle ao abrir modal. |
+| RN-MODAL-013 | Busca fecha ao abrir detalhe | Busca global aberta; usuário abre um card. | Overlay de busca visível. | Busca fecha; modal de detalhe fica por cima. | Buscar título → clicar resultado. |
 
-## Avaliação (`RatingModal` + `RatingModalWrapper`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-030 | Fluxo no card | “Já Assisti” / “Já Joguei” no `MidiaCard` abre `RatingModal` (não passa por `useMidiaInteraction`). Desabilitado se a mídia ainda não lançou (`!hasReleased`). | `frontend/src/components/media/MidiaCard.tsx` (linhas 214–227) |
-| RN-MODAL-031 | Status persistido | Avaliação grava `status: 'assistido'` para qualquer tipo (inclusive jogo). | `frontend/src/components/modals/RatingModalWrapper.tsx` (linhas 24–26) |
-| RN-MODAL-032 | Campos da avaliação | POST `/me/interactions` com `avaliacao` (`gostei` \| `amei` \| `nao_gostei`) e `comentario` opcional. | `frontend/src/components/modals/RatingModalWrapper.tsx` (linhas 36–48) |
-| RN-MODAL-033 | Token obrigatório | Sem token em `localStorage`, toast e fecha modal sem salvar. | `frontend/src/components/modals/RatingModalWrapper.tsx` (linhas 29–34) |
+## 2 — Calendário pessoal
 
-## Filme — visualização (`FilmeModalContent`, `FilmeInfoBlock`)
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-020 | Exige login | Adicionar ao calendário pessoal. | Usuário **não** logado. | Mensagem de erro (toast); submodal de calendário fecha. | Anônimo → tentar adicionar evento. |
+| RN-MODAL-021 | Opções por tipo | Tipos de evento variam conforme filme, anime, série ou jogo. | Logado; modal de cada tipo. | Filme: estreia e/ou sessão de cinema (data, hora, local). Anime: estreia e/ou lembretes semanais. Série e jogo: estreia única. | Percorrer fluxo calendário em filme e anime. |
+| RN-MODAL-022 | Lembretes semanais (anime/série) | Opção recorrente para anime ou série. | Logado; escolher recorrência semanal. | Vários eventos espaçados (~7 dias), conforme quantidade de episódios informada ou padrão (~12). | Criar série de lembretes e conferir quantidade. |
+| RN-MODAL-023 | Estreia sem data | Evento de lançamento sem data conhecida. | Obra sem data de estreia. | Aviso; nada é salvo; modal fecha. | Título sem data → “lançamento”. |
+| RN-MODAL-024 | Ingresso de cinema | Evento tipo sessão/ingresso. | Filme com formulário de cinema preenchido. | Evento com data, hora e local informados. | Preencher e salvar sessão. |
+| RN-MODAL-025 | Confirmação de salvamento | Eventos válidos enviados. | Logado; dados completos. | Toast de sucesso ou erro após tentativa de salvar. | Salvar evento válido e inválido. |
+| RN-MODAL-026 | Botão calendário em filme futuro | Botão “Adicionar ao Calendário” no filme. | Filme com estreia **futura** vs já lançado. | Botão visível só enquanto a estreia ainda não passou. | Filme futuro vs lançado. |
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-040 | Título e pôster | Usa `resolveFilmeTitle` e `resolveFilmePoster` para exibição. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 44–45, 75–76) |
-| RN-MODAL-041 | Onde assistir | Provedores de streaming deduplicados; exclui nome contendo “tmdb”. Se não há streaming nem cinema conhecido, mostra “Desconhecido”. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 26–69, 126–128) |
-| RN-MODAL-042 | Ingresso | Botão ingresso visível se estreia cinema, em cartaz, tem sessões, pré-venda ou link; compra só se `tem_sessoes === true`. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 45–54, 94–100) |
-| RN-MODAL-043 | Trailer | Prioriza trailer oficial; senão primeiro trailer; senão primeiro vídeo. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 35–37) |
-| RN-MODAL-044 | Elenco → pessoa | Link `/pessoa/{id}` grava `orbe:superModalReturn` com `{ type: 'filme', id: tmdbId }` e fecha SuperModal. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linhas 193–201) |
-| RN-MODAL-045 | Continuações no modal | Aba extra via `ContinuacoesSuperModalTabs` com `tipo="filme"` e `tmdbId`. | `frontend/src/components/modals/super-modal/FilmeModalContent.tsx` (linha 233) |
+---
 
-## Série — visualização (`SerieModalContent`, `SerieSeasonDrawer`)
+## 3 — Avaliação (“Já assisti” / “Já joguei”)
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-050 | Streaming | Mescla `streamingProviders` e `plataformas_api`, deduplica e filtra TMDB como provedor. | `frontend/src/components/modals/super-modal/SerieModalContent.tsx` (linhas 39–54) |
-| RN-MODAL-051 | Elenco → pessoa | Mesmo padrão de retorno ao SuperModal com `{ type: 'serie', id }`. | `frontend/src/components/modals/super-modal/SerieModalContent.tsx` (linhas 141–149) |
-| RN-MODAL-052 | Calendário na série | Prop `openCalendarModal` existe mas não há botão de calendário na UI de série (apenas filme futuro dispara fluxo explícito na UI). | `frontend/src/components/modals/super-modal/SerieModalContent.tsx` (interface linha 22; sem uso de `openCalendarModal` no corpo) |
-| RN-MODAL-053 | Continuações | `ContinuacoesSuperModalTabs` com `tipo="serie"`. | `frontend/src/components/modals/super-modal/SerieModalContent.tsx` (grep `ContinuacoesSuperModalTabs`) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-030 | Abrir pelo card | Atalho no card, não pelo menu genérico de lista. | Card de mídia já lançada. | Abre modal de avaliação; desabilitado se a obra ainda não lançou. | Título futuro vs lançado → botão “Já assisti/joguei”. |
+| RN-MODAL-031 | Marca como assistido/jogado | Após enviar avaliação. | Logado; modal de rating aberto. | Status passa a “assistido” (inclusive para jogos). | Avaliar jogo e conferir status na lista. |
+| RN-MODAL-032 | Campos da avaliação | Usuário escolhe sentimento e comentário opcional. | Modal aberto. | Opções do tipo gostei / amei / não gostei; campo de texto opcional. | Enviar com e sem comentário. |
+| RN-MODAL-033 | Login obrigatório | Tentativa sem sessão. | Não logado. | Toast de aviso; modal fecha sem salvar. | Anônimo → avaliar. |
 
-## Anime — visualização (`AnimeModalContent`, `AnimeInfoBlock`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-060 | Sinopse HTML | Remove tags HTML da sinopse e sanitiza texto; fallback “(não informado)”. | `frontend/src/components/modals/super-modal/AnimeModalContent.tsx` (linhas 30–31, 139–142) |
-| RN-MODAL-061 | Pin semanal | Usuário autenticado vê botão “Fixar na semana” / “Na sua semana” via `useAnimeWeeklyPin`. | `frontend/src/components/modals/super-modal/AnimeModalContent.tsx` (linhas 132–173) |
-| RN-MODAL-062 | Plataformas | Lista deduplicada por nome; Crunchyroll mostra só ícone (sem label textual). | `frontend/src/components/modals/super-modal/AnimeModalContent.tsx` (linhas 33–42, 186–199) |
-| RN-MODAL-063 | Personagem / dublador | Cards permitem alternar JP vs PT-BR quando há dubladores; link `/dublador/{id}` fecha SuperModal. | `frontend/src/components/modals/super-modal/AnimeModalContent.tsx` (linhas 44–129) |
-| RN-MODAL-064 | Rankings | Exibe no máximo 6 entradas de ranking com tradução de tipo/contexto. | `frontend/src/components/modals/super-modal/AnimeModalContent.tsx` (linhas 284–299) |
+## 4 — Modal de filme (visualização)
 
-## Jogo — visualização (`JogoModalContent`, `JogoInfoBlock`, `JogoPlatformLinks`, `PcRequirementsDrawer`)
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-040 | Título e pôster | Exibição prioriza textos e imagens curados quando existirem. | Filme com título/pôster alternativos no catálogo. | Título e arte coerentes com curadoria do site. | Comparar com listagem. |
+| RN-MODAL-041 | Onde assistir | Provedores de streaming e cinema. | Filme com e sem provedores. | Lista de serviços (sem duplicatas óbvias); se nada conhecido, texto “Desconhecido”. | Filme só cinema vs só streaming. |
+| RN-MODAL-042 | Ingresso | Compra ou sessões de cinema. | Filme em cartaz, pré-venda ou com sessões. | Botão de ingresso conforme disponibilidade; compra habilitada só quando há sessões confirmadas. | Filme em cartaz com/sem sessões. |
+| RN-MODAL-043 | Trailer | Vídeos disponíveis para o filme. | Filme com trailer oficial e alternativos. | Prioriza trailer oficial; senão primeiro trailer; senão outro vídeo. | Abrir filme com vários vídeos. |
+| RN-MODAL-044 | Elenco → página da pessoa | Clique em ator/equipe. | Elenco listado. | Vai para página da pessoa; modal de filme fecha; ao voltar, fluxo de retorno pode reabrir o filme (quando aplicável). | Clicar nome no elenco → voltar. |
+| RN-MODAL-045 | Continuações no filme | Abas extras no modal. | Filme com sequências ou universo. | Aba “Continuação” e/ou “Universo” com obras relacionadas. | Filme de franquia conhecida. |
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-070 | Requisitos PC | Drawer de requisitos só se jogo é PC/Steam (`steam_app_id` ou nome de plataforma matching) e há `pc_requirements`. | `frontend/src/components/modals/super-modal/JogoModalContent.tsx` (linhas 26–57) |
-| RN-MODAL-071 | Desenvolvedora | Links para `/desenvolvedora/{igdbId}` no bloco de informações. | `frontend/src/components/modals/super-modal/JogoInfoBlock.tsx` (linhas 66–78) |
-| RN-MODAL-072 | Steam no modal | Preço Steam no modal quando há dados de preço ou `steam_app_id`. | `frontend/src/components/modals/super-modal/JogoInfoBlock.tsx` (linhas 31–35) |
+---
 
-## Edição admin (formulários `*EditForm`)
+## 5 — Modal de série (visualização)
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-080 | Salvar filme | Admin edita campos curados (`titulo_curado`, `sinopse_curada`, `poster_curado`, etc.) e persiste com `realApi.updateFilme(id, formData)` onde `id` é o TMDB. | `frontend/src/components/modals/super-modal/FilmeEditForm.tsx` (linhas 23–29) |
-| RN-MODAL-081 | Cancelar edição | Cancelar apenas sai do modo edição sem reverter API (`handleCancel` no SuperModal). | `frontend/src/components/modals/SuperModal.tsx` (linhas 153–155) |
-| RN-MODAL-082 | Tipos editáveis | Formulários existem para filme, série, anime e jogo; outros tipos mostram mensagem de indisponibilidade. | `frontend/src/components/modals/SuperModal.tsx` (linhas 287–299) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-050 | Onde assistir | Mescla fontes de plataforma de streaming. | Série com vários provedores. | Lista deduplicada de serviços. | Inspecionar bloco streaming. |
+| RN-MODAL-051 | Elenco → pessoa | Mesmo padrão do filme. | Elenco presente. | Navega para a página da pessoa; ao voltar, o modal da série pode reabrir quando o site guardou esse retorno. | Clicar ator. |
+| RN-MODAL-052 | Calendário na série | Botão explícito de calendário na UI de série. | Modal de série aberto. | Não há botão dedicado igual ao de filme futuro; calendário pode existir por outros fluxos conforme produto. | Procurar botão calendário na série. |
+| RN-MODAL-053 | Continuações | Abas de franquia/universo. | Série ligada a universo compartilhado. | Abas de continuação/universo como no filme. | Série MCU/DCEU etc. |
 
-## Continuações embutidas (`ContinuacoesSuperModalTabs`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-MODAL-090 | Busca lazy | Carrega `getContinuacoesFilme` ou `getContinuacoesSerie` conforme `tipo` e `tmdbId`. | `frontend/src/components/continuacoes/ContinuacoesSuperModalTabs.tsx` (linhas 20–42) |
-| RN-MODAL-091 | Ocultar vazio | Se não há itens de continuação nem universo, não renderiza nada. | `frontend/src/components/continuacoes/ContinuacoesSuperModalTabs.tsx` (linhas 58–60) |
-| RN-MODAL-092 | Abas dinâmicas | Aba padrão é “Continuação” se houver sequência; senão “Universo”. Só exibe abas com conteúdo. | `frontend/src/components/continuacoes/ContinuacoesSuperModalTabs.tsx` (linhas 62–79) |
+## 6 — Modal de anime (visualização)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-060 | Sinopse legível | Texto da sinopse sem códigos ou formatação estranha visíveis. | Anime com sinopse rica ou vazia. | Texto limpo; se ausente, “(não informado)”. | Abrir anime cuja sinopse venha com formatação na origem. |
+| RN-MODAL-061 | Fixar na semana | Usuário logado. | Conta autenticada. | Botão “Fixar na semana” / “Na sua semana” alterna destaque pessoal da semana. | Logar; fixar e desfixar. |
+| RN-MODAL-062 | Plataformas | Onde assistir o anime. | Várias plataformas incl. Crunchyroll. | Lista por nome; Crunchyroll pode mostrar só ícone. | Card de anime multi-plataforma. |
+| RN-MODAL-063 | Personagem e dublador | Elenco de voz JP e PT-BR quando existir. | Anime com dublagem BR. | Alternar JP/PT-BR; link para página do dublador fecha o modal. | Anime dublado → link dublador. |
+| RN-MODAL-064 | Rankings | Listas de popularidade/classificação. | Anime com muitos rankings. | Até **6** entradas visíveis, com rótulos traduzidos. | Anime popular em várias listas. |
+
+---
+
+## 7 — Modal de jogo (visualização)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-070 | Requisitos de PC | Jogo de PC/Steam com requisitos cadastrados. | Jogo PC com requisitos vs console-only. | Drawer ou bloco de requisitos mínimos/recomendados só quando aplicável. | Jogo Steam vs exclusivo console. |
+| RN-MODAL-071 | Desenvolvedora | Nome da desenvolvedora/publicadora. | Jogo com empresa cadastrada. | Link para página da desenvolvedora. | Clicar link da empresa. |
+| RN-MODAL-072 | Preço Steam | Dados de loja quando disponíveis. | Jogo com ID Steam ou preço. | Exibe preço Steam no bloco de informações quando houver dado. | Jogo com página Steam ativa. |
+
+---
+
+## 8 — Edição (administrador)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-080 | Salvar alterações de filme | Admin em modo edição. | Campos curados editados. | Salvar persiste título, sinopse, pôster etc.; usuário vê dados atualizados ao reabrir. | Admin edita título curado → salvar → reabrir. |
+| RN-MODAL-081 | Cancelar edição | Admin cancela sem salvar. | Modo edição ativo. | Volta à visualização; dados na tela permanecem os anteriores ao save. | Editar → cancelar. |
+| RN-MODAL-082 | Tipos editáveis | Admin tenta editar cada tipo. | Conta admin. | Formulários para filme, série, anime e jogo; outros tipos mostram indisponível. | Alternar tipos em modo edição. |
+
+---
+
+## 9 — Continuações dentro do modal
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-MODAL-090 | Carregar sob demanda | Abas de continuação/universo. | Filme/série com franquia. | Conteúdo das abas carrega ao exibir (pode haver loading breve). | Abrir aba Continuação em filme de saga. |
+| RN-MODAL-091 | Ocultar se vazio | Obra sem sequência nem universo. | Título isolado. | Nenhuma aba extra de continuações. | Filme standalone. |
+| RN-MODAL-092 | Abas dinâmicas | Obra com sequência e/ou universo. | Só sequência, só universo, ou ambos. | Aba padrão “Continuação” se houver sequência; senão “Universo”; só abas com conteúdo. | Comparar filme sequel vs spin-off universo. |

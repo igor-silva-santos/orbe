@@ -1,51 +1,63 @@
-# Regras de negócio — Busca (`SearchOverlay`) e Header
+# Busca global e cabeçalho — Regras de negócio (visão de tela)
 
-## SearchOverlay (`frontend/src/components/modals/SearchOverlay.tsx`)
+**Onde o usuário está:** em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-BUSCA-001 | Visibilidade | Overlay só renderiza com `isSearchOpen` verdadeiro no store global. | `SearchOverlay.tsx` (linha 211) |
-| RN-BUSCA-002 | Histórico e Escape | Mesmo padrão do SuperModal: `pushState({ modal: 'search' })`, `Escape` e `popstate` fecham; ao fechar pode chamar `history.back()`. | `SearchOverlay.tsx` (linhas 40–94) |
-| RN-BUSCA-003 | Reset ao fechar | Fechar limpa query, categoria (`todos`), resultados de mídia e pessoas. | `SearchOverlay.tsx` (linhas 47–50) |
-| RN-BUSCA-004 | Em alta sem query | Com overlay aberto e lista vazia, busca até 20 itens em `realApi.getTrending`. | `SearchOverlay.tsx` (linhas 96–106) |
-| RN-BUSCA-005 | Mínimo de caracteres | Busca na API só com query trimada com length ≥ 2; abaixo disso zera resultados e não carrega. | `SearchOverlay.tsx` (linhas 108–124) |
-| RN-BUSCA-006 | Debounce | Requisições aguardam 350 ms após mudança de query/categoria; respostas obsoletas são descartadas por `searchRequestIdRef`. | `SearchOverlay.tsx` (linhas 126–172) |
-| RN-BUSCA-007 | Categorias de API | `todos` e `pessoas` mapeiam categoria especial; demais repassam `filmes` \| `series` \| `animes` \| `jogos` para `realApi.search`. | `SearchOverlay.tsx` (linhas 130–136) |
-| RN-BUSCA-008 | Agregação de mídia | Resultados de mídia são união plana de filmes, séries, animes e jogos retornados. | `SearchOverlay.tsx` (linhas 138–144) |
-| RN-BUSCA-009 | Pessoas na busca | `pessoas` e `dubladores` viram `PersonSearchItem` com `kind` distinto. | `SearchOverlay.tsx` (linhas 145–159) |
-| RN-BUSCA-010 | Exibição por categoria UI | Com query: filtra grupos conforme chip selecionado; `pessoas` esconde grids de mídia. | `SearchOverlay.tsx` (linhas 175–199, 306–320) |
-| RN-BUSCA-011 | Seção pessoas | Mostra grid de pessoas só se query ≥ 2 chars, categoria `todos` ou `pessoas`, e há resultados. | `SearchOverlay.tsx` (linhas 202–205, 321–333) |
-| RN-BUSCA-012 | Contagem de resultados | Total = soma dos grupos de mídia visíveis + pessoas quando `showPeople`. | `SearchOverlay.tsx` (linhas 207–209) |
-| RN-BUSCA-013 | Interações no card | Cada `MidiaCard` usa `useMidiaInteraction` e `userInteractions` do store (mesmas regras de lista/login). | `SearchOverlay.tsx` (linhas 10–11, 226–233) |
-| RN-BUSCA-014 | Foco visual | Prop `isFocused` ligada a `focusedIndex` (estado preparado; navegação por teclado não implementada no arquivo). | `SearchOverlay.tsx` (linhas 34, 230) |
-| RN-BUSCA-015 | Estados vazios | Sem query e sem trending: “Nenhum conteúdo em alta”. Com query e zero resultados: mensagem com termo buscado. | `SearchOverlay.tsx` (linhas 335–341) |
+**O que existe neste fluxo:** ícone de lupa; overlay de busca com campo de texto, filtros por tipo e grids de resultados; menu principal desktop e menu hambúrguer no mobile.
 
-## PersonSearchCard (`frontend/src/components/search/PersonSearchCard.tsx`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-BUSCA-020 | Rotas por tipo | `pessoa` → `/pessoa/{id}`; `dublador` → `/dublador/{id}`. | `PersonSearchCard.tsx` (linha 17) |
-| RN-BUSCA-021 | Retorno à busca | Antes de navegar, grava `sessionStorage['orbe:returnTo'] = 'search'` e fecha o overlay. | `PersonSearchCard.tsx` (linhas 22–24) |
-| RN-BUSCA-022 | Labels | Subtítulo “Ator / equipe” vs “Dublador” conforme `kind`. | `PersonSearchCard.tsx` (linhas 41–43) |
+## 1 — Busca global (overlay)
 
-## Header (`frontend/src/components/layout/Header.tsx`)
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-BUSCA-001 | Abrir e fechar | A busca só aparece quando acionada pelo header. | Site carregado. | Ícone de busca abre overlay; fechar remove overlay. | Clicar lupa → fechar com X/Esc/clique fora. |
+| RN-BUSCA-002 | Histórico do navegador | Comportamento alinhado ao modal de detalhe. | Busca aberta. | Botão voltar do navegador pode fechar a busca; Esc fecha. | Abrir busca → voltar do browser. |
+| RN-BUSCA-003 | Limpar ao fechar | Ao sair da busca. | Busca usada com texto e filtro. | Campo vazio, categoria “todos”, resultados zerados na próxima abertura. | Buscar algo → fechar → reabrir. |
+| RN-BUSCA-004 | Em alta sem digitar | Overlay aberto e campo vazio. | Primeira abertura ou após limpar. | Até ~20 títulos “em alta” exibidos como sugestão. | Abrir busca sem digitar. |
+| RN-BUSCA-005 | Mínimo de caracteres | Busca efetiva por texto. | Digitar 0 ou 1 caractere. | Sem busca remota; resultados de mídia zerados (permanece em alta se vazio). | Digitar “a” e parar. |
+| RN-BUSCA-006 | Espera antes de buscar | Evita buscar a cada tecla. | Digitar termo com 2+ caracteres. | Resultados atualizam ~350 ms após parar de digitar; buscas antigas não “piscam” por cima das novas. | Digitar rápido “star wars”. |
+| RN-BUSCA-007 | Filtro por tipo | Chips ou abas de categoria. | Query válida. | Opções: todos, filmes, séries, animes, jogos, pessoas; restringe o que é buscado/exibido. | Buscar termo comum; alternar chips. |
+| RN-BUSCA-008 | Resultados de mídia | Várias mídias na mesma busca. | Categoria “todos” ou tipo específico. | Filmes, séries, animes e jogos aparecem em grupos conforme filtro. | Termo que existe em mais de um tipo. |
+| RN-BUSCA-009 | Pessoas e dubladores | Resultados de elenco. | Termo com 2+ chars; categoria todos ou pessoas. | Cards de ator/equipe vs dublador com rótulos distintos. | Buscar nome de ator e de dublador. |
+| RN-BUSCA-010 | O que mostra por categoria | Com texto digitado. | Query ≥ 2; chip selecionado. | Chip “pessoas” esconde grids de mídia; demais chips focam o tipo escolhido. | Mesmo termo em “todos” vs “filmes” vs “pessoas”. |
+| RN-BUSCA-011 | Seção pessoas | Grid dedicado. | Query ≥ 2; todos ou pessoas; há matches. | Bloco de pessoas visível só nessas condições. | Buscar sobrenome comum. |
+| RN-BUSCA-012 | Contagem de resultados | Total exibido ao usuário. | Busca com resultados. | Número reflete mídias visíveis + pessoas quando a seção pessoas está ativa. | Comparar total ao mudar chip. |
+| RN-BUSCA-013 | Ações nos cards | Favoritar e listas na busca. | Logado ou anônimo. | Mesmas regras dos cards nas listagens (login exigido onde aplicável). | Favoritar da busca logado. |
+| RN-BUSCA-014 | Destaque de foco | Preparado para navegação por teclado. | Busca com vários resultados. | Um item pode receber estado visual de foco (navegação completa por teclado pode ser limitada). | Observar foco ao interagir. |
+| RN-BUSCA-015 | Estados vazios | Sem sugestões e sem match. | Sem trending e sem query; ou query sem resultado. | “Nenhum conteúdo em alta” ou mensagem citando o termo buscado. | Termo inventado “zzzxxyy”. |
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-HEADER-001 | Navegação principal | Links fixos: Filmes, Séries, Animes, Jogos, Continuações, Hoje (desktop `lg+`). | `Header.tsx` (linhas 25–32, 127–132) |
-| RN-HEADER-002 | Menu “Mais” | Dropdown com Promoções, Eventos, Jogos em Alta, Premiações, Minha Lista (`/minha-lista/animes`), Extensão CR. | `Header.tsx` (linhas 34–41, 133–157) |
-| RN-HEADER-003 | Link ativo | `pathname === href` aplica estilo primário/semi-bold; item “Mais” destaca se qualquer `moreLinks` está ativo. | `Header.tsx` (linhas 61–62, 96–101, 137) |
-| RN-HEADER-004 | Busca global | Ícone de busca chama `openSearch()` e fecha menu mobile. | `Header.tsx` (linhas 74–77, 163–168) |
-| RN-HEADER-005 | Tema | Alterna claro/escuro via `useTheme().toggleTheme` e callback opcional `onThemeToggle`. | `Header.tsx` (linhas 84–87, 170–176) |
-| RN-HEADER-006 | Notificações | Ícone abre `openNotificationModal`; badge se `notificationCount > 0`, cap “9+”. | `Header.tsx` (linhas 79–82, 178–187) |
-| RN-HEADER-007 | Usuário autenticado | Menu: Minha lista (`/minha-lista`), Meu Perfil, Sair (`logout` + redirect `/`). | `Header.tsx` (linhas 190–227, 89–94) |
-| RN-HEADER-008 | Visitante desktop | Links Entrar e Inscreva-se (`/login`, `/register`) visíveis em `md+`. | `Header.tsx` (linhas 229–243) |
-| RN-HEADER-009 | Menu mobile | Em `< lg`, hamburger lista catálogo, descobrir (moreLinks) e bloco auth (lista/perfil ou login/register). | `Header.tsx` (linhas 255–338) |
-| RN-HEADER-010 | Fechar dropdowns | Clique fora do menu “Mais” fecha; overlay fixo fecha menu do usuário. | `Header.tsx` (linhas 64–72, 342–344) |
+---
 
-## Integração busca ↔ modal ↔ header
+## 2 — Card de pessoa na busca
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-HEADER-020 | Card na busca abre modal | `MidiaCard` chama `openSuperModal`, que fecha busca automaticamente (RN-MODAL-013). | `appStore.ts` (257–263); `MidiaCard.tsx` (218–220) |
-| RN-HEADER-021 | Voltar da pessoa | Página pessoa lê `orbe:returnTo === 'search'` e reabre busca após `router.back()`. | `pessoa/[id]/page.tsx` (74–80) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-BUSCA-020 | Destino do clique | Ator vs dublador. | Resultado de pessoa na busca. | Ator/equipe → página da pessoa; dublador → página do dublador. | Clicar cada tipo. |
+| RN-BUSCA-021 | Voltar à busca | Após abrir perfil a partir da busca. | Veio da overlay de busca. | Ao voltar da página de pessoa/dublador, a busca pode reabrir (fluxo de retorno). | Busca → pessoa → voltar. |
+| RN-BUSCA-022 | Subtítulo do card | Identificação rápida. | Cards na grid de pessoas. | “Ator / equipe” ou “Dublador” conforme o caso. | Ler subtítulos na busca. |
+
+---
+
+## 3 — Cabeçalho (menu e utilidades)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HEADER-001 | Links principais (desktop) | Navegação do catálogo em telas largas. | Janela larga (layout desktop). | Links visíveis: Filmes, Séries, Animes, Jogos, Continuações, Hoje. | Redimensionar janela; clicar cada link. |
+| RN-HEADER-002 | Menu “Mais” | Atalhos secundários. | Desktop. | Dropdown: Promoções, Eventos, Jogos em Alta, Premiações, Minha Lista (animes), Extensão CR. | Abrir “Mais” e seguir um item. |
+| RN-HEADER-003 | Item ativo | Página atual destacada. | Navegar entre seções. | Link da rota atual com estilo primário/negrito; “Mais” destaca se algum sublink está ativo. | Estar em Promoções e olhar o header. |
+| RN-HEADER-004 | Abrir busca | Ícone de lupa. | Qualquer página. | Abre overlay; fecha menu mobile se estiver aberto. | Mobile: abrir menu → busca. |
+| RN-HEADER-005 | Tema claro/escuro | Alternância visual. | Header visível. | Ícone alterna tema; cores do site mudam. | Clicar sol/lua. |
+| RN-HEADER-006 | Notificações | Sino de avisos. | Conta com ou sem notificações. | Abre painel/modal de notificações; badge com contagem (máx. exibição “9+”). | Conta com notificações pendentes. |
+| RN-HEADER-007 | Menu do usuário logado | Conta autenticada. | Sessão ativa. | Opções: Minha lista, Meu perfil, Sair (volta à home após sair). | Logar → menu avatar. |
+| RN-HEADER-008 | Visitante (desktop) | Sem login em tela média/grande. | Anônimo; layout desktop/tablet largo. | Links Entrar e Inscreva-se visíveis. | Anônimo desktop. |
+| RN-HEADER-009 | Menu mobile | Telas estreitas. | Layout mobile. | Hambúrguer com catálogo, “descobrir” (itens do Mais) e bloco login/lista/perfil. | Testar em viewport mobile. |
+| RN-HEADER-010 | Fechar menus | Clique fora. | Dropdown “Mais” ou menu usuário aberto. | Fecha ao clicar fora; overlay escuro fecha menu do usuário. | Abrir dropdown → clicar página. |
+
+---
+
+## 4 — Busca, header e modal juntos
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HEADER-020 | Resultado abre detalhe | Card de mídia na busca. | Busca aberta com resultados. | Clicar card abre modal de detalhe e fecha a busca. | Buscar filme → abrir card. |
+| RN-HEADER-021 | Retorno da página pessoa | Veio da busca. | Fluxo busca → página pessoa → voltar. | Busca reabre quando o site guardou “voltar para busca”. | Executar RN-BUSCA-021 + voltar do browser ou link voltar. |

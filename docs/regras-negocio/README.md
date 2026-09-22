@@ -1,44 +1,33 @@
-# Inventário de regras de negócio — Orbe Nerd
+# Regras de negócio — Orbe Nerd (visão de tela)
 
 **Última revisão:** 2026-09-22  
-**Objetivo:** documentação **minuciosa**, tela a tela, para derivação de cenários de teste. Nenhuma regra substituída por resumo genérico.
+**Para quem é:** QA, produto e suporte — **sem necessidade de acessar código**.
+
+Cada documento descreve **uma página ou fluxo visível** do site. As tabelas listam regras que podem virar casos de teste um a um.
 
 ## Como usar
 
-1. Leia [`00-CONVENCOES.md`](./00-CONVENCOES.md) (IDs, colunas, escopo).
-2. Abra o arquivo da **tela** ou **módulo** abaixo.
-3. Cada linha da tabela principal = **um caso de teste** (ou base para um caso parametrizado).
+1. Leia [`00-CONVENCOES.md`](./00-CONVENCOES.md) (colunas e IDs).
+2. Abra o arquivo da **tela** que você vai testar.
+3. Execute a coluna **Como testar**; confira **Resultado na tela**.
 
-## Mapa de telas (frontend)
+## Telas documentadas
 
-| Arquivo | Rota / módulo | Regras (aprox.) |
-|---------|----------------|-----------------|
-| [`telas/01-HOME.md`](./telas/01-HOME.md) | `/` — hero, 4 carrosséis, continuar assistindo | **90+** |
-| [`telas/02-FILMES.md`](./telas/02-FILMES.md) | `/filmes` | 68 |
-| [`telas/03-SERIES.md`](./telas/03-SERIES.md) | `/series` | 62 |
-| [`telas/04-ANIMES.md`](./telas/04-ANIMES.md) | `/animes` | 20+ |
-| [`telas/05-JOGOS.md`](./telas/05-JOGOS.md) | `/jogos`, redirect em alta | 29 |
-| [`telas/06-PROMOCOES.md`](./telas/06-PROMOCOES.md) | `/promocoes` | 35 |
-| [`telas/07-HOJE.md`](./telas/07-HOJE.md) | `/hoje` | 24 |
-| [`telas/08-MODAIS.md`](./telas/08-MODAIS.md) | SuperModal, calendário, rating | 90+ |
-| [`telas/09-BUSCA-HEADER.md`](./telas/09-BUSCA-HEADER.md) | SearchOverlay, Header | 50+ |
-| [`telas/10-MINHA-LISTA.md`](./telas/10-MINHA-LISTA.md) | Minha lista, fila, animes | 79 |
-| [`telas/11-AUTH-PERFIL.md`](./telas/11-AUTH-PERFIL.md) | Login, registro, perfil, config | 61 |
-| [`telas/12-OUTRAS-TELAS.md`](./telas/12-OUTRAS-TELAS.md) | Continuações, prêmios, eventos, pessoa… | 85+ |
+| Arquivo | O que o usuário abre no site |
+|---------|------------------------------|
+| [`telas/01-HOME.md`](./telas/01-HOME.md) | Página inicial |
+| [`telas/02-FILMES.md`](./telas/02-FILMES.md) | Filmes |
+| [`telas/03-SERIES.md`](./telas/03-SERIES.md) | Séries |
+| [`telas/04-ANIMES.md`](./telas/04-ANIMES.md) | Animes |
+| [`telas/05-JOGOS.md`](./telas/05-JOGOS.md) | Jogos / jogos em alta |
+| [`telas/06-PROMOCOES.md`](./telas/06-PROMOCOES.md) | Promoções |
+| [`telas/07-HOJE.md`](./telas/07-HOJE.md) | Hoje |
+| [`telas/08-MODAIS.md`](./telas/08-MODAIS.md) | Detalhe do título, avaliar, calendário |
+| [`telas/09-BUSCA-HEADER.md`](./telas/09-BUSCA-HEADER.md) | Busca e cabeçalho |
+| [`telas/10-MINHA-LISTA.md`](./telas/10-MINHA-LISTA.md) | Minha lista |
+| [`telas/11-AUTH-PERFIL.md`](./telas/11-AUTH-PERFIL.md) | Entrar, conta, perfil, configurações |
+| [`telas/12-OUTRAS-TELAS.md`](./telas/12-OUTRAS-TELAS.md) | Continuações, prêmios, eventos, ficha de pessoa etc. |
 
-## Curadoria global (backend)
+## Observação
 
-Filtros de exibição e sync: `api/src/qualityFilters.ts` — referenciados em várias telas (home, carrosséis, trending, hoje). Regras específicas de threshold estão nos arquivos de tela **e** podem ser extraídas para `RN-GLOBAL-*` em revisões futuras.
-
-## Documentos relacionados
-
-- Visão funcional (não atomizada): `orbe-1/FUNCIONALIDADES.md`
-- Home (rascunho denso enviado pelo time): espelhado e expandido em `telas/01-HOME.md`
-- Extensão Crunchyroll: `extension/REGRAS-CRUNCHYROLL.md`
-- Minha lista animes (API): `api/MINHA_LISTA_ANIMES.md`
-
-## Próximas expansões sugeridas
-
-- `telas/13-API-SYNC.md` — webhooks, sync, refresh WebSocket
-- `telas/14-EXTENSAO.md` — extensão navegador
-- Sub-IDs por regra de carrossel (ex.: `RN-HOME-TL-042a`) quando um caso QA precisar de variação de dados
+Alguns arquivos ainda estão sendo alinhados ao formato “só tela”. A **página inicial** (`01-HOME.md`) é a referência de estilo atual.

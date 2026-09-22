@@ -1,66 +1,93 @@
-# Telas `/jogos` e `/jogos-em-alta` — Regras de negócio
+# Página Jogos e Jogos em Alta — Regras de negócio (visão de tela)
 
-**Rotas:** `/jogos` (catálogo) · `/jogos-em-alta` (redirect) · conteúdo "Em Alta" também em `/promocoes?tab=em-alta`  
-**Objetivo:** Explorar jogos com filtros; consolidar ranking semanal e blocos Steam/IGDB na aba Promoções.  
-**Stack:** `jogos/page.tsx`, `JogosClient.tsx`, `jogos-em-alta/page.tsx`, `JogosEmAltaContent.tsx` · API `api/src/routes/jogosRoutes.ts`
+**Onde o usuário está:**
 
----
-
-## Catálogo `/jogos`
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-JOGOS-001 | SSR com revalidação | Dados iniciais de lista + filtros no servidor. | API OK no SSR. | `fetchJogosPageData()` → `GET /jogos` + `GET /jogos/filtros`; `revalidate = 300`. | `jogos/page.tsx`, `apiServer.ts` L164–178 | HTML inicial com jogos; ISR 5 min. |
-| RN-JOGOS-002 | Fallback SSR vazio | Erro na busca servidor não derruba a rota. | Exceção em `fetchJogosPageData`. | `emptyData` com filtros vazios. | `jogos/page.tsx` L4–17 | API down no SSR → página vazia funcional. |
-| RN-JOGOS-003 | Evitar refetch na hidratação | Primeira renderização cliente usa dados SSR sem duplicar request imediato. | Montagem inicial com `initialData`. | `skipInitialFetch` impede primeiro `useEffect` de chamar API; mudança de filtro dispara busca. | `JogosClient.tsx` L57–85 | Uma chamada SSR; segunda só ao alterar filtro. |
-| RN-JOGOS-004 | Filtros enviados à API | Gênero, plataforma, modo, ano e mês mapeados para query string. | Valores ≠ `todos`. | `realApi.getJogos` com parâmetros opcionais. | `JogosClient.tsx` L62–68 | Alterar plataforma → query `plataforma=`. |
-| RN-JOGOS-005 | Mês sem ano explícito | Filtro mensal assume ano corrente se ano = todos. | `mes` 1–12, `ano` omitido ou `todos`. | API `parseMonthQuery` usa `new Date().getFullYear()`. | `mediaRoutesHelpers.ts` L60–65, `jogosRoutes.ts` L38–41 | Março + "Todos os Anos" → lançamentos de março do ano atual (UTC). |
-| RN-JOGOS-006 | Prioridade mês sobre ano | Mês e ano juntos restringem ao intervalo do mês naquele ano. | `mes` válido. | `firstReleaseDate` entre início/fim do mês UTC; se só `ano`, ano civil completo. | `jogosRoutes.ts` L38–52 | Ano 2023 + mês 6 → só junho/2023. |
-| RN-JOGOS-007 | Ordenação padrão alfabética | UI não envia `filtro`; API ordena por nome. | `GET /jogos` sem `filtro=populares`. | `orderBy: { name: 'asc' }`. | `jogosRoutes.ts` L68–71 | Lista A–Z por `name`. |
-| RN-JOGOS-008 | Ordenação "populares" na API | Quando `filtro=populares`, popularidade IGDB (`follows`) prevalece. | Query `filtro=populares`. | `follows desc` (nulls last), desempate `rating desc`. | `jogosRoutes.ts` L66–71 | Endpoint com filtro populares vs alfabético. |
-| RN-JOGOS-009 | Listagem sem `jogoQualityFilter` | Catálogo `/jogos` não exige rating/hypes mínimos (diferente de em-alta e hoje). | Jogo fraco no banco. | Pode listar se passar filtros de usuário. | `jogosRoutes.ts` L32–90 vs `jogoQualityFilter` | Jogo abaixo do limiar de qualidade visível em `/jogos` mas não em destaques. |
-| RN-JOGOS-010 | Paginação e cache | Mesmo contrato que outras listas de mídia. | GET `/jogos`. | `limit` default 48, máx. 200; cache 12 h. | `mediaRoutesHelpers.ts`, `jogosRoutes.ts` L32 | Validar `total` e headers de cache. |
-| RN-JOGOS-011 | Seção "O que vem aí" | Próximos jogos do resumo de eventos. | `resumo.proximos.jogos.length > 0`. | `CollapsibleSection` + `HorizontalMediaRow` tipo `jogo`. | `JogosClient.tsx` L91–99 | Com eventos futuros, seção visível. |
-| RN-JOGOS-012 | Eventos recentes | Bloco de eventos de games da semana passada / destaques. | `resumo.destaques_recentes.eventos.length > 0`. | Lista de `GameEventCard`. | `JogosClient.tsx` L102–114 | Dados em `/eventos/resumo` com eventos → cards. |
-| RN-JOGOS-013 | UI de contagem e empty state | Igual padrão animes: conta `results.length`, empty com sugestão. | Filtros aplicados. | Loading spinner; grid ou mensagem "Nenhum jogo encontrado". | `JogosClient.tsx` L165–187 | Filtro sem match → empty state. |
-| RN-JOGOS-014 | Refresh pós-sync | Evento global recarrega lista. | `orbe:data-refresh`. | `useOrbeDataRefresh(loadJogos)`. | `JogosClient.tsx` L77 | Após sync, grade atualiza. |
-| RN-JOGOS-015 | Metadados `/jogos/filtros` | Gêneros, plataformas, modos, engines, anos distintos. | GET filtros. | Anos via `getDistinctYears('Jogo','firstReleaseDate')`; cache 24 h. | `jogosRoutes.ts` L245–264 | Dropdowns alinhados à API. |
-| RN-JOGOS-016 | Preço Steam sob demanda | Cards podem enriquecer preço via endpoint dedicado (fora da listagem). | Jogo com `steamAppId`. | Cache 15 min; revalida Steam se stale > 6 h ou preço inválido. | `jogosRoutes.ts` L94–156 | `GET /jogos/:id/steam-price` retorna centavos BRL. |
+- **Página Jogos** — listagem completa de jogos (menu ou faixa Jogos na inicial).
+- **Jogos em Alta** — conteúdo na aba **Em Alta** da página **Promoções** (`/promocoes?tab=em-alta`). O endereço antigo **/jogos-em-alta** redireciona para lá.
 
 ---
 
-## Redirect `/jogos-em-alta`
+## Catálogo — página Jogos
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-JOGOS-017 | Redirect permanente de rota legada | URL antiga aponta para aba unificada em Promoções. | Request `GET /jogos-em-alta`. | HTTP redirect Next para `/promocoes?tab=em-alta` (sem conteúdo próprio). | `jogos-em-alta/page.tsx` L3–6 | Acessar `/jogos-em-alta` → URL final com `tab=em-alta`. |
-| RN-JOGOS-018 | Navegação do site | Links de header/footer usam destino canônico. | Menu principal. | Href `/promocoes?tab=em-alta` label "Jogos em Alta". | `Header.tsx`, `Footer.tsx` | Clicar menu → mesma URL do redirect. |
+### 1 — Abertura, cabeçalho e gavetas
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-001 | Conteúdo na abertura | Grade e filtros já vêm na abertura. | Catálogo OK. | Cards e selects visíveis. | Abrir Jogos. |
+| RN-JOGOS-002 | Falha na abertura | Indisponibilidade não quebra a página. | Catálogo down. | Grade vazia; filtros vazios possíveis. | Simular falha inicial. |
+| RN-JOGOS-003 | Sem recarga duplicada na abertura | Abrir Jogos não dispara loading extra imediato após a primeira pintura. | Primeira visita OK. | Estável até mudar filtro. | Abrir e aguardar. |
+| RN-JOGOS-011 | Gaveta O que vem aí | Próximos lançamentos de jogos em carrossel. | Resumo com **próximos jogos**. | Seção **O que vem aí** acima dos filtros. | Ambiente com jogos futuros. |
+| RN-JOGOS-012 | Gaveta Eventos recentes | Destaques de eventos de games (ex.: State of Play, Nintendo Direct). | Resumo com **eventos recentes**. | Seção **Eventos recentes** com cards de evento empilhados. | Ambiente com eventos no resumo. |
+
+### 2 — Filtros e recarga
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-004 | Filtros aplicados | Gênero, plataforma, modo de jogo, ano e mês restringem a grade. | Valores específicos selecionados. | Lista coerente (ex.: só PlayStation). | Alterar cada filtro. |
+| RN-JOGOS-005 | Mês sem ano explícito | Só mês selecionado usa o **ano corrente** para lançamentos daquele mês. | Março + todos os anos. | Jogos lançados em março do ano atual. | Filtrar mês atual. |
+| RN-JOGOS-006 | Mês com ano | Mês + ano restringem ao intervalo daquele mês/ano. | Junho 2023. | Só lançamentos de jun/2023. | Combinar mês e ano. |
+| RN-JOGOS-007 | Ordem alfabética | Sem controle “populares” na UI, ordem por nome do jogo. | Filtros em todos. | A–Z nos primeiros cards. | Ler primeiros títulos. |
+| RN-JOGOS-008 | Popularidade (catálogo interno) | Modo “populares” existe no catálogo, **sem** botão nesta página. | — | Usuário só vê ordem alfabética aqui. | Confirmar ausência de atalho Populares. |
+| RN-JOGOS-014 | Atualização após sync | Sync pode atualizar grade com página aberta. | Sync em andamento. | Cards mudam sem F5. | Manter Jogos aberta. |
+| RN-JOGOS-015 | Opções de filtro | Gêneros, plataformas, modos e anos refletem jogos cadastrados; anos decrescentes. | Catálogo variado. | Menus populados coerentemente. | Abrir cada select. |
+
+### 3 — Contador, grade, vazio e curadoria
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-009 | Listagem mais permissiva que destaques | Jogos “fracos” (pouco hype/nota) podem aparecer em Jogos mas **não** em **Em Alta** ou algumas faixas da home. | Jogo obscuro. | Visível em Jogos; ausente em Em Alta. | Comparar mesma busca. |
+| RN-JOGOS-010 | Lote inicial na grade | ~dezenas de cards visíveis; sem “carregar mais”. | Catálogo grande. | Até ~48 cards; contador segue cards visíveis (como Animes). | Contar cards vs contador. |
+| RN-JOGOS-013 | Loading, contador e vazio | Spinner ao filtrar; contador = quantidade na grade; empty **Nenhum jogo encontrado**. | Filtro vazio ou OK. | Comportamento igual padrão Animes. | Filtro impossível e amplo. |
+| RN-JOGOS-016 | Preço Steam no detalhe/card | Quando o jogo tem página na Steam, preço em reais pode aparecer após carregar (não instantâneo na grade). | Jogo com Steam cadastrado. | Preço BRL ou indicador de carregamento no detalhe/card conforme produto. | Abrir jogo Steam conhecido. |
 
 ---
 
-## API e UI `GET /jogos/em-alta` (`JogosEmAltaContent`)
+## Redirect — endereço legado Jogos em Alta
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-JOGOS-019 | Pool de candidatos "recentes" | Jogos elegíveis para destaques semanais. | Consulta em-alta. | `jogoQualityFilter` AND (lançamento ≥ 7 dias OR `hypes >= 5` OR `rating >= 75`); top 150 por `hypes`, `rating`. | `jogosRoutes.ts` L470–491 | Jogo antigo sem hype/nota não entra no pool. |
-| RN-JOGOS-020 | Destaques (top 12) | Grid principal da semana. | Pool não vazio. | `destaques = mapped.slice(0, 12)`; UI badges #1–#3 em `JogosEmAltaContent`. | `jogosRoutes.ts` L567, `JogosEmAltaContent.tsx` L176–188 | Até 12 cards; três primeiros numerados. |
-| RN-JOGOS-021 | Steam mais jogados | Ranking por jogadores simultâneos. | Jogos com `steamPlayerCount` não nulo. | Até 12, ordenado `steamPlayerCount desc`; seção só se length > 0. | `jogosRoutes.ts` L492–506, L568, UI L197–207 | Com dados Steam, faixa horizontal aparece. |
-| RN-JOGOS-022 | Steam promoções (em-alta) | Descontos Steam no payload em-alta. | `steamDiscountPercent >= 10`. | Até 12 em `steam_promocoes` (não exibido como seção separada no componente atual; disponível no JSON). | `jogosRoutes.ts` L507–521, L569 | Inspecionar payload API. |
-| RN-JOGOS-023 | Blocos por plataforma | Agrupa por regex em nomes de plataforma. | Pool mapeado. | Blocos PC/Xbox/PlayStation/Nintendo; até 8 jogos cada; oculta bloco com total 0; UI ordena PC→Xbox→PS→Nintendo. | `jogosRoutes.ts` L449–454, L528–533, UI L40–45, L209–217 | Jogo só Switch aparece em Nintendo. |
-| RN-JOGOS-024 | Blocos por modo | Multijogador, cooperativo, um jogador. | Modos no jogo mapeado. | Match regex em `modos_jogo`; máx. 8; bloco vazio removido. | `jogosRoutes.ts` L456–460, L535–540 | Co-op listado em bloco Cooperativo. |
-| RN-JOGOS-025 | Blocos por gênero (categoria) | Até 6 gêneros com ≥ 2 jogos. | Gêneros em `generos_api`. | Máx. 8 jogos/gênero; ordena por total desc, nome pt-BR. | `jogosRoutes.ts` L542–557, UI L229–238 | Gênero com 1 jogo não vira seção. |
-| RN-JOGOS-026 | Label e métrica da semana | Contexto textual para o usuário. | Resposta em-alta. | `semana`: "Semana N · mês ano" (pt-BR); `metrica` menciona Steam+IGDB ou só IGDB se sem Steam. | `jogosRoutes.ts` L559–566 | Sem `STEAM_API_KEY`/dados, texto de fallback na métrica. |
-| RN-JOGOS-027 | Modo compacto na aba Promoções | Na tab `em-alta`, cabeçalho semana/métrica e banner opcional. | `PromocoesClient` → `JogosEmAltaContent` `compact` + `showPromocoesBanner`. | Sem bloco semana/métrica; banner link para `/promocoes?tab=promocoes`; skeleton 6 cards. | `PromocoesClient.tsx` L768–769, `JogosEmAltaContent.tsx` L104–174 | Aba Em Alta dentro de Promoções vs página dedicada (redirect). |
-| RN-JOGOS-028 | Erro de carregamento em-alta | Falha na API no cliente. | `getJogosEmAlta` rejeita. | Mensagem "Não foi possível carregar os jogos em alta." | `JogosEmAltaContent.tsx` L116–141 | API 500 → card de erro. |
-| RN-JOGOS-029 | Cache em-alta | Performance da aba. | GET `/jogos/em-alta`. | `cacheMiddleware(TWELVE_HOURS)`. | `jogosRoutes.ts` L442 | Header cache 12 h. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-017 | Redirect para Promoções | URL antiga não tem conteúdo próprio. | Usuário acessa **/jogos-em-alta**. | Navegador vai para **Promoções**, aba **Em Alta**. | Digitar URL legada. |
+| RN-JOGOS-018 | Menu do site | Atalho **Jogos em Alta** no cabeçalho/rodapé aponta para o mesmo destino. | Menu visível. | Clique abre Promoções na aba Em Alta. | Clicar item de menu. |
 
 ---
 
-## Endpoints relacionados (não na grade `/jogos`)
+## Jogos em Alta — aba Em Alta (Promoções)
 
-| Endpoint | Regra resumida |
-| --- | --- |
-| `GET /jogos/steam/trending` | Top 25 `steamPlayerCount`, `jogoQualityFilter` |
-| `GET /jogos/steam/sales` | Desconto ≥ 5%, top 25 |
-| `GET /jogos/by-year`, `/by-month`, `/year-tbd` | Carrosséis com qualidade + limites de data |
-| `GET /jogos/:id/details` | IGDB ao vivo, rate limit |
+### 4 — Carregamento e cabeçalho contextual
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-019 | Quem entra no ranking | Destaques semanais priorizam jogos recentes ou com hype/nota mínima; jogos antigos sem interesse ficam de fora. | Jogo lançado há meses sem destaque. | Ausente do **Top da Semana**. | Comparar jogo antigo vs lançamento recente. |
+| RN-JOGOS-026 | Semana e métrica (modo completo) | Fora do modo compacto da aba Promoções, texto indica semana corrente e fontes (Steam + IGDB ou só IGDB). | Abrir Em Alta em contexto que mostra cabeçalho longo (se existir rota dedicada futura). | Na aba Promoções (**compact**), semana/métrica longa **oculta**; banner de promoções visível. | Abrir `/promocoes?tab=em-alta`. |
+| RN-JOGOS-027 | Modo compacto na aba Promoções | Dentro de Promoções, Em Alta usa layout resumido: skeleton de 6 cards, banner para **Promoções ao vivo**, sem bloco grande de semana/métrica. | Aba **Em Alta** em Promoções. | Banner “Ofertas ao vivo…” + link **Ver promoções ao vivo**; grade compacta. | Abrir aba Em Alta. |
+| RN-JOGOS-028 | Erro ao carregar | Falha ao montar Em Alta. | Catálogo/indisponibilidade simulada. | Mensagem **Não foi possível carregar os jogos em alta.** | Simular falha. |
+| RN-JOGOS-029 | Conteúdo estável por sessão | Lista Em Alta não muda a cada segundo; atualiza ao reabrir aba/página. | Aba aberta. | Mesmos blocos durante navegação curta; recarregar pode atualizar. | Ficar na aba; depois F5. |
+
+### 5 — Blocos de conteúdo Em Alta
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-JOGOS-020 | Top da Semana | Até **12** jogos em grade; os **três primeiros** com badge **#1**, **#2**, **#3**. | Pool de destaques não vazio. | Seção **Top da Semana** aberta por padrão. | Contar cards e badges. |
+| RN-JOGOS-021 | Mais jogados na Steam | Faixa horizontal só se houver dados de jogadores simultâneos. | Jogos Steam com pico de jogadores. | Seção **Mais jogados na Steam** com carrossel. | Ambiente com dados Steam. |
+| RN-JOGOS-022 | Promoções Steam (dados) | Descontos Steam fortes entram no pacote de dados de Em Alta; **não** há seção separada dedicada na UI atual (ofertas Steam aparecem principalmente na aba Promoções). | Jogos com desconto alto na Steam. | Verificar ofertas na aba **Promoções** / carrossel catálogo Steam. | Comparar jogo em promo Steam entre abas. |
+| RN-JOGOS-023 | Por plataforma | Blocos PC → Xbox → PlayStation → Nintendo; até **8** jogos por bloco; bloco vazio mostra mensagem amigável. | Jogos multiplataforma. | Switch só no bloco Nintendo, etc. | Ler seções por plataforma. |
+| RN-JOGOS-024 | Por modo de jogo | Multijogador, cooperativo, um jogador — até 8 jogos; bloco vazio com texto explicativo. | Jogos co-op. | Título listado em **Cooperativo** quando aplicável. | Achar jogo co-op conhecido. |
+| RN-JOGOS-025 | Por categoria (gênero) | Até **6** gêneros com **pelo menos 2** jogos; até 8 jogos por gênero. | Gênero com 1 só jogo. | Gênero singleton **não** vira seção. | Contar seções de gênero. |
+
+---
+
+## Diferenças importantes
+
+| Situação | O que o usuário pode notar |
+|----------|----------------------------|
+| Jogos vs Em Alta | Catálogo **Jogos** lista quase tudo; **Em Alta** é curadoria semanal exigente. |
+| Em Alta vs Promoções | **Em Alta** = ranking Orbe; **Promoções** = ofertas de lojas externas + Steam catálogo. |
+| Contador Jogos | Igual **Animes**: conta cards visíveis, não total global. |
+
+---
+
+## Ver também
+
+- Aba Promoções (grátis, ofertas, Em Alta): `06-PROMOCOES.md`
+- Carrossel Jogos na home: `01-HOME.md`
+- Cards e detalhe: `08-MODAIS.md`

@@ -1,108 +1,161 @@
-# Tela `/filmes` — Regras de negócio
+# Página Filmes — Regras de negócio (visão de tela)
 
-**Rota:** `/filmes`  
-**Objetivo:** Catálogo navegável de filmes com atalhos de curadoria (em cartaz, em breve, populares), filtros facetados e destaques editoriais vindos do resumo de eventos.  
-**Arquivos-fonte (frontend):** `frontend/src/app/filmes/page.tsx`, `frontend/src/app/filmes/FilmesClient.tsx`  
-**Arquivos-fonte (API):** `api/src/routes/filmesRoutes.ts`, `api/src/routes/mediaRoutesHelpers.ts`, `api/src/qualityFilters.ts`  
-**Endpoints usados pela tela:** `GET /filmes`, `GET /filmes/filtros` · **Cliente:** `fetchFilmesPageData` (`frontend/src/lib/apiServer.ts`), `realApi.getFilmes` (`frontend/src/data/realApi.ts`)
+**Onde o usuário está:** página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
 
-### Contraste com o carrossel da home
-
-| Aspecto | Tela `/filmes` (`GET /filmes`) | Carrossel home (`GET /filmes/homepage-carousel`, `fetchFilmesForCarousel`) |
-| --- | --- | --- |
-| Filtro Prisma principal | `filmeQualityFilter` / `getFilmeQualityFilterForYear` (DISPLAY) | `filmeCarouselBalancedWhereInput` + exclusão de concertos + pós-filtro `filterFilmesForCarouselBalanced` |
-| Concertos / stand-up | Podem aparecer se passarem qualidade DISPLAY | Excluídos por `filmeCarouselConcertExclusionFilter` e `isConcertOrLiveRecording` |
-| Limite de itens | Paginado (`DEFAULT_LIST_LIMIT` 48, máx. 200) | `CAROUSEL_ITEM_LIMIT` (120), sem paginação na rota do carrossel |
-| Janela de datas | Qualquer filme no banco que passe `where` | Homepage: `releaseDate` entre ano atual −5 e +5 |
-| Mapper de saída | `mapFilmeToMidia` (grade) | Carrossel por ano/mês: `mapFilmeToCarouselCard`; homepage-carousel usa `mapFilmeToMidia` |
-| `homeLaunch` / runtime | Não aplicado na listagem | `homeLaunch: true` exige runtime ≥ `HOME_LAUNCH_MIN_RUNTIME_MINUTES` ou `null` |
-| UI de atalhos | Botões Em Cartaz / Em Breve / Populares | Não exposto na home — curadoria automática no backend |
+**O que existe nesta página:** cabeçalho com título e descrição; gavetas opcionais **O que vem aí** e **Em cartaz**; botões de atalho (Todos, Em Cartaz, Em Breve, Populares); filtros por gênero, ano, mês, status e plataforma de streaming; contador de resultados; grade de cards de filme.
 
 ---
 
-## Regras
+## 1 — Abertura da página e cabeçalho
 
-| ID | Nome | Descrição completa | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-
-| RN-FILMES-001 | SSR paralelo lista+filtros | A página `/filmes` é Server Component que busca dados antes de hidratar o cliente. | API acessível em build/runtime. | `fetchFilmesPageData()` dispara em paralelo `GET /filmes` e `GET /filmes/filtros`; monta `FilmesPageData`. | `page.tsx` L12–20, `apiServer.ts` L112–126 | Abrir `/filmes`; inspecionar HTML inicial com cards quando API OK. |
-| RN-FILMES-002 | ISR revalidate 300 | Página participa de revalidação incremental do Next. | Deploy Next com ISR. | `export const revalidate = 300` (~5 min). | `page.tsx` L10 | Após deploy, confirmar política de cache da rota no Next. |
-| RN-FILMES-003 | Degradação SSR | Falha no fetch servidor não derruba a rota. | `fetchFilmesPageData` lança. | `FilmesClient` recebe `emptyData`: lista vazia e filtros vazios. | `page.tsx` L4–8, L14–17 | Simular API 500 no SSR; página abre com empty state. |
-| RN-FILMES-004 | Cabeçalho estático | Título e descrição da área são fixos no cliente. | Usuário em `/filmes`. | `PageHeader` título "Filmes" e descrição sobre cartaz, lançamentos e clássicos. | `FilmesClient.tsx` L100–103 | Validar copy no topo da página. |
-| RN-FILMES-005 | Gaveta O que vem aí | Seção horizontal de lançamentos futuros de filmes. | `useEventosResumo` retorna `resumo.proximos.filmes.length > 0`. | `CollapsibleSection` id `filmes-o-que-vem-ai`, `HorizontalMediaRow` type `filme`. | `FilmesClient.tsx` L105–114 | Com payload em `/eventos/resumo`; sem itens a seção não renderiza. |
-| RN-FILMES-006 | Interações na gaveta futuros | Cards da gaveta usam store de interações. | Seção visível. | `userInteractions` do `useAppStore` e `useMidiaInteraction` em `onInteraction`. | `FilmesClient.tsx` L38–39, L107–112 | Favoritar card na gaveta; estado reflete como na grade. |
-| RN-FILMES-007 | Gaveta Em cartaz destaque | Segunda gaveta editorial acima dos filtros. | `resumo.destaques_recentes.filmes.length > 0`. | `CollapsibleSection` id `filmes-em-cartaz-destaque`, ícone Clapperboard, título "Em cartaz". | `FilmesClient.tsx` L116–125 | Com destaques no resumo; sem dados bloco ausente. |
-| RN-FILMES-008 | Resumo de eventos no cliente | Gavetas não vêm do SSR da página de filmes. | Montagem do cliente. | `useEventosResumo` chama `getEventosResumo()` uma vez após hidratar. | `useEventosResumo.ts` L15–31 | Network: request `/eventos/resumo` após load da página. |
-| RN-FILMES-009 | Atalho Todos os Filmes | Primeiro botão de filtro rápido. | Clique no botão Grid. | `selectedFilter = 'todos'`; request sem query `filtro`. | `FilmesClient.tsx` L51, L58–59, L71 | Clicar "Todos"; `GET /filmes` sem parâmetro filtro. |
-| RN-FILMES-010 | Atalho Em Cartaz | Segundo atalho restringe flag de cartaz. | Clique "Em Cartaz". | `filtro=em_cartaz` na API; `where.emCartaz = true`. | `FilmesClient.tsx` L60, L71; `filmesRoutes.ts` L77–78 | Ativar atalho; só filmes com `emCartaz`. |
-| RN-FILMES-011 | Atalho Em Breve | Terceiro atalho para estreias futuras curadas. | Clique "Em Breve". | `filtro=em_breve`; `where.emBreve = true`. | `FilmesClient.tsx` L61; `filmesRoutes.ts` L79–80 | Filme só `emBreve` aparece; outros somem. |
-| RN-FILMES-012 | Atalho Populares | Quarto atalho altera ordenação. | Clique "Populares". | `filtro=populares`; `orderBy.popularity desc`. | `FilmesClient.tsx` L62; `filmesRoutes.ts` L103 | Lista reordenada por popularidade decrescente. |
-| RN-FILMES-013 | Estilo do atalho ativo | Feedback visual do filtro rápido selecionado. | Qualquer atalho clicado. | Botão ativo: `bg-primary text-primary-foreground`; inativo: `bg-muted`. | `FilmesClient.tsx` L133–137 | Alternar atalhos; apenas um com estilo primário. |
-| RN-FILMES-014 | Sentinela todos em gênero | Gênero "Todos" não restringe API. | Select em "Todos os Gêneros". | Parâmetro `genero` omitido em `getFilmes`. | `FilmesClient.tsx` L72 | Network sem `genero`. |
-| RN-FILMES-015 | Capitalização de gênero na UI | Labels de gênero são formatados no select. | Lista `availableGenres` populada. | Opção exibe `genre.charAt(0).toUpperCase() + genre.slice(1)`. | `FilmesClient.tsx` L155–158 | Gênero "action" aparece "Action" no dropdown. |
-| RN-FILMES-016 | Filtro ano sentinela | Ano "Todos" libera qualquer ano (sujeito a qualidade). | Select "Todos os Anos". | `ano` omitido na request. | `FilmesClient.tsx` L73 | Sem query `ano`. |
-| RN-FILMES-017 | Lista de anos do SSR | Anos do dropdown vêm de `/filmes/filtros`. | SSR OK. | `availableYears` inicial = `initialData.filters.years` (desc no SQL). | `apiServer.ts` L122; `mediaRoutesHelpers.ts` L41–50 | Comparar anos do select com JSON de filtros. |
-| RN-FILMES-018 | Filtro mês com calendário fixo | Meses 1–12 com labels em português. | Select de mês. | Constante `MONTHS` com value string `'1'`…`'12'`. | `FilmesClient.tsx` L18–31, L189–192 | Janeiro value `1`; dezembro `12`. |
-| RN-FILMES-019 | Mês todos omite parâmetro | "Todos os Meses" não envia `mes`. | Mês em todos. | `mes` undefined na API. | `FilmesClient.tsx` L74 | Request sem `mes`. |
-| RN-FILMES-020 | Status com label traduzido | Opções de status vêm do backend com `value` e `label`. | `/filmes/filtros` retorna statuses. | Select usa `status.label` para exibição e `status.value` no value. | `FilmesClient.tsx` L206–209; `filmesRoutes.ts` L266–269 | Label em PT quando `translateTmdbStatus` conhece o status. |
-| RN-FILMES-021 | Filtro plataforma streaming | Restringe filmes com provider específico. | Plataforma selecionada ≠ todos. | API: `streamingProviders.some.provider.name = plataforma`. | `FilmesClient.tsx` L76; `filmesRoutes.ts` L70–74 | Netflix no select; só filmes com Netflix. |
-| RN-FILMES-022 | Plataformas ordenadas A–Z | Metadado de filtros. | `GET /filmes/filtros`. | `platforms` de providers com filmes, `orderBy name asc`. | `filmesRoutes.ts` L257–261 | Ordem alfabética no select. |
-| RN-FILMES-023 | Selects desabilitados por flag | Estado `isLoadingFilters` controla disabled. | Flag true (hoje nunca setada no código). | Selects com `disabled={isLoadingFilters}` e opacidade reduzida. | `FilmesClient.tsx` L44, L151 | Buscar no código: flag permanece false — selects sempre habilitados. |
-| RN-FILMES-024 | skipInitialFetch na montagem | Evita duplicar request logo após SSR. | Primeira montagem do cliente com dados SSR. | Primeiro `useEffect` de `loadFilmes` retorna sem chamar API; ref `skipInitialFetch`. | `FilmesClient.tsx` L65, L89–95 | Abrir `/filmes`; apenas 2 requests SSR (lista+filtros), sem terceiro GET imediato no client. |
-| RN-FILMES-025 | Refetch ao mudar filtro | Após primeira montagem, qualquer mudança de filtro recarrega. | Usuário altera select ou atalho. | `loadFilmes` executado; dependências no `useCallback`. | `FilmesClient.tsx` L67–85, L89–96 | Trocar gênero; novo `GET /filmes` com query. |
-| RN-FILMES-026 | Refresh global orbe:data-refresh | Sync de dados dispara recarga. | Evento `orbe:data-refresh` na window. | `useOrbeDataRefresh(loadFilmes)` reexecuta com filtros atuais. | `useOrbeDataRefresh.ts`; `FilmesClient.tsx` L87 | Disparar evento após sync; lista atualiza. |
-| RN-FILMES-027 | Loading na grade | Durante fetch cliente a grade some. | `isLoading true`. | Spinner central `loading-spinner` em vez do grid. | `FilmesClient.tsx` L239–242 | Mudar filtro; spinner até resposta. |
-| RN-FILMES-028 | Contador usa total da API | Texto de resultados reflete `total` do backend, não só página. | Resposta com `total` > `results.length`. | `totalResults` de `response.total_results`; pluralização filme/filmes. | `FilmesClient.tsx` L79, L234–236; `realApi.ts` L50–51 | Com >48 filmes, contador mostra total global (ex.: 200) enquanto grade mostra 48. |
-| RN-FILMES-029 | Contador em loading | Durante carregamento não mostra número stale enganoso. | `isLoading`. | Texto "Carregando...". | `FilmesClient.tsx` L235 | Trocar filtro; label Carregando. |
-| RN-FILMES-030 | Grid responsivo de cards | Layout da listagem principal. | `filmes.length > 0` e não loading. | Grid 2–5 colunas, `max-w-[210px]`, `MidiaCard` type `filme`. | `FilmesClient.tsx` L244–254 | Redimensionar viewport; colunas mudam. |
-| RN-FILMES-031 | Empty state | Nenhum resultado após filtros. | `filmes.length === 0` e não loading. | Ícone Filter, título "Nenhum filme encontrado", hint ajustar filtros. | `FilmesClient.tsx` L257–267 | Filtro impossível; mensagem central. |
-| RN-FILMES-032 | Erro de API no cliente silencioso na UI | Falha no fetch não limpa necessariamente lista anterior. | `getFilmes` throw (realApi retorna vazio no catch). | `console.error`; `realApi` devolve `{results:[], total_results:0}`. | `FilmesClient.tsx` L80–81; `realApi.ts` L53–55 | API offline no client; grade pode zerar após erro. |
-| RN-FILMES-033 | Paginação padrão API | Listagem backend paginada. | `GET /filmes` sem page/limit. | `page=1`, `limit=48` (máx. 200). | `mediaRoutesHelpers.ts` L19–27 | curl `/filmes`; validar limit 48. |
-| RN-FILMES-034 | Resposta JSON listagem | Formato estável para o frontend. | GET bem-sucedido. | `{ results, total, page, limit }`; results mapeados `mapFilmeToMidia`. | `filmesRoutes.ts` L105–115 | Validar campos no JSON. |
-| RN-FILMES-035 | Include cardListInclude | Cards trazem gêneros, providers e coleção. | Query findMany. | `include: cardListInclude` (até 4 providers, collection). | `filmesRoutes.ts` L108; `mediaRoutesHelpers.ts` L138–142 | Card na UI mostra gêneros/streaming quando existem. |
-| RN-FILMES-036 | Qualidade DISPLAY padrão | Sem ano/mês específico aplica filtro restritivo. | GET sem `ano` e sem `mes` válido. | `allConditions` inclui `filmeQualityFilter`. | `filmesRoutes.ts` L58–59; `qualityFilters.ts` L111–133 | Filme sem poster não listado. |
-| RN-FILMES-037 | Poster obrigatório na qualidade | Parte do filtro DISPLAY. | Filme `posterPath` null. | Excluído de `/filmes`. | `qualityFilters.ts` L113 | Filme sem poster ausente na grade. |
-| RN-FILMES-038 | Sinopse obrigatória DISPLAY | Overview não vazia. | Overview null ou "". | Excluído salvo exceções em cartaz/breve no OR de engajamento. | `qualityFilters.ts` L114–115 | Filme sem sinopse fora de emCartaz/emBreve tende a sumir. |
-| RN-FILMES-039 | Adulto excluído DISPLAY | Conteúdo adulto TMDB. | `adult: true`. | Excluído (`adult false ou null`). | `qualityFilters.ts` L116 | Filme adulto não na listagem pública. |
-| RN-FILMES-040 | Engajamento OR em DISPLAY | Popularidade ou votos ou flags de cartaz. | Filme marginal. | Passa se `popularity>=30` OU `voteCount>=100` OU `emCartaz` OU `emBreve`. | `qualityFilters.ts` L118–123 | Filme em cartaz com baixa pop ainda aparece. |
-| RN-FILMES-041 | Gate voteAverage DISPLAY | Nota mínima quando muitos votos. | `voteCount > 50`. | Exige `voteAverage >= 6.0` salvo voteCount baixo/null. | `qualityFilters.ts` L125–131 | Filme nota 5.5 com 200 votos filtrado. |
-| RN-FILMES-042 | Qualidade relaxada ano corrente+ | Ano filtrado >= ano atual usa filtro mais permissivo. | `GET /filmes?ano=2026` (ano >= currentYear). | `getFilmeQualityFilterForYear` retorna `filmeQualityFilterRelaxed`. | `qualityFilters.ts` L103–108 | Estreia futura com pop 10 pode entrar no ano atual. |
-| RN-FILMES-043 | Filtro por ano civil | Restringe `releaseDate` ao ano calendário. | `ano` numérico ≠ todos, sem mês. | Intervalo 1/jan–31/dez UTC local Date + qualidade do ano. | `filmesRoutes.ts` L52–57 | Ano 2020 só filmes desse ano. |
-| RN-FILMES-044 | Filtro por mês | Parâmetro `mes` com opcional `ano`. | `mes` 1–12. | `parseMonthQuery`; filtra `releaseDate` no range UTC do mês; qualidade conforme ano. | `filmesRoutes.ts` L43–51; `mediaRoutesHelpers.ts` L60–66 | Março 2025: só estreias desse mês. |
-| RN-FILMES-045 | Mês sem ano usa ano corrente | Default de parseMonthQuery. | `mes=3` sem ano. | Ano = `new Date().getFullYear()`. | `mediaRoutesHelpers.ts` L63 | Em setembro, `mes=9` filtra setembro do ano atual. |
-| RN-FILMES-046 | Filtro gênero por nome | Match exato no nome do gênero. | `genero=Action`. | `genres.some.genero.name`. | `filmesRoutes.ts` L62–64 | Só filmes com gênero Action. |
-| RN-FILMES-047 | Filtro status TMDB | Status bruto do banco. | `status=Released`. | `where.status = status`. | `filmesRoutes.ts` L66–68 | Status filtrado na query. |
-| RN-FILMES-048 | Filtro lancados (API only) | Data de lançamento já passou. | `filtro=lancados` (não exposto na UI atual). | `releaseDate <= now`. | `filmesRoutes.ts` L81–82 | curl com filtro lancados. |
-| RN-FILMES-049 | Filtro futuros (API only) | Lançamentos futuros por data. | `filtro=futuros`. | `releaseDate >= now`. | `filmesRoutes.ts` L83–84 | curl filtro futuros. |
-| RN-FILMES-050 | Disponibilidade cinema (API) | Subfiltro para modo Em Alta. | `disponibilidade=cinema`. | `estreia_cinema` e OR em cartaz/breve/sessões/pré-venda. | `filmesRoutes.ts` L90–94 | Não há UI em FilmesClient; testar via API. |
-| RN-FILMES-051 | Disponibilidade streaming (API) | Filmes com streaming. | `disponibilidade=streaming`. | `estreia_streaming` OU qualquer provider. | `filmesRoutes.ts` L95–98 | curl disponibilidade=streaming. |
-| RN-FILMES-052 | Ordenação alfabética default | Sem filtro populares. | `filtro` ausente ou todos. | `orderBy.title asc`. | `filmesRoutes.ts` L103 | Primeiro card alfabético por título. |
-| RN-FILMES-053 | Cache HTTP listagem 12h | Resposta cacheada no edge/API. | GET `/filmes` 200. | `cacheMiddleware(TWELVE_HOURS)`. | `filmesRoutes.ts` L37 | Header/cache conforme middleware. |
-| RN-FILMES-054 | Endpoint filtros 24h | Metadados de facetas. | `GET /filmes/filtros`. | genres com filmes, years DISTINCT, statuses distinct, platforms; cache 24h. | `filmesRoutes.ts` L242–271 | 200 com arrays; erro 500. |
-| RN-FILMES-055 | Gêneros só com filmes | Evita gêneros órfãos. | Query genres. | `where: { filmes: { some: {} } }`. | `filmesRoutes.ts` L244–247 | Gênero sem filme não no select. |
-| RN-FILMES-056 | Anos DISTINCT SQL | Performance F-07. | getDistinctYears Filme releaseDate. | `EXTRACT(YEAR)` ordenado DESC. | `mediaRoutesHelpers.ts` L41–50 | Anos sem duplicata no filtro. |
-| RN-FILMES-057 | Carrossel homepage janela ±5 anos | Contraste home vs listagem aberta. | `GET /filmes/homepage-carousel`. | `releaseDate` entre currentYear±5; `fetchFilmesForCarousel` + balanced filter. | `filmesRoutes.ts` L306–319 | Filme fora da janela pode estar em `/filmes` mas não no carrossel. |
-| RN-FILMES-058 | Carrossel exclui concertos | Pós-filtro balanced. | Título tipo "Live from Paris". | Removido por `filterFilmesForCarouselBalanced`. | `qualityFilters.ts` L403–411; `mediaRoutesHelpers.ts` L178 | Mesmo filme pode aparecer em `/filmes` se passar DISPLAY. |
-| RN-FILMES-059 | homeLaunch runtime mínimo | Só rotas de carrossel com flag. | `fetchFilmesForCarousel` homeLaunch true. | Runtime null OU >= HOME_LAUNCH_MIN_RUNTIME_MINUTES. | `mediaRoutesHelpers.ts` L159–163 | Listagem `/filmes` não aplica gate de runtime. |
-| RN-FILMES-060 | Detalhes rate limit + cache 300s | Fora da grade. | `GET /filmes/:id/details`. | 400 id inválido; 404 não encontrado; `detailsRateLimiter`; cache 300s. | `filmesRoutes.ts` L123–151 | Id abc → 400. |
-| RN-FILMES-061 | Destaques no detalhe ao vivo | Enriquecimento mais esperado / estreia. | Detalhe encontrado. | Merge `resolveFilmeDestaqueFields` com `maisEsperadoIds`. | `filmesRoutes.ts` L136–147 | Pills no JSON de detalhe. |
-| RN-FILMES-062 | Admin PUT filme | Edição restrita. | PUT com adminMiddleware. | 400 sem campos; update por tmdbId; invalida cache mídia. | `filmesRoutes.ts` L216–238 | Sem token admin → 403. |
-| RN-FILMES-063 | Mais esperados ranking | Endpoint de antecipação. | `GET /filmes/mais-esperados`. | Horizonte 120 dias; `sortFilmesByAntecipacaoScore`; pills mais_esperado. | `filmesRoutes.ts` L279–302 | Não renderizado diretamente em FilmesClient. |
-| RN-FILMES-064 | By-year carrossel cards | Carrossel temporal. | `GET /filmes/by-year?year=`. | 400 ano inválido; `mapFilmeToCarouselCard`. | `filmesRoutes.ts` L327–345 | Diferente mapper da grade. |
-| RN-FILMES-065 | By-month carrossel | Mês obrigatório válido. | year+month query. | `parseYearMonthQuery`; fetchFilmesForCarousel. | `filmesRoutes.ts` L348–365 | 400 se mês inválido. |
-| RN-FILMES-066 | Year-tbd isolado | Lançamentos só com ano. | `GET /filmes/year-tbd`. | `yearOnlyFilmeWhere`; order releaseYear. | `filmesRoutes.ts` L369–384 | Não mistura timeline mensal. |
-| RN-FILMES-067 | realApi total_pages | Adapter frontend. | Resposta API com total e limit. | `total_pages = ceil(total/limit)`; `total_results = total`. | `realApi.ts` L47–51 | Cliente usa total_results no contador. |
-| RN-FILMES-068 | serverFetch revalidate alinhado | SSR usa mesma janela ISR. | fetchFilmesPageData. | `next: { revalidate: REVALIDATE_SECONDS }` em serverFetch. | `apiServer.ts` L92–94 | Coerente com page revalidate 300. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-001 | Conteúdo na primeira abertura | A listagem e as opções de filtro já vêm preparadas quando a página abre, sem precisar clicar em nada. | Site acessível; catálogo com filmes. | Ao entrar em Filmes, cards e menus de filtro aparecem (ou estado vazio amigável se não houver dados). | Abrir a página Filmes em aba nova; observar grade e selects antes de interagir. |
+| RN-FILMES-002 | Atualização gradual do catálogo | Mudanças no catálogo podem levar alguns minutos para aparecer na página após uma atualização em massa, mesmo sem o usuário fazer nada. | Catálogo alterado recentemente no ambiente de teste. | Após aguardar alguns minutos e recarregar Filmes, novos títulos ou datas podem surgir. | Registrar um filme de teste; aguardar ~5 min; recarregar Filmes. |
+| RN-FILMES-003 | Falha no carregamento inicial | Se a listagem não puder ser montada no primeiro momento, a página continua utilizável. | Simular indisponibilidade temporária do catálogo na abertura. | Página abre sem erro do navegador; grade vazia; filtros sem opções ou vazios; mensagem de “nenhum filme” se aplicável. | Ambiente com catálogo indisponível no primeiro acesso. |
+| RN-FILMES-004 | Texto do cabeçalho | Título e subtítulo da área são fixos. | Usuário na página Filmes. | Título **Filmes** e texto sobre cartaz, lançamentos e clássicos no topo. | Ler o cabeçalho da página. |
 
 ---
 
-## Referências cruzadas (API — não montadas diretamente na grade `/filmes`)
+## 2 — Gavetas editoriais (O que vem aí / Em cartaz)
 
-| Endpoint | Uso |
-| --- | --- |
-| `GET /filmes/:id/details` | Modal/página de detalhe (TMDB ao vivo) |
-| `GET /filmes/mais-esperados` | Ranking de antecipação (home/outras telas) |
-| `GET /filmes/homepage-carousel` | Carrossel multimídia da home |
-| `GET /filmes/by-year`, `/by-month`, `/year-tbd` | Carrosséis temporais com curadoria reforçada |
-| `PUT /filmes/:id` | Admin |
-| `GET /pessoas/:id/creditos` | Filmografia (filmes + séries) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-005 | Gaveta O que vem aí | Bloco horizontal de estreias futuras de filme, acima dos filtros. | Resumo de eventos do site inclui filmes em **próximos lançamentos**. | Seção colapsável **O que vem aí** com carrossel horizontal de cards de filme. | Ambiente com lançamentos futuros; abrir Filmes. |
+| RN-FILMES-006 | Ações nos cards da gaveta | Favoritar e demais ações do menu ⋮ funcionam igual à grade principal. | Gaveta visível; usuário logado ou visitante conforme regra do card. | Menu e estados de lista refletem na conta quando logado. | Favoritar um filme na gaveta; recarregar logado. |
+| RN-FILMES-007 | Gaveta Em cartaz | Destaques de filmes **em cartaz** em bloco próprio. | Resumo de eventos traz filmes em **destaques recentes / em cartaz**. | Seção **Em cartaz** com ícone de claquete e carrossel horizontal. | Ambiente com destaques em cartaz; abrir Filmes. |
+| RN-FILMES-008 | Gavetas carregam após a página | As gavetas podem aparecer um instante depois do restante da página. | Página Filmes recém-aberta. | Primeiro aparecem filtros e grade; em seguida as gavetas (se houver conteúdo). | Abrir Filmes e observar ordem de aparecimento dos blocos. |
+
+---
+
+## 3 — Atalhos rápidos (Todos, Em Cartaz, Em Breve, Populares)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-009 | Atalho Todos os Filmes | Restaura a listagem geral sem curadoria de atalho. | Qualquer outro atalho ativo. | Botão **Todos os Filmes** destacado; grade ampla (ordenada por título). | Clicar **Todos os Filmes**. |
+| RN-FILMES-010 | Atalho Em Cartaz | Mostra só filmes marcados como em cartaz. | Catálogo com filmes em cartaz e outros. | Grade restrita a títulos em cartaz; contador atualizado. | Clicar **Em Cartaz**; conferir etiquetas nos cards. |
+| RN-FILMES-011 | Atalho Em Breve | Mostra só estreias futuras curadas como “em breve”. | Filmes em breve e já lançados no catálogo. | Só filmes em breve na grade. | Clicar **Em Breve**. |
+| RN-FILMES-012 | Atalho Populares | Reordena por popularidade (não alfabético). | Vários filmes com popularidade distinta. | Ordem diferente de **Todos**; títulos mais populares no topo. | Alternar **Todos** e **Populares** e comparar ordem. |
+| RN-FILMES-013 | Destaque visual do atalho | Só um atalho aparece como selecionado. | Dois ou mais atalhos disponíveis. | Botão ativo com cor primária; demais em fundo neutro. | Clicar cada atalho e observar estilo. |
+
+---
+
+## 4 — Filtros por gênero, ano, mês, status e plataforma
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-014 | Gênero “Todos” | Não restringe por gênero. | Select em **Todos os Gêneros**. | Grade ampla dentro do atalho ativo. | Escolher todos os gêneros após filtrar um gênero específico. |
+| RN-FILMES-015 | Nome do gênero no menu | Primeira letra do gênero aparece maiúscula no dropdown. | Lista de gêneros populada. | Ex.: “action” exibido como “Action”. | Abrir select de gênero. |
+| RN-FILMES-016 | Ano “Todos” | Não restringe por ano de estreia. | **Todos os Anos** selecionado. | Filmes de vários anos na grade. | Resetar ano para todos. |
+| RN-FILMES-017 | Anos no dropdown | Anos disponíveis refletem filmes existentes no catálogo, do mais recente para o mais antigo. | Catálogo com vários anos. | Select de ano sem duplicatas; ordem decrescente. | Comparar anos do menu com filmes conhecidos. |
+| RN-FILMES-018 | Meses em português | Janeiro a dezembro com rótulos em PT-BR. | Select de mês aberto. | Doze meses nomeados corretamente. | Abrir filtro de mês. |
+| RN-FILMES-019 | Mês “Todos” | Não restringe por mês. | **Todos os Meses**. | Qualquer mês dentro dos demais filtros. | Selecionar todos os meses. |
+| RN-FILMES-020 | Status traduzido | Opções de status exibem rótulo em português quando o produto conhece o status. | Select de status populado. | Labels legíveis (ex.: lançado, em produção). | Abrir filtro de status. |
+| RN-FILMES-021 | Filtro por plataforma | Restringe a filmes disponíveis na plataforma escolhida (streaming). | Netflix (ou outra) selecionada. | Só cards com aquela plataforma nos metadados visíveis. | Filtrar Netflix; abrir detalhe de um card. |
+| RN-FILMES-022 | Plataformas ordenadas | Nomes de plataforma no select em ordem alfabética. | Várias plataformas no catálogo. | Lista A–Z no dropdown. | Abrir **Todas as Plataformas**. |
+| RN-FILMES-023 | Filtros sempre clicáveis | Menus de filtro permanecem habilitados durante uso normal. | Página Filmes estável. | Selects não ficam permanentemente desabilitados. | Usar todos os filtros em sequência. |
+
+---
+
+## 5 — Recarregar listagem e sincronização
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-024 | Primeira visita sem “piscar” desnecessário | Ao abrir Filmes, a grade inicial não dispara um segundo carregamento imediato só por abrir a página. | Primeira visita com catálogo OK. | Conteúdo estável logo após abrir; novo carregamento só ao mudar filtro/atalho. | Abrir Filmes e aguardar sem tocar filtros; observar spinner. |
+| RN-FILMES-025 | Mudança de filtro recarrega | Qualquer alteração em atalho ou select atualiza a grade. | Filtro ou atalho alterado. | Spinner breve; nova lista e contador. | Trocar gênero ou ano. |
+| RN-FILMES-026 | Atualização após sync do site | Quando o site termina uma sincronização de catálogo em segundo plano, a listagem pode atualizar sozinha. | Sync disparada com Filmes aberta. | Cards ou contagem mudam sem F5 manual. | Manter Filmes aberta durante sync no ambiente de teste. |
+
+---
+
+## 6 — Contador, loading, grade e vazio
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-027 | Spinner ao filtrar | Durante nova busca, a grade some e aparece indicador central. | Filtro alterado com rede normal. | Spinner no lugar do grid até concluir. | Trocar filtro e observar loading. |
+| RN-FILMES-028 | Contador com total global | O texto “X filmes encontrados” usa o **total** que corresponde aos filtros, não só os cards visíveis na primeira “página” interna. | Mais de ~48 filmes para o filtro atual. | Contador alto (ex.: 200) com grade mostrando um subconjunto inicial. | Filtro amplo; ler contador vs cards na tela. |
+| RN-FILMES-029 | Contador em carregamento | Enquanto recarrega, não mostra número antigo enganoso. | Filtro recém-alterado. | Texto **Carregando...**. | Trocar filtro e ler linha acima da grade. |
+| RN-FILMES-030 | Grade responsiva | Cards em colunas que aumentam em telas maiores. | Resultados > 0; não loading. | 2 a 5 colunas; cards com largura máxima ~210px. | Redimensionar janela do navegador. |
+| RN-FILMES-031 | Nenhum resultado | Combinação de filtros sem match. | Filtros restritivos. | Ícone de filtro, título **Nenhum filme encontrado**, sugestão de ajustar filtros. | Aplicar filtro impossível. |
+| RN-FILMES-032 | Falha ao recarregar no cliente | Erro ao buscar de novo pode esvaziar a grade ou manter último estado, sem quebrar a página. | Rede cortada ao mudar filtro. | Página continua; grade pode zerar; sem crash. | Desligar rede ao trocar filtro. |
+
+---
+
+## 7 — Tamanho da listagem e curadoria padrão (o que entra na grade)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-033 | Limite inicial de cards na tela | A grade mostra um lote inicial de filmes (dezenas), não o catálogo inteiro de uma vez. | Filtro amplo com centenas de títulos. | Até ~48 cards visíveis na grade por vez (sem botão “carregar mais” nesta página). | Contar cards com filtro **Todos**. |
+| RN-FILMES-034 | Cards com informação de streaming | Quando o filme tem plataformas cadastradas, o card pode exibir ícones/nomes de streaming. | Filme com Netflix/Disney+ etc. | Ícones ou pills de plataforma no card. | Inspecionar card de filme em streaming. |
+| RN-FILMES-035 | Saga e coleção no card | Filmes parte de saga podem mostrar indício de continuação no card. | Filme com saga cadastrada. | Atalho de saga visível no card (detalhe em modais). | Card de filme conhecido em saga. |
+| RN-FILMES-036 | Curadoria de exibição padrão | A listagem pública prioriza filmes “apresentáveis”: com pôster, sinopse e relevância mínima, salvo exceções de cartaz/em breve. | Filme incompleto no catálogo vs filme em cartaz. | Título sem pôster tende a **não** aparecer; em cartaz pode aparecer mesmo com pouca popularidade. | Comparar filme rascunho vs filme em cartaz. |
+| RN-FILMES-037 | Sem pôster | Filmes sem imagem de pôster não entram na grade padrão. | Filme de teste sem pôster. | Ausente em Filmes com filtros abertos. | Buscar título sem pôster na busca global. |
+| RN-FILMES-038 | Sem sinopse | Filmes sem texto de sinopse tendem a ficar de fora, exceto flags de cartaz/em breve. | Filme sem overview. | Ausente na listagem geral. | Validar com dado de teste. |
+| RN-FILMES-039 | Conteúdo adulto explícito | Filmes marcados como adultos não aparecem na listagem pública. | Filme adulto no catálogo. | Ausente em Filmes. | Buscar título adulto. |
+| RN-FILMES-040 | Exceção em cartaz ou em breve | Filmes em cartaz ou em breve podem aparecer mesmo com popularidade baixa. | Filme em cartaz com poucos votos. | Presente ao usar atalho **Em Cartaz** ou **Em Breve**. | Testar título em cartaz marginal. |
+| RN-FILMES-041 | Nota mínima com muitos votos | Filmes com muitas avaliações e nota muito baixa tendem a ser ocultados. | Filme nota ~5,5 com centenas de votos. | Ausente na listagem geral. | Comparar com filme bem avaliado. |
+| RN-FILMES-042 | Ano corrente ou futuro mais permissivo | Filtrar pelo **ano atual** (ou futuro) pode incluir estreias ainda sem muita popularidade. | Ano = ano corrente no select. | Estreia futura do ano aparece na grade. | Filtrar ano corrente; procurar estreia futura. |
+
+---
+
+## 8 — Comportamento dos filtros de data e metadados
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-043 | Filtro por ano civil | Ano escolhido limita a estreias daquele ano calendário. | Ano 2020 selecionado. | Só filmes com data de estreia em 2020. | Filtrar 2020 e abrir detalhes de cards. |
+| RN-FILMES-044 | Filtro por mês | Mês escolhido limita estreias daquele mês (com ano definido ou ano corrente). | Março + ano 2025. | Só estreias de março/2025. | Combinar mês e ano. |
+| RN-FILMES-045 | Mês sem ano usa ano atual | Só mês selecionado assume o ano de “hoje”. | Mês = mês atual; ano = todos. | Estreias daquele mês no ano corrente. | Em setembro, filtrar setembro com todos os anos. |
+| RN-FILMES-046 | Filtro por gênero | Gênero escolhido exige correspondência exata no cadastro do filme. | Gênero Action. | Só filmes daquele gênero. | Filtrar um gênero raro e validar cards. |
+| RN-FILMES-047 | Filtro por status | Status escolhido restringe ao estado cadastral (ex.: lançado, cancelado). | Status específico. | Grade coerente com status nos detalhes. | Filtrar status e conferir detalhe. |
+| RN-FILMES-048 | Só já lançados (catálogo) | Regra interna de “lançados”: data de estreia no passado. | Filme futuro vs passado. | Filme futuro não entra em conjuntos que exigem “já lançado” (ex.: comparar com atalho **Em Breve**). | Estreia futura só em **Em Breve**, não como lançado antigo. |
+| RN-FILMES-049 | Só futuros (catálogo) | Regra interna de “futuros”: estreia hoje ou depois. | Filme passado e futuro. | **Em Breve** alinhado a futuros curados. | Comparar atalhos **Todos** vs **Em Breve**. |
+| RN-FILMES-050 | Disponibilidade cinema (catálogo) | Subconjunto usado em outras áreas para “no cinema”. | Filme só streaming vs em cartaz. | **Em Cartaz** e gaveta **Em cartaz** concentram títulos de cinema. | Validar filme em cartaz nos atalhos/gaveta. |
+| RN-FILMES-051 | Disponibilidade streaming (catálogo) | Subconjunto de títulos com streaming cadastrado. | Filme com plataforma. | Aparece ao filtrar plataforma; etiqueta **No streaming** no card quando aplicável. | Filtrar plataforma + ler etiqueta do card. |
+| RN-FILMES-052 | Ordem alfabética em “Todos” | Sem atalho **Populares**, ordem por título. | **Todos os Filmes** ativo. | Primeiros cards em ordem A–Z por título. | Ler primeiros títulos da grade. |
+
+---
+
+## 9 — Diferenças em relação ao carrossel Filmes na página inicial
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-053 | Listagem mais ampla que a home | A página Filmes pode mostrar títulos que a faixa Filmes da inicial não mostra. | Concerto/gravação ao vivo cadastrada. | Pode aparecer em Filmes e **não** no carrossel da home. | Comparar mesmo título home vs Filmes. |
+| RN-FILMES-054 | Opções de filtro só com filmes | Gêneros/plataformas no menu existem porque há pelo menos um filme associado. | Gênero órfão no cadastro interno. | Gênero sem filme **não** aparece no select. | Abrir todos os gêneros e buscar um raro inexistente. |
+| RN-FILMES-055 | Anos sem duplicata | Cada ano aparece uma vez no filtro de ano. | Vários filmes no mesmo ano. | Ano único no dropdown. | Abrir filtro de ano. |
+| RN-FILMES-056 | Janela temporal da home | Carrossel da inicial foca lançamentos em janela de anos próximos; Filmes lista histórico amplo. | Filme muito antigo fora da janela da home. | Presente em Filmes com filtros; pode faltar na home. | Filme clássico: Filmes vs home. |
+| RN-FILMES-057 | Concertos na listagem | Shows, stand-up e concertos ao vivo podem aparecer aqui. | Título tipo “Live from…”. | Card visível em Filmes; pode faltar no carrossel da home. | Buscar concerto na página Filmes. |
+| RN-FILMES-058 | Curta-metragem futuro na home | Estreias futuras muito curtas podem ser excluídas do carrossel inicial. | Curta com duração conhecida e estreia futura. | Pode aparecer em Filmes filtrando ano/mês; pode faltar na home. | Comparar home vs Filmes. |
+| RN-FILMES-059 | Duração mínima só na home | Regra de “filme de estreia” longo para destaque na home não se aplica à listagem Filmes. | Filme futuro curto. | Visível em Filmes se passar curadoria da listagem. | Mesmo título home vs Filmes. |
+
+---
+
+## 10 — Detalhe, destaques e áreas fora desta página
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-FILMES-060 | Abrir detalhe pelo card | Clique no card abre painel/modal de detalhe do filme. | Card na grade ou gaveta. | Modal com sinopse, datas, links. | Clicar poster/título. |
+| RN-FILMES-061 | Destaques no detalhe | Alguns filmes exibem etiquetas extras (ex.: mais esperado) no detalhe. | Filme elegível a destaque editorial. | Pills no modal além do status normal. | Abrir detalhe de estreia aguardada. |
+| RN-FILMES-062 | Edição administrativa | Alterações de cadastro feitas por equipe interna não são testadas nesta tela pública. | Conta visitante ou usuário comum. | Comportamento da listagem reflete catálogo já publicado; sem UI de edição aqui. | Confirmar ausência de controles de admin na página Filmes. |
+| RN-FILMES-063 | Ranking “mais esperados” | Lista de antecipação de estreias alimenta destaques em outras áreas (ex.: **Em alta** na home), não um bloco dedicado em Filmes. | Estreias próximas no catálogo. | Filmes pode mostrar pills nos cards/detalhe; ranking completo não é seção fixa aqui. | Comparar filme “mais esperado” na home vs Filmes. |
+| RN-FILMES-064 | Timeline por ano (outras telas) | Navegação mês a mês por carrossel existe na home, não como timeline na página Filmes. | Usuário em Filmes. | Filmes usa grade + filtros ano/mês, não carrossel temporal contínuo. | Confirmar ausência de carrossel mensal contínuo em Filmes. |
+| RN-FILMES-065 | Timeline por mês (outras telas) | Agrupamento fino por mês no carrossel da home; aqui filtro de mês na grade. | Mês selecionado. | Grade estática filtrada, não slide por slide de timeline. | Filtrar mês e rolar grade. |
+| RN-FILMES-066 | Só ano confirmado (outras telas) | Blocos “sem data confirmada” aparecem no carrossel da home; em Filmes use filtro de ano e status. | Filme TBA só com ano. | Pode listar com data incompleta nos detalhes; sem separador TBD como na home. | Filme “2027 — data a confirmar” em Filmes vs home. |
+| RN-FILMES-067 | Contador alinhado ao total filtrado | Número exibido corresponde ao conjunto filtrado no servidor, não a páginas visuais futuras. | Filtro restritivo. | Contador = quantidade lógica do filtro. | Anotar contador e amostrar busca por título. |
+| RN-FILMES-068 | Coerência após recarregar | Recarregar a página mantém filtros no estado inicial (não persistem na URL por padrão). | Filtros alterados; F5. | Atalho **Todos** e selects voltam ao padrão; nova carga inicial. | Alterar filtros e recarregar navegador. |
+
+---
+
+## 11 — Diferenças importantes (para não confundir no teste)
+
+| Situação | O que o usuário pode notar |
+|----------|----------------------------|
+| **Populares** em Filmes vs **Em alta** (Filmes) na home | Ordens e conjuntos **diferentes**; a home prioriza **mais esperados** na faixa Filmes. |
+| Concertos e stand-up | Podem aparecer na página Filmes e **não** no carrossel Filmes da home. |
+| Contador vs cards visíveis | O contador pode ser maior que os cards mostrados de uma vez (~48). |
+
+---
+
+## Ver também (outras telas, mesma linguagem)
+
+- Cards, menu ⋮ e modal de detalhe: `08-MODAIS.md`
+- Busca e menu superior: `09-BUSCA-HEADER.md`
+- Carrossel Filmes na página inicial: `01-HOME.md`

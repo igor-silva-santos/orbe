@@ -1,66 +1,73 @@
-# Tela `/hoje` — Regras de negócio
+# Página Hoje — Regras de negócio (visão de tela)
 
-**Rota:** `/hoje`  
-**Objetivo:** Panorama do que está em cartaz, estreias da semana, destaques de streaming e jogos, com personalização local de seções.  
-**Stack:** `hoje/page.tsx`, `HojeClient.tsx`, `hoje-preferences.ts` · API `GET /hoje` (`api/src/routes/homeRoutes.ts`)
+**Onde o usuário está:** página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
 
----
-
-## Frontend
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOJE-001 | Shell SSR, dados no cliente | Página não faz fetch de `/hoje` no servidor. | Montagem `HojeClient`. | `revalidate = 300` na page; `useEffect` chama `realApi.getHoje()` uma vez. | `page.tsx` L3–6, `HojeClient.tsx` L76–81 | HTML sem cards até hidratar; depois request `/hoje`. |
-| RN-HOJE-002 | Cabeçalho e data formatada | Data legível vem da API. | Resposta com campo `data`. | `PageHeader` "Hoje" + linha com ícone calendário e `data` (string pt-BR longa, capitalizada na UI). | `HojeClient.tsx` L150–159, API L387 | Data exibida coincide com `toLocaleDateString pt-BR` do servidor. |
-| RN-HOJE-003 | Preferências de seção (localStorage) | Usuário escolhe quais blocos ver. | Browser com `localStorage`. | Chave `orbe-hoje-sections`; default todas as 6 seções; persistência em toggle. | `hoje-preferences.ts` L18–39 | Desmarcar "Cinema"; recarregar → cinema oculto. |
-| RN-HOJE-004 | Mínimo uma seção ativa | Não permite desligar todas as seções. | Uma seção habilitada, usuário tenta desmarcar. | Toggle ignorado se `next.size === 1` após remoção. | `HojeClient.tsx` L86–88 | Com uma seção on, clique não desativa. |
-| RN-HOJE-005 | Ordem fixa das seções | Blocos renderizados na ordem definida no código. | Várias seções habilitadas. | cinema → estreiasSemana → streamingFilmes → streamingSeries → streamingAnimes → destaquesJogos. | `HojeClient.tsx` L97–143 | Reordenar preferências não muda ordem (só visibilidade). |
-| RN-HOJE-006 | Seção oculta se vazia | Não mostra título sem itens. | Array da seção length 0. | `MediaRow` retorna `null`. | `HojeClient.tsx` L44, L196–206 | Seção habilitada sem dados → não aparece heading vazio. |
-| RN-HOJE-007 | Empty global | Todas seções visíveis sem itens ou todas desabilitadas com dados. | `hasVisibleContent === false`. | Mensagem "Nenhum destaque disponível para os filtros selecionados." | `HojeClient.tsx` L146, L208–214 | Desabilitar seções com conteúdo → mensagem. |
-| RN-HOJE-008 | Erro de API | Falha no fetch. | `getHoje` rejeita. | `data === null` após load → "Não foi possível carregar o conteúdo de hoje." | `HojeClient.tsx` L216–219 | API offline → mensagem de erro. |
-| RN-HOJE-009 | Loading skeleton | Estado intermediário. | `isLoading`. | 8 `MidiaCardSkeleton` em grid. | `HojeClient.tsx` L188–193 | Primeiro paint mostra skeletons. |
-| RN-HOJE-010 | Cards e interações | Mesmo padrão das outras telas de mídia. | Itens em seção. | `MidiaCard` com tipo por seção; `useMidiaInteraction` + store. | `HojeClient.tsx` L68–69, L52–61 | Favoritar filme em cartaz persiste como nas outras rotas. |
+**O que existe nesta página:** título “Hoje” com data do dia; painel para ligar/desligar blocos de conteúdo; até seis faixas horizontais de cards (filmes, séries, animes, jogos), cada uma com título próprio.
 
 ---
 
-## Backend `GET /hoje`
+## 1 — Carregamento, data e mensagens gerais
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOJE-011 | Janela "última semana" | Referência temporal para streaming e animes. | `now` no servidor. | `weekAgo = now - 7 dias` usado em filtros de lançamento/exibição. | `homeRoutes.ts` L248–250 | Filme lançado há 8 dias não entra no pool "esta semana" de streaming. |
-| RN-HOJE-012 | Cinema em cartaz | Filmes atualmente em exibição comercial. | Filmes `emCartaz: true`. | Até 12; `filmeCarouselQualityFilter` + `filmeCarouselLocalizationFilter`; ordem `popularity desc`. | `homeRoutes.ts` L272–276 | Só filmes marcados em cartaz; máx. 12. |
-| RN-HOJE-013 | Estreias da semana (BR) | Filmes estreando na semana civil brasileira. | Calendário BR via `loadEstreiasSemanaFilmes`. | Até 24; qualidade + localização; `allowEstreiaSemana: true` nos destaques (`estreia_semana` pill). | `filmeLancamentoTags.ts` L99–116, `homeRoutes.ts` L390 | Filme fora da semana BR não listado em `estreiasSemana`. |
-| RN-HOJE-014 | Tags "mais esperado" em filmes | Enriquecimento com antecipação. | `loadMaisEsperadoTmdbIds(now)`. | Campos `mais_esperado`, `destaque_pill` via `resolveFilmeDestaqueFields`; estreia da semana tem prioridade sobre mais esperado. | `homeRoutes.ts` L260, L375–384, `filmeLancamentoTags.ts` L78–96 | Card estreia mostra pill estreia; outro filme futuro pode mostrar mais esperado. |
-| RN-HOJE-015 | Streaming filmes — prioridade semanal | Preferência por lançamentos recentes em streaming. | Filme com provider, não em cartaz. | Query A: `releaseDate` entre `weekAgo` e `now`; Query B: fallback geral streaming; merge dedupe por `tmdbId`, slice 12. | `homeRoutes.ts` L252–257, L279–291, L353–371 | Filme popular antigo só aparece se pool semanal < 12. |
-| RN-HOJE-016 | Streaming séries — prioridade semanal | Séries com atividade recente. | `serieQualityFilter`, tem streaming. | OR `lastAirDate` ou `firstAirDate` na janela semana; fallback popularidade; dedupe; 12 itens. | `homeRoutes.ts` L293–317, L372 | Série sem episódio na semana pode entrar pelo fallback. |
-| RN-HOJE-017 | Animes em exibição — prioridade semanal | Animes que exibiram episódio na última semana. | `animeQualityFilter`, `status: RELEASING`. | `airingSchedule` com `airingAt` entre `weekAgo` e `now`; ordem popularidade + `averageScore`. | `homeRoutes.ts` L318–332 | Anime RELEASING sem episódio na semana não entra no pool primário. |
-| RN-HOJE-018 | Animes — fallback | Completa lista se pool semanal insuficiente. | Segunda query animes. | `status IN (RELEASING, NOT_YET_RELEASED)` + `animeQualityFilter`; merge dedupe `anilistId`, 12 total. | `homeRoutes.ts` L334–341, L362–373 | Lista final até 12 animes mesmo com poucos episódios recentes. |
-| RN-HOJE-019 | Destaques jogos | Jogos em hype/nota no catálogo curado. | Jogos passando `jogoQualityFilter`. | Top 8 por `hypes desc`, `rating desc`. | `homeRoutes.ts` L342–350 | Máximo 8 jogos; jogos fracos excluídos pelo filtro de qualidade. |
-| RN-HOJE-020 | Qualidade de animes na rota | Diferente da listagem `/animes`. | Anime sem score/popularidade mínima. | Excluído por `animeQualityFilter` (score OU popularidade mínima + safe adult). | `qualityFilters.ts` L499–508 | Anime marginal visível em `/animes` mas não em `/hoje` streaming. |
-| RN-HOJE-021 | Sinopses sem tradução ao vivo | Texto já persistido no sync. | Resposta `/hoje`. | Comentário no código: sinopse do banco, sem tradução em request. | `homeRoutes.ts` L387–389 | Conteúdo igual ao de `/filmes`/`/series` para mesma mídia. |
-| RN-HOJE-022 | Cache da rota | Performance. | GET `/hoje`. | `cacheMiddleware(TWELVE_HOURS)` (12 h). | `homeRoutes.ts` L247 | Resposta cacheável 12 h no API layer. |
-| RN-HOJE-023 | Erro servidor | Falha nas queries paralelas. | Exceção no `Promise.all`. | HTTP 500 `{ error: 'Erro ao buscar conteúdo de hoje.' }`. | `homeRoutes.ts` L397–400 | Simular erro DB → 500. |
-| RN-HOJE-024 | Payload JSON | Contrato consumido pelo cliente. | Sucesso. | Campos: `data`, `estreiasSemana`, `cinema`, `streamingFilmes`, `streamingSeries`, `streamingAnimes`, `destaquesJogos` (arrays mapeados `map*ToMidia`). | `homeRoutes.ts` L386–396 | Schema bate com interface `HojeData` no client. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOJE-001 | Conteúdo após abrir a página | Os cards não vêm “prontos” no primeiro instante; a página busca os destaques ao abrir. | Acesso normal à página Hoje. | Breve estado de carregamento (esqueletos/cards cinza) e, em seguida, faixas preenchidas ou mensagens de vazio/erro. | Abrir Hoje com rede normal; observar transição skeleton → conteúdo. |
+| RN-HOJE-002 | Data do dia | A página mostra a data atual em português, junto ao título. | Página carregada com sucesso. | Linha com ícone de calendário e data por extenso (pt-BR), coerente com o dia de teste. | Comparar data exibida com o relógio do sistema. |
+| RN-HOJE-008 | Erro ao carregar | Se os destaques não puderem ser obtidos. | Simular falha de rede ou indisponibilidade do serviço. | Mensagem do tipo “Não foi possível carregar o conteúdo de hoje.” | Bloquear rede após abrir a página ou usar ambiente offline. |
+| RN-HOJE-009 | Esqueletos no carregamento | Enquanto aguarda os dados. | Primeiro acesso ou rede lenta. | Grade com vários placeholders de card (cerca de oito). | Throttle de rede e recarregar Hoje. |
+| RN-HOJE-010 | Cards iguais ao resto do site | Interações nos cards seguem o mesmo padrão das listagens. | Usuário logado; itens visíveis em uma faixa. | Favoritar, listas e demais ações do card funcionam como em Filmes/Séries/Animes/Jogos. | Logar; favoritar um filme em “Em cartaz” e conferir em outra tela. |
 
 ---
 
-## Mapeamento seção UI ↔ API
+## 2 — Preferências de seções (o que o usuário escolhe ver)
 
-| Chave preferência | Título na UI | Campo API | Tipo card |
-| --- | --- | --- | --- |
-| `cinema` | Em cartaz nos cinemas | `cinema` | filme |
-| `estreiasSemana` | Estreias da semana | `estreiasSemana` | filme |
-| `streamingFilmes` | Filmes populares no streaming esta semana | `streamingFilmes` | filme |
-| `streamingSeries` | Séries populares no streaming esta semana | `streamingSeries` | serie |
-| `streamingAnimes` | Animes em exibição esta semana | `streamingAnimes` | anime |
-| `destaquesJogos` | Jogos em destaque | `destaquesJogos` | jogo |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOJE-003 | Ligar/desligar blocos | O usuário escolhe quais faixas aparecem; a escolha fica salva no navegador. | Mesmo navegador/dispositivo. | Interruptores ou checkboxes por seção; ao recarregar, as seções desmarcadas continuam ocultas. | Desmarcar “Em cartaz nos cinemas”; F5 → faixa não aparece. |
+| RN-HOJE-004 | Pelo menos uma seção | Não é possível desativar todas as seções de uma vez. | Resta apenas uma seção marcada. | Tentativa de desmarcar a última é ignorada; continua uma seção ativa. | Desmarcar cinco seções; na sexta tentativa, a última permanece ligada. |
+| RN-HOJE-005 | Ordem fixa das faixas | A ordem vertical dos blocos não muda conforme preferências. | Várias seções habilitadas com conteúdo. | Sempre, de cima para baixo: cinema → estreias da semana → filmes no streaming → séries no streaming → animes em exibição → jogos em destaque (só as habilitadas e com itens). | Habilitar todas; rolar e conferir ordem dos títulos das faixas. |
+| RN-HOJE-006 | Faixa sem itens some | Seção ligada mas sem títulos para mostrar não ocupa espaço. | Seção habilitada sem destaques naquele dia. | Nenhum título de faixa vazio; bloco inteiro ausente. | Ambiente ou dia em que uma faixa específica vem vazia. |
+| RN-HOJE-007 | Nada para mostrar | Todas as faixas visíveis estão vazias, ou o usuário desligou tudo que tinha conteúdo. | Filtros de seção deixam zero cards visíveis. | Mensagem “Nenhum destaque disponível para os filtros selecionados.” | Desmarcar seções que tinham conteúdo até só restarem vazias ou desligar todas as que exibem cards. |
 
 ---
 
-## Relação com outras rotas
+## 3 — O que entra em cada faixa (regras de conteúdo)
 
-| Rota | Diferença em relação a `/hoje` |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOJE-011 | Janela “esta semana” | Destaques de streaming e animes priorizam o que teve lançamento ou episódio nos **últimos 7 dias**. | Títulos com datas conhecidas (estreia ou episódio). | Obra lançada há mais de uma semana tende a não liderar o pool “esta semana”; pode aparecer só se faltar conteúdo recente. | Comparar filme estreando há 8 dias vs filme estreando ontem na faixa de streaming. |
+| RN-HOJE-012 | Em cartaz nos cinemas | Filmes marcados como em exibição comercial no momento. | Catálogo com filme em cartaz e filme só em streaming. | Até **12** filmes; foco em popularidade entre os em cartaz; obras de baixa qualidade editorial ou mal localizadas tendem a ficar de fora. | Contar cards na faixa cinema; validar que só entram “em cartaz”. |
+| RN-HOJE-013 | Estreias da semana | Filmes estreando na **semana civil brasileira** corrente. | Filme com estreia BR na semana vs fora da semana. | Até **24** títulos; cards de estreia da semana podem exibir etiqueta de destaque de estreia. | Cruzar com calendário de estreias BR. |
+| RN-HOJE-014 | Etiquetas em filmes | Alguns filmes ganham destaque visual (estreia da semana ou “mais esperado”). | Filme estreando na semana vs filme futuro aguardado. | Estreia da semana tem prioridade sobre “mais esperado” no mesmo card. | Inspecionar pills nos cards de estreias e estreias futuras. |
+| RN-HOJE-015 | Filmes no streaming esta semana | Filmes disponíveis em streaming, não em cartaz, com preferência por lançamentos na última semana. | Pool semanal com menos de 12 títulos. | Até **12** filmes; se faltarem lançamentos recentes, entram títulos populares em streaming para completar, sem duplicar o mesmo filme. | Dia com poucos lançamentos streaming; ver se lista completa até 12. |
+| RN-HOJE-016 | Séries no streaming esta semana | Séries com episódio ou estreia recente na última semana, ou fallback por popularidade. | Série sem episódio na semana mas popular. | Até **12** séries; mescla recentes + fallback. | Série semanal com ep ontem vs série parada há meses. |
+| RN-HOJE-017 | Animes em exibição (prioridade) | Animes **em lançamento** que exibiram episódio na última semana. | Anime em exibição sem ep na semana. | Preferência por quem teve episódio nos últimos 7 dias; ordenação por popularidade e nota. | Anime com ep recente vs anime em hiato. |
+| RN-HOJE-018 | Animes — completar lista | Se poucos animes tiveram episódio na semana, a lista completa com outros em exibição ou a estrear. | Poucos episódios recentes no catálogo. | Até **12** animes no total, sem repetir o mesmo título. | Conferir contagem máxima em dia “fraco” de episódios. |
+| RN-HOJE-019 | Jogos em destaque | Jogos com maior expectativa ou nota entre os elegíveis. | Catálogo com jogos fracos e fortes. | Até **8** jogos; jogos sem sinal de qualidade tendem a ficar de fora. | Contar faixa; comparar com página Jogos. |
+| RN-HOJE-020 | Animes mais exigentes que a listagem | Alguns animes marginais aparecem na listagem geral de animes mas não em Hoje. | Anime com nota/popularidade baixa. | Ausente na faixa de animes de Hoje; pode existir na página Animes do menu. | Mesmo título em Animes vs Hoje. |
+| RN-HOJE-021 | Textos de sinopse | Sinopses exibidas são as já cadastradas no catálogo (sem tradução instantânea na hora da visita). | Abrir detalhe do mesmo título em Hoje e em Filmes. | Mesmo texto de sinopse para a mesma obra. | Abrir modal do filme em Hoje e na listagem Filmes. |
+| RN-HOJE-022 | Atualização dos destaques | O conjunto de títulos do dia não muda a cada segundo. | Duas visitas no mesmo dia. | Listas podem permanecer estáveis por várias horas até o site atualizar o pacote de “hoje”. | Comparar Hoje de manhã e tarde (mesmo dia). |
+| RN-HOJE-023 | Falha grave no servidor | Erro interno ao montar os destaques. | Serviço indisponível. | Mesma mensagem de erro de RN-HOJE-008; usuário não vê faixas parciais “quebradas”. | Ambiente de teste com serviço fora. |
+| RN-HOJE-024 | Seções batem com a tela | Cada faixa visível corresponde a um bloco de destaques (data do dia + listas por tema). | Página carregada com sucesso. | Seis tipos possíveis: data, estreias da semana, cinema, três faixas streaming (filmes/séries/animes), jogos — conforme preferências e conteúdo. | Conferir títulos das faixas com a tabela abaixo. |
+
+---
+
+## 4 — Nomes das faixas (referência QA)
+
+| Chave de preferência (painel) | Título visível na página | Tipo de card |
+| --- | --- | --- |
+| Cinema | Em cartaz nos cinemas | Filme |
+| Estreias da semana | Estreias da semana | Filme |
+| Streaming filmes | Filmes populares no streaming esta semana | Filme |
+| Streaming séries | Séries populares no streaming esta semana | Série |
+| Streaming animes | Animes em exibição esta semana | Anime |
+| Destaques jogos | Jogos em destaque | Jogo |
+
+---
+
+## 5 — Diferença em relação a outras áreas do site
+
+| Área | Em relação à página Hoje |
 | --- | --- |
-| `GET /homepage` | Carrossel multimídia em torno de hoje (filmes/séries/jogos/animes), não o layout editorial de `/hoje`. |
-| `GET /trending` | Ranking por tipo ou misto; sem seções cinema/streaming. |
-| `/animes`, `/jogos` | Catálogos completos com filtros; sem agregação "semana atual". |
+| Página inicial | Carrosséis por data de lançamento; não replica o layout editorial de seis faixas de Hoje. |
+| Em alta / trending | Ranking por tipo; sem blocos cinema + estreias + streaming da semana. |
+| Filmes, Séries, Animes, Jogos | Catálogos completos com filtros; Hoje agrega só destaques da semana e do momento. |

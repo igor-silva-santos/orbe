@@ -1,61 +1,77 @@
-# Regras de negócio — Autenticação, Perfil e Configurações
+# Entrar, cadastro, perfil e configurações — Regras de negócio (visão de tela)
 
-## Login (`app/login/page.tsx`)
+**Onde o usuário está:** telas de **Entrar**, **Inscreva-se**, **Meu perfil** e **Configurações**, além do comportamento global de sessão em todo o site.
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-001 | Campos obrigatórios | Email (`type=email`) e senha são `required` no formulário. | `login/page.tsx` (linhas 72–100) |
-| RN-AUTH-002 | Fluxo de sucesso | `loginWithCredentials` → `saveToken` implícito → `establishBrowserSession(token)` → `login(user)` no store → redirect `safeRedirectPath(redirect query)`. | `login/page.tsx` (26–31); `lib/auth/session.ts` (36–39); `lib/session.ts` (8–12) |
-| RN-AUTH-003 | Erro genérico | Falha de API mostra toast “Ocorreu um erro ao tentar fazer login”. | `login/page.tsx` (32–34) |
-| RN-AUTH-004 | Redirect seguro | Parâmetro `redirect` só aceita path relativo único; bloqueia `//` e `/\`. | `lib/session.ts` (8–12) |
-| RN-AUTH-005 | UI senha | Toggle mostrar/ocultar senha. | `login/page.tsx` (linhas 102–108) |
-| RN-AUTH-006 | Link cadastro | Rodapé aponta `/register`. | `login/page.tsx` (129–136) |
+**O que existe neste fluxo:** formulários de email/senha; redirecionamento após login; menu do usuário no header; dados públicos/privados do perfil.
 
-## Registro (`app/register/page.tsx`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-010 | Senha mínima | `MIN_PASSWORD_LENGTH = 8`; validação client antes do submit e `minLength` no input. | `register/page.tsx` (linhas 12, 28–30, 131) |
-| RN-AUTH-011 | Confirmação | Senha e confirmar devem coincidir; toast se divergirem. | `register/page.tsx` (32–35) |
-| RN-AUTH-012 | Campos | Nome, email e senhas obrigatórios. | `register/page.tsx` (79–165) |
-| RN-AUTH-013 | Pós-registro | Mesmo fluxo de sessão do login: token, cookie, `login(user)`, redirect seguro. | `register/page.tsx` (40–45) |
-| RN-AUTH-014 | Erro API | Toast com `error.message` se `Error`, senão mensagem genérica. | `register/page.tsx` (46–48) |
+## 1 — Entrar
 
-## Sessão global (`AppProvider`, store, middleware)
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-001 | Campos obrigatórios | Formulário de login. | Página Entrar aberta. | Email e senha exigidos pelo navegador antes de enviar. | Enviar vazio → validação nativa. |
+| RN-AUTH-002 | Sucesso | Credenciais válidas. | Conta existente. | Usuário entra; redireciona para página anterior segura ou home; nome aparece no header. | Login OK vindo de Minha Lista. |
+| RN-AUTH-003 | Erro genérico | Credenciais inválidas ou falha de rede. | Login falha. | Toast “Ocorreu um erro ao tentar fazer login” (ou equivalente). | Senha errada. |
+| RN-AUTH-004 | Redirect seguro | Parâmetro de retorno na URL após login. | Link de Entrar vindo de página protegida. | Só redireciona para páginas internas do site; não envia o usuário para sites externos. | Após login, confirmar retorno à Minha Lista; tentar manipular URL de retorno externo se QA tiver cenário. |
+| RN-AUTH-005 | Mostrar senha | Acessibilidade. | Campo senha. | Ícone alterna texto visível/oculto. | Clicar olho no campo senha. |
+| RN-AUTH-006 | Ir para cadastro | Rodapé. | Página login. | Link para Inscreva-se. | Clicar cadastro. |
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-020 | Bootstrap | Ao carregar app, `bootstrapSession()` restaura usuário via token; se falhar, limpa token. | `AppProvider.tsx` (27–35); `lib/auth/session.ts` (24–32) |
-| RN-AUTH-021 | Dados pós-login | Com usuário válido, carrega notificações, interações e pins da semana de anime. | `AppProvider.tsx` (37–57) |
-| RN-AUTH-022 | Persistência Zustand | Store persiste `user`, `isAuthenticated`, `theme`, `userInteractions`, `fastScrollEnabled`; reidrata `isAuthenticated` se há `user`. | `appStore.ts` (310–321) |
-| RN-AUTH-023 | Logout | `logout` limpa token (`clearSession`), usuário, notificações, interações e pins semanais. | `appStore.ts` (138–148); `lib/auth/session.ts` (54–57) |
-| RN-AUTH-024 | Cookie sessão | `establishBrowserSession` POST `/api/auth/session`; cookie httpOnly 7 dias em produção `secure`. | `lib/session.ts` (14–38) |
-| RN-AUTH-025 | Role normalizada | API: `admin` ou default `user` em `normalizeUser`. | `lib/auth/session.ts` (8–16) |
+---
 
-## Perfil (`app/perfil/page.tsx`)
+## 2 — Inscreva-se
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-030 | Proteção rota | Middleware exige sessão; página ainda redireciona login se `getUserProfile` falhar. | `middleware.ts`; `perfil/page.tsx` (24–27) |
-| RN-AUTH-031 | Dados exibidos | Nome, email, role (Administrador vs Explorador), avatar remoto só se host permitido (`isAllowedRemoteImageHost`). | `perfil/page.tsx` (82–100, 11) |
-| RN-AUTH-032 | Bio | Texto da bio ou placeholder convidando a editar em configurações. | `perfil/page.tsx` (152–154) |
-| RN-AUTH-033 | Conta | Email, membro desde (`data_criacao` pt-BR), visibilidade Público/Privado (`perfil_publico`). | `perfil/page.tsx` (158–177) |
-| RN-AUTH-034 | Atalhos | Links: Minha lista, Configurações. | `perfil/page.tsx` (104–117) |
-| RN-AUTH-035 | Admin sync | Role `admin`: link `/admin/sync-logs` e botão temporário para baixar log de sync (`/sync/logs?filter=sync`). | `perfil/page.tsx` (118–138) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-010 | Senha mínima | Regra de segurança. | Cadastro novo. | Senha com menos de **8** caracteres bloqueada com aviso antes de enviar. | Senha de 7 chars. |
+| RN-AUTH-011 | Confirmar senha | Dois campos devem coincidir. | Senhas diferentes. | Toast de erro; formulário não envia. | Senha ≠ confirmar. |
+| RN-AUTH-012 | Campos obrigatórios | Nome, email, senhas. | Formulário. | Nome, email e senhas required. | Enviar incompleto. |
+| RN-AUTH-013 | Sucesso | Cadastro aceito. | Email novo. | Mesmo fluxo pós-login: sessão ativa + redirect seguro. | Registrar conta QA. |
+| RN-AUTH-014 | Erro do servidor | Email duplicado etc. | Cadastro recusado. | Toast com mensagem retornada ou genérica. | Registrar email já usado. |
 
-## Configurações (`app/configuracoes/page.tsx`)
+---
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-040 | Proteção | Mesmo padrão perfil: middleware + redirect se falha ao carregar perfil. | `configuracoes/page.tsx` (21–35) |
-| RN-AUTH-041 | Campos editáveis | Nome, URL avatar, bio, toggle perfil público (default `true` se ausente na API). | `configuracoes/page.tsx` (16–29, 90–145) |
-| RN-AUTH-042 | Salvar | `updateUserProfile` com objeto `{ nome, bio, avatar, perfil_publico }`; feedback success/error inline. | `configuracoes/page.tsx` (41–57, 72–77) |
-| RN-AUTH-043 | Privacidade copy | Toggle “Perfil Público” descreve visibilidade de lista e favoritos para outros usuários. | `configuracoes/page.tsx` (133–137) |
-| RN-AUTH-044 | Sem alteração de senha | Página não expõe troca de senha ou email (apenas perfil público básico). | `configuracoes/page.tsx` (arquivo completo) |
+## 3 — Sessão em todo o site
 
-## Relação Header ↔ rotas protegidas
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-020 | Restaurar ao abrir o site | Usuário já logou antes. | Fechar aba e reabrir. | Continua logado se sessão válida; senão volta anônimo. | Login → fechar browser → reabrir. |
+| RN-AUTH-021 | Dados após login | Conteúdo personalizado. | Login bem-sucedido. | Notificações, interações nos cards e pins de anime da semana carregam. | Ver badge notificação e favoritos. |
+| RN-AUTH-022 | Preferências lembradas | Tema e interações locais. | Usuário alterou tema ou favoritos. | Tema, favoritos e opção de scroll rápido persistem entre visitas no mesmo navegador. | Mudar tema → F5. |
+| RN-AUTH-023 | Sair | Logout pelo menu. | Logado. | Limpa usuário, notificações, interações e pins; volta estado de visitante. | Sair → header sem avatar. |
+| RN-AUTH-024 | Sessão no navegador | Cookie de sessão. | Login em produção. | Sessão mantida por vários dias no mesmo dispositivo (comportamento de “permanecer logado”). | Permanecer logado overnight (QA). |
+| RN-AUTH-025 | Tipo de conta | Papel do usuário. | Admin vs explorador. | Admin vê ferramentas extras (ex. edição no modal, links no perfil); demais usuários não. | Comparar contas. |
 
-| ID | Regra | Descrição | Evidência |
-|----|-------|-----------|-----------|
-| RN-AUTH-050 | Minha lista no menu | Usuário logado acessa `/minha-lista` pelo header (user menu e mobile). | `Header.tsx` (203–210, 303–308) |
-| RN-AUTH-051 | Perfil no menu | Link `/perfil` no menu usuário; configurações só via perfil ou botão dedicado. | `Header.tsx` (211–218); `perfil/page.tsx` (111–117) |
+---
+
+## 4 — Meu perfil
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-030 | Só para logados | Proteção da rota. | Anônimo ou sessão inválida. | Redirect para Entrar; falha ao carregar perfil também redireciona. | Abrir Meu perfil sem login. |
+| RN-AUTH-031 | Dados básicos | Identidade na página. | Perfil carregado. | Nome, email, papel (Administrador / Explorador); foto só se URL de avatar for de origem permitida. | Perfil com avatar externo válido/inválido. |
+| RN-AUTH-032 | Bio | Texto sobre o usuário. | Com/sem bio salva. | Bio visível ou placeholder convidando a editar em Configurações. | Conta sem bio. |
+| RN-AUTH-033 | Bloco conta | Metadados. | Perfil OK. | Email, “membro desde” em pt-BR, visibilidade Público/Privado. | Ler seção conta. |
+| RN-AUTH-034 | Atalhos | Navegação rápida. | Perfil aberto. | Links para Minha lista e Configurações. | Clicar atalhos. |
+| RN-AUTH-035 | Ferramentas admin | Conta administrador. | Role admin. | Link para logs de sincronização e ação para baixar log de sync (ferramenta temporária de QA/operações). | Logar admin; usuário comum não vê. |
+
+---
+
+## 5 — Configurações
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-040 | Só para logados | Mesmo padrão do perfil. | Anônimo. | Redirect Entrar se perfil não carrega. | Abrir Configurações sem login. |
+| RN-AUTH-041 | Campos editáveis | Formulário. | Logado. | Nome, URL do avatar, bio, interruptor perfil público (padrão público se nunca definido). | Alterar nome e salvar. |
+| RN-AUTH-042 | Salvar perfil | Envio do formulário. | Dados válidos. | Mensagem inline de sucesso ou erro; perfil reflete mudanças. | Salvar bio nova → ver perfil. |
+| RN-AUTH-043 | Texto de privacidade | Toggle perfil público. | Configurações abertas. | Explica que perfil público afeta visibilidade de lista/favoritos para outros. | Ler copy do toggle. |
+| RN-AUTH-044 | Sem troca de senha aqui | Escopo da página. | Configurações. | Não há campos de senha ou email nesta tela. | Confirmar ausência de “alterar senha”. |
+
+---
+
+## 6 — Header e rotas protegidas
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-AUTH-050 | Minha lista no menu | Usuário logado. | Header desktop/mobile. | Entrada para Minha lista no menu do usuário e no mobile. | Abrir menu avatar. |
+| RN-AUTH-051 | Perfil e configurações | Navegação. | Logado. | Perfil no menu; Configurações via perfil ou botão dedicado. | Ir perfil → configurações. |

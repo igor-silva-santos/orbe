@@ -1,203 +1,170 @@
-# Tela `/` (Home) — Regras de negócio
+# Página inicial — Regras de negócio (visão de tela)
 
-**Rota:** `/`  
-**Componentes:** `frontend/src/app/page.tsx`, `HomeClient.tsx`, `MediaCarousel.tsx`, `AnimeCarousel.tsx`, `MidiaCard.tsx`, `ContinuarAssistindoSection.tsx`  
-**API:** `GET /homepage` (`api/src/routes/homeRoutes.ts`), `GET /{filmes|series|jogos}/by-month`, `year-tbd`, `GET /filmes/mais-esperados`, `GET /trending`, `GET /animes/by-season`, `GET /minha-lista/animes/continuar`  
-**Utilitários:** `frontend/src/lib/carousel-utils.ts`, `hooks/useCarouselMonthLoader.ts`, `hooks/useCarouselYearTbd.ts`, `api/src/mappers.ts` (`resolveSerieCarouselReleaseDate`), `api/src/qualityFilters.ts`, `api/src/routes/mediaRoutesHelpers.ts`
+**Onde o usuário está:** página inicial do site (primeira tela após abrir o endereço principal).
 
----
-
-## A — SSR e shell da home
-
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-SSR-001 | Fetch homepage no servidor | A página chama `fetchHomepage()` no Server Component antes de renderizar o cliente. | API acessível no build/runtime. | `HomeClient` recebe `initialData` com quatro listas. | `page.tsx` L4-12 | Inspecionar props/hidratação com rede ok. |
-| RN-HOME-SSR-002 | Degradação se API falha no SSR | Qualquer erro em `fetchHomepage` é capturado. | API indisponível ou 5xx no SSR. | `initialData` = listas vazias para filmes, séries, jogos e animes; a página **não** retorna erro Next. | `page.tsx` L8-9 | Derrubar API e abrir `/`. |
-| RN-HOME-SSR-003 | Bootstrap client após SSR vazio | Com listas vazias do SSR, carrosséis disparam `by-month` / `by-season` quando `bootstrapEnabled` fica true. | SSR vazio + seção visível. | Usuário ainda vê conteúdo após loads client (não tela morta). | `useCarouselMonthLoader.ts` L288-317, `HomeClient` bootstrap | Simular falha SSR e scroll até filmes. |
-| RN-HOME-HC-001 | Estado local sincronizado com props | `useEffect` reaplica `initialData` quando props do servidor mudam. | Navegação ou revalidação. | `data` state igual ao novo `initialData`. | `HomeClient.tsx` L44-46 | — |
-| RN-HOME-HC-002 | Refresh pós-sync na home | `useOrbeDataRefresh` chama `orbeNerdApi.getHomepage()` e substitui as quatro listas. | Evento `orbe:data-refresh` na janela. | Carrosséis recebem dados novos sem `router.refresh` obrigatório. | `HomeClient.tsx` L48-62 | Disparar sync/WS e observar refetch. |
-| RN-HOME-HC-003 | Erro silencioso no refresh client | Falha em `getHomepage` no refresh só loga no console. | API down após sync. | Estado anterior permanece; sem toast. | `HomeClient.tsx` L57-58 | — |
-| RN-HOME-HC-004 | Ordem das seções | Ordem fixa: hero → Continuar assistindo → Filmes → Séries → Animes → Jogos. | Página carregada. | DOM segue essa sequência. | `HomeClient.tsx` L97-135 | Smoke visual. |
-| RN-HOME-HC-005 | Títulos linkam para listagens | Cada `SectionHeading` é `Link` para `/filmes`, `/series`, `/animes`, `/jogos`. | — | Clique navega para rota de categoria. | `HomeClient.tsx` L141-150 | Clicar título “Filmes”. |
-| RN-HOME-HC-006 | `startIndex` filmes/séries/jogos | Antes do bootstrap mensal, índice inicial = `resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data))`. | SSR com itens na janela 90d. | Carrossel tenta abrir no próximo lançamento (regra TL). | `HomeClient.tsx` L104, L114, L132 | Comparar slide focal com data de hoje. |
-| RN-HOME-HC-007 | Lazy bootstrap filmes/jogos | `bootstrapEnabled` para filmes e jogos = hero **ou** seção visível (`useSectionVisible`). | Usuário só vê hero. | Fetch mensal de filmes/jogos pode adiar até hero próximo do viewport. | `HomeClient.tsx` L40-42, L105, L133 | Scroll lento: network só ao aproximar `#filmes`. |
-| RN-HOME-HC-008 | Lazy bootstrap séries/animes | Séries e animes: `bootstrapEnabled` só quando a própria seção está visível. | Hero visível, séries fora da tela. | Séries não bootstrap até scroll. | `HomeClient.tsx` L115, L123 | — |
+**O que existe nesta página:** faixa de boas-vindas no topo; bloco “Continuar assistindo” (só para quem entrou na conta); quatro faixas horizontais — **Filmes**, **Séries**, **Animes** e **Jogos** — cada uma com carrossel de cards de título.
 
 ---
 
-## B — `GET /homepage` (backend)
+## 1 — Layout e ordem do que aparece
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-API-001 | Rate limit homepage | Rota protegida por `homepageRateLimiter`. | Muitas requisições rápidas. | HTTP 429 conforme middleware de segurança. | `homeRoutes.ts` L113 | Stress curl `/homepage`. |
-| RN-HOME-API-002 | Cache 12 horas | Resposta cacheada `TWELVE_HOURS` (43200s). | CDN/middleware ativo. | Headers de cache na API. | `homeRoutes.ts` L113 | — |
-| RN-HOME-API-003 | Recorte passado/futuro filmes | Busca até 40 filmes com `releaseDate` em [hoje−90d, hoje) desc + até 40 em [hoje, fim mês seguinte] asc; concatena passado **invertido** + futuro. | Data servidor = hoje. | ~80 filmes max; mês atual não “some” por take nos mais antigos. | `homeRoutes.ts` L54-55, L133-140, L195 | Validar presença de lançamento do mês corrente. |
-| RN-HOME-API-004 | `recentPastStart` 90 dias | Início do passado recente = hoje − 90 dias, meia-noite local servidor. | — | Alinhado a `CAROUSEL_TIMELINE_PAST_DAYS` no client. | `homeRoutes.ts` L58-63, L119 | Filme lançado há 100d fora do bootstrap. |
-| RN-HOME-API-005 | Horizonte futuro filmes/jogos | `nextMonthEnd` = último instante do **mês seguinte** ao mês corrente. | — | Futuro inclui resto do mês atual + mês seguinte completo. | `homeRoutes.ts` L71-72, L138 | Lançamento em M+2 fora do seed. |
-| RN-HOME-API-006 | Filmes `homeLaunch: true` | `fetchFilmesForCarousel` com `homeLaunch` aplica runtime mínimo 40 min (ou null) + `filterFilmesHomeLaunchCarousel`. | Filme curta-metragem <40min futuro. | Excluído do seed home se runtime conhecido <40. | `mediaRoutesHelpers.ts` L159-181, `filmeAntecipacao.ts` L4, L96-101 | Filme 30min futuro. |
-| RN-HOME-API-007 | Curadoria equilibrada filmes | Where Prisma = `filmeCarouselBalancedWhereInput` + pós `filterFilmesForCarouselBalanced` (exclui concertos). | Título tipo concerto. | Ausente no JSON filmes. | `mediaRoutesHelpers.ts` L168-178, `qualityFilters.ts` L283-317, L415-416 | “Live from Paris” concert. |
-| RN-HOME-API-008 | Tags destaque filme no map | Cada filme recebe `resolveFilmeDestaqueFields` com `allowEstreiaSemana: false`. | — | Pills `mais_esperado` etc. conforme `filmeLancamentoTags`. | `homeRoutes.ts` L225-231 | Card com pill esperado. |
-| RN-HOME-API-009 | Séries query prioridade | Primeira query: `serieCarouselQualityFilter` + janela [início mês atual, fim mês seguinte] em first/last/next ep ou temporada. | Série com next ep no mês. | Entra em `seriePriority`. | `homeRoutes.ts` L74-91, L141-147 | — |
-| RN-HOME-API-010 | Séries query passado recente | Segunda query: mesmas dimensões entre `recentPastStart` e **antes** do início do mês atual. | Episódio há 60d. | Entra em `seriePast`. | `homeRoutes.ts` L93-110, L149-155 | — |
-| RN-HOME-API-011 | Dedupe séries por `tmdbId` | Map: entradas de prioridade sobrescrevem antes de passado. | Mesmo id nas duas queries. | Uma entrada; prioridade vence. | `homeRoutes.ts` L196-199 | — |
-| RN-HOME-API-012 | Recorte séries `pickAroundToday` | Ordena `sortSeriesByCarouselDate`; recorta 40 antes + 40 depois de hoje usando `resolveSerieCarouselReleaseDate`. | — | Lista centrada em “hoje”. | `homeRoutes.ts` L200-206, `mappers.ts` L714-756 | Série semanal com next ep. |
-| RN-HOME-API-013 | Data efetiva série — próximo ep | Se `nextEpisodeAirDate` ≥ hoje → usa essa data no carrossel. | Next ep futuro. | Card posicionado na data do ep. | `mappers.ts` L731-733 | — |
-| RN-HOME-API-014 | Data efetiva série — último ep 90d | Senão, se `lastAirDate` ∈ [hoje−90d, hoje] → usa último ep. | Ep exibido ontem. | Série permanece na timeline. | `mappers.ts` L735-737 | — |
-| RN-HOME-API-015 | Data efetiva série — temporadas | Senão, temporada recente / próxima / `firstAirDate` nos últimos 90d (ordem no código). | — | Data derivada coerente com comentário no mapper. | `mappers.ts` L740-755 | — |
-| RN-HOME-API-016 | Jogos passado/futuro | Mesmo padrão 40+40 em `firstReleaseDate`; include até 4 plataformas. | — | Até ~80 jogos seed. | `homeRoutes.ts` L157-177, L207 | — |
-| RN-HOME-API-017 | `jogoQualityFilter` | Jogos devem passar OR rating/ratingCount/hypes/follows mínimos. | Jogo irrelevante IGDB. | Fora do payload. | `qualityFilters.ts` L526-533, `homeRoutes.ts` L159 | — |
-| RN-HOME-API-018 | Animes formatos permitidos | Apenas `TV`, `TV_SHORT`, `MOVIE`, `ONA`. | OVA/ SPECIAL no banco. | Não listados no seed home. | `homeRoutes.ts` L182 | — |
-| RN-HOME-API-019 | Animes OR de inclusão | (a) `seasonYear`+temporada corrente `getCurrentSeason`; ou (b) `startDate` no mês atual→fim mês seguinte; ou (c) `airingSchedule` entre hoje e hoje+21d. | Anime fora dessas janelas. | Ausente do seed. | `homeRoutes.ts` L115, L121, L183-187 | — |
-| RN-HOME-API-020 | `animeQualityFilter` + safe | Exclui hentai (`isAdult`, gênero/tag Hentai); score ou popularidade mínimos. | Hentai tag. | Bloqueado. | `qualityFilters.ts` L493-508 | — |
-| RN-HOME-API-021 | Data anime no `pickAroundToday` | Data = primeiro `airingSchedule` futuro (dia) ou `startDate` calendário. | Com próximo airing. | Posição na timeline pelo airing. | `homeRoutes.ts` L208-218 | — |
-| RN-HOME-API-022 | Mapper carrossel | Resposta usa `map*ToCarouselCard` (não `map*ToMidia` completo). | — | Payload enxuto para cards. | `homeRoutes.ts` L234-238 | Inspecionar JSON. |
-| RN-HOME-API-023 | Erro 500 homepage | Exceção → 500 `{ error: 'Erro ao buscar dados da homepage.' }`. | Falha Prisma. | Client SSR cai no catch (listas vazias). | `homeRoutes.ts` L240-242 | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-001 | Ordem das seções | A página segue uma ordem fixa de blocos de cima para baixo. | Página inicial carregada com sucesso. | Do topo para baixo: mensagem de boas-vindas → (opcional) Continuar assistindo → Filmes → Séries → Animes → Jogos. | Abrir a página inicial e rolar devagar; conferir a ordem. |
+| RN-HOME-002 | Título da faixa leva à listagem | O nome de cada faixa (Filmes, Séries, etc.) funciona como atalho. | Página inicial visível. | Ao clicar no título “Filmes”, o usuário vai para a página de listagem de filmes; o mesmo padrão para Séries, Animes e Jogos. | Clicar em cada título de faixa e verificar a página de destino. |
+| RN-HOME-003 | Página não “quebra” sem conteúdo | Se no primeiro momento não houver títulos para mostrar, a estrutura da página continua aparecendo. | Simular rede lenta ou catálogo vazio no primeiro carregamento. | Não aparece tela de erro do navegador; faixas e controles continuam; carrosséis podem mostrar placeholders e depois preencher ao rolar. | Throttle de rede ou ambiente de teste vazio; abrir a página inicial. |
+| RN-HOME-004 | Carregamento tardio das faixas | Filmes e jogos podem começar a buscar mais títulos quando o usuário se aproxima da faixa; séries e animes quando a própria faixa entra na área visível. | Usuário abre a página e fica só no topo (boas-vindas). | Ao rolar até Filmes/Jogos/Séries/Animes, novos cards ou animação de carregamento podem aparecer; não é obrigatório tudo carregar antes de rolar. | Abrir a página, não rolar: observar rede/atividade; rolar até cada faixa. |
 
 ---
 
-## C — Timeline compartilhada (`carousel-utils.ts` + `MediaCarousel`)
+## 2 — Faixa de boas-vindas (hero)
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-TL-001 | Janela 90 dias | Só entram itens com data efetiva ≥ hoje−90d (`CAROUSEL_TIMELINE_PAST_DAYS`). | Reestreia há 1 ano. | Removido após `filterMidiaForCarouselTimeline`. | `carousel-utils.ts` L85-96, L244-250 | — |
-| RN-HOME-TL-002 | Data efetiva — próximo airing | Se `nextAiringEpisode.airingAt` existe e ≥ hoje, substitui `data_lancamento_api` para posicionamento. | Série com next ep. | Card no mês do ep, não da estreia da série. | `carousel-utils.ts` L31-41 | — |
-| RN-HOME-TL-003 | Índice próximo lançamento | `calculateCarouselStartIndex`: primeiro item com data ≥ hoje **e** dentro da janela 90d. | Há futuro na timeline. | Índice desse item. | `carousel-utils.ts` L134-147 | — |
-| RN-HOME-TL-004 | Fallback último lançado | Se não há futuro, `calculateLastReleasedIndex` (último ≤ hoje na janela). | Só passado recente. | Abre no último lançado. | `carousel-utils.ts` L152-169 | — |
-| RN-HOME-TL-005 | Fallback índice 0 / último slide | `resolveCarouselOpenIndex`: se ambos falham, último índice da lista. | Lista só fora da janela (edge). | Não quebra; índice válido. | `carousel-utils.ts` L198-207 | — |
-| RN-HOME-TL-006 | Título do mês no header | Derivado do item focal via `monthTitleFromItem` / `formatCarouselMonthTitle` (pt-BR, capitalizado). | — | “Lançamentos de …” | `carousel-utils.ts` L223-236, `MediaCarousel.tsx` L188-197 | — |
-| RN-HOME-TL-007 | Merge por id | `mergeMediaByDate`: dedupe por `id`, ordena por data efetiva. | Dois meses carregados com mesmo filme. | Uma entrada; ordem cronológica. | `carousel-utils.ts` L44-54 | — |
-| RN-HOME-TL-008 | Seed SSR marca meses carregados | `initialItems` do month loader registram `monthKey` em `loadedMonthsRef`. | Homepage SSR com itens. | Sem `by-month` redundante para esses meses no mount. | `useCarouselMonthLoader.ts` L67-77 | Network: menos calls by-month. |
-| RN-HOME-TL-009 | Bootstrap sequencial sem M−1 | Se SSR insuficiente: carrega mês atual, M+1, M+2 **em série**; **não** prefetch M−1 antes de abrir. | Cold start sem SSR. | Não abre em julho/agosto por prepend acidental. | `useCarouselMonthLoader.ts` L310-315 | Cold start API. |
-| RN-HOME-TL-010 | Resolver posição até +6 meses | `resolveOpenPosition` busca próximo lançamento tentando até 6 meses à frente. | Vácuo no mês atual. | Encontra próximo mês com futuro ou cai no último lançado. | `useCarouselMonthLoader.ts` L264-286 | Mês sem lançamentos. |
-| RN-HOME-TL-011 | Fila prefetch prioridade | `visible` < `forward` < `backward` na fila de meses. | Scroll rápido. | Mês visível buscado antes dos adjacentes. | `useCarouselMonthLoader.ts` L23-27, L147-149 | — |
-| RN-HOME-TL-012 | Borda do mês | A `monthEdgeBuffer` slides do fim/início do mês dispara fetch M+1/M+2 ou M−1. | Índice perto do fim do mês. | Prefetch forward. | `useCarouselMonthLoader.ts` L227-256 | — |
-| RN-HOME-TL-013 | Buffer dobra com scroll rápido | `monthEdgeBuffer = fastScrollEnabled ? 8 : 4`. | Toggle Zap ativo. | Prefetch mais cedo. | `MediaCarousel.tsx` L62-63, L114 | — |
-| RN-HOME-TL-014 | Ao focar mês garante M+1 e M+2 | `ensureUpcomingMonthsLoaded` enfileira dois meses à frente. | Mudança de mês visível. | Dados futuros prontos. | `useCarouselMonthLoader.ts` L215-224 | — |
-| RN-HOME-TL-015 | Navegação mês setas — limite vazios | Até `EMPTY_MONTH_NAV_LIMIT` (8) meses candidatos ao pular mês. | Meses sem títulos. | Não loop infinito. | `MediaCarousel.tsx` L63, L482+ | Clicar seta mês em vácuo. |
-| RN-HOME-TL-016 | Prepend ajusta scroll | Se itens prependidos (`firstItemId` mudou), `scrollTo(previousIndex + added)`. | Carregar mês passado. | Viewport não “pula”. | `MediaCarousel.tsx` L413-429 | Scroll para trás no tempo. |
-| RN-HOME-TL-017 | Filtro gênero pós-timeline | `applyDisplayFilters` aplica gênero **depois** da janela 90d. | Gênero selecionado. | Lista filtrada; timeline recalculada. | `MediaCarousel.tsx` L124-131 | Filtrar gênero raro. |
-| RN-HOME-TL-018 | Mudança de gênero reposiciona | `useEffect` chama `requestScrollToOpenPosition` ao mudar `selectedGenre`. | Trocar gênero. | Volta ao “próximo lançamento” do subconjunto. | `MediaCarousel.tsx` L457-467 | — |
-| RN-HOME-TL-019 | Skeleton inicial 10 slides | Até posicionamento, `SKELETON_SLIDE_COUNT=10`, centro `SKELETON_CENTER_INDEX`. | `hasInitialPositioning` true. | Placeholders centralizados (align center Embla). | `MediaCarousel.tsx` L57-59, L253-259 | Reload home. |
-| RN-HOME-TL-020 | Ctrl + roda no carrossel | `useCtrlWheelCarousel` navega slides com Ctrl+wheel. | Foco no viewport. | Scroll horizontal do carrossel. | `MediaCarousel.tsx` L251 | Desktop QA. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-HERO-001 | Botão “Começar agora” | O botão principal leva o usuário à faixa de filmes na mesma página. | Página inicial no topo. | Ao clicar, a página rola suavemente até a seção Filmes; o endereço do navegador **não** precisa mudar de página. | Clicar “Começar agora” e verificar scroll até Filmes. |
+| RN-HOME-HERO-002 | Link “Ver jogos em alta” | O segundo botão abre a área de promoções com foco em jogos em destaque. | Página inicial no topo. | Abre a página de promoções já na aba/visualização de jogos em alta. | Clicar no link e conferir aba/conteúdo de em alta. |
 
 ---
 
-## D — Ano TBD (TBA) na timeline
+## 3 — Continuar assistindo
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-TBD-001 | Rota isolada | `GET /{tipo}/year-tbd?year=` — não entra na timeline mensal. | Filme só com ano. | Slides append separados. | `useCarouselYearTbd.ts` L17-20 | — |
-| RN-HOME-TBD-002 | Critério TBD | `ano_lancamento_api` presente e `data_lancamento_confirmada` falsa/ausente. | — | Classificado TBD. | `useCarouselYearTbd.ts` L85-87 | — |
-| RN-HOME-TBD-003 | Append anos corrente..+5 | `displaySlides` adiciona 6 anos de separadores/slides TBD após lista datada. | Modo timeline (não Em alta). | Slides extra no fim. | `MediaCarousel.tsx` L174-176 | Scroll até fim do carrossel. |
-| RN-HOME-TBD-004 | Título separador | Copy `Lançamentos de {ano} — sem data confirmada`. | Foco em slide TBD. | Header atualizado. | `useCarouselYearTbd.ts` L81-83, `MediaCarousel.tsx` L355-366 | — |
-| RN-HOME-TBD-005 | Prefetch ano corrente no mount | `loadYearTbd(ano atual)` ao montar (se não Em alta). | — | TBD do ano carregado cedo. | `MediaCarousel.tsx` L272-276 | — |
-| RN-HOME-TBD-006 | Prefetch ano+1 ao cruzar mês | Ao mudar `monthKey` visível, `loadYearTbd(year + 1)`. | Navegar para dezembro. | Próximo ano TBD buscado. | `MediaCarousel.tsx` L374-379 | — |
-| RN-HOME-TBD-007 | Dedupe fetch ano | `loadedYearsRef` evita refetch do mesmo ano. | — | Uma request por ano. | `useCarouselYearTbd.ts` L37-39 | — |
-
----
-
-## E — Modo “Em alta” (`MediaCarousel`)
-
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-EA-001 | Desliga timeline | `emAltaMode` true: slides só datados, sem TBD nem prefetch mensal da timeline. | Toggle Em alta. | Sem separadores year-tbd. | `MediaCarousel.tsx` L165-177, L201 | — |
-| RN-HOME-EA-002 | Filmes — endpoint | Filmes usam `GET /filmes/mais-esperados?limit=40` (não `filtro=populares`). | Em alta filmes. | Lista por score antecipação. | `MediaCarousel.tsx` L217-220 | Comparar com doc antigo “populares”. |
-| RN-HOME-EA-003 | Séries/jogos — trending | `GET /trending?type=series|jogos&limit=40`. | Em alta séries/jogos. | Popularidade/rating conforme `homeRoutes` trending. | `MediaCarousel.tsx` L217-220 | — |
-| RN-HOME-EA-004 | Cache por chave filmes | `emAltaLoadedKeyRef` inclui `filmes:${emAltaDisponibilidade}` quando aplicável. | — | Refetch só se chave mudar. | `MediaCarousel.tsx` L212-225 | — |
-| RN-HOME-EA-005 | Scroll para 0 ao ativar | `emblaApi.scrollTo(0)` ao entrar Em alta. | Toggle on. | Início da lista em alta. | `MediaCarousel.tsx` L242-247 | — |
-| RN-HOME-EA-006 | Ao desligar volta “hoje” | `scrollToToday()` após sair de Em alta. | Toggle off. | Reposiciona na timeline atual. | `MediaCarousel.tsx` L469-479 | — |
-| RN-HOME-EA-007 | Gêneros da fonte ativa | Lista de gêneros deriva de `activeSourceItems` (timeline ou em alta). | — | Dropdown coerente com modo. | `MediaCarousel.tsx` L153-158 | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-CA-001 | Bloco só para usuário logado | A faixa “Continuar assistindo” não aparece para visitante. | Usuário **não** está logado. | Nenhum bloco “Continuar assistindo” entre o hero e Filmes. | Abrir a página em anônimo. |
+| RN-HOME-CA-002 | Bloco oculto sem itens | Se o usuário logado não tem nada para continuar, a faixa some. | Logado, sem animes em progresso na lista. | Seção ausente. | Conta sem itens “continuar”/“seguir”. |
+| RN-HOME-CA-003 | Até dez títulos | Quando há itens, no máximo dez cards na faixa horizontal. | Logado com mais de dez animes em progresso. | Só os dez primeiros (ordem de uso recente) aparecem na home. | Conta com 11+ itens; contar cards. |
+| RN-HOME-CA-004 | Card mostra temporada e episódio | Cada card exibe temporada e número do episódio. | Pelo menos um item na faixa. | Texto no formato “S{n} · E{n}” (temporada e episódio). | Ler um card qualquer. |
+| RN-HOME-CA-005 | Tempo restante | Se houver tempo restante do episódio, aparece texto “Restam …”. | Item com progresso parcial no episódio. | Linha com tempo restante abaixo do título. | Item com episódio pela metade. |
+| RN-HOME-CA-006 | Abrir no streaming | Se o sistema tem link do Crunchyroll para aquele item, o clique abre em nova aba. | Item com link de streaming associado. | Nova aba do navegador no serviço de streaming. | Clicar card com link. |
+| RN-HOME-CA-007 | Sem link vai à minha lista | Sem link externo, o clique leva à área de animes da minha lista. | Item sem URL de streaming. | Navega para minha lista de animes na mesma aba. | Clicar card sem link externo. |
+| RN-HOME-CA-008 | “Ver todos” | Link no canto da faixa leva à listagem completa de animes da minha lista. | Faixa visível. | Abre minha lista de animes. | Clicar “Ver todos”. |
 
 ---
 
-## F — `AnimeCarousel` (home)
+## 4 — O que entra nos carrosséis de Filmes, Séries e Jogos (conteúdo)
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-AC-001 | Seed `/homepage` | `initialData` do SSR; temporadas extras via `GET /animes/by-season`. | — | Primeira pintura com seed. | `AnimeCarousel.tsx` L38-40, fetch season no arquivo | — |
-| RN-HOME-AC-002 | Modo inicial semana 4+ | Se hoje está na ≥4ª semana da temporada corrente → abre **weekly**; senão **launch**. | Data na 4ª semana. | Weekly automático uma vez. | `AnimeCarousel.tsx` L348-364 | Mock data início vs fim de temporada. |
-| RN-HOME-AC-003 | Modo inicial não sobrescreve usuário | `initialViewModeApplied` impede reaplicar após toggle manual. | Usuário mudou modo. | Escolha preservada. | `AnimeCarousel.tsx` L135, L350 | Toggle e reload parcial. |
-| RN-HOME-AC-004 | Launch — ordenação | Ordena por `animeTimelineDate` (airing ou startDate). | Modo launch. | Cronologia de estreias. | `AnimeCarousel.tsx` L52-60 | — |
-| RN-HOME-AC-005 | Launch — abertura corrente | Próximo anime ≥ hoje; senão último ≤ hoje. | Temporada atual. | Scroll inicial coerente. | (lógica build slides no arquivo) | — |
-| RN-HOME-AC-006 | Weekly — só com next airing | Agrupa animes com `nextAiringEpisode` por dia da semana local. | Modo weekly. | Separadores por dia. | `AnimeCarousel.tsx` L36, weekly branch | — |
-| RN-HOME-AC-007 | Weekly — abre hoje | Posiciona no separador do dia de hoje. | — | Header do dia atual. | weekly scroll no arquivo | — |
-| RN-HOME-AC-008 | Toggle launch ↔ weekly | Rebuild slides + scroll pendente. | Clique ícone calendário/lista. | Lista reestruturada. | `AnimeCarousel.tsx` L726 | — |
-| RN-HOME-AC-009 | Prefetch temporada mount | Temporada inicial + anterior + posterior (virada WINTER/FALL). | Mount com bootstrap. | 3 seasons em cache. | prefetch no `AnimeCarousel` | — |
-| RN-HOME-AC-010 | Buffer borda temporada | 15 slides (25 se fast scroll) da borda dispara prev/next season. | Scroll ao fim. | Fetch próxima estação. | `AnimeCarousel.tsx` L377-405 | — |
-| RN-HOME-AC-011 | Filtro client pós-fetch | Formatos relevantes + `!isAdult` mesmo se API incluir adult. | — | Hentai não aparece. | filtros no fetch handler | — |
-| RN-HOME-AC-012 | Em alta animes | `GET /animes?filtro=populares&limit=40` + mesmo filtro formato/adult. | Toggle em alta. | Lista popular curada client-side. | `AnimeCarousel` emAlta paths | — |
-| RN-HOME-AC-013 | Pins semana logado | Carrega `getAnimeWeeklyPins` se autenticado; limpa se anônimo. | Login/logout. | Store `animeWeeklyPinIds` atualizado. | `AnimeCarousel.tsx` L333-346 | — |
-| RN-HOME-AC-014 | Loop Embla só weekly | `loop: viewMode === 'weekly' && !emAltaMode`. | Launch mode. | Sem loop infinito. | `AnimeCarousel.tsx` L192, L208 | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-CON-001 | Foco em lançamentos recentes e próximos | Os três carrosséis priorizam títulos com data de lançamento (ou equivalente) nos **últimos 90 dias** e até o **fim do mês seguinte** ao mês atual — não uma lista infinita de clássicos antigos. | Data de teste conhecida; título com estreia há mais de 90 dias só por reestreia antiga. | Título muito antigo fora dessa janela **não** aparece no carrossel temporal (pode existir em outras páginas do site). | Comparar título reestreia antiga na home vs página Filmes. |
+| RN-HOME-CON-002 | Filmes: sem shows e concertos na faixa | Gravações de show, stand-up e concertos ao vivo não devem aparecer nos carrosséis de lançamento da home. | Catálogo com filme de concerto cadastrado. | Ausente na faixa Filmes da home. | Buscar concerto na página Filmes; verificar ausência na home. |
+| RN-HOME-CON-003 | Filmes: curta duração futura | Filmes de estreia futura com duração conhecida muito curta (abaixo do padrão de “filme de cinema”) não entram na seleção inicial da home. | Filme futuro com duração de curta-metragem conhecida. | Não aparece no carrossel inicial de filmes. | Validar com título de teste curto. |
+| RN-HOME-CON-004 | Filmes: destaques no card | Alguns filmes exibem etiqueta extra (ex.: “mais esperado”) conforme regras editoriais do produto. | Filme elegível a destaque na semana/mês. | Pill ou etiqueta no card além do status normal. | Comparar cards em destaque na mídia. |
+| RN-HOME-CON-005 | Séries: data do próximo episódio | Série em exibição com episódio futuro aparece posicionada na **data do próximo episódio**, não só na estreia original da série. | Série com próximo episódio marcado para data futura. | Card na faixa Séries alinhado ao mês/dia do próximo ep ao rolar a timeline. | Série semanal com ep na sexta; conferir posição na sexta. |
+| RN-HOME-CON-006 | Séries: episódio recente | Se não há episódio futuro, mas houve episódio nos últimos 90 dias, a série continua na timeline nessa data recente. | Episódio exibido há poucos dias. | Card ainda visível ao navegar no passado recente do carrossel. | Série que estreou ep ontem. |
+| RN-HOME-CON-007 | Jogos: plataformas no card | Cards de jogos mostram ícones de até quatro plataformas quando disponíveis. | Jogo com várias plataformas. | Até quatro ícones visíveis no card. | Inspecionar card de jogo multiplataforma. |
+| RN-HOME-CON-008 | Jogos pouco relevantes | Jogos sem nenhum sinal de interesse (nota, seguidores, expectativa) tendem a não aparecer na seleção da home. | Jogo obscuro no catálogo. | Ausente na faixa Jogos da home. | Comparar com página Jogos. |
+| RN-HOME-CON-009 | Conteúdo adulto explícito em animes | Animes classificados como conteúdo adulto explícito (ex.: hentai) não aparecem na faixa Animes da home. | Título adulto no catálogo geral. | Ausente na home; pode ou não aparecer em outras áreas conforme política do site. | Buscar título adulto; verificar home. |
+| RN-HOME-CON-010 | Animes da temporada e agenda | Na faixa Animes entram títulos da temporada corrente, estreias no mês atual/próximo ou com episódio previsto nas **próximas três semanas**. | Anime fora de temporada e sem episódio próximo. | Pode não aparecer no carregamento inicial. | Anime antigo fora de exibição. |
 
 ---
 
-## G — `MidiaCard` na home
+## 5 — Timeline: datas, mês no título e posição inicial (Filmes, Séries, Jogos)
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-CARD-001 | Clique abre SuperModal | Default `onClick` → `openSuperModal(midia, type)`. | Clique no card. | Modal detalhe. | `MidiaCard.tsx` L218-220 | — |
-| RN-HOME-CARD-002 | Menu document listener | Menu ⋮ usa listener em `document` (não fixed puro) por transform do Embla. | Abrir menu. | Clique fora fecha. | `MidiaCard.tsx` L100-112 | — |
-| RN-HOME-CARD-003 | Ações do menu | Favorito, quero assistir, acompanhando (série/anime), já assisti/joguei, ocultar; anime logado: fixar semana. | — | Itens conforme tipo. | `MidiaCard.tsx` L200-216 | — |
-| RN-HOME-CARD-004 | Já assisti/joguei bloqueado | `disabled` se `!midiaHasReleased`; handler ignora se não lançou. | Filme futuro. | Ação indisponível. | `MidiaCard.tsx` L214, L225-226 | — |
-| RN-HOME-CARD-005 | Rating antes de assistido | `ja_assisti`/`ja_joguei` abre `openRatingModal` antes de persistir. | Lançado. | Modal de nota. | `MidiaCard.tsx` L226-228 | — |
-| RN-HOME-CARD-006 | Badge filme — ordem | pré-venda > em cartaz/sessões > streaming pós-lançamento > em breve. | Flags TMDB/detetive. | Primeira condição verdadeira vence. | `card-status.ts` L69-77 | Matriz de flags. |
-| RN-HOME-CARD-007 | Badge série/anime | novo ep (24h) > em exibição > em breve > streaming. | Ep <24h. | “NOVO EP”. | `card-status.ts` L80-102, `MidiaCard.tsx` L138-150 | — |
-| RN-HOME-CARD-008 | Novo ep anime vs série | Anime: `data_lancamento_api`; série: `lastAiredEpisode.airingAt`. | — | Janela 24h correta por tipo. | `MidiaCard.tsx` L139-149 | — |
-| RN-HOME-CARD-009 | Dublagem no card | Usa `dublagem_info` — não infere de elenco. | Anime dublado sem elenco no card. | “Dublado” correto. | `MidiaCard.tsx` L133-136 | — |
-| RN-HOME-CARD-010 | Countdown compartilhado | `<1 dia` tick 1s; senão 1 min (`useSharedTick`). | Next ep amanhã vs hoje. | Atualização de label. | `MidiaCard.tsx` L64-76 | — |
-| RN-HOME-CARD-011 | Rodapé próximo ep | Label só se não for “lançamento futuro” puro de anime. | Anime futuro sem ep. | Sem rodapé enganoso. | `MidiaCard.tsx` L152-162 | — |
-| RN-HOME-CARD-012 | Saga filme | Link `/continuacoes?saga=` com stopPropagation. | Filme com saga. | Não abre modal ao clicar saga. | handler saga no JSX inferior | — |
-| RN-HOME-CARD-013 | Adulto blur | Poster `blur-md` com hover remove blur. | `isAdult` true. | Conteúdo mascarado. | `MidiaCard.tsx` L261 | — |
-| RN-HOME-CARD-014 | Indicador lista | Pill de lista só se logado e status favorito/quero/acompanhando. | Anônimo. | Sem pill. | `MidiaCard.tsx` L176-177 | — |
-| RN-HOME-CARD-015 | Interação exige login | `useMidiaInteraction` toast se anônimo. | Favoritar deslogado. | Toast erro. | `useMidiaInteraction.ts` | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-TL-001 | Título do mês no carrossel | Acima dos cards de Filmes/Séries/Jogos aparece um título do tipo “Lançamentos de [mês] de [ano]” conforme o card central/focado. | Carrossel carregado com pelo menos um título datado. | Texto em português com mês por extenso. | Abrir faixa Filmes e ler o título superior. |
+| RN-HOME-TL-002 | Abrir no próximo lançamento | Ao carregar, o carrossel posiciona o foco no **primeiro título com data hoje ou futura** dentro da janela de 90 dias. | Existe estreia futura na faixa. | Card central (ou focado) é o próximo lançamento, não o primeiro da lista histórica. | Abrir home em dia com estreias futuras; ver qual card está ao centro. |
+| RN-HOME-TL-003 | Sem futuro: último lançado | Se não há mais nenhuma data futura na lista carregada, o foco vai para o **último título já lançado** (ainda dentro dos 90 dias). | Só passado recente na faixa. | Foco no lançamento mais recente já ocorrido. | Testar em dia sem estreias futuras carregadas. |
+| RN-HOME-TL-004 | Série/anime: data do episódio | Para séries (e posicionamento equivalente quando o card traz “próximo episódio”), a data usada na timeline é a do **próximo episódio**, se for hoje ou futuro. | Card com “próximo episódio” visível. | Posição no carrossel coerente com a data do episódio, não só estreia da série. | Série com nova temporada distante mas ep semanal próximo. |
+| RN-HOME-TL-005 | Placeholders no início | Antes de calcular a posição, o usuário pode ver cartões cinza/esqueleto centralizados. | Primeiro acesso ou rede lenta. | Até ~10 placeholders; depois substituídos por cards reais na posição correta. | Recarregar com rede lenta na faixa Filmes. |
+| RN-HOME-TL-006 | Rolagem horizontal | O usuário desliza ou usa setas para ver títulos anteriores e posteriores no tempo. | Faixa com vários cards. | Movimento horizontal; card central em destaque (anel/foco). | Arrastar carrossel e usar setas laterais. |
+| RN-HOME-TL-007 | Ctrl + roda do mouse | Com tecla Ctrl pressionada, a roda do mouse no carrossel avança/volta slides (em desktop). | Desktop, foco na faixa. | Carrossel muda de slide com Ctrl+scroll. | Testar em navegador desktop. |
+| RN-HOME-TL-008 | Carregar meses ao navegar | Ao chegar perto do fim ou início de um mês no carrossel, o sistema busca títulos do mês seguinte ou anterior. | Usuário rola vários meses para frente ou para trás. | Novos cards aparecem; título do mês no topo atualiza. | Rolar rapidamente 3–4 meses à frente. |
+| RN-HOME-TL-009 | Não “pular” ao puxar o passado | Ao incluir meses mais antigos no início da lista, a posição visual do card que o usuário estava vendo se mantém. | Usuário no meio do carrossel; sistema carrega mês anterior. | O mesmo título permanece em foco (sem salto brusco). | Rolar para trás até disparar carga de mês anterior. |
+| RN-HOME-TL-010 | Setas de mudança de mês | Controles permitem saltar para o próximo/anterior **mês** com títulos (até um limite de meses vazios seguidos). | Carrossel com navegação por mês habilitada. | Avanço/retrocesso por mês; após vários meses sem título, para de avançar em vazio. | Clicar setas de mês repetidamente. |
+| RN-HOME-TL-011 | Filtro por gênero | Menu de filtro na faixa restringe os cards ao gênero escolhido. | Vários gêneros na faixa. | Só cards daquele gênero; lista de gêneros reflete o que existe nos cards carregados. | Abrir filtro, escolher um gênero. |
+| RN-HOME-TL-012 | Troca de gênero reposiciona | Ao mudar o gênero, o carrossel recalcula e volta a focar no “próximo lançamento” **dentro do filtro**. | Filtro alterado com resultados. | Posição inicial coerente com o subconjunto filtrado. | Filtrar gênero raro e observar card central. |
+| RN-HOME-TL-013 | Scroll rápido (ícone raio) | Opção global de “scroll rápido” acelera a animação do carrossel e antecipa carregamento ao se aproximar da borda do mês. | Usuário ativa ícone de raio/Zap no controle da faixa (se visível). | Transições mais rápidas; mais cards pré-carregados ao rolar forte. | Ligar/desligar e comparar velocidade. |
 
 ---
 
-## H — Continuar assistindo
+## 6 — Lançamentos “só ano” (data a confirmar)
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-CA-001 | Oculto anônimo | Componente retorna `null` se `!isAuthenticated`. | Visitante. | Seção ausente. | `ContinuarAssistindoSection.tsx` L23 | — |
-| RN-HOME-CA-002 | Oculto lista vazia | `null` se `items.length === 0`. | Logado sem itens. | Seção ausente. | L23 | — |
-| RN-HOME-CA-003 | API continuar | `GET /minha-lista/animes/continuar` com auth. | Logado com itens. | Array `results`. | `ContinuarAssistindoSection.tsx` L17-18, `minhaListaAnimesRoutes.ts` L81+ | — |
-| RN-HOME-CA-004 | Status API | Backend filtra status `continuar` ou `seguir`, `isRemoved: false`, ordem `updatedAt desc`. | — | Ordem recência. | `minhaListaAnimesRoutes.ts` L87 | — |
-| RN-HOME-CA-005 | Limite UI 10 | `slice(0, 10)` no cliente. | >10 itens API. | Máximo 10 cards. | `ContinuarAssistindoSection.tsx` L19 | — |
-| RN-HOME-CA-006 | Link Crunchyroll | Se `crunchyrollUrl` → `target=_blank`; senão `/minha-lista/animes`. | Item com URL. | Nova aba. | L37-39 | — |
-| RN-HOME-CA-007 | Tempo restante | Mostra `formatRemainingTime` se `remainingTimeSec > 0`. | Ep parcial. | Texto “Restam …”. | L56-59 | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-TBD-001 | Separador de ano sem dia | Após os títulos com dia definido, o carrossel pode mostrar bloco “Lançamentos de [ano] — sem data confirmada”. | Existem títulos com ano mas sem dia/mês confirmado. | Cartão separador + cards desses títulos **depois** da parte datada. | Rolar até o fim da timeline datada em Filmes. |
+| RN-HOME-TBD-002 | Título ao focar TBD | Ao parar em um separador ou card “só ano”, o título superior usa a frase de ano sem data confirmada. | Usuário focou slide TBD. | Texto “sem data confirmada” no cabeçalho do carrossel. | Focar separador de ano. |
+| RN-HOME-TBD-003 | Anos futuros na fila | São reservados espaços para anos do ano corrente até alguns anos à frente (blocos podem ir enchendo ao rolar). | Carrossel em modo timeline (não “Em alta”). | Ao avançar meses/anos, aparecem novos blocos TBD conforme o ano. | Rolar até virada de ano no carrossel. |
 
 ---
 
-## I — Hero e CTAs
+## 7 — Modo “Em alta” (Filmes, Séries, Jogos)
 
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-HERO-001 | CTA primário scroll | Botão “Começar agora” faz `scrollIntoView` em `#filmes` (smooth). | — | Não navega rota. | `HomeClient.tsx` L79-84 | — |
-| RN-HOME-HERO-002 | CTA secundário promoções | Link `/promocoes?tab=em-alta`. | — | Abre aba em alta. | L86-91 | — |
-
----
-
-## J — Shell global (impacto na home)
-
-| ID | Nome | Descrição | Pré-condições | Resultado esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-HOME-SHELL-001 | Layout monta modais globais | `layout.tsx` inclui Header, SearchOverlay, SuperModal, NotificationModal, RatingModal, AppProvider + SyncRefreshListener. | Qualquer rota incl. home. | Cards/modais funcionam na home. | `frontend/src/app/layout.tsx` | Abrir busca e modal a partir do card. |
-| RN-HOME-SHELL-002 | Sem AdultContentModal dedicado | Conteúdo adulto: blur no card + filtros API; não há modal de consentimento separado. | Anime adulto (não hentai bloqueado). | Blur apenas. | `qualityFilters.ts` comentário L482-485 | — |
-| RN-HOME-SHELL-003 | Fast scroll global | `fastScrollEnabled` no store afeta duração Embla e buffers (carrosséis). | Toggle no header. | Animação mais rápida. | `MediaCarousel.tsx` L109-114 | — |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-EA-001 | Ativar Em alta | Botão/controle “Em alta” na faixa troca a lista para destaques de popularidade/expectativa. | Faixa Filmes, Séries ou Jogos. | Timeline por mês some; cards em ordem de “em alta”; sem separadores de ano TBD. | Clicar Em alta na faixa Filmes. |
+| RN-HOME-EA-002 | Filmes em alta ≠ populares da página Filmes | A lista “Em alta” na home de **filmes** usa critério de **mais esperados** (antecipação de estreia), não o mesmo botão “Populares” da página Filmes. | Modo Em alta em Filmes na home. | Ordem/conjunto pode diferir da página Filmes → Populares. | Comparar os mesmos dias home Em alta vs página Filmes Populares. |
+| RN-HOME-EA-003 | Séries e jogos em alta | Em Séries e Jogos, Em alta mostra títulos em destaque por popularidade/relevância do catálogo. | Modo Em alta ativo. | Lista fixa (~dezena de títulos) sem navegação por mês. | Ativar Em alta em Séries. |
+| RN-HOME-EA-004 | Início da lista | Ao ativar Em alta, o carrossel vai para o **primeiro** card da lista em alta. | Toggle ligado. | Primeiro slide visível. | Ativar e ver posição. |
+| RN-HOME-EA-005 | Desativar volta à timeline | Ao desligar Em alta, o carrossel retorna ao modo data e reposiciona no contexto de “hoje”. | Estava em Em alta. | Modo mês retorna; foco próximo lançamento. | Ligar e desligar Em alta. |
+| RN-HOME-EA-006 | Gênero em Em alta | Filtro de gênero continua disponível e lista só títulos em alta daquele gênero. | Em alta com vários gêneros. | Dropdown coerente com cards visíveis. | Filtrar gênero em Em alta. |
 
 ---
 
-## Notas de divergência (doc legado × código)
+## 8 — Faixa Animes (carrossel próprio)
 
-| Expectativa antiga | Código atual |
-|--------------------|--------------|
-| “Em alta” filmes = `?filtro=populares` | Home usa `/filmes/mais-esperados?limit=40` |
-| “Em alta” = `/trending` agregado | Séries/jogos: `/trending?type=…&limit=40` |
-| `AdultContentModal` na home | Não existe; blur + `animeSafeWhereFilter` |
-| Homepage lista todos do mês | Bootstrap ~80/tipo + expansão `by-month`; curadoria forte |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-AC-001 | Dois modos: estreias e semana | A faixa Animes permite alternar entre visão por **temporada/estreias** e **agenda da semana** (por dia). | Faixa Animes visível. | Botões/ícones alternam entre modos; título do carrossel muda (temporada vs dia da semana). | Clicar alternância calendário/lista. |
+| RN-HOME-AC-002 | Modo inicial automático | Na **quarta semana em diante** da temporada corrente, a página pode abrir já na agenda semanal; no início da temporada, abre em estreias. | Data de teste no fim vs início da temporada. | Modo inicial diferente; só na primeira visita (escolha manual depois é mantida). | Testar em duas datas da mesma temporada. |
+| RN-HOME-AC-003 | Estreias: temporada atual | No modo estreias, título indica estreias da temporada/ano (ex.: “Estreias de Verão 2026”). | Modo estreias, temporada corrente. | Copy com nome da estação e ano. | Ler título da faixa. |
+| RN-HOME-AC-004 | Estreias: posição inicial | Foco no próximo anime a estrear (ou último já estreado na temporada). | Animes com datas na temporada. | Card central coerente com “próximo” na data de hoje. | Abrir home e ver card central. |
+| RN-HOME-AC-005 | Agenda semanal: só com episódio marcado | No modo semana, entram animes que têm **próximo episódio** agendado; agrupados por dia da semana. | Modo semana. | Separadores “Segunda”, “Terça”, etc., com cards abaixo. | Ativar modo semana em temporada ativa. |
+| RN-HOME-AC-006 | Agenda: abrir no dia de hoje | Ao entrar no modo semana, o foco vai para o separador do **dia da semana de hoje**. | Modo semana com episódios na semana. | Separador do dia atual visível/central. | Abrir modo semana no meio da semana. |
+| RN-HOME-AC-007 | Trocar temporada | Setas mudam ano/temporada (Inverno, Primavera, Verão, Outono). | Modo estreias. | Novos cards após breve carregamento se a temporada ainda não estava aberta. | Avançar para próxima temporada. |
+| RN-HOME-AC-008 | Em alta em animes | Modo destaque lista animes populares (sem eixo de temporada). | Em alta ligado na faixa Animes. | Lista por popularidade; filtros de formato/adulto aplicados na exibição. | Toggle Em alta em Animes. |
+| RN-HOME-AC-009 | Fixar na semana (logado) | Usuário logado pode fixar anime no menu do card para destacar na semana. | Logado, card de anime. | Opção no menu ⋮; ícone de pin no card quando fixado. | Fixar e ver pin. |
+| RN-HOME-AC-010 | Loop na agenda semanal | No modo semana, a rolagem pode ser contínua (volta ao início). | Modo semana ativo. | Comportamento de carrossel em loop (diferente do modo estreias). | Rolar até o fim no modo semana. |
 
 ---
 
-## Referência cruzada
+## 9 — Cards de título (todas as faixas da home)
 
-- Listagens completas: [`02-FILMES.md`](./02-FILMES.md), [`03-SERIES.md`](./03-SERIES.md), [`04-ANIMES.md`](./04-ANIMES.md)
-- Modais e busca acionados pelos cards: [`08-MODAIS.md`](./08-MODAIS.md), [`09-BUSCA-HEADER.md`](./09-BUSCA-HEADER.md)
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-CARD-001 | Abrir detalhe | Toque/clique no card abre painel de detalhe do título (modal). | Card visível. | Modal com sinopse, datas, links, etc. | Clicar poster/título. |
+| RN-HOME-CARD-002 | Menu ⋮ | Botão de três pontos abre menu de ações sem sair da home. | Card visível. | Menu com favoritar, quero assistir, etc. | Abrir menu. |
+| RN-HOME-CARD-003 | Fechar menu ao clicar fora | Clicar fora do menu fecha o menu. | Menu aberto. | Menu some. | Clicar área vazia. |
+| RN-HOME-CARD-004 | Favoritar / quero assistir | Ações gravam na conta do usuário quando logado. | Logado. | Estado ativo reflete no menu; indicador no card se aplicável. | Favoritar e recarregar página logado. |
+| RN-HOME-CARD-005 | Visitante não grava | Sem login, ações de lista pedem entrada na conta (mensagem). | Não logado. | Aviso; nada salvo. | Favoritar deslogado. |
+| RN-HOME-CARD-006 | Acompanhando (série/anime) | Opção extra para série e anime. | Card série ou anime. | Item “Acompanhando” no menu. | Abrir menu em série. |
+| RN-HOME-CARD-007 | Já assisti / já joguei | Só disponível se o título **já foi lançado** (data de lançamento no passado). | Filme/jogo futuro. | Opção desabilitada ou sem efeito. | Tentar em estreia futura. |
+| RN-HOME-CARD-008 | Avaliar ao marcar visto | Ao marcar já assisti/joguei em título lançado, abre fluxo de **nota** antes de concluir. | Lançado, logado. | Modal de avaliação. | Marcar já assisti em filme antigo. |
+| RN-HOME-CARD-009 | Etiqueta de status — filme | Ordem de prioridade visual: **Pré-venda** → **Em cartaz** → **No streaming** (após lançamento) → **Em breve**. | Filmes com flags diferentes. | Uma etiqueta principal por card. | Comparar filme em cartaz vs streaming. |
+| RN-HOME-CARD-010 | Etiqueta — série/anime | **Novo ep** (24h) → **Em exibição** → **Em breve** → **No streaming**. | Episódio exibido há menos de 24h. | “NOVO EP” visível. | Testar dia após estreia de ep. |
+| RN-HOME-CARD-011 | Novo ep: regra de 24h | “Novo ep” usa data do último episódio (série) ou regra equivalente no anime. | Ep entre 1h e 24h atrás. | Etiqueta presente; após 24h some. | Esperar ou simular data. |
+| RN-HOME-CARD-012 | Dublagem no anime | Texto **Dublado** ou **Legendado** vem da informação oficial do título, não da lista de elenco no card. | Anime com dublagem BR cadastrada. | “Dublado” no card. | Comparar com título só legendado. |
+| RN-HOME-CARD-013 | Contagem para próximo episódio | Rodapé do card pode mostrar contagem regressiva para o próximo episódio. | Série/anime com próximo ep futuro. | Texto com dias/horas; abaixo de 1 dia atualiza mais frequentemente. | Card com ep amanhã vs hoje à noite. |
+| RN-HOME-CARD-014 | Saga em filme | Filme parte de saga pode mostrar atalho para página de continuações. | Filme com saga. | Link de saga; clique **não** abre o modal (só o link). | Clicar saga vs poster. |
+| RN-HOME-CARD-015 | Conteúdo adulto no poster | Poster de título adulto aparece desfocado até passar o mouse (desktop) ou interação equivalente. | Título marcado adulto ainda permitido. | Blur no poster. | Hover no card adulto. |
+| RN-HOME-CARD-016 | Indicador na minha lista | Logado com favorito/quero/acompanhando, o card pode mostrar marca visual de lista. | Logado com item na lista. | Borda ou pill de destaque. | Favoritar e olhar o card. |
+| RN-HOME-CARD-017 | Ocultar título | “Não me interessa” remove o título das recomendações pessoais conforme política da conta. | Logado. | Título some das listas personalizadas subsequentes. | Ocultar e buscar de novo. |
+
+---
+
+## 10 — Atualização de conteúdo e elementos globais
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-HOME-UPD-001 | Atualizar após sincronização do catálogo | Quando o site recebe atualização em massa de títulos (em segundo plano), as faixas da home podem **atualizar sozinhas** sem o usuário recarregar a página. | Ambiente onde sync/disparo de atualização ocorre. | Cards novos ou datas alteradas após evento. | Após sync, manter home aberta e observar. |
+| RN-HOME-UPD-002 | Falha na atualização silenciosa | Se a atualização automática falhar, a home mantém o que já estava na tela. | Falha de rede na atualização. | Sem mensagem obrigatória; conteúdo antigo permanece. | Cortar rede após sync. |
+| RN-HOME-SHELL-001 | Menu superior e busca | Cabeçalho do site (busca, conta, tema) está presente na home e funciona igual às outras páginas. | Qualquer estado de login. | Busca abre overlay; login leva à entrada. | Usar busca e menu no topo. |
+| RN-HOME-SHELL-002 | Sem popup de “consentimento +18” | Conteúdo adulto é tratado com blur e exclusão de alguns títulos; **não** há janela modal pedindo aceite de conteúdo adulto só na home. | Título adulto permitido. | Apenas blur/exclusão, sem popup dedicado. | Navegar home com título adulto. |
+
+---
+
+## 11 — Diferenças importantes (para não confundir no teste)
+
+| Situação | O que o usuário pode notar |
+|----------|----------------------------|
+| Filmes “Em alta” na home vs “Populares” na página Filmes | Listas e ordens **diferentes**; home prioriza **mais esperados**. |
+| Card na home vs mesmo título na página Filmes | Concertos podem aparecer na listagem Filmes e **não** no carrossel da home. |
+| Página Séries completa vs carrossel Séries na home | A home usa critérios mais rígidos de qualidade e datas; a listagem de Séries pode mostrar mais títulos. |
+
+---
+
+## Ver também (outras telas, mesma linguagem)
+
+- Detalhe do título e avaliação: `08-MODAIS.md`
+- Busca e cabeçalho: `09-BUSCA-HEADER.md`
+- Listagem completa de filmes: `02-FILMES.md`

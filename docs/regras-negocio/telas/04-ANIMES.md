@@ -1,42 +1,78 @@
-# Tela `/animes` — Regras de negócio
+# Página Animes — Regras de negócio (visão de tela)
 
-**Rota:** `/animes`  
-**Objetivo:** Catálogo navegável de animes com filtros e destaques de lançamentos futuros.  
-**Stack:** `frontend/src/app/animes/page.tsx`, `AnimesClient.tsx` · API `GET /animes`, `GET /animes/filtros` (`api/src/routes/animesRoutes.ts`)
+**Onde o usuário está:** página **Animes** do site (listagem completa de animes, acessível pelo menu ou pelo título da faixa Animes na página inicial).
 
----
-
-## Regras
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-ANIMES-001 | Renderização SSR com revalidação | A página é Server Component que busca lista e filtros no servidor antes de hidratar o cliente. | API acessível a partir do frontend em build/runtime. | `fetchAnimesPageData()` chama em paralelo `GET /animes` e `GET /animes/filtros`; `revalidate = 300` (ISR ~5 min). | `page.tsx` L10–20, `apiServer.ts` L146–161 | Abrir `/animes` com rede OK; inspecionar HTML inicial com cards; após 5+ min, confirmar revalidação no deploy Next. |
-| RN-ANIMES-002 | Degradação graciosa no SSR | Falha na API no servidor não quebra a página. | `fetchAnimesPageData` lança erro. | Cliente recebe `emptyData` (lista vazia, filtros vazios). | `page.tsx` L4–8, L14–17 | Simular API indisponível no SSR; página abre com estado vazio e filtros sem opções. |
-| RN-ANIMES-003 | Cabeçalho e copy fixos | Título e descrição da área de animes são estáticos. | Usuário em `/animes`. | `PageHeader` com título "Animes" e descrição sobre temporadas e clássicos. | `AnimesClient.tsx` L75 | Verificar texto do cabeçalho na UI. |
-| RN-ANIMES-004 | Seção "O que vem aí" condicional | Destaques de animes futuros vêm do resumo de eventos, não da listagem principal. | `useEventosResumo()` retorna `resumo.proximos.animes` com length > 0. | `CollapsibleSection` "O que vem aí" com `HorizontalMediaRow` tipo `anime`; interações via `useMidiaInteraction` e `userInteractions` do store. | `AnimesClient.tsx` L25, L77–86 | Com dados em `/eventos/resumo`; seção aparece. Sem itens em `proximos.animes`, seção ausente. |
-| RN-ANIMES-005 | Opções de filtro vindas do servidor | Gêneros, anos, formatos, fontes e status populam os `<select>`. | SSR ou estado inicial com `initialData.filters`. | Listas refletem resposta de `GET /animes/filtros` (gêneros ordenados A–Z; anos `seasonYear` desc; status com `value` + `label` traduzido). | `animesRoutes.ts` L137–154, `AnimesClient.tsx` L30–34 | Comparar opções do dropdown com payload de `/animes/filtros`. |
-| RN-ANIMES-006 | Valor sentinela `todos` | Filtros não enviam parâmetro à API quando o usuário não restringe. | Qualquer filtro em "Todos os …". | Parâmetro omitido em `realApi.getAnimes` (`undefined`). | `AnimesClient.tsx` L46–51 | Selecionar "Todos os Gêneros"; request sem `genero`. |
-| RN-ANIMES-007 | Recarga ao mudar filtro | Lista no cliente é sempre atualizada quando filtros mudam. | Cliente montado. | `useEffect` chama `loadAnimes` em cada mudança de filtro (inclui primeira montagem após hidratação — refetch mesmo com dados SSR). | `AnimesClient.tsx` L43–71 | Abrir página; ver segunda chamada `GET /animes` no network após load. |
-| RN-ANIMES-008 | Refresh global pós-sync | Após sincronização de dados no app, a grade recarrega. | Evento `orbe:data-refresh` disparado na janela. | `useOrbeDataRefresh(loadAnimes)` reexecuta busca com filtros atuais. | `useOrbeDataRefresh.ts`, `AnimesClient.tsx` L67 | Disparar evento de refresh; lista atualiza sem reload completo. |
-| RN-ANIMES-009 | Contador na UI usa página atual | O texto "X animes encontrados" reflete o tamanho do array retornado na página, não o `total` global. | Resposta paginada com `total` > `results.length`. | Mensagem usa `animes.length`; durante loading mostra "Carregando...". | `AnimesClient.tsx` L133–136, API L82 | Com mais de 48 animes no banco, contador mostra até 48 (limite padrão) se cliente não paginar. |
-| RN-ANIMES-010 | Grade e estado vazio | Layout responsivo de cards ou empty state. | Lista carregada. | Grid 2–5 colunas, `MidiaCard` tipo `anime`, max-width 210px; se `results` vazio, ícone + "Nenhum anime encontrado" + sugestão de ajustar filtros. | `AnimesClient.tsx` L139–154 | Aplicar filtros impossíveis; empty state. Com resultados, cards clicáveis. |
-| RN-ANIMES-011 | Paginação padrão da API | Listagem backend paginada com limites seguros. | `GET /animes` sem `page`/`limit`. | `page=1`, `limit=48` (máx. 200); resposta `{ results, total, page, limit }`. | `mediaRoutesHelpers.ts` L19–27, `animesRoutes.ts` L31–82 | `curl /animes`; validar JSON e limite 48. |
-| RN-ANIMES-012 | Exclusão de conteúdo adulto (lista) | Por padrão animes marcados adultos não entram na listagem. | `includeAdult` ausente ou ≠ `true`. | `where.isAdult = false`. | `animesRoutes.ts` L34–38 | Anime `isAdult: true` não aparece na listagem pública. |
-| RN-ANIMES-013 | Safe search por tags bloqueadas | Tags sensíveis são excluídas quando safe search ativo. | `safeSearch=true` **ou** conteúdo adulto não liberado. | `tags.none` com nomes em `["Hentai","Ecchi","Yaoi","Yuri","Adult"]`. | `animesRoutes.ts` L26, L58–68 | Anime com tag Hentai não listado sem `includeAdult=true` e sem desligar safe search. |
-| RN-ANIMES-014 | Filtros de query na listagem | Parâmetros opcionais restringem o `where` Prisma. | Query com `genero`, `formato`, `fonte`, `status`, `ano` ≠ `todos`. | Filtro por relação de gênero, campos `format`, `source`, `status`, `seasonYear` inteiro. | `animesRoutes.ts` L40–56 | `GET /animes?genero=Action&ano=2024` retorna só correspondentes. |
-| RN-ANIMES-015 | Ordenação da listagem | Modo de ordenação controlado por `filtro`. | Query `filtro`. | `populares` → `popularity desc`; caso contrário → `titleRomaji asc`. (UI atual não expõe `filtro`; default alfabético.) | `animesRoutes.ts` L70 | `GET /animes?filtro=populares` ordena por popularidade. |
-| RN-ANIMES-016 | Listagem sem `animeQualityFilter` | A rota `/animes` **não** aplica o filtro de qualidade usado em home/hoje/carrosséis. | Anime com nota/popularidade baixa e não adulto. | Pode aparecer na listagem se passar filtros de adulto/tags. | Contraste `animesRoutes.ts` L33–81 vs `qualityFilters.ts` `animeQualityFilter` | Comparar anime marginal em `/animes` vs `/hoje` streaming. |
-| RN-ANIMES-017 | Cache HTTP da listagem | Respostas de lista cacheadas no edge/API. | GET bem-sucedido. | `cacheMiddleware(TWELVE_HOURS)` (12 h). | `animesRoutes.ts` L29 | Header de cache na resposta da API. |
-| RN-ANIMES-018 | Endpoint de filtros e cache | Metadados de filtros agregados do banco. | `GET /animes/filtros`. | JSON com arrays `genres`, `years`, `formats`, `sources`, `statuses`; cache 24 h; erro → 500. | `animesRoutes.ts` L137–159 | Endpoint responde 200 e status labels em PT quando aplicável. |
-| RN-ANIMES-019 | Detalhes ao vivo (fora da grade) | Modal/página de detalhe usa rota separada com rate limit. | `GET /animes/:id/details`, id numérico positivo. | Dados AniList ao vivo; 400 id inválido; 404 não encontrado; cache 300 s. | `animesRoutes.ts` L90–105 | Id inválido → 400; id inexistente → 404. |
-| RN-ANIMES-020 | Próximo episódio | Agenda do próximo lançamento futuro. | `GET /animes/:id/next-episode`. | Primeiro `airingSchedule` com `airingAt >= now`, ordenado por `airingAt asc`. | `animesRoutes.ts` L163–187 | Anime em exibição retorna próximo episódio cronológico. |
+**O que existe nesta página:** cabeçalho; gaveta opcional **O que vem aí**; filtros por gênero, ano (temporada), formato, fonte (mangá/light novel etc.) e status; contador; grade de cards de anime.
 
 ---
 
-## Referências cruzadas (API, não expostas diretamente na tela)
+## 1 — Abertura, cabeçalho e gaveta
 
-| Endpoint | Uso |
-| --- | --- |
-| `GET /animes/weekly-schedule` | Cronograma semanal agrupado por dia |
-| `GET /animes/by-year`, `GET /animes/by-season` | Carrosséis com `animeQualityFilter` / `animeSeasonQualityFilter` |
-| `PUT /animes/:id` | Admin only |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-ANIMES-001 | Conteúdo na abertura | Lista e filtros já aparecem ao entrar (com possível segunda atualização logo após). | Catálogo acessível. | Cards e selects visíveis após carregar. | Abrir Animes. |
+| RN-ANIMES-002 | Falha na abertura | Catálogo indisponível no primeiro momento não quebra a página. | Falha simulada. | Grade vazia; filtros vazios; página utilizável. | Ambiente com catálogo indisponível na abertura. |
+| RN-ANIMES-003 | Texto do cabeçalho | Título e descrição fixos. | Usuário em Animes. | **Animes** + texto sobre temporadas e clássicos. | Ler cabeçalho. |
+| RN-ANIMES-004 | Gaveta O que vem aí | Animes futuros em carrossel horizontal. | Resumo com **próximos animes**. | Seção **O que vem aí** acima dos filtros. | Ambiente com estreias futuras. |
+
+---
+
+## 2 — Filtros e recarga da grade
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-ANIMES-005 | Opções dos filtros | Gêneros, anos, formatos, fontes e status vêm do catálogo disponível. | Catálogo populado. | Dropdowns preenchidos; gêneros em ordem alfabética; anos do mais recente ao mais antigo; status com rótulo em português quando aplicável. | Abrir cada select e comparar com títulos conhecidos. |
+| RN-ANIMES-006 | Valor “Todos” | Cada filtro em “Todos os …” não restringe aquele critério. | Todos em todos os selects. | Grade ampla. | Resetar filtros. |
+| RN-ANIMES-007 | Recarga ao mudar filtro e na hidratação | A grade recarrega quando a página termina de abrir **e** sempre que um filtro muda (pode haver um loading extra logo após a primeira pintura). | Página recém-aberta ou filtro alterado. | Spinner possível logo após abrir; novo spinner ao mudar filtro. | Abrir Animes observando loading; depois trocar gênero. |
+| RN-ANIMES-008 | Atualização após sync | Sync do catálogo pode atualizar a grade com a página aberta. | Sync disparada. | Lista muda sem F5. | Manter Animes aberta durante sync. |
+
+---
+
+## 3 — Contador, grade, vazio e paginação visível
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-ANIMES-009 | Contador = cards da página atual | O texto “X animes encontrados” conta os cards **mostrados**, não necessariamente o total de animes que existem para o filtro no catálogo. | Mais de ~48 animes para o filtro. | Contador pode mostrar até ~48 enquanto existem mais no catálogo. | Filtro amplo; comparar contador com total esperado manualmente. |
+| RN-ANIMES-010 | Grade, loading e vazio | Spinner central durante busca; grid responsivo; empty state amigável. | Filtro impossível ou resultados OK. | **Nenhum anime encontrado** + dica; ou 2–5 colunas de cards ~210px. | Testar filtro vazio e filtro amplo. |
+| RN-ANIMES-011 | Lote inicial sem “carregar mais” | A grade mostra um lote inicial (~dezenas); não há botão para próxima página nesta tela. | Catálogo grande. | ~48 cards visíveis; sem paginação na UI. | Contar cards com filtros abertos. |
+
+---
+
+## 4 — Conteúdo adulto, tags sensíveis e curadoria
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-ANIMES-012 | Exclusão de adulto explícito | Animes marcados como conteúdo adulto não entram na listagem pública desta página. | Anime adulto no catálogo. | Ausente em Animes. | Buscar título adulto conhecido. |
+| RN-ANIMES-013 | Tags sensíveis ocultas | Títulos com tags como conteúdo adulto explícito (ex.: hentai, ecchi pesado) ficam de fora da listagem padrão. | Anime com tag bloqueada. | Não aparece na grade pública. | Validar título de teste com tag sensível. |
+| RN-ANIMES-014 | Filtros combinados | Gênero, ano (temporada), formato, fonte e status restringem juntos. | Vários filtros ativos. | Só animes que atendem **todos** os critérios. | Combinar gênero + ano + formato. |
+| RN-ANIMES-015 | Ordem alfabética padrão | Sem controle “populares” na UI, ordem por título (romaji/título exibido). | Filtros em todos. | Ordem A–Z aproximada pelos primeiros cards. | Ler primeiros títulos. |
+| RN-ANIMES-016 | Listagem vs home / Hoje | A página Animes é **mais permissiva** que o carrossel Animes da home e que algumas seções da página Hoje (que exigem qualidade mínima). | Anime marginal (baixa popularidade, fora de temporada). | Pode aparecer em Animes e faltar na home/Hoje streaming. | Comparar mesmo anime nas três áreas. |
+
+---
+
+## 5 — Detalhe, agenda e outras áreas
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-ANIMES-017 | Conteúdo pode demorar a atualizar | Após mudanças no catálogo, aguardar e recarregar para ver efeito (mesma lógica das outras listagens). | Cadastro alterado. | Novidades após reload. | Alterar anime de teste; recarregar. |
+| RN-ANIMES-018 | Metadados de filtro completos | Formatos e fontes listam valores realmente usados por algum anime. | Catálogo variado. | Sem opções “fantasma” no menu. | Percorrer formatos/fontes. |
+| RN-ANIMES-019 | Detalhe ao vivo | Clique no card abre detalhe que pode buscar informações atualizadas (sinopse, episódios, links). | Card qualquer. | Modal/página de detalhe; id inválido não abre conteúdo quebrado. | Clicar card; testar título removido. |
+| RN-ANIMES-020 | Próximo episódio (detalhe/agenda) | Informação de próximo episódio aparece no detalhe/card quando existir agenda futura; não é filtro da grade. | Anime em exibição semanal. | Contagem ou data de próximo ep no card/detalhe. | Anime em temporada corrente. |
+
+---
+
+## 6 — Diferenças importantes
+
+| Situação | O que o usuário pode notar |
+|----------|----------------------------|
+| Contador em Animes vs Filmes/Séries | Em Animes o número segue os **cards visíveis**; em Filmes/Séries segue o **total** do filtro. |
+| Home Animes | Carrossel da inicial filtra temporada, agenda semanal e exclui adulto explícito de forma mais rígida. |
+| Recarga ao abrir | Animes pode **recarregar** a lista logo após abrir; Filmes/Séries/Jogos evitam isso na primeira visita. |
+
+---
+
+## Ver também
+
+- Faixa Animes na home (estreias / semana / em alta): `01-HOME.md`
+- Cards e modal: `08-MODAIS.md`
+- Minha lista e continuar assistindo: `10-MINHA-LISTA.md`

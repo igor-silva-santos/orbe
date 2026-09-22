@@ -1,53 +1,62 @@
-# Convenções — inventário de regras de negócio (QA)
+# Convenções — regras de negócio para QA (visão de tela)
 
-## Objetivo
+## Público e princípio
 
-Cada linha deste inventário é **uma regra atômica**: um comportamento verificável, sem agregação de várias regras em um único item. O material serve para **cenários de teste** (manual, exploratório ou automatizado).
+Este inventário é escrito para quem **só enxerga o produto no navegador**: testadores, PO e suporte.  
+**Não** se usa:
+
+- nomes de arquivos, funções, componentes ou frameworks;
+- URLs de API, métodos HTTP, JSON, cache de servidor ou banco de dados;
+- jargão de implementação (SSR, hook, store, Prisma, etc.).
+
+Tudo é descrito como **o que aparece na tela**, **o que o usuário pode fazer** e **o que deve acontecer** em seguida.
+
+## Uma regra = um comportamento testável
+
+Cada linha da tabela é **uma** regra. Não agrupar vários comportamentos em um único item.
 
 ## Formato de ID
 
-| Prefixo | Escopo |
-|---------|--------|
-| `RN-HOME-*` | Rota `/` (homepage) |
-| `RN-FILMES-*` | `/filmes` e endpoints de filme usados na home |
-| `RN-SERIES-*` | `/series` e endpoints de série usados na home |
-| `RN-ANIMES-*` | `/animes` e carrossel de animes na home |
-| `RN-JOGOS-*` | `/jogos`, `/jogos-em-alta`, promoções |
-| `RN-PROMO-*` | `/promocoes` |
-| `RN-HOJE-*` | `/hoje` |
-| `RN-MODAL-*` | SuperModal e modais globais |
-| `RN-BUSCA-*` / `RN-HEADER-*` | Busca e cabeçalho |
-| `RN-LISTA-*` | Minha lista / watchlist |
-| `RN-AUTH-*` | Login, registro, perfil, configurações |
+| Prefixo | Tela / área no site |
+|---------|---------------------|
+| `RN-HOME-*` | Página inicial (início) |
+| `RN-FILMES-*` | Página Filmes |
+| `RN-SERIES-*` | Página Séries |
+| `RN-ANIMES-*` | Página Animes |
+| `RN-JOGOS-*` | Página Jogos e jogos em alta |
+| `RN-PROMO-*` | Página Promoções |
+| `RN-HOJE-*` | Página Hoje |
+| `RN-MODAL-*` | Janelas de detalhe, avaliação, calendário |
+| `RN-BUSCA-*` / `RN-HEADER-*` | Busca e menu superior |
+| `RN-LISTA-*` | Minha lista |
+| `RN-AUTH-*` | Entrar, criar conta, perfil, configurações |
 | `RN-CONT-*` | Continuações (sagas) |
 | `RN-PREM-*` / `RN-EVT-*` | Prêmios e eventos |
-| `RN-PERS-*` / `RN-DUB-*` / `RN-DEV-*` | Pessoa, dublador, desenvolvedora |
-| `RN-GLOBAL-*` | Curadoria compartilhada (`qualityFilters.ts`, sync) |
+| `RN-PERS-*` / `RN-DUB-*` / `RN-DEV-*` | Páginas de pessoa, dublador, desenvolvedora |
 
 ## Colunas da tabela
 
 | Coluna | Conteúdo |
 |--------|----------|
-| **ID** | Identificador estável para rastreio em Jira/TestRail |
+| **ID** | Código estável para Jira, planilha ou TestRail |
 | **Nome** | Título curto da regra |
-| **Descrição** | Comportamento completo (o que o sistema faz e por quê) |
-| **Pré-condições** | Estado de dados, auth, data/hora, flags |
-| **Resultado esperado** | Observável na UI ou na resposta HTTP |
-| **Evidência** | Arquivo e linha ou função no repositório |
-| **Cenário QA** | Passos sugeridos para reproduzir |
+| **Descrição** | Comportamento completo em linguagem de negócio |
+| **Pré-condições** | Situação do usuário, login, data relativa (“hoje”), conteúdo visível ou ausente — **sem** citar backend |
+| **Resultado na tela** | O que deve ser visto ou acontecer na interface (mensagem, scroll, card, ausência de bloco, etc.) |
+| **Como testar** | Passos que qualquer pessoa segue só com o site aberto |
 
-## Evidência no código
+## Navegação nas regras
 
-- Caminhos relativos à raiz do monorepo (`frontend/…`, `api/…`).
-- Quando a regra é composta (Prisma + pós-filtro), citar **ambos**.
-- Divergências entre documentação antiga e código: registrar em **Notas de divergência** no fim da tela.
+- Referir-se a **seções visíveis**: “faixa Filmes”, “carrossel de séries”, “botão Em alta”, “menu ⋮ do card”.
+- Rotas de página são permitidas **como endereço que o usuário visita** (ex.: “página inicial”, “página Filmes”), não como “endpoint”.
+- Quando o comportamento depende de **data do calendário**, deixar explícito (ex.: “lançamento com data de amanhã”, “episódio exibido há menos de 24 horas”).
 
-## O que não entra aqui
+## O que não entra
 
-- Estimativas de horas ou esforço.
-- Regras puramente visuais de marketing (copy do hero) **salvo** quando há ação de negócio (scroll, link).
-- Detalhes de infra (deploy) — ver `docs/DEV.md`, `docs/PRODUCAO.md`.
+- Estimativa de horas.
+- Detalhes de deploy ou infraestrutura.
+- Documentação técnica para desenvolvedores (fica fora desta pasta ou em material interno separado, se necessário).
 
 ## Manutenção
 
-Ao alterar comportamento de carrossel, curadoria ou interações, atualizar o arquivo da tela **e** qualquer `RN-GLOBAL-*` afetado.
+Ao mudar o produto, atualize a **tela** afetada. Se o mesmo card ou modal aparece em várias páginas, a regra pode estar duplicada com referência “também vale em …” na descrição.

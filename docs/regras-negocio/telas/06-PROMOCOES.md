@@ -1,94 +1,100 @@
-# Tela `/promocoes` — Regras de negócio
+# Página Promoções — Regras de negócio (visão de tela)
 
-**Rota:** `/promocoes` (query `?tab=gratis|promocoes|em-alta`)  
-**Objetivo:** Agregar jogos grátis e promoções de múltiplas lojas, com aba de jogos em alta do catálogo Orbe.  
-**Stack:** `promocoes/page.tsx`, `PromocoesClient.tsx`, `JogosEmAltaContent.tsx` · API `api/src/dealsRoutes.ts`, `api/src/deals/dealsService.ts`, `GET /jogos/em-alta`
+**Onde o usuário está:** página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
 
----
-
-## Navegação e estrutura
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-001 | Aba inicial por query string | Tab padrão derivada de `searchParams.tab`. | Acesso `/promocoes`. | Sem param ou inválido → `gratis`; `tab=promocoes` → promoções; `tab=em-alta` → em alta. | `page.tsx` L11–18 | `/promocoes?tab=em-alta` abre aba Em Alta. |
-| RN-PROMO-002 | ISR da página | Shell da página revalida no servidor. | Build Next. | `revalidate = 600` (10 min); dados de deals são client-side. | `page.tsx` L3 | Página estática revalidada; deals via API no browser. |
-| RN-PROMO-003 | Três abas funcionais | Grátis, Promoções, Em Alta. | Cliente montado. | `Tabs` com contadores nas duas primeiras; Em Alta sem contador de deals. | `PromocoesClient.tsx` L571–597 | Alternar abas; conteúdo distinto. |
-| RN-PROMO-004 | Em Alta não carrega deals | Aba em-alta usa só `/jogos/em-alta`. | `activeTab === 'em-alta'`. | `loadActiveTab` retorna sem chamar `/deals/*`; loading global desligado. | `PromocoesClient.tsx` L350–354, L553 | Na aba Em Alta, network sem `/deals/gratis`. |
-| RN-PROMO-005 | Lazy load por aba | Dados carregados na primeira visita à aba. | Troca de tab. | Grátis: `loadGratis` se `!gratisData`; Promoções: `loadPromocoes(1)` se `!promoData`. | `PromocoesClient.tsx` L377–381 | Ir direto a Promoções → uma chamada `/deals/promocoes`. |
+**O que existe nesta página:** hero com voltar, título, texto sobre lojas (Epic, EA App, Steam, etc.), horário da última atualização, botão **Atualizar agora**; abas com contadores (grátis e promoções); busca, ordenação, filtros por loja/plataforma; seções de ofertas; rodapé de fontes; aba **Em Alta** embute o conteúdo de jogos em alta (ver `05-JOGOS.md`).
 
 ---
 
-## Agregação backend (`dealsService` + `dealsRoutes`)
+## 1 — Abas, endereço e carregamento inicial
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-006 | Fontes de jogos grátis | Merge Epic, GamerPower, CheapShark, Steam, itch, ITAD (quando configurado). | Refresh do overview. | `gratisAll` deduplicado, normalizado BRL, enriquecido com links Orbe; split temporário/permanente. | `dealsService.ts` L147–168 | Overview contém itens de múltiplas `source`. |
-| RN-PROMO-007 | Fontes de promoções pagas | Vendas CheapShark (geral, Epic store, Ubisoft), Epic sales, ITAD, Steam, itch. | Refresh. | `promocoes` ordenadas por `dealRating`, desconto, título; dedupe. | `dealsService.ts` L172–187 | Promo com maior dealRating no topo após sort servidor. |
-| RN-PROMO-008 | Catálogo Steam Orbe | Promoções de jogos já no banco com desconto Steam. | Sync catálogo + Steam. | `catalogoSteam` separado de `promocoes` ao vivo. | `dealsService.ts` L170, L126 | Resposta `/deals/promocoes` inclui `catalogoSteam`. |
-| RN-PROMO-009 | Cache em camadas | Redis/memória + TTL soft/hard. | Requests repetidos. | Soft TTL 60 s (revalidação background); hard 120 s; HTTP `max-age=60`, `s-maxage` soft TTL. | `dealsService.ts` L18–21, `dealsRoutes.ts` L24–31 | Header `X-Deals-Fetched-At` presente. |
-| RN-PROMO-010 | Saúde das fontes | Estado agregado para alertas na UI. | Pelo menos uma fonte falhou. | `sourcesHealth`: 0 falhas → `ok`; 1+ → `degraded`; quase todas → `critical`. | `dealsService.ts` L557–562 | Simular falha Epic → alerta âmbar na UI. |
-| RN-PROMO-011 | Meta interna não vaza | `_meta` removido das respostas públicas. | Qualquer rota `/deals*`. | Middleware `dealsJsonMiddleware` strip `_meta`. | `dealsRoutes.ts` L35–46 | JSON público sem campo `_meta`. |
-| RN-PROMO-012 | GET `/deals/gratis` | Payload da aba grátis. | Chamada frontend `getFreeDeals`. | `gratisTemporarios`, `gratisPermanentes`, `deals` (= todos grátis), `sources`, `sourcesHealth`, câmbio USD/BRL. | `dealsRoutes.ts` L88–105 | Contrato bate com `DealsGratisResponse`. |
-| RN-PROMO-013 | GET `/deals/promocoes` paginado | Ofertas ao vivo com paginação server-side em memória. | `page`, `limit` query. | Default page 1, limit 48; máx. limit 100; `hasMore` quando há mais itens; inclui `catalogoSteam` completo (não paginado). | `dealsRoutes.ts` L108–131, `paginateDeals` | `page=2` retorna próximo slice; `catalogoSteam` sempre no body. |
-| RN-PROMO-014 | Câmbio USD→BRL | Preços convertidos quando aplicável. | `resolveUsdBrlRate` no refresh. | `usdBrlRate` e `usdBrlRateFetchedAt` nas respostas grátis/promo. | `dealsService.ts` L109–111, UI `SourceFooter` | Rodapé mostra taxa e hora. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-001 | Aba pela URL | Endereço define aba inicial. | `/promocoes`, `/promocoes?tab=promocoes`, `/promocoes?tab=em-alta`. | Padrão **Jogos de Graça**; `promocoes` → aba Promoções; `em-alta` → Em Alta. | Abrir cada URL. |
+| RN-PROMO-002 | Shell da página | Estrutura (hero, abas) aparece mesmo antes das ofertas terminarem de carregar. | Primeira visita. | Layout visível; conteúdo das abas grátis/promo preenche depois. | Abrir Promoções com rede lenta. |
+| RN-PROMO-003 | Três abas | Grátis, Promoções, Em Alta com ícones distintos. | Página carregada. | Alternar abas muda conteúdo principal. | Clicar cada aba. |
+| RN-PROMO-004 | Em Alta sem ofertas de loja | Aba **Em Alta** não carrega jogos grátis/promoções de lojas externas. | Aba **Em Alta** ativa. | Só blocos de jogos em alta; sem skeleton de 12 cards de deal (salvo loading interno de Em Alta). | Abrir Em Alta; observar ausência de grids de oferta. |
+| RN-PROMO-005 | Carregar sob demanda | Cada aba de ofertas busca dados na **primeira** vez que o usuário entra nela. | Abrir direto em Promoções sem passar por Grátis. | Promoções carrega ao selecionar aba; Grátis pode não ter sido buscado ainda. | Entrar direto `?tab=promocoes`. |
 
 ---
 
-## Aba "Jogos de Graça"
+## 2 — Origem dos dados (visão do usuário)
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-015 | Separação temporário vs permanente | UI distingue giveaways limitados de F2P/zero permanente. | `gratisData` carregado. | Preferência arrays `gratisTemporarios`/`gratisPermanentes`; fallback filtra `freeTier`. | `PromocoesClient.tsx` L402–414 | Seção "Estão de graça" vs "São de graça". |
-| RN-PROMO-016 | Ordenação padrão grátis | Temporários por urgência. | Aba grátis. | Default `freeSort = ending_soon`; permanentes usam `title` se sort for `ending_soon`. | `PromocoesClient.tsx` L329, L456 | Ordenar "Acaba primeiro" muda ordem dos temporários. |
-| RN-PROMO-017 | Filtro por plataforma | Chips dinâmicos só com plataformas presentes. | Deals carregados. | `availablePlatformFilters`; se filtro ativo some da lista, reset para `all`. | `dealFilters.ts`, `PromocoesClient.tsx` L435–438 | Filtrar Steam; chip some se não houver Steam. |
-| RN-PROMO-018 | Busca por título | Filtro client-side case-insensitive. | `searchQuery` não vazio. | `filterBySearch` em temporários, permanentes e destaques. | `dealFilters.ts` L39–43 | Buscar substring do título reduz grid. |
-| RN-PROMO-019 | Destaques por plataforma (grátis) | Seções colapsáveis itch e EA App. | `platformFilter=all`, sem busca, deals nessas plataformas. | `FREE_FEATURED_PLATFORMS` = itch, origin; deals removidos do bloco principal e mostrados em seção dedicada. | `dealFilters.ts` L25, `PromocoesClient.tsx` L459–491 | itch aparece em seção "Grátis na itch.io", não duplicado no principal. |
-| RN-PROMO-020 | Agrupamento por loja | Lista principal agrupa por `platform` quando filtro = todas. | `DealsByPlatform` com `all`. | Subtítulos uppercase por plataforma; grid 2–6 colunas. | `PromocoesClient.tsx` L70–106 | Várias lojas → múltiplos subtítulos. |
-| RN-PROMO-021 | Contador na tab Grátis | Badge no trigger da aba. | Filtros ativos. | Conta deals grátis após plataforma + busca. | `PromocoesClient.tsx` L582–584 | Busca reduz número no badge. |
-| RN-PROMO-022 | Empty states grátis | Mensagens quando não há itens. | Listas filtradas vazias. | Textos específicos para temporários/permanentes vazios. | `PromocoesClient.tsx` L631–634, L679–681 | Sem giveaways → mensagem amigável. |
-
----
-
-## Aba "Promoções"
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-023 | Ordenação padrão promoções | Popularidade de deal. | Aba promoções. | `saleSort = popular` (`dealRating` desc). | `PromocoesClient.tsx` L330, `dealSort.ts` | Trocar para "Maior desconto" reordena. |
-| RN-PROMO-024 | Faixa catálogo Steam | Carrossel horizontal de `catalogoSteam` filtrado. | `catalogoSteam.length > 0`. | Seção "Promoções na Steam (catálogo)" com `HorizontalDealsRow`; link para aba Em Alta. | `PromocoesClient.tsx` L708–730 | Jogos Orbe em promo na Steam no topo da aba. |
-| RN-PROMO-025 | Ofertas ao vivo paginadas no cliente | Primeira página 48; "Carregar mais" append. | `promoHasMore`, sem busca, plataforma all. | `loadPromocoes(page+1, true)` concatena `promoDeals`; botão oculto se busca ou filtro plataforma. | `PromocoesClient.tsx` L339–347, L384–394, L745–756 | Carregar mais aumenta grid; com busca ativa botão some. |
-| RN-PROMO-026 | Contador tab Promoções | Soma promo filtradas + catálogo filtrado. | Filtros aplicados. | Badge = `filteredPromocoes.length + filteredCatalogo.length`. | `PromocoesClient.tsx` L589–591 | Filtrar plataforma atualiza contador. |
-| RN-PROMO-027 | Banner wishlist (informativo) | Placeholder de feature futura. | Aba promoções visível. | Caixa tracejada "Lista de desejos Steam (em breve)" sem ação. | `PromocoesClient.tsx` L689–695 | Texto visível, sem botão funcional Steam. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-006 | Várias lojas — grátis | Jogos de graça agregam Epic, giveaways, Steam, itch.io, etc. | Aba Grátis carregada. | Cards de lojas diferentes; rodapé lista fontes com contagem. | Ler rodapé após load. |
+| RN-PROMO-007 | Várias lojas — promo pagas | Promoções pagas combinam várias lojas; ordem padrão prioriza “melhor deal”. | Aba Promoções. | Ofertas misturadas; ordenação **Popularidade** por padrão. | Abrir aba Promoções. |
+| RN-PROMO-008 | Catálogo Orbe na Steam | Jogos já catalogados no site com desconto na Steam aparecem em faixa dedicada. | Jogos Orbe em promo Steam. | Seção **Promoções na Steam (catálogo)** com carrossel horizontal. | Aba Promoções com catálogo populado. |
+| RN-PROMO-009 | Atualização periódica | Ofertas são atualizadas em intervalo curto; botão **Atualizar agora** força nova busca. | Aba grátis ou promo. | Horário **Última atualização** muda após atualizar. | Clicar **Atualizar agora** duas vezes. |
+| RN-PROMO-010 | Alerta de fontes indisponíveis | Se alguma loja falhar, banner âmbar ou vermelho avisa que a lista pode estar incompleta. | Fonte externa down no ambiente. | Banner listando lojas com falha. | Simular/induzir falha de fonte. |
+| RN-PROMO-011 | Sem detalhes técnicos internos | Usuário não vê metadados de diagnóstico — só ofertas, contadores e alertas amigáveis. | Qualquer aba de oferta. | Nenhum painel “debug” na interface. | Inspecionar UI. |
+| RN-PROMO-012 | Conteúdo da aba Grátis | Temporários, permanentes e lista unificada para contagem. | Grátis carregado. | Seções **Estão de graça** e **São de graça**; chips de plataforma. | Percorrer aba Grátis. |
+| RN-PROMO-013 | Paginação de promoções pagas | Primeira leva ~48 ofertas; **Carregar mais** traz o restante quando existir. | Muitas promoções ao vivo. | Botão **Carregar mais promoções** aumenta grid. | Clicar até sumir botão. |
+| RN-PROMO-014 | Preços em reais | Quando aplicável, valores convertidos; rodapé pode mostrar taxa USD/BRL e hora da cotação. | Ofertas em dólar. | Preço BRL nos cards; linha USD/BRL no rodapé. | Ler rodapé e cards. |
 
 ---
 
-## Aba "Em Alta" e redirect legado
+## 3 — Aba Jogos de Graça
 
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-028 | Conteúdo Em Alta embutido | Reutiliza componente compartilhado. | Tab `em-alta`. | `JogosEmAltaContent` com `compact` e banner para promoções ao vivo. | `PromocoesClient.tsx` L768–769 | Ver regras RN-JOGOS-019–029 em `05-JOGOS.md`. |
-| RN-PROMO-029 | Entrada via redirect | `/jogos-em-alta` → esta aba. | Redirect Next. | URL canônica `/promocoes?tab=em-alta`. | `jogos-em-alta/page.tsx` | Bookmarks antigos funcionam. |
-
----
-
-## UX global da página
-
-| ID | Nome | Descrição | Pré-condições | Esperado | Evidência | Cenário QA |
-| --- | --- | --- | --- | --- | --- | --- |
-| RN-PROMO-030 | Atualizar agora | Refetch da aba ativa (exceto em-alta). | Botão "Atualizar agora". | `loadActiveTab(true, activeTab)` com spinner; em-alta não refetch deals. | `PromocoesClient.tsx` L539–547, L349–370 | Clicar atualizar na aba Grátis → novo `fetchedAt`. |
-| RN-PROMO-031 | Estado de erro global | Falha no fetch de deals. | API 500. | Mensagem "Não foi possível carregar promoções e jogos grátis." + Tentar novamente. | `PromocoesClient.tsx` L364–368, L559–568 | Derrubar API deals → card erro. |
-| RN-PROMO-032 | Skeleton loading | Placeholder enquanto carrega aba grátis/promo. | `isLoading && tab !== em-alta`. | 12 cards skeleton shimmer. | `PromocoesClient.tsx` L553–558 | Primeira visita mostra skeleton. |
-| RN-PROMO-033 | Alerta fontes indisponíveis | UI de degradação. | `sourcesHealth` degraded/critical. | Banner âmbar ou vermelho listando fontes com `ok: false`. | `PromocoesClient.tsx` L221–255, L576 | Epic down → nome na lista de falhas. |
-| RN-PROMO-034 | Rodapé de fontes | Transparência de origem dos dados. | `sources` presente após load grátis/promo. | Contagens por Epic, GamerPower, CheapShark, itch, ITAD, Steam, Orbe com cor ok/erro. | `PromocoesClient.tsx` L258–307, L685, L765 | Contadores batem com `sources.*.count`. |
-| RN-PROMO-035 | PAGE_SIZE cliente | Alinhado à paginação API default. | Load promoções. | `PAGE_SIZE = 48` em `getSaleDeals`. | `PromocoesClient.tsx` L42, L340 | Primeira página com até 48 ofertas. |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-015 | Temporário vs permanente | **Estão de graça** = promo 100% por tempo limitado; **São de graça** = F2P ou sempre zero. | Deals de ambos tipos. | Duas seções com textos explicativos diferentes. | Ler subtítulos das seções. |
+| RN-PROMO-016 | Ordenação padrão grátis | Temporários por **Acaba primeiro**; permanentes por título quando essa ordenação não se aplica. | Aba Grátis. | Select de ordenação; mudar reordena temporários. | Trocar ordenação. |
+| RN-PROMO-017 | Filtro por plataforma/loja | Chips só aparecem para lojas que têm oferta no momento; filtro ativo some se a loja deixar de ter itens. | Filtrar e atualizar. | Chip some ou volta para **Todas**. | Filtrar Steam; atualizar se vazio. |
+| RN-PROMO-018 | Busca por título | Campo **Buscar jogo...** filtra temporários, permanentes e destaques (case insensitive). | Texto parcial do título. | Grid reduzido. | Buscar substring. |
+| RN-PROMO-019 | Destaques itch.io e EA App | Com filtro **Todas** e sem busca, ofertas itch.io e EA App podem aparecer em seções colapsáveis próprias, removidas do bloco principal para não duplicar. | Deals nessas lojas. | Seções **Grátis na itch.io** / **Grátis na EA** (ou equivalente). | Confirmar que itch não repete no grid principal. |
+| RN-PROMO-020 | Agrupamento por loja | Com **Todas** plataformas, lista principal agrupa subtítulos por loja (uppercase). | Várias lojas. | Subtítulos EPIC, STEAM, etc., cada um com grid. | Ver aba Grátis com muitas fontes. |
+| RN-PROMO-021 | Contador na aba Grátis | Número ao lado do nome da aba reflete ofertas grátis **após** filtro de plataforma e busca. | Busca ativa. | Badge diminui. | Buscar título raro. |
+| RN-PROMO-022 | Vazio grátis | Sem temporários ou sem permanentes. | Lista filtrada vazia. | Mensagens específicas por seção. | Filtrar loja sem giveaways. |
 
 ---
 
-## Rotas auxiliares `/deals` (API)
+## 4 — Aba Promoções (pagas)
 
-| Rota | Regra |
-| --- | --- |
-| `GET /deals?sections=gratis,promocoes` | Resposta parcial sem `all` |
-| `GET /deals/epic` | Subconjunto Epic grátis |
-| `GET /deals/gamerpower?platform&type` | Filtros opcionais em giveaways |
-| `GET /deals/cheapshark?storeId&freeOnly` | Mapeamento storeId → plataforma |
-| `GET /deals/cheapshark/stores` | Lista lojas (cache 24 h) |
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-023 | Ordenação padrão promo | **Popularidade** (melhor avaliação de deal). | Aba Promoções. | Trocar para **Maior desconto** reordena grid. | Usar select de ordenação. |
+| RN-PROMO-024 | Faixa catálogo Steam | Carrossel no topo quando há jogos do catálogo Orbe em desconto na Steam. | Pelo menos um jogo Orbe em promo na Steam. | Seção com link **Ver aba Em Alta →**. | Abrir Promoções com catálogo em promo. |
+| RN-PROMO-025 | Carregar mais | Botão só com filtro **Todas**, sem busca, e quando ainda há páginas. | >48 promoções. | **Carregar mais promoções** append cards; com busca o botão some. | Buscar título → botão ausente. |
+| RN-PROMO-026 | Contador aba Promoções | Badge = ofertas ao vivo filtradas + itens do carrossel catálogo Steam filtrados. | Filtro plataforma. | Número atualiza. | Filtrar Epic. |
+| RN-PROMO-027 | Wishlist Steam (em breve) | Caixa tracejada informativa, **sem** botão funcional de login Steam. | Aba Promoções visível. | Texto **Lista de desejos Steam (em breve)**. | Ler bloco no topo da aba. |
+
+---
+
+## 5 — Aba Em Alta e redirect legado
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-028 | Em Alta embutido | Mesmo conteúdo de jogos em alta (Top da Semana, Steam, plataformas…) em modo compacto + banner para promoções. | Tab `em-alta`. | Ver regras RN-JOGOS-019–029 em `05-JOGOS.md`. | Abrir aba Em Alta. |
+| RN-PROMO-029 | Bookmark antigo | `/jogos-em-alta` redireciona para esta aba. | URL legada. | Endereço final `?tab=em-alta`. | Acessar URL antiga. |
+
+---
+
+## 6 — UX global (hero, erros, loading)
+
+| ID | Nome | Descrição | Pré-condições | Resultado na tela | Como testar |
+| --- | --- | --- | --- | --- | --- |
+| RN-PROMO-030 | Atualizar agora | Recarrega aba ativa **Grátis** ou **Promoções**; **Em Alta** não usa este botão para ofertas de loja. | Botão no hero. | Spinner no ícone; horário atualiza (abas de deal). | Clicar em Grátis vs Em Alta. |
+| RN-PROMO-031 | Erro global de ofertas | Falha ao buscar grátis/promo. | Indisponibilidade. | **Não foi possível carregar promoções e jogos grátis.** + **Tentar novamente**. | Simular falha. |
+| RN-PROMO-032 | Skeleton inicial | Primeira carga de Grátis/Promo mostra 12 placeholders shimmer. | Rede lenta, aba ≠ Em Alta. | Skeleton antes dos cards reais. | Throttle + abrir Promoções. |
+| RN-PROMO-033 | Banner de degradação | Mesmo RN-PROMO-010 — lista fontes com falha. | Fontes parciais down. | Banner âmbar/vermelho. | Ambiente degradado. |
+| RN-PROMO-034 | Rodapé de fontes | Contagens por loja com cor verde (ok) ou vermelho (erro). | Após load grátis/promo. | Linha **Fontes:** Epic (n), Steam (n)… | Comparar com quantidade visível. |
+| RN-PROMO-035 | Tamanho da primeira página promo | Primeira leva de **Ofertas ao vivo** alinhada a ~48 itens antes de **Carregar mais**. | Muitas ofertas. | Grid inicial ~48; botão carrega resto. | Contar antes de carregar mais. |
+
+---
+
+## Diferenças importantes
+
+| Situação | O que o usuário pode notar |
+|----------|----------------------------|
+| Grátis vs Promoções | Grátis separa temporário/permanente; Promoções mistura descontos pagos + faixa Steam catálogo. |
+| Em Alta vs Promoções | Em Alta **não** lista giveaways de Epic/etc.; é ranking do catálogo de jogos. |
+| Busca / filtro vs Carregar mais | Com busca ou loja filtrada, **Carregar mais** some — tudo filtrado client-side na página já carregada. |
+
+---
+
+## Ver também
+
+- Jogos em Alta (detalhe dos blocos): `05-JOGOS.md`
+- Catálogo Jogos: `05-JOGOS.md` (seção catálogo)
+- Cards de mídia (fora de deals): `08-MODAIS.md`
