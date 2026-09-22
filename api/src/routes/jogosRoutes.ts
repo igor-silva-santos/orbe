@@ -33,7 +33,7 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, plataforma, modo, ano, mes } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const allConditions: Prisma.JogoWhereInput[] = [];
+    const allConditions: Prisma.JogoWhereInput[] = [jogoQualityFilter];
 
     const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
 
@@ -61,7 +61,7 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       allConditions.push({ gameModes: { some: { gameMode: { name: modo as string } } } });
     }
 
-    const where: Prisma.JogoWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
+    const where: Prisma.JogoWhereInput = { AND: allConditions };
 
     // `follows` (quantos usuários seguem o jogo no IGDB) é o sinal de popularidade real;
     // `rating` é nota de qualidade, não indica se o jogo está "em alta" agora.

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { loginWithCredentials } from '@/lib/auth/session';
 import { getToken } from '@/lib/auth/token';
-import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
+import { establishBrowserSession, postLoginRedirectFromSearch } from '@/lib/session';
 
 export default function LoginPage() {
   const { login } = useAppStore();
@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (token) await establishBrowserSession(token);
       login(user);
       const params = new URLSearchParams(window.location.search);
-      window.location.href = safeRedirectPath(params.get('redirect'));
+      window.location.href = postLoginRedirectFromSearch(params);
     } catch (error) {
       console.error('Login API call failed:', error);
       toast.error('Ocorreu um erro ao tentar fazer login. Tente novamente.');
