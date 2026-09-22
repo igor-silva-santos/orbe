@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_DIR = ROOT / "cenarios-camadas" / "execucao" / "manifests"
-OUT_DIR = ROOT / "cenarios-camadas" / "execucao" / "prod"
+DEFAULT_OUT_SUBDIR = "prod"
 
 ROUTES = {
     "01-HOME.md": "/",
@@ -107,6 +107,23 @@ def open_search_if_needed(page, arquivo: str) -> None:
                 break
         except PwTimeout:
             continue
+
+
+def scroll_for_arquivo(page, arquivo: str) -> None:
+    """Garante conteúdo abaixo da dobra no texto usado pelas heurísticas."""
+    ids_by_file = {
+        "01-HOME.md": ["filmes", "series", "animes", "jogos"],
+        "08-MODAIS.md": ["filmes"],
+        "09-BUSCA-HEADER.md": ["filmes"],
+    }
+    for sid in ids_by_file.get(arquivo, []):
+        loc = page.locator(f"#{sid}")
+        try:
+            if loc.count() > 0:
+                loc.scroll_into_view_if_needed(timeout=8000)
+                page.wait_for_timeout(600)
+        except PwTimeout:
+            pass
 
 
 def get_body(page) -> str:
@@ -214,7 +231,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("manifest", help="ex: 01-HOME.json")
     ap.add_argument("--executor", default="executar-feliz-lote (agente QA)")
+    ap.add_argument("--out-dir", default=DEFAULT_OUT_SUBDIR, help="subpasta em execucao/ (ex: prod-rodada-2)")
     args = ap.parse_args()
+    out_dir = ROOT / "cenarios-camadas" / "execucao" / args.out_dir
 
     manifest_path = MANIFEST_DIR / args.manifest
     if not manifest_path.exists():
@@ -224,8 +243,8 @@ def main() -> int:
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     arquivo = data["arquivo"]
     base = data["ambiente"].rstrip("/")
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = OUT_DIR / manifest_path.name
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / manifest_path.name
 
     path = ROUTES.get(arquivo, "/")
     results = []
@@ -238,6 +257,7 @@ def main() -> int:
         except PwTimeout:
             page.goto(base + path, wait_until="domcontentloaded", timeout=90000)
         page.wait_for_timeout(2000)
+        scroll_for_arquivo(page, arquivo)
         open_search_if_needed(page, arquivo)
         if arquivo == "08-MODAIS.md":
             open_modal_if_needed(page, arquivo)

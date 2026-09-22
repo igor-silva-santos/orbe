@@ -1,0 +1,147 @@
+{
+  "arquivo": "04-ANIMES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior multitask rodada 2 pós-deploy front+back",
+  "cenarios": [
+    {
+      "id": "CT-RN-ANIMES-001-F",
+      "regra": "RN-ANIMES-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-002-F",
+      "regra": "RN-ANIMES-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-003-F",
+      "regra": "RN-ANIMES-003",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-004-F",
+      "regra": "RN-ANIMES-004",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-005-F",
+      "regra": "RN-ANIMES-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/4): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-006-F",
+      "regra": "RN-ANIMES-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-007-F",
+      "regra": "RN-ANIMES-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-008-F",
+      "regra": "RN-ANIMES-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-009-F",
+      "regra": "RN-ANIMES-009",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-010-F",
+      "regra": "RN-ANIMES-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-011-F",
+      "regra": "RN-ANIMES-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-012-F",
+      "regra": "RN-ANIMES-012",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-013-F",
+      "regra": "RN-ANIMES-013",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Não aparece na grade pública",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-014-F",
+      "regra": "RN-ANIMES-014",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-015-F",
+      "regra": "RN-ANIMES-015",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-016-F",
+      "regra": "RN-ANIMES-016",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-017-F",
+      "regra": "RN-ANIMES-017",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-018-F",
+      "regra": "RN-ANIMES-018",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-019-F",
+      "regra": "RN-ANIMES-019",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Modal/página de detalhe, id inválido  abre conteúdo quebrado",
+      "testado_em": "2026-09-22T19:04:13Z"
+    },
+    {
+      "id": "CT-RN-ANIMES-020-F",
+      "regra": "RN-ANIMES-020",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:13Z"
+    }
+  ]
+}
