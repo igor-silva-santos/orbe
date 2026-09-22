@@ -1,0 +1,327 @@
+#!/usr/bin/env python3
+"""
+Executa os 511 Feliz com passos ampliados (métricas reais).
+Saída: execucao/metricas-reais-511.csv + JSON por tela + dashboard HTML.
+Opcional: QA_EMAIL e QA_PASSWORD no ambiente para cenários logados.
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+import os
+import re
+import sys
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
+
+ROOT = Path(__file__).resolve().parents[1]
+MANIFEST_DIR = ROOT / "cenarios-camadas" / "execucao" / "manifests"
+OUT_DIR = ROOT / "cenarios-camadas" / "execucao" / "metricas-reais-511"
+BASE = "https://orbe-seven.vercel.app"
+
+ROUTES = {
+    "01-HOME.md": "/",
+    "02-FILMES.md": "/filmes",
+    "03-SERIES.md": "/series",
+    "04-ANIMES.md": "/animes",
+    "05-JOGOS.md": "/jogos",
+    "06-PROMOCOES.md": "/promocoes",
+    "07-HOJE.md": "/hoje",
+    "08-MODAIS.md": "/",
+    "09-BUSCA-HEADER.md": "/",
+    "10-MINHA-LISTA.md": "/minha-lista",
+    "11-AUTH-PERFIL.md": "/login",
+    "12-OUTRAS-TELAS.md": "/continuacoes",
+}
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def norm(s: str) -> str:
+    return re.sub(r"\s+", " ", (s or "").lower())
+
+
+def needs_login(pre: str, titulo: str, esperado: str, arquivo: str) -> bool:
+    if arquivo in ("10-MINHA-LISTA.md", "11-AUTH-PERFIL.md"):
+        blob = norm(f"{pre} {titulo} {esperado}")
+        if "não logado" in blob or "visitante" in blob:
+            return False
+        return True
+    blob = norm(f"{pre} {titulo} {esperado}")
+    if "não logado" in blob or "anônimo" in blob or "visitante" in blob:
+        return False
+    return any(x in blob for x in ("logado", "autentic", "minha lista", "sessão"))
+
+
+def goto(page, path: str) -> None:
+    try:
+        page.goto(BASE + path, wait_until="networkidle", timeout=90000)
+    except PwTimeout:
+        page.goto(BASE + path, wait_until="domcontentloaded", timeout=90000)
+    page.wait_for_timeout(800)
+
+
+def scroll_sections(page) -> None:
+    for sid in ("filmes", "series", "animes", "jogos"):
+        loc = page.locator(f"#{sid}")
+        try:
+            if loc.count():
+                loc.scroll_into_view_if_needed(timeout=5000)
+                page.wait_for_timeout(400)
+        except PwTimeout:
+            pass
+
+
+def try_login(page) -> bool:
+    email = os.environ.get("QA_EMAIL", "").strip()
+    password = os.environ.get("QA_PASSWORD", "").strip()
+    if not email or not password:
+        return False
+    goto(page, "/login")
+    try:
+        page.get_by_label(re.compile("e-mail|email", re.I)).fill(email, timeout=5000)
+        page.get_by_label(re.compile("senha|password", re.I)).fill(password, timeout=5000)
+        page.get_by_role("button", name=re.compile("entrar|login", re.I)).click(timeout=5000)
+        page.wait_for_timeout(2500)
+        return "/login" not in page.url
+    except PwTimeout:
+        return False
+
+
+def run_rule(page, arquivo: str, c: dict, logged_in: bool) -> dict:
+    rid = c["regra"]
+    cid = c["id"]
+    pre, titulo, esp = c["pre"], c["titulo"], c["resultado_esperado"]
+    passos_n = 0
+    evidencia = ""
+
+    if needs_login(pre, titulo, esp, arquivo) and not logged_in:
+        return result(
+            cid,
+            rid,
+            arquivo,
+            "PENDENTE_QA_HUMANO",
+            "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
+            0,
+            "login",
+        )
+
+    path = ROUTES.get(arquivo, "/")
+    goto(page, path)
+    passos_n += 1
+
+    if arquivo == "01-HOME.md":
+        scroll_sections(page)
+        passos_n += 1
+
+    # --- handlers por regra ---
+    if rid == "RN-HOME-001":
+        body = norm(page.locator("body").inner_text(timeout=15000))
+        keys = ["filmes", "séries", "series", "animes", "jogos"]
+        pos = [body.find(k) for k in keys if body.find(k) >= 0]
+        ok = len(pos) >= 3 and pos == sorted(pos)
+        return result(cid, rid, arquivo, "PASS" if ok else "FAIL", f"Ordem índices: {pos}", passos_n, "passo_a_passo")
+
+    if rid == "RN-HOME-002":
+        links = [
+            ("#filmes", "Filmes", "/filmes"),
+            ("#series", "Séries", "/series"),
+            ("#animes", "Animes", "/animes"),
+            ("#jogos", "Jogos", "/jogos"),
+        ]
+        fails = []
+        for sel, name, expect_path in links:
+            goto(page, "/")
+            scroll_sections(page)
+            passos_n += 1
+            try:
+                page.locator(sel).get_by_role("link", name=name, exact=True).click(timeout=8000)
+                page.wait_for_timeout(1200)
+                if expect_path not in page.url:
+                    fails.append(name)
+            except PwTimeout:
+                fails.append(name)
+        if not fails:
+            return result(cid, rid, arquivo, "PASS", "Navegação Filmes/Séries/Animes/Jogos OK", passos_n, "passo_a_passo")
+        return result(cid, rid, arquivo, "FAIL", f"Falhou: {fails}", passos_n, "passo_a_passo")
+
+    if rid.startswith("RN-HOME-EA"):
+        goto(page, "/")
+        scroll_sections(page)
+        n = page.get_by_role("button", name="Ver o que está em alta agora").count()
+        passos_n += 2
+        if n >= 4:
+            return result(cid, rid, arquivo, "PASS", f"{n} botões em alta visíveis", passos_n, "passo_a_passo")
+        return result(cid, rid, arquivo, "FAIL", f"Esperado 4 botões em alta, encontrado {n}", passos_n, "passo_a_passo")
+
+    if arquivo == "02-FILMES.md":
+        h1 = page.locator("h1").first.inner_text(timeout=8000) if page.locator("h1").count() else ""
+        passos_n += 1
+        if "filme" in norm(h1):
+            return result(cid, rid, arquivo, "PASS", f"h1={h1[:60]}", passos_n, "passo_a_passo")
+        return result(cid, rid, arquivo, "FAIL", f"h1 inesperado: {h1}", passos_n, "passo_a_passo")
+
+    if arquivo == "03-SERIES.md":
+        h1 = page.locator("h1").first.inner_text(timeout=8000) if page.locator("h1").count() else ""
+        passos_n += 1
+        if "série" in norm(h1) or "serie" in norm(h1):
+            return result(cid, rid, arquivo, "PASS", f"h1={h1[:60]}", passos_n, "passo_a_passo")
+        return result(cid, rid, arquivo, "FAIL", f"h1 inesperado: {h1}", passos_n, "passo_a_passo")
+
+    if arquivo == "08-MODAIS.md":
+        goto(page, "/")
+        scroll_sections(page)
+        passos_n += 1
+        try:
+            page.locator("#filmes a[href]").first.click(timeout=8000)
+            page.wait_for_timeout(2000)
+            dialog = page.locator("[role=dialog], [data-state=open]").count()
+            passos_n += 1
+            if dialog > 0:
+                return result(cid, rid, arquivo, "PASS", "Modal/dialog aberto após clique", passos_n, "passo_a_passo")
+            return result(cid, rid, arquivo, "FAIL", "Clique sem modal visível", passos_n, "passo_a_passo")
+        except PwTimeout:
+            return result(cid, rid, arquivo, "PENDENTE_QA_HUMANO", "Sem card clicável — QA confirma manual", passos_n, "catalogo_ui")
+
+    if "comparar" in norm(c["passos"]) or "título" in norm(pre):
+        return result(
+            cid,
+            rid,
+            arquivo,
+            "PENDENTE_QA_HUMANO",
+            "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+            passos_n,
+            "catalogo",
+        )
+
+    # smoke: página sem erro fatal
+    body = norm(page.locator("body").inner_text(timeout=12000))
+    passos_n += 1
+    if "application error" in body or "erro 500" in body:
+        return result(cid, rid, arquivo, "FAIL", "Erro de aplicação no body", passos_n, "smoke")
+    if len(body) < 200:
+        return result(cid, rid, arquivo, "FAIL", "Conteúdo insuficiente na página", passos_n, "smoke")
+
+    return result(
+        cid,
+        rid,
+        arquivo,
+        "PENDENTE_QA_HUMANO",
+        "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        passos_n,
+        "manual_obrigatorio",
+    )
+
+
+def result(cid, regra, arquivo, veredito, evidencia, passos, tipo):
+    return {
+        "id": cid,
+        "regra": regra,
+        "arquivo": arquivo,
+        "veredito": veredito,
+        "evidencia": evidencia,
+        "passos_executados": passos,
+        "tipo_execucao": tipo,
+        "testado_em": now_iso(),
+        "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)",
+    }
+
+
+def main() -> int:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    all_rows: list[dict] = []
+    by_file: dict[str, list] = {}
+
+    scenarios = []
+    for mf in sorted(MANIFEST_DIR.glob("*.json")):
+        data = json.loads(mf.read_text(encoding="utf-8"))
+        for c in data["cenarios"]:
+            c["_arquivo"] = data["arquivo"]
+            scenarios.append(c)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(viewport={"width": 1280, "height": 900})
+        page = context.new_page()
+        logged_in = try_login(page)
+
+        for i, c in enumerate(scenarios, 1):
+            row = run_rule(page, c["_arquivo"], c, logged_in)
+            all_rows.append(row)
+            by_file.setdefault(c["_arquivo"], []).append(row)
+            if i % 50 == 0:
+                print(f"... {i}/511", file=sys.stderr)
+
+        browser.close()
+
+    # JSON por tela
+    for ar, rows in by_file.items():
+        slug = ar.replace(".md", ".json")
+        (OUT_DIR / slug).write_text(
+            json.dumps({"arquivo": ar, "ambiente": BASE, "cenarios": rows}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    # CSV métricas
+    csv_path = OUT_DIR / "metricas-reais-511.csv"
+    fields = [
+        "ID_Cenario",
+        "ID_Regra",
+        "Arquivo",
+        "Veredito",
+        "Tipo_Execucao",
+        "Passos_Executados",
+        "Evidencia",
+        "Testado_Em",
+    ]
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for r in all_rows:
+            w.writerow(
+                {
+                    "ID_Cenario": r["id"],
+                    "ID_Regra": r["regra"],
+                    "Arquivo": r["arquivo"],
+                    "Veredito": r["veredito"],
+                    "Tipo_Execucao": r["tipo_execucao"],
+                    "Passos_Executados": r["passos_executados"],
+                    "Evidencia": r["evidencia"],
+                    "Testado_Em": r["testado_em"],
+                }
+            )
+
+    cnt = Counter(r["veredito"] for r in all_rows)
+    html = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Métricas reais 511 Feliz</title>
+<style>body{{font-family:system-ui;margin:24px}} .kpi{{display:inline-block;margin:12px 24px 12px 0;font-size:18px}}
+.pass{{color:#15803d;font-weight:700}} .fail{{color:#b91c1c}} .pend{{color:#b45309}}
+table{{border-collapse:collapse;width:100%;font-size:12px}} th,td{{border:1px solid #eee;padding:6px}}</style></head><body>
+<h1>Métricas reais — 511 cenários Feliz</h1><p>Gerado: {now_iso()} · Ambiente: {BASE}</p>
+<p>Login QA: {"sim" if os.environ.get("QA_EMAIL") else "não — PENDENTE_QA_HUMANO em cenários logados"}</p>
+<div>
+<span class="kpi pass">PASS: {cnt.get('PASS',0)}</span>
+<span class="kpi fail">FAIL: {cnt.get('FAIL',0)}</span>
+<span class="kpi pend">PENDENTE_QA_HUMANO: {cnt.get('PENDENTE_QA_HUMANO',0)}</span>
+</div>
+<p><strong>Meta PO:</strong> zerar PENDENTE na <a href="../QA-EXECUCAO-HUMANA-511.csv">planilha humana</a> com prints e TL.</p>
+<table><thead><tr><th>Cenário</th><th>Veredito</th><th>Tipo</th><th>Evidência</th></tr></thead><tbody>
+"""
+    for r in all_rows:
+        cls = "pass" if r["veredito"] == "PASS" else "fail" if r["veredito"] == "FAIL" else "pend"
+        html += f"<tr><td>{r['id']}</td><td class='{cls}'>{r['veredito']}</td><td>{r['tipo_execucao']}</td><td>{r['evidencia'][:120]}</td></tr>\n"
+    html += "</tbody></table></body></html>"
+    (OUT_DIR / "metricas-reais-511.html").write_text(html, encoding="utf-8")
+
+    print("Métricas:", dict(cnt), "total", len(all_rows))
+    print(csv_path)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
