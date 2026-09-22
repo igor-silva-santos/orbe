@@ -33,6 +33,13 @@ python3 docs/regras-negocio/scripts/validar-cobertura-camadas.py
 
 Linhas geradas automaticamente são **rascunho** (`Status_Elaboracao = Rascunho camadas`). QA sênior deve refinar negativos e charters antes da auditoria TL — especialmente regras de auth, busca e modais.
 
+## Meta 511 com excelência (obrigatório — não parar no runner 128/253/130)
+
+| Documento | Função |
+| --- | --- |
+| [`execucao/QA-META-511-EXCELENCIA.md`](./execucao/QA-META-511-EXCELENCIA.md) | PO: time QA refaz até **511 Feliz humanos** com evidência |
+| [`execucao/QA-EXECUCAO-HUMANA-511.csv`](./execucao/QA-EXECUCAO-HUMANA-511.csv) | Planilha para preencher (gerar: `gerar-planilha-execucao-humana.py`) |
+
 ## Playbook do time QA (antes do teste manual do PO)
 
 | Documento | Função |
