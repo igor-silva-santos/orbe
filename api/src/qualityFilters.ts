@@ -235,6 +235,14 @@ export const filmeCarouselConcertExclusionFilter: Prisma.FilmeWhereInput = {
   },
 };
 
+/**
+ * Home / lançamentos: mesma base da listagem `/filmes` (quality + concertos),
+ * sem o engajamento duplo do carrossel equilibrado — evita sumir estreia que já aparece em futuros.
+ */
+export const filmeHomeLaunchWhereInput: Prisma.FilmeWhereInput = {
+  AND: [filmeQualityFilter, filmeCarouselConcertExclusionFilter],
+};
+
 /** Filtro combinado para carrossel/homepage de filmes */
 export const filmeCarouselWhereInput: Prisma.FilmeWhereInput = {
   AND: [

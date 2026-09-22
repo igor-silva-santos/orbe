@@ -2,7 +2,7 @@
 """
 Executa os 511 Feliz com passos ampliados (métricas reais).
 Saída: execucao/metricas-reais-511.csv + JSON por tela + dashboard HTML.
-Opcional: QA_EMAIL e QA_PASSWORD no ambiente para cenários logados.
+QA_EMAIL/QA_PASSWORD opcionais; com QA_AUTO_REGISTER=1 cria conta descartável e exclui no fim.
 """
 
 from __future__ import annotations
@@ -11,7 +11,12 @@ import csv
 import json
 import os
 import re
+import secrets
+import subprocess
 import sys
+import time
+import urllib.error
+import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,9 +83,66 @@ def scroll_sections(page) -> None:
             pass
 
 
-def try_login(page) -> bool:
+def api_register(email: str, password: str, nome: str) -> str | None:
+    url = f"{BASE}/api/auth/register"
+    body = json.dumps({"nome": nome, "email": email, "password": password}).encode("utf-8")
+    req = urllib.request.Request(
+        url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("token")
+    except urllib.error.HTTPError as e:
+        print(f"register HTTP {e.code}: {e.read().decode()[:200]}", file=sys.stderr)
+        return None
+
+
+def api_delete_account(email: str, password: str, token: str) -> bool:
+    url = f"{BASE}/api/users/me"
+    body = json.dumps({"password": password}).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+        method="DELETE",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return resp.status == 204
+    except urllib.error.HTTPError as e:
+        print(f"delete account HTTP {e.code}", file=sys.stderr)
+        return False
+
+
+def provision_qa_credentials() -> tuple[str, str, str | None, bool]:
     email = os.environ.get("QA_EMAIL", "").strip()
     password = os.environ.get("QA_PASSWORD", "").strip()
+    if email and password:
+        return email, password, None, False
+    if os.environ.get("QA_AUTO_REGISTER") != "1":
+        return "", "", None, False
+    email = f"qa.orbe+{int(time.time())}.{secrets.token_hex(4)}@discard.test"
+    password = os.environ.get("QA_DEFAULT_PASSWORD", "QaOrbeTest8!")
+    nome = os.environ.get("QA_NOME", "QA Orbe Automático")
+    token = api_register(email, password, nome)
+    os.environ["QA_EMAIL"] = email
+    os.environ["QA_PASSWORD"] = password
+    if token:
+        os.environ["QA_TOKEN"] = token
+    return email, password, token, True
+
+
+def try_login(page, token: str | None = None) -> bool:
+    email = os.environ.get("QA_EMAIL", "").strip()
+    password = os.environ.get("QA_PASSWORD", "").strip()
+    if token:
+        goto(page, "/")
+        page.evaluate("(t) => localStorage.setItem('token', t)", token)
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_timeout(1500)
+        if "/login" not in page.url:
+            return True
     if not email or not password:
         return False
     goto(page, "/login")
@@ -237,6 +299,8 @@ def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     all_rows: list[dict] = []
     by_file: dict[str, list] = {}
+    qa_email, qa_password, qa_token = provision_qa_credentials()
+    auto_account = bool(qa_email and qa_password and os.environ.get("QA_AUTO_REGISTER") == "1")
 
     scenarios = []
     for mf in sorted(MANIFEST_DIR.glob("*.json")):
@@ -249,7 +313,7 @@ def main() -> int:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={"width": 1280, "height": 900})
         page = context.new_page()
-        logged_in = try_login(page)
+        logged_in = try_login(page, qa_token)
 
         for i, c in enumerate(scenarios, 1):
             row = run_rule(page, c["_arquivo"], c, logged_in)
@@ -259,6 +323,20 @@ def main() -> int:
                 print(f"... {i}/511", file=sys.stderr)
 
         browser.close()
+
+    if auto_account and qa_token:
+        if api_delete_account(qa_email, qa_password, qa_token):
+            print("Conta QA descartável excluída.", file=sys.stderr)
+        else:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "qa-conta-descartavel.py"),
+                    "delete",
+                ],
+                env=os.environ.copy(),
+                check=False,
+            )
 
     # JSON por tela
     for ar, rows in by_file.items():
@@ -303,7 +381,7 @@ def main() -> int:
 .pass{{color:#15803d;font-weight:700}} .fail{{color:#b91c1c}} .pend{{color:#b45309}}
 table{{border-collapse:collapse;width:100%;font-size:12px}} th,td{{border:1px solid #eee;padding:6px}}</style></head><body>
 <h1>Métricas reais — 511 cenários Feliz</h1><p>Gerado: {now_iso()} · Ambiente: {BASE}</p>
-<p>Login QA: {"sim" if os.environ.get("QA_EMAIL") else "não — PENDENTE_QA_HUMANO em cenários logados"}</p>
+<p>Login QA: {"sim (" + os.environ.get("QA_EMAIL", "") + ")" if os.environ.get("QA_EMAIL") else "não — PENDENTE_QA_HUMANO em cenários logados"}</p>
 <div>
 <span class="kpi pass">PASS: {cnt.get('PASS',0)}</span>
 <span class="kpi fail">FAIL: {cnt.get('FAIL',0)}</span>
