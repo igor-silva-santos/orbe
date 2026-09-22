@@ -1,0 +1,3 @@
+QA_Nome,Data,Tela,Rota,Mes_Referencia,Titulo,Data_No_Card,Deve_Estar_S_N,ID_Regra,Motivo,Evidencia_URL_ou_Print,Veredito_TL
+Exemplo Silva,2026-09-22,Home,/#filmes,2026-03,Nome do Filme,2026-03-12,S,RN-FILMES-001,Estreia no mês,print-001.png,
+,,,,,,,,,,

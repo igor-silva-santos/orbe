@@ -33,6 +33,14 @@ python3 docs/regras-negocio/scripts/validar-cobertura-camadas.py
 
 Linhas geradas automaticamente são **rascunho** (`Status_Elaboracao = Rascunho camadas`). QA sênior deve refinar negativos e charters antes da auditoria TL — especialmente regras de auth, busca e modais.
 
+## Playbook do time QA (antes do teste manual do PO)
+
+| Documento | Função |
+| --- | --- |
+| [`execucao/QA-PLAYBOOK-EQUIPE.md`](./execucao/QA-PLAYBOOK-EQUIPE.md) | Contas sem confirmação de e-mail, auditoria **1 mês** do carrossel, ordem de execução |
+| [`execucao/QA-TL-RUIDO-VS-BUG.md`](./execucao/QA-TL-RUIDO-VS-BUG.md) | TL separa ruído de bug; gate para liberar PO |
+| [`execucao/QA-AUDITORIA-CARROSSEL-TEMPLATE.csv`](./execucao/QA-AUDITORIA-CARROSSEL-TEMPLATE.csv) | Planilha para listar filmes do mês e “deve estar?” |
+
 ## Retorno QA → DEV (FAIL em produção)
 
 | Documento | Uso |
