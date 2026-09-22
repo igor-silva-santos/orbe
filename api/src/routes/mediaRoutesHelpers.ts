@@ -6,12 +6,10 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import {
   filmeCarouselBalancedWhereInput,
+  filmeHomeLaunchWhereInput,
   filterFilmesForCarouselBalanced,
 } from '../qualityFilters';
-import {
-  filterFilmesHomeLaunchCarousel,
-  HOME_LAUNCH_MIN_RUNTIME_MINUTES,
-} from '../filmeAntecipacao';
+import { filterFilmesHomeLaunchCarousel } from '../filmeAntecipacao';
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
@@ -156,18 +154,15 @@ export async function fetchFilmesForCarousel(
     ? { ...carouselLiteInclude, videos: { where: { type: 'Trailer' }, take: 1, select: { type: true } } }
     : carouselLiteInclude;
 
-  const homeLaunchRuntimeWhere: Prisma.FilmeWhereInput | null = options.homeLaunch
-    ? {
-        OR: [{ runtime: null }, { runtime: { gte: HOME_LAUNCH_MIN_RUNTIME_MINUTES } }],
-      }
-    : null;
+  const prismaCarouselWhere = options.homeLaunch
+    ? filmeHomeLaunchWhereInput
+    : filmeCarouselBalancedWhereInput;
 
   const filmes = await prisma.filme.findMany({
     where: {
       AND: [
-        filmeCarouselBalancedWhereInput,
+        prismaCarouselWhere,
         extraWhere,
-        ...(homeLaunchRuntimeWhere ? [homeLaunchRuntimeWhere] : []),
       ],
     },
     orderBy: options.orderBy ?? { releaseDate: 'asc' },

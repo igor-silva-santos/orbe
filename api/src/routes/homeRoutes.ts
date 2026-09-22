@@ -52,8 +52,8 @@ const router = Router();
  * Evita `take` nos mais antigos da janela de 90 dias, que escondia o mês atual.
  */
 const HOMEPAGE_AROUND_PAST = 40;
-/** Futuro: horizonte 120d — precisa de take maior que a janela de 1 mês antiga */
-const HOMEPAGE_AROUND_FUTURE = 55;
+/** Futuro: horizonte 120d — alinhado ao take do carrossel completo */
+const HOMEPAGE_AROUND_FUTURE = 80;
 
 /** Lançamentos recentes no bootstrap do carrossel (análogo a em cartaz nos filmes) */
 const getRecentCarouselPastStart = (days = 90): Date => {
@@ -111,7 +111,9 @@ const carouselSerieRecentPastWindow = (
 });
 
 // Homepage — em torno de hoje (passado recente + próximo), não os 80 mais antigos da janela
-router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
+const HOMEPAGE_CACHE_SECONDS = 3600;
+
+router.get('/homepage', homepageRateLimiter, cacheMiddleware(HOMEPAGE_CACHE_SECONDS), async (_req, res) => {
   const year = new Date().getFullYear();
   const season = getCurrentSeason();
   const today = startOfToday();
