@@ -6,8 +6,10 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import {
   filmeCarouselBalancedWhereInput,
-  filmeHomeLaunchWhereInput,
+  filmeCarouselConcertExclusionFilter,
+  filterFilmesExcludeConcerts,
   filterFilmesForCarouselBalanced,
+  getFilmeQualityFilterForYear,
 } from '../qualityFilters';
 import { filterFilmesHomeLaunchCarousel } from '../filmeAntecipacao';
 
@@ -148,15 +150,27 @@ export async function fetchFilmesForCarousel(
     year?: number;
     /** Carrossel de lançamento da home: gate de antecipação + runtime mínimo */
     homeLaunch?: boolean;
+    /** Lançamentos só com ano (TBA) — sem gate de data futura */
+    yearTbd?: boolean;
   } = {},
 ) {
   const include = options.homeLaunch
     ? { ...carouselLiteInclude, videos: { where: { type: 'Trailer' }, take: 1, select: { type: true } } }
     : carouselLiteInclude;
 
-  const prismaCarouselWhere = options.homeLaunch
-    ? filmeHomeLaunchWhereInput
-    : filmeCarouselBalancedWhereInput;
+  const year = options.year ?? new Date().getFullYear();
+  const qualityClause = getFilmeQualityFilterForYear(year);
+
+  const prismaCarouselWhere: Prisma.FilmeWhereInput =
+    options.homeLaunch || options.yearTbd
+      ? {
+          AND: [
+            qualityClause,
+            filmeCarouselConcertExclusionFilter,
+            ...(options.yearTbd ? [{ posterPath: { not: null } }] : []),
+          ],
+        }
+      : filmeCarouselBalancedWhereInput;
 
   const filmes = await prisma.filme.findMany({
     where: {
@@ -170,8 +184,10 @@ export async function fetchFilmesForCarousel(
     include,
   });
 
-  let result = filterFilmesForCarouselBalanced(filmes);
-  if (options.homeLaunch) {
+  let result = options.yearTbd
+    ? filterFilmesExcludeConcerts(filmes)
+    : filterFilmesForCarouselBalanced(filmes);
+  if (options.homeLaunch && !options.yearTbd) {
     result = filterFilmesHomeLaunchCarousel(result);
   }
   return result;

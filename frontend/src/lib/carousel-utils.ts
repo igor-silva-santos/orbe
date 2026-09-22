@@ -84,6 +84,29 @@ export function monthKeyFromItem(item: Midia | undefined): string | null {
 /** Ignora reestreias históricas fora da janela do carrossel (alinhado ao passado recente da API) */
 export const CAROUSEL_TIMELINE_PAST_DAYS = 90;
 
+/** Anos com bloco year-tbd anexados ao fim do carrossel (ano corrente + N-1) */
+export const CAROUSEL_YEAR_TBD_APPEND_YEARS = 8;
+
+export function getCarouselAppendYears(reference = new Date()): number[] {
+  const startYear = reference.getFullYear();
+  return Array.from({ length: CAROUSEL_YEAR_TBD_APPEND_YEARS }, (_, i) => startYear + i);
+}
+
+/** Índice do separador year-tbd na lista de slides (após os cards com data) */
+export function indexOfYearTbdSeparator(
+  year: number,
+  datedCount: number,
+  slidesByYear: Record<number, unknown[] | undefined>,
+  reference = new Date(),
+): number {
+  let offset = datedCount;
+  for (const y of getCarouselAppendYears(reference)) {
+    if (y === year) return offset;
+    offset += slidesByYear[y]?.length ?? 0;
+  }
+  return -1;
+}
+
 export function getCarouselTimelineMinDate(reference = new Date()): Date {
   const min = new Date(reference);
   min.setHours(0, 0, 0, 0);

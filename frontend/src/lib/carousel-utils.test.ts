@@ -9,6 +9,7 @@ import {
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
   filterMidiaForCarouselTimeline,
+  indexOfYearTbdSeparator,
   isCarouselBootstrapReady,
   parseMidiaReleaseDate,
 } from './carousel-utils';
@@ -202,6 +203,17 @@ describe('findMonthBounds', () => {
     const julyBounds = findMonthBounds(items, '2026-07');
     assert.ok(julyBounds);
     assert.ok(nearJulyStart <= julyBounds.start + monthEdgeBuffer);
+  });
+});
+
+describe('indexOfYearTbdSeparator', () => {
+  it('aponta para o separador após os cards datados', () => {
+    const ref = new Date('2026-09-22');
+    const slidesByYear: Record<number, unknown[]> = {
+      2026: [{ kind: 'sep' }, { kind: 'media' }],
+      2027: [{ kind: 'sep' }, { kind: 'media' }, { kind: 'media' }],
+    };
+    assert.equal(indexOfYearTbdSeparator(2027, 40, slidesByYear, ref), 42);
   });
 });
 

@@ -28,8 +28,15 @@ Vingadores: Doutor Destino, One Piece (nov/dez), Galinha Pintadinha: O Filme, Ci
 - Antecipação: piso pop **5–18**, ficha mínima mais leve, **em cartaz/breve/pré-venda** ignoram piso de hype.
 - Runtime mínimo **35 min** (curtas com flag cinema passam).
 
-Revalidar após deploy:
+## Bug 2027 (year-tbd)
+
+Estreias **só com ano** (`releaseDate` null, `releaseYear` 2027) vinham da rota `/filmes/year-tbd` com filtro **equilibrado** (excluía TBA). Navegação por mês em 2027 vazia não levava ao bloco TBA no fim do carrossel.
+
+Correção: `yearTbd: true` na API + prefetch dos anos 2026–2033 + scroll para separador ao navegar.
+
+Revalidar:
 
 ```bash
+curl -sS "https://orbe-seven.vercel.app/api/filmes/year-tbd?year=2027" | jq 'length'
 curl -sS "https://orbe-seven.vercel.app/api/homepage" | jq '.filmes | length'
 ```
