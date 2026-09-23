@@ -19,6 +19,8 @@ O robô **não substitui** o supervisor. Se o robô marcou PASS mas o passo pede
 
 ---
 
+**Runbook IA autônoma (sync → E2E → robô → pacote):** `RUNBOOK-IA-AUTONOMA-511.md` na mesma pasta.
+
 ## 2. Fluxo recomendado (uma rodada)
 
 ```bash

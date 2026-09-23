@@ -1,0 +1,68 @@
+name: QA — Robô 511 + E2E produção
+
+# Gera artefatos para o supervisor IA avaliar se robô/E2E fizeram certo.
+# Secrets: opcional QA_* ; SYNC não necessário.
+
+on:
+  workflow_dispatch:
+    inputs:
+      qa_auto_register:
+        description: Criar conta descartável (QA_AUTO_REGISTER=1)
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            api/package-lock.json
+            frontend/package-lock.json
+
+      - name: Testes unitários API
+        run: cd api && npm ci && npm test
+
+      - name: Testes unitários frontend
+        run: cd frontend && npm ci && npm test
+
+      - name: Instalar Playwright
+        run: cd frontend && npx playwright install chromium
+
+      - name: E2E produção
+        env:
+          PLAYWRIGHT_BASE_URL: https://orbe-seven.vercel.app
+          PLAYWRIGHT_JSON_REPORT: ${{ github.workspace }}/docs/regras-negocio/cenarios-camadas/execucao/e2e-playwright-report.json
+          PLAYWRIGHT_OUTPUT_DIR: ${{ runner.temp }}/playwright
+        run: cd frontend && npm run test:e2e:prod
+
+      - name: Robô 511 Feliz
+        env:
+          QA_AUTO_REGISTER: ${{ inputs.qa_auto_register && '1' || '0' }}
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+          python3 docs/regras-negocio/scripts/executar-feliz-excelencia-todos.py
+
+      - name: Fila + pacote supervisor IA
+        run: |
+          python3 docs/regras-negocio/scripts/gerar-fila-supervisor-qa.py
+          python3 docs/regras-negocio/scripts/montar-pacote-supervisor-qa.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qa-pacote-supervisor-511
+          path: |
+            docs/regras-negocio/cenarios-camadas/execucao/pacote-supervisor-qa.json
+            docs/regras-negocio/cenarios-camadas/execucao/pacote-supervisor-qa.md
+            docs/regras-negocio/cenarios-camadas/execucao/PROMPT-SUPERVISOR-IA.md
+            docs/regras-negocio/cenarios-camadas/execucao/supervisor-fila-qa.json
+            docs/regras-negocio/cenarios-camadas/execucao/metricas-reais-511/
+            docs/regras-negocio/cenarios-camadas/execucao/e2e-playwright-report.json

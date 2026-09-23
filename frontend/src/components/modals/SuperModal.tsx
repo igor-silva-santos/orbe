@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useId } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { X, Edit, Calendar, Clock, Star, Tv, BookOpen, Gamepad2, Heart, Bookmark, Check, EyeOff, ExternalLink } from 'lucide-react';
@@ -41,6 +41,7 @@ const SuperModal: React.FC = () => {
   const loadInFlightRef = useRef<string | null>(null);
   const pathname = usePathname();
   const openPathRef = useRef<string | null>(null);
+  const dialogTitleId = useId();
 
   const { midia, type } = superModalData;
 
@@ -319,10 +320,24 @@ const SuperModal: React.FC = () => {
   const displayAwards = (details as { premiacoes?: typeof midia.premiacoes })?.premiacoes
     ?? midia.premiacoes;
 
+  const dialogLabel =
+    (details as { title?: string; name?: string })?.title
+    ?? (details as { name?: string })?.name
+    ?? (midia as { title?: string; name?: string }).title
+    ?? (midia as { name?: string }).name
+    ?? 'Detalhes da mídia';
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden"
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+    >
       <div className="container mx-auto px-4 py-8 max-w-full">
         <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden">
+          <h2 id={dialogTitleId} className="sr-only">{dialogLabel}</h2>
           <>
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               {user?.role === 'admin' && (
