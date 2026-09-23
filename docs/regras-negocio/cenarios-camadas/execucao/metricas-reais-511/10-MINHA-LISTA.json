@@ -10,7 +10,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T20:17:03Z",
+      "testado_em": "2026-09-22T21:20:55Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -21,7 +21,7 @@
       "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
       "passos_executados": 1,
       "tipo_execucao": "catalogo",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "testado_em": "2026-09-22T21:20:57Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -29,10 +29,10 @@
       "regra": "RN-LISTA-010",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:20:59Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -40,10 +40,10 @@
       "regra": "RN-LISTA-011",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:01Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -51,10 +51,10 @@
       "regra": "RN-LISTA-012",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:03Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -62,10 +62,10 @@
       "regra": "RN-LISTA-020",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:05Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -73,10 +73,10 @@
       "regra": "RN-LISTA-021",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:07Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -84,10 +84,10 @@
       "regra": "RN-LISTA-030",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:09Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -95,10 +95,10 @@
       "regra": "RN-LISTA-031",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:11Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -106,10 +106,10 @@
       "regra": "RN-LISTA-032",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:12Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -117,10 +117,10 @@
       "regra": "RN-LISTA-033",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:14Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -128,10 +128,10 @@
       "regra": "RN-LISTA-034",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:16Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -139,10 +139,10 @@
       "regra": "RN-LISTA-035",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:17Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -150,10 +150,10 @@
       "regra": "RN-LISTA-036",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:19Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -161,10 +161,10 @@
       "regra": "RN-LISTA-037",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:04Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:21Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -175,7 +175,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "testado_em": "2026-09-22T21:21:23Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -183,10 +183,10 @@
       "regra": "RN-LISTA-041",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:24Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -194,10 +194,10 @@
       "regra": "RN-LISTA-042",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:26Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -205,10 +205,10 @@
       "regra": "RN-LISTA-043",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -216,10 +216,10 @@
       "regra": "RN-LISTA-044",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:30Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -227,10 +227,10 @@
       "regra": "RN-LISTA-045",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:31Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -238,10 +238,10 @@
       "regra": "RN-LISTA-046",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:33Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -249,10 +249,10 @@
       "regra": "RN-LISTA-047",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -260,10 +260,10 @@
       "regra": "RN-LISTA-048",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:37Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -271,10 +271,10 @@
       "regra": "RN-LISTA-049",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:39Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -282,10 +282,10 @@
       "regra": "RN-LISTA-050",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:41Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -293,10 +293,10 @@
       "regra": "RN-LISTA-051",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:42Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -304,10 +304,10 @@
       "regra": "RN-LISTA-052",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:44Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -315,10 +315,10 @@
       "regra": "RN-LISTA-053",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:46Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -326,10 +326,10 @@
       "regra": "RN-LISTA-060",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:48Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -337,10 +337,10 @@
       "regra": "RN-LISTA-061",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:49Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -348,10 +348,10 @@
       "regra": "RN-LISTA-062",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:51Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -359,10 +359,10 @@
       "regra": "RN-LISTA-063",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:53Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -370,10 +370,10 @@
       "regra": "RN-LISTA-064",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+      "passos_executados": 1,
+      "tipo_execucao": "catalogo",
+      "testado_em": "2026-09-22T21:21:55Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -381,10 +381,10 @@
       "regra": "RN-LISTA-065",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:56Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -392,10 +392,10 @@
       "regra": "RN-LISTA-066",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:21:58Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -403,10 +403,10 @@
       "regra": "RN-LISTA-070",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:22:00Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -414,10 +414,10 @@
       "regra": "RN-LISTA-071",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:22:03Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -425,10 +425,10 @@
       "regra": "RN-LISTA-072",
       "arquivo": "10-MINHA-LISTA.md",
       "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:17:06Z",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-22T21:22:04Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     }
   ]

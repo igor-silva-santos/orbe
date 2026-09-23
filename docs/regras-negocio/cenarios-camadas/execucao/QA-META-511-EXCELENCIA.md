@@ -95,6 +95,14 @@ Saída: [`METRICAS-REAIS-LEIA-ME.md`](./METRICAS-REAIS-LEIA-ME.md) · `metricas-
 
 O runner `executar-feliz-multitask.py` (128/253/130) está **obsoleto** como métrica de conclusão.
 
+### Robô + supervisor IA (obrigatório na visão PO)
+
+O robô sozinho **não fecha** os 511. Use o fluxo em **[`QA-SUPERVISOR-IA.md`](./QA-SUPERVISOR-IA.md)**:
+
+1. `executar-feliz-excelencia-todos.py` → métricas  
+2. `gerar-fila-supervisor-qa.py` → fila priorizada  
+3. **IA / QA sênior** reexecuta, corrige vereditos do robô, grava `QA-EXECUCAO-HUMANA-511.csv` via `supervisor-qa-registrar.py`
+
 ---
 
 ## 6. TL — bloquear liberação ao PO se

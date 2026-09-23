@@ -10,7 +10,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:02Z",
+      "testado_em": "2026-09-22T21:09:51Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -21,7 +21,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:10Z",
+      "testado_em": "2026-09-22T21:10:01Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -32,7 +32,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:18Z",
+      "testado_em": "2026-09-22T21:10:13Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -43,7 +43,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:27Z",
+      "testado_em": "2026-09-22T21:10:23Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -54,7 +54,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:35Z",
+      "testado_em": "2026-09-22T21:10:34Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -65,7 +65,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:44Z",
+      "testado_em": "2026-09-22T21:10:44Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -76,7 +76,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:10:52Z",
+      "testado_em": "2026-09-22T21:10:54Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -87,7 +87,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:00Z",
+      "testado_em": "2026-09-22T21:11:04Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -98,7 +98,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:09Z",
+      "testado_em": "2026-09-22T21:11:14Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -109,7 +109,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:18Z",
+      "testado_em": "2026-09-22T21:11:25Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -120,7 +120,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:26Z",
+      "testado_em": "2026-09-22T21:11:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -131,7 +131,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:34Z",
+      "testado_em": "2026-09-22T21:11:46Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -142,40 +142,40 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:43Z",
+      "testado_em": "2026-09-22T21:11:56Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-020-F",
       "regra": "RN-MODAL-020",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:11:43Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:12:07Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-021-F",
       "regra": "RN-MODAL-021",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:11:43Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:12:17Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-022-F",
       "regra": "RN-MODAL-022",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:11:43Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:12:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -186,7 +186,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:11:51Z",
+      "testado_em": "2026-09-22T21:12:38Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -197,18 +197,18 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:00Z",
+      "testado_em": "2026-09-22T21:12:49Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-025-F",
       "regra": "RN-MODAL-025",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:12:00Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:13:00Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -219,7 +219,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:09Z",
+      "testado_em": "2026-09-22T21:13:12Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -230,18 +230,18 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:18Z",
+      "testado_em": "2026-09-22T21:13:22Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-031-F",
       "regra": "RN-MODAL-031",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:12:18Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:13:33Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -252,7 +252,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:26Z",
+      "testado_em": "2026-09-22T21:13:44Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -263,7 +263,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:35Z",
+      "testado_em": "2026-09-22T21:13:54Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -274,7 +274,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:44Z",
+      "testado_em": "2026-09-22T21:14:05Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -285,7 +285,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:12:52Z",
+      "testado_em": "2026-09-22T21:14:15Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -296,7 +296,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:01Z",
+      "testado_em": "2026-09-22T21:14:25Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -307,7 +307,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:10Z",
+      "testado_em": "2026-09-22T21:14:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -318,7 +318,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:18Z",
+      "testado_em": "2026-09-22T21:14:46Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -329,7 +329,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:28Z",
+      "testado_em": "2026-09-22T21:14:56Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -340,7 +340,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:36Z",
+      "testado_em": "2026-09-22T21:15:07Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -351,7 +351,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:45Z",
+      "testado_em": "2026-09-22T21:15:17Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -362,7 +362,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:13:53Z",
+      "testado_em": "2026-09-22T21:15:27Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -373,7 +373,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:02Z",
+      "testado_em": "2026-09-22T21:15:39Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -384,18 +384,18 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:11Z",
+      "testado_em": "2026-09-22T21:15:49Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
       "id": "CT-RN-MODAL-061-F",
       "regra": "RN-MODAL-061",
       "arquivo": "08-MODAIS.md",
-      "veredito": "PENDENTE_QA_HUMANO",
-      "evidencia": "Conta QA necessária — definir QA_EMAIL/QA_PASSWORD ou QA executa manual.",
-      "passos_executados": 0,
-      "tipo_execucao": "login",
-      "testado_em": "2026-09-22T20:14:11Z",
+      "veredito": "FAIL",
+      "evidencia": "Clique sem modal visível",
+      "passos_executados": 3,
+      "tipo_execucao": "passo_a_passo",
+      "testado_em": "2026-09-22T21:16:00Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -406,7 +406,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:20Z",
+      "testado_em": "2026-09-22T21:16:12Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -417,7 +417,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:28Z",
+      "testado_em": "2026-09-22T21:16:22Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -428,7 +428,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:37Z",
+      "testado_em": "2026-09-22T21:16:33Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -439,7 +439,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:45Z",
+      "testado_em": "2026-09-22T21:16:44Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -450,7 +450,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:14:54Z",
+      "testado_em": "2026-09-22T21:16:54Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -461,7 +461,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:03Z",
+      "testado_em": "2026-09-22T21:17:04Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -472,7 +472,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:12Z",
+      "testado_em": "2026-09-22T21:17:15Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -483,7 +483,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:20Z",
+      "testado_em": "2026-09-22T21:17:25Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -494,7 +494,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:29Z",
+      "testado_em": "2026-09-22T21:17:36Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -505,7 +505,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:37Z",
+      "testado_em": "2026-09-22T21:17:46Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -516,7 +516,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:46Z",
+      "testado_em": "2026-09-22T21:17:56Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -527,7 +527,7 @@
       "evidencia": "Clique sem modal visível",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-22T20:15:55Z",
+      "testado_em": "2026-09-22T21:18:08Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     }
   ]
