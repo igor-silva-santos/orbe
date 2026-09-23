@@ -25,6 +25,13 @@
 
 `npm run test:e2e:prod` → **5/5** (1 flaky). Ver `e2e-playwright-report-rodada.json`.
 
+## Atualização 17:40 UTC — lotes smoke (`--limit 60 --rounds 10`)
+
+- Script prioriza **HEADER/BUSCA/HOJE/SHELL/HERO**; **exclui** CARD/CON/TBD/TL da fila automática.
+- **+138** vereditos nesta execução → **511/511** preenchidos (33 CARD/CON/TBD/TL fechados como **BLOQUEADO** aguardando sync/dados PO).
+- **syncActive: true** — `validar-sync-anos.py` **não** rodado; revisar carrossel 2027 quando sync parar.
+- **Modais:** intactos (sem re-litigar 22/09).
+
 ## Atualização 16:58 UTC — CSV novo + fila (sem reabrir modais)
 
 - **Master** com `metricas-reais-511.csv` **23/09 15:48–16:20Z**: PASS 12, FAIL **3** (modais: clique-fora no robô), PENDENTE 496.

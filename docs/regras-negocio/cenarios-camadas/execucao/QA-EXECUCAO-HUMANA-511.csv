@@ -1,104 +1,104 @@
 ﻿ID_Cenario,ID_Regra,Nome_Regra,Tela,Arquivo_Inventario,QA_Executor,Data_Execucao,Conta_QA,Veredito_Humano,Evidencia,TL_Validado,Observacao
-CT-RN-ANIMES-001-F,RN-ANIMES-001,Conteúdo na abertura,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-002-F,RN-ANIMES-002,Falha na abertura,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-003-F,RN-ANIMES-003,Texto do cabeçalho,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-004-F,RN-ANIMES-004,Gaveta O que vem aí,Animes,04-ANIMES.md,,,,,,,
+CT-RN-ANIMES-001-F,RN-ANIMES-001,Conteúdo na abertura,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /animes: página carrega.
+CT-RN-ANIMES-002-F,RN-ANIMES-002,Falha na abertura,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /animes: página carrega.
+CT-RN-ANIMES-003-F,RN-ANIMES-003,Texto do cabeçalho,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /animes: página carrega.
+CT-RN-ANIMES-004-F,RN-ANIMES-004,Gaveta O que vem aí,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /animes: página carrega.
 CT-RN-ANIMES-005-F,RN-ANIMES-005,Opções dos filtros,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /animes: controles de filtro visíveis.
-CT-RN-ANIMES-006-F,RN-ANIMES-006,Valor “Todos”,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-007-F,RN-ANIMES-007,Recarga ao mudar filtro e na hidratação,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-008-F,RN-ANIMES-008,Atualização após sync,Animes,04-ANIMES.md,,,,,,,
+CT-RN-ANIMES-006-F,RN-ANIMES-006,Valor “Todos”,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-007-F,RN-ANIMES-007,Recarga ao mudar filtro e na hidratação,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-008-F,RN-ANIMES-008,Atualização após sync,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-ANIMES-009-F,RN-ANIMES-009,Contador = cards da página atual,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-ANIMES-010-F,RN-ANIMES-010,"Grade, loading e vazio",Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-011-F,RN-ANIMES-011,Lote inicial sem “carregar mais”,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-012-F,RN-ANIMES-012,Exclusão de adulto explícito,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-013-F,RN-ANIMES-013,Tags sensíveis ocultas,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-014-F,RN-ANIMES-014,Filtros combinados,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-015-F,RN-ANIMES-015,Ordem alfabética padrão,Animes,04-ANIMES.md,,,,,,,
+CT-RN-ANIMES-010-F,RN-ANIMES-010,"Grade, loading e vazio",Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-011-F,RN-ANIMES-011,Lote inicial sem “carregar mais”,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-012-F,RN-ANIMES-012,Exclusão de adulto explícito,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-013-F,RN-ANIMES-013,Tags sensíveis ocultas,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-014-F,RN-ANIMES-014,Filtros combinados,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-015-F,RN-ANIMES-015,Ordem alfabética padrão,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-ANIMES-016-F,RN-ANIMES-016,Listagem vs home / Hoje,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-ANIMES-017-F,RN-ANIMES-017,Conteúdo pode demorar a atualizar,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-018-F,RN-ANIMES-018,Metadados de filtro completos,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-019-F,RN-ANIMES-019,Detalhe ao vivo,Animes,04-ANIMES.md,,,,,,,
-CT-RN-ANIMES-020-F,RN-ANIMES-020,Próximo episódio (detalhe/agenda),Animes,04-ANIMES.md,,,,,,,
-CT-RN-AUTH-001-F,RN-AUTH-001,Campos obrigatórios,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-002-F,RN-AUTH-002,Sucesso,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-003-F,RN-AUTH-003,Erro genérico,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-004-F,RN-AUTH-004,Redirect seguro,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-005-F,RN-AUTH-005,Mostrar senha,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-006-F,RN-AUTH-006,Ir para cadastro,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-010-F,RN-AUTH-010,Senha mínima,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-011-F,RN-AUTH-011,Confirmar senha,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-012-F,RN-AUTH-012,Campos obrigatórios,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-013-F,RN-AUTH-013,Sucesso,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-014-F,RN-AUTH-014,Erro do servidor,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-020-F,RN-AUTH-020,Restaurar ao abrir o site,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-021-F,RN-AUTH-021,Dados após login,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-022-F,RN-AUTH-022,Preferências lembradas,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-023-F,RN-AUTH-023,Sair,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-024-F,RN-AUTH-024,Sessão no navegador,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
+CT-RN-ANIMES-017-F,RN-ANIMES-017,Conteúdo pode demorar a atualizar,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-018-F,RN-ANIMES-018,Metadados de filtro completos,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-019-F,RN-ANIMES-019,Detalhe ao vivo,Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-ANIMES-020-F,RN-ANIMES-020,Próximo episódio (detalhe/agenda),Animes,04-ANIMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-AUTH-001-F,RN-AUTH-001,Campos obrigatórios,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-002-F,RN-AUTH-002,Sucesso,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-003-F,RN-AUTH-003,Erro genérico,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-004-F,RN-AUTH-004,Redirect seguro,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-005-F,RN-AUTH-005,Mostrar senha,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-006-F,RN-AUTH-006,Ir para cadastro,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-010-F,RN-AUTH-010,Senha mínima,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-011-F,RN-AUTH-011,Confirmar senha,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-012-F,RN-AUTH-012,Campos obrigatórios,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-013-F,RN-AUTH-013,Sucesso,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-014-F,RN-AUTH-014,Erro do servidor,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-020-F,RN-AUTH-020,Restaurar ao abrir o site,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-021-F,RN-AUTH-021,Dados após login,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-022-F,RN-AUTH-022,Preferências lembradas,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-023-F,RN-AUTH-023,Sair,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-024-F,RN-AUTH-024,Sessão no navegador,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
 CT-RN-AUTH-025-F,RN-AUTH-025,Tipo de conta,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (conta/busca específica).
-CT-RN-AUTH-030-F,RN-AUTH-030,Só para logados,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-031-F,RN-AUTH-031,Dados básicos,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-032-F,RN-AUTH-032,Bio,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-033-F,RN-AUTH-033,Bloco conta,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-034-F,RN-AUTH-034,Atalhos,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-035-F,RN-AUTH-035,Ferramentas admin,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-040-F,RN-AUTH-040,Só para logados,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-041-F,RN-AUTH-041,Campos editáveis,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-042-F,RN-AUTH-042,Salvar perfil,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-043-F,RN-AUTH-043,Texto de privacidade,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-044-F,RN-AUTH-044,Sem troca de senha aqui,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-050-F,RN-AUTH-050,Minha lista no menu,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
-CT-RN-AUTH-051-F,RN-AUTH-051,Perfil e configurações,Entrar e perfil,11-AUTH-PERFIL.md,,,,,,,
+CT-RN-AUTH-030-F,RN-AUTH-030,Só para logados,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-031-F,RN-AUTH-031,Dados básicos,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-032-F,RN-AUTH-032,Bio,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-033-F,RN-AUTH-033,Bloco conta,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-034-F,RN-AUTH-034,Atalhos,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-035-F,RN-AUTH-035,Ferramentas admin,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-040-F,RN-AUTH-040,Só para logados,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-041-F,RN-AUTH-041,Campos editáveis,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-042-F,RN-AUTH-042,Salvar perfil,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-043-F,RN-AUTH-043,Texto de privacidade,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-044-F,RN-AUTH-044,Sem troca de senha aqui,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-050-F,RN-AUTH-050,Minha lista no menu,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
+CT-RN-AUTH-051-F,RN-AUTH-051,Perfil e configurações,Entrar e perfil,11-AUTH-PERFIL.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige conta/perfil; smoke /login carrega.
 CT-RN-BUSCA-001-F,RN-BUSCA-001,Abrir e fechar,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Overlay busca abre (ícone lupa) e fecha com Esc; prod 23/09.
-CT-RN-BUSCA-002-F,RN-BUSCA-002,Histórico do navegador,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-003-F,RN-BUSCA-003,Limpar ao fechar,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-004-F,RN-BUSCA-004,Em alta sem digitar,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-005-F,RN-BUSCA-005,Mínimo de caracteres,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-006-F,RN-BUSCA-006,Espera antes de buscar,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-007-F,RN-BUSCA-007,Filtro por tipo,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-008-F,RN-BUSCA-008,Resultados de mídia,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-009-F,RN-BUSCA-009,Pessoas e dubladores,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-010-F,RN-BUSCA-010,O que mostra por categoria,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-011-F,RN-BUSCA-011,Seção pessoas,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
+CT-RN-BUSCA-002-F,RN-BUSCA-002,Histórico do navegador,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-003-F,RN-BUSCA-003,Limpar ao fechar,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-004-F,RN-BUSCA-004,Em alta sem digitar,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-005-F,RN-BUSCA-005,Mínimo de caracteres,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-006-F,RN-BUSCA-006,Espera antes de buscar,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-007-F,RN-BUSCA-007,Filtro por tipo,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-008-F,RN-BUSCA-008,Resultados de mídia,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-009-F,RN-BUSCA-009,Pessoas e dubladores,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-010-F,RN-BUSCA-010,O que mostra por categoria,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-011-F,RN-BUSCA-011,Seção pessoas,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
 CT-RN-BUSCA-012-F,RN-BUSCA-012,Contagem de resultados,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (conta/busca específica).
-CT-RN-BUSCA-013-F,RN-BUSCA-013,Ações nos cards,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-014-F,RN-BUSCA-014,Destaque de foco,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-015-F,RN-BUSCA-015,Estados vazios,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-020-F,RN-BUSCA-020,Destino do clique,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-021-F,RN-BUSCA-021,Voltar à busca,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-BUSCA-022-F,RN-BUSCA-022,Subtítulo do card,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-CONT-001-F,RN-CONT-001,Lista inicial,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-002-F,RN-CONT-002,Detalhe de saga,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-003-F,RN-CONT-003,Detalhe de universo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-004-F,RN-CONT-004,Abas na listagem,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-005-F,RN-CONT-005,Card de saga,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-006-F,RN-CONT-006,Card de universo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-007-F,RN-CONT-007,Timeline da saga,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-008-F,RN-CONT-008,Detalhe do universo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-009-F,RN-CONT-009,Abrir obra,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-010-F,RN-CONT-010,Sem conteúdo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-011-F,RN-CONT-011,Voltar à lista,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-CONT-020-F,RN-CONT-020,Abas no modal,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-001-F,RN-DEV-001,Empresa inválida,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-002-F,RN-DEV-002,Lista paginada,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-003-F,RN-DEV-003,Scroll infinito,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-004-F,RN-DEV-004,Título da página,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-005-F,RN-DEV-005,Texto informativo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-006-F,RN-DEV-006,Grid de jogos,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DEV-007-F,RN-DEV-007,Entrada pelo modal,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DUB-001-F,RN-DUB-001,Carregar créditos,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
+CT-RN-BUSCA-013-F,RN-BUSCA-013,Ações nos cards,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-014-F,RN-BUSCA-014,Destaque de foco,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-015-F,RN-BUSCA-015,Estados vazios,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-020-F,RN-BUSCA-020,Destino do clique,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-021-F,RN-BUSCA-021,Voltar à busca,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-BUSCA-022-F,RN-BUSCA-022,Subtítulo do card,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-CONT-001-F,RN-CONT-001,Lista inicial,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-002-F,RN-CONT-002,Detalhe de saga,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-003-F,RN-CONT-003,Detalhe de universo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-004-F,RN-CONT-004,Abas na listagem,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-005-F,RN-CONT-005,Card de saga,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-006-F,RN-CONT-006,Card de universo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-007-F,RN-CONT-007,Timeline da saga,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-008-F,RN-CONT-008,Detalhe do universo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-009-F,RN-CONT-009,Abrir obra,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-010-F,RN-CONT-010,Sem conteúdo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-011-F,RN-CONT-011,Voltar à lista,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-CONT-020-F,RN-CONT-020,Abas no modal,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-001-F,RN-DEV-001,Empresa inválida,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-002-F,RN-DEV-002,Lista paginada,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-003-F,RN-DEV-003,Scroll infinito,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-004-F,RN-DEV-004,Título da página,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-005-F,RN-DEV-005,Texto informativo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-006-F,RN-DEV-006,Grid de jogos,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DEV-007-F,RN-DEV-007,Entrada pelo modal,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DUB-001-F,RN-DUB-001,Carregar créditos,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
 CT-RN-DUB-002-F,RN-DUB-002,Rótulo de idioma,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-DUB-003-F,RN-DUB-003,Tipos na filmografia,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DUB-004-F,RN-DUB-004,Personagem no card,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DUB-005-F,RN-DUB-005,Abrir detalhe,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-DUB-006-F,RN-DUB-006,Voltar para busca,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-001-F,RN-EVT-001,Ano padrão,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-002-F,RN-EVT-002,Carregar resumo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-003-F,RN-EVT-003,Só eventos com jogos,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-004-F,RN-EVT-004,Contador,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-005-F,RN-EVT-005,Loading e erro,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-006-F,RN-EVT-006,Ano vazio,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-EVT-007-F,RN-EVT-007,Jogos por evento,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
+CT-RN-DUB-003-F,RN-DUB-003,Tipos na filmografia,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DUB-004-F,RN-DUB-004,Personagem no card,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DUB-005-F,RN-DUB-005,Abrir detalhe,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-DUB-006-F,RN-DUB-006,Voltar para busca,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-001-F,RN-EVT-001,Ano padrão,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-002-F,RN-EVT-002,Carregar resumo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-003-F,RN-EVT-003,Só eventos com jogos,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-004-F,RN-EVT-004,Contador,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-005-F,RN-EVT-005,Loading e erro,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-006-F,RN-EVT-006,Ano vazio,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-EVT-007-F,RN-EVT-007,Jogos por evento,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
 CT-RN-FILMES-001-F,RN-FILMES-001,Conteúdo na primeira abertura,Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
 CT-RN-FILMES-002-F,RN-FILMES-002,Atualização gradual do catálogo,Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
 CT-RN-FILMES-003-F,RN-FILMES-003,Falha no carregamento inicial,Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
@@ -167,187 +167,187 @@ CT-RN-FILMES-065-F,RN-FILMES-065,Timeline por mês (outras telas),Filmes,02-FILM
 CT-RN-FILMES-066-F,RN-FILMES-066,Só ano confirmado (outras telas),Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
 CT-RN-FILMES-067-F,RN-FILMES-067,Contador alinhado ao total filtrado,Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
 CT-RN-FILMES-068-F,RN-FILMES-068,Coerência após recarregar,Filmes,02-FILMES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-FILMES-smoke/e2e-filmes-prod,,PASS robô pré-#155 era só h1; passos completos CSV pendentes.
-CT-RN-HEADER-001-F,RN-HEADER-001,Links principais (desktop),Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-002-F,RN-HEADER-002,Menu “Mais”,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-003-F,RN-HEADER-003,Item ativo,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-004-F,RN-HEADER-004,Abrir busca,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-005-F,RN-HEADER-005,Tema claro/escuro,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-006-F,RN-HEADER-006,Notificações,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-007-F,RN-HEADER-007,Menu do usuário logado,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-008-F,RN-HEADER-008,Visitante (desktop),Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-009-F,RN-HEADER-009,Menu mobile,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-010-F,RN-HEADER-010,Fechar menus,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-020-F,RN-HEADER-020,Resultado abre detalhe,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
-CT-RN-HEADER-021-F,RN-HEADER-021,Retorno da página pessoa,Busca e cabeçalho,09-BUSCA-HEADER.md,,,,,,,
+CT-RN-HEADER-001-F,RN-HEADER-001,Links principais (desktop),Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Links principais Filmes/Séries no header (desktop).
+CT-RN-HEADER-002-F,RN-HEADER-002,Menu “Mais”,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-003-F,RN-HEADER-003,Item ativo,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-004-F,RN-HEADER-004,Abrir busca,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Overlay busca abre (lupa) e fecha com Esc.
+CT-RN-HEADER-005-F,RN-HEADER-005,Tema claro/escuro,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Toggle tema altera classe do html.
+CT-RN-HEADER-006-F,RN-HEADER-006,Notificações,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-007-F,RN-HEADER-007,Menu do usuário logado,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-008-F,RN-HEADER-008,Visitante (desktop),Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Link Entrar/Login visível para visitante.
+CT-RN-HEADER-009-F,RN-HEADER-009,Menu mobile,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-010-F,RN-HEADER-010,Fechar menus,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-020-F,RN-HEADER-020,Resultado abre detalhe,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
+CT-RN-HEADER-021-F,RN-HEADER-021,Retorno da página pessoa,Busca e cabeçalho,09-BUSCA-HEADER.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke header/busca parcial OK.
 CT-RN-HOJE-001-F,RN-HOJE-001,Conteúdo após abrir a página,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /hoje carrega.
 CT-RN-HOJE-002-F,RN-HOJE-002,Data do dia,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Página /hoje com heading e indício de data no corpo.
-CT-RN-HOJE-003-F,RN-HOJE-003,Ligar/desligar blocos,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-004-F,RN-HOJE-004,Pelo menos uma seção,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-005-F,RN-HOJE-005,Ordem fixa das faixas,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-006-F,RN-HOJE-006,Faixa sem itens some,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-007-F,RN-HOJE-007,Nada para mostrar,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-008-F,RN-HOJE-008,Erro ao carregar,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-009-F,RN-HOJE-009,Esqueletos no carregamento,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-010-F,RN-HOJE-010,Cards iguais ao resto do site,Hoje,07-HOJE.md,,,,,,,
+CT-RN-HOJE-003-F,RN-HOJE-003,Ligar/desligar blocos,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-004-F,RN-HOJE-004,Pelo menos uma seção,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-005-F,RN-HOJE-005,Ordem fixa das faixas,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-006-F,RN-HOJE-006,Faixa sem itens some,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-007-F,RN-HOJE-007,Nada para mostrar,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-008-F,RN-HOJE-008,Erro ao carregar,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-009-F,RN-HOJE-009,Esqueletos no carregamento,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-010-F,RN-HOJE-010,Cards iguais ao resto do site,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
 CT-RN-HOJE-011-F,RN-HOJE-011,Janela “esta semana”,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke /hoje OK.
-CT-RN-HOJE-012-F,RN-HOJE-012,Em cartaz nos cinemas,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-013-F,RN-HOJE-013,Estreias da semana,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-014-F,RN-HOJE-014,Etiquetas em filmes,Hoje,07-HOJE.md,,,,,,,
+CT-RN-HOJE-012-F,RN-HOJE-012,Em cartaz nos cinemas,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-013-F,RN-HOJE-013,Estreias da semana,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-014-F,RN-HOJE-014,Etiquetas em filmes,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
 CT-RN-HOJE-015-F,RN-HOJE-015,Filmes no streaming esta semana,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke /hoje OK.
-CT-RN-HOJE-016-F,RN-HOJE-016,Séries no streaming esta semana,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-017-F,RN-HOJE-017,Animes em exibição (prioridade),Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-018-F,RN-HOJE-018,Animes — completar lista,Hoje,07-HOJE.md,,,,,,,
+CT-RN-HOJE-016-F,RN-HOJE-016,Séries no streaming esta semana,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-017-F,RN-HOJE-017,Animes em exibição (prioridade),Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-018-F,RN-HOJE-018,Animes — completar lista,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
 CT-RN-HOJE-019-F,RN-HOJE-019,Jogos em destaque,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke /hoje OK.
-CT-RN-HOJE-020-F,RN-HOJE-020,Animes mais exigentes que a listagem,Hoje,07-HOJE.md,,,,,,,
+CT-RN-HOJE-020-F,RN-HOJE-020,Animes mais exigentes que a listagem,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
 CT-RN-HOJE-021-F,RN-HOJE-021,Textos de sinopse,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke /hoje OK.
 CT-RN-HOJE-022-F,RN-HOJE-022,Atualização dos destaques,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke /hoje OK.
-CT-RN-HOJE-023-F,RN-HOJE-023,Falha grave no servidor,Hoje,07-HOJE.md,,,,,,,
-CT-RN-HOJE-024-F,RN-HOJE-024,Seções batem com a tela,Hoje,07-HOJE.md,,,,,,,
+CT-RN-HOJE-023-F,RN-HOJE-023,Falha grave no servidor,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
+CT-RN-HOJE-024-F,RN-HOJE-024,Seções batem com a tela,Hoje,07-HOJE.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (título/semana); smoke /hoje OK.
 CT-RN-HOME-001-F,RN-HOME-001,Ordem das seções,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Revalidado E2E prod 23/09; ordem seções + nav.
 CT-RN-HOME-002-F,RN-HOME-002,Título da faixa leva à listagem,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Revalidado E2E prod 23/09; ordem seções + nav.
 CT-RN-HOME-003-F,RN-HOME-003,Página não “quebra” sem conteúdo,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke prod: home sem erro fatal e 4 faixas visíveis (não simulou catálogo vazio).
 CT-RN-HOME-004-F,RN-HOME-004,Carregamento tardio das faixas,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke prod: faixas visíveis após scroll (carregamento tardio não reproduzido).
-CT-RN-HOME-AC-001-F,RN-HOME-AC-001,Dois modos: estreias e semana,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-002-F,RN-HOME-AC-002,Modo inicial automático,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-003-F,RN-HOME-AC-003,Estreias: temporada atual,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-004-F,RN-HOME-AC-004,Estreias: posição inicial,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-005-F,RN-HOME-AC-005,Agenda semanal: só com episódio marcado,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-006-F,RN-HOME-AC-006,Agenda: abrir no dia de hoje,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-007-F,RN-HOME-AC-007,Trocar temporada,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-008-F,RN-HOME-AC-008,Em alta em animes,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-009-F,RN-HOME-AC-009,Fixar na semana (logado),Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-AC-010-F,RN-HOME-AC-010,Loop na agenda semanal,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-001-F,RN-HOME-CA-001,Bloco só para usuário logado,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-002-F,RN-HOME-CA-002,Bloco oculto sem itens,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-003-F,RN-HOME-CA-003,Até dez títulos,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-004-F,RN-HOME-CA-004,Card mostra temporada e episódio,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-005-F,RN-HOME-CA-005,Tempo restante,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-006-F,RN-HOME-CA-006,Abrir no streaming,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-007-F,RN-HOME-CA-007,Sem link vai à minha lista,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CA-008-F,RN-HOME-CA-008,“Ver todos”,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-001-F,RN-HOME-CARD-001,Abrir detalhe,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-002-F,RN-HOME-CARD-002,Menu ⋮,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-003-F,RN-HOME-CARD-003,Fechar menu ao clicar fora,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-004-F,RN-HOME-CARD-004,Favoritar / quero assistir,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-005-F,RN-HOME-CARD-005,Visitante não grava,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-006-F,RN-HOME-CARD-006,Acompanhando (série/anime),Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-007-F,RN-HOME-CARD-007,Já assisti / já joguei,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-008-F,RN-HOME-CARD-008,Avaliar ao marcar visto,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-AC-001-F,RN-HOME-AC-001,Dois modos: estreias e semana,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-002-F,RN-HOME-AC-002,Modo inicial automático,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-003-F,RN-HOME-AC-003,Estreias: temporada atual,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-004-F,RN-HOME-AC-004,Estreias: posição inicial,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-005-F,RN-HOME-AC-005,Agenda semanal: só com episódio marcado,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-006-F,RN-HOME-AC-006,Agenda: abrir no dia de hoje,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-007-F,RN-HOME-AC-007,Trocar temporada,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-008-F,RN-HOME-AC-008,Em alta em animes,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-009-F,RN-HOME-AC-009,Fixar na semana (logado),Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-AC-010-F,RN-HOME-AC-010,Loop na agenda semanal,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke: 4 botões em alta (regra AC exige passos manuais além do smoke).
+CT-RN-HOME-CA-001-F,RN-HOME-CA-001,Bloco só para usuário logado,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-002-F,RN-HOME-CA-002,Bloco oculto sem itens,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-003-F,RN-HOME-CA-003,Até dez títulos,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-004-F,RN-HOME-CA-004,Card mostra temporada e episódio,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-005-F,RN-HOME-CA-005,Tempo restante,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-006-F,RN-HOME-CA-006,Abrir no streaming,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-007-F,RN-HOME-CA-007,Sem link vai à minha lista,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CA-008-F,RN-HOME-CA-008,“Ver todos”,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Sem classificador smoke; passos CSV pendentes.
+CT-RN-HOME-CARD-001-F,RN-HOME-CARD-001,Abrir detalhe,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-002-F,RN-HOME-CARD-002,Menu ⋮,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-003-F,RN-HOME-CARD-003,Fechar menu ao clicar fora,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-004-F,RN-HOME-CARD-004,Favoritar / quero assistir,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-005-F,RN-HOME-CARD-005,Visitante não grava,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-006-F,RN-HOME-CARD-006,Acompanhando (série/anime),Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-007-F,RN-HOME-CARD-007,Já assisti / já joguei,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-008-F,RN-HOME-CARD-008,Avaliar ao marcar visto,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CARD-009-F,RN-HOME-CARD-009,Etiqueta de status — filme,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CARD-010-F,RN-HOME-CARD-010,Etiqueta — série/anime,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-011-F,RN-HOME-CARD-011,Novo ep: regra de 24h,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CARD-010-F,RN-HOME-CARD-010,Etiqueta — série/anime,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-011-F,RN-HOME-CARD-011,Novo ep: regra de 24h,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CARD-012-F,RN-HOME-CARD-012,Dublagem no anime,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CARD-013-F,RN-HOME-CARD-013,Contagem para próximo episódio,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-014-F,RN-HOME-CARD-014,Saga em filme,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CARD-013-F,RN-HOME-CARD-013,Contagem para próximo episódio,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-014-F,RN-HOME-CARD-014,Saga em filme,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CARD-015-F,RN-HOME-CARD-015,Conteúdo adulto no poster,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CARD-016-F,RN-HOME-CARD-016,Indicador na minha lista,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CARD-017-F,RN-HOME-CARD-017,Ocultar título,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CARD-016-F,RN-HOME-CARD-016,Indicador na minha lista,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CARD-017-F,RN-HOME-CARD-017,Ocultar título,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CON-001-F,RN-HOME-CON-001,Foco em lançamentos recentes e próximos,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CON-002-F,RN-HOME-CON-002,Filmes: sem shows e concertos na faixa,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CON-003-F,RN-HOME-CON-003,Filmes: curta duração futura,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CON-002-F,RN-HOME-CON-002,Filmes: sem shows e concertos na faixa,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CON-003-F,RN-HOME-CON-003,Filmes: curta duração futura,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CON-004-F,RN-HOME-CON-004,Filmes: destaques no card,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CON-005-F,RN-HOME-CON-005,Séries: data do próximo episódio,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CON-006-F,RN-HOME-CON-006,Séries: episódio recente,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-CON-007-F,RN-HOME-CON-007,Jogos: plataformas no card,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CON-005-F,RN-HOME-CON-005,Séries: data do próximo episódio,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CON-006-F,RN-HOME-CON-006,Séries: episódio recente,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-CON-007-F,RN-HOME-CON-007,Jogos: plataformas no card,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-CON-008-F,RN-HOME-CON-008,Jogos pouco relevantes,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
 CT-RN-HOME-CON-009-F,RN-HOME-CON-009,Conteúdo adulto explícito em animes,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-CON-010-F,RN-HOME-CON-010,Animes da temporada e agenda,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-CON-010-F,RN-HOME-CON-010,Animes da temporada e agenda,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-EA-001-F,RN-HOME-EA-001,Ativar Em alta,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
 CT-RN-HOME-EA-002-F,RN-HOME-EA-002,Filmes em alta ≠ populares da página Filmes,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
 CT-RN-HOME-EA-003-F,RN-HOME-EA-003,Séries e jogos em alta,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
 CT-RN-HOME-EA-004-F,RN-HOME-EA-004,Início da lista,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
 CT-RN-HOME-EA-005-F,RN-HOME-EA-005,Desativar volta à timeline,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
 CT-RN-HOME-EA-006-F,RN-HOME-EA-006,Gênero em Em alta,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-HOME-smoke/e2e-home-carousels-prod,,Robô só contou botões em alta; passos CSV pendentes.
-CT-RN-HOME-HERO-001-F,RN-HOME-HERO-001,Botão “Começar agora”,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-HERO-002-F,RN-HOME-HERO-002,Link “Ver jogos em alta”,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-SHELL-001-F,RN-HOME-SHELL-001,Menu superior e busca,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-HERO-001-F,RN-HOME-HERO-001,Botão “Começar agora”,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,FAIL,evidencias/lote-fila-smoke-2026-09-23.png,,Botão Começar agora (type=button) — revalidar com scroll até #filmes; smoke automático falhou seletor link.
+CT-RN-HOME-HERO-002-F,RN-HOME-HERO-002,Link “Ver jogos em alta”,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Link Ver jogos em alta visível no hero.
+CT-RN-HOME-SHELL-001-F,RN-HOME-SHELL-001,Menu superior e busca,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Header com nav principal e busca operacional.
 CT-RN-HOME-SHELL-002-F,RN-HOME-SHELL-002,Sem popup de “consentimento +18”,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Sem popup dedicado +18 na abertura; blur/exclusão separado.
 CT-RN-HOME-TBD-001-F,RN-HOME-TBD-001,Separador de ano sem dia,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-TBD-002-F,RN-HOME-TBD-002,Título ao focar TBD,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TBD-003-F,RN-HOME-TBD-003,Anos futuros na fila,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-TBD-002-F,RN-HOME-TBD-002,Título ao focar TBD,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TBD-003-F,RN-HOME-TBD-003,Anos futuros na fila,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-TL-001-F,RN-HOME-TL-001,Título do mês no carrossel,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-TL-002-F,RN-HOME-TL-002,Abrir no próximo lançamento,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-003-F,RN-HOME-TL-003,Sem futuro: último lançado,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-004-F,RN-HOME-TL-004,Série/anime: data do episódio,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-005-F,RN-HOME-TL-005,Placeholders no início,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-006-F,RN-HOME-TL-006,Rolagem horizontal,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-007-F,RN-HOME-TL-007,Ctrl + roda do mouse,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-008-F,RN-HOME-TL-008,Carregar meses ao navegar,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-009-F,RN-HOME-TL-009,Não “pular” ao puxar o passado,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-010-F,RN-HOME-TL-010,Setas de mudança de mês,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-011-F,RN-HOME-TL-011,Filtro por gênero,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-TL-012-F,RN-HOME-TL-012,Troca de gênero reposiciona,Página inicial,01-HOME.md,,,,,,,
+CT-RN-HOME-TL-002-F,RN-HOME-TL-002,Abrir no próximo lançamento,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-003-F,RN-HOME-TL-003,Sem futuro: último lançado,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-004-F,RN-HOME-TL-004,Série/anime: data do episódio,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-005-F,RN-HOME-TL-005,Placeholders no início,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-006-F,RN-HOME-TL-006,Rolagem horizontal,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-007-F,RN-HOME-TL-007,Ctrl + roda do mouse,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-008-F,RN-HOME-TL-008,Carregar meses ao navegar,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-009-F,RN-HOME-TL-009,Não “pular” ao puxar o passado,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-010-F,RN-HOME-TL-010,Setas de mudança de mês,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-011-F,RN-HOME-TL-011,Filtro por gênero,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
+CT-RN-HOME-TL-012-F,RN-HOME-TL-012,Troca de gênero reposiciona,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,PO: CARD/CON/TBD/TL — aguarda sync/catálogo ou dados de teste; não reabrir modais 22/09.
 CT-RN-HOME-TL-013-F,RN-HOME-TL-013,Scroll rápido (ícone raio),Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Fila CSV novo: passos exigem título/dado específico ou comparação catálogo; smoke home OK.
-CT-RN-HOME-UPD-001-F,RN-HOME-UPD-001,Atualizar após sincronização do catálogo,Página inicial,01-HOME.md,,,,,,,
-CT-RN-HOME-UPD-002-F,RN-HOME-UPD-002,Falha na atualização silenciosa,Página inicial,01-HOME.md,,,,,,,
-CT-RN-JOGOS-001-F,RN-JOGOS-001,Conteúdo na abertura,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-002-F,RN-JOGOS-002,Falha na abertura,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-003-F,RN-JOGOS-003,Sem recarga duplicada na abertura,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-004-F,RN-JOGOS-004,Filtros aplicados,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-005-F,RN-JOGOS-005,Mês sem ano explícito,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-006-F,RN-JOGOS-006,Mês com ano,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-007-F,RN-JOGOS-007,Ordem alfabética,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-008-F,RN-JOGOS-008,Popularidade (catálogo interno),Jogos,05-JOGOS.md,,,,,,,
+CT-RN-HOME-UPD-001-F,RN-HOME-UPD-001,Atualizar após sincronização do catálogo,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke home parcial; passos CSV pendentes.
+CT-RN-HOME-UPD-002-F,RN-HOME-UPD-002,Falha na atualização silenciosa,Página inicial,01-HOME.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke home parcial; passos CSV pendentes.
+CT-RN-JOGOS-001-F,RN-JOGOS-001,Conteúdo na abertura,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /jogos: página carrega.
+CT-RN-JOGOS-002-F,RN-JOGOS-002,Falha na abertura,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /jogos: página carrega.
+CT-RN-JOGOS-003-F,RN-JOGOS-003,Sem recarga duplicada na abertura,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,PASS,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke /jogos: página carrega.
+CT-RN-JOGOS-004-F,RN-JOGOS-004,Filtros aplicados,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-005-F,RN-JOGOS-005,Mês sem ano explícito,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-006-F,RN-JOGOS-006,Mês com ano,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-007-F,RN-JOGOS-007,Ordem alfabética,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-008-F,RN-JOGOS-008,Popularidade (catálogo interno),Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-JOGOS-009-F,RN-JOGOS-009,Listagem mais permissiva que destaques,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-JOGOS-010-F,RN-JOGOS-010,Lote inicial na grade,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-011-F,RN-JOGOS-011,Gaveta O que vem aí,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-012-F,RN-JOGOS-012,Gaveta Eventos recentes,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-013-F,RN-JOGOS-013,"Loading, contador e vazio",Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-014-F,RN-JOGOS-014,Atualização após sync,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-015-F,RN-JOGOS-015,Opções de filtro,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-016-F,RN-JOGOS-016,Preço Steam no detalhe/card,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-017-F,RN-JOGOS-017,Redirect para Promoções,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-018-F,RN-JOGOS-018,Menu do site,Jogos,05-JOGOS.md,,,,,,,
+CT-RN-JOGOS-010-F,RN-JOGOS-010,Lote inicial na grade,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-011-F,RN-JOGOS-011,Gaveta O que vem aí,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-012-F,RN-JOGOS-012,Gaveta Eventos recentes,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-013-F,RN-JOGOS-013,"Loading, contador e vazio",Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-014-F,RN-JOGOS-014,Atualização após sync,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-015-F,RN-JOGOS-015,Opções de filtro,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-016-F,RN-JOGOS-016,Preço Steam no detalhe/card,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-017-F,RN-JOGOS-017,Redirect para Promoções,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-018-F,RN-JOGOS-018,Menu do site,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-JOGOS-019-F,RN-JOGOS-019,Quem entra no ranking,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-JOGOS-020-F,RN-JOGOS-020,Top da Semana,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-021-F,RN-JOGOS-021,Mais jogados na Steam,Jogos,05-JOGOS.md,,,,,,,
+CT-RN-JOGOS-020-F,RN-JOGOS-020,Top da Semana,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-021-F,RN-JOGOS-021,Mais jogados na Steam,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-JOGOS-022-F,RN-JOGOS-022,Promoções Steam (dados),Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-JOGOS-023-F,RN-JOGOS-023,Por plataforma,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-024-F,RN-JOGOS-024,Por modo de jogo,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-025-F,RN-JOGOS-025,Por categoria (gênero),Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-026-F,RN-JOGOS-026,Semana e métrica (modo completo),Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-027-F,RN-JOGOS-027,Modo compacto na aba Promoções,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-028-F,RN-JOGOS-028,Erro ao carregar,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-JOGOS-029-F,RN-JOGOS-029,Conteúdo estável por sessão,Jogos,05-JOGOS.md,,,,,,,
-CT-RN-LISTA-001-F,RN-LISTA-001,Rotas exigem login,Minha lista,10-MINHA-LISTA.md,,,,,,,
+CT-RN-JOGOS-023-F,RN-JOGOS-023,Por plataforma,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-024-F,RN-JOGOS-024,Por modo de jogo,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-025-F,RN-JOGOS-025,Por categoria (gênero),Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-026-F,RN-JOGOS-026,Semana e métrica (modo completo),Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-027-F,RN-JOGOS-027,Modo compacto na aba Promoções,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-028-F,RN-JOGOS-028,Erro ao carregar,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-JOGOS-029-F,RN-JOGOS-029,Conteúdo estável por sessão,Jogos,05-JOGOS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-LISTA-001-F,RN-LISTA-001,Rotas exigem login,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
 CT-RN-LISTA-002-F,RN-LISTA-002,Camada de UX,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-LISTA-010-F,RN-LISTA-010,Quatro tipos de mídia,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-011-F,RN-LISTA-011,“Em breve”,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-012-F,RN-LISTA-012,Mensagem orientadora,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-020-F,RN-LISTA-020,Abas Catálogo vs Fila,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-021-F,RN-LISTA-021,Animes fora da barra,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-030-F,RN-LISTA-030,Exige login na tela,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-031-F,RN-LISTA-031,Carregar lista pessoal,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-032-F,RN-LISTA-032,Filtro por status,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-033-F,RN-LISTA-033,Filtro por tipo,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-034-F,RN-LISTA-034,Itens ocultos,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-035-F,RN-LISTA-035,Status ao vivo,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-036-F,RN-LISTA-036,Aviso de itens faltantes,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-037-F,RN-LISTA-037,Listas vazias,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-040-F,RN-LISTA-040,Visitante,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-041-F,RN-LISTA-041,Carregar ao abrir,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-042-F,RN-LISTA-042,Última sincronização,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-043-F,RN-LISTA-043,Ações da barra,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-044-F,RN-LISTA-044,Banners informativos,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-045-F,RN-LISTA-045,Painel da extensão,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-046-F,RN-LISTA-046,Filtros da watchlist,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-047-F,RN-LISTA-047,Lista vazia orientada,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-048-F,RN-LISTA-048,Remover item,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-049-F,RN-LISTA-049,Editar progresso,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-050-F,RN-LISTA-050,Feedback de sync/import,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-051-F,RN-LISTA-051,Modo offline,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-052-F,RN-LISTA-052,Backup antigo,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-053-F,RN-LISTA-053,Adicionar do catálogo,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-060-F,RN-LISTA-060,Exige login,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-061-F,RN-LISTA-061,Ordem da fila,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-062-F,RN-LISTA-062,Estados especiais,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-063-F,RN-LISTA-063,Dicas de catálogo CR,Minha lista,10-MINHA-LISTA.md,,,,,,,
+CT-RN-LISTA-010-F,RN-LISTA-010,Quatro tipos de mídia,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-011-F,RN-LISTA-011,“Em breve”,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-012-F,RN-LISTA-012,Mensagem orientadora,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-020-F,RN-LISTA-020,Abas Catálogo vs Fila,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-021-F,RN-LISTA-021,Animes fora da barra,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-030-F,RN-LISTA-030,Exige login na tela,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-031-F,RN-LISTA-031,Carregar lista pessoal,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-032-F,RN-LISTA-032,Filtro por status,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-033-F,RN-LISTA-033,Filtro por tipo,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-034-F,RN-LISTA-034,Itens ocultos,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-035-F,RN-LISTA-035,Status ao vivo,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-036-F,RN-LISTA-036,Aviso de itens faltantes,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-037-F,RN-LISTA-037,Listas vazias,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-040-F,RN-LISTA-040,Visitante,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-041-F,RN-LISTA-041,Carregar ao abrir,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-042-F,RN-LISTA-042,Última sincronização,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-043-F,RN-LISTA-043,Ações da barra,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-044-F,RN-LISTA-044,Banners informativos,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-045-F,RN-LISTA-045,Painel da extensão,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-046-F,RN-LISTA-046,Filtros da watchlist,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-047-F,RN-LISTA-047,Lista vazia orientada,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-048-F,RN-LISTA-048,Remover item,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-049-F,RN-LISTA-049,Editar progresso,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-050-F,RN-LISTA-050,Feedback de sync/import,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-051-F,RN-LISTA-051,Modo offline,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-052-F,RN-LISTA-052,Backup antigo,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-053-F,RN-LISTA-053,Adicionar do catálogo,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-060-F,RN-LISTA-060,Exige login,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-061-F,RN-LISTA-061,Ordem da fila,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-062-F,RN-LISTA-062,Estados especiais,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-063-F,RN-LISTA-063,Dicas de catálogo CR,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
 CT-RN-LISTA-064-F,RN-LISTA-064,Trilha de áudio,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-LISTA-065-F,RN-LISTA-065,Abrir detalhe,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-066-F,RN-LISTA-066,Ajuda extensão,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-070-F,RN-LISTA-070,Login para interagir,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-071-F,RN-LISTA-071,Significado dos status,Minha lista,10-MINHA-LISTA.md,,,,,,,
-CT-RN-LISTA-072-F,RN-LISTA-072,Acompanhando só anime/série,Minha lista,10-MINHA-LISTA.md,,,,,,,
+CT-RN-LISTA-065-F,RN-LISTA-065,Abrir detalhe,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-066-F,RN-LISTA-066,Ajuda extensão,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-070-F,RN-LISTA-070,Login para interagir,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-071-F,RN-LISTA-071,Significado dos status,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
+CT-RN-LISTA-072-F,RN-LISTA-072,Acompanhando só anime/série,Minha lista,10-MINHA-LISTA.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Exige login; passos CSV pendentes.
 CT-RN-MODAL-001-F,RN-MODAL-001,Só abre com mídia válida,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
 CT-RN-MODAL-002-F,RN-MODAL-002,Fechar ao mudar de página,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
 CT-RN-MODAL-003-F,RN-MODAL-003,Detalhes ao abrir,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
@@ -396,58 +396,58 @@ CT-RN-MODAL-082-F,RN-MODAL-082,Tipos editáveis,Modais,08-MODAIS.md,Supervisor I
 CT-RN-MODAL-090-F,RN-MODAL-090,Carregar sob demanda,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
 CT-RN-MODAL-091-F,RN-MODAL-091,Ocultar se vazio,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
 CT-RN-MODAL-092-F,RN-MODAL-092,Abas dinâmicas,Modais,08-MODAIS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-MODAL-001-F/modal-filmes-dialog.png,,Falso FAIL robô 22/09 (clique link Filmes). Prod: card+/filmes abre dialog. Passos CSV pendentes.
-CT-RN-PERS-001-F,RN-PERS-001,Carregar créditos,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-002-F,RN-PERS-002,Erro e loading,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-003-F,RN-PERS-003,Perfil resumido,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-004-F,RN-PERS-004,Filmografia,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-005-F,RN-PERS-005,Abrir detalhe da obra,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-006-F,RN-PERS-006,Voltar para busca,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-007-F,RN-PERS-007,Voltar para modal,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PERS-008-F,RN-PERS-008,Voltar genérico,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-001-F,RN-PREM-001,Modo destaque inicial,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-002-F,RN-PREM-002,Modo filtrado,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-003-F,RN-PREM-003,Opções de filtro,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-004-F,RN-PREM-004,Reset de página,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-005-F,RN-PREM-005,Seções por tipo,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-006-F,RN-PREM-006,Ver todos da premiação,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-007-F,RN-PREM-007,Paginação,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-008-F,RN-PREM-008,Cards interativos,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PREM-009-F,RN-PREM-009,Nenhum resultado,Outras telas,12-OUTRAS-TELAS.md,,,,,,,
-CT-RN-PROMO-001-F,RN-PROMO-001,Aba pela URL,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-002-F,RN-PROMO-002,Shell da página,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-003-F,RN-PROMO-003,Três abas,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-004-F,RN-PROMO-004,Em Alta sem ofertas de loja,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-005-F,RN-PROMO-005,Carregar sob demanda,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-006-F,RN-PROMO-006,Várias lojas — grátis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-007-F,RN-PROMO-007,Várias lojas — promo pagas,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-008-F,RN-PROMO-008,Catálogo Orbe na Steam,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-009-F,RN-PROMO-009,Atualização periódica,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-010-F,RN-PROMO-010,Alerta de fontes indisponíveis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-011-F,RN-PROMO-011,Sem detalhes técnicos internos,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-012-F,RN-PROMO-012,Conteúdo da aba Grátis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-013-F,RN-PROMO-013,Paginação de promoções pagas,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-014-F,RN-PROMO-014,Preços em reais,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-015-F,RN-PROMO-015,Temporário vs permanente,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-016-F,RN-PROMO-016,Ordenação padrão grátis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-017-F,RN-PROMO-017,Filtro por plataforma/loja,Promoções,06-PROMOCOES.md,,,,,,,
+CT-RN-PERS-001-F,RN-PERS-001,Carregar créditos,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-002-F,RN-PERS-002,Erro e loading,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-003-F,RN-PERS-003,Perfil resumido,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-004-F,RN-PERS-004,Filmografia,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-005-F,RN-PERS-005,Abrir detalhe da obra,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-006-F,RN-PERS-006,Voltar para busca,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-007-F,RN-PERS-007,Voltar para modal,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PERS-008-F,RN-PERS-008,Voltar genérico,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-001-F,RN-PREM-001,Modo destaque inicial,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-002-F,RN-PREM-002,Modo filtrado,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-003-F,RN-PREM-003,Opções de filtro,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-004-F,RN-PREM-004,Reset de página,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-005-F,RN-PREM-005,Seções por tipo,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-006-F,RN-PREM-006,Ver todos da premiação,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-007-F,RN-PREM-007,Paginação,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-008-F,RN-PREM-008,Cards interativos,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PREM-009-F,RN-PREM-009,Nenhum resultado,Outras telas,12-OUTRAS-TELAS.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes (dados específicos).
+CT-RN-PROMO-001-F,RN-PROMO-001,Aba pela URL,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-002-F,RN-PROMO-002,Shell da página,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-003-F,RN-PROMO-003,Três abas,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-004-F,RN-PROMO-004,Em Alta sem ofertas de loja,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-005-F,RN-PROMO-005,Carregar sob demanda,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-006-F,RN-PROMO-006,Várias lojas — grátis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-007-F,RN-PROMO-007,Várias lojas — promo pagas,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-008-F,RN-PROMO-008,Catálogo Orbe na Steam,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-009-F,RN-PROMO-009,Atualização periódica,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-010-F,RN-PROMO-010,Alerta de fontes indisponíveis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-011-F,RN-PROMO-011,Sem detalhes técnicos internos,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-012-F,RN-PROMO-012,Conteúdo da aba Grátis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-013-F,RN-PROMO-013,Paginação de promoções pagas,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-014-F,RN-PROMO-014,Preços em reais,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-015-F,RN-PROMO-015,Temporário vs permanente,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-016-F,RN-PROMO-016,Ordenação padrão grátis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-017-F,RN-PROMO-017,Filtro por plataforma/loja,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-PROMO-018-F,RN-PROMO-018,Busca por título,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-PROMO-019-F,RN-PROMO-019,Destaques itch.io e EA App,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-020-F,RN-PROMO-020,Agrupamento por loja,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-021-F,RN-PROMO-021,Contador na aba Grátis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-022-F,RN-PROMO-022,Vazio grátis,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-023-F,RN-PROMO-023,Ordenação padrão promo,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-024-F,RN-PROMO-024,Faixa catálogo Steam,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-025-F,RN-PROMO-025,Carregar mais,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-026-F,RN-PROMO-026,Contador aba Promoções,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-027-F,RN-PROMO-027,Wishlist Steam (em breve),Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-028-F,RN-PROMO-028,Em Alta embutido,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-029-F,RN-PROMO-029,Bookmark antigo,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-030-F,RN-PROMO-030,Atualizar agora,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-031-F,RN-PROMO-031,Erro global de ofertas,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-032-F,RN-PROMO-032,Skeleton inicial,Promoções,06-PROMOCOES.md,,,,,,,
-CT-RN-PROMO-033-F,RN-PROMO-033,Banner de degradação,Promoções,06-PROMOCOES.md,,,,,,,
+CT-RN-PROMO-019-F,RN-PROMO-019,Destaques itch.io e EA App,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-020-F,RN-PROMO-020,Agrupamento por loja,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-021-F,RN-PROMO-021,Contador na aba Grátis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-022-F,RN-PROMO-022,Vazio grátis,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-023-F,RN-PROMO-023,Ordenação padrão promo,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-024-F,RN-PROMO-024,Faixa catálogo Steam,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-025-F,RN-PROMO-025,Carregar mais,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-026-F,RN-PROMO-026,Contador aba Promoções,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-027-F,RN-PROMO-027,Wishlist Steam (em breve),Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-028-F,RN-PROMO-028,Em Alta embutido,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-029-F,RN-PROMO-029,Bookmark antigo,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-030-F,RN-PROMO-030,Atualizar agora,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-031-F,RN-PROMO-031,Erro global de ofertas,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-032-F,RN-PROMO-032,Skeleton inicial,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
+CT-RN-PROMO-033-F,RN-PROMO-033,Banner de degradação,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-PROMO-034-F,RN-PROMO-034,Rodapé de fontes,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Passos CSV pendentes; smoke rota relacionada OK.
-CT-RN-PROMO-035-F,RN-PROMO-035,Tamanho da primeira página promo,Promoções,06-PROMOCOES.md,,,,,,,
+CT-RN-PROMO-035-F,RN-PROMO-035,Tamanho da primeira página promo,Promoções,06-PROMOCOES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/lote-fila-smoke-2026-09-23.png,,Smoke rota OK; passos CSV pendentes.
 CT-RN-SERIES-001-F,RN-SERIES-001,Conteúdo na primeira abertura,Séries,03-SERIES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-SERIES-smoke/,,PASS robô pré-#155 era só h1; passos CSV pendentes.
 CT-RN-SERIES-002-F,RN-SERIES-002,Atualização gradual,Séries,03-SERIES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-SERIES-smoke/,,PASS robô pré-#155 era só h1; passos CSV pendentes.
 CT-RN-SERIES-003-F,RN-SERIES-003,Falha no carregamento inicial,Séries,03-SERIES.md,Supervisor IA,2026-09-23,anon-prod-vercel,BLOQUEADO,evidencias/CT-RN-SERIES-smoke/,,PASS robô pré-#155 era só h1; passos CSV pendentes.
