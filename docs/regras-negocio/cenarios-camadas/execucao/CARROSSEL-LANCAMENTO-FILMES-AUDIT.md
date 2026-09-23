@@ -59,3 +59,15 @@ O carrossel navega por mês e anexa bloco **year-tbd** no fim do ano; se a API n
 1. **Catálogo:** rodar sync TMDB para o período (ex.: `api` → `npm run sync:movies -- 2027-01-01 2027-12-31`) e republicar API.
 2. **Curadoria:** títulos futuros distantes podem ser filtrados no sync (`isMovieRelevantForSync`) — revisar skips no log de sync, não só o front.
 3. **QA:** cenários que pedem “vários títulos em 2027” podem ser **BLOQUEADO** com evidência de API (tabela acima) até o catálogo existir — ver [`QA-SUPERVISOR-IA.md`](./QA-SUPERVISOR-IA.md).
+
+## Lista `/filmes` vs carrossel (23/09/2026)
+
+Posters quebrados no console (`sw.js` + `image.tmdb.org` **ERR_FAILED**) **não** significam que o título foi excluído do carrossel — muitas vezes o card existe sem imagem. Triagem: [`QA-CONSOLE-TRIAGEM.md`](./QA-CONSOLE-TRIAGEM.md).
+
+Auditoria automática (produção):
+
+```bash
+python3 docs/regras-negocio/scripts/auditar-filmes-vs-carrossel.py
+```
+
+Snapshot: **44** futuros na listagem, **98** no payload home, **5** só em `/filmes` (ex.: estreias nov/dez 2026 fora da janela do carrossel) — alinhado à curadoria, não a erro de poster.
