@@ -35,7 +35,7 @@ router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, ano, mes, status, plataforma } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const allConditions: Prisma.SerieWhereInput[] = [];
+    const allConditions: Prisma.SerieWhereInput[] = [serieQualityFilter];
 
     const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
 
@@ -64,7 +64,7 @@ router.get('/series', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       });
     }
 
-    const where: Prisma.SerieWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
+    const where: Prisma.SerieWhereInput = { AND: allConditions };
 
     const orderBy: Prisma.SerieOrderByWithRelationInput = filtro === 'populares' ? { popularity: 'desc' } : { name: 'asc' };
 

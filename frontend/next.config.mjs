@@ -148,6 +148,13 @@ const nextConfig = {
     ],
   
   },
+  redirects: async () => [
+    {
+      source: '/jogos-em-alta',
+      destination: '/promocoes?tab=em-alta',
+      permanent: false,
+    },
+  ],
   rewrites: async () => {
     // Proxy /api/* → API Express. Em dev: localhost:3001.
     // Em produção: API_PROXY_ORIGIN ou origem derivada de NEXT_PUBLIC_API_URL.
