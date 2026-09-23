@@ -1,0 +1,915 @@
+{
+  "gerado_em": "2026-09-23T15:02:03Z",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "robo_511": {
+    "fonte": "cenarios-camadas/execucao/metricas-reais-511/metricas-reais-511.csv",
+    "total": 511,
+    "contagem": {
+      "PASS": 138,
+      "PENDENTE_QA_HUMANO": 325,
+      "FAIL": 48
+    },
+    "fail_amostra": [
+      {
+        "ID_Cenario": "CT-RN-MODAL-001-F",
+        "ID_Regra": "RN-MODAL-001",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:09:51Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-002-F",
+        "ID_Regra": "RN-MODAL-002",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:01Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-003-F",
+        "ID_Regra": "RN-MODAL-003",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:13Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-004-F",
+        "ID_Regra": "RN-MODAL-004",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:23Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-005-F",
+        "ID_Regra": "RN-MODAL-005",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:34Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-006-F",
+        "ID_Regra": "RN-MODAL-006",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-007-F",
+        "ID_Regra": "RN-MODAL-007",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:10:54Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-008-F",
+        "ID_Regra": "RN-MODAL-008",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:04Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-009-F",
+        "ID_Regra": "RN-MODAL-009",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:14Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-010-F",
+        "ID_Regra": "RN-MODAL-010",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:25Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-011-F",
+        "ID_Regra": "RN-MODAL-011",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:35Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-012-F",
+        "ID_Regra": "RN-MODAL-012",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:46Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-013-F",
+        "ID_Regra": "RN-MODAL-013",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:11:56Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-020-F",
+        "ID_Regra": "RN-MODAL-020",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:12:07Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-021-F",
+        "ID_Regra": "RN-MODAL-021",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:12:17Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-022-F",
+        "ID_Regra": "RN-MODAL-022",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:12:28Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-023-F",
+        "ID_Regra": "RN-MODAL-023",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:12:38Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-024-F",
+        "ID_Regra": "RN-MODAL-024",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:12:49Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-025-F",
+        "ID_Regra": "RN-MODAL-025",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-026-F",
+        "ID_Regra": "RN-MODAL-026",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:12Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-030-F",
+        "ID_Regra": "RN-MODAL-030",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:22Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-031-F",
+        "ID_Regra": "RN-MODAL-031",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:33Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-032-F",
+        "ID_Regra": "RN-MODAL-032",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-033-F",
+        "ID_Regra": "RN-MODAL-033",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:13:54Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-040-F",
+        "ID_Regra": "RN-MODAL-040",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:05Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-041-F",
+        "ID_Regra": "RN-MODAL-041",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:15Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-042-F",
+        "ID_Regra": "RN-MODAL-042",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:25Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-043-F",
+        "ID_Regra": "RN-MODAL-043",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:35Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-044-F",
+        "ID_Regra": "RN-MODAL-044",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:46Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-045-F",
+        "ID_Regra": "RN-MODAL-045",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:14:56Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-050-F",
+        "ID_Regra": "RN-MODAL-050",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:15:07Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-051-F",
+        "ID_Regra": "RN-MODAL-051",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:15:17Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-052-F",
+        "ID_Regra": "RN-MODAL-052",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:15:27Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-053-F",
+        "ID_Regra": "RN-MODAL-053",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:15:39Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-060-F",
+        "ID_Regra": "RN-MODAL-060",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:15:49Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-061-F",
+        "ID_Regra": "RN-MODAL-061",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-062-F",
+        "ID_Regra": "RN-MODAL-062",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:12Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-063-F",
+        "ID_Regra": "RN-MODAL-063",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:22Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-064-F",
+        "ID_Regra": "RN-MODAL-064",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:33Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-070-F",
+        "ID_Regra": "RN-MODAL-070",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-071-F",
+        "ID_Regra": "RN-MODAL-071",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:16:54Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-072-F",
+        "ID_Regra": "RN-MODAL-072",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:04Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-080-F",
+        "ID_Regra": "RN-MODAL-080",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:15Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-081-F",
+        "ID_Regra": "RN-MODAL-081",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:25Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-082-F",
+        "ID_Regra": "RN-MODAL-082",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:36Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-090-F",
+        "ID_Regra": "RN-MODAL-090",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:46Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-091-F",
+        "ID_Regra": "RN-MODAL-091",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:17:56Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-092-F",
+        "ID_Regra": "RN-MODAL-092",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "3",
+        "Evidencia": "Clique sem modal visível",
+        "Testado_Em": "2026-09-22T21:18:08Z"
+      }
+    ],
+    "pendente_amostra": [
+      {
+        "ID_Cenario": "CT-RN-HOME-003-F",
+        "ID_Regra": "RN-HOME-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:36Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-004-F",
+        "ID_Regra": "RN-HOME-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:40Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-001-F",
+        "ID_Regra": "RN-HOME-AC-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-002-F",
+        "ID_Regra": "RN-HOME-AC-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:49Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-003-F",
+        "ID_Regra": "RN-HOME-AC-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:53Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-004-F",
+        "ID_Regra": "RN-HOME-AC-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:45:57Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-005-F",
+        "ID_Regra": "RN-HOME-AC-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:02Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-006-F",
+        "ID_Regra": "RN-HOME-AC-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:06Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-007-F",
+        "ID_Regra": "RN-HOME-AC-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:10Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-008-F",
+        "ID_Regra": "RN-HOME-AC-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:14Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-009-F",
+        "ID_Regra": "RN-HOME-AC-009",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:18Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-010-F",
+        "ID_Regra": "RN-HOME-AC-010",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:23Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-001-F",
+        "ID_Regra": "RN-HOME-CA-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:27Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-002-F",
+        "ID_Regra": "RN-HOME-CA-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:31Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-003-F",
+        "ID_Regra": "RN-HOME-CA-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:36Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-004-F",
+        "ID_Regra": "RN-HOME-CA-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:40Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-005-F",
+        "ID_Regra": "RN-HOME-CA-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-006-F",
+        "ID_Regra": "RN-HOME-CA-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:48Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-007-F",
+        "ID_Regra": "RN-HOME-CA-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:53Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-008-F",
+        "ID_Regra": "RN-HOME-CA-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:46:57Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-001-F",
+        "ID_Regra": "RN-HOME-CARD-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:01Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-002-F",
+        "ID_Regra": "RN-HOME-CARD-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:05Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-003-F",
+        "ID_Regra": "RN-HOME-CARD-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:10Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-004-F",
+        "ID_Regra": "RN-HOME-CARD-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:14Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-005-F",
+        "ID_Regra": "RN-HOME-CARD-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:19Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-006-F",
+        "ID_Regra": "RN-HOME-CARD-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:23Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-007-F",
+        "ID_Regra": "RN-HOME-CARD-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:27Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-008-F",
+        "ID_Regra": "RN-HOME-CARD-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:32Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-009-F",
+        "ID_Regra": "RN-HOME-CARD-009",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-22T20:47:37Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-010-F",
+        "ID_Regra": "RN-HOME-CARD-010",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:41Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-011-F",
+        "ID_Regra": "RN-HOME-CARD-011",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:47:46Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-012-F",
+        "ID_Regra": "RN-HOME-CARD-012",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-22T20:47:52Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-013-F",
+        "ID_Regra": "RN-HOME-CARD-013",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-014-F",
+        "ID_Regra": "RN-HOME-CARD-014",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:10Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-015-F",
+        "ID_Regra": "RN-HOME-CARD-015",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-22T20:48:15Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-016-F",
+        "ID_Regra": "RN-HOME-CARD-016",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:20Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-017-F",
+        "ID_Regra": "RN-HOME-CARD-017",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:24Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-001-F",
+        "ID_Regra": "RN-HOME-CON-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-22T20:48:29Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-002-F",
+        "ID_Regra": "RN-HOME-CON-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:34Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-003-F",
+        "ID_Regra": "RN-HOME-CON-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-22T20:48:38Z"
+      }
+    ]
+  },
+  "e2e_playwright": {
+    "expected": 4,
+    "unexpected": 4,
+    "skipped": 0,
+    "duration_ms": 0
+  },
+  "e2e_report_path": "/workspace/docs/regras-negocio/cenarios-camadas/execucao/e2e-playwright-report-rodada.json",
+  "validar_sync_2027_2030": {
+    "exit_code": 1,
+    "stdout": "OK 2027: by-year=1 year-tbd=0\nFAIL 2028: by-year=0 year-tbd=0\nFAIL 2029: by-year=0 year-tbd=0\nFAIL 2030: by-year=0 year-tbd=0"
+  },
+  "fila_supervisor": "cenarios-camadas/execucao/supervisor-fila-qa.json",
+  "instrucoes_agente": [
+    "Comparar FAIL do robô com passos em cenarios-teste-camadas.csv — muitos 08-MODAIS são falso FAIL.",
+    "Reexecutar no browser cenários FAIL e amostra PENDENTE; registrar em QA-EXECUCAO-HUMANA-511.csv.",
+    "E2E PASS não substitui 511 — só smoke de home/filmes.",
+    "Console: ver QA-CONSOLE-TRIAGEM.md (WS, SW, TMDB)."
+  ]
+}

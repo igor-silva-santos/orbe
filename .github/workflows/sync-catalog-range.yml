@@ -88,14 +88,34 @@ jobs:
             BODY=$(echo "$RESPONSE" | sed '$d')
             echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
             if [ "$HTTP_CODE" = "409" ]; then
-              echo "Checkpoint — tentando com force:true"
-              RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
-                -H "x-sync-secret: ${SYNC_SECRET}" \
-                -H "Content-Type: application/json" \
-                -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR},\"force\":true}")
-              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-              BODY=$(echo "$RESPONSE" | sed '$d')
-              echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+              if echo "$BODY" | grep -q "sincronização em andamento"; then
+                echo "Outro sync em andamento — aguardando syncActive=false para disparar ${YEAR}..."
+                for w in $(seq 1 90); do
+                  sleep 20
+                  STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+                  ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+                  if [ "$ACTIVE" != "True" ]; then
+                    echo "Sync livre após ${w} tentativa(s) — reenviando ano ${YEAR}"
+                    RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
+                      -H "x-sync-secret: ${SYNC_SECRET}" \
+                      -H "Content-Type: application/json" \
+                      -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR},\"force\":true}")
+                    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+                    BODY=$(echo "$RESPONSE" | sed '$d')
+                    echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+                    break
+                  fi
+                done
+              else
+                echo "Checkpoint — tentando com force:true"
+                RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
+                  -H "x-sync-secret: ${SYNC_SECRET}" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR},\"force\":true}")
+                HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+                BODY=$(echo "$RESPONSE" | sed '$d')
+                echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+              fi
             fi
             if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
               echo "::error::Falha HTTP ${HTTP_CODE} no ano ${YEAR}"

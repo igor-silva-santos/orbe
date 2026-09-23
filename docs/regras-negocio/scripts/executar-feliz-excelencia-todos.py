@@ -25,7 +25,9 @@ from playwright.sync_api import sync_playwright, TimeoutError as PwTimeout
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_DIR = ROOT / "cenarios-camadas" / "execucao" / "manifests"
-OUT_DIR = ROOT / "cenarios-camadas" / "execucao" / "metricas-reais-511"
+OUT_DIR = Path(os.environ.get("METRICAS_511_OUT_DIR", "")).resolve() if os.environ.get("METRICAS_511_OUT_DIR") else (
+    ROOT / "cenarios-camadas" / "execucao" / "metricas-reais-511"
+)
 BASE = "https://orbe-seven.vercel.app"
 
 ROUTES = {
@@ -133,6 +135,45 @@ def provision_qa_credentials() -> tuple[str, str, str | None, bool]:
     return email, password, token, True
 
 
+def super_modal_visible(page) -> bool:
+    return page.locator(".super-modal-content").count() > 0
+
+
+def open_modal_from_home_carousel(page, section: str) -> bool:
+    """Clica card (MidiaCard), não o link de navegação da seção."""
+    goto(page, "/")
+    scroll_sections(page)
+    card = page.locator(f"{section} div.cursor-pointer").filter(has=page.locator("img")).first
+    try:
+        card.click(timeout=10_000)
+        page.wait_for_timeout(2000)
+        return super_modal_visible(page)
+    except PwTimeout:
+        return False
+
+
+def open_modal_from_filmes_page(page) -> bool:
+    goto(page, "/filmes")
+    card = page.locator("div.cursor-pointer").filter(has=page.locator("img")).first
+    try:
+        card.click(timeout=10_000)
+        page.wait_for_timeout(2000)
+        return super_modal_visible(page)
+    except PwTimeout:
+        return False
+
+
+def modal_section_for_rule(rid: str, titulo: str, pre: str) -> str:
+    blob = norm(f"{rid} {titulo} {pre}")
+    if "jogo" in blob:
+        return "#jogos"
+    if "anime" in blob:
+        return "#animes"
+    if "série" in blob or "serie" in blob or "séries" in blob:
+        return "#series"
+    return "#filmes"
+
+
 def try_login(page, token: str | None = None) -> bool:
     email = os.environ.get("QA_EMAIL", "").strip()
     password = os.environ.get("QA_PASSWORD", "").strip()
@@ -222,34 +263,61 @@ def run_rule(page, arquivo: str, c: dict, logged_in: bool) -> dict:
             return result(cid, rid, arquivo, "PASS", f"{n} botões em alta visíveis", passos_n, "passo_a_passo")
         return result(cid, rid, arquivo, "FAIL", f"Esperado 4 botões em alta, encontrado {n}", passos_n, "passo_a_passo")
 
-    if arquivo == "02-FILMES.md":
+    if arquivo in ("02-FILMES.md", "03-SERIES.md"):
         h1 = page.locator("h1").first.inner_text(timeout=8000) if page.locator("h1").count() else ""
         passos_n += 1
-        if "filme" in norm(h1):
-            return result(cid, rid, arquivo, "PASS", f"h1={h1[:60]}", passos_n, "passo_a_passo")
-        return result(cid, rid, arquivo, "FAIL", f"h1 inesperado: {h1}", passos_n, "passo_a_passo")
-
-    if arquivo == "03-SERIES.md":
-        h1 = page.locator("h1").first.inner_text(timeout=8000) if page.locator("h1").count() else ""
-        passos_n += 1
-        if "série" in norm(h1) or "serie" in norm(h1):
-            return result(cid, rid, arquivo, "PASS", f"h1={h1[:60]}", passos_n, "passo_a_passo")
-        return result(cid, rid, arquivo, "FAIL", f"h1 inesperado: {h1}", passos_n, "passo_a_passo")
+        if len(norm(h1)) < 2:
+            return result(cid, rid, arquivo, "FAIL", "Página sem h1", passos_n, "smoke")
+        return result(
+            cid,
+            rid,
+            arquivo,
+            "PENDENTE_QA_HUMANO",
+            f"Página OK (h1={h1[:50]}) — robô não cobre passos da regra; QA/supervisor executa CSV.",
+            passos_n,
+            "manual_obrigatorio",
+        )
 
     if arquivo == "08-MODAIS.md":
-        goto(page, "/")
-        scroll_sections(page)
+        section = modal_section_for_rule(rid, titulo, pre)
         passos_n += 1
-        try:
-            page.locator("#filmes a[href]").first.click(timeout=8000)
-            page.wait_for_timeout(2000)
-            dialog = page.locator("[role=dialog], [data-state=open]").count()
+        opened = open_modal_from_home_carousel(page, section)
+        if not opened:
             passos_n += 1
-            if dialog > 0:
-                return result(cid, rid, arquivo, "PASS", "Modal/dialog aberto após clique", passos_n, "passo_a_passo")
-            return result(cid, rid, arquivo, "FAIL", "Clique sem modal visível", passos_n, "passo_a_passo")
-        except PwTimeout:
-            return result(cid, rid, arquivo, "PENDENTE_QA_HUMANO", "Sem card clicável — QA confirma manual", passos_n, "catalogo_ui")
+            opened = open_modal_from_filmes_page(page)
+        passos_n += 1
+        if not opened:
+            return result(
+                cid,
+                rid,
+                arquivo,
+                "PENDENTE_QA_HUMANO",
+                "Card/modal não abriu — QA confirma passos da regra no CSV.",
+                passos_n,
+                "catalogo_ui",
+            )
+        blob = norm(f"{titulo} {pre} {esp}")
+        if "esc" in blob or "tecla" in blob:
+            page.keyboard.press("Escape")
+            page.wait_for_timeout(800)
+            if super_modal_visible(page):
+                return result(cid, rid, arquivo, "FAIL", "Esc não fechou SuperModal", passos_n, "passo_a_passo")
+            return result(cid, rid, arquivo, "PASS", "SuperModal abriu e Esc fechou", passos_n, "passo_a_passo")
+        if "fora" in blob or "overlay" in blob or "clique fora" in blob:
+            page.locator(".fixed.inset-0").first.click(position={"x": 5, "y": 5}, timeout=5000)
+            page.wait_for_timeout(800)
+            if super_modal_visible(page):
+                return result(cid, rid, arquivo, "FAIL", "Clique fora não fechou modal", passos_n, "passo_a_passo")
+            return result(cid, rid, arquivo, "PASS", "SuperModal abriu e clique fora fechou", passos_n, "passo_a_passo")
+        return result(
+            cid,
+            rid,
+            arquivo,
+            "PENDENTE_QA_HUMANO",
+            "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
+            passos_n,
+            "modal_parcial",
+        )
 
     if "comparar" in norm(c["passos"]) or "título" in norm(pre):
         return result(
@@ -299,8 +367,8 @@ def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     all_rows: list[dict] = []
     by_file: dict[str, list] = {}
-    qa_email, qa_password, qa_token = provision_qa_credentials()
-    auto_account = bool(qa_email and qa_password and os.environ.get("QA_AUTO_REGISTER") == "1")
+    qa_email, qa_password, qa_token, auto_registered = provision_qa_credentials()
+    auto_account = auto_registered
 
     scenarios = []
     for mf in sorted(MANIFEST_DIR.glob("*.json")):

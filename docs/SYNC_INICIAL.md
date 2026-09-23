@@ -1,5 +1,7 @@
 # Sync inicial — catálogo e premiações
 
+**Orquestração em produção (agente/CI):** ver `docs/INFRA-SYNC-QA.md` e o runbook `docs/regras-negocio/cenarios-camadas/execucao/RUNBOOK-IA-AUTONOMA-511.md`.
+
 Após deploy da API no Render, popule o banco com estes comandos.
 
 Substitua `SUA_API` e `SYNC_SECRET` pelos valores do dashboard Render.
