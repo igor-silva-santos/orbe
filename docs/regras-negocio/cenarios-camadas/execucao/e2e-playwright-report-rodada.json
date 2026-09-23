@@ -1,50 +1,29 @@
 {
-  "rodada": "2026-09-23T15:00Z",
+  "rodada": "2026-09-23T16:46Z",
   "ambiente": "https://orbe-seven.vercel.app",
-  "nota": "E2E prod parcial — VM sem disco; home-carousels não concluído na última tentativa; filmes-catalogo falhou por seletor (corrigido no repo).",
+  "comando": "cd frontend && npm run test:e2e:prod",
+  "nota": "Pós-merge #155/#156. 5 specs; 1 flaky (crash GPU headless-shell no teste de links home, passou no retry).",
   "stats": {
-    "expected": 4,
-    "unexpected": 4,
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "flaky": 1,
     "skipped": 0
   },
-  "suites": [
+  "specs": [
     {
-      "title": "e2e",
-      "specs": [
-        {
-          "title": "home-carousels.spec.ts",
-          "tests": [
-            {
-              "results": [
-                {
-                  "status": "unknown",
-                  "errors": [
-                    {
-                      "message": "run interrompido (ENOSPC/EAGAIN no agente)"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "filmes-catalogo.spec.ts",
-          "tests": [
-            {
-              "results": [
-                {
-                  "status": "failed",
-                  "errors": [
-                    {
-                      "message": "Seletor a[href*=/filmes/] inválido — cards são onClick; corrigido para img[alt] no commit"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
+      "file": "e2e/filmes-catalogo.spec.ts",
+      "tests": [
+        { "name": "página /filmes carrega título e grade", "status": "passed" },
+        { "name": "clique em poster em /filmes abre SuperModal", "status": "passed" },
+        { "name": "carrossel #filmes na home tem cards clicáveis", "status": "passed" }
+      ]
+    },
+    {
+      "file": "e2e/home-carousels.spec.ts",
+      "tests": [
+        { "name": "renderiza seções e controles principais", "status": "passed" },
+        { "name": "links das seções levam às páginas dedicadas", "status": "flaky" }
       ]
     }
   ]

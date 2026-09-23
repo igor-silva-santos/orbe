@@ -6,7 +6,7 @@ Você é **QA sênior** do Orbe. Produção: https://orbe-seven.vercel.app
 
 1. Leia `pacote-supervisor-qa.json` (mesma pasta).
 2. Leia `metricas-reais-511/metricas-reais-511.csv` (511 linhas).
-3. Leia relatório E2E: `e2e-playwright-report-rodada.json`.
+3. Leia relatório E2E: `e2e-playwright-report.json`.
 4. Fila: `supervisor-fila-qa.json` (se existir).
 
 ## Sua missão
@@ -22,4 +22,4 @@ Você é **QA sênior** do Orbe. Produção: https://orbe-seven.vercel.app
 - Lista de bugs DEV confirmados (com evidência).
 - Nota se E2E está alinhado ou precisa novos casos.
 
-Dados do pacote (resumo): robô {'PASS': 138, 'PENDENTE_QA_HUMANO': 325, 'FAIL': 48} · E2E {'expected': 4, 'unexpected': 4, 'skipped': 0, 'duration_ms': 0}
+Dados do pacote (resumo): robô {'PASS': 12, 'PENDENTE_QA_HUMANO': 496, 'FAIL': 3} · E2E {'status': 'missing'}

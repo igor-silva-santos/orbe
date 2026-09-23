@@ -1,0 +1,9 @@
+{
+  "dialog": 1,
+  "superModal": 1,
+  "escOk": true,
+  "backdropOk": false,
+  "homeCarouselModal": false,
+  "homeErr": "Locator.click: Element is outside of the viewport\nCall log:\n  - waiting for locator(\"#filmes div.cursor-pointer\").filter(has=locator(\"img\")).first\n    - locator resolved to <div class=\"relative bg-car",
+  "consoleSample": []
+}

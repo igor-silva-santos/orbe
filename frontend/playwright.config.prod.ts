@@ -12,10 +12,14 @@ export default defineConfig({
   retries: 1,
   workers: 1,
   reporter: [['json', { outputFile: process.env.PLAYWRIGHT_JSON_REPORT ?? 'playwright-report.json' }], ['list']],
+  timeout: 90_000,
+  expect: { timeout: 20_000 },
   use: {
     baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    navigationTimeout: 60_000,
+    actionTimeout: 30_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

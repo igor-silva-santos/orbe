@@ -1,44 +1,44 @@
 # Fila supervisor IA — 511 Feliz
 
-Gerado: 2026-09-23T15:02:02Z
+Gerado: 2026-09-23T16:53:30Z
 
 ## Resumo robô
 
-- **FAIL**: 48
-- **PENDENTE_QA_HUMANO**: 325
-- **PASS**: 138
+- **FAIL**: 3
+- **PENDENTE_QA_HUMANO**: 496
+- **PASS**: 12
 
 ## Próximos 30 (maior prioridade)
 
-- `CT-RN-MODAL-001-F` (FAIL) — RN-MODAL-001 — Clique sem modal visível
-- `CT-RN-MODAL-002-F` (FAIL) — RN-MODAL-002 — Clique sem modal visível
-- `CT-RN-MODAL-003-F` (FAIL) — RN-MODAL-003 — Clique sem modal visível
-- `CT-RN-MODAL-004-F` (FAIL) — RN-MODAL-004 — Clique sem modal visível
-- `CT-RN-MODAL-005-F` (FAIL) — RN-MODAL-005 — Clique sem modal visível
-- `CT-RN-MODAL-006-F` (FAIL) — RN-MODAL-006 — Clique sem modal visível
-- `CT-RN-MODAL-007-F` (FAIL) — RN-MODAL-007 — Clique sem modal visível
-- `CT-RN-MODAL-008-F` (FAIL) — RN-MODAL-008 — Clique sem modal visível
-- `CT-RN-MODAL-009-F` (FAIL) — RN-MODAL-009 — Clique sem modal visível
-- `CT-RN-MODAL-010-F` (FAIL) — RN-MODAL-010 — Clique sem modal visível
-- `CT-RN-MODAL-011-F` (FAIL) — RN-MODAL-011 — Clique sem modal visível
-- `CT-RN-MODAL-012-F` (FAIL) — RN-MODAL-012 — Clique sem modal visível
-- `CT-RN-MODAL-013-F` (FAIL) — RN-MODAL-013 — Clique sem modal visível
-- `CT-RN-MODAL-020-F` (FAIL) — RN-MODAL-020 — Clique sem modal visível
-- `CT-RN-MODAL-021-F` (FAIL) — RN-MODAL-021 — Clique sem modal visível
-- `CT-RN-MODAL-022-F` (FAIL) — RN-MODAL-022 — Clique sem modal visível
-- `CT-RN-MODAL-023-F` (FAIL) — RN-MODAL-023 — Clique sem modal visível
-- `CT-RN-MODAL-024-F` (FAIL) — RN-MODAL-024 — Clique sem modal visível
-- `CT-RN-MODAL-025-F` (FAIL) — RN-MODAL-025 — Clique sem modal visível
-- `CT-RN-MODAL-026-F` (FAIL) — RN-MODAL-026 — Clique sem modal visível
-- `CT-RN-MODAL-030-F` (FAIL) — RN-MODAL-030 — Clique sem modal visível
-- `CT-RN-MODAL-031-F` (FAIL) — RN-MODAL-031 — Clique sem modal visível
-- `CT-RN-MODAL-032-F` (FAIL) — RN-MODAL-032 — Clique sem modal visível
-- `CT-RN-MODAL-033-F` (FAIL) — RN-MODAL-033 — Clique sem modal visível
-- `CT-RN-MODAL-040-F` (FAIL) — RN-MODAL-040 — Clique sem modal visível
-- `CT-RN-MODAL-041-F` (FAIL) — RN-MODAL-041 — Clique sem modal visível
-- `CT-RN-MODAL-042-F` (FAIL) — RN-MODAL-042 — Clique sem modal visível
-- `CT-RN-MODAL-043-F` (FAIL) — RN-MODAL-043 — Clique sem modal visível
-- `CT-RN-MODAL-044-F` (FAIL) — RN-MODAL-044 — Clique sem modal visível
-- `CT-RN-MODAL-045-F` (FAIL) — RN-MODAL-045 — Clique sem modal visível
+- `CT-RN-MODAL-001-F` (FAIL) — RN-MODAL-001 — Clique fora não fechou modal
+- `CT-RN-MODAL-007-F` (FAIL) — RN-MODAL-007 — Clique fora não fechou modal
+- `CT-RN-MODAL-013-F` (FAIL) — RN-MODAL-013 — Clique fora não fechou modal
+- `CT-RN-HOME-CARD-009-F` (PENDENTE_QA_HUMANO) — RN-HOME-CARD-009 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CARD-012-F` (PENDENTE_QA_HUMANO) — RN-HOME-CARD-012 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CARD-015-F` (PENDENTE_QA_HUMANO) — RN-HOME-CARD-015 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CON-001-F` (PENDENTE_QA_HUMANO) — RN-HOME-CON-001 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CON-004-F` (PENDENTE_QA_HUMANO) — RN-HOME-CON-004 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CON-008-F` (PENDENTE_QA_HUMANO) — RN-HOME-CON-008 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-CON-009-F` (PENDENTE_QA_HUMANO) — RN-HOME-CON-009 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-SHELL-002-F` (PENDENTE_QA_HUMANO) — RN-HOME-SHELL-002 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-TBD-001-F` (PENDENTE_QA_HUMANO) — RN-HOME-TBD-001 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-TL-001-F` (PENDENTE_QA_HUMANO) — RN-HOME-TL-001 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOME-TL-013-F` (PENDENTE_QA_HUMANO) — RN-HOME-TL-013 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-ANIMES-005-F` (PENDENTE_QA_HUMANO) — RN-ANIMES-005 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-ANIMES-009-F` (PENDENTE_QA_HUMANO) — RN-ANIMES-009 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-ANIMES-016-F` (PENDENTE_QA_HUMANO) — RN-ANIMES-016 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-AUTH-025-F` (PENDENTE_QA_HUMANO) — RN-AUTH-025 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-BUSCA-012-F` (PENDENTE_QA_HUMANO) — RN-BUSCA-012 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-DUB-002-F` (PENDENTE_QA_HUMANO) — RN-DUB-002 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-002-F` (PENDENTE_QA_HUMANO) — RN-HOJE-002 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-011-F` (PENDENTE_QA_HUMANO) — RN-HOJE-011 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-015-F` (PENDENTE_QA_HUMANO) — RN-HOJE-015 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-019-F` (PENDENTE_QA_HUMANO) — RN-HOJE-019 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-021-F` (PENDENTE_QA_HUMANO) — RN-HOJE-021 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-HOJE-022-F` (PENDENTE_QA_HUMANO) — RN-HOJE-022 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-JOGOS-009-F` (PENDENTE_QA_HUMANO) — RN-JOGOS-009 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-JOGOS-019-F` (PENDENTE_QA_HUMANO) — RN-JOGOS-019 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-JOGOS-022-F` (PENDENTE_QA_HUMANO) — RN-JOGOS-022 — Exige título/dado específico no catálogo — QA preenche planilha humana.
+- `CT-RN-LISTA-002-F` (PENDENTE_QA_HUMANO) — RN-LISTA-002 — Exige título/dado específico no catálogo — QA preenche planilha humana.
 
 Lista completa: `supervisor-fila-qa.json`
