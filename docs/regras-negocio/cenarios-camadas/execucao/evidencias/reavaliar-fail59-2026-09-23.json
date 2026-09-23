@@ -1,0 +1,12 @@
+{
+  "gerado_em": "2026-09-23T19:56:20.909010+00:00",
+  "sync_active": true,
+  "validar_sync": "adiado — syncActive ainda true",
+  "api_2027_by_year": 1,
+  "login_smoke": {
+    "login_ok": true,
+    "minha_lista_ok": true,
+    "perfil_smoke": true
+  },
+  "planilha_atualizados": 59
+}
