@@ -31,3 +31,11 @@ python3 docs/regras-negocio/scripts/executar-feliz-excelencia-todos.py
 
 `PENDENTE_QA_HUMANO` → **0** na planilha humana validada pelo TL.  
 `PASS` humano + automatizado = cobertura real; **FAIL** confirmados = bugs reais.
+
+## Supervisor IA (após o robô)
+
+```bash
+python3 docs/regras-negocio/scripts/gerar-fila-supervisor-qa.py
+```
+
+Detalhes: [`QA-SUPERVISOR-IA.md`](./QA-SUPERVISOR-IA.md).
