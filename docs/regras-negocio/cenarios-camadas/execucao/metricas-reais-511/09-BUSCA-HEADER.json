@@ -10,7 +10,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:13Z",
+      "testado_em": "2026-09-23T16:33:45Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -21,7 +21,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:15Z",
+      "testado_em": "2026-09-23T16:33:47Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -32,7 +32,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:18Z",
+      "testado_em": "2026-09-23T16:33:50Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -43,7 +43,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:20Z",
+      "testado_em": "2026-09-23T16:33:53Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -54,7 +54,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:23Z",
+      "testado_em": "2026-09-23T16:33:55Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -65,7 +65,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:25Z",
+      "testado_em": "2026-09-23T16:33:57Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -76,7 +76,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:27Z",
+      "testado_em": "2026-09-23T16:34:00Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -87,7 +87,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:30Z",
+      "testado_em": "2026-09-23T16:34:04Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -98,7 +98,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:32Z",
+      "testado_em": "2026-09-23T16:34:06Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -109,7 +109,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:35Z",
+      "testado_em": "2026-09-23T16:34:09Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -120,7 +120,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:37Z",
+      "testado_em": "2026-09-23T16:34:12Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -131,7 +131,7 @@
       "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
       "passos_executados": 1,
       "tipo_execucao": "catalogo",
-      "testado_em": "2026-09-22T21:18:40Z",
+      "testado_em": "2026-09-23T16:34:14Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -142,7 +142,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:42Z",
+      "testado_em": "2026-09-23T16:34:16Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -153,7 +153,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:44Z",
+      "testado_em": "2026-09-23T16:34:19Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -164,7 +164,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:47Z",
+      "testado_em": "2026-09-23T16:34:21Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -175,7 +175,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:49Z",
+      "testado_em": "2026-09-23T16:34:24Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -186,7 +186,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:52Z",
+      "testado_em": "2026-09-23T16:34:26Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -197,7 +197,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:54Z",
+      "testado_em": "2026-09-23T16:34:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -208,7 +208,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:57Z",
+      "testado_em": "2026-09-23T16:34:31Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -219,7 +219,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:18:59Z",
+      "testado_em": "2026-09-23T16:34:33Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -230,7 +230,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:03Z",
+      "testado_em": "2026-09-23T16:34:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -241,7 +241,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:05Z",
+      "testado_em": "2026-09-23T16:34:38Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -252,7 +252,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:07Z",
+      "testado_em": "2026-09-23T16:34:40Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -263,7 +263,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:10Z",
+      "testado_em": "2026-09-23T16:34:42Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -274,7 +274,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:12Z",
+      "testado_em": "2026-09-23T16:34:45Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -285,7 +285,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:15Z",
+      "testado_em": "2026-09-23T16:34:47Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -296,7 +296,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:17Z",
+      "testado_em": "2026-09-23T16:34:50Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -307,7 +307,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:20Z",
+      "testado_em": "2026-09-23T16:34:52Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -318,7 +318,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:19:22Z",
+      "testado_em": "2026-09-23T16:34:54Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -329,7 +329,7 @@
       "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
       "passos_executados": 2,
       "tipo_execucao": "manual_obrigatorio",
-      "testado_em": "2026-09-22T21:20:53Z",
+      "testado_em": "2026-09-23T16:34:57Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     }
   ]
