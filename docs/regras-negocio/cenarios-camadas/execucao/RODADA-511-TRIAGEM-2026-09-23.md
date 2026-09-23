@@ -25,8 +25,15 @@
 
 `npm run test:e2e:prod` → **5/5** (1 flaky). Ver `e2e-playwright-report-rodada.json`.
 
+## Atualização 16:58 UTC — CSV novo + fila (sem reabrir modais)
+
+- **Master** com `metricas-reais-511.csv` **23/09 15:48–16:20Z**: PASS 12, FAIL **3** (modais: clique-fora no robô), PENDENTE 496.
+- **Modais:** planilha mantém triagem anterior (**48** linhas); **não** reabertos nesta rodada.
+- **Fila:** lote `supervisor-lote-fila-prod.py` — **34** cenários (skip `08-MODAIS.md`) → **220/511** vereditos humanos.
+- **PASS novos:** HOME-003/004, HOJE-001/002, SHELL-002, ANIMES-005, BUSCA-001; demais do lote **BLOQUEADO** (catálogo/título específico).
+
 ## Próximo
 
-1. Reexecutar robô pós-#155 → novo `metricas-reais-511.csv`.
-2. Aguardar `syncActive: false` + validar `validar-sync-anos.py --start 2027 --end 2030`.
-3. Continuar fila `supervisor-fila-qa.json` (325 PENDENTE + restante sem veredito).
+1. Aguardar `syncActive: false` + `validar-sync-anos.py --start 2027 --end 2030`.
+2. Continuar fila (próximo lote 30, skip modais).
+3. Opcional: ajustar robô clique-fora (coordenada backdrop) — **não** reclassificar os 48 FAIL antigos.
