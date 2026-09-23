@@ -10,7 +10,7 @@
       "evidencia": "Clique fora não fechou modal",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:15:21Z",
+      "testado_em": "2026-09-23T18:22:22Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -21,7 +21,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:15:45Z",
+      "testado_em": "2026-09-23T18:22:59Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -32,7 +32,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:16:11Z",
+      "testado_em": "2026-09-23T18:23:34Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -43,7 +43,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:16:35Z",
+      "testado_em": "2026-09-23T18:24:10Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -54,7 +54,7 @@
       "evidencia": "SuperModal abriu e Esc fechou",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:17:01Z",
+      "testado_em": "2026-09-23T18:24:38Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -65,7 +65,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:17:26Z",
+      "testado_em": "2026-09-23T18:25:03Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -76,7 +76,7 @@
       "evidencia": "Clique fora não fechou modal",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:17:51Z",
+      "testado_em": "2026-09-23T18:25:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -87,7 +87,7 @@
       "evidencia": "SuperModal abriu e Esc fechou",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:18:16Z",
+      "testado_em": "2026-09-23T18:25:56Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -98,7 +98,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:18:41Z",
+      "testado_em": "2026-09-23T18:26:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -109,7 +109,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:19:05Z",
+      "testado_em": "2026-09-23T18:27:02Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -120,7 +120,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:19:30Z",
+      "testado_em": "2026-09-23T18:27:40Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -131,7 +131,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:19:53Z",
+      "testado_em": "2026-09-23T18:28:13Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -142,7 +142,7 @@
       "evidencia": "Clique fora não fechou modal",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:20:19Z",
+      "testado_em": "2026-09-23T18:28:49Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -153,7 +153,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:20:43Z",
+      "testado_em": "2026-09-23T18:29:18Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -164,7 +164,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:21:11Z",
+      "testado_em": "2026-09-23T18:29:48Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -175,7 +175,7 @@
       "evidencia": "SuperModal abriu e Esc fechou",
       "passos_executados": 3,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:21:21Z",
+      "testado_em": "2026-09-23T18:29:58Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -186,7 +186,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:21:45Z",
+      "testado_em": "2026-09-23T18:30:31Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -197,7 +197,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:22:11Z",
+      "testado_em": "2026-09-23T18:31:05Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -208,7 +208,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:22:36Z",
+      "testado_em": "2026-09-23T18:31:32Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -219,7 +219,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:23:00Z",
+      "testado_em": "2026-09-23T18:31:57Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -230,7 +230,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:23:26Z",
+      "testado_em": "2026-09-23T18:32:23Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -241,7 +241,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:23:51Z",
+      "testado_em": "2026-09-23T18:32:59Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -252,7 +252,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:24:15Z",
+      "testado_em": "2026-09-23T18:33:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -263,7 +263,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:24:40Z",
+      "testado_em": "2026-09-23T18:34:07Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -274,7 +274,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:25:05Z",
+      "testado_em": "2026-09-23T18:34:41Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -285,7 +285,7 @@
       "evidencia": "SuperModal abriu e Esc fechou",
       "passos_executados": 4,
       "tipo_execucao": "passo_a_passo",
-      "testado_em": "2026-09-23T16:25:30Z",
+      "testado_em": "2026-09-23T18:35:20Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -296,7 +296,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:25:54Z",
+      "testado_em": "2026-09-23T18:35:52Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -307,7 +307,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:26:19Z",
+      "testado_em": "2026-09-23T18:36:18Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -318,7 +318,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:26:43Z",
+      "testado_em": "2026-09-23T18:36:52Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -329,7 +329,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:27:10Z",
+      "testado_em": "2026-09-23T18:37:28Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -340,7 +340,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:27:35Z",
+      "testado_em": "2026-09-23T18:38:02Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -351,7 +351,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:27:58Z",
+      "testado_em": "2026-09-23T18:38:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -362,7 +362,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:28:23Z",
+      "testado_em": "2026-09-23T18:39:07Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -373,7 +373,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:28:47Z",
+      "testado_em": "2026-09-23T18:39:42Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -384,7 +384,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 3,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:28:56Z",
+      "testado_em": "2026-09-23T18:39:53Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -395,7 +395,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:29:20Z",
+      "testado_em": "2026-09-23T18:40:26Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -406,7 +406,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:29:44Z",
+      "testado_em": "2026-09-23T18:41:00Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -417,7 +417,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 3,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:29:52Z",
+      "testado_em": "2026-09-23T18:41:14Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -428,7 +428,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 3,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:30:01Z",
+      "testado_em": "2026-09-23T18:41:25Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -439,7 +439,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:30:26Z",
+      "testado_em": "2026-09-23T18:42:02Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -450,7 +450,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:30:50Z",
+      "testado_em": "2026-09-23T18:42:35Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -461,7 +461,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:31:15Z",
+      "testado_em": "2026-09-23T18:43:02Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -472,7 +472,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:31:40Z",
+      "testado_em": "2026-09-23T18:43:39Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -483,7 +483,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:32:05Z",
+      "testado_em": "2026-09-23T18:44:15Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -494,7 +494,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:32:30Z",
+      "testado_em": "2026-09-23T18:44:42Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -505,7 +505,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:32:54Z",
+      "testado_em": "2026-09-23T18:45:08Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -516,7 +516,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:33:18Z",
+      "testado_em": "2026-09-23T18:45:40Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     },
     {
@@ -527,7 +527,7 @@
       "evidencia": "SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.",
       "passos_executados": 4,
       "tipo_execucao": "modal_parcial",
-      "testado_em": "2026-09-23T16:33:43Z",
+      "testado_em": "2026-09-23T18:46:16Z",
       "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
     }
   ]

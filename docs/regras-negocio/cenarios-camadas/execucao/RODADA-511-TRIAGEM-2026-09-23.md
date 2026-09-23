@@ -25,6 +25,15 @@
 
 `npm run test:e2e:prod` → **5/5** (1 flaky). Ver `e2e-playwright-report-rodada.json`.
 
+## Atualização 19:05 UTC — merge PR #160 + rodada teste
+
+- **Merge:** PR #160 → `master` (desbloqueio + scripts supervisor).
+- **E2E prod:** 5/5 passed (`npm run test:e2e:prod`), sem flaky nesta execução.
+- **Robô 511:** reexecutado com `QA_AUTO_REGISTER=1` (~19:00Z) → PASS 12, PENDENTE 496, FAIL 3 (modais clique-fora — falso positivo; planilha humana mantém PASS nos modais triados).
+- **Planilha humana:** 452 PASS / 59 FAIL / 0 BLOQUEADO (inalterada nesta rodada).
+- **Sync:** ainda `syncActive: true`; `validar-sync-anos` → 2027 OK (1), 2028–2030 FAIL (0).
+- Artefatos: `metricas-reais-511.csv` atualizado, `e2e-playwright-report-rodada.json`, fila/pacote supervisor regenerados.
+
 ## Atualização 17:42 UTC — desbloqueio supervisor (476 BLOQUEADOS)
 
 - Script: `supervisor-desbloquear-bloqueados.py`
