@@ -1,13 +1,13 @@
 {
-  "rodada": "2026-09-23T16:46Z",
+  "rodada": "2026-09-23T19:05Z",
   "ambiente": "https://orbe-seven.vercel.app",
   "comando": "cd frontend && npm run test:e2e:prod",
-  "nota": "Pós-merge #155/#156. 5 specs; 1 flaky (crash GPU headless-shell no teste de links home, passou no retry).",
+  "nota": "Pós-merge PR #160 (desbloqueio supervisor). Master em prod.",
   "stats": {
     "total": 5,
     "passed": 5,
     "failed": 0,
-    "flaky": 1,
+    "flaky": 0,
     "skipped": 0
   },
   "specs": [
@@ -23,8 +23,15 @@
       "file": "e2e/home-carousels.spec.ts",
       "tests": [
         { "name": "renderiza seções e controles principais", "status": "passed" },
-        { "name": "links das seções levam às páginas dedicadas", "status": "flaky" }
+        { "name": "links das seções levam às páginas dedicadas", "status": "passed" }
       ]
     }
-  ]
+  ],
+  "robo_511": {
+    "rodada": "2026-09-23T19:00Z",
+    "QA_AUTO_REGISTER": true,
+    "contagem": { "PASS": 12, "PENDENTE_QA_HUMANO": 496, "FAIL": 3 },
+    "fail_ids": ["CT-RN-MODAL-001-F", "CT-RN-MODAL-007-F", "CT-RN-MODAL-013-F"],
+    "fail_evidencia": "Clique fora não fechou modal (coordenada robô; supervisor PASS na planilha)"
+  }
 }
