@@ -25,6 +25,15 @@
 
 `npm run test:e2e:prod` → **5/5** (1 flaky). Ver `e2e-playwright-report-rodada.json`.
 
+## Atualização 17:42 UTC — desbloqueio supervisor (476 BLOQUEADOS)
+
+- Script: `supervisor-desbloquear-bloqueados.py`
+- **0 BLOQUEADO** restantes na planilha.
+- **417 PASS** + **59 FAIL** (desbloqueados) + **35 PASS** já existentes ≈ **452 PASS / 59 FAIL / 511 total**.
+- FAIL concentrado: **AUTH/LISTA** (exige sessão QA) e regras **2027** com API `by-year=1` (< meta PO 3).
+- Evidência agregada: `evidencias/desbloqueio-supervisor-2026-09-23.json`
+- Robô 511 reexecutando em background (`QA_AUTO_REGISTER=1`) para refresh de métricas — não altera veredito modais 22/09.
+
 ## Atualização 17:40 UTC — lotes smoke (`--limit 60 --rounds 10`)
 
 - Script prioriza **HEADER/BUSCA/HOJE/SHELL/HERO**; **exclui** CARD/CON/TBD/TL da fila automática.
