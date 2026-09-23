@@ -10,7 +10,7 @@ import { broadcast } from './websocket';
 import { isMovieRelevantForSync, hasPortugueseLocalization, isConcertOrLiveRecording } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { detectMovieBrLocalization, getBrOverviewFromTranslations, type TmdbTranslationEntry } from './tmdbBrLocalization';
-import { isOpenPeriod } from './syncDateHelpers';
+import { isFuturePeriodStart, isOpenPeriod } from './syncDateHelpers';
 import { resolveTmdbRelease, isYearWithinRange } from './yearOnlyRelease';
 import type { SyncContentOptions } from './syncOptions';
 import { resolveSyncContentOptions } from './syncOptions';
@@ -311,6 +311,40 @@ async function fetchMovieIdsForPeriod(startDate: string, endDate: string): Promi
     logger.info(`  upcoming: total acumulado ${movieIds.size} IDs`);
   }
 
+  if (isFuturePeriodStart(startDate)) {
+    logger.info('Período futuro — discover global (primary_release) além do filtro BR...');
+    const futurePasses = [
+      {
+        label: 'primary_release global asc',
+        params: {
+          'primary_release_date.gte': startDate,
+          'primary_release_date.lte': endDate,
+          sort_by: 'primary_release_date.asc',
+          without_genres: '104',
+        },
+        pages: 35,
+      },
+      {
+        label: 'popularidade global',
+        params: {
+          'primary_release_date.gte': startDate,
+          'primary_release_date.lte': endDate,
+          sort_by: 'popularity.desc',
+          'vote_count.gte': 1,
+          without_genres: '104',
+        },
+        pages: 25,
+      },
+    ];
+    for (const pass of futurePasses) {
+      const ids = await fetchIdsFromDiscover(pass.params, pass.pages);
+      logger.info(`  discover ${pass.label}: +${ids.length} IDs (${movieIds.size} acumulados antes)`);
+      for (const id of ids) {
+        movieIds.add(id);
+      }
+    }
+  }
+
   logger.info(`Total de ${movieIds.size} IDs de filmes encontrados para o período.`);
   return Array.from(movieIds);
 }
@@ -399,6 +433,9 @@ async function processMovieBatch(
       const flags = sourceFlags.get(id) ?? {};
       const disponibilidade = parseFilmeTmdbDisponibilidade(movieDetails);
       const periodOpen = period ? isOpenPeriod(period.end.toISOString().split('T')[0]) : false;
+      const futurePeriod = period
+        ? isFuturePeriodStart(period.start.toISOString().split('T')[0])
+        : false;
       const isCinemaCurated =
         periodOpen && (flags.emCartaz || flags.emBreve) && disponibilidade.estreiaCinema;
 
@@ -423,7 +460,10 @@ async function processMovieBatch(
         continue;
       }
 
-      if (!isCinemaCurated && !isMovieRelevantForSync(movieDetails)) {
+      const passesQuality =
+        isMovieRelevantForSync(movieDetails)
+        || (futurePeriod && !movieDetails.adult && !isConcertOrLiveRecording(movieDetails));
+      if (!isCinemaCurated && !passesQuality) {
         bumpSkip('quality_filter', { id, title: movieDetails.title, year: eventYear, month: eventMonth });
         logger.info(
           `⏭️ Filme [${id}] "${movieDetails.title}" ignorado: critérios de sync ` +

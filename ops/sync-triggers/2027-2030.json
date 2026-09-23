@@ -3,5 +3,6 @@
   "end_year": 2030,
   "force_first_year": true,
   "requested_by": "PO sync carrossel 2027-2030",
-  "requested_at": "2026-09-23T11:30:00Z"
+  "requested_at": "2026-09-23T15:38:00Z",
+  "note": "Re-disparo pós-merge #155 + API discover futuro; aguarda syncActive=false no job"
 }
