@@ -1,0 +1,105 @@
+name: Sync catálogo por ano (filmes)
+
+# Sincroniza UM ano de filmes (TMDB discover) na API Render.
+# Use para backfill 2025→2030 **um ano por vez**, validar em prod e repetir.
+#
+# Secrets: ORBE_API_URL, SYNC_SECRET (Settings → Secrets → Actions)
+# Depois do sync: rode "Invalidar Cache API" se o carrossel ainda servir payload antigo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Ano (ex. 2025 … 2030)
+        required: true
+        default: '2025'
+        type: string
+      anime_same_year:
+        description: Usar o mesmo ano para animes (startYear/endYear)
+        required: false
+        default: true
+        type: boolean
+      force_restart:
+        description: Apagar checkpoint e forçar sync_all deste ano (cuidado)
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync-year:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acordar API
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          for i in $(seq 1 12); do
+            if curl -sf "${API_BASE}/api/health" >/dev/null; then
+              echo "API online."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::API não respondeu."
+          exit 1
+
+      - name: Sync filmes do ano
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          YEAR="${{ inputs.year }}"
+          START="${YEAR}-01-01"
+          END="${YEAR}-12-31"
+          if [ "${{ inputs.anime_same_year }}" = "true" ]; then
+            A_START="${YEAR}"
+            A_END="${YEAR}"
+          else
+            A_START="2026"
+            A_END="2026"
+          fi
+
+          FORCE_JSON=""
+          if [ "${{ inputs.force_restart }}" = "true" ]; then
+            FORCE_JSON=",\"force\":true"
+          fi
+
+          echo "▶ Sync ${START} → ${END} (animes ${A_START}-${A_END})"
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
+            -H "x-sync-secret: ${SYNC_SECRET}" \
+            -H "Content-Type: application/json" \
+            -d "{\"startDate\":\"${START}\",\"endDate\":\"${END}\",\"startYear\":${A_START},\"endYear\":${A_END}${FORCE_JSON}}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          echo "HTTP ${HTTP_CODE}"
+          echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            exit 1
+          fi
+
+      - name: Keep-alive até sync terminar
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          for i in $(seq 1 12); do
+            STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+            ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+            [ "$ACTIVE" = "True" ] && break
+            sleep 5
+          done
+          if [ "$ACTIVE" != "True" ]; then
+            echo "::warning::sync não ficou active — verifique logs da API"
+            exit 0
+          fi
+          for i in $(seq 1 48); do
+            sleep 600
+            curl -sf "${API_BASE}/api/health" >/dev/null || true
+            STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+            ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+            echo "[$(date -u +%H:%M:%S)] keep-alive #${i} active=${ACTIVE}"
+            [ "$ACTIVE" != "True" ] && exit 0
+          done

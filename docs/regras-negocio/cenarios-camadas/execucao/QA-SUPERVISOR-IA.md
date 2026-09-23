@@ -96,7 +96,16 @@ Não aceite 128 PASS do runner antigo como meta; meta = 511 vereditos humanos/IA
 
 ---
 
-## 7. Relação com outros docs
+## 7. Console do navegador (obrigatório)
+
+O PO reportou títulos em `/filmes` com posters quebrados e ruído de WebSocket — o supervisor **deve** triar o console antes de concluir FAIL de carrossel.
+
+Guia: **[`QA-CONSOLE-TRIAGEM.md`](./QA-CONSOLE-TRIAGEM.md)**  
+Script lista vs home: `python3 docs/regras-negocio/scripts/auditar-filmes-vs-carrossel.py`
+
+---
+
+## 8. Relação com outros docs
 
 - Meta PO: [`QA-META-511-EXCELENCIA.md`](./QA-META-511-EXCELENCIA.md)
 - Métricas robô: [`METRICAS-REAIS-LEIA-ME.md`](./METRICAS-REAIS-LEIA-ME.md)

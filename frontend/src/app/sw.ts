@@ -17,9 +17,20 @@ const isDynamicCatalogApi = ({ sameOrigin, url }: { sameOrigin: boolean; url: UR
   (url.pathname === '/api/home' ||
     /^\/api\/(filmes|series|animes|jogos)\/(by-month|by-season)/.test(url.pathname));
 
+/** Posters/logos de CDN — cache do SW gerava `no-response` quando TMDB falhava/timeout. */
+const isMediaCdnImage = ({ url }: { url: URL }) =>
+  url.hostname === 'image.tmdb.org' ||
+  url.hostname === 's4.anilist.co' ||
+  url.hostname === 'images.igdb.com';
+
 const runtimeCaching = [
   {
     matcher: isDynamicCatalogApi,
+    method: 'GET' as const,
+    handler: new NetworkOnly(),
+  },
+  {
+    matcher: isMediaCdnImage,
     method: 'GET' as const,
     handler: new NetworkOnly(),
   },
