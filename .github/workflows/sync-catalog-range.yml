@@ -1,0 +1,139 @@
+name: Sync catálogo intervalo de anos
+
+# Dispara sync sequencial (ex. 2027→2030) com secrets do GitHub.
+# Também roda ao commitar em ops/sync-triggers/*.json (agente/PO sem gh workflow run).
+
+on:
+  push:
+    paths:
+      - 'ops/sync-triggers/**'
+  workflow_dispatch:
+    inputs:
+      start_year:
+        description: Ano inicial
+        required: true
+        default: '2027'
+      end_year:
+        description: Ano final (inclusivo)
+        required: true
+        default: '2030'
+      force_first_year:
+        description: force:true no 1º ano (limpa checkpoint interrompido)
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  sync-range:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ler parâmetros do trigger (push) ou inputs
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            FILE=$(ls ops/sync-triggers/*.json 2>/dev/null | tail -1)
+            if [ -z "$FILE" ]; then
+              echo "::error::Nenhum ops/sync-triggers/*.json"
+              exit 1
+            fi
+            echo "Usando $FILE"
+            START=$(python3 -c "import json; print(json.load(open('$FILE'))['start_year'])")
+            END=$(python3 -c "import json; print(json.load(open('$FILE'))['end_year'])")
+            FORCE=$(python3 -c "import json; d=json.load(open('$FILE')); print('true' if d.get('force_first_year', True) else 'false')")
+          else
+            START="${{ inputs.start_year }}"
+            END="${{ inputs.end_year }}"
+            FORCE="${{ inputs.force_first_year }}"
+          fi
+          echo "start_year=$START" >> "$GITHUB_OUTPUT"
+          echo "end_year=$END" >> "$GITHUB_OUTPUT"
+          echo "force_first=$FORCE" >> "$GITHUB_OUTPUT"
+
+      - name: Acordar API
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          for i in $(seq 1 12); do
+            curl -sf "${API_BASE}/api/health" >/dev/null && exit 0
+            sleep 10
+          done
+          exit 1
+
+      - name: Sync anos ${{ steps.params.outputs.start_year }}–${{ steps.params.outputs.end_year }}
+        env:
+          API_URL: ${{ secrets.ORBE_API_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+          START_YEAR: ${{ steps.params.outputs.start_year }}
+          END_YEAR: ${{ steps.params.outputs.end_year }}
+          FORCE_FIRST: ${{ steps.params.outputs.force_first }}
+        run: |
+          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          FIRST=1
+          for YEAR in $(seq "$START_YEAR" "$END_YEAR"); do
+            FORCE_JSON=""
+            if [ "$FIRST" = "1" ] && [ "$FORCE_FIRST" = "true" ]; then
+              FORCE_JSON=",\"force\":true"
+            fi
+            FIRST=0
+            echo "======== Sync ano ${YEAR} ========"
+            RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
+              -H "x-sync-secret: ${SYNC_SECRET}" \
+              -H "Content-Type: application/json" \
+              -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR}${FORCE_JSON}}")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+            echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+            if [ "$HTTP_CODE" = "409" ]; then
+              echo "Checkpoint — tentando com force:true"
+              RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
+                -H "x-sync-secret: ${SYNC_SECRET}" \
+                -H "Content-Type: application/json" \
+                -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR},\"force\":true}")
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              BODY=$(echo "$RESPONSE" | sed '$d')
+              echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+            fi
+            if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+              echo "::error::Falha HTTP ${HTTP_CODE} no ano ${YEAR}"
+              exit 1
+            fi
+
+            echo "Aguardando syncActive..."
+            ACTIVE=False
+            for i in $(seq 1 24); do
+              sleep 10
+              STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+              ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+              [ "$ACTIVE" = "True" ] && break
+            done
+            if [ "$ACTIVE" != "True" ]; then
+              echo "::warning::sync não ficou active para ${YEAR}"
+              continue
+            fi
+
+            for i in $(seq 1 48); do
+              sleep 600
+              curl -sf "${API_BASE}/api/health" >/dev/null || true
+              STATUS=$(curl -sf "${API_BASE}/api/sync/status" || echo '{}')
+              ACTIVE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('syncActive', False))" 2>/dev/null || echo False)
+              PHASE=$(echo "$STATUS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('phase') or '-')" 2>/dev/null || echo -)
+              echo "[$(date -u +%H:%M:%S)] ${YEAR} keep-alive #${i} active=${ACTIVE} phase=${PHASE}"
+              [ "$ACTIVE" != "True" ] && break
+            done
+          done
+
+      - name: Smoke API por ano (produção)
+        env:
+          START_YEAR: ${{ steps.params.outputs.start_year }}
+          END_YEAR: ${{ steps.params.outputs.end_year }}
+        run: |
+          API_BASE="https://orbe-seven.vercel.app"
+          for YEAR in $(seq "$START_YEAR" "$END_YEAR"); do
+            COUNT=$(curl -sf "${API_BASE}/api/filmes/by-year?year=${YEAR}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)")
+            TBD=$(curl -sf "${API_BASE}/api/filmes/year-tbd?year=${YEAR}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)")
+            echo "by-year ${YEAR}: ${COUNT} | year-tbd: ${TBD}"
+          done
