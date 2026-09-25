@@ -5,7 +5,7 @@ import {
   mapAnimeToMidia,
   mapJogoToMidia,
 } from './mappers';
-import { cardListInclude, animeCarouselInclude } from './routes/mediaRoutesHelpers';
+import { cardListInclude, animeCarouselInclude, serieCardListInclude } from './routes/mediaRoutesHelpers';
 
 const jogoListInclude = {
   genres: { include: { genero: true } },
@@ -76,7 +76,7 @@ export async function getUserListaEnriched(
     idsByType.serie.size
       ? prisma.serie.findMany({
           where: { tmdbId: { in: [...idsByType.serie] } },
-          include: cardListInclude,
+          include: serieCardListInclude,
         })
       : [],
     idsByType.anime.size

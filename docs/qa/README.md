@@ -14,7 +14,8 @@ Simular um usuário percorrendo **rotas, abas, modais, carrosséis e header**, r
 
 ```bash
 cd frontend
-npm run test:e2e:explore
+npm run test:e2e:explore   # jornadas (modais, carrosséis, abas)
+npm run test:e2e:routes    # HTTP de cada rota catalogada + API pública
 ```
 
 Variável opcional: `PLAYWRIGHT_BASE_URL` (padrão: `https://orbe-seven.vercel.app`).
@@ -23,8 +24,10 @@ Variável opcional: `PLAYWRIGHT_BASE_URL` (padrão: `https://orbe-seven.vercel.a
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| `docs/qa/exploracao-orbe-latest.json` | Relatório completo por área |
-| `docs/qa/exploracao-orbe-latest.md` | Resumo legível |
+| `docs/qa/mapa-orbe-rotas.md` | **Mapa** UI + API + modais (onde validar) |
+| `docs/qa/validacao-rotas-latest.json` | Status HTTP por rota |
+| `docs/qa/exploracao-orbe-latest.json` | Console/rede/interações |
+| `docs/qa/exploracao-orbe-latest.md` | Resumo explorador |
 
 ## Áreas (sequenciais — contexto único)
 
@@ -45,4 +48,5 @@ O explorer **não substitui** QA humano nem os 511 casos; complementa com varred
 
 ## Inventário de rotas
 
-Ver subpastas em `frontend/src/app/**/page.tsx` (33 páginas + redirects). Detalhe de modais: `frontend/src/components/modals/`.
+**Mapa completo:** `docs/qa/mapa-orbe-rotas.md`  
+**Catálogo Playwright:** `frontend/e2e/explorer/route-manifest.ts` (40+ URLs UI + padrões dinâmicos + 30+ GET API smoke; ~85 GET no Express no total).
