@@ -100,6 +100,8 @@ Se o job passar de **6 horas**, o workflow falha mas o **checkpoint no banco** p
 
 ## 5. Passo a passo — Cloudflare Tunnel + Docker (UI simples)
 
+> **Cursor + MCP:** para configurar os servidores MCP oficiais da Cloudflare no Cursor (OAuth no seu navegador) e alinhar com o [prompt de agent setup](https://developers.cloudflare.com/agent-setup/prompt.md), veja [`CLOUDFLARE-AGENT-SETUP.md`](CLOUDFLARE-AGENT-SETUP.md). Isso **complementa** o tunnel abaixo; o `cloudflared` continua rodando no **seu PC**, não na VM do Cloud Agent.
+
 ### 5.1 Cloudflare (sem cartão)
 
 1. Crie conta em [dash.cloudflare.com](https://dash.cloudflare.com/sign-up).
@@ -182,6 +184,7 @@ Se no futuro você aceitar verificação com cartão na Oracle, o guia [`MIGRAR-
 
 ## 8. Referências
 
+- Agent setup Cloudflare (MCP + skills): [`CLOUDFLARE-AGENT-SETUP.md`](CLOUDFLARE-AGENT-SETUP.md) · [prompt oficial](https://developers.cloudflare.com/agent-setup/prompt.md)
 - Infra Vercel ↔ API: [`INFRA-VERCEL-RENDER-REDE.md`](INFRA-VERCEL-RENDER-REDE.md)
 - Egress Render (legado): [`RENDER-RECUPERAR-BANDA.md`](RENDER-RECUPERAR-BANDA.md)
 - Env produção: [`PRODUCAO.md`](PRODUCAO.md)
