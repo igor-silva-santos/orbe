@@ -1,4 +1,5 @@
 import { logger } from './logger';
+import { isSyncKeepAliveEnabled } from './renderEgressConfig';
 
 /** Render free hiberna após ~15 min sem HTTP — ping a cada 10 min durante sync */
 const DEFAULT_INTERVAL_MS = 10 * 60 * 1000;
@@ -33,6 +34,10 @@ async function ping(): Promise<void> {
 
 /** Inicia pings periódicos enquanto o sync estiver ativo neste processo */
 export function startSyncKeepAlive(): void {
+  if (!isSyncKeepAliveEnabled()) {
+    logger.info('[sync-keepalive] Desabilitado (DISABLE_SYNC_KEEPALIVE).');
+    return;
+  }
   if (active) return;
   active = true;
 

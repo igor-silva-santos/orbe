@@ -47,6 +47,17 @@ services:
         sync: false
       - key: GITHUB_ACTIONS_READ_TOKEN
         sync: false
+      # --- Egress Render free (~5 GB/mês) — ver docs/RENDER-RECUPERAR-BANDA.md ---
+      - key: ORBE_EGRESS_SAVER
+        value: "true"
+      - key: SYNC_SKIP_DETETIVE_PHASE
+        value: "true"
+      - key: DISABLE_DETETIVE_CRON
+        value: "true"
+      - key: DISABLE_BACKFILL_STEP
+        value: "true"
+      - key: DEALS_CRON_SCHEDULE
+        value: "*/15 * * * *"
 
   # Front Next.js — alternativa quando Vercel Hobby estoura banda (mesma conta Render).
   - type: web

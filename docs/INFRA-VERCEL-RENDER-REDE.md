@@ -61,6 +61,8 @@ Variáveis obrigatórias em qualquer host de front:
 
 ## 2. Render — API (e front opcional)
 
+**Egress free (5 GB/mês):** não existe “limpar banda” no painel — só reset do ciclo + **Resume** + evitar novo pico. Passo a passo: [`RENDER-RECUPERAR-BANDA.md`](RENDER-RECUPERAR-BANDA.md).
+
 **Importante:** o repo usa `render.yaml` com serviço **`orbe-api`**. A URL antiga `orbe-7bu0.onrender.com` pode estar **suspensa** enquanto um serviço novo (`orbe-api.onrender.com`) responde outra coisa. No dashboard, copie o **hostname real** do Web Service **Live** e atualize:
 
 - Vercel: `API_PROXY_ORIGIN`
@@ -83,7 +85,7 @@ Se vier HTML *Service Suspended*: conta Render suspensa (pagamento/plano) — re
 
 3. Na **Vercel** (ou novo host do front), conferir que `API_PROXY_ORIGIN` aponta para **esse** hostname (ex.: `orbe-7bu0.onrender.com`).
 
-4. **Keep-alive:** workflow `.github/workflows/keep-alive.yml` deve estar verde (evita cold start; não substitui serviço suspenso).
+4. **Keep-alive:** workflow `.github/workflows/keep-alive.yml` só roda se `ORBE_KEEP_ALIVE_ENABLED=true` (repo variable) — evita ping 24/7 no free tier. Durante sync longo, os workflows de sync fazem ping próprio.
 
 ---
 
@@ -118,4 +120,4 @@ Regra prática: olhe **Network** → requisição para **mesma origem** `/api/..
 - Com API no Render suspensa, mesmo efeito.
 - Com infra ok, o código na `master` (SW, proxy `auth/me`, poll de sync) trata o restante; rede corporativa pode deixar **alguns** avisos que não impedem uso.
 
-Ver também: `docs/SOLUCAO-CONSOLE-E-SYNC.md`, `docs/INFRA-SYNC-QA.md`.
+Ver também: `docs/SOLUCAO-CONSOLE-E-SYNC.md`, `docs/INFRA-SYNC-QA.md`, `docs/RENDER-RECUPERAR-BANDA.md`, `docs/MIGRAR-API-SEM-CARTAO.md` (API fora do Render sem cartão).
