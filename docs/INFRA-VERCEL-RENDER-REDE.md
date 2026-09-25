@@ -120,4 +120,4 @@ Regra prática: olhe **Network** → requisição para **mesma origem** `/api/..
 - Com API no Render suspensa, mesmo efeito.
 - Com infra ok, o código na `master` (SW, proxy `auth/me`, poll de sync) trata o restante; rede corporativa pode deixar **alguns** avisos que não impedem uso.
 
-Ver também: `docs/SOLUCAO-CONSOLE-E-SYNC.md`, `docs/INFRA-SYNC-QA.md`.
+Ver também: `docs/SOLUCAO-CONSOLE-E-SYNC.md`, `docs/INFRA-SYNC-QA.md`, `docs/RENDER-RECUPERAR-BANDA.md`, `docs/MIGRAR-API-SEM-CARTAO.md` (API fora do Render sem cartão).
