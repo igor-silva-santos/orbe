@@ -11,6 +11,8 @@ const nextConfig = {
   // Sem isso o Next nunca gera essa pasta e o build da imagem falha no COPY.
   output: 'standalone',
   images: {
+    // Hobby Vercel: /_next/image consome banda do workspace; posters já vêm de CDN (TMDB/IGDB).
+    unoptimized: true,
     minimumCacheTTL: 86400,
     remotePatterns: [
       {
