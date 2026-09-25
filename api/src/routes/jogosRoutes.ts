@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapJogoToMidia, mapJogoToCarouselCard } from '../mappers';
+import {
+  buildCatalogMultiplayerFallback,
+  buildGameRecommendations,
+} from '../jogosRecomendacoesService';
 import { fetchDeveloperGamesFromIgdb, fetchIgdbCompanyBrief, fetchJogoDetailsLive } from '../externalDetails';
 import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents, isPlausibleSteamDiscountPercent } from '../steamClient';
 import { jogoQualityFilter } from '../qualityFilters';
@@ -574,6 +578,27 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) =>
   } catch (error) {
     logger.error(`Erro ao buscar jogos em alta: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos em alta.' });
+  }
+});
+
+const SIX_HOURS = 6 * 60 * 60;
+
+/** Recomendações diárias: demos e acesso antecipado (Steam), foco multijogador. */
+router.get('/jogos/recomendacoes', cacheMiddleware(SIX_HOURS), async (_req, res) => {
+  try {
+    let payload = await buildGameRecommendations();
+    if (payload.demos.length === 0 && payload.earlyAccess.length === 0) {
+      const fallback = await buildCatalogMultiplayerFallback();
+      payload = {
+        ...payload,
+        highlights: fallback,
+        source: 'steam+orbe',
+      };
+    }
+    res.json(payload);
+  } catch (error) {
+    logger.error(`Erro em /jogos/recomendacoes: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar recomendações de jogos.' });
   }
 });
 

@@ -14,11 +14,13 @@ import {
   TrendingUp,
   AlertTriangle,
   Gamepad2,
+  Lightbulb,
 } from 'lucide-react';
 import realApi from '@/data/realApi';
 import DealCard from '@/components/deals/DealCard';
 import HorizontalDealsRow from '@/components/deals/HorizontalDealsRow';
 import JogosEmAltaContent from '@/components/jogos/JogosEmAltaContent';
+import JogosRecomendacoesContent from '@/components/jogos/JogosRecomendacoesContent';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -312,7 +314,7 @@ function SourceFooter({
   );
 }
 
-type PromocoesTab = 'gratis' | 'promocoes' | 'em-alta';
+type PromocoesTab = 'gratis' | 'promocoes' | 'em-alta' | 'recomendacoes';
 
 type PromocoesClientProps = {
   initialTab?: PromocoesTab;
@@ -352,7 +354,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   }, []);
 
   const loadActiveTab = useCallback(async (silent = false, tab: PromocoesTab) => {
-    if (tab === 'em-alta') {
+    if (tab === 'em-alta' || tab === 'recomendacoes') {
       setIsLoading(false);
       setIsRefreshing(false);
       return;
@@ -383,7 +385,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     setActiveTab(tab);
     if (tab === 'gratis' && !gratisData) void loadGratis();
     if (tab === 'promocoes' && !promoData) void loadPromocoes(1, false);
-    if (tab === 'em-alta') setIsLoading(false);
+    if (tab === 'em-alta' || tab === 'recomendacoes') setIsLoading(false);
   };
 
   const handleLoadMorePromos = async () => {
@@ -575,7 +577,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
       </section>
 
       <main className="container mx-auto px-4 py-8 md:py-10">
-        {isLoading && activeTab !== 'em-alta' ? (
+        {isLoading && activeTab !== 'em-alta' && activeTab !== 'recomendacoes' ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 justify-items-center">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="w-full max-w-[210px] aspect-[206/290] rounded-[20px] bg-skeleton orbe-shimmer" />
@@ -618,6 +620,10 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
               <TabsTrigger value="em-alta" className="gap-2 px-4 py-2">
                 <Gamepad2 className="h-4 w-4" />
                 Em Alta
+              </TabsTrigger>
+              <TabsTrigger value="recomendacoes" className="gap-2 px-4 py-2">
+                <Lightbulb className="h-4 w-4" />
+                Recomendações
               </TabsTrigger>
             </TabsList>
 
@@ -841,6 +847,10 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
 
             <TabsContent value="em-alta" className="space-y-6 mt-0">
               <JogosEmAltaContent showPromocoesBanner compact />
+            </TabsContent>
+
+            <TabsContent value="recomendacoes" className="space-y-6 mt-0">
+              <JogosRecomendacoesContent />
             </TabsContent>
           </Tabs>
         )}
