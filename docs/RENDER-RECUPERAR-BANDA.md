@@ -17,14 +17,32 @@ No Render **não há** botão “limpar banda”, “zerar egress” ou “reset
 
 ---
 
+## Onde ver o **ciclo** (reset da banda)
+
+No Render o contador de **Included Bandwidth** é **mensal por calendário**: zera no **dia 1 de cada mês** (horário UTC do painel). Não há botão de reset no meio do mês.
+
+**Caminho no painel (igual à sua tela “Monthly Included Usage”):**
+
+1. [dashboard.render.com](https://dashboard.render.com) → selecione o **workspace** (canto superior esquerdo, ex. Hobby).
+2. Menu lateral → **Billing** (ícone de cartão / fatura).
+3. Role até **Monthly Included Usage** — é aí que aparecem **Included Bandwidth** (5 GB no Hobby), **Free Instance Hours**, etc.
+
+O Render **não costuma mostrar** uma linha tipo “renova em 03/10/2026” nessa página; a regra oficial é **início do mês**. Se hoje é 25/09 e você está em **5,77 GB / 5 GB**, o contador volta a **0 GB** quando virar **01/10** (e aí você pode **Resume** o serviço, se ainda estiver suspenso).
+
+Uso por serviço (gráfico de egress): abra o Web Service → aba **Metrics** → gráfico **Outbound Bandwidth**.
+
+Documentação: [Outbound bandwidth](https://render.com/docs/outbound-bandwidth), [Free tier](https://render.com/docs/free).
+
+---
+
 ## Passo a passo na UI Render (sem API key)
 
 ### 1. Confirmar suspensão e uso
 
 1. Acesse [dashboard.render.com](https://dashboard.render.com).
-2. **Account** (ou workspace) → **Billing** / **Usage**.
-3. Verifique **Outbound bandwidth** (egress): se ≥ 5 GB no ciclo free, o serviço pode ser suspenso.
-4. Anote a data de **renovação do ciclo** (próximo reset).
+2. Workspace → **Billing** → **Monthly Included Usage** (bandwidth, instance hours).
+3. Verifique **Included Bandwidth**: se ≥ 5 GB no ciclo atual, serviços free ficam suspensos até o **próximo dia 1** (sem cartão) ou até pagar o excedente.
+4. Próximo reset: **primeiro dia do mês seguinte** (ver seção acima).
 
 ### 2. Serviço suspenso → Resume
 

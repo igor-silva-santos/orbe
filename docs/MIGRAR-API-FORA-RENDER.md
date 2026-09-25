@@ -2,8 +2,6 @@
 
 Guia operacional para hospedar a **API Express** (Prisma/Supabase, sync TMDB/IGDB, Puppeteer/detetive) **sem depender do free tier do Render** (5 GB/mês de egress, suspensão sem “reset manual”). O **frontend continua na Vercel**; só mudam o host da API e as variáveis que apontam para ela.
 
-> **Sem cartão de crédito?** A Oracle Cloud pede cartão na verificação (sem cobrança no Always Free). Se você **não quer ou não confia** nisso, use **[`MIGRAR-API-SEM-CARTAO.md`](MIGRAR-API-SEM-CARTAO.md)** (PC + Cloudflare Tunnel + opcional sync no GitHub Actions).
-
 > **Não precisa recriar o Render** para “limpar banda”. O caminho recomendado é **sair do Render** para a API e manter o Render suspenso ou apagado depois da migração. O PR [#170](https://github.com/igor-silva-santos/orbe/pull/170) reduz egress *enquanto* você ainda estiver no Render; **esta migração substitui** essa dependência do limite mensal.
 
 ---
@@ -25,11 +23,11 @@ Variáveis típicas da API: ver [`api/.env.example`](../api/.env.example) e tabe
 
 ## 2. Comparativo de opções **sem pagar** (API Node long-running)
 
-### 2.1 Oracle Cloud — Always Free (VM + Docker) — **recomendado se aceitar verificação com cartão**
+### 2.1 Oracle Cloud — Always Free (VM + Docker) — **recomendado**
 
 | Prós | Contras |
 |------|---------|
-| VM **sempre ligada** (within Always Free shapes: ex. Ampere A1 ou AMD Micro) | Cadastro Oracle; **cartão pedido para verificação** (sem cobrança no tier free); às vezes fila de capacity na região |
+| VM **sempre ligada** (within Always Free shapes: ex. Ampere A1 ou AMD Micro) | Cadastro Oracle; às vezes fila de capacity na região |
 | **Sem teto de 5 GB/mês** como o Render free para egress da API | Você opera OS, updates, firewall |
 | RAM/CPU suficientes para Chromium + sync longo | HTTPS: IP público + **Let's Encrypt** ou **Cloudflare Tunnel** (grátis) |
 | Mesmo `Dockerfile` do repo (Chromium já incluso) | Supabase: adicionar IP público da VM nas restrições de rede |
@@ -71,9 +69,7 @@ O front já é Next na Vercel; a API é **Express monolítico** (`api/src/index.
 
 ## 3. Recomendação única
 
-**Sem cartão:** [`MIGRAR-API-SEM-CARTAO.md`](MIGRAR-API-SEM-CARTAO.md) — **PC + Cloudflare Tunnel** (plano B: sync no GitHub Actions).
-
-**Com cartão só para verificação Oracle:** hospedar a API em uma **VM Oracle Cloud Always Free**, rodando o container do [`Dockerfile`](../Dockerfile) (raiz) ou [`api/Dockerfile`](../api/Dockerfile), com **systemd** ou **docker compose** para restart automático.
+**Hospedar a API em uma VM Oracle Cloud Always Free**, rodando o container do [`Dockerfile`](../Dockerfile) (raiz) ou [`api/Dockerfile`](../api/Dockerfile), com **systemd** ou **docker compose** para restart automático.
 
 - Front: **Vercel** inalterado (só `API_PROXY_ORIGIN`).
 - DB: **Supabase** inalterado.
@@ -86,7 +82,7 @@ Opcional depois da migração: desligar modo conservador (`ORBE_EGRESS_SAVER`, `
 
 ## 4. Pré-requisitos (você, na UI)
 
-1. Conta [Oracle Cloud](https://www.oracle.com/cloud/free/) (Always Free; **cartão pedido para verificação**, sem cobrança no tier free — se recusar, use [`MIGRAR-API-SEM-CARTAO.md`](MIGRAR-API-SEM-CARTAO.md)).
+1. Conta [Oracle Cloud](https://www.oracle.com/cloud/free/) (Always Free; cartão às vezes pedido para verificação, sem cobrança no tier free).
 2. Acesso ao [Vercel](https://vercel.com) projeto `orbe` e ao [GitHub](https://github.com) repo `igor-silva-santos/orbe` (secrets).
 3. [Supabase](https://supabase.com) → projeto Orbe → URLs e senha do Postgres (copiar do dashboard).
 4. Domínio opcional mas recomendado (ex. `api.orbenerd.com`) — pode usar **Cloudflare Tunnel** sem abrir porta 443 na VM.
@@ -279,7 +275,7 @@ O script `orbe-render-api.sh` continua válido; a detecção de suspensão Rende
 | Pergunta | Resposta |
 |----------|----------|
 | Recriar Render para banda? | **Não.** Migre a API e desligue o serviço Render. |
-| Onde hospedar de graça? | **Oracle VM** (com cartão na verificação) **ou** [**sem cartão**](MIGRAR-API-SEM-CARTAO.md): PC + Cloudflare Tunnel. |
+| Onde hospedar de graça? | **Oracle Always Free VM** + Docker da API. |
 | Front? | **Vercel** — só mudar `API_PROXY_ORIGIN` + redeploy. |
 | Sync / Puppeteer? | Rodam na VM; GHA só dispara endpoints (como hoje). |
 | PR #170? | Mitigação no Render; **migração remove** o problema de egress do Render. |
