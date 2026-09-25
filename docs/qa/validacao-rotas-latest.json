@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-25T02:59:12.929Z",
+  "generatedAt": "2026-09-25T03:01:39.413Z",
   "totals": {
-    "uiRoutes": 39,
+    "uiRoutes": 41,
     "uiFailed": 0,
-    "apiRoutes": 33,
+    "apiRoutes": 35,
     "apiFailed": 0,
-    "staticUiCatalog": 37,
+    "staticUiCatalog": 39,
     "dynamicPatterns": 5,
-    "publicApiCatalog": 27
+    "publicApiCatalog": 29
   },
   "samples": {
     "filmeId": 1601797,
@@ -16,7 +16,7 @@
     "jogoId": 307541,
     "pessoaId": null,
     "dubladorId": null,
-    "companyId": null,
+    "companyId": 7726,
     "sagaId": "1169365",
     "universoId": "mcu"
   },
@@ -64,6 +64,13 @@
       "finalUrl": "https://orbe-seven.vercel.app/premios"
     },
     {
+      "path": "/premios?ano=2025",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/premios?ano=2025"
+    },
+    {
       "path": "/hoje",
       "kind": "static",
       "httpStatus": 200,
@@ -76,6 +83,13 @@
       "httpStatus": 200,
       "ok": true,
       "finalUrl": "https://orbe-seven.vercel.app/eventos"
+    },
+    {
+      "path": "/eventos?ano=2025",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/eventos?ano=2025"
     },
     {
       "path": "/continuacoes",
@@ -186,13 +200,6 @@
       "finalUrl": "https://orbe-seven.vercel.app/admin/sync-logs"
     },
     {
-      "path": "/extensao",
-      "kind": "static",
-      "httpStatus": 200,
-      "ok": true,
-      "finalUrl": "https://orbe-seven.vercel.app/extensao"
-    },
-    {
       "path": "/extensao/crunchyroll",
       "kind": "static",
       "httpStatus": 200,
@@ -282,6 +289,13 @@
       "httpStatus": 200,
       "ok": true,
       "finalUrl": "https://orbe-seven.vercel.app/manifest.webmanifest"
+    },
+    {
+      "path": "/desenvolvedora/7726",
+      "kind": "dynamic",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/desenvolvedora/7726"
     },
     {
       "path": "/continuacoes?saga=1169365",
@@ -427,6 +441,18 @@
     },
     {
       "path": "/api/premios",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/premios/destaques",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/premios/filtros",
       "kind": "api",
       "httpStatus": 200,
       "ok": true

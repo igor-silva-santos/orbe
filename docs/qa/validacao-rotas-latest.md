@@ -1,12 +1,12 @@
 # Validação de rotas Orbe
 
-Gerado: 2026-09-25T02:59:12.929Z
+Gerado: 2026-09-25T03:01:39.413Z
 
 ## Totais
 
-- **UI testadas:** 39 (37 estáticas + 2 dinâmicas amostradas)
+- **UI testadas:** 41 (39 estáticas + 2 dinâmicas amostradas)
 - **UI com falha:** 0
-- **API GET públicas testadas:** 33
+- **API GET públicas testadas:** 35
 - **API com falha:** 0
 
 ## Inventário completo no código

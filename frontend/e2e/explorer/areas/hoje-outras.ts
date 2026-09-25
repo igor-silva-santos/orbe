@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { ExplorerCollector } from '../collector';
-import { gotoRoute, openFirstSuperModal, closeSuperModalIfOpen, timedStep } from '../helpers';
+import { gotoRoute, openFirstSuperModal, closeSuperModalIfOpen, timedStep, enableAllHojeSections } from '../helpers';
 import type { ExplorerAreaReport } from '../types';
 
 const ROUTES = [
@@ -33,14 +33,7 @@ export async function exploreAreaHojeOutras(page: Page, baseUrl: string): Promis
         routesVisited.push(route);
 
         if (route === '/hoje') {
-          const toggles = page.getByRole('button').filter({ hasText: /filmes|séries|animes|jogos|cinema|streaming/i });
-          const n = await toggles.count();
-          for (let i = 0; i < n; i++) {
-            const btn = toggles.nth(i);
-            const pressed = await btn.getAttribute('aria-pressed');
-            if (pressed === 'false') await btn.click().catch(() => {});
-          }
-          await page.waitForTimeout(1500);
+          await enableAllHojeSections(page);
           await openFirstSuperModal(page, collector, 'main').catch(() => {});
           await closeSuperModalIfOpen(page);
         }

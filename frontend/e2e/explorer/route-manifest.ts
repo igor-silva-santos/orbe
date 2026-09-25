@@ -115,6 +115,8 @@ export const PUBLIC_API_GET_ROUTES: string[] = [
   '/api/deals/promocoes?limit=5',
   '/api/deals',
   '/api/premios',
+  '/api/premios/destaques',
+  '/api/premios/filtros',
   '/api/eventos',
   '/api/eventos/resumo',
   '/api/continuacoes/sagas',

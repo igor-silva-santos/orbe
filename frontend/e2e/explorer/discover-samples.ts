@@ -69,11 +69,11 @@ export async function discoverRouteSamples(request: APIRequestContext): Promise<
   }
 
   if (jogos?.results?.[0]?.id) {
-    const jogoDet = await jsonOrNull<{ desenvolvedores?: { id: number }[] }>(
+    const jogoDet = await jsonOrNull<{ desenvolvedoras?: { igdbId: number }[] }>(
       request,
       `/api/jogos/${jogos.results[0].id}/details`,
     );
-    samples.companyId = jogoDet?.desenvolvedores?.[0]?.id ?? null;
+    samples.companyId = jogoDet?.desenvolvedoras?.[0]?.igdbId ?? null;
   }
 
   const saga = sagas?.sagas?.[0];

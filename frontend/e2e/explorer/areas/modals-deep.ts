@@ -8,6 +8,7 @@ import {
   openSearch,
   timedStep,
   fillSearchQuery,
+  enableAllHojeSections,
 } from '../helpers';
 import type { ExplorerAreaReport } from '../types';
 
@@ -25,15 +26,21 @@ export async function exploreAreaModalsDeep(page: Page, baseUrl: string): Promis
       await gotoRoute(page, collector, '/');
       await openSearch(page);
       await fillSearchQuery(page, 'mario');
-      await page.waitForTimeout(2500);
+      await page
+        .waitForResponse((r) => r.url().includes('/api/pesquisa') && r.status() === 200, { timeout: 60_000 })
+        .catch(() => {});
 
-      for (const label of [/todos/i, /filmes/i, /jogos/i, /pessoas/i]) {
+      for (const label of [/todos/i, /filmes/i, /jogos/i]) {
         const chip = page.getByRole('button', { name: label }).first();
-        if (await chip.isVisible().catch(() => false)) await chip.click().catch(() => {});
-        await page.waitForTimeout(800);
+        if (await chip.isVisible().catch(() => false)) {
+          await Promise.all([
+            page.waitForResponse((r) => r.url().includes('/api/pesquisa') && r.status() === 200, { timeout: 45_000 }).catch(() => {}),
+            chip.click().catch(() => {}),
+          ]);
+        }
       }
 
-      const firstResult = page.locator('div.cursor-pointer').filter({ has: page.locator('img') }).first();
+      const firstResult = page.locator('div.rounded-\\[20px\\].cursor-pointer, div.cursor-pointer').filter({ has: page.locator('img') }).first();
       if (await firstResult.isVisible().catch(() => false)) {
         await firstResult.click().catch(() => {});
         await page.waitForTimeout(1500);

@@ -69,10 +69,33 @@ export async function fillSearchQuery(page: Page, query: string): Promise<void> 
   await page.locator('input[type="search"], input[type="text"]').first().fill(query).catch(() => {});
 }
 
+export async function enableAllHojeSections(page: Page): Promise<void> {
+  await page
+    .waitForResponse((r) => r.url().includes('/api/hoje') && r.status() === 200, { timeout: 90_000 })
+    .catch(() => {});
+  for (const option of [
+    'Cinema',
+    'Estreias',
+    'Filmes no streaming',
+    'Séries no streaming',
+    'Animes em exibição',
+    'Jogos em destaque',
+  ]) {
+    const btn = page.getByRole('button', { name: new RegExp(option, 'i') }).first();
+    if (!(await btn.isVisible().catch(() => false))) continue;
+    const pressed = await btn.getAttribute('aria-pressed');
+    if (pressed === 'false') await btn.click().catch(() => {});
+  }
+  await page.locator('div.rounded-\\[20px\\].cursor-pointer').first().waitFor({ state: 'visible', timeout: 45_000 }).catch(() => {});
+}
+
 export async function openFirstSuperModal(page: Page, collector: ExplorerCollector, scope?: string): Promise<boolean> {
   await closeSuperModalIfOpen(page);
   const root = scope ? page.locator(scope) : page.locator('main');
-  const card = root.locator('div.cursor-pointer').filter({ has: page.locator('img') }).first();
+  const card = root
+    .locator('div.rounded-\\[20px\\].cursor-pointer, div.cursor-pointer')
+    .filter({ has: page.locator('img') })
+    .first();
   const target = (await card.isVisible({ timeout: 5_000 }).catch(() => false))
     ? card
     : root.locator('[class*="aspect-"]').filter({ has: page.locator('img') }).first();

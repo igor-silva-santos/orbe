@@ -77,6 +77,8 @@ Catálogo machine-readable: `frontend/e2e/explorer/route-manifest.ts`.
 
 ## 2. UI global (não são `page.tsx`)
 
+Ver **`docs/qa/SUPERFICIES-OCULTAS.md`** (modais, PWA, rolagem rápida, prefs Hoje, etc.).
+
 Montadas em `app/layout.tsx`:
 
 | Superfície | Componente | Store |

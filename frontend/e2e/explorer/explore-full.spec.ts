@@ -9,15 +9,16 @@ import { exploreAreaCatalogs } from './areas/catalogs';
 import { exploreAreaPromocoes } from './areas/promocoes';
 import { exploreAreaHojeOutras } from './areas/hoje-outras';
 import { exploreAreaModalsDeep } from './areas/modals-deep';
+import { exploreAreaDynamicRoutes } from './areas/dynamic-routes';
 import { mergeReports, writeReport } from './report';
 import type { ExplorerAreaReport } from './types';
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'https://orbe-seven.vercel.app';
 
-test.describe.configure({ mode: 'serial', timeout: 600_000 });
+test.describe.configure({ mode: 'serial', timeout: 900_000 });
 
-test('exploração completa Orbe → docs/qa/exploracao-orbe-latest', async ({ page }) => {
-  test.setTimeout(600_000);
+test('exploração completa Orbe → docs/qa/exploracao-orbe-latest', async ({ page, request }) => {
+  test.setTimeout(900_000);
   const areas: ExplorerAreaReport[] = [];
 
   areas.push(await exploreAreaShell(page, baseURL));
@@ -25,6 +26,7 @@ test('exploração completa Orbe → docs/qa/exploracao-orbe-latest', async ({ p
   areas.push(await exploreAreaCatalogs(page, baseURL));
   areas.push(await exploreAreaPromocoes(page, baseURL));
   areas.push(await exploreAreaHojeOutras(page, baseURL));
+  areas.push(await exploreAreaDynamicRoutes(page, request, baseURL));
   areas.push(await exploreAreaModalsDeep(page, baseURL));
 
   const report = mergeReports(areas, baseURL);

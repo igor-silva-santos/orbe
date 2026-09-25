@@ -28,7 +28,9 @@ export async function exploreAreaShell(page: Page, baseUrl: string): Promise<Exp
     await gotoRoute(page, collector, '/');
     await openSearch(page);
     await fillSearchQuery(page, 'batman');
-    await page.waitForTimeout(1500);
+    await page
+      .waitForResponse((r) => r.url().includes('/api/pesquisa') && r.status() === 200, { timeout: 45_000 })
+      .catch(() => {});
     await closeSearch(page);
 
     const bell = page.getByRole('button', { name: /notificações/i }).first();
