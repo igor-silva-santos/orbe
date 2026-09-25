@@ -22,6 +22,7 @@
     "sync:games": "cross-env LOG_TO_FILE=true ts-node src/syncGames.ts",
     "sync:awards": "cross-env LOG_TO_FILE=true ts-node src/scrapeAwards.ts",
     "sync:detetive": "cross-env LOG_TO_FILE=true ts-node src/detetive.ts",
+    "sync:full": "cross-env LOG_TO_FILE=true SYNC_RUNNER=github-actions ts-node src/runFullSyncCli.ts",
     "cache:invalidate": "bash ../scripts/invalidate-cache.sh"
   },
   "dependencies": {

@@ -61,6 +61,8 @@ Variáveis obrigatórias em qualquer host de front:
 
 ## 2. Render — API (e front opcional)
 
+Para **migrar a API para fora do Render** (sem depender do reset de 5 GB/mês): [`MIGRAR-API-FORA-RENDER.md`](MIGRAR-API-FORA-RENDER.md).
+
 **Importante:** o repo usa `render.yaml` com serviço **`orbe-api`**. A URL antiga `orbe-7bu0.onrender.com` pode estar **suspensa** enquanto um serviço novo (`orbe-api.onrender.com`) responde outra coisa. No dashboard, copie o **hostname real** do Web Service **Live** e atualize:
 
 - Vercel: `API_PROXY_ORIGIN`
