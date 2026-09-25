@@ -10,7 +10,7 @@ Use este arquivo amanhã antes de mergulhar nos JSONs.
 | Jornadas + console | `npm run test:e2e:explore` | 0 critical; ver `.md` resumo |
 | Busca global | `curl -s -o /dev/null -w "%{http_code}" "https://orbe-seven.vercel.app/api/pesquisa?q=ab"` | **200** |
 
-- **Última exploração:** 8 achados, **0 críticos** (ver `exploracao-orbe-latest.md`).
+- **Última exploração:** 7 achados, **0 críticos** (ver `exploracao-orbe-latest.md`).
 
 Produção: **https://orbe-seven.vercel.app**
 
