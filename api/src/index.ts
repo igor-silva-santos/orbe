@@ -317,39 +317,77 @@ import { warmUpDealsCache } from './deals/dealsService';
 import cron from 'node-cron';
 import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 import { refreshStaleSteamPrices } from './syncSteam';
+import {
+  dealsWarmupCronSchedule,
+  isDealsWarmupCronEnabled,
+  isDetetiveCronEnabled,
+  isOrbeEgressSaverMode,
+  isSteamPriceCronEnabled,
+} from './renderEgressConfig';
+
+if (isOrbeEgressSaverMode()) {
+  logger.info(
+    'ORBE_EGRESS_SAVER ativo — crons pesados e fase detetive no sync usam defaults conservadores (ver docs/RENDER-RECUPERAR-BANDA.md).',
+  );
+}
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00, horário de São Paulo)
-cron.schedule('0 3 * * *', () => {
-  logger.info('Executando o Detetive Digital agendado...');
-  runDetetive();
-}, { timezone: 'America/Sao_Paulo' });
+if (isDetetiveCronEnabled()) {
+  cron.schedule(
+    '0 3 * * *',
+    () => {
+      logger.info('Executando o Detetive Digital agendado...');
+      runDetetive();
+    },
+    { timezone: 'America/Sao_Paulo' },
+  );
+} else {
+  logger.info('Cron do Detetive Digital desabilitado (DISABLE_DETETIVE_CRON / ORBE_EGRESS_SAVER).');
+}
 
-// Deals: verifica Epic/GamerPower/CheapShark a cada 1 min e atualiza Redis só se o conteúdo mudou
-// (o frontend não faz polling — só busca o cache quando o usuário dá F5 ou clica em "Atualizar")
-cron.schedule('* * * * *', async () => {
-  logger.info('[deals-cache] Warm-up agendado...');
-  try {
-    const result = await warmUpDealsCache();
-    if (result.updated) {
-      logger.info('[deals-cache] Warm-up: conteúdo atualizado no Redis.');
-    } else if (result.unchanged) {
-      logger.info('[deals-cache] Warm-up: sem mudanças (TTL renovado).');
-    }
-  } catch (error) {
-    logger.error('[deals-cache] Warm-up falhou:', error);
-  }
-}, { timezone: 'America/Sao_Paulo' });
+// Deals: atualiza Redis só se o conteúdo mudou (frontend busca no F5 / "Atualizar")
+if (isDealsWarmupCronEnabled()) {
+  const dealsSchedule = dealsWarmupCronSchedule();
+  cron.schedule(
+    dealsSchedule,
+    async () => {
+      logger.info('[deals-cache] Warm-up agendado...');
+      try {
+        const result = await warmUpDealsCache();
+        if (result.updated) {
+          logger.info('[deals-cache] Warm-up: conteúdo atualizado no Redis.');
+        } else if (result.unchanged) {
+          logger.info('[deals-cache] Warm-up: sem mudanças (TTL renovado).');
+        }
+      } catch (error) {
+        logger.error('[deals-cache] Warm-up falhou:', error);
+      }
+    },
+    { timezone: 'America/Sao_Paulo' },
+  );
+  logger.info(`[deals-cache] Cron ativo: ${dealsSchedule} (America/Sao_Paulo).`);
+} else {
+  logger.info('[deals-cache] Cron desabilitado (DISABLE_DEALS_WARMUP_CRON).');
+}
 
 // Refresh diário de preços Steam (jogos com steamAppId e sync >24h), horário de São Paulo
-cron.schedule('0 4 * * *', async () => {
-  logger.info('Executando refresh diário de preços Steam...');
-  try {
-    const updated = await refreshStaleSteamPrices(prisma);
-    logger.info(`Refresh diário Steam: ${updated} jogos atualizados.`);
-  } catch (error) {
-    logger.error('Erro no refresh diário de preços Steam:', error);
-  }
-}, { timezone: 'America/Sao_Paulo' });
+if (isSteamPriceCronEnabled()) {
+  cron.schedule(
+    '0 4 * * *',
+    async () => {
+      logger.info('Executando refresh diário de preços Steam...');
+      try {
+        const updated = await refreshStaleSteamPrices(prisma);
+        logger.info(`Refresh diário Steam: ${updated} jogos atualizados.`);
+      } catch (error) {
+        logger.error('Erro no refresh diário de preços Steam:', error);
+      }
+    },
+    { timezone: 'America/Sao_Paulo' },
+  );
+} else {
+  logger.info('Cron de preços Steam desabilitado (DISABLE_STEAM_PRICE_CRON).');
+}
 
 // Renovação diária da inscrição de webhooks IGDB (expira periodicamente), horário de São Paulo
 if (isIgdbWebhooksEnabled()) {
