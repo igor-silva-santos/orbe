@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-25T02:55:48.042Z",
+  "generatedAt": "2026-09-25T02:59:12.929Z",
   "totals": {
     "uiRoutes": 39,
     "uiFailed": 0,
-    "apiRoutes": 34,
-    "apiFailed": 2,
+    "apiRoutes": 33,
+    "apiFailed": 0,
     "staticUiCatalog": 37,
     "dynamicPatterns": 5,
-    "publicApiCatalog": 28
+    "publicApiCatalog": 27
   },
   "samples": {
     "filmeId": 1601797,
@@ -318,10 +318,10 @@
       "ok": true
     },
     {
-      "path": "/api/pesquisa?q=orbe",
+      "path": "/api/pesquisa?q=ab",
       "kind": "api",
-      "httpStatus": 500,
-      "ok": false
+      "httpStatus": 200,
+      "ok": true
     },
     {
       "path": "/api/filmes?limit=2",
@@ -462,12 +462,6 @@
       "ok": true
     },
     {
-      "path": "/api/auth/session",
-      "kind": "api",
-      "httpStatus": 405,
-      "ok": false
-    },
-    {
       "path": "/api/filmes/1601797/details",
       "kind": "api",
       "httpStatus": 200,
@@ -504,18 +498,5 @@
       "ok": true
     }
   ],
-  "failed": [
-    {
-      "path": "/api/pesquisa?q=orbe",
-      "kind": "api",
-      "httpStatus": 500,
-      "ok": false
-    },
-    {
-      "path": "/api/auth/session",
-      "kind": "api",
-      "httpStatus": 405,
-      "ok": false
-    }
-  ]
+  "failed": []
 }
