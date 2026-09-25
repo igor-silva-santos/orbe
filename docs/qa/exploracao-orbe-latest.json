@@ -1,0 +1,627 @@
+{
+  "version": 1,
+  "baseUrl": "https://orbe-seven.vercel.app",
+  "generatedAt": "2026-09-25T03:18:39.589Z",
+  "areas": [
+    {
+      "area": "SHELL-HEADER-FOOTER-ESTATICAS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:10:37.949Z",
+      "finishedAt": "2026-09-25T03:11:44.493Z",
+      "routesVisited": [
+        "/minha-lista",
+        "/login",
+        "/register",
+        "/ajuda",
+        "/contato",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ],
+      "steps": [
+        {
+          "step": "goto /minha-lista",
+          "ok": true,
+          "durationMs": 258
+        },
+        {
+          "step": "goto /login",
+          "ok": true,
+          "durationMs": 71
+        },
+        {
+          "step": "goto /register",
+          "ok": true,
+          "durationMs": 215
+        },
+        {
+          "step": "goto /ajuda",
+          "ok": true,
+          "durationMs": 245
+        },
+        {
+          "step": "goto /contato",
+          "ok": true,
+          "durationMs": 183
+        },
+        {
+          "step": "goto /termos",
+          "ok": true,
+          "durationMs": 1332
+        },
+        {
+          "step": "goto /privacidade",
+          "ok": true,
+          "durationMs": 189
+        },
+        {
+          "step": "goto /cookies",
+          "ok": true,
+          "durationMs": 247
+        },
+        {
+          "step": "goto /dmca",
+          "ok": true,
+          "durationMs": 171
+        },
+        {
+          "step": "header busca + notificações",
+          "ok": false,
+          "durationMs": 63629,
+          "notes": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /mais/i }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" class=\"text-[13.5px] transition-colors flex items-center px-3 py-2 rounded-full text-muted-foreground hover:text-foreground gap-1 \">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"fixed inset-0 z-50 bg-black/80 backdrop-blur-sm\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"fixed inset-0 z-50 bg-black/80 backdrop-blur-sm\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    54 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"fixed inset-0 z-50 bg-black/80 backdrop-blur-sm\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+        }
+      ],
+      "issues": [],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "HOME",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:11:44.493Z",
+      "finishedAt": "2026-09-25T03:12:05.390Z",
+      "routesVisited": [
+        "/"
+      ],
+      "steps": [
+        {
+          "step": "home load + scroll faixas",
+          "ok": true,
+          "durationMs": 2209
+        },
+        {
+          "step": "home supermodal filme",
+          "ok": false,
+          "durationMs": 16807,
+          "notes": "locator.click: Element is outside of the viewport\nCall log:\n\u001b[2m  - waiting for locator('#filmes').locator('div.rounded-\\\\[20px\\\\].cursor-pointer').filter({ has: locator('img') }).first()\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n"
+        },
+        {
+          "step": "anime carousel mode toggle",
+          "ok": true,
+          "durationMs": 1881
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0001",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T03:12:05.390Z",
+          "kind": "slow",
+          "severity": "medium",
+          "step": "home supermodal filme",
+          "message": "Ação levou 16807ms (limite 15000ms)",
+          "durationMs": 16807
+        },
+        {
+          "id": "ISS-0002",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T03:12:05.390Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "home supermodal filme",
+          "message": "locator.click: Element is outside of the viewport\nCall log:\n\u001b[2m  - waiting for locator('#filmes').locator('div.rounded-\\\\[20px\\\\].cursor-pointer').filter({ has: locator('img') }).first()\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n"
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "CATALOGOS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:12:05.391Z",
+      "finishedAt": "2026-09-25T03:13:28.963Z",
+      "routesVisited": [
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos"
+      ],
+      "steps": [
+        {
+          "step": "/filmes load",
+          "ok": true,
+          "durationMs": 1505
+        },
+        {
+          "step": "/filmes supermodal",
+          "ok": true,
+          "durationMs": 20567
+        },
+        {
+          "step": "/filmes filtros",
+          "ok": true,
+          "durationMs": 30603
+        },
+        {
+          "step": "/series load",
+          "ok": true,
+          "durationMs": 1055
+        },
+        {
+          "step": "/series supermodal",
+          "ok": true,
+          "durationMs": 20557
+        },
+        {
+          "step": "/series filtros",
+          "ok": true,
+          "durationMs": 672
+        },
+        {
+          "step": "/animes load",
+          "ok": true,
+          "durationMs": 1632
+        },
+        {
+          "step": "/animes supermodal",
+          "ok": true,
+          "durationMs": 1257
+        },
+        {
+          "step": "/animes filtros",
+          "ok": true,
+          "durationMs": 97
+        },
+        {
+          "step": "/jogos load",
+          "ok": true,
+          "durationMs": 3569
+        },
+        {
+          "step": "/jogos supermodal",
+          "ok": true,
+          "durationMs": 1692
+        },
+        {
+          "step": "/jogos filtros",
+          "ok": true,
+          "durationMs": 366
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0003",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T03:13:23.239Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0004",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T03:13:28.597Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "PROMOCOES",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:13:28.964Z",
+      "finishedAt": "2026-09-25T03:13:46.118Z",
+      "routesVisited": [
+        "/promocoes?tab=gratis",
+        "/promocoes?tab=promocoes",
+        "/promocoes?tab=em-alta",
+        "/promocoes?tab=recomendacoes"
+      ],
+      "steps": [
+        {
+          "step": "/promocoes?tab=gratis",
+          "ok": true,
+          "durationMs": 4173
+        },
+        {
+          "step": "/promocoes?tab=promocoes",
+          "ok": true,
+          "durationMs": 4353
+        },
+        {
+          "step": "/promocoes?tab=em-alta",
+          "ok": true,
+          "durationMs": 4387
+        },
+        {
+          "step": "/promocoes?tab=recomendacoes",
+          "ok": true,
+          "durationMs": 4241
+        }
+      ],
+      "issues": [],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "HOJE-CONTINUACOES-OUTRAS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:13:46.118Z",
+      "finishedAt": "2026-09-25T03:15:59.998Z",
+      "routesVisited": [
+        "/hoje",
+        "/continuacoes",
+        "/premios",
+        "/eventos",
+        "/minha-lista/animes",
+        "/minha-lista/fila",
+        "/extensao",
+        "/extensao/crunchyroll",
+        "/sugestoes",
+        "/bug-report",
+        "/apoie"
+      ],
+      "steps": [
+        {
+          "step": "/hoje",
+          "ok": true,
+          "durationMs": 111952
+        },
+        {
+          "step": "/continuacoes",
+          "ok": true,
+          "durationMs": 1330
+        },
+        {
+          "step": "/premios",
+          "ok": true,
+          "durationMs": 1467
+        },
+        {
+          "step": "/eventos",
+          "ok": true,
+          "durationMs": 8041
+        },
+        {
+          "step": "/minha-lista/animes",
+          "ok": true,
+          "durationMs": 5154
+        },
+        {
+          "step": "/minha-lista/fila",
+          "ok": true,
+          "durationMs": 939
+        },
+        {
+          "step": "/extensao",
+          "ok": true,
+          "durationMs": 899
+        },
+        {
+          "step": "/extensao/crunchyroll",
+          "ok": true,
+          "durationMs": 886
+        },
+        {
+          "step": "/sugestoes",
+          "ok": true,
+          "durationMs": 864
+        },
+        {
+          "step": "/bug-report",
+          "ok": true,
+          "durationMs": 864
+        },
+        {
+          "step": "/apoie",
+          "ok": true,
+          "durationMs": 1484
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0005",
+          "area": "HOJE-CONTINUACOES-OUTRAS",
+          "route": "/hoje",
+          "timestamp": "2026-09-25T03:15:39.395Z",
+          "kind": "missing_ui",
+          "severity": "high",
+          "step": "supermodal",
+          "message": "Nenhum card clicável com poster encontrado"
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "ROTAS-DINAMICAS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:15:59.998Z",
+      "finishedAt": "2026-09-25T03:16:27.177Z",
+      "routesVisited": [
+        "/desenvolvedora/7726",
+        "/continuacoes?saga=1169365",
+        "/continuacoes?universo=mcu"
+      ],
+      "steps": [
+        {
+          "step": "/desenvolvedora/7726",
+          "ok": true,
+          "durationMs": 21869
+        },
+        {
+          "step": "/continuacoes?saga=1169365",
+          "ok": true,
+          "durationMs": 933
+        },
+        {
+          "step": "/continuacoes?universo=mcu",
+          "ok": true,
+          "durationMs": 998
+        }
+      ],
+      "issues": [],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "MODAIS-BUSCA-GLOBAL",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T03:16:27.178Z",
+      "finishedAt": "2026-09-25T03:18:39.589Z",
+      "routesVisited": [
+        "/filmes",
+        "/jogos",
+        "/animes",
+        "/series"
+      ],
+      "steps": [
+        {
+          "step": "busca categorias + query",
+          "ok": true,
+          "durationMs": 82561
+        },
+        {
+          "step": "modal profundo /filmes",
+          "ok": true,
+          "durationMs": 22068
+        },
+        {
+          "step": "modal profundo /jogos",
+          "ok": true,
+          "durationMs": 3242
+        },
+        {
+          "step": "modal profundo /animes",
+          "ok": true,
+          "durationMs": 2788
+        },
+        {
+          "step": "modal profundo /series",
+          "ok": true,
+          "durationMs": 21752
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0006",
+          "area": "MODAIS-BUSCA-GLOBAL",
+          "route": "global",
+          "timestamp": "2026-09-25T03:18:15.049Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0007",
+          "area": "MODAIS-BUSCA-GLOBAL",
+          "route": "global",
+          "timestamp": "2026-09-25T03:18:17.837Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    }
+  ],
+  "summary": {
+    "totalIssues": 7,
+    "bySeverity": {
+      "critical": 0,
+      "high": 1,
+      "medium": 6,
+      "low": 0,
+      "observation": 0
+    },
+    "byKind": {
+      "slow": 1,
+      "interaction": 5,
+      "missing_ui": 1
+    }
+  }
+}

@@ -42,6 +42,7 @@ import {
   serieCarouselLiteInclude,
   animeCarouselInclude,
   cardListInclude,
+  serieCardListInclude,
   pickAroundToday,
 } from './mediaRoutesHelpers';
 
@@ -558,7 +559,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: cardListInclude,
+          include: serieCardListInclude,
         }),
       );
     } else {

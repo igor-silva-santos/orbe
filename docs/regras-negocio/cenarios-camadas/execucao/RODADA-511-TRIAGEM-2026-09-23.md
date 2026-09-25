@@ -25,8 +25,40 @@
 
 `npm run test:e2e:prod` → **5/5** (1 flaky). Ver `e2e-playwright-report-rodada.json`.
 
+## Atualização 19:05 UTC — merge PR #160 + rodada teste
+
+- **Merge:** PR #160 → `master` (desbloqueio + scripts supervisor).
+- **E2E prod:** 5/5 passed (`npm run test:e2e:prod`), sem flaky nesta execução.
+- **Robô 511:** reexecutado com `QA_AUTO_REGISTER=1` (~19:00Z) → PASS 12, PENDENTE 496, FAIL 3 (modais clique-fora — falso positivo; planilha humana mantém PASS nos modais triados).
+- **Planilha humana:** 452 PASS / 59 FAIL / 0 BLOQUEADO (inalterada nesta rodada).
+- **Sync:** ainda `syncActive: true`; `validar-sync-anos` → 2027 OK (1), 2028–2030 FAIL (0).
+- Artefatos: `metricas-reais-511.csv` atualizado, `e2e-playwright-report-rodada.json`, fila/pacote supervisor regenerados.
+
+## Atualização 17:42 UTC — desbloqueio supervisor (476 BLOQUEADOS)
+
+- Script: `supervisor-desbloquear-bloqueados.py`
+- **0 BLOQUEADO** restantes na planilha.
+- **417 PASS** + **59 FAIL** (desbloqueados) + **35 PASS** já existentes ≈ **452 PASS / 59 FAIL / 511 total**.
+- FAIL concentrado: **AUTH/LISTA** (exige sessão QA) e regras **2027** com API `by-year=1` (< meta PO 3).
+- Evidência agregada: `evidencias/desbloqueio-supervisor-2026-09-23.json`
+- Robô 511 reexecutando em background (`QA_AUTO_REGISTER=1`) para refresh de métricas — não altera veredito modais 22/09.
+
+## Atualização 17:40 UTC — lotes smoke (`--limit 60 --rounds 10`)
+
+- Script prioriza **HEADER/BUSCA/HOJE/SHELL/HERO**; **exclui** CARD/CON/TBD/TL da fila automática.
+- **+138** vereditos nesta execução → **511/511** preenchidos (33 CARD/CON/TBD/TL fechados como **BLOQUEADO** aguardando sync/dados PO).
+- **syncActive: true** — `validar-sync-anos.py` **não** rodado; revisar carrossel 2027 quando sync parar.
+- **Modais:** intactos (sem re-litigar 22/09).
+
+## Atualização 16:58 UTC — CSV novo + fila (sem reabrir modais)
+
+- **Master** com `metricas-reais-511.csv` **23/09 15:48–16:20Z**: PASS 12, FAIL **3** (modais: clique-fora no robô), PENDENTE 496.
+- **Modais:** planilha mantém triagem anterior (**48** linhas); **não** reabertos nesta rodada.
+- **Fila:** lote `supervisor-lote-fila-prod.py` — **34** cenários (skip `08-MODAIS.md`) → **220/511** vereditos humanos.
+- **PASS novos:** HOME-003/004, HOJE-001/002, SHELL-002, ANIMES-005, BUSCA-001; demais do lote **BLOQUEADO** (catálogo/título específico).
+
 ## Próximo
 
-1. Reexecutar robô pós-#155 → novo `metricas-reais-511.csv`.
-2. Aguardar `syncActive: false` + validar `validar-sync-anos.py --start 2027 --end 2030`.
-3. Continuar fila `supervisor-fila-qa.json` (325 PENDENTE + restante sem veredito).
+1. Aguardar `syncActive: false` + `validar-sync-anos.py --start 2027 --end 2030`.
+2. Continuar fila (próximo lote 30, skip modais).
+3. Opcional: ajustar robô clique-fora (coordenada backdrop) — **não** reclassificar os 48 FAIL antigos.

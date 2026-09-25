@@ -99,3 +99,4 @@ api/TMDB_API_ANALYSIS.md
 .env*
 !.env.example
 !**/.env.example
+frontend/playwright-report.json

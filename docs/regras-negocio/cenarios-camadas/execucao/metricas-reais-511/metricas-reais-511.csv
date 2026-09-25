@@ -1,512 +1,512 @@
 ﻿ID_Cenario,ID_Regra,Arquivo,Veredito,Tipo_Execucao,Passos_Executados,Evidencia,Testado_Em
-CT-RN-HOME-001-F,RN-HOME-001,01-HOME.md,PASS,passo_a_passo,2,"Ordem índices: [10, 17, 24, 31]",2026-09-23T15:48:50Z
-CT-RN-HOME-002-F,RN-HOME-002,01-HOME.md,PASS,passo_a_passo,6,Navegação Filmes/Séries/Animes/Jogos OK,2026-09-23T15:49:27Z
-CT-RN-HOME-003-F,RN-HOME-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:35Z
-CT-RN-HOME-004-F,RN-HOME-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:39Z
-CT-RN-HOME-AC-001-F,RN-HOME-AC-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:44Z
-CT-RN-HOME-AC-002-F,RN-HOME-AC-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:48Z
-CT-RN-HOME-AC-003-F,RN-HOME-AC-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:53Z
-CT-RN-HOME-AC-004-F,RN-HOME-AC-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:49:57Z
-CT-RN-HOME-AC-005-F,RN-HOME-AC-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:01Z
-CT-RN-HOME-AC-006-F,RN-HOME-AC-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:06Z
-CT-RN-HOME-AC-007-F,RN-HOME-AC-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:11Z
-CT-RN-HOME-AC-008-F,RN-HOME-AC-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:15Z
-CT-RN-HOME-AC-009-F,RN-HOME-AC-009,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:19Z
-CT-RN-HOME-AC-010-F,RN-HOME-AC-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:23Z
-CT-RN-HOME-CA-001-F,RN-HOME-CA-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:27Z
-CT-RN-HOME-CA-002-F,RN-HOME-CA-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:31Z
-CT-RN-HOME-CA-003-F,RN-HOME-CA-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:36Z
-CT-RN-HOME-CA-004-F,RN-HOME-CA-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:40Z
-CT-RN-HOME-CA-005-F,RN-HOME-CA-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:44Z
-CT-RN-HOME-CA-006-F,RN-HOME-CA-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:48Z
-CT-RN-HOME-CA-007-F,RN-HOME-CA-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:52Z
-CT-RN-HOME-CA-008-F,RN-HOME-CA-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:50:56Z
-CT-RN-HOME-CARD-001-F,RN-HOME-CARD-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:00Z
-CT-RN-HOME-CARD-002-F,RN-HOME-CARD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:05Z
-CT-RN-HOME-CARD-003-F,RN-HOME-CARD-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:10Z
-CT-RN-HOME-CARD-004-F,RN-HOME-CARD-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:14Z
-CT-RN-HOME-CARD-005-F,RN-HOME-CARD-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:18Z
-CT-RN-HOME-CARD-006-F,RN-HOME-CARD-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:22Z
-CT-RN-HOME-CARD-007-F,RN-HOME-CARD-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:26Z
-CT-RN-HOME-CARD-008-F,RN-HOME-CARD-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:30Z
-CT-RN-HOME-CARD-009-F,RN-HOME-CARD-009,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:51:34Z
-CT-RN-HOME-CARD-010-F,RN-HOME-CARD-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:38Z
-CT-RN-HOME-CARD-011-F,RN-HOME-CARD-011,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:42Z
-CT-RN-HOME-CARD-012-F,RN-HOME-CARD-012,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:51:46Z
-CT-RN-HOME-CARD-013-F,RN-HOME-CARD-013,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:50Z
-CT-RN-HOME-CARD-014-F,RN-HOME-CARD-014,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:51:54Z
-CT-RN-HOME-CARD-015-F,RN-HOME-CARD-015,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:51:58Z
-CT-RN-HOME-CARD-016-F,RN-HOME-CARD-016,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:02Z
-CT-RN-HOME-CARD-017-F,RN-HOME-CARD-017,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:07Z
-CT-RN-HOME-CON-001-F,RN-HOME-CON-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:52:11Z
-CT-RN-HOME-CON-002-F,RN-HOME-CON-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:15Z
-CT-RN-HOME-CON-003-F,RN-HOME-CON-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:19Z
-CT-RN-HOME-CON-004-F,RN-HOME-CON-004,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:52:23Z
-CT-RN-HOME-CON-005-F,RN-HOME-CON-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:28Z
-CT-RN-HOME-CON-006-F,RN-HOME-CON-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:32Z
-CT-RN-HOME-CON-007-F,RN-HOME-CON-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:36Z
-CT-RN-HOME-CON-008-F,RN-HOME-CON-008,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:52:40Z
-CT-RN-HOME-CON-009-F,RN-HOME-CON-009,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:52:44Z
-CT-RN-HOME-CON-010-F,RN-HOME-CON-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:52:49Z
-CT-RN-HOME-EA-001-F,RN-HOME-EA-001,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:52:57Z
-CT-RN-HOME-EA-002-F,RN-HOME-EA-002,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:53:06Z
-CT-RN-HOME-EA-003-F,RN-HOME-EA-003,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:53:15Z
-CT-RN-HOME-EA-004-F,RN-HOME-EA-004,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:53:23Z
-CT-RN-HOME-EA-005-F,RN-HOME-EA-005,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:53:31Z
-CT-RN-HOME-EA-006-F,RN-HOME-EA-006,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T15:53:39Z
-CT-RN-HOME-HERO-001-F,RN-HOME-HERO-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:53:44Z
-CT-RN-HOME-HERO-002-F,RN-HOME-HERO-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:53:48Z
-CT-RN-HOME-SHELL-001-F,RN-HOME-SHELL-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:53:52Z
-CT-RN-HOME-SHELL-002-F,RN-HOME-SHELL-002,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:53:56Z
-CT-RN-HOME-TBD-001-F,RN-HOME-TBD-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:54:00Z
-CT-RN-HOME-TBD-002-F,RN-HOME-TBD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:05Z
-CT-RN-HOME-TBD-003-F,RN-HOME-TBD-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:09Z
-CT-RN-HOME-TL-001-F,RN-HOME-TL-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:54:13Z
-CT-RN-HOME-TL-002-F,RN-HOME-TL-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:17Z
-CT-RN-HOME-TL-003-F,RN-HOME-TL-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:21Z
-CT-RN-HOME-TL-004-F,RN-HOME-TL-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:25Z
-CT-RN-HOME-TL-005-F,RN-HOME-TL-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:30Z
-CT-RN-HOME-TL-006-F,RN-HOME-TL-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:34Z
-CT-RN-HOME-TL-007-F,RN-HOME-TL-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:38Z
-CT-RN-HOME-TL-008-F,RN-HOME-TL-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:42Z
-CT-RN-HOME-TL-009-F,RN-HOME-TL-009,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:46Z
-CT-RN-HOME-TL-010-F,RN-HOME-TL-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:50Z
-CT-RN-HOME-TL-011-F,RN-HOME-TL-011,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:54Z
-CT-RN-HOME-TL-012-F,RN-HOME-TL-012,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:54:59Z
-CT-RN-HOME-TL-013-F,RN-HOME-TL-013,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T15:55:03Z
-CT-RN-HOME-UPD-001-F,RN-HOME-UPD-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:55:07Z
-CT-RN-HOME-UPD-002-F,RN-HOME-UPD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T15:55:12Z
-CT-RN-FILMES-001-F,RN-FILMES-001,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:19Z
-CT-RN-FILMES-002-F,RN-FILMES-002,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:24Z
-CT-RN-FILMES-003-F,RN-FILMES-003,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:30Z
-CT-RN-FILMES-004-F,RN-FILMES-004,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:36Z
-CT-RN-FILMES-005-F,RN-FILMES-005,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:42Z
-CT-RN-FILMES-006-F,RN-FILMES-006,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:47Z
-CT-RN-FILMES-007-F,RN-FILMES-007,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:53Z
-CT-RN-FILMES-008-F,RN-FILMES-008,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:55:58Z
-CT-RN-FILMES-009-F,RN-FILMES-009,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:04Z
-CT-RN-FILMES-010-F,RN-FILMES-010,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:11Z
-CT-RN-FILMES-011-F,RN-FILMES-011,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:17Z
-CT-RN-FILMES-012-F,RN-FILMES-012,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:23Z
-CT-RN-FILMES-013-F,RN-FILMES-013,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:29Z
-CT-RN-FILMES-014-F,RN-FILMES-014,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:34Z
-CT-RN-FILMES-015-F,RN-FILMES-015,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:40Z
-CT-RN-FILMES-016-F,RN-FILMES-016,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:46Z
-CT-RN-FILMES-017-F,RN-FILMES-017,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:52Z
-CT-RN-FILMES-018-F,RN-FILMES-018,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:56:58Z
-CT-RN-FILMES-019-F,RN-FILMES-019,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:04Z
-CT-RN-FILMES-020-F,RN-FILMES-020,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:10Z
-CT-RN-FILMES-021-F,RN-FILMES-021,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:16Z
-CT-RN-FILMES-022-F,RN-FILMES-022,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:22Z
-CT-RN-FILMES-023-F,RN-FILMES-023,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:28Z
-CT-RN-FILMES-024-F,RN-FILMES-024,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:34Z
-CT-RN-FILMES-025-F,RN-FILMES-025,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:39Z
-CT-RN-FILMES-026-F,RN-FILMES-026,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:46Z
-CT-RN-FILMES-027-F,RN-FILMES-027,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:51Z
-CT-RN-FILMES-028-F,RN-FILMES-028,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:57:56Z
-CT-RN-FILMES-029-F,RN-FILMES-029,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:03Z
-CT-RN-FILMES-030-F,RN-FILMES-030,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:09Z
-CT-RN-FILMES-031-F,RN-FILMES-031,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:15Z
-CT-RN-FILMES-032-F,RN-FILMES-032,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:20Z
-CT-RN-FILMES-033-F,RN-FILMES-033,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:26Z
-CT-RN-FILMES-034-F,RN-FILMES-034,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:31Z
-CT-RN-FILMES-035-F,RN-FILMES-035,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:37Z
-CT-RN-FILMES-036-F,RN-FILMES-036,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:43Z
-CT-RN-FILMES-037-F,RN-FILMES-037,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:48Z
-CT-RN-FILMES-038-F,RN-FILMES-038,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:53Z
-CT-RN-FILMES-039-F,RN-FILMES-039,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:58:59Z
-CT-RN-FILMES-040-F,RN-FILMES-040,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:06Z
-CT-RN-FILMES-041-F,RN-FILMES-041,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:12Z
-CT-RN-FILMES-042-F,RN-FILMES-042,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:18Z
-CT-RN-FILMES-043-F,RN-FILMES-043,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:23Z
-CT-RN-FILMES-044-F,RN-FILMES-044,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:29Z
-CT-RN-FILMES-045-F,RN-FILMES-045,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:34Z
-CT-RN-FILMES-046-F,RN-FILMES-046,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:40Z
-CT-RN-FILMES-047-F,RN-FILMES-047,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:45Z
-CT-RN-FILMES-048-F,RN-FILMES-048,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:51Z
-CT-RN-FILMES-049-F,RN-FILMES-049,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T15:59:56Z
-CT-RN-FILMES-050-F,RN-FILMES-050,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:02Z
-CT-RN-FILMES-051-F,RN-FILMES-051,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:09Z
-CT-RN-FILMES-052-F,RN-FILMES-052,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:14Z
-CT-RN-FILMES-053-F,RN-FILMES-053,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:20Z
-CT-RN-FILMES-054-F,RN-FILMES-054,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:26Z
-CT-RN-FILMES-055-F,RN-FILMES-055,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:31Z
-CT-RN-FILMES-056-F,RN-FILMES-056,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:37Z
-CT-RN-FILMES-057-F,RN-FILMES-057,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:43Z
-CT-RN-FILMES-058-F,RN-FILMES-058,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:49Z
-CT-RN-FILMES-059-F,RN-FILMES-059,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:54Z
-CT-RN-FILMES-060-F,RN-FILMES-060,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:00:59Z
-CT-RN-FILMES-061-F,RN-FILMES-061,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:07Z
-CT-RN-FILMES-062-F,RN-FILMES-062,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:13Z
-CT-RN-FILMES-063-F,RN-FILMES-063,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:19Z
-CT-RN-FILMES-064-F,RN-FILMES-064,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:24Z
-CT-RN-FILMES-065-F,RN-FILMES-065,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:30Z
-CT-RN-FILMES-066-F,RN-FILMES-066,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:36Z
-CT-RN-FILMES-067-F,RN-FILMES-067,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:42Z
-CT-RN-FILMES-068-F,RN-FILMES-068,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:47Z
-CT-RN-SERIES-001-F,RN-SERIES-001,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:53Z
-CT-RN-SERIES-002-F,RN-SERIES-002,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:01:58Z
-CT-RN-SERIES-003-F,RN-SERIES-003,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:06Z
-CT-RN-SERIES-004-F,RN-SERIES-004,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:12Z
-CT-RN-SERIES-005-F,RN-SERIES-005,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:17Z
-CT-RN-SERIES-006-F,RN-SERIES-006,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:22Z
-CT-RN-SERIES-007-F,RN-SERIES-007,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:28Z
-CT-RN-SERIES-008-F,RN-SERIES-008,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:34Z
-CT-RN-SERIES-009-F,RN-SERIES-009,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:39Z
-CT-RN-SERIES-010-F,RN-SERIES-010,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:45Z
-CT-RN-SERIES-011-F,RN-SERIES-011,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:50Z
-CT-RN-SERIES-012-F,RN-SERIES-012,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:02:56Z
-CT-RN-SERIES-013-F,RN-SERIES-013,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:02Z
-CT-RN-SERIES-014-F,RN-SERIES-014,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:09Z
-CT-RN-SERIES-015-F,RN-SERIES-015,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:14Z
-CT-RN-SERIES-016-F,RN-SERIES-016,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:20Z
-CT-RN-SERIES-017-F,RN-SERIES-017,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:26Z
-CT-RN-SERIES-018-F,RN-SERIES-018,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:31Z
-CT-RN-SERIES-019-F,RN-SERIES-019,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:36Z
-CT-RN-SERIES-020-F,RN-SERIES-020,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:42Z
-CT-RN-SERIES-021-F,RN-SERIES-021,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:47Z
-CT-RN-SERIES-022-F,RN-SERIES-022,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:53Z
-CT-RN-SERIES-023-F,RN-SERIES-023,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:03:59Z
-CT-RN-SERIES-024-F,RN-SERIES-024,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:06Z
-CT-RN-SERIES-025-F,RN-SERIES-025,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:12Z
-CT-RN-SERIES-026-F,RN-SERIES-026,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:17Z
-CT-RN-SERIES-027-F,RN-SERIES-027,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:23Z
-CT-RN-SERIES-028-F,RN-SERIES-028,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:29Z
-CT-RN-SERIES-029-F,RN-SERIES-029,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:34Z
-CT-RN-SERIES-030-F,RN-SERIES-030,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:40Z
-CT-RN-SERIES-031-F,RN-SERIES-031,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:46Z
-CT-RN-SERIES-032-F,RN-SERIES-032,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:51Z
-CT-RN-SERIES-033-F,RN-SERIES-033,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:04:56Z
-CT-RN-SERIES-034-F,RN-SERIES-034,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:02Z
-CT-RN-SERIES-035-F,RN-SERIES-035,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:09Z
-CT-RN-SERIES-036-F,RN-SERIES-036,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:14Z
-CT-RN-SERIES-037-F,RN-SERIES-037,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:19Z
-CT-RN-SERIES-038-F,RN-SERIES-038,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:25Z
-CT-RN-SERIES-039-F,RN-SERIES-039,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:31Z
-CT-RN-SERIES-040-F,RN-SERIES-040,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:36Z
-CT-RN-SERIES-041-F,RN-SERIES-041,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:42Z
-CT-RN-SERIES-042-F,RN-SERIES-042,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:47Z
-CT-RN-SERIES-043-F,RN-SERIES-043,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:53Z
-CT-RN-SERIES-044-F,RN-SERIES-044,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:05:58Z
-CT-RN-SERIES-045-F,RN-SERIES-045,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:05Z
-CT-RN-SERIES-046-F,RN-SERIES-046,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:11Z
-CT-RN-SERIES-047-F,RN-SERIES-047,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:17Z
-CT-RN-SERIES-048-F,RN-SERIES-048,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:23Z
-CT-RN-SERIES-049-F,RN-SERIES-049,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:28Z
-CT-RN-SERIES-050-F,RN-SERIES-050,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:33Z
-CT-RN-SERIES-051-F,RN-SERIES-051,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:39Z
-CT-RN-SERIES-052-F,RN-SERIES-052,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:45Z
-CT-RN-SERIES-053-F,RN-SERIES-053,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:50Z
-CT-RN-SERIES-054-F,RN-SERIES-054,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:06:56Z
-CT-RN-SERIES-055-F,RN-SERIES-055,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:02Z
-CT-RN-SERIES-056-F,RN-SERIES-056,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:08Z
-CT-RN-SERIES-057-F,RN-SERIES-057,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:14Z
-CT-RN-SERIES-058-F,RN-SERIES-058,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:20Z
-CT-RN-SERIES-059-F,RN-SERIES-059,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:26Z
-CT-RN-SERIES-060-F,RN-SERIES-060,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:31Z
-CT-RN-SERIES-061-F,RN-SERIES-061,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:37Z
-CT-RN-SERIES-062-F,RN-SERIES-062,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T16:07:42Z
-CT-RN-ANIMES-001-F,RN-ANIMES-001,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:07:49Z
-CT-RN-ANIMES-002-F,RN-ANIMES-002,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:07:55Z
-CT-RN-ANIMES-003-F,RN-ANIMES-003,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:01Z
-CT-RN-ANIMES-004-F,RN-ANIMES-004,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:09Z
-CT-RN-ANIMES-005-F,RN-ANIMES-005,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:08:15Z
-CT-RN-ANIMES-006-F,RN-ANIMES-006,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:21Z
-CT-RN-ANIMES-007-F,RN-ANIMES-007,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:27Z
-CT-RN-ANIMES-008-F,RN-ANIMES-008,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:33Z
-CT-RN-ANIMES-009-F,RN-ANIMES-009,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:08:39Z
-CT-RN-ANIMES-010-F,RN-ANIMES-010,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:45Z
-CT-RN-ANIMES-011-F,RN-ANIMES-011,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:50Z
-CT-RN-ANIMES-012-F,RN-ANIMES-012,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:08:56Z
-CT-RN-ANIMES-013-F,RN-ANIMES-013,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:01Z
-CT-RN-ANIMES-014-F,RN-ANIMES-014,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:09Z
-CT-RN-ANIMES-015-F,RN-ANIMES-015,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:14Z
-CT-RN-ANIMES-016-F,RN-ANIMES-016,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:09:20Z
-CT-RN-ANIMES-017-F,RN-ANIMES-017,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:26Z
-CT-RN-ANIMES-018-F,RN-ANIMES-018,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:32Z
-CT-RN-ANIMES-019-F,RN-ANIMES-019,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:38Z
-CT-RN-ANIMES-020-F,RN-ANIMES-020,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:43Z
-CT-RN-JOGOS-001-F,RN-JOGOS-001,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:50Z
-CT-RN-JOGOS-002-F,RN-JOGOS-002,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:09:56Z
-CT-RN-JOGOS-003-F,RN-JOGOS-003,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:02Z
-CT-RN-JOGOS-004-F,RN-JOGOS-004,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:09Z
-CT-RN-JOGOS-005-F,RN-JOGOS-005,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:14Z
-CT-RN-JOGOS-006-F,RN-JOGOS-006,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:21Z
-CT-RN-JOGOS-007-F,RN-JOGOS-007,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:26Z
-CT-RN-JOGOS-008-F,RN-JOGOS-008,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:32Z
-CT-RN-JOGOS-009-F,RN-JOGOS-009,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:10:37Z
-CT-RN-JOGOS-010-F,RN-JOGOS-010,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:42Z
-CT-RN-JOGOS-011-F,RN-JOGOS-011,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:48Z
-CT-RN-JOGOS-012-F,RN-JOGOS-012,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:10:54Z
-CT-RN-JOGOS-013-F,RN-JOGOS-013,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:00Z
-CT-RN-JOGOS-014-F,RN-JOGOS-014,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:08Z
-CT-RN-JOGOS-015-F,RN-JOGOS-015,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:14Z
-CT-RN-JOGOS-016-F,RN-JOGOS-016,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:20Z
-CT-RN-JOGOS-017-F,RN-JOGOS-017,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:25Z
-CT-RN-JOGOS-018-F,RN-JOGOS-018,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:31Z
-CT-RN-JOGOS-019-F,RN-JOGOS-019,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:11:37Z
-CT-RN-JOGOS-020-F,RN-JOGOS-020,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:43Z
-CT-RN-JOGOS-021-F,RN-JOGOS-021,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:11:49Z
-CT-RN-JOGOS-022-F,RN-JOGOS-022,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:11:54Z
-CT-RN-JOGOS-023-F,RN-JOGOS-023,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:00Z
-CT-RN-JOGOS-024-F,RN-JOGOS-024,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:08Z
-CT-RN-JOGOS-025-F,RN-JOGOS-025,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:14Z
-CT-RN-JOGOS-026-F,RN-JOGOS-026,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:19Z
-CT-RN-JOGOS-027-F,RN-JOGOS-027,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:25Z
-CT-RN-JOGOS-028-F,RN-JOGOS-028,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:31Z
-CT-RN-JOGOS-029-F,RN-JOGOS-029,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:36Z
-CT-RN-PROMO-001-F,RN-PROMO-001,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:40Z
-CT-RN-PROMO-002-F,RN-PROMO-002,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:42Z
-CT-RN-PROMO-003-F,RN-PROMO-003,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:44Z
-CT-RN-PROMO-004-F,RN-PROMO-004,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:46Z
-CT-RN-PROMO-005-F,RN-PROMO-005,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:48Z
-CT-RN-PROMO-006-F,RN-PROMO-006,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:50Z
-CT-RN-PROMO-007-F,RN-PROMO-007,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:52Z
-CT-RN-PROMO-008-F,RN-PROMO-008,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:54Z
-CT-RN-PROMO-009-F,RN-PROMO-009,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:56Z
-CT-RN-PROMO-010-F,RN-PROMO-010,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:12:58Z
-CT-RN-PROMO-011-F,RN-PROMO-011,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:00Z
-CT-RN-PROMO-012-F,RN-PROMO-012,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:04Z
-CT-RN-PROMO-013-F,RN-PROMO-013,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:06Z
-CT-RN-PROMO-014-F,RN-PROMO-014,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:08Z
-CT-RN-PROMO-015-F,RN-PROMO-015,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:10Z
-CT-RN-PROMO-016-F,RN-PROMO-016,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:12Z
-CT-RN-PROMO-017-F,RN-PROMO-017,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:14Z
-CT-RN-PROMO-018-F,RN-PROMO-018,06-PROMOCOES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:13:15Z
-CT-RN-PROMO-019-F,RN-PROMO-019,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:17Z
-CT-RN-PROMO-020-F,RN-PROMO-020,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:19Z
-CT-RN-PROMO-021-F,RN-PROMO-021,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:21Z
-CT-RN-PROMO-022-F,RN-PROMO-022,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:23Z
-CT-RN-PROMO-023-F,RN-PROMO-023,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:26Z
-CT-RN-PROMO-024-F,RN-PROMO-024,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:28Z
-CT-RN-PROMO-025-F,RN-PROMO-025,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:30Z
-CT-RN-PROMO-026-F,RN-PROMO-026,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:32Z
-CT-RN-PROMO-027-F,RN-PROMO-027,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:34Z
-CT-RN-PROMO-028-F,RN-PROMO-028,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:36Z
-CT-RN-PROMO-029-F,RN-PROMO-029,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:38Z
-CT-RN-PROMO-030-F,RN-PROMO-030,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:40Z
-CT-RN-PROMO-031-F,RN-PROMO-031,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:42Z
-CT-RN-PROMO-032-F,RN-PROMO-032,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:44Z
-CT-RN-PROMO-033-F,RN-PROMO-033,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:46Z
-CT-RN-PROMO-034-F,RN-PROMO-034,06-PROMOCOES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:13:48Z
-CT-RN-PROMO-035-F,RN-PROMO-035,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:50Z
-CT-RN-HOJE-001-F,RN-HOJE-001,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:53Z
-CT-RN-HOJE-002-F,RN-HOJE-002,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:13:56Z
-CT-RN-HOJE-003-F,RN-HOJE-003,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:13:58Z
-CT-RN-HOJE-004-F,RN-HOJE-004,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:01Z
-CT-RN-HOJE-005-F,RN-HOJE-005,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:05Z
-CT-RN-HOJE-006-F,RN-HOJE-006,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:07Z
-CT-RN-HOJE-007-F,RN-HOJE-007,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:10Z
-CT-RN-HOJE-008-F,RN-HOJE-008,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:13Z
-CT-RN-HOJE-009-F,RN-HOJE-009,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:15Z
-CT-RN-HOJE-010-F,RN-HOJE-010,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:17Z
-CT-RN-HOJE-011-F,RN-HOJE-011,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:14:20Z
-CT-RN-HOJE-012-F,RN-HOJE-012,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:22Z
-CT-RN-HOJE-013-F,RN-HOJE-013,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:26Z
-CT-RN-HOJE-014-F,RN-HOJE-014,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:28Z
-CT-RN-HOJE-015-F,RN-HOJE-015,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:14:31Z
-CT-RN-HOJE-016-F,RN-HOJE-016,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:33Z
-CT-RN-HOJE-017-F,RN-HOJE-017,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:36Z
-CT-RN-HOJE-018-F,RN-HOJE-018,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:38Z
-CT-RN-HOJE-019-F,RN-HOJE-019,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:14:41Z
-CT-RN-HOJE-020-F,RN-HOJE-020,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:43Z
-CT-RN-HOJE-021-F,RN-HOJE-021,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:14:46Z
-CT-RN-HOJE-022-F,RN-HOJE-022,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:14:48Z
-CT-RN-HOJE-023-F,RN-HOJE-023,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:51Z
-CT-RN-HOJE-024-F,RN-HOJE-024,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:14:53Z
-CT-RN-MODAL-001-F,RN-MODAL-001,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T16:15:21Z
-CT-RN-MODAL-002-F,RN-MODAL-002,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:15:45Z
-CT-RN-MODAL-003-F,RN-MODAL-003,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:16:11Z
-CT-RN-MODAL-004-F,RN-MODAL-004,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:16:35Z
-CT-RN-MODAL-005-F,RN-MODAL-005,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T16:17:01Z
-CT-RN-MODAL-006-F,RN-MODAL-006,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:17:26Z
-CT-RN-MODAL-007-F,RN-MODAL-007,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T16:17:51Z
-CT-RN-MODAL-008-F,RN-MODAL-008,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T16:18:16Z
-CT-RN-MODAL-009-F,RN-MODAL-009,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:18:41Z
-CT-RN-MODAL-010-F,RN-MODAL-010,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:19:05Z
-CT-RN-MODAL-011-F,RN-MODAL-011,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:19:30Z
-CT-RN-MODAL-012-F,RN-MODAL-012,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:19:53Z
-CT-RN-MODAL-013-F,RN-MODAL-013,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T16:20:19Z
-CT-RN-MODAL-020-F,RN-MODAL-020,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:20:43Z
-CT-RN-MODAL-021-F,RN-MODAL-021,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:21:11Z
-CT-RN-MODAL-022-F,RN-MODAL-022,08-MODAIS.md,PASS,passo_a_passo,3,SuperModal abriu e Esc fechou,2026-09-23T16:21:21Z
-CT-RN-MODAL-023-F,RN-MODAL-023,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:21:45Z
-CT-RN-MODAL-024-F,RN-MODAL-024,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:22:11Z
-CT-RN-MODAL-025-F,RN-MODAL-025,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:22:36Z
-CT-RN-MODAL-026-F,RN-MODAL-026,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:23:00Z
-CT-RN-MODAL-030-F,RN-MODAL-030,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:23:26Z
-CT-RN-MODAL-031-F,RN-MODAL-031,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:23:51Z
-CT-RN-MODAL-032-F,RN-MODAL-032,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:24:15Z
-CT-RN-MODAL-033-F,RN-MODAL-033,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:24:40Z
-CT-RN-MODAL-040-F,RN-MODAL-040,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:25:05Z
-CT-RN-MODAL-041-F,RN-MODAL-041,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T16:25:30Z
-CT-RN-MODAL-042-F,RN-MODAL-042,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:25:54Z
-CT-RN-MODAL-043-F,RN-MODAL-043,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:26:19Z
-CT-RN-MODAL-044-F,RN-MODAL-044,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:26:43Z
-CT-RN-MODAL-045-F,RN-MODAL-045,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:27:10Z
-CT-RN-MODAL-050-F,RN-MODAL-050,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:27:35Z
-CT-RN-MODAL-051-F,RN-MODAL-051,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:27:58Z
-CT-RN-MODAL-052-F,RN-MODAL-052,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:28:23Z
-CT-RN-MODAL-053-F,RN-MODAL-053,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:28:47Z
-CT-RN-MODAL-060-F,RN-MODAL-060,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:28:56Z
-CT-RN-MODAL-061-F,RN-MODAL-061,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:29:20Z
-CT-RN-MODAL-062-F,RN-MODAL-062,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:29:44Z
-CT-RN-MODAL-063-F,RN-MODAL-063,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:29:52Z
-CT-RN-MODAL-064-F,RN-MODAL-064,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:30:01Z
-CT-RN-MODAL-070-F,RN-MODAL-070,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:30:26Z
-CT-RN-MODAL-071-F,RN-MODAL-071,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:30:50Z
-CT-RN-MODAL-072-F,RN-MODAL-072,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:31:15Z
-CT-RN-MODAL-080-F,RN-MODAL-080,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:31:40Z
-CT-RN-MODAL-081-F,RN-MODAL-081,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:32:05Z
-CT-RN-MODAL-082-F,RN-MODAL-082,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:32:30Z
-CT-RN-MODAL-090-F,RN-MODAL-090,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:32:54Z
-CT-RN-MODAL-091-F,RN-MODAL-091,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:33:18Z
-CT-RN-MODAL-092-F,RN-MODAL-092,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T16:33:43Z
-CT-RN-BUSCA-001-F,RN-BUSCA-001,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:45Z
-CT-RN-BUSCA-002-F,RN-BUSCA-002,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:47Z
-CT-RN-BUSCA-003-F,RN-BUSCA-003,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:50Z
-CT-RN-BUSCA-004-F,RN-BUSCA-004,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:53Z
-CT-RN-BUSCA-005-F,RN-BUSCA-005,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:55Z
-CT-RN-BUSCA-006-F,RN-BUSCA-006,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:33:57Z
-CT-RN-BUSCA-007-F,RN-BUSCA-007,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:00Z
-CT-RN-BUSCA-008-F,RN-BUSCA-008,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:04Z
-CT-RN-BUSCA-009-F,RN-BUSCA-009,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:06Z
-CT-RN-BUSCA-010-F,RN-BUSCA-010,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:09Z
-CT-RN-BUSCA-011-F,RN-BUSCA-011,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:12Z
-CT-RN-BUSCA-012-F,RN-BUSCA-012,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:34:14Z
-CT-RN-BUSCA-013-F,RN-BUSCA-013,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:16Z
-CT-RN-BUSCA-014-F,RN-BUSCA-014,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:19Z
-CT-RN-BUSCA-015-F,RN-BUSCA-015,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:21Z
-CT-RN-BUSCA-020-F,RN-BUSCA-020,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:24Z
-CT-RN-BUSCA-021-F,RN-BUSCA-021,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:26Z
-CT-RN-BUSCA-022-F,RN-BUSCA-022,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:28Z
-CT-RN-HEADER-001-F,RN-HEADER-001,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:31Z
-CT-RN-HEADER-002-F,RN-HEADER-002,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:33Z
-CT-RN-HEADER-003-F,RN-HEADER-003,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:35Z
-CT-RN-HEADER-004-F,RN-HEADER-004,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:38Z
-CT-RN-HEADER-005-F,RN-HEADER-005,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:40Z
-CT-RN-HEADER-006-F,RN-HEADER-006,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:42Z
-CT-RN-HEADER-007-F,RN-HEADER-007,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:45Z
-CT-RN-HEADER-008-F,RN-HEADER-008,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:47Z
-CT-RN-HEADER-009-F,RN-HEADER-009,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:50Z
-CT-RN-HEADER-010-F,RN-HEADER-010,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:52Z
-CT-RN-HEADER-020-F,RN-HEADER-020,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:54Z
-CT-RN-HEADER-021-F,RN-HEADER-021,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:57Z
-CT-RN-LISTA-001-F,RN-LISTA-001,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:34:59Z
-CT-RN-LISTA-002-F,RN-LISTA-002,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:35:01Z
-CT-RN-LISTA-010-F,RN-LISTA-010,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:04Z
-CT-RN-LISTA-011-F,RN-LISTA-011,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:06Z
-CT-RN-LISTA-012-F,RN-LISTA-012,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:08Z
-CT-RN-LISTA-020-F,RN-LISTA-020,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:10Z
-CT-RN-LISTA-021-F,RN-LISTA-021,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:12Z
-CT-RN-LISTA-030-F,RN-LISTA-030,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:14Z
-CT-RN-LISTA-031-F,RN-LISTA-031,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:16Z
-CT-RN-LISTA-032-F,RN-LISTA-032,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:18Z
-CT-RN-LISTA-033-F,RN-LISTA-033,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:21Z
-CT-RN-LISTA-034-F,RN-LISTA-034,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:23Z
-CT-RN-LISTA-035-F,RN-LISTA-035,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:25Z
-CT-RN-LISTA-036-F,RN-LISTA-036,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:27Z
-CT-RN-LISTA-037-F,RN-LISTA-037,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:29Z
-CT-RN-LISTA-040-F,RN-LISTA-040,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:31Z
-CT-RN-LISTA-041-F,RN-LISTA-041,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:33Z
-CT-RN-LISTA-042-F,RN-LISTA-042,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:35Z
-CT-RN-LISTA-043-F,RN-LISTA-043,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:37Z
-CT-RN-LISTA-044-F,RN-LISTA-044,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:39Z
-CT-RN-LISTA-045-F,RN-LISTA-045,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:41Z
-CT-RN-LISTA-046-F,RN-LISTA-046,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:43Z
-CT-RN-LISTA-047-F,RN-LISTA-047,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:45Z
-CT-RN-LISTA-048-F,RN-LISTA-048,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:47Z
-CT-RN-LISTA-049-F,RN-LISTA-049,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:49Z
-CT-RN-LISTA-050-F,RN-LISTA-050,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:51Z
-CT-RN-LISTA-051-F,RN-LISTA-051,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:53Z
-CT-RN-LISTA-052-F,RN-LISTA-052,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:55Z
-CT-RN-LISTA-053-F,RN-LISTA-053,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:57Z
-CT-RN-LISTA-060-F,RN-LISTA-060,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:35:59Z
-CT-RN-LISTA-061-F,RN-LISTA-061,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:01Z
-CT-RN-LISTA-062-F,RN-LISTA-062,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:04Z
-CT-RN-LISTA-063-F,RN-LISTA-063,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:05Z
-CT-RN-LISTA-064-F,RN-LISTA-064,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:36:07Z
-CT-RN-LISTA-065-F,RN-LISTA-065,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:11Z
-CT-RN-LISTA-066-F,RN-LISTA-066,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:14Z
-CT-RN-LISTA-070-F,RN-LISTA-070,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:16Z
-CT-RN-LISTA-071-F,RN-LISTA-071,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:18Z
-CT-RN-LISTA-072-F,RN-LISTA-072,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:20Z
-CT-RN-AUTH-001-F,RN-AUTH-001,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:22Z
-CT-RN-AUTH-002-F,RN-AUTH-002,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:24Z
-CT-RN-AUTH-003-F,RN-AUTH-003,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:26Z
-CT-RN-AUTH-004-F,RN-AUTH-004,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:28Z
-CT-RN-AUTH-005-F,RN-AUTH-005,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:30Z
-CT-RN-AUTH-006-F,RN-AUTH-006,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:32Z
-CT-RN-AUTH-010-F,RN-AUTH-010,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:34Z
-CT-RN-AUTH-011-F,RN-AUTH-011,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:36Z
-CT-RN-AUTH-012-F,RN-AUTH-012,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:38Z
-CT-RN-AUTH-013-F,RN-AUTH-013,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:40Z
-CT-RN-AUTH-014-F,RN-AUTH-014,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:42Z
-CT-RN-AUTH-020-F,RN-AUTH-020,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:44Z
-CT-RN-AUTH-021-F,RN-AUTH-021,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:46Z
-CT-RN-AUTH-022-F,RN-AUTH-022,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:48Z
-CT-RN-AUTH-023-F,RN-AUTH-023,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:50Z
-CT-RN-AUTH-024-F,RN-AUTH-024,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:52Z
-CT-RN-AUTH-025-F,RN-AUTH-025,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:36:54Z
-CT-RN-AUTH-030-F,RN-AUTH-030,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:56Z
-CT-RN-AUTH-031-F,RN-AUTH-031,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:36:58Z
-CT-RN-AUTH-032-F,RN-AUTH-032,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:00Z
-CT-RN-AUTH-033-F,RN-AUTH-033,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:03Z
-CT-RN-AUTH-034-F,RN-AUTH-034,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:05Z
-CT-RN-AUTH-035-F,RN-AUTH-035,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:07Z
-CT-RN-AUTH-040-F,RN-AUTH-040,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:09Z
-CT-RN-AUTH-041-F,RN-AUTH-041,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:11Z
-CT-RN-AUTH-042-F,RN-AUTH-042,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:13Z
-CT-RN-AUTH-043-F,RN-AUTH-043,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:15Z
-CT-RN-AUTH-044-F,RN-AUTH-044,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:17Z
-CT-RN-AUTH-050-F,RN-AUTH-050,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:19Z
-CT-RN-AUTH-051-F,RN-AUTH-051,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:21Z
-CT-RN-CONT-001-F,RN-CONT-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:29Z
-CT-RN-CONT-002-F,RN-CONT-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:36Z
-CT-RN-CONT-003-F,RN-CONT-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:43Z
-CT-RN-CONT-004-F,RN-CONT-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:50Z
-CT-RN-CONT-005-F,RN-CONT-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:37:57Z
-CT-RN-CONT-006-F,RN-CONT-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:07Z
-CT-RN-CONT-007-F,RN-CONT-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:14Z
-CT-RN-CONT-008-F,RN-CONT-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:21Z
-CT-RN-CONT-009-F,RN-CONT-009,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:28Z
-CT-RN-CONT-010-F,RN-CONT-010,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:35Z
-CT-RN-CONT-011-F,RN-CONT-011,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:42Z
-CT-RN-CONT-020-F,RN-CONT-020,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:48Z
-CT-RN-DEV-001-F,RN-DEV-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:38:55Z
-CT-RN-DEV-002-F,RN-DEV-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:15Z
-CT-RN-DEV-003-F,RN-DEV-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:26Z
-CT-RN-DEV-004-F,RN-DEV-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:33Z
-CT-RN-DEV-005-F,RN-DEV-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:40Z
-CT-RN-DEV-006-F,RN-DEV-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:47Z
-CT-RN-DEV-007-F,RN-DEV-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:42:54Z
-CT-RN-DUB-001-F,RN-DUB-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:02Z
-CT-RN-DUB-002-F,RN-DUB-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T16:43:10Z
-CT-RN-DUB-003-F,RN-DUB-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:18Z
-CT-RN-DUB-004-F,RN-DUB-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:25Z
-CT-RN-DUB-005-F,RN-DUB-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:32Z
-CT-RN-DUB-006-F,RN-DUB-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:39Z
-CT-RN-EVT-001-F,RN-EVT-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:46Z
-CT-RN-EVT-002-F,RN-EVT-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:52Z
-CT-RN-EVT-003-F,RN-EVT-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:43:59Z
-CT-RN-EVT-004-F,RN-EVT-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:07Z
-CT-RN-EVT-005-F,RN-EVT-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:14Z
-CT-RN-EVT-006-F,RN-EVT-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:21Z
-CT-RN-EVT-007-F,RN-EVT-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:28Z
-CT-RN-PERS-001-F,RN-PERS-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:36Z
-CT-RN-PERS-002-F,RN-PERS-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:44Z
-CT-RN-PERS-003-F,RN-PERS-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:44:52Z
-CT-RN-PERS-004-F,RN-PERS-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:01Z
-CT-RN-PERS-005-F,RN-PERS-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:11Z
-CT-RN-PERS-006-F,RN-PERS-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:17Z
-CT-RN-PERS-007-F,RN-PERS-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:24Z
-CT-RN-PERS-008-F,RN-PERS-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:31Z
-CT-RN-PREM-001-F,RN-PREM-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:38Z
-CT-RN-PREM-002-F,RN-PREM-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:45Z
-CT-RN-PREM-003-F,RN-PREM-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:52Z
-CT-RN-PREM-004-F,RN-PREM-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:45:58Z
-CT-RN-PREM-005-F,RN-PREM-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:46:07Z
-CT-RN-PREM-006-F,RN-PREM-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:46:14Z
-CT-RN-PREM-007-F,RN-PREM-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:46:21Z
-CT-RN-PREM-008-F,RN-PREM-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:46:32Z
-CT-RN-PREM-009-F,RN-PREM-009,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T16:46:40Z
+CT-RN-HOME-001-F,RN-HOME-001,01-HOME.md,PASS,passo_a_passo,2,"Ordem índices: [10, 17, 24, 31]",2026-09-23T17:42:03Z
+CT-RN-HOME-002-F,RN-HOME-002,01-HOME.md,PASS,passo_a_passo,6,Navegação Filmes/Séries/Animes/Jogos OK,2026-09-23T17:42:51Z
+CT-RN-HOME-003-F,RN-HOME-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:00Z
+CT-RN-HOME-004-F,RN-HOME-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:13Z
+CT-RN-HOME-AC-001-F,RN-HOME-AC-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:19Z
+CT-RN-HOME-AC-002-F,RN-HOME-AC-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:25Z
+CT-RN-HOME-AC-003-F,RN-HOME-AC-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:30Z
+CT-RN-HOME-AC-004-F,RN-HOME-AC-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:35Z
+CT-RN-HOME-AC-005-F,RN-HOME-AC-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:41Z
+CT-RN-HOME-AC-006-F,RN-HOME-AC-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:46Z
+CT-RN-HOME-AC-007-F,RN-HOME-AC-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:50Z
+CT-RN-HOME-AC-008-F,RN-HOME-AC-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:43:55Z
+CT-RN-HOME-AC-009-F,RN-HOME-AC-009,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:00Z
+CT-RN-HOME-AC-010-F,RN-HOME-AC-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:05Z
+CT-RN-HOME-CA-001-F,RN-HOME-CA-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:10Z
+CT-RN-HOME-CA-002-F,RN-HOME-CA-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:15Z
+CT-RN-HOME-CA-003-F,RN-HOME-CA-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:19Z
+CT-RN-HOME-CA-004-F,RN-HOME-CA-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:24Z
+CT-RN-HOME-CA-005-F,RN-HOME-CA-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:28Z
+CT-RN-HOME-CA-006-F,RN-HOME-CA-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:32Z
+CT-RN-HOME-CA-007-F,RN-HOME-CA-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:36Z
+CT-RN-HOME-CA-008-F,RN-HOME-CA-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:40Z
+CT-RN-HOME-CARD-001-F,RN-HOME-CARD-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:44Z
+CT-RN-HOME-CARD-002-F,RN-HOME-CARD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:48Z
+CT-RN-HOME-CARD-003-F,RN-HOME-CARD-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:52Z
+CT-RN-HOME-CARD-004-F,RN-HOME-CARD-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:44:56Z
+CT-RN-HOME-CARD-005-F,RN-HOME-CARD-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:00Z
+CT-RN-HOME-CARD-006-F,RN-HOME-CARD-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:06Z
+CT-RN-HOME-CARD-007-F,RN-HOME-CARD-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:10Z
+CT-RN-HOME-CARD-008-F,RN-HOME-CARD-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:14Z
+CT-RN-HOME-CARD-009-F,RN-HOME-CARD-009,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:45:18Z
+CT-RN-HOME-CARD-010-F,RN-HOME-CARD-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:23Z
+CT-RN-HOME-CARD-011-F,RN-HOME-CARD-011,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:27Z
+CT-RN-HOME-CARD-012-F,RN-HOME-CARD-012,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:45:31Z
+CT-RN-HOME-CARD-013-F,RN-HOME-CARD-013,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:35Z
+CT-RN-HOME-CARD-014-F,RN-HOME-CARD-014,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:39Z
+CT-RN-HOME-CARD-015-F,RN-HOME-CARD-015,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:45:43Z
+CT-RN-HOME-CARD-016-F,RN-HOME-CARD-016,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:47Z
+CT-RN-HOME-CARD-017-F,RN-HOME-CARD-017,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:51Z
+CT-RN-HOME-CON-001-F,RN-HOME-CON-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:45:55Z
+CT-RN-HOME-CON-002-F,RN-HOME-CON-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:45:59Z
+CT-RN-HOME-CON-003-F,RN-HOME-CON-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:46:03Z
+CT-RN-HOME-CON-004-F,RN-HOME-CON-004,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:46:07Z
+CT-RN-HOME-CON-005-F,RN-HOME-CON-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:46:15Z
+CT-RN-HOME-CON-006-F,RN-HOME-CON-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:46:20Z
+CT-RN-HOME-CON-007-F,RN-HOME-CON-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:46:25Z
+CT-RN-HOME-CON-008-F,RN-HOME-CON-008,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:46:30Z
+CT-RN-HOME-CON-009-F,RN-HOME-CON-009,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:46:35Z
+CT-RN-HOME-CON-010-F,RN-HOME-CON-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:46:41Z
+CT-RN-HOME-EA-001-F,RN-HOME-EA-001,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:46:53Z
+CT-RN-HOME-EA-002-F,RN-HOME-EA-002,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:47:02Z
+CT-RN-HOME-EA-003-F,RN-HOME-EA-003,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:47:11Z
+CT-RN-HOME-EA-004-F,RN-HOME-EA-004,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:47:19Z
+CT-RN-HOME-EA-005-F,RN-HOME-EA-005,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:47:28Z
+CT-RN-HOME-EA-006-F,RN-HOME-EA-006,01-HOME.md,PASS,passo_a_passo,4,4 botões em alta visíveis,2026-09-23T17:47:47Z
+CT-RN-HOME-HERO-001-F,RN-HOME-HERO-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:47:53Z
+CT-RN-HOME-HERO-002-F,RN-HOME-HERO-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:47:58Z
+CT-RN-HOME-SHELL-001-F,RN-HOME-SHELL-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:04Z
+CT-RN-HOME-SHELL-002-F,RN-HOME-SHELL-002,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:48:08Z
+CT-RN-HOME-TBD-001-F,RN-HOME-TBD-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:48:16Z
+CT-RN-HOME-TBD-002-F,RN-HOME-TBD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:20Z
+CT-RN-HOME-TBD-003-F,RN-HOME-TBD-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:24Z
+CT-RN-HOME-TL-001-F,RN-HOME-TL-001,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:48:28Z
+CT-RN-HOME-TL-002-F,RN-HOME-TL-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:32Z
+CT-RN-HOME-TL-003-F,RN-HOME-TL-003,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:36Z
+CT-RN-HOME-TL-004-F,RN-HOME-TL-004,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:40Z
+CT-RN-HOME-TL-005-F,RN-HOME-TL-005,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:45Z
+CT-RN-HOME-TL-006-F,RN-HOME-TL-006,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:51Z
+CT-RN-HOME-TL-007-F,RN-HOME-TL-007,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:55Z
+CT-RN-HOME-TL-008-F,RN-HOME-TL-008,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:48:59Z
+CT-RN-HOME-TL-009-F,RN-HOME-TL-009,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:04Z
+CT-RN-HOME-TL-010-F,RN-HOME-TL-010,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:09Z
+CT-RN-HOME-TL-011-F,RN-HOME-TL-011,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:13Z
+CT-RN-HOME-TL-012-F,RN-HOME-TL-012,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:19Z
+CT-RN-HOME-TL-013-F,RN-HOME-TL-013,01-HOME.md,PENDENTE_QA_HUMANO,catalogo,2,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T17:49:24Z
+CT-RN-HOME-UPD-001-F,RN-HOME-UPD-001,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:29Z
+CT-RN-HOME-UPD-002-F,RN-HOME-UPD-002,01-HOME.md,PENDENTE_QA_HUMANO,manual_obrigatorio,3,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T17:49:35Z
+CT-RN-FILMES-001-F,RN-FILMES-001,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:49:50Z
+CT-RN-FILMES-002-F,RN-FILMES-002,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:04Z
+CT-RN-FILMES-003-F,RN-FILMES-003,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:18Z
+CT-RN-FILMES-004-F,RN-FILMES-004,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:30Z
+CT-RN-FILMES-005-F,RN-FILMES-005,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:43Z
+CT-RN-FILMES-006-F,RN-FILMES-006,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:50Z
+CT-RN-FILMES-007-F,RN-FILMES-007,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:50:55Z
+CT-RN-FILMES-008-F,RN-FILMES-008,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:02Z
+CT-RN-FILMES-009-F,RN-FILMES-009,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:09Z
+CT-RN-FILMES-010-F,RN-FILMES-010,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:16Z
+CT-RN-FILMES-011-F,RN-FILMES-011,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:21Z
+CT-RN-FILMES-012-F,RN-FILMES-012,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:27Z
+CT-RN-FILMES-013-F,RN-FILMES-013,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:32Z
+CT-RN-FILMES-014-F,RN-FILMES-014,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:38Z
+CT-RN-FILMES-015-F,RN-FILMES-015,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:44Z
+CT-RN-FILMES-016-F,RN-FILMES-016,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:49Z
+CT-RN-FILMES-017-F,RN-FILMES-017,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:51:54Z
+CT-RN-FILMES-018-F,RN-FILMES-018,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:00Z
+CT-RN-FILMES-019-F,RN-FILMES-019,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:08Z
+CT-RN-FILMES-020-F,RN-FILMES-020,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:14Z
+CT-RN-FILMES-021-F,RN-FILMES-021,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:20Z
+CT-RN-FILMES-022-F,RN-FILMES-022,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:27Z
+CT-RN-FILMES-023-F,RN-FILMES-023,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:32Z
+CT-RN-FILMES-024-F,RN-FILMES-024,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:38Z
+CT-RN-FILMES-025-F,RN-FILMES-025,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:52:52Z
+CT-RN-FILMES-026-F,RN-FILMES-026,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:09Z
+CT-RN-FILMES-027-F,RN-FILMES-027,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:25Z
+CT-RN-FILMES-028-F,RN-FILMES-028,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:33Z
+CT-RN-FILMES-029-F,RN-FILMES-029,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:40Z
+CT-RN-FILMES-030-F,RN-FILMES-030,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:46Z
+CT-RN-FILMES-031-F,RN-FILMES-031,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:53:54Z
+CT-RN-FILMES-032-F,RN-FILMES-032,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:54:01Z
+CT-RN-FILMES-033-F,RN-FILMES-033,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:54:09Z
+CT-RN-FILMES-034-F,RN-FILMES-034,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:54:23Z
+CT-RN-FILMES-035-F,RN-FILMES-035,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:54:36Z
+CT-RN-FILMES-036-F,RN-FILMES-036,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:54:50Z
+CT-RN-FILMES-037-F,RN-FILMES-037,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:04Z
+CT-RN-FILMES-038-F,RN-FILMES-038,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:18Z
+CT-RN-FILMES-039-F,RN-FILMES-039,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:30Z
+CT-RN-FILMES-040-F,RN-FILMES-040,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:41Z
+CT-RN-FILMES-041-F,RN-FILMES-041,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:47Z
+CT-RN-FILMES-042-F,RN-FILMES-042,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:55:54Z
+CT-RN-FILMES-043-F,RN-FILMES-043,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:56:01Z
+CT-RN-FILMES-044-F,RN-FILMES-044,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:56:10Z
+CT-RN-FILMES-045-F,RN-FILMES-045,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:56:25Z
+CT-RN-FILMES-046-F,RN-FILMES-046,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:56:37Z
+CT-RN-FILMES-047-F,RN-FILMES-047,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:56:50Z
+CT-RN-FILMES-048-F,RN-FILMES-048,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:04Z
+CT-RN-FILMES-049-F,RN-FILMES-049,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:16Z
+CT-RN-FILMES-050-F,RN-FILMES-050,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:28Z
+CT-RN-FILMES-051-F,RN-FILMES-051,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:37Z
+CT-RN-FILMES-052-F,RN-FILMES-052,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:43Z
+CT-RN-FILMES-053-F,RN-FILMES-053,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:50Z
+CT-RN-FILMES-054-F,RN-FILMES-054,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:57:57Z
+CT-RN-FILMES-055-F,RN-FILMES-055,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:05Z
+CT-RN-FILMES-056-F,RN-FILMES-056,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:13Z
+CT-RN-FILMES-057-F,RN-FILMES-057,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:20Z
+CT-RN-FILMES-058-F,RN-FILMES-058,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:27Z
+CT-RN-FILMES-059-F,RN-FILMES-059,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:33Z
+CT-RN-FILMES-060-F,RN-FILMES-060,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:42Z
+CT-RN-FILMES-061-F,RN-FILMES-061,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:58:56Z
+CT-RN-FILMES-062-F,RN-FILMES-062,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:59:11Z
+CT-RN-FILMES-063-F,RN-FILMES-063,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:59:27Z
+CT-RN-FILMES-064-F,RN-FILMES-064,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:59:41Z
+CT-RN-FILMES-065-F,RN-FILMES-065,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T17:59:54Z
+CT-RN-FILMES-066-F,RN-FILMES-066,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:00:05Z
+CT-RN-FILMES-067-F,RN-FILMES-067,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:00:20Z
+CT-RN-FILMES-068-F,RN-FILMES-068,02-FILMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Filmes) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:00:33Z
+CT-RN-SERIES-001-F,RN-SERIES-001,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:00:45Z
+CT-RN-SERIES-002-F,RN-SERIES-002,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:00:53Z
+CT-RN-SERIES-003-F,RN-SERIES-003,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:09Z
+CT-RN-SERIES-004-F,RN-SERIES-004,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:23Z
+CT-RN-SERIES-005-F,RN-SERIES-005,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:29Z
+CT-RN-SERIES-006-F,RN-SERIES-006,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:37Z
+CT-RN-SERIES-007-F,RN-SERIES-007,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:44Z
+CT-RN-SERIES-008-F,RN-SERIES-008,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:01:51Z
+CT-RN-SERIES-009-F,RN-SERIES-009,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:02:06Z
+CT-RN-SERIES-010-F,RN-SERIES-010,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:02:22Z
+CT-RN-SERIES-011-F,RN-SERIES-011,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:02:33Z
+CT-RN-SERIES-012-F,RN-SERIES-012,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:02:44Z
+CT-RN-SERIES-013-F,RN-SERIES-013,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:02:56Z
+CT-RN-SERIES-014-F,RN-SERIES-014,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:03:11Z
+CT-RN-SERIES-015-F,RN-SERIES-015,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:03:24Z
+CT-RN-SERIES-016-F,RN-SERIES-016,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:03:32Z
+CT-RN-SERIES-017-F,RN-SERIES-017,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:03:47Z
+CT-RN-SERIES-018-F,RN-SERIES-018,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:03:56Z
+CT-RN-SERIES-019-F,RN-SERIES-019,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:02Z
+CT-RN-SERIES-020-F,RN-SERIES-020,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:07Z
+CT-RN-SERIES-021-F,RN-SERIES-021,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:13Z
+CT-RN-SERIES-022-F,RN-SERIES-022,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:19Z
+CT-RN-SERIES-023-F,RN-SERIES-023,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:25Z
+CT-RN-SERIES-024-F,RN-SERIES-024,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:32Z
+CT-RN-SERIES-025-F,RN-SERIES-025,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:04:46Z
+CT-RN-SERIES-026-F,RN-SERIES-026,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:05:03Z
+CT-RN-SERIES-027-F,RN-SERIES-027,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:05:17Z
+CT-RN-SERIES-028-F,RN-SERIES-028,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:05:32Z
+CT-RN-SERIES-029-F,RN-SERIES-029,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:05:45Z
+CT-RN-SERIES-030-F,RN-SERIES-030,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:05:52Z
+CT-RN-SERIES-031-F,RN-SERIES-031,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:00Z
+CT-RN-SERIES-032-F,RN-SERIES-032,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:08Z
+CT-RN-SERIES-033-F,RN-SERIES-033,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:16Z
+CT-RN-SERIES-034-F,RN-SERIES-034,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:30Z
+CT-RN-SERIES-035-F,RN-SERIES-035,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:45Z
+CT-RN-SERIES-036-F,RN-SERIES-036,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:06:59Z
+CT-RN-SERIES-037-F,RN-SERIES-037,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:14Z
+CT-RN-SERIES-038-F,RN-SERIES-038,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:28Z
+CT-RN-SERIES-039-F,RN-SERIES-039,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:37Z
+CT-RN-SERIES-040-F,RN-SERIES-040,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:42Z
+CT-RN-SERIES-041-F,RN-SERIES-041,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:48Z
+CT-RN-SERIES-042-F,RN-SERIES-042,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:53Z
+CT-RN-SERIES-043-F,RN-SERIES-043,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:07:58Z
+CT-RN-SERIES-044-F,RN-SERIES-044,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:06Z
+CT-RN-SERIES-045-F,RN-SERIES-045,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:22Z
+CT-RN-SERIES-046-F,RN-SERIES-046,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:31Z
+CT-RN-SERIES-047-F,RN-SERIES-047,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:36Z
+CT-RN-SERIES-048-F,RN-SERIES-048,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:43Z
+CT-RN-SERIES-049-F,RN-SERIES-049,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:49Z
+CT-RN-SERIES-050-F,RN-SERIES-050,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:08:55Z
+CT-RN-SERIES-051-F,RN-SERIES-051,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:09:00Z
+CT-RN-SERIES-052-F,RN-SERIES-052,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:09:17Z
+CT-RN-SERIES-053-F,RN-SERIES-053,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:09:31Z
+CT-RN-SERIES-054-F,RN-SERIES-054,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:09:42Z
+CT-RN-SERIES-055-F,RN-SERIES-055,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:09:58Z
+CT-RN-SERIES-056-F,RN-SERIES-056,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:06Z
+CT-RN-SERIES-057-F,RN-SERIES-057,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:12Z
+CT-RN-SERIES-058-F,RN-SERIES-058,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:18Z
+CT-RN-SERIES-059-F,RN-SERIES-059,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:24Z
+CT-RN-SERIES-060-F,RN-SERIES-060,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:30Z
+CT-RN-SERIES-061-F,RN-SERIES-061,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:36Z
+CT-RN-SERIES-062-F,RN-SERIES-062,03-SERIES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Página OK (h1=Séries) — robô não cobre passos da regra; QA/supervisor executa CSV.,2026-09-23T18:10:43Z
+CT-RN-ANIMES-001-F,RN-ANIMES-001,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:10:50Z
+CT-RN-ANIMES-002-F,RN-ANIMES-002,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:10:56Z
+CT-RN-ANIMES-003-F,RN-ANIMES-003,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:04Z
+CT-RN-ANIMES-004-F,RN-ANIMES-004,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:12Z
+CT-RN-ANIMES-005-F,RN-ANIMES-005,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:11:18Z
+CT-RN-ANIMES-006-F,RN-ANIMES-006,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:24Z
+CT-RN-ANIMES-007-F,RN-ANIMES-007,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:31Z
+CT-RN-ANIMES-008-F,RN-ANIMES-008,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:37Z
+CT-RN-ANIMES-009-F,RN-ANIMES-009,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:11:44Z
+CT-RN-ANIMES-010-F,RN-ANIMES-010,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:11:59Z
+CT-RN-ANIMES-011-F,RN-ANIMES-011,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:12:16Z
+CT-RN-ANIMES-012-F,RN-ANIMES-012,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:12:29Z
+CT-RN-ANIMES-013-F,RN-ANIMES-013,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:12:40Z
+CT-RN-ANIMES-014-F,RN-ANIMES-014,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:12:55Z
+CT-RN-ANIMES-015-F,RN-ANIMES-015,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:13:09Z
+CT-RN-ANIMES-016-F,RN-ANIMES-016,04-ANIMES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:13:16Z
+CT-RN-ANIMES-017-F,RN-ANIMES-017,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:13:24Z
+CT-RN-ANIMES-018-F,RN-ANIMES-018,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:13:32Z
+CT-RN-ANIMES-019-F,RN-ANIMES-019,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:13:38Z
+CT-RN-ANIMES-020-F,RN-ANIMES-020,04-ANIMES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:13:51Z
+CT-RN-JOGOS-001-F,RN-JOGOS-001,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:08Z
+CT-RN-JOGOS-002-F,RN-JOGOS-002,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:14Z
+CT-RN-JOGOS-003-F,RN-JOGOS-003,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:20Z
+CT-RN-JOGOS-004-F,RN-JOGOS-004,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:26Z
+CT-RN-JOGOS-005-F,RN-JOGOS-005,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:31Z
+CT-RN-JOGOS-006-F,RN-JOGOS-006,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:38Z
+CT-RN-JOGOS-007-F,RN-JOGOS-007,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:44Z
+CT-RN-JOGOS-008-F,RN-JOGOS-008,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:14:51Z
+CT-RN-JOGOS-009-F,RN-JOGOS-009,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:14:59Z
+CT-RN-JOGOS-010-F,RN-JOGOS-010,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:08Z
+CT-RN-JOGOS-011-F,RN-JOGOS-011,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:14Z
+CT-RN-JOGOS-012-F,RN-JOGOS-012,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:20Z
+CT-RN-JOGOS-013-F,RN-JOGOS-013,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:27Z
+CT-RN-JOGOS-014-F,RN-JOGOS-014,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:33Z
+CT-RN-JOGOS-015-F,RN-JOGOS-015,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:39Z
+CT-RN-JOGOS-016-F,RN-JOGOS-016,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:15:47Z
+CT-RN-JOGOS-017-F,RN-JOGOS-017,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:16:01Z
+CT-RN-JOGOS-018-F,RN-JOGOS-018,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:16:15Z
+CT-RN-JOGOS-019-F,RN-JOGOS-019,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:16:25Z
+CT-RN-JOGOS-020-F,RN-JOGOS-020,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:16:40Z
+CT-RN-JOGOS-021-F,RN-JOGOS-021,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:16:54Z
+CT-RN-JOGOS-022-F,RN-JOGOS-022,05-JOGOS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:17:06Z
+CT-RN-JOGOS-023-F,RN-JOGOS-023,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:17:18Z
+CT-RN-JOGOS-024-F,RN-JOGOS-024,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:17:29Z
+CT-RN-JOGOS-025-F,RN-JOGOS-025,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:17:44Z
+CT-RN-JOGOS-026-F,RN-JOGOS-026,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:17:56Z
+CT-RN-JOGOS-027-F,RN-JOGOS-027,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:11Z
+CT-RN-JOGOS-028-F,RN-JOGOS-028,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:25Z
+CT-RN-JOGOS-029-F,RN-JOGOS-029,05-JOGOS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:38Z
+CT-RN-PROMO-001-F,RN-PROMO-001,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:41Z
+CT-RN-PROMO-002-F,RN-PROMO-002,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:44Z
+CT-RN-PROMO-003-F,RN-PROMO-003,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:47Z
+CT-RN-PROMO-004-F,RN-PROMO-004,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:50Z
+CT-RN-PROMO-005-F,RN-PROMO-005,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:53Z
+CT-RN-PROMO-006-F,RN-PROMO-006,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:55Z
+CT-RN-PROMO-007-F,RN-PROMO-007,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:18:58Z
+CT-RN-PROMO-008-F,RN-PROMO-008,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:01Z
+CT-RN-PROMO-009-F,RN-PROMO-009,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:04Z
+CT-RN-PROMO-010-F,RN-PROMO-010,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:06Z
+CT-RN-PROMO-011-F,RN-PROMO-011,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:08Z
+CT-RN-PROMO-012-F,RN-PROMO-012,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:10Z
+CT-RN-PROMO-013-F,RN-PROMO-013,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:12Z
+CT-RN-PROMO-014-F,RN-PROMO-014,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:14Z
+CT-RN-PROMO-015-F,RN-PROMO-015,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:16Z
+CT-RN-PROMO-016-F,RN-PROMO-016,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:18Z
+CT-RN-PROMO-017-F,RN-PROMO-017,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:20Z
+CT-RN-PROMO-018-F,RN-PROMO-018,06-PROMOCOES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:19:22Z
+CT-RN-PROMO-019-F,RN-PROMO-019,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:25Z
+CT-RN-PROMO-020-F,RN-PROMO-020,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:28Z
+CT-RN-PROMO-021-F,RN-PROMO-021,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:31Z
+CT-RN-PROMO-022-F,RN-PROMO-022,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:34Z
+CT-RN-PROMO-023-F,RN-PROMO-023,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:37Z
+CT-RN-PROMO-024-F,RN-PROMO-024,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:40Z
+CT-RN-PROMO-025-F,RN-PROMO-025,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:43Z
+CT-RN-PROMO-026-F,RN-PROMO-026,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:46Z
+CT-RN-PROMO-027-F,RN-PROMO-027,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:50Z
+CT-RN-PROMO-028-F,RN-PROMO-028,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:53Z
+CT-RN-PROMO-029-F,RN-PROMO-029,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:56Z
+CT-RN-PROMO-030-F,RN-PROMO-030,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:19:59Z
+CT-RN-PROMO-031-F,RN-PROMO-031,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:02Z
+CT-RN-PROMO-032-F,RN-PROMO-032,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:05Z
+CT-RN-PROMO-033-F,RN-PROMO-033,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:07Z
+CT-RN-PROMO-034-F,RN-PROMO-034,06-PROMOCOES.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:20:09Z
+CT-RN-PROMO-035-F,RN-PROMO-035,06-PROMOCOES.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:11Z
+CT-RN-HOJE-001-F,RN-HOJE-001,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:15Z
+CT-RN-HOJE-002-F,RN-HOJE-002,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:20:17Z
+CT-RN-HOJE-003-F,RN-HOJE-003,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:20Z
+CT-RN-HOJE-004-F,RN-HOJE-004,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:23Z
+CT-RN-HOJE-005-F,RN-HOJE-005,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:26Z
+CT-RN-HOJE-006-F,RN-HOJE-006,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:30Z
+CT-RN-HOJE-007-F,RN-HOJE-007,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:35Z
+CT-RN-HOJE-008-F,RN-HOJE-008,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:40Z
+CT-RN-HOJE-009-F,RN-HOJE-009,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:45Z
+CT-RN-HOJE-010-F,RN-HOJE-010,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:50Z
+CT-RN-HOJE-011-F,RN-HOJE-011,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:20:54Z
+CT-RN-HOJE-012-F,RN-HOJE-012,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:20:59Z
+CT-RN-HOJE-013-F,RN-HOJE-013,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:04Z
+CT-RN-HOJE-014-F,RN-HOJE-014,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:10Z
+CT-RN-HOJE-015-F,RN-HOJE-015,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:21:15Z
+CT-RN-HOJE-016-F,RN-HOJE-016,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:20Z
+CT-RN-HOJE-017-F,RN-HOJE-017,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:25Z
+CT-RN-HOJE-018-F,RN-HOJE-018,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:30Z
+CT-RN-HOJE-019-F,RN-HOJE-019,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:21:35Z
+CT-RN-HOJE-020-F,RN-HOJE-020,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:37Z
+CT-RN-HOJE-021-F,RN-HOJE-021,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:21:41Z
+CT-RN-HOJE-022-F,RN-HOJE-022,07-HOJE.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:21:44Z
+CT-RN-HOJE-023-F,RN-HOJE-023,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:48Z
+CT-RN-HOJE-024-F,RN-HOJE-024,07-HOJE.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:21:50Z
+CT-RN-MODAL-001-F,RN-MODAL-001,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T18:22:22Z
+CT-RN-MODAL-002-F,RN-MODAL-002,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:22:59Z
+CT-RN-MODAL-003-F,RN-MODAL-003,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:23:34Z
+CT-RN-MODAL-004-F,RN-MODAL-004,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:24:10Z
+CT-RN-MODAL-005-F,RN-MODAL-005,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T18:24:38Z
+CT-RN-MODAL-006-F,RN-MODAL-006,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:25:03Z
+CT-RN-MODAL-007-F,RN-MODAL-007,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T18:25:28Z
+CT-RN-MODAL-008-F,RN-MODAL-008,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T18:25:56Z
+CT-RN-MODAL-009-F,RN-MODAL-009,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:26:28Z
+CT-RN-MODAL-010-F,RN-MODAL-010,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:27:02Z
+CT-RN-MODAL-011-F,RN-MODAL-011,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:27:40Z
+CT-RN-MODAL-012-F,RN-MODAL-012,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:28:13Z
+CT-RN-MODAL-013-F,RN-MODAL-013,08-MODAIS.md,FAIL,passo_a_passo,4,Clique fora não fechou modal,2026-09-23T18:28:49Z
+CT-RN-MODAL-020-F,RN-MODAL-020,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:29:18Z
+CT-RN-MODAL-021-F,RN-MODAL-021,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:29:48Z
+CT-RN-MODAL-022-F,RN-MODAL-022,08-MODAIS.md,PASS,passo_a_passo,3,SuperModal abriu e Esc fechou,2026-09-23T18:29:58Z
+CT-RN-MODAL-023-F,RN-MODAL-023,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:30:31Z
+CT-RN-MODAL-024-F,RN-MODAL-024,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:31:05Z
+CT-RN-MODAL-025-F,RN-MODAL-025,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:31:32Z
+CT-RN-MODAL-026-F,RN-MODAL-026,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:31:57Z
+CT-RN-MODAL-030-F,RN-MODAL-030,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:32:23Z
+CT-RN-MODAL-031-F,RN-MODAL-031,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:32:59Z
+CT-RN-MODAL-032-F,RN-MODAL-032,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:33:35Z
+CT-RN-MODAL-033-F,RN-MODAL-033,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:34:07Z
+CT-RN-MODAL-040-F,RN-MODAL-040,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:34:41Z
+CT-RN-MODAL-041-F,RN-MODAL-041,08-MODAIS.md,PASS,passo_a_passo,4,SuperModal abriu e Esc fechou,2026-09-23T18:35:20Z
+CT-RN-MODAL-042-F,RN-MODAL-042,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:35:52Z
+CT-RN-MODAL-043-F,RN-MODAL-043,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:36:18Z
+CT-RN-MODAL-044-F,RN-MODAL-044,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:36:52Z
+CT-RN-MODAL-045-F,RN-MODAL-045,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:37:28Z
+CT-RN-MODAL-050-F,RN-MODAL-050,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:38:02Z
+CT-RN-MODAL-051-F,RN-MODAL-051,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:38:35Z
+CT-RN-MODAL-052-F,RN-MODAL-052,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:39:07Z
+CT-RN-MODAL-053-F,RN-MODAL-053,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:39:42Z
+CT-RN-MODAL-060-F,RN-MODAL-060,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:39:53Z
+CT-RN-MODAL-061-F,RN-MODAL-061,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:40:26Z
+CT-RN-MODAL-062-F,RN-MODAL-062,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:41:00Z
+CT-RN-MODAL-063-F,RN-MODAL-063,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:41:14Z
+CT-RN-MODAL-064-F,RN-MODAL-064,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,3,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:41:25Z
+CT-RN-MODAL-070-F,RN-MODAL-070,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:42:02Z
+CT-RN-MODAL-071-F,RN-MODAL-071,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:42:35Z
+CT-RN-MODAL-072-F,RN-MODAL-072,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:43:02Z
+CT-RN-MODAL-080-F,RN-MODAL-080,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:43:39Z
+CT-RN-MODAL-081-F,RN-MODAL-081,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:44:15Z
+CT-RN-MODAL-082-F,RN-MODAL-082,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:44:42Z
+CT-RN-MODAL-090-F,RN-MODAL-090,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:45:08Z
+CT-RN-MODAL-091-F,RN-MODAL-091,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:45:40Z
+CT-RN-MODAL-092-F,RN-MODAL-092,08-MODAIS.md,PENDENTE_QA_HUMANO,modal_parcial,4,SuperModal aberto (.super-modal-content) — QA valida restante dos passos da regra.,2026-09-23T18:46:16Z
+CT-RN-BUSCA-001-F,RN-BUSCA-001,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:21Z
+CT-RN-BUSCA-002-F,RN-BUSCA-002,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:24Z
+CT-RN-BUSCA-003-F,RN-BUSCA-003,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:28Z
+CT-RN-BUSCA-004-F,RN-BUSCA-004,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:30Z
+CT-RN-BUSCA-005-F,RN-BUSCA-005,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:33Z
+CT-RN-BUSCA-006-F,RN-BUSCA-006,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:35Z
+CT-RN-BUSCA-007-F,RN-BUSCA-007,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:38Z
+CT-RN-BUSCA-008-F,RN-BUSCA-008,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:40Z
+CT-RN-BUSCA-009-F,RN-BUSCA-009,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:43Z
+CT-RN-BUSCA-010-F,RN-BUSCA-010,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:45Z
+CT-RN-BUSCA-011-F,RN-BUSCA-011,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:48Z
+CT-RN-BUSCA-012-F,RN-BUSCA-012,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:46:50Z
+CT-RN-BUSCA-013-F,RN-BUSCA-013,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:52Z
+CT-RN-BUSCA-014-F,RN-BUSCA-014,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:55Z
+CT-RN-BUSCA-015-F,RN-BUSCA-015,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:57Z
+CT-RN-BUSCA-020-F,RN-BUSCA-020,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:46:59Z
+CT-RN-BUSCA-021-F,RN-BUSCA-021,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:02Z
+CT-RN-BUSCA-022-F,RN-BUSCA-022,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:05Z
+CT-RN-HEADER-001-F,RN-HEADER-001,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:07Z
+CT-RN-HEADER-002-F,RN-HEADER-002,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:11Z
+CT-RN-HEADER-003-F,RN-HEADER-003,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:17Z
+CT-RN-HEADER-004-F,RN-HEADER-004,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:20Z
+CT-RN-HEADER-005-F,RN-HEADER-005,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:24Z
+CT-RN-HEADER-006-F,RN-HEADER-006,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:27Z
+CT-RN-HEADER-007-F,RN-HEADER-007,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:31Z
+CT-RN-HEADER-008-F,RN-HEADER-008,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:34Z
+CT-RN-HEADER-009-F,RN-HEADER-009,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:37Z
+CT-RN-HEADER-010-F,RN-HEADER-010,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:40Z
+CT-RN-HEADER-020-F,RN-HEADER-020,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:45Z
+CT-RN-HEADER-021-F,RN-HEADER-021,09-BUSCA-HEADER.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:48Z
+CT-RN-LISTA-001-F,RN-LISTA-001,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:52Z
+CT-RN-LISTA-002-F,RN-LISTA-002,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:47:55Z
+CT-RN-LISTA-010-F,RN-LISTA-010,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:47:59Z
+CT-RN-LISTA-011-F,RN-LISTA-011,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:03Z
+CT-RN-LISTA-012-F,RN-LISTA-012,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:07Z
+CT-RN-LISTA-020-F,RN-LISTA-020,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:11Z
+CT-RN-LISTA-021-F,RN-LISTA-021,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:14Z
+CT-RN-LISTA-030-F,RN-LISTA-030,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:17Z
+CT-RN-LISTA-031-F,RN-LISTA-031,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:20Z
+CT-RN-LISTA-032-F,RN-LISTA-032,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:23Z
+CT-RN-LISTA-033-F,RN-LISTA-033,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:26Z
+CT-RN-LISTA-034-F,RN-LISTA-034,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:28Z
+CT-RN-LISTA-035-F,RN-LISTA-035,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:31Z
+CT-RN-LISTA-036-F,RN-LISTA-036,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:35Z
+CT-RN-LISTA-037-F,RN-LISTA-037,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:38Z
+CT-RN-LISTA-040-F,RN-LISTA-040,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:41Z
+CT-RN-LISTA-041-F,RN-LISTA-041,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:45Z
+CT-RN-LISTA-042-F,RN-LISTA-042,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:47Z
+CT-RN-LISTA-043-F,RN-LISTA-043,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:50Z
+CT-RN-LISTA-044-F,RN-LISTA-044,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:53Z
+CT-RN-LISTA-045-F,RN-LISTA-045,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:55Z
+CT-RN-LISTA-046-F,RN-LISTA-046,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:48:58Z
+CT-RN-LISTA-047-F,RN-LISTA-047,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:02Z
+CT-RN-LISTA-048-F,RN-LISTA-048,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:05Z
+CT-RN-LISTA-049-F,RN-LISTA-049,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:08Z
+CT-RN-LISTA-050-F,RN-LISTA-050,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:11Z
+CT-RN-LISTA-051-F,RN-LISTA-051,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:15Z
+CT-RN-LISTA-052-F,RN-LISTA-052,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:17Z
+CT-RN-LISTA-053-F,RN-LISTA-053,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:19Z
+CT-RN-LISTA-060-F,RN-LISTA-060,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:21Z
+CT-RN-LISTA-061-F,RN-LISTA-061,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:24Z
+CT-RN-LISTA-062-F,RN-LISTA-062,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:27Z
+CT-RN-LISTA-063-F,RN-LISTA-063,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:30Z
+CT-RN-LISTA-064-F,RN-LISTA-064,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:49:32Z
+CT-RN-LISTA-065-F,RN-LISTA-065,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:35Z
+CT-RN-LISTA-066-F,RN-LISTA-066,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:38Z
+CT-RN-LISTA-070-F,RN-LISTA-070,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:41Z
+CT-RN-LISTA-071-F,RN-LISTA-071,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:44Z
+CT-RN-LISTA-072-F,RN-LISTA-072,10-MINHA-LISTA.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:47Z
+CT-RN-AUTH-001-F,RN-AUTH-001,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:50Z
+CT-RN-AUTH-002-F,RN-AUTH-002,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:52Z
+CT-RN-AUTH-003-F,RN-AUTH-003,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:54Z
+CT-RN-AUTH-004-F,RN-AUTH-004,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:56Z
+CT-RN-AUTH-005-F,RN-AUTH-005,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:49:58Z
+CT-RN-AUTH-006-F,RN-AUTH-006,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:00Z
+CT-RN-AUTH-010-F,RN-AUTH-010,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:03Z
+CT-RN-AUTH-011-F,RN-AUTH-011,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:05Z
+CT-RN-AUTH-012-F,RN-AUTH-012,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:07Z
+CT-RN-AUTH-013-F,RN-AUTH-013,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:09Z
+CT-RN-AUTH-014-F,RN-AUTH-014,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:11Z
+CT-RN-AUTH-020-F,RN-AUTH-020,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:13Z
+CT-RN-AUTH-021-F,RN-AUTH-021,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:15Z
+CT-RN-AUTH-022-F,RN-AUTH-022,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:17Z
+CT-RN-AUTH-023-F,RN-AUTH-023,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:21Z
+CT-RN-AUTH-024-F,RN-AUTH-024,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:23Z
+CT-RN-AUTH-025-F,RN-AUTH-025,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:50:27Z
+CT-RN-AUTH-030-F,RN-AUTH-030,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:30Z
+CT-RN-AUTH-031-F,RN-AUTH-031,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:33Z
+CT-RN-AUTH-032-F,RN-AUTH-032,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:35Z
+CT-RN-AUTH-033-F,RN-AUTH-033,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:37Z
+CT-RN-AUTH-034-F,RN-AUTH-034,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:39Z
+CT-RN-AUTH-035-F,RN-AUTH-035,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:41Z
+CT-RN-AUTH-040-F,RN-AUTH-040,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:43Z
+CT-RN-AUTH-041-F,RN-AUTH-041,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:44Z
+CT-RN-AUTH-042-F,RN-AUTH-042,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:46Z
+CT-RN-AUTH-043-F,RN-AUTH-043,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:49Z
+CT-RN-AUTH-044-F,RN-AUTH-044,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:50Z
+CT-RN-AUTH-050-F,RN-AUTH-050,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:52Z
+CT-RN-AUTH-051-F,RN-AUTH-051,11-AUTH-PERFIL.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:50:54Z
+CT-RN-CONT-001-F,RN-CONT-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:05Z
+CT-RN-CONT-002-F,RN-CONT-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:13Z
+CT-RN-CONT-003-F,RN-CONT-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:21Z
+CT-RN-CONT-004-F,RN-CONT-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:28Z
+CT-RN-CONT-005-F,RN-CONT-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:40Z
+CT-RN-CONT-006-F,RN-CONT-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:51:51Z
+CT-RN-CONT-007-F,RN-CONT-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:52:04Z
+CT-RN-CONT-008-F,RN-CONT-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:52:16Z
+CT-RN-CONT-009-F,RN-CONT-009,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:52:27Z
+CT-RN-CONT-010-F,RN-CONT-010,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:52:39Z
+CT-RN-CONT-011-F,RN-CONT-011,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:52:51Z
+CT-RN-CONT-020-F,RN-CONT-020,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:53:07Z
+CT-RN-DEV-001-F,RN-DEV-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:53:19Z
+CT-RN-DEV-002-F,RN-DEV-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:53:31Z
+CT-RN-DEV-003-F,RN-DEV-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:53:43Z
+CT-RN-DEV-004-F,RN-DEV-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:53:54Z
+CT-RN-DEV-005-F,RN-DEV-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:54:06Z
+CT-RN-DEV-006-F,RN-DEV-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:54:17Z
+CT-RN-DEV-007-F,RN-DEV-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:54:25Z
+CT-RN-DUB-001-F,RN-DUB-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:54:34Z
+CT-RN-DUB-002-F,RN-DUB-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,catalogo,1,Exige título/dado específico no catálogo — QA preenche planilha humana.,2026-09-23T18:54:46Z
+CT-RN-DUB-003-F,RN-DUB-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:54:57Z
+CT-RN-DUB-004-F,RN-DUB-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:55:09Z
+CT-RN-DUB-005-F,RN-DUB-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:55:20Z
+CT-RN-DUB-006-F,RN-DUB-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:55:31Z
+CT-RN-EVT-001-F,RN-EVT-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:55:43Z
+CT-RN-EVT-002-F,RN-EVT-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:01Z
+CT-RN-EVT-003-F,RN-EVT-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:12Z
+CT-RN-EVT-004-F,RN-EVT-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:24Z
+CT-RN-EVT-005-F,RN-EVT-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:36Z
+CT-RN-EVT-006-F,RN-EVT-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:47Z
+CT-RN-EVT-007-F,RN-EVT-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:56:59Z
+CT-RN-PERS-001-F,RN-PERS-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:57:15Z
+CT-RN-PERS-002-F,RN-PERS-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:57:26Z
+CT-RN-PERS-003-F,RN-PERS-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:57:38Z
+CT-RN-PERS-004-F,RN-PERS-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:57:58Z
+CT-RN-PERS-005-F,RN-PERS-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:58:09Z
+CT-RN-PERS-006-F,RN-PERS-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:58:19Z
+CT-RN-PERS-007-F,RN-PERS-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:58:27Z
+CT-RN-PERS-008-F,RN-PERS-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:58:38Z
+CT-RN-PREM-001-F,RN-PREM-001,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:58:50Z
+CT-RN-PREM-002-F,RN-PREM-002,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:59:02Z
+CT-RN-PREM-003-F,RN-PREM-003,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:59:20Z
+CT-RN-PREM-004-F,RN-PREM-004,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:59:32Z
+CT-RN-PREM-005-F,RN-PREM-005,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T18:59:43Z
+CT-RN-PREM-006-F,RN-PREM-006,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T19:00:10Z
+CT-RN-PREM-007-F,RN-PREM-007,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T19:00:21Z
+CT-RN-PREM-008-F,RN-PREM-008,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T19:00:33Z
+CT-RN-PREM-009-F,RN-PREM-009,12-OUTRAS-TELAS.md,PENDENTE_QA_HUMANO,manual_obrigatorio,2,Smoke OK — QA deve executar passos completos do CSV e registrar evidência.,2026-09-23T19:00:45Z

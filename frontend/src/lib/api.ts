@@ -294,6 +294,10 @@ export const orbeNerdApi = {
     return apiClient.get('/jogos/em-alta');
   },
 
+  getGameRecommendations: async () => {
+    return apiClient.get('/jogos/recomendacoes');
+  },
+
   getHoje: async () => {
     return apiClient.get('/hoje');
   },

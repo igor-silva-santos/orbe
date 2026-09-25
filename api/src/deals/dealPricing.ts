@@ -5,7 +5,36 @@ export function parsePriceNumber(value: string | null | undefined): number | nul
   if (!normalized || normalized === 'n/a' || normalized === 'free' || normalized === 'grátis' || normalized === 'gratis') {
     return 0;
   }
-  const match = normalized.replace(/\./g, '').replace(',', '.').match(/(\d+(?:\.\d+)?)/);
+
+  const isExplicitBrl = normalized.includes('r$') || normalized.includes('brl');
+  const isExplicitUsd =
+    normalized.includes('usd') || normalized.includes('us$') || /^\$/.test(normalized.trim());
+
+  let numericPart = normalized.replace(/[^\d.,]/g, '');
+  if (!numericPart) return null;
+
+  const commaCount = (numericPart.match(/,/g) ?? []).length;
+  const dotCount = (numericPart.match(/\./g) ?? []).length;
+
+  let canonical: string;
+
+  if (isExplicitBrl || (commaCount >= 1 && dotCount >= 1)) {
+    // BR: 1.234,56
+    canonical = numericPart.replace(/\./g, '').replace(',', '.');
+  } else if (commaCount === 1 && dotCount === 0) {
+    // BR sem milhar: 34,50
+    canonical = numericPart.replace(',', '.');
+  } else if (isExplicitUsd || (dotCount === 1 && commaCount === 0)) {
+    // US: $34.50
+    canonical = numericPart;
+  } else if (dotCount > 1) {
+    // Milhar BR sem vírgula (raro): 1.234.567
+    canonical = numericPart.replace(/\./g, '');
+  } else {
+    canonical = numericPart.replace(',', '.');
+  }
+
+  const match = canonical.match(/(\d+(?:\.\d+)?)/);
   if (!match) return null;
   const parsed = Number.parseFloat(match[1]);
   return Number.isFinite(parsed) ? parsed : null;
