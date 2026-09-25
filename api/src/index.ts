@@ -22,6 +22,8 @@ import contactRoutes, { isValidEmail } from './contactRoutes';
 import dealsRoutes from './dealsRoutes';
 import minhaListaAnimesRoutes from './minhaListaAnimesRoutes';
 import dubladoresRoutes from './dubladoresRoutes';
+import adminRoutes from './adminRoutes';
+import { ensureUserAdminFromEnv } from './adminFromEnv';
 import { verifyBearerToken, MissingTokenError } from './authMiddleware';
 import {
   applySecurityMiddleware,
@@ -65,6 +67,7 @@ app.use('/api', contactRoutes);
 app.use('/api', dealsRoutes);
 app.use('/api', minhaListaAnimesRoutes);
 app.use('/api', dubladoresRoutes);
+app.use('/api', adminRoutes);
 
 function timingSafeEqualStrings(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
@@ -184,19 +187,21 @@ const registerHandler = async (req: express.Request, res: express.Response) => {
       throw createError;
     }
 
-    const token = jwt.sign({ userId: newUser.id, role: newUser.role }, JWT_SECRET, {
+    const effective = await ensureUserAdminFromEnv(prisma, newUser);
+
+    const token = jwt.sign({ userId: effective.id, role: effective.role }, JWT_SECRET, {
       expiresIn: '7d',
     });
 
     const user: AuthUserPayload = {
-      id: newUser.id,
-      email: newUser.email,
-      role: newUser.role,
-      quer_avaliar: newUser.quer_avaliar,
-      data_criacao: newUser.data_criacao,
+      id: effective.id,
+      email: effective.email,
+      role: effective.role,
+      quer_avaliar: effective.quer_avaliar,
+      data_criacao: effective.data_criacao,
     };
 
-    res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id, token, user });
+    res.status(201).json({ message: 'Usuário criado com sucesso!', userId: effective.id, token, user });
   } catch (error) {
     logger.error(`Erro no registro: ${error}`);
     res.status(500).json({ error: 'Erro interno do servidor.' });
@@ -231,16 +236,18 @@ const loginHandler = async (req: express.Request, res: express.Response) => {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
-    const token = jwt.sign({ userId: userRecord.id, role: userRecord.role }, JWT_SECRET, {
+    const effective = await ensureUserAdminFromEnv(prisma, userRecord);
+
+    const token = jwt.sign({ userId: effective.id, role: effective.role }, JWT_SECRET, {
       expiresIn: '7d',
     });
 
     const user: AuthUserPayload = {
-      id: userRecord.id,
-      email: userRecord.email,
-      role: userRecord.role,
-      quer_avaliar: userRecord.quer_avaliar,
-      data_criacao: userRecord.data_criacao,
+      id: effective.id,
+      email: effective.email,
+      role: effective.role,
+      quer_avaliar: effective.quer_avaliar,
+      data_criacao: effective.data_criacao,
     };
 
     res.json({ token, user });
@@ -269,7 +276,8 @@ const meHandler = async (req: express.Request, res: express.Response) => {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
 
-    res.json(user);
+    const effective = await ensureUserAdminFromEnv(prisma, user);
+    res.json(effective);
   } catch (error) {
     if (error instanceof MissingTokenError) {
       return res.status(401).json({ error: 'Token não fornecido.' });

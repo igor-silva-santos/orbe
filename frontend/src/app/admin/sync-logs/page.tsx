@@ -19,6 +19,7 @@ import {
 import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
+import AdminSyncNav from '@/components/admin/AdminSyncNav';
 
 // ---------- Tipos ----------
 
@@ -460,6 +461,8 @@ export default function SyncLogsAdminPage() {
           </p>
         </div>
       </div>
+
+      <AdminSyncNav />
 
       {/* Lista de execuções */}
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">

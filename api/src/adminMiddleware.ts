@@ -1,18 +1,29 @@
 import { Response, NextFunction } from 'express';
+import { prisma } from './clients';
 import { logger } from './logger';
 import { verifyBearerToken, MissingTokenError, type AuthRequest } from './authMiddleware';
+import { ensureUserAdminFromEnv } from './adminFromEnv';
 
-const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+/** Valida JWT e confere papel admin no banco (inclui ORBE_ADMIN_EMAILS). */
+const adminMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const user = verifyBearerToken(req.headers.authorization);
+    const tokenUser = verifyBearerToken(req.headers.authorization);
 
-    if (user.role !== 'admin') {
-      logger.warn(`Usuário (ID: ${user.userId}) sem permissão de admin tentou acessar rota protegida.`);
+    const record = await prisma.user.findUnique({
+      where: { id: tokenUser.userId },
+      select: { id: true, email: true, role: true },
+    });
+    if (!record) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    const effective = await ensureUserAdminFromEnv(prisma, record);
+    if (effective.role !== 'admin') {
+      logger.warn(`Usuário (ID: ${tokenUser.userId}) sem permissão de admin tentou acessar rota protegida.`);
       return res.status(403).json({ error: 'Acesso proibido. Requer permissão de administrador.' });
     }
 
-    req.user = user;
-    logger.info(`Acesso de admin concedido para o usuário (ID: ${user.userId})`);
+    req.user = { userId: effective.id, role: effective.role };
     next();
   } catch (error) {
     if (error instanceof MissingTokenError) {
