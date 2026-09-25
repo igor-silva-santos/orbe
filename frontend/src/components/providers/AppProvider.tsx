@@ -8,6 +8,7 @@ import { mapNotifications, type ApiNotification } from '@/lib/notifications';
 import { realApi } from '@/data/realApi';
 import SyncRefreshListener from '@/components/providers/SyncRefreshListener';
 import orbeNerdApi from '@/lib/api';
+import { isExpectedAuthError } from '@/lib/http/isExpectedAuthError';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -38,14 +39,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         const notifications = await realApi.getNotifications();
         setNotifications(mapNotifications(notifications as ApiNotification[]));
       } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
+        if (!isExpectedAuthError(error)) {
+          console.error('Erro ao carregar notificações:', error);
+        }
       }
 
       try {
         const interactions = await realApi.getInteractions();
         setInteractions(interactions);
       } catch (error) {
-        console.error('Erro ao carregar interações do usuário:', error);
+        if (!isExpectedAuthError(error)) {
+          console.error('Erro ao carregar interações do usuário:', error);
+        }
       }
 
       try {
@@ -53,7 +58,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setAnimeWeeklyPinIds(weekly.anilistIds ?? []);
         setAnimeWeeklyPinned(weekly.animes ?? []);
       } catch (error) {
-        console.error('Erro ao carregar animes da semana:', error);
+        if (!isExpectedAuthError(error)) {
+          console.error('Erro ao carregar animes da semana:', error);
+        }
       }
     };
 

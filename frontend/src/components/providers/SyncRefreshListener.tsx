@@ -35,10 +35,17 @@ export default function SyncRefreshListener() {
 
     const poll = async () => {
       if (cancelled) return;
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+        timeoutId = setTimeout(poll, 60000);
+        return;
+      }
 
       let delayMs = 45000;
       try {
-        const res = await fetch(`${API_BASE}/sync/status`, { cache: 'no-store' });
+        const res = await fetch(`${API_BASE}/sync/status`, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
         if (!res.ok) throw new Error(`status ${res.status}`);
         const status = (await res.json()) as SyncStatusResponse;
         const active = Boolean(status.syncActive);

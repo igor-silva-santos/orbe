@@ -12,12 +12,14 @@ function resolveApiOrigin(): string | null {
   return null;
 }
 
+const NO_STORE = { 'Cache-Control': 'no-store' };
+
 export async function proxyApiGet(path: string): Promise<Response> {
   const origin = resolveApiOrigin();
   if (!origin) {
     return Response.json(
       { syncActive: false, stale: false, resumeAvailable: false, interrupted: false },
-      { status: 200, headers: { 'Cache-Control': 'no-store' } },
+      { status: 200, headers: NO_STORE },
     );
   }
 
@@ -32,7 +34,34 @@ export async function proxyApiGet(path: string): Promise<Response> {
     status: upstream.status,
     headers: {
       'Content-Type': upstream.headers.get('content-type') ?? 'application/json',
-      'Cache-Control': 'no-store',
+      ...NO_STORE,
+    },
+  });
+}
+
+/** Repassa Authorization para rotas autenticadas (evita rewrite + cache do SW). */
+export async function proxyApiGetWithAuth(path: string, incoming: Request): Promise<Response> {
+  const origin = resolveApiOrigin();
+  if (!origin) {
+    return Response.json({ error: 'API indisponível.' }, { status: 503, headers: NO_STORE });
+  }
+
+  const auth = incoming.headers.get('authorization');
+  const url = `${origin}/api/${path.replace(/^\//, '')}`;
+  const upstream = await fetch(url, {
+    cache: 'no-store',
+    headers: {
+      Accept: 'application/json',
+      ...(auth ? { Authorization: auth } : {}),
+    },
+  });
+
+  const body = await upstream.text();
+  return new Response(body, {
+    status: upstream.status,
+    headers: {
+      'Content-Type': upstream.headers.get('content-type') ?? 'application/json',
+      ...NO_STORE,
     },
   });
 }

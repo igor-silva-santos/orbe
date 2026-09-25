@@ -19,7 +19,7 @@ type AdminShellProps = {
 };
 
 export default function AdminShell({ title, description, actions, children }: AdminShellProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-background">

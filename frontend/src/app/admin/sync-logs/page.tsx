@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE } from '@/lib/apiBase';
-import SyncRunStatusBadge from '@/components/admin/sync/SyncRunStatusBadge';
 
 // ---------- Tipos ----------
 
@@ -220,7 +219,7 @@ const EVENTS_PAGE_SIZE = 100;
 
 export default function SyncLogsAdminPage() {
   const searchParams = useSearchParams();
-  const runFromQuery = searchParams.get('run');
+  const runFromQuery = searchParams?.get('run') ?? null;
 
   // ---- Lista de execuções ----
   const [runs, setRuns] = useState<SyncLogRunListItem[]>([]);
