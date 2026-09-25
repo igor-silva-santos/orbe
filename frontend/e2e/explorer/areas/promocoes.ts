@@ -7,6 +7,7 @@ const TABS = [
   '/promocoes?tab=gratis',
   '/promocoes?tab=promocoes',
   '/promocoes?tab=em-alta',
+  '/promocoes?tab=recomendacoes',
 ] as const;
 
 export async function exploreAreaPromocoes(page: Page, baseUrl: string): Promise<ExplorerAreaReport> {

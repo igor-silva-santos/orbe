@@ -10,9 +10,9 @@ Use este arquivo amanhã antes de mergulhar nos JSONs.
 | Jornadas + console | `npm run test:e2e:explore` | 0 critical; ver `.md` resumo |
 | Busca global | `curl -s -o /dev/null -w "%{http_code}" "https://orbe-seven.vercel.app/api/pesquisa?q=ab"` | **200** |
 
-Produção: **https://orbe-seven.vercel.app**
+- **Última exploração:** 8 achados, **0 críticos** (ver `exploracao-orbe-latest.md`).
 
-## O que foi feito nesta rodada autônoma
+Produção: **https://orbe-seven.vercel.app**
 
 1. **Mapa de rotas** — `docs/qa/mapa-orbe-rotas.md` + catálogo Playwright.
 2. **Validação automatizada** — cada URL catalogada + amostras dinâmicas (`/pessoa`, saga, universo…).

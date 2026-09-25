@@ -93,31 +93,38 @@ export async function openFirstSuperModal(page: Page, collector: ExplorerCollect
   await closeSuperModalIfOpen(page);
   const root = scope ? page.locator(scope) : page.locator('main');
   const card = root
-    .locator('div.rounded-\\[20px\\].cursor-pointer, div.cursor-pointer')
+    .locator('div.rounded-\\[20px\\].cursor-pointer')
     .filter({ has: page.locator('img') })
     .first();
-  const target = (await card.isVisible({ timeout: 5_000 }).catch(() => false))
-    ? card
-    : root.locator('[class*="aspect-"]').filter({ has: page.locator('img') }).first();
+  const fallback = root.locator('div.cursor-pointer').filter({ has: page.locator('img') }).first();
+
+  const target = (await card.isVisible({ timeout: 8_000 }).catch(() => false)) ? card : fallback;
 
   if (!(await target.isVisible({ timeout: 45_000 }).catch(() => false))) {
     collector.noteMissing('supermodal', 'Nenhum card clicável com poster encontrado');
     return false;
   }
-  await target.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(300);
-  try {
-    await target.click({ timeout: 20_000 });
-  } catch {
-    await target.click({ timeout: 10_000, force: true });
-  }
+
   const dialog = page.getByRole('dialog');
-  const visible = await dialog.isVisible({ timeout: 20_000 }).catch(() => false);
-  if (!visible) {
-    collector.noteInteraction('supermodal', 'Clique no card não abriu SuperModal');
-    return false;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await target.scrollIntoViewIfNeeded().catch(() => {});
+    await page.waitForTimeout(250);
+    const hit = target.locator('div[class*="aspect-"]').first();
+    const clickTarget = (await hit.isVisible().catch(() => false)) ? hit : target;
+    try {
+      await clickTarget.click({ timeout: 15_000 });
+    } catch {
+      await target.click({ timeout: 10_000, force: true });
+    }
+    if (await dialog.isVisible({ timeout: 30_000 }).catch(() => false)) {
+      return true;
+    }
+    await closeSuperModalIfOpen(page);
   }
-  return true;
+
+  collector.noteInteraction('supermodal', 'Clique no card não abriu SuperModal');
+  return false;
 }
 
 export async function exerciseCarouselSection(page: Page, sectionId: string): Promise<void> {

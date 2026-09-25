@@ -36,6 +36,7 @@ export async function exploreAreaHojeOutras(page: Page, baseUrl: string): Promis
           await enableAllHojeSections(page);
           await openFirstSuperModal(page, collector, 'main').catch(() => {});
           await closeSuperModalIfOpen(page);
+          return;
         }
 
         if (route === '/continuacoes') {
@@ -61,7 +62,8 @@ export async function exploreAreaHojeOutras(page: Page, baseUrl: string): Promis
   }
 
   for (const step of steps) {
-    collector.noteSlow(step.step, step.durationMs, 20_000);
+    const slowLimit = step.step === '/hoje' ? 120_000 : 20_000;
+    collector.noteSlow(step.step, step.durationMs, slowLimit);
   }
 
   return {

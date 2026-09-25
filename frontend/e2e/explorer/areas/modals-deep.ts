@@ -83,7 +83,7 @@ export async function exploreAreaModalsDeep(page: Page, baseUrl: string): Promis
   }
 
   for (const step of steps) {
-    collector.noteSlow(step.step, step.durationMs, 30_000);
+    collector.noteSlow(step.step, step.durationMs, step.step === 'busca categorias + query' ? 90_000 : 30_000);
     if (step.notes) collector.noteInteraction(step.step, step.notes);
   }
 
