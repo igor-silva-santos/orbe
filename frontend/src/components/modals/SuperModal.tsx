@@ -332,11 +332,16 @@ const SuperModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-labelledby={dialogTitleId}
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden"
-      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden"
     >
-      <div className="container mx-auto px-4 py-8 max-w-full">
-        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden">
+      <button
+        type="button"
+        aria-label="Fechar modal"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-default"
+        onClick={handleClose}
+      />
+      <div className="relative container mx-auto px-4 py-8 max-w-full pointer-events-none">
+        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden pointer-events-auto">
           <h2 id={dialogTitleId} className="sr-only">{dialogLabel}</h2>
           <>
             <div className="absolute top-4 right-4 z-10 flex gap-2">

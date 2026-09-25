@@ -21,6 +21,11 @@ import HorizontalDealsRow from '@/components/deals/HorizontalDealsRow';
 import JogosEmAltaContent from '@/components/jogos/JogosEmAltaContent';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  isBargainPromo,
+  isSteamDeal,
+  PROMO_BARGAIN_MAX_BRL,
+} from '@/lib/dealPricing';
 import { sortDeals, sortOptionsForTab, type DealSortOption } from '@/lib/dealSort';
 import {
   ALL_PLATFORM_FILTERS,
@@ -327,7 +332,7 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
   const [platformFilter, setPlatformFilter] = useState<DealPlatform | 'all'>('all');
   const [activeTab, setActiveTab] = useState<PromocoesTab>(initialTab);
   const [freeSort, setFreeSort] = useState<DealSortOption>('ending_soon');
-  const [saleSort, setSaleSort] = useState<DealSortOption>('popular');
+  const [saleSort, setSaleSort] = useState<DealSortOption>('price_asc');
   const [searchQuery, setSearchQuery] = useState('');
 
   const loadGratis = useCallback(async () => {
@@ -499,6 +504,26 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
     const filtered = filterBySearch(filterByPlatform(catalogoSteam, platformFilter), searchQuery);
     return sortDeals(filtered, saleSort);
   }, [catalogoSteam, platformFilter, searchQuery, saleSort]);
+
+  const promosSteamAoVivo = useMemo(
+    () => filteredPromocoes.filter((deal) => isSteamDeal(deal)),
+    [filteredPromocoes],
+  );
+
+  const promosOutrasLojas = useMemo(
+    () => filteredPromocoes.filter((deal) => !isSteamDeal(deal)),
+    [filteredPromocoes],
+  );
+
+  const promosAbaixoDe30 = useMemo(() => {
+    const seen = new Set<string>();
+    const pool = [...filteredPromocoes, ...filteredCatalogo].filter((deal) => {
+      if (seen.has(deal.id)) return false;
+      seen.add(deal.id);
+      return isBargainPromo(deal);
+    });
+    return sortDeals(pool, 'price_asc');
+  }, [filteredPromocoes, filteredCatalogo]);
 
   const permanentSectionDefaultOpen = mainTemporarios.length === 0 && mainPermanentes.length > 0;
 
@@ -705,6 +730,25 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 onChange={setPlatformFilter}
               />
 
+              {showFeaturedSections && promosAbaixoDe30.length > 0 && (
+                <section className="space-y-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 md:p-6">
+                  <div>
+                    <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                      <Tag className="h-5 w-5 text-emerald-600" />
+                      Até R$ {PROMO_BARGAIN_MAX_BRL}
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({promosAbaixoDe30.length})
+                      </span>
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                      Promoções com preço final até R$ {PROMO_BARGAIN_MAX_BRL},00 — Steam e outras lojas,
+                      ordenadas do menor para o maior.
+                    </p>
+                  </div>
+                  <HorizontalDealsRow deals={promosAbaixoDe30} enableDrag priorityCount={10} />
+                </section>
+              )}
+
               {filteredCatalogo.length > 0 && (
                 <section className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -730,34 +774,64 @@ export default function PromocoesClient({ initialTab = 'gratis' }: PromocoesClie
                 </section>
               )}
 
-              <section className="space-y-4">
-                <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
-                  <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
-                  Ofertas ao vivo
-                  <span className="text-sm font-normal text-muted-foreground">
-                    ({filteredPromocoes.length})
-                  </span>
-                </h2>
+              <section className="space-y-6">
+                <div className="space-y-4">
+                  <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                    Ofertas ao vivo — Steam
+                    <span className="text-sm font-normal text-muted-foreground">
+                      ({promosSteamAoVivo.length})
+                    </span>
+                  </h2>
+                  <p className="text-sm text-muted-foreground max-w-2xl -mt-2">
+                    Descontos na Steam (e catálogo Orbe) com preço em BRL na loja brasileira.
+                  </p>
 
-                {filteredPromocoes.length > 0 ? (
-                  <>
-                    <DealsGrid deals={filteredPromocoes} priorityCount={6} />
-                    {promoHasMore && !searchQuery && platformFilter === 'all' && (
-                      <div className="flex justify-center pt-2">
-                        <button
-                          type="button"
-                          onClick={() => void handleLoadMorePromos()}
-                          disabled={isLoadingMore}
-                          className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors disabled:opacity-60"
-                        >
-                          {isLoadingMore ? 'Carregando...' : 'Carregar mais promoções'}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="bg-card rounded-lg border border-border p-8 text-center">
-                    <p className="text-muted-foreground text-sm">Nenhuma promoção ao vivo nesta plataforma.</p>
+                  {promosSteamAoVivo.length > 0 ? (
+                    <DealsGrid deals={promosSteamAoVivo} priorityCount={6} />
+                  ) : (
+                    <div className="bg-card rounded-lg border border-border p-8 text-center">
+                      <p className="text-muted-foreground text-sm">
+                        Nenhuma promoção ao vivo na Steam neste filtro.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-[var(--orbe-accent-2)]" />
+                    Ofertas ao vivo — outras lojas
+                    <span className="text-sm font-normal text-muted-foreground">
+                      ({promosOutrasLojas.length})
+                    </span>
+                  </h2>
+                  <p className="text-sm text-muted-foreground max-w-2xl -mt-2">
+                    Epic, GOG, Ubisoft, itch.io e parceiros — valores convertidos para BRL quando a fonte
+                    informa USD.
+                  </p>
+
+                  {promosOutrasLojas.length > 0 ? (
+                    <DealsGrid deals={promosOutrasLojas} priorityCount={6} />
+                  ) : (
+                    <div className="bg-card rounded-lg border border-border p-8 text-center">
+                      <p className="text-muted-foreground text-sm">
+                        Nenhuma promoção ao vivo em outras lojas neste filtro.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {promoHasMore && !searchQuery && platformFilter === 'all' && (
+                  <div className="flex justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleLoadMorePromos()}
+                      disabled={isLoadingMore}
+                      className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium orbe-text-primary hover:bg-muted transition-colors disabled:opacity-60"
+                    >
+                      {isLoadingMore ? 'Carregando...' : 'Carregar mais promoções'}
+                    </button>
                   </div>
                 )}
               </section>

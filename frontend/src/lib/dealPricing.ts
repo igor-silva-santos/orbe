@@ -1,5 +1,7 @@
-/** Extrai valor numérico de strings como "$24.99", "R$ 19,90" ou "Grátis". */
-export function parsePriceNumber(value: string | null | undefined): number | null {
+import type { UnifiedDeal } from '@/types/deals';
+
+/** Espelha a lógica do backend (`api/src/deals/dealPricing.ts`) para strings de preço. */
+export function parsePriceNumberFromString(value: string | null | undefined): number | null {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
   if (!normalized || normalized === 'n/a' || normalized === 'free' || normalized === 'grátis' || normalized === 'gratis') {
@@ -19,16 +21,12 @@ export function parsePriceNumber(value: string | null | undefined): number | nul
   let canonical: string;
 
   if (isExplicitBrl || (commaCount >= 1 && dotCount >= 1)) {
-    // BR: 1.234,56
     canonical = numericPart.replace(/\./g, '').replace(',', '.');
   } else if (commaCount === 1 && dotCount === 0) {
-    // BR sem milhar: 34,50
     canonical = numericPart.replace(',', '.');
   } else if (isExplicitUsd || (dotCount === 1 && commaCount === 0)) {
-    // US: $34.50
     canonical = numericPart;
   } else if (dotCount > 1) {
-    // Milhar BR sem vírgula (raro): 1.234.567
     canonical = numericPart.replace(/\./g, '');
   } else {
     canonical = numericPart.replace(',', '.');
@@ -40,12 +38,25 @@ export function parsePriceNumber(value: string | null | undefined): number | nul
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function formatBrlFromCents(cents: number): string {
-  return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
+export function getDealSalePriceValue(deal: UnifiedDeal): number {
+  if (deal.salePriceValue != null && Number.isFinite(deal.salePriceValue)) {
+    return deal.salePriceValue;
+  }
+  if (deal.salePrice?.toLowerCase().includes('grátis') || deal.salePrice?.toLowerCase().includes('gratis')) {
+    return 0;
+  }
+  const parsed = parsePriceNumberFromString(deal.salePrice);
+  return parsed != null && Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
 }
 
-/** Taxa USD→BRL fallback (configurável via env). */
-export function getUsdBrlRate(): number {
-  const raw = Number(process.env.DEALS_USD_BRL_RATE ?? 5.5);
-  return Number.isFinite(raw) && raw > 0 ? raw : 5.5;
+export const PROMO_BARGAIN_MAX_BRL = 30;
+
+export function isBargainPromo(deal: UnifiedDeal, maxBrl = PROMO_BARGAIN_MAX_BRL): boolean {
+  if (deal.kind === 'free') return false;
+  const value = getDealSalePriceValue(deal);
+  return value > 0 && value <= maxBrl;
+}
+
+export function isSteamDeal(deal: UnifiedDeal): boolean {
+  return deal.platform === 'steam' || deal.source === 'steam' || deal.source === 'orbe';
 }
