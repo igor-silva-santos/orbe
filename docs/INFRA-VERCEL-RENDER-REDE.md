@@ -46,7 +46,17 @@ Variáveis obrigatórias em qualquer host de front:
 
 ---
 
-## 2. Render — API
+## 2. Render — API (e front opcional)
+
+**Importante:** o repo usa `render.yaml` com serviço **`orbe-api`**. A URL antiga `orbe-7bu0.onrender.com` pode estar **suspensa** enquanto um serviço novo (`orbe-api.onrender.com`) responde outra coisa. No dashboard, copie o **hostname real** do Web Service **Live** e atualize:
+
+- Vercel: `API_PROXY_ORIGIN`
+- GitHub secret: `ORBE_API_URL`
+- Extensão / docs se ainda apontarem para `orbe-7bu0`
+
+**Cloud Agent:** para o agente operar o Render (deploy, env, logs), adicione o secret **`RENDER_API_KEY`** no Environment do Cursor (Render → Account Settings → API Keys). Sem isso o agente só testa URLs públicas.
+
+Blueprint atualizado: serviço **`orbe-web`** (Docker do `frontend/`) na mesma conta — use quando a Vercel estiver suspensa.
 
 1. Dashboard → serviço da API → status **Live** (não Suspended).
 2. Teste **fora do browser** (terminal):

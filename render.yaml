@@ -43,3 +43,34 @@ services:
         value: "false"
       - key: IGDB_WEBHOOK_SECRET
         sync: false
+      - key: ORBE_ADMIN_EMAILS
+        sync: false
+      - key: GITHUB_ACTIONS_READ_TOKEN
+        sync: false
+
+  # Front Next.js — alternativa quando Vercel Hobby estoura banda (mesma conta Render).
+  - type: web
+    name: orbe-web
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: API_PROXY_ORIGIN
+        fromService:
+          type: web
+          name: orbe-api
+          property: host
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: orbe-api
+          property: host
+        # Render injeta host; o Next precisa de /api — ajuste no dashboard se necessário:
+        # NEXT_PUBLIC_API_URL=https://<orbe-api-host>/api
