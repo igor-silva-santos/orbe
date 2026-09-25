@@ -161,14 +161,18 @@ const Header: React.FC<HeaderProps> = ({
 
           <div className="flex items-center space-x-2">
             <button
+              type="button"
               onClick={handleSearchClick}
+              aria-label="Abrir busca"
               className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Search className="h-5 w-5" />
             </button>
 
             <button
+              type="button"
               onClick={handleThemeToggle}
+              aria-label={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
               className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
@@ -176,7 +180,9 @@ const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              type="button"
               onClick={handleNotificationClick}
+              aria-label="Abrir notificações"
               className="relative w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Bell className="h-5 w-5" />

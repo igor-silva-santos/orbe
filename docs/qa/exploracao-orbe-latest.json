@@ -1,0 +1,691 @@
+{
+  "version": 1,
+  "baseUrl": "https://orbe-seven.vercel.app",
+  "generatedAt": "2026-09-25T02:50:34.459Z",
+  "areas": [
+    {
+      "area": "SHELL-HEADER-FOOTER-ESTATICAS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:45:47.745Z",
+      "finishedAt": "2026-09-25T02:46:23.133Z",
+      "routesVisited": [
+        "/minha-lista",
+        "/login",
+        "/register",
+        "/ajuda",
+        "/contato",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ],
+      "steps": [
+        {
+          "step": "goto /minha-lista",
+          "ok": true,
+          "durationMs": 159
+        },
+        {
+          "step": "goto /login",
+          "ok": true,
+          "durationMs": 122
+        },
+        {
+          "step": "goto /register",
+          "ok": true,
+          "durationMs": 70
+        },
+        {
+          "step": "goto /ajuda",
+          "ok": true,
+          "durationMs": 103
+        },
+        {
+          "step": "goto /contato",
+          "ok": true,
+          "durationMs": 92
+        },
+        {
+          "step": "goto /termos",
+          "ok": true,
+          "durationMs": 103
+        },
+        {
+          "step": "goto /privacidade",
+          "ok": true,
+          "durationMs": 86
+        },
+        {
+          "step": "goto /cookies",
+          "ok": true,
+          "durationMs": 86
+        },
+        {
+          "step": "goto /dmca",
+          "ok": true,
+          "durationMs": 70
+        },
+        {
+          "step": "header busca + notificações",
+          "ok": true,
+          "durationMs": 34493
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0005",
+          "area": "SHELL-HEADER-FOOTER-ESTATICAS",
+          "route": "/",
+          "timestamp": "2026-09-25T02:48:20.466Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "Unrecognized feature: 'web-share'."
+        },
+        {
+          "id": "ISS-0010",
+          "area": "SHELL-HEADER-FOOTER-ESTATICAS",
+          "route": "/",
+          "timestamp": "2026-09-25T02:48:21.039Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "No available adapters."
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "HOME",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:46:23.133Z",
+      "finishedAt": "2026-09-25T02:46:44.262Z",
+      "routesVisited": [
+        "/"
+      ],
+      "steps": [
+        {
+          "step": "home load + scroll faixas",
+          "ok": true,
+          "durationMs": 2501
+        },
+        {
+          "step": "home supermodal filme",
+          "ok": false,
+          "durationMs": 16355,
+          "notes": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#filmes').locator('div.cursor-pointer').filter({ has: locator('img') }).first()\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    28 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - element is outside of the viewport\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+        },
+        {
+          "step": "anime carousel mode toggle",
+          "ok": true,
+          "durationMs": 2273
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0001",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T02:46:44.262Z",
+          "kind": "slow",
+          "severity": "medium",
+          "step": "home supermodal filme",
+          "message": "Ação levou 16355ms (limite 15000ms)",
+          "durationMs": 16355
+        },
+        {
+          "id": "ISS-0002",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T02:46:44.262Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "home supermodal filme",
+          "message": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#filmes').locator('div.cursor-pointer').filter({ has: locator('img') }).first()\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    28 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - element is outside of the viewport\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+        },
+        {
+          "id": "ISS-0006",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T02:48:20.466Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "Unrecognized feature: 'web-share'."
+        },
+        {
+          "id": "ISS-0011",
+          "area": "HOME",
+          "route": "/",
+          "timestamp": "2026-09-25T02:48:21.039Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "No available adapters."
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "CATALOGOS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:46:44.262Z",
+      "finishedAt": "2026-09-25T02:48:06.097Z",
+      "routesVisited": [
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos"
+      ],
+      "steps": [
+        {
+          "step": "/filmes load",
+          "ok": true,
+          "durationMs": 1678
+        },
+        {
+          "step": "/filmes supermodal",
+          "ok": true,
+          "durationMs": 20311
+        },
+        {
+          "step": "/filmes filtros",
+          "ok": true,
+          "durationMs": 30494
+        },
+        {
+          "step": "/series load",
+          "ok": true,
+          "durationMs": 1256
+        },
+        {
+          "step": "/series supermodal",
+          "ok": true,
+          "durationMs": 20224
+        },
+        {
+          "step": "/series filtros",
+          "ok": true,
+          "durationMs": 625
+        },
+        {
+          "step": "/animes load",
+          "ok": true,
+          "durationMs": 1731
+        },
+        {
+          "step": "/animes supermodal",
+          "ok": true,
+          "durationMs": 99
+        },
+        {
+          "step": "/animes filtros",
+          "ok": true,
+          "durationMs": 96
+        },
+        {
+          "step": "/jogos load",
+          "ok": true,
+          "durationMs": 4771
+        },
+        {
+          "step": "/jogos supermodal",
+          "ok": true,
+          "durationMs": 187
+        },
+        {
+          "step": "/jogos filtros",
+          "ok": true,
+          "durationMs": 362
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0003",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T02:48:00.681Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0004",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T02:48:05.735Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0007",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T02:48:20.466Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "Unrecognized feature: 'web-share'."
+        },
+        {
+          "id": "ISS-0012",
+          "area": "CATALOGOS",
+          "route": "/filmes",
+          "timestamp": "2026-09-25T02:48:21.039Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "No available adapters."
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "PROMOCOES",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:48:06.097Z",
+      "finishedAt": "2026-09-25T02:48:16.900Z",
+      "routesVisited": [
+        "/promocoes?tab=gratis",
+        "/promocoes?tab=promocoes",
+        "/promocoes?tab=em-alta"
+      ],
+      "steps": [
+        {
+          "step": "/promocoes?tab=gratis",
+          "ok": true,
+          "durationMs": 3438
+        },
+        {
+          "step": "/promocoes?tab=promocoes",
+          "ok": true,
+          "durationMs": 3776
+        },
+        {
+          "step": "/promocoes?tab=em-alta",
+          "ok": true,
+          "durationMs": 3589
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0008",
+          "area": "PROMOCOES",
+          "route": "/promocoes",
+          "timestamp": "2026-09-25T02:48:20.466Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "Unrecognized feature: 'web-share'."
+        },
+        {
+          "id": "ISS-0013",
+          "area": "PROMOCOES",
+          "route": "/promocoes",
+          "timestamp": "2026-09-25T02:48:21.039Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "No available adapters."
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "HOJE-CONTINUACOES-OUTRAS",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:48:16.900Z",
+      "finishedAt": "2026-09-25T02:48:57.119Z",
+      "routesVisited": [
+        "/hoje",
+        "/continuacoes",
+        "/premios",
+        "/eventos",
+        "/minha-lista/animes",
+        "/minha-lista/fila",
+        "/extensao",
+        "/extensao/crunchyroll",
+        "/sugestoes",
+        "/bug-report",
+        "/apoie"
+      ],
+      "steps": [
+        {
+          "step": "/hoje",
+          "ok": true,
+          "durationMs": 22969
+        },
+        {
+          "step": "/continuacoes",
+          "ok": true,
+          "durationMs": 1312
+        },
+        {
+          "step": "/premios",
+          "ok": true,
+          "durationMs": 880
+        },
+        {
+          "step": "/eventos",
+          "ok": true,
+          "durationMs": 8429
+        },
+        {
+          "step": "/minha-lista/animes",
+          "ok": true,
+          "durationMs": 1298
+        },
+        {
+          "step": "/minha-lista/fila",
+          "ok": true,
+          "durationMs": 943
+        },
+        {
+          "step": "/extensao",
+          "ok": true,
+          "durationMs": 879
+        },
+        {
+          "step": "/extensao/crunchyroll",
+          "ok": true,
+          "durationMs": 874
+        },
+        {
+          "step": "/sugestoes",
+          "ok": true,
+          "durationMs": 878
+        },
+        {
+          "step": "/bug-report",
+          "ok": true,
+          "durationMs": 890
+        },
+        {
+          "step": "/apoie",
+          "ok": true,
+          "durationMs": 867
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0009",
+          "area": "HOJE-CONTINUACOES-OUTRAS",
+          "route": "/hoje",
+          "timestamp": "2026-09-25T02:48:20.466Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "Unrecognized feature: 'web-share'."
+        },
+        {
+          "id": "ISS-0014",
+          "area": "HOJE-CONTINUACOES-OUTRAS",
+          "route": "/hoje",
+          "timestamp": "2026-09-25T02:48:21.039Z",
+          "kind": "observation",
+          "severity": "low",
+          "step": "runtime",
+          "message": "No available adapters."
+        },
+        {
+          "id": "ISS-0015",
+          "area": "HOJE-CONTINUACOES-OUTRAS",
+          "route": "/hoje",
+          "timestamp": "2026-09-25T02:48:41.175Z",
+          "kind": "missing_ui",
+          "severity": "high",
+          "step": "supermodal",
+          "message": "Nenhum card clicável com poster encontrado"
+        },
+        {
+          "id": "ISS-0016",
+          "area": "HOJE-CONTINUACOES-OUTRAS",
+          "route": "/hoje",
+          "timestamp": "2026-09-25T02:48:57.119Z",
+          "kind": "slow",
+          "severity": "medium",
+          "step": "/hoje",
+          "message": "Ação levou 22969ms (limite 20000ms)",
+          "durationMs": 22969
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    },
+    {
+      "area": "MODAIS-BUSCA-GLOBAL",
+      "baseUrl": "https://orbe-seven.vercel.app",
+      "startedAt": "2026-09-25T02:48:57.120Z",
+      "finishedAt": "2026-09-25T02:50:34.459Z",
+      "routesVisited": [
+        "/filmes",
+        "/jogos",
+        "/animes",
+        "/series"
+      ],
+      "steps": [
+        {
+          "step": "busca categorias + query",
+          "ok": true,
+          "durationMs": 69805
+        },
+        {
+          "step": "modal profundo /filmes",
+          "ok": true,
+          "durationMs": 21650
+        },
+        {
+          "step": "modal profundo /jogos",
+          "ok": true,
+          "durationMs": 1861
+        },
+        {
+          "step": "modal profundo /animes",
+          "ok": true,
+          "durationMs": 1621
+        },
+        {
+          "step": "modal profundo /series",
+          "ok": true,
+          "durationMs": 2402
+        }
+      ],
+      "issues": [
+        {
+          "id": "ISS-0017",
+          "area": "MODAIS-BUSCA-GLOBAL",
+          "route": "global",
+          "timestamp": "2026-09-25T02:50:30.436Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0018",
+          "area": "MODAIS-BUSCA-GLOBAL",
+          "route": "global",
+          "timestamp": "2026-09-25T02:50:32.057Z",
+          "kind": "interaction",
+          "severity": "medium",
+          "step": "supermodal",
+          "message": "Clique no card não abriu SuperModal"
+        },
+        {
+          "id": "ISS-0019",
+          "area": "MODAIS-BUSCA-GLOBAL",
+          "route": "global",
+          "timestamp": "2026-09-25T02:50:34.459Z",
+          "kind": "slow",
+          "severity": "high",
+          "step": "busca categorias + query",
+          "message": "Ação levou 69805ms (limite 30000ms)",
+          "durationMs": 69805
+        }
+      ],
+      "discoveredLinks": [
+        "/",
+        "/filmes",
+        "/series",
+        "/animes",
+        "/jogos",
+        "/continuacoes",
+        "/hoje",
+        "/login",
+        "/register",
+        "/promocoes",
+        "/eventos",
+        "/premios",
+        "/minha-lista/animes",
+        "/extensao/crunchyroll",
+        "/apoie",
+        "/ajuda",
+        "/contato",
+        "/bug-report",
+        "/sugestoes",
+        "/termos",
+        "/privacidade",
+        "/cookies",
+        "/dmca"
+      ]
+    }
+  ],
+  "summary": {
+    "totalIssues": 19,
+    "bySeverity": {
+      "critical": 0,
+      "high": 2,
+      "medium": 7,
+      "low": 10,
+      "observation": 0
+    },
+    "byKind": {
+      "observation": 10,
+      "slow": 3,
+      "interaction": 5,
+      "missing_ui": 1
+    }
+  }
+}

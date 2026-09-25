@@ -10,6 +10,7 @@
     "test": "tsx --test src/lib/carousel-loop.test.ts src/lib/carousel-utils.test.ts src/lib/carousel-anime-agenda.test.ts src/lib/brazil-timezone.test.ts src/lib/image-utils.test.ts src/lib/session.test.ts src/lib/dealPricing.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:prod": "playwright test --config=playwright.config.prod.ts",
+    "test:e2e:explore": "playwright test --config=playwright.config.prod.ts e2e/explorer/explore-full.spec.ts",
     "test:e2e:install": "playwright install chromium"
   },
   "dependencies": {
