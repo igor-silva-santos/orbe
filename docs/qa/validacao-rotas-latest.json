@@ -1,0 +1,521 @@
+{
+  "generatedAt": "2026-09-25T02:55:48.042Z",
+  "totals": {
+    "uiRoutes": 39,
+    "uiFailed": 0,
+    "apiRoutes": 34,
+    "apiFailed": 2,
+    "staticUiCatalog": 37,
+    "dynamicPatterns": 5,
+    "publicApiCatalog": 28
+  },
+  "samples": {
+    "filmeId": 1601797,
+    "serieId": 203737,
+    "animeId": 208225,
+    "jogoId": 307541,
+    "pessoaId": null,
+    "dubladorId": null,
+    "companyId": null,
+    "sagaId": "1169365",
+    "universoId": "mcu"
+  },
+  "ui": [
+    {
+      "path": "/",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/"
+    },
+    {
+      "path": "/filmes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/filmes"
+    },
+    {
+      "path": "/series",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/series"
+    },
+    {
+      "path": "/animes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/animes"
+    },
+    {
+      "path": "/jogos",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/jogos"
+    },
+    {
+      "path": "/premios",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/premios"
+    },
+    {
+      "path": "/hoje",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/hoje"
+    },
+    {
+      "path": "/eventos",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/eventos"
+    },
+    {
+      "path": "/continuacoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/continuacoes"
+    },
+    {
+      "path": "/promocoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes"
+    },
+    {
+      "path": "/promocoes?tab=gratis",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes?tab=gratis"
+    },
+    {
+      "path": "/promocoes?tab=promocoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes?tab=promocoes"
+    },
+    {
+      "path": "/promocoes?tab=em-alta",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes?tab=em-alta"
+    },
+    {
+      "path": "/promocoes?tab=recomendacoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes?tab=recomendacoes"
+    },
+    {
+      "path": "/jogos-em-alta",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/promocoes?tab=em-alta"
+    },
+    {
+      "path": "/minha-lista",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login?redirect=%2Fminha-lista"
+    },
+    {
+      "path": "/minha-lista/animes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login?redirect=%2Fminha-lista%2Fanimes",
+      "note": "redirect login (esperado sem sessão)"
+    },
+    {
+      "path": "/minha-lista/fila",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login?redirect=%2Fminha-lista%2Ffila"
+    },
+    {
+      "path": "/login",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login"
+    },
+    {
+      "path": "/register",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/register"
+    },
+    {
+      "path": "/perfil",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login?redirect=%2Fperfil",
+      "note": "redirect login (esperado sem sessão)"
+    },
+    {
+      "path": "/configuracoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/login?redirect=%2Fconfiguracoes",
+      "note": "redirect login (esperado sem sessão)"
+    },
+    {
+      "path": "/admin/sync-logs",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/admin/sync-logs"
+    },
+    {
+      "path": "/extensao",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/extensao"
+    },
+    {
+      "path": "/extensao/crunchyroll",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/extensao/crunchyroll"
+    },
+    {
+      "path": "/ajuda",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/ajuda"
+    },
+    {
+      "path": "/apoie",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/apoie"
+    },
+    {
+      "path": "/sugestoes",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/sugestoes"
+    },
+    {
+      "path": "/bug-report",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/bug-report"
+    },
+    {
+      "path": "/contato",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/contato"
+    },
+    {
+      "path": "/termos",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/termos"
+    },
+    {
+      "path": "/privacidade",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/privacidade"
+    },
+    {
+      "path": "/cookies",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/cookies"
+    },
+    {
+      "path": "/dmca",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/dmca"
+    },
+    {
+      "path": "/robots.txt",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/robots.txt"
+    },
+    {
+      "path": "/sitemap.xml",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/sitemap.xml"
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "kind": "static",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/manifest.webmanifest"
+    },
+    {
+      "path": "/continuacoes?saga=1169365",
+      "kind": "dynamic",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/continuacoes?saga=1169365"
+    },
+    {
+      "path": "/continuacoes?universo=mcu",
+      "kind": "dynamic",
+      "httpStatus": 200,
+      "ok": true,
+      "finalUrl": "https://orbe-seven.vercel.app/continuacoes?universo=mcu"
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/homepage",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/hoje",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/trending",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/pesquisa?q=orbe",
+      "kind": "api",
+      "httpStatus": 500,
+      "ok": false
+    },
+    {
+      "path": "/api/filmes?limit=2",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/filmes/filtros",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/filmes/homepage-carousel",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/series?limit=2",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/series/filtros",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/animes?limit=2",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/animes/filtros",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/animes/weekly-schedule",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos?limit=2",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/filtros",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/em-alta",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/recomendacoes",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/steam/trending",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/steam/sales",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/deals/gratis?limit=5",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/deals/promocoes?limit=5",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/deals",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/premios",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/eventos",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/eventos/resumo",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/continuacoes/sagas",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/continuacoes/universos",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/sync/status",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/auth/session",
+      "kind": "api",
+      "httpStatus": 405,
+      "ok": false
+    },
+    {
+      "path": "/api/filmes/1601797/details",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/series/203737/details",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/animes/208225/details",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/307541/details",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/jogos/307541/steam-price",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    },
+    {
+      "path": "/api/continuacoes/sagas/1169365",
+      "kind": "api",
+      "httpStatus": 200,
+      "ok": true
+    }
+  ],
+  "failed": [
+    {
+      "path": "/api/pesquisa?q=orbe",
+      "kind": "api",
+      "httpStatus": 500,
+      "ok": false
+    },
+    {
+      "path": "/api/auth/session",
+      "kind": "api",
+      "httpStatus": 405,
+      "ok": false
+    }
+  ]
+}

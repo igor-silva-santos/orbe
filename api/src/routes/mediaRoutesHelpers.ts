@@ -141,6 +141,12 @@ export const cardListInclude = {
   collection: { select: { id: true, name: true } },
 };
 
+/** Séries não têm `collection` no schema — não reutilizar cardListInclude nelas. */
+export const serieCardListInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 4 },
+};
+
 export async function fetchFilmesForCarousel(
   extraWhere: Prisma.FilmeWhereInput,
   options: {
