@@ -27,6 +27,7 @@ import { syncRateLimiter } from './securityMiddleware';
 import { broadcast } from './websocket';
 import adminMiddleware from './adminMiddleware';
 import { getLogBuffer, getLogBufferMeta, getSyncLogBuffer, getDetetiveLogBuffer } from './logger';
+import { isBackfillStepEnabled } from './renderEgressConfig';
 
 const router = Router();
 
@@ -519,6 +520,15 @@ router.post('/run-sync-resume', syncRateLimiter, protectSync, async (_req, res) 
  * - senão, inicia o próximo ano pendente do ponteiro de backfill.
  */
 router.post('/run-sync-backfill-step', syncRateLimiter, protectSync, async (_req, res) => {
+  if (!isBackfillStepEnabled()) {
+    return res.status(200).json({
+      message:
+        'Backfill automático desabilitado neste ambiente (DISABLE_BACKFILL_STEP / ORBE_EGRESS_SAVER). ' +
+        'Rode manualmente com env explícita ou workflow_dispatch após revisar egress.',
+      skipped: true,
+    });
+  }
+
   const status = await getSyncStatus(prisma);
 
   if (status.syncActive && !status.stale) {

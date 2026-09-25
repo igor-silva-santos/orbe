@@ -23,18 +23,39 @@ name: Sync Backfill Noturno
 
 on:
   schedule:
+    # Desligado por padrão: só roda no cron se ORBE_BACKFILL_CRON_ENABLED=true (repo variable).
     - cron: '*/12 3-4 * * *'
   workflow_dispatch: {}
 
 jobs:
   advance-backfill:
+    if: github.event_name == 'workflow_dispatch' || vars.ORBE_BACKFILL_CRON_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Disparar próximo passo do backfill
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verificar API (não loop se suspensa)
+        env:
+          ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
         run: |
-          curl -sf -X POST "${ORBE_API_URL}/api/run-sync-backfill-step" \
-            -H "x-sync-secret: ${SYNC_SECRET}" \
-            -H "Content-Type: application/json"
+          source .github/scripts/orbe-render-api.sh
+          set +e
+          orbe_wait_health
+          code=$?
+          set -e
+          if [ "$code" = "78" ]; then exit 0; fi
+          exit "$code"
+
+      - name: Disparar próximo passo do backfill
         env:
           ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
           SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: |
+          source .github/scripts/orbe-render-api.sh
+          set +e
+          orbe_curl_post /api/run-sync-backfill-step
+          code=$?
+          set -e
+          if [ "$code" = "78" ]; then exit 0; fi
+          exit "$code"
