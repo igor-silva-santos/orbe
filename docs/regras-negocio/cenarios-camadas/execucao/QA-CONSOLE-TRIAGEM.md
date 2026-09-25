@@ -19,7 +19,7 @@
 
 | Sintoma | Impacto | Evidência |
 | --- | --- | --- |
-| `sw.js` → `no-response` + `image.tmdb.org` **ERR_FAILED** | Posters quebrados em `/filmes` e carrossel; título “some” visualmente | Print + URL do poster; corrigido com SW **NetworkOnly** para CDN (PR) |
+| `sw.js` → `no-response` + `image.tmdb.org` **ERR_FAILED** | Posters quebrados em `/filmes` e carrossel; título “some” visualmente | Corrigido: SW **GracefulNetwork** em CDN + **NetworkOnly** em todo `GET /api/*` (sem cache 24h). Após deploy: hard refresh ou limpar SW. |
 | `Application error` / `Erro 500` no body | Página inutilizável | FAIL + rede (status HTTP) |
 | `/api/filmes/...` 4xx/5xx na aba Network | Dado não carrega | FAIL API |
 
