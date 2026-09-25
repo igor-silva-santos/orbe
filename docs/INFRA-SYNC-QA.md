@@ -39,7 +39,7 @@ O papel `admin` **não** é promovido pela UI. Para você (único operador):
 
 1. No **Render** (API), defina `ORBE_ADMIN_EMAILS` com o e-mail da sua conta Orbe (ex.: `voce@gmail.com`). Vários e-mails: separados por vírgula.
 2. Cadastre-se ou faça login com esse e-mail no site. Na próxima requisição o banco recebe `role=admin`.
-3. No perfil aparecem **Sync ao vivo** (`/admin/sync`), **Jobs GitHub** (`/admin/jobs`) e **Logs no banco** (`/admin/sync-logs`).
+3. No perfil aparece **Painel de sincronização** (`/admin`) — último sync, ao vivo, GitHub e histórico.
 
 Opcional no Render: `GITHUB_ACTIONS_READ_TOKEN` (PAT só leitura de Actions) se o repo for privado.
 
