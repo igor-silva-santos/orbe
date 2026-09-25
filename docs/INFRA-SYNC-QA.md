@@ -33,6 +33,18 @@ Para re-disparar 2027–2030:
 # Opção B: atualizar ops/sync-triggers/2027-2030.json e push
 ```
 
+## Admin no site (sem rota de “virar admin”)
+
+O papel `admin` **não** é promovido pela UI. Para você (único operador):
+
+1. No **Render** (API), defina `ORBE_ADMIN_EMAILS` com o e-mail da sua conta Orbe (ex.: `voce@gmail.com`). Vários e-mails: separados por vírgula.
+2. Cadastre-se ou faça login com esse e-mail no site. Na próxima requisição o banco recebe `role=admin`.
+3. No perfil aparece **Painel de sincronização** (`/admin`) — último sync, ao vivo, GitHub e histórico.
+
+Opcional no Render: `GITHUB_ACTIONS_READ_TOKEN` (PAT só leitura de Actions) se o repo for privado.
+
+Alternativa manual (sem env): `UPDATE "User" SET role = 'admin' WHERE email = '...';` no Supabase.
+
 ## Checklist “infra OK” antes de avisar o PO
 
 - [ ] `GET https://orbe-7bu0.onrender.com/api/sync/status` → `syncActive: false` (ou job do range em execução com fase esperada)

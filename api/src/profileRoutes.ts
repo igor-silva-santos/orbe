@@ -4,6 +4,7 @@ import { logger } from './logger';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import { isStringWithMaxLength, isValidHttpUrl } from './validation';
 import { AccountDeletionError, deleteUserAccount } from './deleteUserAccount';
+import { ensureUserAdminFromEnv } from './adminFromEnv';
 
 const router = Router();
 
@@ -30,7 +31,8 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
             }
         });
         if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
-        res.json(user);
+        const effective = await ensureUserAdminFromEnv(prisma, user);
+        res.json(effective);
     } catch (error) {
         logger.error(`Erro ao buscar perfil ID ${userId}:`, error);
         res.status(500).json({ error: 'Erro ao buscar perfil.' });
