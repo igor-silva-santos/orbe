@@ -46,6 +46,14 @@ export async function discoverRouteSamples(request: APIRequestContext): Promise<
   samples.animeId = animes?.results?.[0]?.id ?? null;
   samples.jogoId = jogos?.results?.[0]?.id ?? null;
 
+  if (samples.filmeId) {
+    const detFilme = await jsonOrNull<{ elenco?: { id: number }[] }>(
+      request,
+      `/api/filmes/${samples.filmeId}/details`,
+    );
+    samples.pessoaId = detFilme?.elenco?.[0]?.id ?? samples.pessoaId;
+  }
+
   const pessoaFromSearch = pesquisa?.pessoas?.[0]?.id;
   if (pessoaFromSearch) samples.pessoaId = pessoaFromSearch;
 
