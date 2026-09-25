@@ -1,5 +1,18 @@
 # Infra — Vercel, Render e rede corporativa
 
+## Diagnóstico rápido (curl)
+
+```bash
+curl -sSI "https://orbe-seven.vercel.app/api/homepage" | rg -i 'HTTP/|x-render-routing'
+curl -sSI "https://orbe-7bu0.onrender.com/api/health"   | rg -i 'HTTP/|x-render-routing'
+```
+
+| Header `x-render-routing` | Significado |
+|---------------------------|-------------|
+| `suspend-by-user` | Serviço **suspenso** no Render → Dashboard → **Resume** |
+| `no-server` | Hostname sem Web Service (ex. `orbe-api` nunca criado) → criar serviço / Blueprint |
+| (ausente) + JSON 200 | API ok |
+
 ## O que está acontecendo (2026-09-25)
 
 | Sintoma | Causa real | O que **não** é |
