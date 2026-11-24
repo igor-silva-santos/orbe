@@ -95,8 +95,13 @@ O agente na nuvem **não** consegue `git push` no GitHub (só GitLab tem token a
 ### Opção A — Automático no pipeline (recomendado)
 
 1. GitHub → **Settings** → **Developer settings** → **Fine-grained tokens** → token com **Contents: Read and write** no repo `orbe`.
-2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (masked).
-3. Merge MR ou re-execute o pipeline do MR: o job **`mirror:github`** roda após `test:api` e faz push da branch (`cursor/m2-android-c710`, depois `master`).
+2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (masked, **sem** “Protect variable”).
+3. Run pipeline na branch `cursor/m2-android-c710` (MR !1). Jobs:
+   - **`mirror:github`** após `test:api` verde, ou
+   - **`mirror:github:manual`** (play) se só quiser espelhar sem esperar testes.
+4. No log deve aparecer `OK: https://github.com/igor-silva-santos/orbe/tree/...`
+
+**Por que o GitHub ficou em “2 months ago”:** o job antigo **saía 0** sem token (`Protect variable` oculta o PAT no MR) ou **`--force-with-lease`** falhava em branch nova — corrigido no commit `5590eb6`.
 
 ### Opção B — Push mirror no GitLab (sem CI)
 
