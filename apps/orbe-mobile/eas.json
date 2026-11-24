@@ -12,7 +12,10 @@
       "android": {
         "buildType": "apk"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://orbe-7bu0.onrender.com/api"
+      }
     },
     "production-apk": {
       "android": {

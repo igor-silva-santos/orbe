@@ -450,6 +450,7 @@ export const orbeNerdApi = {
     apiClient.post('/notifications/subscribe', subscription as Record<string, unknown>),
   unsubscribePush: (endpoint: string) =>
     apiClient.post('/notifications/unsubscribe', { endpoint }),
+  sendTestPush: () => apiClient.post('/notifications/test-push', {}),
 };
 
 export interface WatchlistSyncResponse {

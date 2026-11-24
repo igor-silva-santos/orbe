@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchFilmes, type FilmesQuery } from '@/api/filmes';
@@ -25,6 +26,7 @@ function queryForFilter(filterId: string): Omit<FilmesQuery, 'page'> {
 }
 
 export default function FilmesScreen() {
+  const router = useRouter();
   const [filterId, setFilterId] = useState('todos');
   const baseQuery = useMemo(() => queryForFilter(filterId), [filterId]);
 
@@ -45,13 +47,14 @@ export default function FilmesScreen() {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const renderItem = useCallback(({ item }: { item: CarouselCard }) => {
-    return (
+  const renderItem = useCallback(
+    ({ item }: { item: CarouselCard }) => (
       <View style={styles.cell}>
-        <MediaCard item={item} width={CARD_W} />
+        <MediaCard item={item} width={CARD_W} onPress={() => router.push(`/filme/${item.id}`)} />
       </View>
-    );
-  }, []);
+    ),
+    [router],
+  );
 
   return (
     <View style={styles.container}>

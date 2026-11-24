@@ -7,6 +7,9 @@ export const metadata: Metadata = {
 };
 
 const APK_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL?.trim() || '';
+const APK_SHA256 = process.env.NEXT_PUBLIC_ANDROID_APK_SHA256?.trim().toUpperCase() || '';
+const APK_VERSION = process.env.NEXT_PUBLIC_ANDROID_APK_VERSION?.trim() || '';
+const APK_BUILD_DATE = process.env.NEXT_PUBLIC_ANDROID_APK_BUILD_DATE?.trim() || '';
 
 export default function AndroidAppDownloadPage() {
   const hasApk = APK_URL.length > 0;
@@ -18,6 +21,23 @@ export default function AndroidAppDownloadPage() {
         App nativo (não é WebView). iPhone: use o site no navegador e &quot;Adicionar à Tela de Início&quot;.
       </p>
 
+      {(APK_VERSION || APK_BUILD_DATE) && (
+        <dl className="text-sm grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-lg border border-border bg-muted/30 p-4">
+          {APK_VERSION && (
+            <div>
+              <dt className="text-muted-foreground">Versão</dt>
+              <dd className="font-semibold">{APK_VERSION}</dd>
+            </div>
+          )}
+          {APK_BUILD_DATE && (
+            <div>
+              <dt className="text-muted-foreground">Build</dt>
+              <dd className="font-semibold">{APK_BUILD_DATE}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+
       {hasApk ? (
         <a
           href={APK_URL}
@@ -27,10 +47,23 @@ export default function AndroidAppDownloadPage() {
         </a>
       ) : (
         <p className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-          O APK ainda não está publicado. Quando o primeiro build existir, defina{' '}
-          <code className="text-foreground">NEXT_PUBLIC_ANDROID_APK_URL</code> no ambiente do frontend
-          e aponte para o arquivo HTTPS (veja <code>docs/distribuicao-android-apk.md</code>).
+          O APK ainda não está publicado. Após o primeiro{' '}
+          <code className="text-foreground">eas build</code>, defina{' '}
+          <code className="text-foreground">NEXT_PUBLIC_ANDROID_APK_URL</code> no Vercel (e opcionalmente SHA,
+          versão e data). Veja <code>docs/distribuicao-android-apk.md</code>.
         </p>
+      )}
+
+      {APK_SHA256 && (
+        <section className="space-y-2 text-sm">
+          <h2 className="text-lg font-semibold text-foreground">Integridade (SHA-256)</h2>
+          <p className="text-muted-foreground">
+            Compare o hash do arquivo baixado com o valor abaixo antes de instalar.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 text-xs font-mono break-all">
+            {APK_SHA256}
+          </pre>
+        </section>
       )}
 
       <section className="space-y-3 text-sm text-muted-foreground">
@@ -40,10 +73,13 @@ export default function AndroidAppDownloadPage() {
           <li>No Android, permita instalação desta fonte quando o sistema pedir.</li>
           <li>Abra o arquivo e conclua a instalação.</li>
         </ol>
-        <p>
-          Confira o SHA-256 do arquivo na página quando publicarmos o primeiro build (instruções no
-          repositório em <code>docs/distribuicao-android-apk.md</code>).
-        </p>
+        {!APK_SHA256 && hasApk && (
+          <p>
+            Publique também{' '}
+            <code className="text-foreground">NEXT_PUBLIC_ANDROID_APK_SHA256</code> (veja{' '}
+            <code>ops/apk-sha256.sh</code>).
+          </p>
+        )}
       </section>
 
       <Link href="/" className="text-primary hover:underline text-sm">

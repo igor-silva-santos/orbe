@@ -1,17 +1,42 @@
 # Orbe Nerd — app Android (Expo)
 
-Cliente nativo **Android-first**. iOS fica fora do escopo enquanto não houver conta Apple paga — use o site PWA no iPhone.
+Cliente nativo **Android-first**. iOS: site PWA (“Adicionar à Tela de Início”).
 
-## Configuração
+API padrão: `https://orbe-7bu0.onrender.com/api` (Render).
 
-1. Copie `.env.example` para `.env` e ajuste `EXPO_PUBLIC_API_URL`.
-2. Instale dependências e inicie (comandos na seção abaixo — execute manualmente).
+## Desenvolvimento
 
-## Build APK para o site
+```bash
+cd apps/orbe-mobile
+cp .env.example .env
+npm install
+npx expo start
+```
 
-Perfil EAS `production-apk` gera APK instalável. Depois publique o arquivo conforme [`docs/distribuicao-android-apk.md`](../../docs/distribuicao-android-apk.md).
+## Marco M2 (implementado)
 
-## Marco atual (M0/M1)
+- Abas: Início · Filmes · Busca · Conta
+- Detalhe de filme: `/filme/[id]`
+- Ícones em `assets/` (necessários para EAS)
 
-- Login com JWT em Secure Store
-- Home com prévia dos filmes do `/api/homepage`
+## Build APK (M2-G — você executa)
+
+1. `npm i -g eas-cli` e `eas login`
+2. No projeto: `eas build:configure` (uma vez)
+3. Build:
+
+```bash
+cd apps/orbe-mobile
+eas build -p android --profile production-apk
+```
+
+4. Baixe o APK, publique (ex.: `frontend/public/downloads/`) e configure no Vercel:
+
+- `NEXT_PUBLIC_ANDROID_APK_URL`
+- `NEXT_PUBLIC_ANDROID_APK_SHA256` — use `../../ops/apk-sha256.sh`
+
+Página: `/app/android` — ver [`docs/distribuicao-android-apk.md`](../../docs/distribuicao-android-apk.md).
+
+## Push web (não é FCM nativo ainda)
+
+Notificações no navegador: [`docs/render-vapid-m2f.md`](../../docs/render-vapid-m2f.md).

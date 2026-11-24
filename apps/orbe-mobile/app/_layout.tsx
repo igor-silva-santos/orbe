@@ -17,6 +17,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="filme/[id]" options={{ title: 'Filme' }} />
         <Stack.Screen name="login" options={{ title: 'Entrar', headerBackVisible: false }} />
       </Stack>
     </QueryClientProvider>

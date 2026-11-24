@@ -7,12 +7,13 @@ import type { CarouselCard } from '@/types/media';
 type Props = {
   title: string;
   data: CarouselCard[];
+  onItemPress?: (item: CarouselCard) => void;
 };
 
 const CARD_W = 124;
 const ESTIMATED_H = CARD_W * 1.5 + 44;
 
-export function MediaCarousel({ title, data }: Props) {
+export function MediaCarousel({ title, data, onItemPress }: Props) {
   if (!data.length) return null;
 
   return (
@@ -26,7 +27,9 @@ export function MediaCarousel({ title, data }: Props) {
           estimatedListSize={{ height: ESTIMATED_H, width: 360 }}
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item, index) => `${item.type ?? 'm'}-${item.id}-${index}`}
-          renderItem={({ item }) => <MediaCard item={item} width={CARD_W} />}
+          renderItem={({ item }) => (
+            <MediaCard item={item} width={CARD_W} onPress={onItemPress ? () => onItemPress(item) : undefined} />
+          )}
         />
       </View>
     </View>

@@ -1,11 +1,20 @@
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchHomepage } from '@/api/homepage';
 import { MediaCarousel } from '@/components/MediaCarousel';
 import { colors } from '@/theme';
 import { getApiBase } from '@/config';
+import { mediaDetailHref } from '@/navigation/mediaRoutes';
+import type { CarouselCard } from '@/types/media';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const openCard = (item: CarouselCard) => {
+    const href = mediaDetailHref({ ...item, type: item.type ?? 'filme' });
+    if (href) router.push(href);
+  };
+
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ['homepage'],
     queryFn: fetchHomepage,
@@ -29,7 +38,7 @@ export default function HomeScreen() {
       {isError && (
         <Text style={styles.error}>{error instanceof Error ? error.message : 'Erro ao carregar a home.'}</Text>
       )}
-      <MediaCarousel title="Filmes" data={data?.filmes ?? []} />
+      <MediaCarousel title="Filmes" data={data?.filmes ?? []} onItemPress={openCard} />
       <MediaCarousel title="Séries" data={data?.series ?? []} />
       <MediaCarousel title="Animes" data={data?.animes ?? []} />
       <MediaCarousel title="Jogos" data={data?.jogos ?? []} />

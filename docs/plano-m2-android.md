@@ -281,4 +281,6 @@ eas build -p android --profile production-apk
 
 **API:** `https://orbe-7bu0.onrender.com/api` (Render + `app.json` / `eas.json`).
 
-**Próximo manual:** `npm install` em `apps/orbe-mobile`, `npx expo start`, login, testar abas. APK = pacote **M2-G** (`eas build`).
+**Status código (nov/2026):** M2-A–E no app; M2-F (`/notifications/test-push`, Configurações, `docs/render-vapid-m2f.md`); M2-G (ícones `assets/`, página `/app/android` com SHA, `ops/apk-sha256.sh`).
+
+**Seu passo obrigatório:** VAPID no Render + `eas build` + env Vercel do APK.

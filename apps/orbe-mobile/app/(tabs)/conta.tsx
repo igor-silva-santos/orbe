@@ -36,6 +36,9 @@ export default function ContaScreen() {
       <Text style={styles.meta}>{getApiBase()}</Text>
       <Text style={styles.label}>Versão do app</Text>
       <Text style={styles.meta}>{appVersion}</Text>
+      <Text style={styles.hint}>
+        APK para instalar direto: em breve em orbenerd.com/app/android (build EAS).
+      </Text>
       <Pressable style={styles.button} onPress={onLogoutPress}>
         <Text style={styles.buttonText}>Sair</Text>
       </Pressable>
@@ -48,6 +51,7 @@ const styles = StyleSheet.create({
   label: { color: colors.textMuted, fontSize: 12, textTransform: 'uppercase', marginTop: 16 },
   value: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 4 },
   meta: { color: colors.text, fontSize: 13, marginTop: 4 },
+  hint: { color: colors.textMuted, fontSize: 12, marginTop: 20, lineHeight: 18 },
   button: {
     marginTop: 32,
     backgroundColor: colors.accent,

@@ -131,3 +131,26 @@ Repita para `series`, `animes` (`startYear`/`endYear`) e `games`.
 `DATABASE_URL`, `DIRECT_URL`, `TMDB_API_KEY`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `SECRET_KEY`, vars `POSTGRES_*` / `SUPABASE_*`, `NEXT_PUBLIC_WS_URL`, `NEXT_PUBLIC_SUPABASE_*`.
 
 Falta no Vercel (frontend): `NEXT_PUBLIC_API_URL` (depois da API up).
+
+### Push web (VAPID) — Render
+
+Ver passo a passo: [`docs/render-vapid-m2f.md`](render-vapid-m2f.md).
+
+```
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:contato@orbenerd.com
+```
+
+### APK Android no site
+
+Após `eas build`, no Vercel (`frontend`):
+
+```
+NEXT_PUBLIC_ANDROID_APK_URL=
+NEXT_PUBLIC_ANDROID_APK_SHA256=
+NEXT_PUBLIC_ANDROID_APK_VERSION=0.1.0
+NEXT_PUBLIC_ANDROID_APK_BUILD_DATE=
+```
+
+Hash: `ops/apk-sha256.sh arquivo.apk`.
