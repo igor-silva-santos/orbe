@@ -309,11 +309,18 @@ import { warmUpDealsCache } from './deals/dealsService';
 import cron from 'node-cron';
 import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 import { refreshStaleSteamPrices } from './syncSteam';
+import { checkReleaseDates } from './scheduleChecker';
 
 // Agendador para o Detetive Digital (roda todo dia às 3:00, horário de São Paulo)
 cron.schedule('0 3 * * *', () => {
   logger.info('Executando o Detetive Digital agendado...');
   runDetetive();
+}, { timezone: 'America/Sao_Paulo' });
+
+// Lembretes de estreia (7d e 1d) para interações favorito / quero assistir
+cron.schedule('0 8 * * *', () => {
+  logger.info('Executando verificação de lançamentos próximos...');
+  void checkReleaseDates();
 }, { timezone: 'America/Sao_Paulo' });
 
 // Deals: verifica Epic/GamerPower/CheapShark a cada 1 min e atualiza Redis só se o conteúdo mudou

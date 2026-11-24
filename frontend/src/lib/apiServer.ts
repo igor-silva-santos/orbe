@@ -76,9 +76,11 @@ export interface JogosPageData {
 const REVALIDATE_SECONDS = 300;
 
 function getApiOrigin(): string {
+  const publicApi = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, '').replace(/\/$/, '');
   return (
     process.env.API_PROXY_ORIGIN?.replace(/\/$/, '') ||
     process.env.INTERNAL_API_URL?.replace(/\/$/, '') ||
+    publicApi ||
     (process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : '')
   );
 }

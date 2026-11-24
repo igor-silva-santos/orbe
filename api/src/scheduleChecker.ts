@@ -3,7 +3,7 @@ import { logger } from './logger';
 
 
 
-async function checkReleaseDates() {
+export async function checkReleaseDates() {
   logger.info('Iniciando verificação de lançamentos próximos...');
 
   const notificationDays = [7, 1]; // Notificar 7 dias antes e 1 dia antes
@@ -152,6 +152,3 @@ async function checkReleaseDates() {
   logger.info('Verificação de lançamentos próximos concluída.');
 }
 
-checkReleaseDates().finally(async () => {
-  await prisma.$disconnect();
-});
