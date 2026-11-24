@@ -28,7 +28,8 @@ export default function LoginPage() {
       if (token) await establishBrowserSession(token);
       login(user);
       const params = new URLSearchParams(window.location.search);
-      window.location.href = safeRedirectPath(params.get('redirect'));
+      const redirect = params.get('redirect') ?? params.get('next');
+      window.location.href = safeRedirectPath(redirect);
     } catch (error) {
       console.error('Login API call failed:', error);
       toast.error('Ocorreu um erro ao tentar fazer login. Tente novamente.');

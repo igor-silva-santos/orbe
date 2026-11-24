@@ -54,8 +54,10 @@ const MAX_URL_LENGTH = 500;
 const MAX_NOTE_LENGTH = 5000;
 const MAX_LISTS = 50;
 
-export function buildWatchlistAnimeId(crunchyrollId: string): string {
-  return `cr:${crunchyrollId}`;
+/** PK por usuário — evita colisão global em `cr:catalog:<animeId>`. */
+export function buildWatchlistAnimeId(userId: number, crunchyrollId: string): string {
+  const safe = crunchyrollId.replace(/[^a-zA-Z0-9._:@-]/g, '_').slice(0, 180);
+  return `wl:${userId}:${safe}`;
 }
 
 export function inferStatusFromProgress(
@@ -162,7 +164,7 @@ export function mapImportPayloadToData(
   const now = new Date();
 
   return {
-    id: buildWatchlistAnimeId(payload.crunchyrollId),
+    id: buildWatchlistAnimeId(userId, payload.crunchyrollId),
     userId,
     crunchyrollId: payload.crunchyrollId,
     crunchyrollUrl: payload.crunchyrollUrl ?? null,

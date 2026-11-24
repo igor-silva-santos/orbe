@@ -1,7 +1,7 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { logger } from './logger';
-import { resolveCorsOptions } from './securityMiddleware';
+import { getAllowedWebSocketOrigins } from './securityMiddleware';
 
 // Gerenciamento de conexoes WebSocket
 const clients = new Set<WebSocket>();
@@ -15,12 +15,10 @@ let wsHeartbeatInterval: ReturnType<typeof setInterval> | null = null;
  * de `resolveCorsOptions` pra decidir manualmente se aceitamos o handshake.
  */
 function isWebSocketOriginAllowed(origin: string | undefined): boolean {
-  const { origin: allowedOrigin } = resolveCorsOptions();
-  if (allowedOrigin === true) return true; // dev sem CORS_ORIGIN configurado — sem restricao
-  if (!origin) return false; // lista explicita configurada e request sem Origin — rejeita
-  if (Array.isArray(allowedOrigin)) return allowedOrigin.includes(origin);
-  if (typeof allowedOrigin === 'string') return origin === allowedOrigin;
-  return false;
+  const allowed = getAllowedWebSocketOrigins();
+  if (allowed.length === 0) return true;
+  if (!origin) return false;
+  return allowed.includes(origin);
 }
 
 // Funcao para enviar mensagem para todos os clientes conectados

@@ -120,11 +120,18 @@ const request = async (
   });
 
   if (response.status === 401) {
-    removeToken();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login?error=session_expired';
+    const isAuthAttempt =
+      urlString.includes('/auth/login') ||
+      urlString.includes('/auth/register') ||
+      urlString.includes('/login') ||
+      urlString.includes('/register');
+    if (!isAuthAttempt) {
+      removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?error=session_expired';
+      }
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
     }
-    throw new Error('Sessão expirada. Por favor, faça login novamente.');
   }
 
   if (!response.ok) {
@@ -443,6 +450,7 @@ export const orbeNerdApi = {
     apiClient.post('/notifications/subscribe', subscription as Record<string, unknown>),
   unsubscribePush: (endpoint: string) =>
     apiClient.post('/notifications/unsubscribe', { endpoint }),
+  sendTestPush: () => apiClient.post('/notifications/test-push', {}),
 };
 
 export interface WatchlistSyncResponse {

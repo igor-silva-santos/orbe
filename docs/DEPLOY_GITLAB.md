@@ -69,6 +69,8 @@ Com os dois hooks configurados, cada push na `master` roda `.gitlab-ci.yml` → 
 | `deploy:production` | Push na `master` (após testes) |
 | `orbe-sync-guard` | Schedule ou pipeline manual (`ORBE_OPS_ACTION`) |
 
+**CI falhou com `libssl.so.1.1` / Prisma:** a imagem `node:20-bookworm-slim` precisa de `openssl` instalado antes de `prisma generate` (já está no `before_script` do `test:api`). Erro típico: 4 testes passam suites internas mas o job morre com `PrismaClientInitializationError`.
+
 Sync no GitHub Actions (**Sync All**, keep-alive, etc.) continua independente — não publica frontend/API.
 
 ## 4. Identidade Git (este repo)

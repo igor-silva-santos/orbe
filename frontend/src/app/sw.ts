@@ -14,7 +14,7 @@ declare const self: ServiceWorkerGlobalScope;
 /** Catálogo dinâmico — nunca servir stale do cache do SW (defaultCache guarda /api/* por 24h). */
 const isDynamicCatalogApi = ({ sameOrigin, url }: { sameOrigin: boolean; url: URL }) =>
   sameOrigin &&
-  (url.pathname === '/api/home' ||
+  (url.pathname === '/api/homepage' ||
     /^\/api\/(filmes|series|animes|jogos)\/(by-month|by-season)/.test(url.pathname));
 
 const runtimeCaching = [

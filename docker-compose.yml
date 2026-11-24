@@ -28,9 +28,13 @@ services:
     ports:
       - "3001:3001"
     environment:
+      NODE_ENV: "development"
       DATABASE_URL: "postgresql://postgres:admin2011@postgres:5432/orbe_nerd_db"
       REDIS_URL: "redis://redis:6379"
-      JWT_SECRET: "seu_segredo_jwt_super_secreto"
+      JWT_SECRET: "dev_orbe_jwt_altere_antes_de_expor_na_rede"
+      SYNC_SECRET: "dev_orbe_sync_altere_antes_de_expor_na_rede"
+      CORS_ORIGIN: "http://localhost:3000,http://127.0.0.1:3000"
+      ALLOW_INSECURE_DEV_SECRETS: "true"
       PORT: 3001
     depends_on:
       - postgres

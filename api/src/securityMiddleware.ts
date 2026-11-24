@@ -138,6 +138,35 @@ type CorsOriginCallback = (
   callback: (err: Error | null, allow?: boolean) => void
 ) => void;
 
+/** Origens fixas para handshake WebSocket (CORS no Express usa callback, não lista). */
+export function getAllowedWebSocketOrigins(): string[] {
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
+  const extensionOrigin = process.env.EXTENSION_ORIGIN?.trim();
+  const origins = new Set<string>([
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://10.0.2.2:3000',
+  ]);
+
+  if (corsOrigin && corsOrigin !== '*') {
+    corsOrigin.split(',').map((o) => o.trim()).filter(Boolean).forEach((o) => origins.add(o));
+  }
+
+  if (extensionOrigin) {
+    origins.add(extensionOrigin);
+  }
+
+  const allowAll =
+    !isProduction &&
+    (!corsOrigin || corsOrigin === '*');
+
+  if (allowAll) {
+    return [];
+  }
+
+  return Array.from(origins);
+}
+
 export function resolveCorsOptions(): {
   origin: string | string[] | boolean | CorsOriginCallback;
   credentials: boolean;

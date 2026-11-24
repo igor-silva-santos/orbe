@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Orbe Nerd",
+    "slug": "orbe-nerd",
+    "scheme": "orbe",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B10"
+    },
+    "android": {
+      "package": "com.orbenerd.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0B10"
+      }
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "extra": {
+      "eas": {
+        "projectId": "SUBSTITUA_APOS_eas_init"
+      },
+      "apiUrlDefault": "https://orbe-7bu0.onrender.com/api"
+    }
+  }
+}

@@ -2,6 +2,17 @@ import type Redis from 'ioredis';
 import { getRedisClient } from './redisClient';
 import { logger } from './logger';
 
+/** Deve coincidir com `CACHE_KEY_VERSION` em `cacheMiddleware.ts` */
+const CACHE_KEY_VERSION = process.env.CACHE_KEY_VERSION || '4';
+
+function versionedCachePattern(pattern: string): string {
+  if (pattern.startsWith(`cache:v${CACHE_KEY_VERSION}:`)) return pattern;
+  if (pattern.startsWith('cache:')) {
+    return pattern.replace(/^cache:/, `cache:v${CACHE_KEY_VERSION}:`);
+  }
+  return pattern;
+}
+
 /** SCAN em vez de KEYS — KEYS bloqueia o Redis inteiro durante a varredura do keyspace. */
 function scanKeys(client: Redis, pattern: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
@@ -26,7 +37,8 @@ export async function invalidateCacheByPatterns(patterns: string[]): Promise<voi
     const keysToDelete = new Set<string>();
 
     for (const pattern of patterns) {
-      const normalized = pattern.includes('*') ? pattern : `${pattern}*`;
+      const versioned = versionedCachePattern(pattern);
+      const normalized = versioned.includes('*') ? versioned : `${versioned}*`;
       const keys = await scanKeys(redisClient, normalized);
       keys.forEach((key) => keysToDelete.add(key));
     }

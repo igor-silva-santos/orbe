@@ -2,13 +2,16 @@ import type { Notification } from '@/types';
 
 export type ApiNotification = {
   id: number;
-  usuario_id?: number;
+  type: string;
+  message: string;
+  foi_visualizada: boolean;
   midia_id?: number | null;
   tipo_midia?: string | null;
-  titulo: string;
-  tipo_notificacao: string;
-  foi_visualizada: boolean;
-  data_criacao: string;
+  createdAt: string;
+  /** Campos legados (se algum proxy antigo ainda enviar) */
+  titulo?: string;
+  tipo_notificacao?: string;
+  data_criacao?: string;
 };
 
 /** Normaliza payload da API Express para o tipo usado no frontend. */
@@ -17,10 +20,10 @@ export function mapNotification(raw: ApiNotification): Notification {
     id: raw.id,
     midia_id: raw.midia_id ?? undefined,
     tipo_midia: raw.tipo_midia as Notification['tipo_midia'],
-    message: raw.titulo,
-    type: raw.tipo_notificacao,
+    message: raw.message ?? raw.titulo ?? '',
+    type: raw.type ?? raw.tipo_notificacao ?? 'info',
     foi_visualizada: raw.foi_visualizada,
-    createdAt: raw.data_criacao,
+    createdAt: raw.createdAt ?? raw.data_criacao ?? new Date().toISOString(),
   };
 }
 
