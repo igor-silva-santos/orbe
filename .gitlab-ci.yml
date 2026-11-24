@@ -46,55 +46,59 @@ test:api:
     # Run pipeline (web) na branch — exige test:api para mirror:github (needs)
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
-.mirror_github_script: &mirror_github_script
-  - |
-    set -e
-    if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
-      echo "ERRO: GITHUB_MIRROR_TOKEN não está disponível neste job."
-      echo "GitLab → Settings → CI/CD → Variables:"
-      echo "  • Nome exato GITHUB_MIRROR_TOKEN"
-      echo "  • Desmarque 'Protect variable' (MR em branch não protegida não recebe var protegida)"
-      echo "  • Fine-grained PAT: Contents Read and write no repo orbe"
-      exit 1
-    fi
-    BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
-    echo "Espelhando commit $(git rev-parse --short HEAD) → github … branch=${BRANCH}"
-    git remote remove github 2>/dev/null || true
-    git remote add github "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/igor-silva-santos/orbe.git"
-    if git ls-remote --heads github "refs/heads/${BRANCH}" | grep -q .; then
-      git push github "HEAD:refs/heads/${BRANCH}" --force-with-lease
-    else
-      git push github "HEAD:refs/heads/${BRANCH}"
-    fi
-    echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
+.mirror_github:
+  image: node:${NODE_VERSION}-bookworm-slim
+  variables:
+    GIT_DEPTH: "0"
+    GIT_STRATEGY: clone
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates
+  script:
+    - |
+      set -e
+      if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
+        echo "ERRO: GITHUB_MIRROR_TOKEN não está disponível neste job."
+        echo "GitLab → Settings → CI/CD → Variables: sem Protect variable"
+        exit 1
+      fi
+      BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
+      echo "branch=${BRANCH} sha=$(git rev-parse HEAD)"
+      git config user.email "gitlab-ci@orbenerd.local"
+      git config user.name "GitLab Mirror"
+      git fetch --unshallow 2>/dev/null || true
+      git remote remove github 2>/dev/null || true
+      git remote add github "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/igor-silva-santos/orbe.git"
+      REMOTE_HEAD="$(git ls-remote --heads github "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
+      if [ -n "${REMOTE_HEAD}" ]; then
+        echo "Branch existe no GitHub; atualizando com force-with-lease"
+        git push github "HEAD:refs/heads/${BRANCH}" --force-with-lease
+      else
+        echo "Criando branch nova no GitHub"
+        git push github "HEAD:refs/heads/${BRANCH}"
+      fi
+      echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
 
 mirror:github:
   stage: deploy
-  image: alpine/git:2.54.1
+  extends: .mirror_github
   needs:
     - job: test:api
       optional: true
-  variables:
-    GIT_DEPTH: 0
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
-  script: *mirror_github_script
 
 # Se test:api falhar mas você só quiser espelhar: Run pipeline → job manual
 mirror:github:manual:
   stage: deploy
-  image: alpine/git:2.54.1
+  extends: .mirror_github
   needs: []
-  variables:
-    GIT_DEPTH: 0
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: manual
-  script: *mirror_github_script
 
 deploy:production:
   stage: deploy
