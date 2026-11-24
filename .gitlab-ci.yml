@@ -43,6 +43,8 @@ test:api:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Run pipeline (web) na branch — exige test:api para mirror:github (needs)
+    - if: '$CI_PIPELINE_SOURCE == "web"'
 
 .mirror_github_script: &mirror_github_script
   - |
@@ -70,7 +72,8 @@ mirror:github:
   stage: deploy
   image: alpine/git:2.47.0
   needs:
-    - test:api
+    - job: test:api
+      optional: true
   variables:
     GIT_DEPTH: 0
   rules:
