@@ -94,7 +94,11 @@ O agente na nuvem **não** consegue `git push` no GitHub (só GitLab tem token a
 
 ### Opção A — Automático no pipeline (recomendado)
 
-1. GitHub → **Settings** → **Developer settings** → **Fine-grained tokens** → token com **Contents: Read and write** no repo `orbe`.
+1. GitHub → **Fine-grained PAT** no repo `orbe`:
+   - **Contents:** Read and write
+   - **Metadata:** Read
+   - **Workflows:** Read and write *(obrigatório — o repo tem `.github/workflows/`)*  
+   Alternativa mais simples: **Classic PAT** com escopo **`repo`**.
 2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (masked, **sem** “Protect variable”).
 3. Run pipeline na branch `cursor/m2-android-c710` (MR !1). Jobs:
    - **`mirror:github`** após `test:api` verde, ou
