@@ -56,11 +56,21 @@ test:api:
   script:
     - |
       set -e
-      if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
-        echo "ERRO: GITHUB_MIRROR_TOKEN não está disponível neste job."
-        echo "GitLab → Variables: sem Protect variable"
+      MIRROR_TOKEN="${GITHUB_MIRROR_TOKEN:-${GH_MIRROR_TOKEN:-}}"
+      echo "CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}"
+      echo "CI_COMMIT_REF_PROTECTED=${CI_COMMIT_REF_PROTECTED:-false}"
+      echo "GITHUB_MIRROR_TOKEN length=${#MIRROR_TOKEN} (0 = GitLab não passou a variável)"
+      if [ -z "${MIRROR_TOKEN}" ]; then
+        echo "ERRO: GITHUB_MIRROR_TOKEN vazio neste job."
+        echo ""
+        echo "Correção (99% dos casos): GitLab → Settings → CI/CD → Variables → GITHUB_MIRROR_TOKEN"
+        echo "  • DESMARQUE «Protect variable» (branch ${CI_COMMIT_REF_NAME} não é protegida)"
+        echo "  • Environment scope: All (default)"
+        echo "  • Tipo: Variable (não File)"
+        echo "  • Salve de novo e rode o pipeline outra vez (commit 97da51b+)"
         exit 1
       fi
+      export GITHUB_MIRROR_TOKEN="${MIRROR_TOKEN}"
       GITHUB_REPO="https://github.com/igor-silva-santos/orbe.git"
       BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
       SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"

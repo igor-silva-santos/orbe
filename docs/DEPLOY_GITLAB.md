@@ -99,7 +99,11 @@ O agente na nuvem **não** consegue `git push` no GitHub (só GitLab tem token a
    - **Metadata:** Read
    - **Workflows:** Read and write *(obrigatório — o repo tem `.github/workflows/`)*  
    Alternativa mais simples: **Classic PAT** com escopo **`repo`**.
-2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (masked, **sem** “Protect variable”).
+2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN`:
+   - **Protect variable: OFF** — se estiver ON, jobs na branch `cursor/...` veem **length=0** e falham (log que você viu)
+   - Masked: pode ficar ON
+   - Environment: **All**
+   - Apague e recrie se tiver dúvida (sem espaço no fim do PAT)
 3. Run pipeline na branch `cursor/m2-android-c710` (MR !1). Jobs:
    - **`mirror:github`** após `test:api` verde, ou
    - **`mirror:github:manual`** (play) se só quiser espelhar sem esperar testes.
