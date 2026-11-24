@@ -20,6 +20,8 @@ stages:
   - deploy
   - operations
 
+# Espelho GitHub (igor-silva-santos/orbe): defina GITHUB_MIRROR_TOKEN no GitLab CI/CD (PAT com escrita no repo).
+
 variables:
   NODE_VERSION: "20"
   # Até configurar RENDER_DEPLOY_HOOK + VERCEL_DEPLOY_HOOK no GitLab, não falha o pipeline
@@ -41,6 +43,26 @@ test:api:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+mirror:github:
+  stage: deploy
+  image: alpine/git:2.47.0
+  needs:
+    - test:api
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+  script:
+    - |
+      set -e
+      if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
+        echo "GITHUB_MIRROR_TOKEN não definido — pulando espelho (docs/DEPLOY_GITLAB.md § GitHub)."
+        exit 0
+      fi
+      git remote remove github 2>/dev/null || true
+      git remote add github "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/igor-silva-santos/orbe.git"
+      git push github "HEAD:refs/heads/${CI_COMMIT_REF_NAME}" --force-with-lease
+      echo "Espelhado ${CI_COMMIT_REF_NAME} → github.com/igor-silva-santos/orbe"
 
 deploy:production:
   stage: deploy

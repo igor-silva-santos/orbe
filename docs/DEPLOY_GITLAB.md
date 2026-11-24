@@ -88,7 +88,35 @@ git remote -v
 # github  → github.com/igor-silva-santos/orbe.git (espelho)
 ```
 
-## 5. Checklist rápido
+## 5. Espelhar no GitHub (`igor-silva-santos/orbe`)
+
+O agente na nuvem **não** consegue `git push` no GitHub (só GitLab tem token aqui). Use **uma** destas opções:
+
+### Opção A — Automático no pipeline (recomendado)
+
+1. GitHub → **Settings** → **Developer settings** → **Fine-grained tokens** → token com **Contents: Read and write** no repo `orbe`.
+2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (masked).
+3. Merge MR ou re-execute o pipeline do MR: o job **`mirror:github`** roda após `test:api` e faz push da branch (`cursor/m2-android-c710`, depois `master`).
+
+### Opção B — Push mirror no GitLab (sem CI)
+
+**Settings** → **Repository** → **Mirroring repositories** → **Add new** → **Push mirror**  
+URL: `https://x-access-token:SEU_PAT@github.com/igor-silva-santos/orbe.git`, branch `master` (ou espelho de todas).
+
+### Opção C — Uma vez no seu PC
+
+```bash
+export GITHUB_MIRROR_TOKEN=ghp_...
+./ops/push-github-mirror.sh cursor/m2-android-c710
+```
+
+PowerShell (defina o token na sessão antes):
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -Command "$env:GITHUB_MIRROR_TOKEN='seu_pat'; bash ./ops/push-github-mirror.sh cursor/m2-android-c710"
+```
+
+## 6. Checklist rápido
 
 - [ ] `master` no GitLab está à frente do que está em produção
 - [ ] Vercel **não** faz deploy em push do GitHub
