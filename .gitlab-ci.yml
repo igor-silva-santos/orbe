@@ -70,7 +70,7 @@ test:api:
 
 mirror:github:
   stage: deploy
-  image: alpine/git:2.47.0
+  image: alpine/git:2.54.1
   needs:
     - job: test:api
       optional: true
@@ -85,7 +85,7 @@ mirror:github:
 # Se test:api falhar mas você só quiser espelhar: Run pipeline → job manual
 mirror:github:manual:
   stage: deploy
-  image: alpine/git:2.47.0
+  image: alpine/git:2.54.1
   needs: []
   variables:
     GIT_DEPTH: 0
