@@ -52,7 +52,7 @@ test:api:
     GIT_DEPTH: "0"
     GIT_STRATEGY: clone
   before_script:
-    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git ca-certificates
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates
   script:
     - |
       set -e
@@ -62,24 +62,30 @@ test:api:
         exit 1
       fi
       GITHUB_REPO="https://github.com/igor-silva-santos/orbe.git"
-      AUTH_HEADER="AUTHORIZATION: bearer ${GITHUB_MIRROR_TOKEN}"
       BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
-      echo "branch=${BRANCH} sha=$(git rev-parse HEAD)"
-      git config user.email "gitlab-ci@orbenerd.local"
+      SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+      echo "branch=${BRANCH} sha=${SHA}"
+      git config user.email "gitlab-cli@orbenerd.local"
       git config user.name "GitLab Mirror"
       git fetch --unshallow 2>/dev/null || true
+      CRED_FILE="$(mktemp)"
+      chmod 600 "${CRED_FILE}"
+      printf 'https://x-access-token:%s@github.com\n' "${GITHUB_MIRROR_TOKEN}" > "${CRED_FILE}"
+      git config --global credential.helper "store --file=${CRED_FILE}"
       echo "Testando PAT na API (repos/orbe)..."
       HTTP_CODE="$(curl -sS -o /tmp/gh-repo.json -w '%{http_code}' \
-        -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_MIRROR_TOKEN}" \
+        -H "Accept: application/vnd.github+json" \
         "https://api.github.com/repos/igor-silva-santos/orbe")"
       echo "API HTTP ${HTTP_CODE}"
       if [ "${HTTP_CODE}" != "200" ]; then
         head -c 400 /tmp/gh-repo.json || true
         echo ""
-        echo "PAT sem acesso ao repo. Use fine-grained: repo orbe + Contents Read/Write + Metadata Read."
+        echo "PAT não autenticou na API (revise token no GitLab, sem aspas nem espaço extra)."
+        rm -f "${CRED_FILE}"
         exit 1
       fi
-      REMOTE_HEAD="$(git -c "http.extraHeader=${AUTH_HEADER}" ls-remote "${GITHUB_REPO}" "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
+      REMOTE_HEAD="$(git ls-remote "${GITHUB_REPO}" "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
       PUSH_OPTS=""
       if [ -n "${REMOTE_HEAD}" ]; then
         echo "Branch já existe no GitHub; force-with-lease"
@@ -87,17 +93,16 @@ test:api:
       else
         echo "Criando branch nova no GitHub"
       fi
-      if ! git -c "http.extraHeader=${AUTH_HEADER}" push ${PUSH_OPTS} "${GITHUB_REPO}" "HEAD:refs/heads/${BRANCH}" 2> /tmp/push.log; then
+      if ! git push ${PUSH_OPTS} "${GITHUB_REPO}" "${SHA}:refs/heads/${BRANCH}" 2> /tmp/push.log; then
         echo "--- git push (erro) ---"
         cat /tmp/push.log
         if grep -qi workflow /tmp/push.log; then
-          echo ""
-          echo "Este repo tem .github/workflows — no PAT fine-grained marque também:"
-          echo "  • Repository permissions → Workflows → Read and write"
-          echo "Ou use Classic PAT com escopo repo (full)."
+          echo "→ PAT: Workflows Read and write no repo orbe"
         fi
+        rm -f "${CRED_FILE}"
         exit 1
       fi
+      rm -f "${CRED_FILE}"
       echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
 
 mirror:github:
