@@ -44,25 +44,54 @@ test:api:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+.mirror_github_script: &mirror_github_script
+  - |
+    set -e
+    if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
+      echo "ERRO: GITHUB_MIRROR_TOKEN não está disponível neste job."
+      echo "GitLab → Settings → CI/CD → Variables:"
+      echo "  • Nome exato GITHUB_MIRROR_TOKEN"
+      echo "  • Desmarque 'Protect variable' (MR em branch não protegida não recebe var protegida)"
+      echo "  • Fine-grained PAT: Contents Read and write no repo orbe"
+      exit 1
+    fi
+    BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
+    echo "Espelhando commit $(git rev-parse --short HEAD) → github … branch=${BRANCH}"
+    git remote remove github 2>/dev/null || true
+    git remote add github "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/igor-silva-santos/orbe.git"
+    if git ls-remote --heads github "refs/heads/${BRANCH}" | grep -q .; then
+      git push github "HEAD:refs/heads/${BRANCH}" --force-with-lease
+    else
+      git push github "HEAD:refs/heads/${BRANCH}"
+    fi
+    echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
+
 mirror:github:
   stage: deploy
   image: alpine/git:2.47.0
   needs:
     - test:api
+  variables:
+    GIT_DEPTH: 0
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
-  script:
-    - |
-      set -e
-      if [ -z "${GITHUB_MIRROR_TOKEN:-}" ]; then
-        echo "GITHUB_MIRROR_TOKEN não definido — pulando espelho (docs/DEPLOY_GITLAB.md § GitHub)."
-        exit 0
-      fi
-      git remote remove github 2>/dev/null || true
-      git remote add github "https://x-access-token:${GITHUB_MIRROR_TOKEN}@github.com/igor-silva-santos/orbe.git"
-      git push github "HEAD:refs/heads/${CI_COMMIT_REF_NAME}" --force-with-lease
-      echo "Espelhado ${CI_COMMIT_REF_NAME} → github.com/igor-silva-santos/orbe"
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+  script: *mirror_github_script
+
+# Se test:api falhar mas você só quiser espelhar: Run pipeline → job manual
+mirror:github:manual:
+  stage: deploy
+  image: alpine/git:2.47.0
+  needs: []
+  variables:
+    GIT_DEPTH: 0
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+  script: *mirror_github_script
 
 deploy:production:
   stage: deploy
