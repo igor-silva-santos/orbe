@@ -205,4 +205,4 @@ orbe-sync-guard:
     - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "health"'
     - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "status"'
     - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "resume"'
-    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "watch"
+    - if: '$CI_PIPELINE_SOURCE == "web" && $ORBE_OPS_ACTION == "watch"'
