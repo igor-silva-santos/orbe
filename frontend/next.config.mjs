@@ -11,6 +11,8 @@ const nextConfig = {
   // Sem isso o Next nunca gera essa pasta e o build da imagem falha no COPY.
   output: 'standalone',
   images: {
+    // Hobby Vercel: /_next/image consome banda do workspace; posters já vêm de CDN (TMDB/IGDB).
+    unoptimized: true,
     minimumCacheTTL: 86400,
     remotePatterns: [
       {
@@ -148,6 +150,13 @@ const nextConfig = {
     ],
   
   },
+  redirects: async () => [
+    {
+      source: '/jogos-em-alta',
+      destination: '/promocoes?tab=em-alta',
+      permanent: false,
+    },
+  ],
   rewrites: async () => {
     // Proxy /api/* → API Express. Em dev: localhost:3001.
     // Em produção: API_PROXY_ORIGIN ou origem derivada de NEXT_PUBLIC_API_URL.

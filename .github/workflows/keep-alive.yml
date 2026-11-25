@@ -5,10 +5,9 @@ name: Keep API Acordada (Render free tier)
 # Detetive Digital 3h, refresh de preços Steam 4h, renovação de webhooks
 # IGDB 5h — ver api/src/index.ts), já que o processo inteiro fica suspenso.
 #
-# Este workflow só faz um GET em /api/health o tempo todo (24h/dia), pra
-# garantir que o serviço nunca hiberne e os crons internos disparem nos
-# horários certos. Sem side effects — não inicia nem interfere em sync
-# nenhum, só mantém o processo vivo.
+# GET em /api/health a cada ~12 min **somente se** ORBE_KEEP_ALIVE_ENABLED=true (repo variable)
+# ou disparo manual. Evita egress 24/7 no Render free; durante sync longo, sync-all.yml
+# e sync-catalog-range.yml fazem ping próprio.
 
 on:
   schedule:
@@ -17,11 +16,24 @@ on:
 
 jobs:
   ping:
+    if: github.event_name == 'workflow_dispatch' || vars.ORBE_KEEP_ALIVE_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: GET /api/health
         env:
-          API_URL: ${{ secrets.ORBE_API_URL }}
+          ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
         run: |
-          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
-          curl -sf "${API_BASE}/api/health" >/dev/null && echo "OK: ${API_BASE}/api/health respondeu." || echo "::warning::${API_BASE}/api/health não respondeu (cold start em andamento?)."
+          source .github/scripts/orbe-render-api.sh
+          set +e
+          orbe_wait_health
+          code=$?
+          set -e
+          if [ "$code" = "78" ]; then
+            echo "Render suspenso — keep-alive não adianta até Resume + reset de banda."
+            exit 0
+          fi
+          if [ "$code" != "0" ]; then exit "$code"; fi
+          echo "OK: $(orbe_api_base)/api/health"

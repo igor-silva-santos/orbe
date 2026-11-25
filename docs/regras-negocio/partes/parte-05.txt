@@ -1,0 +1,687 @@
+========== 345/511 — RN-LISTA-065 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Abrir detalhe
+Descrição: Clique na linha.
+Pré-condições: Anime ligado ao catálogo Orbe.
+Resultado na tela: Abre modal de detalhe do anime.
+Como testar: Clicar linha com anime resolvido.
+
+========== 346/511 — RN-LISTA-066 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Ajuda extensão
+Descrição: Orientação na página.
+Pré-condições: Página fila.
+Resultado na tela: Link para watchlist Crunchyroll e nota sobre filtro de dublagem PT-BR no popup da extensão.
+Como testar: Ler bloco de instruções.
+
+========== 347/511 — RN-LISTA-070 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Login para interagir
+Descrição: Favoritar, listas, etc.
+Pré-condições: Anônimo em tela que mostra cards (ex. após bug).
+Resultado na tela: Toast pedindo login; ação não conclui.
+Como testar: Deslogar e tentar favoritar na lista.
+
+========== 348/511 — RN-LISTA-071 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Significado dos status
+Descrição: Menu do card.
+Pré-condições: Logado.
+Resultado na tela: Favorito, quero assistir, acompanhando; “não me interessa” oculta da lista principal.
+Como testar: Aplicar cada status.
+
+========== 349/511 — RN-LISTA-072 ==========
+Tela: área **Minha Lista** do site (menu do usuário, menu “Mais” ou atalhos equivalentes), exclusiva para quem entrou na conta.
+Nome: Acompanhando só anime/série
+Descrição: Opção no menu.
+Pré-condições: Card de filme vs anime.
+Resultado na tela: “Acompanhando” oferecido para anime e série; não para filme/jogo da mesma forma.
+Como testar: Abrir menu em filme e anime.
+
+========== 350/511 — RN-MODAL-001 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Só abre com mídia válida
+Descrição: O modal de detalhe exige tipo e obra reconhecidos.
+Pré-condições: Clique em card de mídia suportada.
+Resultado na tela: Overlay e conteúdo aparecem; tipos não suportados não abrem modal.
+Como testar: Abrir filme, série, anime e jogo a partir de cards.
+
+========== 351/511 — RN-MODAL-002 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Fechar ao mudar de página
+Descrição: Se o usuário vai para outra página do site com o modal aberto.
+Pré-condições: Modal aberto; clicar link do menu ou digitar outra URL interna.
+Resultado na tela: Modal fecha; a nova página carrega normalmente (sem “voltar” extra inesperado).
+Como testar: Com modal aberto, ir para Filmes pelo header.
+
+========== 352/511 — RN-MODAL-003 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Detalhes ao abrir
+Descrição: Ao abrir, a tela busca informações completas da obra.
+Pré-condições: Abrir modal pela primeira vez para um título.
+Resultado na tela: Breve loading; depois sinopse, elenco, links etc. mais completos que no card.
+Como testar: Abrir modal e comparar dados com o card.
+
+========== 353/511 — RN-MODAL-004 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Falha ao buscar detalhes
+Descrição: Se a busca de detalhes falhar.
+Pré-condições: Rede instável ou título problemático.
+Resultado na tela: Modal ainda mostra o que já vinha do card; raramente tela de erro se não houver nenhum dado.
+Como testar: Simular offline após abrir modal.
+
+========== 354/511 — RN-MODAL-005 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Botão voltar do navegador
+Descrição: O modal participa do histórico do navegador.
+Pré-condições: Modal aberto em desktop/mobile.
+Resultado na tela: Fechar pelo X, clique fora ou Esc pode voltar uma entrada no histórico; botão “voltar” do browser fecha o modal.
+Como testar: Abrir modal → botão voltar do navegador.
+
+========== 355/511 — RN-MODAL-006 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Rolagem da página de fundo
+Descrição: Enquanto o modal está aberto.
+Pré-condições: Modal visível.
+Resultado na tela: A página atrás não rola (scroll bloqueado); ao fechar, rolagem normal volta.
+Como testar: Tentar rolar a listagem com modal aberto.
+
+========== 356/511 — RN-MODAL-007 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Clique fora fecha
+Descrição: Clicar na área escura fora do card.
+Pré-condições: Modal aberto.
+Resultado na tela: Modal fecha.
+Como testar: Clicar no backdrop.
+
+========== 357/511 — RN-MODAL-008 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Tecla Esc fecha
+Descrição: Teclado com foco na página.
+Pré-condições: Modal aberto (desktop).
+Resultado na tela: Esc fecha o modal.
+Como testar: Pressionar Esc.
+
+========== 358/511 — RN-MODAL-009 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Premiações no topo
+Descrição: Obra com prêmios cadastrados.
+Pré-condições: Filme/série/etc. com lista de premiações.
+Resultado na tela: Bloco de prêmios acima do restante do conteúdo.
+Como testar: Abrir título premiado conhecido.
+
+========== 359/511 — RN-MODAL-010 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Modo edição (administrador)
+Descrição: Conta com perfil administrador.
+Pré-condições: Usuário admin; modal aberto.
+Resultado na tela: Botão de editar visível; alterna para formulários de curadoria; visitante/usuário comum não vê editar.
+Como testar: Logar como admin vs usuário normal.
+
+========== 360/511 — RN-MODAL-011 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Conteúdo por tipo
+Descrição: Cada tipo de mídia tem layout próprio.
+Pré-condições: Abrir os quatro tipos.
+Resultado na tela: Filme, série, anime e jogo mostram blocos adequados (streaming, temporadas, plataformas, etc.).
+Como testar: Quatro modais distintos.
+
+========== 361/511 — RN-MODAL-012 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Carregando detalhes
+Descrição: Entre abrir e receber dados completos.
+Pré-condições: Rede lenta.
+Resultado na tela: Indicador de carregamento com mensagem fixa.
+Como testar: Throttle ao abrir modal.
+
+========== 362/511 — RN-MODAL-013 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Busca fecha ao abrir detalhe
+Descrição: Busca global aberta; usuário abre um card.
+Pré-condições: Overlay de busca visível.
+Resultado na tela: Busca fecha; modal de detalhe fica por cima.
+Como testar: Buscar título → clicar resultado.
+
+========== 363/511 — RN-MODAL-020 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Exige login
+Descrição: Adicionar ao calendário pessoal.
+Pré-condições: Usuário **não** logado.
+Resultado na tela: Mensagem de erro (toast); submodal de calendário fecha.
+Como testar: Anônimo → tentar adicionar evento.
+
+========== 364/511 — RN-MODAL-021 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Opções por tipo
+Descrição: Tipos de evento variam conforme filme, anime, série ou jogo.
+Pré-condições: Logado; modal de cada tipo.
+Resultado na tela: Filme: estreia e/ou sessão de cinema (data, hora, local). Anime: estreia e/ou lembretes semanais. Série e jogo: estreia única.
+Como testar: Percorrer fluxo calendário em filme e anime.
+
+========== 365/511 — RN-MODAL-022 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Lembretes semanais (anime/série)
+Descrição: Opção recorrente para anime ou série.
+Pré-condições: Logado; escolher recorrência semanal.
+Resultado na tela: Vários eventos espaçados (~7 dias), conforme quantidade de episódios informada ou padrão (~12).
+Como testar: Criar série de lembretes e conferir quantidade.
+
+========== 366/511 — RN-MODAL-023 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Estreia sem data
+Descrição: Evento de lançamento sem data conhecida.
+Pré-condições: Obra sem data de estreia.
+Resultado na tela: Aviso; nada é salvo; modal fecha.
+Como testar: Título sem data → “lançamento”.
+
+========== 367/511 — RN-MODAL-024 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Ingresso de cinema
+Descrição: Evento tipo sessão/ingresso.
+Pré-condições: Filme com formulário de cinema preenchido.
+Resultado na tela: Evento com data, hora e local informados.
+Como testar: Preencher e salvar sessão.
+
+========== 368/511 — RN-MODAL-025 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Confirmação de salvamento
+Descrição: Eventos válidos enviados.
+Pré-condições: Logado; dados completos.
+Resultado na tela: Toast de sucesso ou erro após tentativa de salvar.
+Como testar: Salvar evento válido e inválido.
+
+========== 369/511 — RN-MODAL-026 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Botão calendário em filme futuro
+Descrição: Botão “Adicionar ao Calendário” no filme.
+Pré-condições: Filme com estreia **futura** vs já lançado.
+Resultado na tela: Botão visível só enquanto a estreia ainda não passou.
+Como testar: Filme futuro vs lançado.
+
+========== 370/511 — RN-MODAL-030 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Abrir pelo card
+Descrição: Atalho no card, não pelo menu genérico de lista.
+Pré-condições: Card de mídia já lançada.
+Resultado na tela: Abre modal de avaliação; desabilitado se a obra ainda não lançou.
+Como testar: Título futuro vs lançado → botão “Já assisti/joguei”.
+
+========== 371/511 — RN-MODAL-031 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Marca como assistido/jogado
+Descrição: Após enviar avaliação.
+Pré-condições: Logado; modal de rating aberto.
+Resultado na tela: Status passa a “assistido” (inclusive para jogos).
+Como testar: Avaliar jogo e conferir status na lista.
+
+========== 372/511 — RN-MODAL-032 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Campos da avaliação
+Descrição: Usuário escolhe sentimento e comentário opcional.
+Pré-condições: Modal aberto.
+Resultado na tela: Opções do tipo gostei / amei / não gostei; campo de texto opcional.
+Como testar: Enviar com e sem comentário.
+
+========== 373/511 — RN-MODAL-033 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Login obrigatório
+Descrição: Tentativa sem sessão.
+Pré-condições: Não logado.
+Resultado na tela: Toast de aviso; modal fecha sem salvar.
+Como testar: Anônimo → avaliar.
+
+========== 374/511 — RN-MODAL-040 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Título e pôster
+Descrição: Exibição prioriza textos e imagens curados quando existirem.
+Pré-condições: Filme com título/pôster alternativos no catálogo.
+Resultado na tela: Título e arte coerentes com curadoria do site.
+Como testar: Comparar com listagem.
+
+========== 375/511 — RN-MODAL-041 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Onde assistir
+Descrição: Provedores de streaming e cinema.
+Pré-condições: Filme com e sem provedores.
+Resultado na tela: Lista de serviços (sem duplicatas óbvias); se nada conhecido, texto “Desconhecido”.
+Como testar: Filme só cinema vs só streaming.
+
+========== 376/511 — RN-MODAL-042 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Ingresso
+Descrição: Compra ou sessões de cinema.
+Pré-condições: Filme em cartaz, pré-venda ou com sessões.
+Resultado na tela: Botão de ingresso conforme disponibilidade; compra habilitada só quando há sessões confirmadas.
+Como testar: Filme em cartaz com/sem sessões.
+
+========== 377/511 — RN-MODAL-043 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Trailer
+Descrição: Vídeos disponíveis para o filme.
+Pré-condições: Filme com trailer oficial e alternativos.
+Resultado na tela: Prioriza trailer oficial; senão primeiro trailer; senão outro vídeo.
+Como testar: Abrir filme com vários vídeos.
+
+========== 378/511 — RN-MODAL-044 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Elenco → página da pessoa
+Descrição: Clique em ator/equipe.
+Pré-condições: Elenco listado.
+Resultado na tela: Vai para página da pessoa; modal de filme fecha; ao voltar, fluxo de retorno pode reabrir o filme (quando aplicável).
+Como testar: Clicar nome no elenco → voltar.
+
+========== 379/511 — RN-MODAL-045 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Continuações no filme
+Descrição: Abas extras no modal.
+Pré-condições: Filme com sequências ou universo.
+Resultado na tela: Aba “Continuação” e/ou “Universo” com obras relacionadas.
+Como testar: Filme de franquia conhecida.
+
+========== 380/511 — RN-MODAL-050 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Onde assistir
+Descrição: Mescla fontes de plataforma de streaming.
+Pré-condições: Série com vários provedores.
+Resultado na tela: Lista deduplicada de serviços.
+Como testar: Inspecionar bloco streaming.
+
+========== 381/511 — RN-MODAL-051 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Elenco → pessoa
+Descrição: Mesmo padrão do filme.
+Pré-condições: Elenco presente.
+Resultado na tela: Navega para a página da pessoa; ao voltar, o modal da série pode reabrir quando o site guardou esse retorno.
+Como testar: Clicar ator.
+
+========== 382/511 — RN-MODAL-052 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Calendário na série
+Descrição: Botão explícito de calendário na UI de série.
+Pré-condições: Modal de série aberto.
+Resultado na tela: Não há botão dedicado igual ao de filme futuro; calendário pode existir por outros fluxos conforme produto.
+Como testar: Procurar botão calendário na série.
+
+========== 383/511 — RN-MODAL-053 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Continuações
+Descrição: Abas de franquia/universo.
+Pré-condições: Série ligada a universo compartilhado.
+Resultado na tela: Abas de continuação/universo como no filme.
+Como testar: Série MCU/DCEU etc.
+
+========== 384/511 — RN-MODAL-060 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Sinopse legível
+Descrição: Texto da sinopse sem códigos ou formatação estranha visíveis.
+Pré-condições: Anime com sinopse rica ou vazia.
+Resultado na tela: Texto limpo; se ausente, “(não informado)”.
+Como testar: Abrir anime cuja sinopse venha com formatação na origem.
+
+========== 385/511 — RN-MODAL-061 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Fixar na semana
+Descrição: Usuário logado.
+Pré-condições: Conta autenticada.
+Resultado na tela: Botão “Fixar na semana” / “Na sua semana” alterna destaque pessoal da semana.
+Como testar: Logar; fixar e desfixar.
+
+========== 386/511 — RN-MODAL-062 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Plataformas
+Descrição: Onde assistir o anime.
+Pré-condições: Várias plataformas incl. Crunchyroll.
+Resultado na tela: Lista por nome; Crunchyroll pode mostrar só ícone.
+Como testar: Card de anime multi-plataforma.
+
+========== 387/511 — RN-MODAL-063 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Personagem e dublador
+Descrição: Elenco de voz JP e PT-BR quando existir.
+Pré-condições: Anime com dublagem BR.
+Resultado na tela: Alternar JP/PT-BR; link para página do dublador fecha o modal.
+Como testar: Anime dublado → link dublador.
+
+========== 388/511 — RN-MODAL-064 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Rankings
+Descrição: Listas de popularidade/classificação.
+Pré-condições: Anime com muitos rankings.
+Resultado na tela: Até **6** entradas visíveis, com rótulos traduzidos.
+Como testar: Anime popular em várias listas.
+
+========== 389/511 — RN-MODAL-070 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Requisitos de PC
+Descrição: Jogo de PC/Steam com requisitos cadastrados.
+Pré-condições: Jogo PC com requisitos vs console-only.
+Resultado na tela: Drawer ou bloco de requisitos mínimos/recomendados só quando aplicável.
+Como testar: Jogo Steam vs exclusivo console.
+
+========== 390/511 — RN-MODAL-071 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Desenvolvedora
+Descrição: Nome da desenvolvedora/publicadora.
+Pré-condições: Jogo com empresa cadastrada.
+Resultado na tela: Link para página da desenvolvedora.
+Como testar: Clicar link da empresa.
+
+========== 391/511 — RN-MODAL-072 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Preço Steam
+Descrição: Dados de loja quando disponíveis.
+Pré-condições: Jogo com ID Steam ou preço.
+Resultado na tela: Exibe preço Steam no bloco de informações quando houver dado.
+Como testar: Jogo com página Steam ativa.
+
+========== 392/511 — RN-MODAL-080 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Salvar alterações de filme
+Descrição: Admin em modo edição.
+Pré-condições: Campos curados editados.
+Resultado na tela: Salvar persiste título, sinopse, pôster etc.; usuário vê dados atualizados ao reabrir.
+Como testar: Admin edita título curado → salvar → reabrir.
+
+========== 393/511 — RN-MODAL-081 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Cancelar edição
+Descrição: Admin cancela sem salvar.
+Pré-condições: Modo edição ativo.
+Resultado na tela: Volta à visualização; dados na tela permanecem os anteriores ao save.
+Como testar: Editar → cancelar.
+
+========== 394/511 — RN-MODAL-082 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Tipos editáveis
+Descrição: Admin tenta editar cada tipo.
+Pré-condições: Conta admin.
+Resultado na tela: Formulários para filme, série, anime e jogo; outros tipos mostram indisponível.
+Como testar: Alternar tipos em modo edição.
+
+========== 395/511 — RN-MODAL-090 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Carregar sob demanda
+Descrição: Abas de continuação/universo.
+Pré-condições: Filme/série com franquia.
+Resultado na tela: Conteúdo das abas carrega ao exibir (pode haver loading breve).
+Como testar: Abrir aba Continuação em filme de saga.
+
+========== 396/511 — RN-MODAL-091 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Ocultar se vazio
+Descrição: Obra sem sequência nem universo.
+Pré-condições: Título isolado.
+Resultado na tela: Nenhuma aba extra de continuações.
+Como testar: Filme standalone.
+
+========== 397/511 — RN-MODAL-092 ==========
+Tela: sobreposição (modal) de detalhes de uma mídia — filme, série, anime ou jogo — aberta a partir de cards em listagens, busca, home, Hoje, prêmios, etc.
+Nome: Abas dinâmicas
+Descrição: Obra com sequência e/ou universo.
+Pré-condições: Só sequência, só universo, ou ambos.
+Resultado na tela: Aba padrão “Continuação” se houver sequência; senão “Universo”; só abas com conteúdo.
+Como testar: Comparar filme sequel vs spin-off universo.
+
+========== 398/511 — RN-PERS-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Carregar créditos
+Descrição: Página da pessoa.
+Pré-condições: ID válido.
+Resultado na tela: Nome, foto, biografia e filmografia carregam.
+Como testar: Abrir ator conhecido.
+
+========== 399/511 — RN-PERS-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Erro e loading
+Descrição: ID inválido ou falha.
+Pré-condições: Pessoa inexistente.
+Resultado na tela: Mensagem de erro ou texto de carregamento.
+Como testar: URL com id inválido.
+
+========== 400/511 — RN-PERS-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Perfil resumido
+Descrição: Dados básicos.
+Pré-condições: Pessoa com foto e bio longa.
+Resultado na tela: Nome, foto, biografia truncada (~6 linhas).
+Como testar: Bio longa → “ver mais” se existir ou clamp.
+
+========== 401/511 — RN-PERS-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Filmografia
+Descrição: Grid de obras.
+Pré-condições: Créditos filmes e séries.
+Resultado na tela: Cards clicáveis; personagem opcional exibido.
+Como testar: Clicar filme vs série.
+
+========== 402/511 — RN-PERS-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Abrir detalhe da obra
+Descrição: Clique na filmografia.
+Pré-condições: Item listado.
+Resultado na tela: Modal de detalhe abre para filme ou série.
+Como testar: Clicar poster na grid.
+
+========== 403/511 — RN-PERS-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Voltar para busca
+Descrição: Veio da busca global.
+Pré-condições: Fluxo busca → pessoa.
+Resultado na tela: Voltar reabre busca quando aplicável.
+Como testar: RN-HEADER-021 / RN-BUSCA-021.
+
+========== 404/511 — RN-PERS-007 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Voltar para modal
+Descrição: Veio do elenco de filme/série.
+Pré-condições: Retorno guardado pelo site.
+Resultado na tela: Voltar reabre modal do filme/série anterior.
+Como testar: Filme → elenco → voltar.
+
+========== 405/511 — RN-PERS-008 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Voltar genérico
+Descrição: Sem contexto salvo.
+Pré-condições: Entrada direta na URL.
+Resultado na tela: Botão voltar do browser ou fallback para home.
+Como testar: Abrir pessoa em nova aba → voltar.
+
+========== 406/511 — RN-PREM-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Modo destaque inicial
+Descrição: Filtros no padrão “todos”.
+Pré-condições: Primeira visita à página.
+Resultado na tela: Blocos com destaques da **última edição** por categoria.
+Como testar: Abrir prêmios sem mexer filtros.
+
+========== 407/511 — RN-PREM-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Modo filtrado
+Descrição: Qualquer filtro alterado.
+Pré-condições: Tipo, prêmio ou ano ≠ todos.
+Resultado na tela: Lista paginada (48 itens por página) substitui visão de destaques.
+Como testar: Escolher ano específico.
+
+========== 408/511 — RN-PREM-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Opções de filtro
+Descrição: Carregamento da página.
+Pré-condições: Página montada.
+Resultado na tela: Listas de nomes de prêmios e anos disponíveis nos seletores.
+Como testar: Abrir dropdowns de filtro.
+
+========== 409/511 — RN-PREM-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Reset de página
+Descrição: Mudança de filtro.
+Pré-condições: Estava na página 2+.
+Resultado na tela: Volta para página 1 ao alterar filtro.
+Como testar: Paginar → mudar ano.
+
+========== 410/511 — RN-PREM-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Seções por tipo
+Descrição: Modo destaque.
+Pré-condições: Filtro tipo = todos.
+Resultado na tela: Até quatro blocos: filmes, séries, animes, jogos; filtrar tipo reduz a um bloco.
+Como testar: Filtrar só animes.
+
+========== 411/511 — RN-PREM-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Ver todos da premiação
+Descrição: Botão em destaque.
+Pré-condições: Card de destaque visível.
+Resultado na tela: Aplica filtros com nome/ano daquele prêmio e tipo da seção.
+Como testar: Clicar “ver todos” em um destaque.
+
+========== 412/511 — RN-PREM-007 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Paginação
+Descrição: Modo filtrado.
+Pré-condições: Muitos resultados.
+Resultado na tela: Anterior/próxima desabilitadas nos limites; texto “Página X de Y”.
+Como testar: Navegar páginas.
+
+========== 413/511 — RN-PREM-008 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Cards interativos
+Descrição: Obras indicadas.
+Pré-condições: Logado/anônimo.
+Resultado na tela: Cards com mesmas ações de favorito/lista das outras páginas.
+Como testar: Favoritar indicado logado.
+
+========== 414/511 — RN-PREM-009 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Nenhum resultado
+Descrição: Filtro impossível.
+Pré-condições: Zero prêmios no critério.
+Resultado na tela: Mensagem pedindo ajustar filtros.
+Como testar: Ano + prêmio sem combinação.
+
+========== 415/511 — RN-PROMO-001 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Aba pela URL
+Descrição: Endereço define aba inicial.
+Pré-condições: `/promocoes`, `/promocoes?tab=promocoes`, `/promocoes?tab=em-alta`.
+Resultado na tela: Padrão **Jogos de Graça**; `promocoes` → aba Promoções; `em-alta` → Em Alta.
+Como testar: Abrir cada URL.
+
+========== 416/511 — RN-PROMO-002 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Shell da página
+Descrição: Estrutura (hero, abas) aparece mesmo antes das ofertas terminarem de carregar.
+Pré-condições: Primeira visita.
+Resultado na tela: Layout visível; conteúdo das abas grátis/promo preenche depois.
+Como testar: Abrir Promoções com rede lenta.
+
+========== 417/511 — RN-PROMO-003 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Três abas
+Descrição: Grátis, Promoções, Em Alta com ícones distintos.
+Pré-condições: Página carregada.
+Resultado na tela: Alternar abas muda conteúdo principal.
+Como testar: Clicar cada aba.
+
+========== 418/511 — RN-PROMO-004 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Em Alta sem ofertas de loja
+Descrição: Aba **Em Alta** não carrega jogos grátis/promoções de lojas externas.
+Pré-condições: Aba **Em Alta** ativa.
+Resultado na tela: Só blocos de jogos em alta; sem skeleton de 12 cards de deal (salvo loading interno de Em Alta).
+Como testar: Abrir Em Alta; observar ausência de grids de oferta.
+
+========== 419/511 — RN-PROMO-005 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Carregar sob demanda
+Descrição: Cada aba de ofertas busca dados na **primeira** vez que o usuário entra nela.
+Pré-condições: Abrir direto em Promoções sem passar por Grátis.
+Resultado na tela: Promoções carrega ao selecionar aba; Grátis pode não ter sido buscado ainda.
+Como testar: Entrar direto `?tab=promocoes`.
+
+========== 420/511 — RN-PROMO-006 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Várias lojas — grátis
+Descrição: Jogos de graça agregam Epic, giveaways, Steam, itch.io, etc.
+Pré-condições: Aba Grátis carregada.
+Resultado na tela: Cards de lojas diferentes; rodapé lista fontes com contagem.
+Como testar: Ler rodapé após load.
+
+========== 421/511 — RN-PROMO-007 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Várias lojas — promo pagas
+Descrição: Promoções pagas combinam várias lojas; ordem padrão prioriza “melhor deal”.
+Pré-condições: Aba Promoções.
+Resultado na tela: Ofertas misturadas; ordenação **Popularidade** por padrão.
+Como testar: Abrir aba Promoções.
+
+========== 422/511 — RN-PROMO-008 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Catálogo Orbe na Steam
+Descrição: Jogos já catalogados no site com desconto na Steam aparecem em faixa dedicada.
+Pré-condições: Jogos Orbe em promo Steam.
+Resultado na tela: Seção **Promoções na Steam (catálogo)** com carrossel horizontal.
+Como testar: Aba Promoções com catálogo populado.
+
+========== 423/511 — RN-PROMO-009 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Atualização periódica
+Descrição: Ofertas são atualizadas em intervalo curto; botão **Atualizar agora** força nova busca.
+Pré-condições: Aba grátis ou promo.
+Resultado na tela: Horário **Última atualização** muda após atualizar.
+Como testar: Clicar **Atualizar agora** duas vezes.
+
+========== 424/511 — RN-PROMO-010 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Alerta de fontes indisponíveis
+Descrição: Se alguma loja falhar, banner âmbar ou vermelho avisa que a lista pode estar incompleta.
+Pré-condições: Fonte externa down no ambiente.
+Resultado na tela: Banner listando lojas com falha.
+Como testar: Simular/induzir falha de fonte.
+
+========== 425/511 — RN-PROMO-011 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Sem detalhes técnicos internos
+Descrição: Usuário não vê metadados de diagnóstico — só ofertas, contadores e alertas amigáveis.
+Pré-condições: Qualquer aba de oferta.
+Resultado na tela: Nenhum painel “debug” na interface.
+Como testar: Inspecionar UI.
+
+========== 426/511 — RN-PROMO-012 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Conteúdo da aba Grátis
+Descrição: Temporários, permanentes e lista unificada para contagem.
+Pré-condições: Grátis carregado.
+Resultado na tela: Seções **Estão de graça** e **São de graça**; chips de plataforma.
+Como testar: Percorrer aba Grátis.
+
+========== 427/511 — RN-PROMO-013 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Paginação de promoções pagas
+Descrição: Primeira leva ~48 ofertas; **Carregar mais** traz o restante quando existir.
+Pré-condições: Muitas promoções ao vivo.
+Resultado na tela: Botão **Carregar mais promoções** aumenta grid.
+Como testar: Clicar até sumir botão.
+
+========== 428/511 — RN-PROMO-014 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Preços em reais
+Descrição: Quando aplicável, valores convertidos; rodapé pode mostrar taxa USD/BRL e hora da cotação.
+Pré-condições: Ofertas em dólar.
+Resultado na tela: Preço BRL nos cards; linha USD/BRL no rodapé.
+Como testar: Ler rodapé e cards.
+
+========== 429/511 — RN-PROMO-015 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Temporário vs permanente
+Descrição: **Estão de graça** = promo 100% por tempo limitado; **São de graça** = F2P ou sempre zero.
+Pré-condições: Deals de ambos tipos.
+Resultado na tela: Duas seções com textos explicativos diferentes.
+Como testar: Ler subtítulos das seções.
+
+========== 430/511 — RN-PROMO-016 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Ordenação padrão grátis
+Descrição: Temporários por **Acaba primeiro**; permanentes por título quando essa ordenação não se aplica.
+Pré-condições: Aba Grátis.
+Resultado na tela: Select de ordenação; mudar reordena temporários.
+Como testar: Trocar ordenação.

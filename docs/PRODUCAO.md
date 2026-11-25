@@ -80,6 +80,13 @@ Sem CLI Railway/Fly/Render nesta máquina. Escolha uma:
 | `IGDB_WEBHOOKS_ENABLED` | não | `false` — só `true` se webhooks IGDB estiverem configurados |
 | `IGDB_WEBHOOK_SECRET` | não | Obrigatório apenas com `IGDB_WEBHOOKS_ENABLED=true` |
 | `SYNC_LOG_TO_FILE` | não | `true` grava `logs/sync.log` no servidor (além do buffer em memória) |
+| `ORBE_EGRESS_SAVER` | não | `true` no blueprint — modo conservador no Render free |
+| `SYNC_SKIP_DETETIVE_PHASE` | não | Pula detetive no `run-sync-all` (Puppeteer) |
+| `DISABLE_DETETIVE_CRON` | não | Desliga cron 03:00 do detetive |
+| `DISABLE_BACKFILL_STEP` | não | Bloqueia backfill via GHA |
+| `DEALS_CRON_SCHEDULE` | não | Cron de promoções (padrão `*/15 * * * *`) |
+
+Ver também: [`RENDER-RECUPERAR-BANDA.md`](RENDER-RECUPERAR-BANDA.md).
 
 **Logs de sync (investigação):** `GET /api/sync/logs?filter=sync` — admin (Bearer) ou `x-sync-secret`. Botão temporário em `/perfil` (admin).
 

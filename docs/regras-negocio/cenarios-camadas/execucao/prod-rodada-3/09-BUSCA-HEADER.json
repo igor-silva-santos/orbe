@@ -1,0 +1,217 @@
+{
+  "arquivo": "09-BUSCA-HEADER.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-BUSCA-001-F",
+      "regra": "RN-BUSCA-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-002-F",
+      "regra": "RN-BUSCA-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-003-F",
+      "regra": "RN-BUSCA-003",
+      "resultado": "PASS",
+      "evidencia": "Keywords (1/1): ['todos']",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-004-F",
+      "regra": "RN-BUSCA-004",
+      "resultado": "PASS",
+      "evidencia": "Keywords (1/2): ['em alta']",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-005-F",
+      "regra": "RN-BUSCA-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-006-F",
+      "regra": "RN-BUSCA-006",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Resultados atualizam ~350 ms após parar de digitar, piscam, buscas antigas  “piscam” por cima das novas",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-007-F",
+      "regra": "RN-BUSCA-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-008-F",
+      "regra": "RN-BUSCA-008",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-009-F",
+      "regra": "RN-BUSCA-009",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-010-F",
+      "regra": "RN-BUSCA-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-011-F",
+      "regra": "RN-BUSCA-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-012-F",
+      "regra": "RN-BUSCA-012",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-013-F",
+      "regra": "RN-BUSCA-013",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-014-F",
+      "regra": "RN-BUSCA-014",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-015-F",
+      "regra": "RN-BUSCA-015",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-020-F",
+      "regra": "RN-BUSCA-020",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-021-F",
+      "regra": "RN-BUSCA-021",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-BUSCA-022-F",
+      "regra": "RN-BUSCA-022",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-001-F",
+      "regra": "RN-HEADER-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-002-F",
+      "regra": "RN-HEADER-002",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-003-F",
+      "regra": "RN-HEADER-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (1/3): ['Mais']",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-004-F",
+      "regra": "RN-HEADER-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-005-F",
+      "regra": "RN-HEADER-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-006-F",
+      "regra": "RN-HEADER-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-007-F",
+      "regra": "RN-HEADER-007",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-008-F",
+      "regra": "RN-HEADER-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-009-F",
+      "regra": "RN-HEADER-009",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-010-F",
+      "regra": "RN-HEADER-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-020-F",
+      "regra": "RN-HEADER-020",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:10Z"
+    },
+    {
+      "id": "CT-RN-HEADER-021-F",
+      "regra": "RN-HEADER-021",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:10Z"
+    }
+  ]
+}

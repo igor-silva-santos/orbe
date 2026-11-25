@@ -119,11 +119,11 @@ export default function ProfilePage() {
               <>
                 <button
                   type="button"
-                  onClick={() => router.push('/admin/sync-logs')}
-                  className="flex items-center w-full px-4 py-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors text-sm font-medium"
+                  onClick={() => router.push('/admin')}
+                  className="flex items-center w-full px-4 py-2 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/15 transition-colors text-sm font-medium"
                 >
                   <ScrollText className="mr-2 h-4 w-4" />
-                  Logs de sincronização
+                  Painel de sincronização
                 </button>
                 <button
                   type="button"

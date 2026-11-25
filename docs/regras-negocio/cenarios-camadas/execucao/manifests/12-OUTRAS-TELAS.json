@@ -1,0 +1,448 @@
+{
+  "arquivo": "12-OUTRAS-TELAS.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 49,
+  "cenarios": [
+    {
+      "id": "CT-RN-CONT-001-F",
+      "regra": "RN-CONT-001",
+      "titulo": "Feliz: Lista inicial",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir Continuações offline após visita anterior.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Carrega listas de **Sagas** e **Universos**; falha de rede → listas vazias sem quebrar a página.",
+      "pre": "Acesso pelo menu Continuações.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-002-F",
+      "regra": "RN-CONT-002",
+      "titulo": "Feliz: Detalhe de saga",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar card de saga.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mostra timeline da saga; limpa seleção de universo.",
+      "pre": "Saga válida no catálogo.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-003-F",
+      "regra": "RN-CONT-003",
+      "titulo": "Feliz: Detalhe de universo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Link de universo cinematográfico.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mostra universo; força visualização de universos; limpa saga.",
+      "pre": "Universo válido.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-004-F",
+      "regra": "RN-CONT-004",
+      "titulo": "Feliz: Abas na listagem",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar abas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Alternar “Sagas” vs “Universos cinematográficos”.",
+      "pre": "Lista carregada.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-005-F",
+      "regra": "RN-CONT-005",
+      "titulo": "Feliz: Card de saga",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Ler card antes de entrar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para detalhe; mostra quantidade de filmes e preview de títulos.",
+      "pre": "Várias sagas.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-006-F",
+      "regra": "RN-CONT-006",
+      "titulo": "Feliz: Card de universo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Universo com filmes numerados.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para detalhe; preview numérico quando há ordem de obras.",
+      "pre": "Universos com ordem.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-007-F",
+      "regra": "RN-CONT-007",
+      "titulo": "Feliz: Timeline da saga",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir saga longa (ex. franquia).\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Linha do tempo cronológica; texto introdutório da saga se existir.",
+      "pre": "Saga com filmes.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-008-F",
+      "regra": "RN-CONT-008",
+      "titulo": "Feliz: Detalhe do universo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Universo compartilhado conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contagens, faixa de anos, descrição, timeline filme+série.",
+      "pre": "Universo com filmes e séries.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-009-F",
+      "regra": "RN-CONT-009",
+      "titulo": "Feliz: Abrir obra",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar filme na timeline.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre modal de detalhe com informações mínimas até carregar o restante.",
+      "pre": "Item filme ou série.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-010-F",
+      "regra": "RN-CONT-010",
+      "titulo": "Feliz: Sem conteúdo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Ambiente vazio.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem orientando que dados podem depender de sincronização do catálogo.",
+      "pre": "Zero sagas/universos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-011-F",
+      "regra": "RN-CONT-011",
+      "titulo": "Feliz: Voltar à lista",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Voltar pelo link.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link “Todas as sagas” / “Todos os universos” retorna à listagem geral.",
+      "pre": "Detalhe de saga ou universo.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-CONT-020-F",
+      "regra": "RN-CONT-020",
+      "titulo": "Feliz: Abas no modal",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir filme de saga → abas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesmas regras das abas RN-MODAL-090 a RN-MODAL-092 (continuação/universo sob demanda).",
+      "pre": "Modal aberto.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-001-F",
+      "regra": "RN-DEV-001",
+      "titulo": "Feliz: Empresa inválida",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir link de desenvolvedora inválido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem de erro sem carregamento infinito.",
+      "pre": "Link quebrado ou id inexistente.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-002-F",
+      "regra": "RN-DEV-002",
+      "titulo": "Feliz: Lista paginada",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Empresa grande (Nintendo etc.).\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Primeira leva (~24 jogos); indicador de mais páginas.",
+      "pre": "Empresa com muitos jogos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-003-F",
+      "regra": "RN-DEV-003",
+      "titulo": "Feliz: Scroll infinito",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Rolar até carregar 2ª página.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Próxima página carrega automaticamente ao aproximar do fim (~200px).",
+      "pre": "`hasMore` verdadeiro.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-004-F",
+      "regra": "RN-DEV-004",
+      "titulo": "Feliz: Título da página",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Empresa sem nome na resposta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cabeçalho com nome da desenvolvedora ou fallback “Desenvolvedora”.",
+      "pre": "Resposta com nome.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-005-F",
+      "regra": "RN-DEV-005",
+      "titulo": "Feliz: Texto informativo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Ler subtítulo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Copy informa a fonte do catálogo de jogos e que rolar carrega mais títulos.",
+      "pre": "Página aberta.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-006-F",
+      "regra": "RN-DEV-006",
+      "titulo": "Feliz: Grid de jogos",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Favoritar jogo da grid.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cada jogo é card padrão com ações de lista/favorito.",
+      "pre": "Jogos listados.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DEV-007-F",
+      "regra": "RN-DEV-007",
+      "titulo": "Feliz: Entrada pelo modal",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Jogo → link dev → validar URL.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link da desenvolvedora leva a esta página.",
+      "pre": "Modal de jogo aberto.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-001-F",
+      "regra": "RN-DUB-001",
+      "titulo": "Feliz: Carregar créditos",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Dublador conhecido PT-BR.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, foto e obras dubladas.",
+      "pre": "ID válido.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-002-F",
+      "regra": "RN-DUB-002",
+      "titulo": "Feliz: Rótulo de idioma",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Comparar dublador BR vs seiyuu.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Português → “Dublagem em português”; japonês → “Voz original”; outro → texto genérico.",
+      "pre": "Metadado de idioma.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-003-F",
+      "regra": "RN-DUB-003",
+      "titulo": "Feliz: Tipos na filmografia",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Grid com anime e filme.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode incluir filme, série, anime e jogo com rótulo de tipo.",
+      "pre": "Créditos variados.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-004-F",
+      "regra": "RN-DUB-004",
+      "titulo": "Feliz: Personagem no card",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Card “como {personagem}”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome do personagem no card/poster.",
+      "pre": "Crédito com personagem.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-005-F",
+      "regra": "RN-DUB-005",
+      "titulo": "Feliz: Abrir detalhe",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar anime dublado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal abre para o tipo correto (filme, série, anime, jogo).",
+      "pre": "Item na grid.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-DUB-006-F",
+      "regra": "RN-DUB-006",
+      "titulo": "Feliz: Voltar para busca",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Busca → dublador → voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Voltar reabre busca; **não** reabre modal de filme como na página pessoa.",
+      "pre": "Veio da overlay de busca.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-001-F",
+      "regra": "RN-EVT-001",
+      "titulo": "Feliz: Ano padrão",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir eventos em setembro/2026.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ano atual selecionado; opções = ano atual e cinco anteriores.",
+      "pre": "Página aberta.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-002-F",
+      "regra": "RN-EVT-002",
+      "titulo": "Feliz: Carregar resumo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Trocar ano.\n3. Simular erro.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista de eventos do ano; erro → estado de falha sem dados.",
+      "pre": "Ano escolhido.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-003-F",
+      "regra": "RN-EVT-003",
+      "titulo": "Feliz: Só eventos com jogos",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Ano com evento “sem jogos” oculto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Evento só aparece se tiver pelo menos um jogo associado.",
+      "pre": "Ano com eventos vazios e cheios.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-004-F",
+      "regra": "RN-EVT-004",
+      "titulo": "Feliz: Contador",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Contar cards vs badge.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Número de eventos exibidos naquele ano.",
+      "pre": "Ano com eventos relevantes.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-005-F",
+      "regra": "RN-EVT-005",
+      "titulo": "Feliz: Loading e erro",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Throttle e offline.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Esqueletos durante carga; mensagem/CTA em falha.",
+      "pre": "Rede lenta ou falha.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-006-F",
+      "regra": "RN-EVT-006",
+      "titulo": "Feliz: Ano vazio",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Selecionar ano antigo vazio.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sugestão para escolher outro ano.",
+      "pre": "Ano sem jogos em eventos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-EVT-007-F",
+      "regra": "RN-EVT-007",
+      "titulo": "Feliz: Jogos por evento",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Expandir/rolar evento E3 etc.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cada evento mostra jogos em cards com interações do usuário.",
+      "pre": "Evento com jogos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-001-F",
+      "regra": "RN-PERS-001",
+      "titulo": "Feliz: Carregar créditos",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir ator conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, foto, biografia e filmografia carregam.",
+      "pre": "ID válido.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-002-F",
+      "regra": "RN-PERS-002",
+      "titulo": "Feliz: Erro e loading",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. URL com id inválido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem de erro ou texto de carregamento.",
+      "pre": "Pessoa inexistente.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-003-F",
+      "regra": "RN-PERS-003",
+      "titulo": "Feliz: Perfil resumido",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Bio longa → “ver mais” se existir ou clamp.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, foto, biografia truncada (~6 linhas).",
+      "pre": "Pessoa com foto e bio longa.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-004-F",
+      "regra": "RN-PERS-004",
+      "titulo": "Feliz: Filmografia",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar filme vs série.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards clicáveis; personagem opcional exibido.",
+      "pre": "Créditos filmes e séries.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-005-F",
+      "regra": "RN-PERS-005",
+      "titulo": "Feliz: Abrir detalhe da obra",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar poster na grid.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal de detalhe abre para filme ou série.",
+      "pre": "Item listado.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-006-F",
+      "regra": "RN-PERS-006",
+      "titulo": "Feliz: Voltar para busca",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. RN-HEADER-021 / RN-BUSCA-021.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Voltar reabre busca quando aplicável.",
+      "pre": "Fluxo busca → pessoa.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-007-F",
+      "regra": "RN-PERS-007",
+      "titulo": "Feliz: Voltar para modal",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Filme → elenco → voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Voltar reabre modal do filme/série anterior.",
+      "pre": "Retorno guardado pelo site.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PERS-008-F",
+      "regra": "RN-PERS-008",
+      "titulo": "Feliz: Voltar genérico",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir pessoa em nova aba → voltar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botão voltar do browser ou fallback para home.",
+      "pre": "Entrada direta na URL.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-001-F",
+      "regra": "RN-PREM-001",
+      "titulo": "Feliz: Modo destaque inicial",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir prêmios sem mexer filtros.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Blocos com destaques da **última edição** por categoria.",
+      "pre": "Primeira visita à página.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-002-F",
+      "regra": "RN-PREM-002",
+      "titulo": "Feliz: Modo filtrado",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Escolher ano específico.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista paginada (48 itens por página) substitui visão de destaques.",
+      "pre": "Tipo, prêmio ou ano ≠ todos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-003-F",
+      "regra": "RN-PREM-003",
+      "titulo": "Feliz: Opções de filtro",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Abrir dropdowns de filtro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Listas de nomes de prêmios e anos disponíveis nos seletores.",
+      "pre": "Página montada.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-004-F",
+      "regra": "RN-PREM-004",
+      "titulo": "Feliz: Reset de página",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Paginar → mudar ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Volta para página 1 ao alterar filtro.",
+      "pre": "Estava na página 2+.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-005-F",
+      "regra": "RN-PREM-005",
+      "titulo": "Feliz: Seções por tipo",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Filtrar só animes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até quatro blocos: filmes, séries, animes, jogos; filtrar tipo reduz a um bloco.",
+      "pre": "Filtro tipo = todos.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-006-F",
+      "regra": "RN-PREM-006",
+      "titulo": "Feliz: Ver todos da premiação",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Clicar “ver todos” em um destaque.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aplica filtros com nome/ano daquele prêmio e tipo da seção.",
+      "pre": "Card de destaque visível.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-007-F",
+      "regra": "RN-PREM-007",
+      "titulo": "Feliz: Paginação",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Navegar páginas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Anterior/próxima desabilitadas nos limites; texto “Página X de Y”.",
+      "pre": "Muitos resultados.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-008-F",
+      "regra": "RN-PREM-008",
+      "titulo": "Feliz: Cards interativos",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Favoritar indicado logado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards com mesmas ações de favorito/lista das outras páginas.",
+      "pre": "Logado/anônimo.",
+      "tela": "Outras telas"
+    },
+    {
+      "id": "CT-RN-PREM-009-F",
+      "regra": "RN-PREM-009",
+      "titulo": "Feliz: Nenhum resultado",
+      "passos": "1. Abrir o site e navegar até **Outras telas**.\n2. Ano + prêmio sem combinação.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem pedindo ajustar filtros.",
+      "pre": "Zero prêmios no critério.",
+      "tela": "Outras telas"
+    }
+  ]
+}

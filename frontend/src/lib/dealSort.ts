@@ -1,3 +1,4 @@
+import { getDealSalePriceValue } from '@/lib/dealPricing';
 import type { UnifiedDeal } from '@/types/deals';
 
 export type DealSortOption =
@@ -24,12 +25,7 @@ function parseEndsAt(value: string | null | undefined): number {
 }
 
 function priceValue(deal: UnifiedDeal): number {
-  if (deal.salePriceValue != null) return deal.salePriceValue;
-  if (deal.salePrice?.toLowerCase().includes('grátis') || deal.salePrice?.toLowerCase().includes('gratis')) {
-    return 0;
-  }
-  const match = deal.salePrice?.replace(/\./g, '').replace(',', '.').match(/(\d+(?:\.\d+)?)/);
-  return match ? Number.parseFloat(match[1]) : Number.POSITIVE_INFINITY;
+  return getDealSalePriceValue(deal);
 }
 
 export function sortDeals(deals: UnifiedDeal[], sort: DealSortOption): UnifiedDeal[] {

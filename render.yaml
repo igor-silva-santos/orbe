@@ -43,3 +43,45 @@ services:
         value: "false"
       - key: IGDB_WEBHOOK_SECRET
         sync: false
+      - key: ORBE_ADMIN_EMAILS
+        sync: false
+      - key: GITHUB_ACTIONS_READ_TOKEN
+        sync: false
+      # --- Egress Render free (~5 GB/mês) — ver docs/RENDER-RECUPERAR-BANDA.md ---
+      - key: ORBE_EGRESS_SAVER
+        value: "true"
+      - key: SYNC_SKIP_DETETIVE_PHASE
+        value: "true"
+      - key: DISABLE_DETETIVE_CRON
+        value: "true"
+      - key: DISABLE_BACKFILL_STEP
+        value: "true"
+      - key: DEALS_CRON_SCHEDULE
+        value: "*/15 * * * *"
+
+  # Front Next.js — alternativa quando Vercel Hobby estoura banda (mesma conta Render).
+  - type: web
+    name: orbe-web
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: API_PROXY_ORIGIN
+        fromService:
+          type: web
+          name: orbe-api
+          property: host
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: orbe-api
+          property: host
+        # Render injeta host; o Next precisa de /api — ajuste no dashboard se necessário:
+        # NEXT_PUBLIC_API_URL=https://<orbe-api-host>/api
