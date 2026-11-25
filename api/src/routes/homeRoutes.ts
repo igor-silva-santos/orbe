@@ -510,6 +510,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
   }
 
   try {
+    const now = new Date();
     const categoryFilter = category && category !== 'todos' ? (category as string) : null;
 
     const promises = [];
