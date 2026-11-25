@@ -59,8 +59,11 @@ const Header: React.FC<HeaderProps> = ({
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
-  const isActiveLink = (href: string) =>
-    href === '/minha-lista' ? pathname.startsWith('/minha-lista') : pathname === href;
+  const isActiveLink = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/minha-lista') return pathname.startsWith('/minha-lista');
+    return pathname === href;
+  };
   const isMoreActive = moreLinks.some((link) => isActiveLink(link.href));
 
   useEffect(() => {
