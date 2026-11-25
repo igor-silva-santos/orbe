@@ -26,7 +26,7 @@ const JogoInfoBlock: React.FC<JogoInfoBlockProps> = ({ jogo }) => {
 
   return (
     <div className="flex-1 space-y-4">
-      <h1 className="text-3xl md:text-4xl font-bold text-foreground">{jogo.titulo_curado || jogo.titulo_api}</h1>
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground break-words">{jogo.titulo_curado || jogo.titulo_api}</h1>
 
       {(hasSteamPriceDisplay(jogo) || hasSteamAppId(jogo)) && (
         <div className="pt-1">

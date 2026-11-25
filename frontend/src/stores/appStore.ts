@@ -9,6 +9,8 @@ interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   userInteractions: UserInteraction[];
+  /** true depois que /me/interactions respondeu nesta sessão */
+  interactionsReady: boolean;
   animeWeeklyPinIds: number[];
   animeWeeklyPinned: Anime[];
 
@@ -57,6 +59,7 @@ interface AppState {
   logout: () => void;
   setInteractions: (interactions: UserInteraction[]) => void;
   upsertInteraction: (interaction: UserInteraction) => void;
+  removeInteraction: (midiaId: number, tipoMidia: UserInteraction['tipo_midia']) => void;
   setAnimeWeeklyPinIds: (ids: number[]) => void;
   setAnimeWeeklyPinned: (animes: Anime[]) => void;
   mergePinnedAnimes: (animes: Anime[]) => void;
@@ -96,6 +99,7 @@ export const useAppStore = create<AppState>()(
       user: null,
       isAuthenticated: false,
       userInteractions: [],
+      interactionsReady: false,
       animeWeeklyPinIds: [],
       animeWeeklyPinned: [],
       theme: 'system',
@@ -143,12 +147,13 @@ export const useAppStore = create<AppState>()(
           notifications: [],
           unreadCount: 0,
           userInteractions: [],
+          interactionsReady: false,
           animeWeeklyPinIds: [],
           animeWeeklyPinned: [],
         });
       },
 
-      setInteractions: (interactions) => set({ userInteractions: interactions }),
+      setInteractions: (interactions) => set({ userInteractions: interactions, interactionsReady: true }),
 
       setAnimeWeeklyPinIds: (ids) => set({ animeWeeklyPinIds: ids }),
 
@@ -171,6 +176,15 @@ export const useAppStore = create<AppState>()(
           newInteractions.push(interaction);
         }
         set({ userInteractions: newInteractions });
+      },
+
+      removeInteraction: (midiaId, tipoMidia) => {
+        const { userInteractions } = get();
+        set({
+          userInteractions: userInteractions.filter(
+            (interaction) => !(interaction.midia_id === midiaId && interaction.tipo_midia === tipoMidia),
+          ),
+        });
       },
 
       // Ações do tema

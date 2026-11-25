@@ -219,11 +219,11 @@ export default function PremiosPage() {
           {highlightSections.map((section) => (
             <section key={section.key} className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h2 className="font-display text-lg orbe-text-primary flex items-center gap-2">
-                  <section.icon className="h-5 w-5 text-primary" />
-                  {section.title}
+                <h2 className="font-display text-base sm:text-lg orbe-text-primary flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+                  <section.icon className="h-5 w-5 text-primary shrink-0" />
+                  <span className="break-words">{section.title}</span>
                   {section.award && (
-                    <span className="text-sm font-normal text-muted-foreground">
+                    <span className="text-sm font-normal text-muted-foreground break-words">
                       ({section.award.nome} · {section.award.ano})
                     </span>
                   )}
@@ -274,7 +274,7 @@ export default function PremiosPage() {
               {`${totalResults} ${totalResults === 1 ? 'premiação encontrada' : 'premiações encontradas'}`}
             </p>
             {totalPages > 1 && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setPage((current) => Math.max(1, current - 1))}

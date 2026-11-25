@@ -70,10 +70,10 @@ export default function FilaAnimeClient() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-10">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10">
       <PageHeader
         title="Fila de animes"
-        description="Sincronizado da Crunchyroll. Prioridade: Continuar → A seguir → Começar. “Aguardando dublagem” = sub à frente da dublagem BR; “Aguardando novo episódio” = falta ep no ar."
+        description="Sincronizado da Crunchyroll. A fila segue Continuar, A seguir e Começar. “Aguardando dublagem” é quando a legenda está à frente da dublagem. “Aguardando novo episódio” é quando ainda não entrou no ar."
       />
       <MinhaListaNav />
 

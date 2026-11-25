@@ -112,4 +112,36 @@ router.post('/me/interactions', interactionRateLimiter, authMiddleware, async (r
     }
 });
 
+// Remove a marcação (toque de novo na mesma opção do card).
+router.delete('/me/interactions', authMiddleware, async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.userId;
+    if (!userId) {
+        return res.status(403).json({ error: 'Usuário não autenticado.' });
+    }
+
+    const midiaId = Number(req.query.midia_id);
+    const tipoMidia = req.query.tipo_midia;
+
+    if (!isPositiveInt(midiaId)) {
+        return res.status(400).json({ error: 'midia_id inválido.' });
+    }
+    if (!isValidMediaType(tipoMidia)) {
+        return res.status(400).json({ error: 'tipo_midia inválido.' });
+    }
+
+    try {
+        await prisma.preferencias_usuario_midia.deleteMany({
+            where: {
+                usuario_id: userId,
+                midia_id: midiaId,
+                tipo_midia: tipoMidia,
+            },
+        });
+        res.status(204).send();
+    } catch (error) {
+        logger.error(`Erro ao remover interação para o usuário ID ${userId}:`, error);
+        res.status(500).json({ error: 'Erro ao remover interação.' });
+    }
+});
+
 export default router;

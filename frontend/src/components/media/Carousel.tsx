@@ -49,6 +49,10 @@ const Carousel = forwardRef<HTMLDivElement, CarouselProps>(({
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    const target = e.target;
+    if (target instanceof Element && target.closest('button, a, input, textarea, select, [data-no-drag]')) {
+      return;
+    }
     const el = localRef.current;
     if (!el) return;
 

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  MoreVertical,
   Heart,
   Bookmark,
   Star,
@@ -11,6 +10,7 @@ import {
   EyeOff,
   Pin,
 } from 'lucide-react';
+import CardActionMenu from '@/components/media/CardActionMenu';
 import PlatformIcon from '@/components/ui/PlatformIcons';
 import AwardIcon from '@/components/ui/AwardIcons';
 import SafeImage from '@/components/ui/SafeImage';
@@ -94,22 +94,11 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const openRatingModal = useAppStore((s) => s.openRatingModal);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [canHover, setCanHover] = useState(false);
 
-  // `position: fixed` não é confiável aqui: dentro dos carrosséis da home, o Embla aplica um
-  // `transform` inline no track, o que vira o containing block do fixed e encolhe a área "fora"
-  // clicável para o tamanho da faixa do carrossel. Um listener no document não depende disso.
   useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMenuOpen]);
+    setCanHover(window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  }, []);
 
   const isEpisodeMedia = type === 'anime' || type === 'serie';
   const nextAiringEpisode = isEpisodeMedia
@@ -217,28 +206,20 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
 
   const handleCardClick = () => {
     openSuperModal(midia, type);
-    setIsMenuOpen(false);
   };
 
-  const handleMenuAction = (action: UserAction, event: React.MouseEvent) => {
-    event.stopPropagation();
+  const handleMenuAction = (action: UserAction, active: boolean) => {
     if ((action === 'ja_assisti' || action === 'ja_joguei') && !hasReleased) return;
-    if (action === 'ja_assisti' || action === 'ja_joguei') {
+    if ((action === 'ja_assisti' || action === 'ja_joguei') && !active) {
       openRatingModal(midia, type, action);
-    } else {
-      onInteraction?.(action, midia, type);
+      return;
     }
-    setIsMenuOpen(false);
+    onInteraction?.(action, midia, type);
   };
 
-  const handleMenuToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const cardTitle = midia.titulo_curado || midia.titulo_api;
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+  const card = (
         <div className="relative group" ref={ref}>
             <div
               className={`relative bg-card rounded-[20px] overflow-hidden cursor-pointer select-none w-full max-w-[210px] mx-auto flex flex-col transition-colors ${
@@ -301,37 +282,16 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     <SteamPriceLabel item={midia} variant="card" />
                   </div>
                 )}
-                <div
-                  className={`absolute right-2 ${hasStatusBadge ? 'top-10' : 'top-2'}`}
-                  ref={menuRef}
-                >
-                  <button
-                    onClick={handleMenuToggle}
-                    className="bg-black/55 text-white p-1.5 rounded-full opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
-                    aria-label="Ações do card"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
-                  {isMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-md shadow-lg py-1 z-50">
-                      {menuActions.map((menuAction) => (
-                        <button
-                          key={menuAction.action}
-                          onClick={(e) => !menuAction.disabled && handleMenuAction(menuAction.action, e)}
-                          disabled={menuAction.disabled}
-                          className={`flex items-center w-full px-3 py-2 text-sm transition-colors ${menuAction.disabled ? 'text-muted-foreground cursor-not-allowed opacity-50' : 'hover:bg-muted'} ${menuAction.active ? 'text-primary' : 'text-foreground'}`}
-                        >
-                          <menuAction.icon className="h-4 w-4 mr-2" />
-                          {menuAction.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <CardActionMenu
+                  title={cardTitle || 'Este título'}
+                  actions={menuActions}
+                  raised={hasStatusBadge}
+                  onAction={handleMenuAction}
+                />
               </div>
               <div className="p-3 flex flex-col shrink-0">
                 <div className="flex justify-between items-start mb-1 min-h-[40px] max-h-[40px]">
-                  <h3 className="font-bold text-sm sm:text-base line-clamp-2 pr-2 flex-grow orbe-text-primary leading-tight">{midia.titulo_curado || midia.titulo_api}</h3>
+                  <h3 className="font-bold text-sm sm:text-base line-clamp-2 pr-2 flex-grow orbe-text-primary leading-tight break-words">{cardTitle}</h3>
                   {rating && (
                     <div className="flex items-center gap-1 text-sm shrink-0">
                       <Star className="h-4 w-4 text-yellow-400" />
@@ -405,10 +365,16 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
               </div>
             </div>
           </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p>{midia.titulo_curado || midia.titulo_api}</p>
-        </TooltipContent>
+  );
+
+  if (!canHover) return card;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{card}</TooltipTrigger>
+      <TooltipContent side="bottom">
+        <p>{cardTitle}</p>
+      </TooltipContent>
     </Tooltip>
   );
 }));

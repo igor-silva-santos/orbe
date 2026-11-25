@@ -14,30 +14,38 @@ const ACTION_TO_STATUS: Partial<Record<UserAction, UserInteraction['status']>> =
   nao_me_interessa: 'oculto',
 };
 
+const SAVED_TOAST: Partial<Record<UserAction, string>> = {
+  favoritar: 'Adicionado aos favoritos.',
+  quero_assistir: 'Marcado como quero assistir.',
+  acompanhando: 'Marcado como acompanhando.',
+  nao_me_interessa: 'Marcado como não me interessa.',
+};
+
+const REMOVED_TOAST: Partial<Record<UserInteraction['status'], string>> = {
+  favorito: 'Removido dos favoritos.',
+  quero_assistir: 'Removido de quero assistir.',
+  acompanhando: 'Você não está mais acompanhando.',
+  assistido: 'Marcação de já assisti / já joguei desfeita.',
+  oculto: 'Voltou a aparecer para você.',
+};
+
 /**
- * Handler compartilhado pro menu de ações do MidiaCard (Favoritar, Quero Assistir,
- * Acompanhando, Não me Interessa). Sem isso conectado, os botões do menu não faziam
- * nada — a API e o store já existiam, só faltava a ligação com a UI. ("Já Assisti"/
- * "Já Joguei" já são tratados dentro do próprio MidiaCard, que abre o RatingModal
- * diretamente antes de chamar onInteraction — nunca chegam até aqui.)
- * O MidiaCard repassa o próprio `type` no callback, então funciona tanto em listas de um
- * tipo só quanto em listas mistas (Hoje, Eventos, Prêmios, Busca).
+ * Menu de ações do card. A mesma opção, tocada de novo, desfaz a marcação.
+ * Lê as interações com getState() para a função manter a mesma identidade
+ * entre renders e não invalidar o memo dos cards.
  */
 export function useMidiaInteraction() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const upsertInteraction = useAppStore((s) => s.upsertInteraction);
+  const removeInteraction = useAppStore((s) => s.removeInteraction);
   const animeWeeklyPinIds = useAppStore((s) => s.animeWeeklyPinIds);
   const setAnimeWeeklyPinIds = useAppStore((s) => s.setAnimeWeeklyPinIds);
   const mergePinnedAnimes = useAppStore((s) => s.mergePinnedAnimes);
 
-  // useCallback com identidade estável entre renders — sem isso, toda renderização de
-  // MediaCarousel criava uma nova função aqui, que descia como prop `onInteraction` pra
-  // cada MidiaCard montado e invalidava o React.memo deles (nova identidade de prop a
-  // cada vez, mesmo sem nenhuma mudança real).
   return useCallback(
     async (action: UserAction, midia: Filme | Serie | Anime | Jogo, type: TipoMidia) => {
       if (!isAuthenticated) {
-        toast.error('Você precisa estar logado para fazer isso.');
+        toast.error('Entre na sua conta para salvar isso.');
         return;
       }
 
@@ -56,6 +64,27 @@ export function useMidiaInteraction() {
         return;
       }
 
+      const toggleStatus: UserInteraction['status'] | undefined =
+        action === 'ja_assisti' || action === 'ja_joguei'
+          ? 'assistido'
+          : ACTION_TO_STATUS[action];
+
+      const current = useAppStore.getState().userInteractions.find(
+        (interaction) => interaction.midia_id === midia.id && interaction.tipo_midia === type,
+      );
+
+      if (toggleStatus && current?.status === toggleStatus) {
+        try {
+          await orbeNerdApi.deleteInteraction(midia.id, type);
+          removeInteraction(midia.id, type);
+          toast.success(REMOVED_TOAST[toggleStatus] ?? 'Marcação removida.');
+        } catch (error) {
+          console.error('Erro ao remover interação:', error);
+          toast.error('Não foi possível desfazer. Tente novamente.');
+        }
+        return;
+      }
+
       const status = ACTION_TO_STATUS[action];
       if (!status) return;
 
@@ -66,6 +95,7 @@ export function useMidiaInteraction() {
           status,
         });
         upsertInteraction(interaction);
+        toast.success(SAVED_TOAST[action] ?? 'Salvo na sua lista.');
       } catch (error) {
         console.error('Erro ao salvar interação:', error);
         toast.error('Não foi possível salvar. Tente novamente.');
@@ -74,6 +104,7 @@ export function useMidiaInteraction() {
     [
       isAuthenticated,
       upsertInteraction,
+      removeInteraction,
       animeWeeklyPinIds,
       setAnimeWeeklyPinIds,
       mergePinnedAnimes,

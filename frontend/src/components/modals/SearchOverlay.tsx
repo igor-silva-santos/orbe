@@ -36,6 +36,7 @@ const SearchOverlay: React.FC = () => {
   const historyPushedRef = useRef(false);
   const isClosingRef = useRef(false);
   const searchRequestIdRef = useRef(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleClose = useCallback(() => {
     if (isClosingRef.current) return;
@@ -76,6 +77,9 @@ const SearchOverlay: React.FC = () => {
 
     if (isSearchOpen) {
       document.body.style.overflow = 'hidden';
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        searchInputRef.current?.focus();
+      }
       if (window.history.state?.modal !== 'search') {
         window.history.pushState({ modal: 'search' }, '');
         historyPushedRef.current = true;
@@ -240,11 +244,11 @@ const SearchOverlay: React.FC = () => {
   };
 
   return (
-    <div className="search-overlay overflow-x-hidden">
-      <div className="container mx-auto px-4 py-6 md:py-8 h-full max-w-6xl">
-        <div className="bg-card rounded-lg shadow-xl border border-border p-5 md:p-8 max-h-[92vh] overflow-hidden flex flex-col">
-          <div className="flex justify-between items-center mb-6 shrink-0">
-            <h2 className="font-display text-2xl orbe-text-primary">Pesquisar</h2>
+    <div className="search-overlay overflow-hidden">
+      <div className="mx-auto flex h-[100dvh] w-full max-w-6xl flex-col p-3 sm:px-4 sm:py-8">
+        <div className="bg-card rounded-lg shadow-xl border border-border p-4 sm:p-8 flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="flex justify-between items-center mb-4 sm:mb-6 shrink-0 gap-3">
+            <h2 className="font-display text-xl sm:text-2xl orbe-text-primary">Pesquisar</h2>
             <button onClick={handleClose} className="p-2 rounded-full hover:bg-muted transition-colors orbe-text-primary">
               <X className="h-5 w-5" />
             </button>
@@ -254,12 +258,12 @@ const SearchOverlay: React.FC = () => {
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Filme, série, anime, jogo ou pessoa..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-12 py-3.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
-                autoFocus
+                className="w-full pl-12 pr-12 py-3.5 text-base bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary orbe-text-primary placeholder:text-muted-foreground"
               />
               {searchQuery && (
                 <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-primary">

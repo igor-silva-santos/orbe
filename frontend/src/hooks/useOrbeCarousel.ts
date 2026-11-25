@@ -8,7 +8,13 @@ import type { EmblaOptionsType } from 'embla-carousel';
 export const ORBE_CAROUSEL_OPTIONS: EmblaOptionsType = {
   align: 'center',
   dragFree: true,
-  watchDrag: true,
+  // Botões do card (⋮, links) não podem iniciar o arraste — no toque o Embla
+  // engolia o clique e a opção do menu parecia não fazer nada.
+  watchDrag: (_api, event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return true;
+    return !target.closest('button, a, input, textarea, select, [data-no-drag]');
+  },
   // false keeps center alignment at edges; infinite wrap is handled in useCarouselInfiniteLoop.
   containScroll: false,
   duration: 40,

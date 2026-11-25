@@ -36,7 +36,7 @@ const moreLinks: NavLink[] = [
   { href: '/eventos', label: 'Eventos' },
   { href: '/promocoes?tab=em-alta', label: 'Jogos em Alta' },
   { href: '/premios', label: 'Premiações' },
-  { href: '/minha-lista/animes', label: 'Minha Lista' },
+  { href: '/minha-lista', label: 'Minha Lista' },
   { href: '/extensao/crunchyroll', label: 'Extensão CR' },
 ];
 
@@ -58,7 +58,8 @@ const Header: React.FC<HeaderProps> = ({
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
-  const isActiveLink = (href: string) => pathname === href;
+  const isActiveLink = (href: string) =>
+    href === '/minha-lista' ? pathname.startsWith('/minha-lista') : pathname === href;
   const isMoreActive = moreLinks.some((link) => isActiveLink(link.href));
 
   useEffect(() => {
@@ -107,7 +108,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
             <Link
               href="/"
-              className="flex items-center space-x-3 shrink-0"
+              className="flex items-center space-x-2 sm:space-x-3 shrink-0 min-w-0"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Image
@@ -119,8 +120,9 @@ const Header: React.FC<HeaderProps> = ({
                 aria-hidden="true"
                 priority
               />
-              <span className="font-display text-lg md:text-[21px] orbe-text-primary whitespace-nowrap tracking-wide">
-                ORBE NERD
+              <span className="font-display text-base min-[400px]:text-lg md:text-[21px] orbe-text-primary whitespace-nowrap tracking-wide">
+                <span className="min-[380px]:hidden">ORBE</span>
+                <span className="hidden min-[380px]:inline">ORBE NERD</span>
               </span>
             </Link>
 
@@ -159,17 +161,18 @@ const Header: React.FC<HeaderProps> = ({
             </nav>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-0.5 sm:space-x-2 shrink-0">
             <button
               onClick={handleSearchClick}
-              className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
+              aria-label="Pesquisar"
             >
               <Search className="h-5 w-5" />
             </button>
 
             <button
               onClick={handleThemeToggle}
-              className="w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -177,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={handleNotificationClick}
-              className="relative w-10 h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
+              className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
@@ -202,7 +205,7 @@ const Header: React.FC<HeaderProps> = ({
                   <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-md shadow-lg py-1 z-50">
                     <Link
                       href="/minha-lista"
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"
+                      className="flex items-center w-full px-3 py-3 sm:py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <List className="h-4 w-4 mr-2" />
@@ -210,7 +213,7 @@ const Header: React.FC<HeaderProps> = ({
                     </Link>
                     <Link
                       href="/perfil"
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"
+                      className="flex items-center w-full px-3 py-3 sm:py-2 text-sm hover:bg-muted transition-colors orbe-text-primary"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <User className="h-4 w-4 mr-2" />

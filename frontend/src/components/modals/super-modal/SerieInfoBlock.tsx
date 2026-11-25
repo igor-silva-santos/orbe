@@ -44,9 +44,9 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
 
   return (
     <div className="flex flex-col">
-      <h1 className="text-3xl md:text-4xl font-bold">{serie.titulo_curado || serie.titulo_api}</h1>
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold break-words">{serie.titulo_curado || serie.titulo_api}</h1>
       
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4 text-sm md:text-base">
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-x-4 gap-y-2 mt-4 text-sm md:text-base">
         <div className="flex">
           <span className={`font-semibold ${labelColor} mr-2`}>Lançamento:</span>
           <span>{releaseLabel}</span>
@@ -72,9 +72,9 @@ const SerieInfoBlock = ({ serie }: SerieInfoBlockProps) => {
           <span>{serie.numero_episodios}</span>
         </div>
         {creators && (
-          <div className="flex col-span-2">
-            <span className={`font-semibold ${labelColor} mr-2`}>Criadores:</span>
-            <span>{creators}</span>
+          <div className="flex col-span-2 min-w-0">
+            <span className={`font-semibold ${labelColor} mr-2 shrink-0`}>Criadores:</span>
+            <span className="break-words min-w-0">{creators}</span>
           </div>
         )}
         {serie.nextAiringEpisode && now !== null && (
