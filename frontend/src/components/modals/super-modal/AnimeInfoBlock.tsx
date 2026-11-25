@@ -34,7 +34,7 @@ const AnimeInfoBlock: React.FC<AnimeInfoBlockProps> = ({ anime }) => {
 
   return (
     <div className="flex-1 space-y-4">
-      <h1 className="text-2xl md:text-4xl font-bold text-foreground">{title}</h1>
+      <h1 className="text-2xl md:text-4xl font-bold text-foreground break-words">{title}</h1>
       {anime.titleRomaji && anime.titleRomaji !== title && (
         <h2 className="text-lg md:text-xl text-gray-400 -mt-2">{anime.titleRomaji}</h2>
       )}

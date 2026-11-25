@@ -63,25 +63,24 @@ const RatingModal: React.FC<RatingModalProps> = ({
   return (
     <>
       {/* Modal de Avaliação */}
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-background rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <h2 className="text-xl font-bold">
+      <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div className="bg-background rounded-t-2xl sm:rounded-lg shadow-xl max-w-md w-full max-h-[92dvh] overflow-y-auto">
+          <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border">
+            <h2 className="text-lg sm:text-xl font-bold break-words">
               Você gostou de {getActionText()} esse {getMediaText()}?
             </h2>
             <button
               onClick={handleClose}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Fechar"
             >
               <X className="h-6 w-6" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6">
-            {/* Informações da Mídia */}
-            <div className="flex items-center space-x-4 mb-6">
+          <div className="p-4 sm:p-6">
+            <div className="flex items-center gap-4 mb-6 min-w-0">
               <Image
                 src={midia.poster_curado || midia.poster_url_api}
                 alt={midia.titulo_curado || midia.titulo_api}
@@ -89,8 +88,8 @@ const RatingModal: React.FC<RatingModalProps> = ({
                 height={96}
                 className="w-16 h-24 object-cover rounded"
               />
-              <div>
-                <h3 className="font-semibold text-lg">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-base sm:text-lg break-words">
                   {midia.titulo_curado || midia.titulo_api}
                 </h3>
                 <p className="text-muted-foreground text-sm">
@@ -135,11 +134,10 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
       {/* Modal de Review (aparece após selecionar avaliação) */}
       {showReviewModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 p-4">
-          <div className="bg-background rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-xl font-bold">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[70] p-0 sm:p-4">
+          <div className="bg-background rounded-t-2xl sm:rounded-lg shadow-xl max-w-md w-full max-h-[92dvh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border">
+              <h2 className="text-lg sm:text-xl font-bold break-words">
                 Gostaria de deixar sua análise desse {getMediaText()}?
               </h2>
               <button
@@ -151,9 +149,8 @@ const RatingModal: React.FC<RatingModalProps> = ({
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              {/* Informações da Mídia */}
-              <div className="flex items-center space-x-4 mb-6">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center gap-4 mb-6 min-w-0">
                 <Image
                   src={midia.poster_curado || midia.poster_url_api}
                   alt={midia.titulo_curado || midia.titulo_api}
@@ -161,8 +158,8 @@ const RatingModal: React.FC<RatingModalProps> = ({
                   height={96}
                   className="w-16 h-24 object-cover rounded"
                 />
-                <div>
-                  <h3 className="font-semibold text-lg">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg break-words">
                     {midia.titulo_curado || midia.titulo_api}
                   </h3>
                   <p className="text-muted-foreground text-sm">
@@ -180,7 +177,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
                   placeholder={`Conte o que você achou desse ${getMediaText().toLowerCase()}...`}
-                  className="w-full h-32 p-3 border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full h-32 p-3 text-base border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                   maxLength={500}
                 />
                 <p className="text-xs text-muted-foreground mt-1">

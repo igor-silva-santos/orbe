@@ -71,19 +71,27 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
+  const memberSince = (() => {
+    if (!user.data_criacao) return null;
+    const date = new Date(user.data_criacao);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  })();
+
   return (
-    <div className="container max-w-4xl mx-auto py-10 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="container max-w-4xl mx-auto py-6 sm:py-10 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {/* Coluna da Esquerda: Avatar e Ações Rápidas */}
         <div className="md:col-span-1 space-y-6">
           <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
               <div className="relative w-32 h-32 mx-auto mb-4 group">
-                <div className="w-full h-full rounded-full overflow-hidden border-4 border-primary/20">
+                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/20">
                   {user.avatar && isAllowedRemoteImageHost(user.avatar) ? (
                     <Image
                       src={user.avatar}
                       alt={user.nome || 'Avatar'}
                       fill
+                      sizes="128px"
                       className="object-cover"
                     />
                   ) : (
@@ -93,8 +101,8 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-              <h2 className="text-xl font-bold">{user.nome || 'Usuário Orbe'}</h2>
-              <p className="text-sm text-muted-foreground mb-4">{user.email}</p>
+              <h2 className="text-xl font-bold break-words">{user.nome || 'Usuário Orbe'}</h2>
+              <p className="text-sm text-muted-foreground mb-4 break-all">{user.email}</p>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
                 {user.role === 'admin' ? 'Administrador' : 'Explorador'}
               </span>
@@ -149,7 +157,7 @@ export default function ProfilePage() {
                 <Edit2 className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed break-words">
               {user.bio || 'Você ainda não adicionou uma biografia. Vá em configurações para contar um pouco sobre seus gostos nerds!'}
             </p>
           </div>
@@ -157,20 +165,20 @@ export default function ProfilePage() {
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h3 className="text-lg font-bold mb-4">Informações da Conta</h3>
             <div className="space-y-4">
-              <div className="flex items-center text-sm">
-                <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span className="font-medium mr-2">Email:</span>
-                <span className="text-muted-foreground">{user.email}</span>
+              <div className="flex items-start text-sm min-w-0">
+                <Mail className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="font-medium mr-2 shrink-0">Email:</span>
+                <span className="text-muted-foreground break-all min-w-0">{user.email}</span>
               </div>
+              {memberSince && (
+                <div className="flex items-start text-sm min-w-0">
+                  <Calendar className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="font-medium mr-2 shrink-0">Membro desde:</span>
+                  <span className="text-muted-foreground break-words">{memberSince}</span>
+                </div>
+              )}
               <div className="flex items-center text-sm">
-                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span className="font-medium mr-2">Membro desde:</span>
-                <span className="text-muted-foreground">
-                  {new Date(user.data_criacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-              <div className="flex items-center text-sm">
-                <Shield className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Shield className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="font-medium mr-2">Visibilidade:</span>
                 <span className="px-2 py-0.5 border border-border rounded-md text-xs">
                   {user.perfil_publico ? 'Público' : 'Privado'}

@@ -4,12 +4,14 @@ import { toast } from 'sonner';
 import RatingModal from './RatingModal';
 import { useAppStore } from '@/stores/appStore';
 import { API_BASE } from '@/lib/apiBase';
+import type { UserInteraction } from '@/types';
 
 const RatingModalWrapper = () => {
   const { 
     isRatingModalOpen, 
     ratingModalData, 
-    closeRatingModal 
+    closeRatingModal,
+    upsertInteraction,
   } = useAppStore();
 
   const handleRating = async (rating: 'gostei' | 'amei' | 'nao_gostei', review?: string) => {
@@ -53,6 +55,11 @@ const RatingModalWrapper = () => {
         throw new Error(body?.error || 'Erro ao salvar avaliação');
       }
 
+      const saved = await response.json().catch(() => null);
+      if (saved && typeof saved === 'object') {
+        upsertInteraction(saved as UserInteraction);
+      }
+      toast.success(action === 'ja_joguei' ? 'Marcado como já joguei.' : 'Marcado como já assisti.');
       closeRatingModal();
     } catch (error) {
       console.error('Erro ao salvar avaliação:', error);

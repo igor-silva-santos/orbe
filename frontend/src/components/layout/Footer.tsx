@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
       { label: 'Eventos', href: '/eventos' },
       { label: 'Jogos em Alta', href: '/promocoes?tab=em-alta' },
       { label: 'Premiações', href: '/premios' },
-      { label: 'Minha Lista', href: '/minha-lista/animes' },
+      { label: 'Minha Lista', href: '/minha-lista' },
       { label: 'Extensão CR', href: '/extensao/crunchyroll' },
       { label: 'Apoie-nos', href: '/apoie' },
     ],

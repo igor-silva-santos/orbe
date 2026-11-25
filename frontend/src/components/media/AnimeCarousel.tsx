@@ -654,7 +654,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     <div className="overflow-hidden max-w-full">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary"
+          className="text-lg sm:text-xl font-bold min-h-8 h-auto leading-tight cursor-pointer font-display orbe-text-primary break-words"
           onClick={() => emblaApi?.scrollTo(startIndex)}
         >
           {emAltaMode
@@ -665,7 +665,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                 ? 'Carregando...'
                 : currentTitle || 'Carregando...'}
         </h3>
-        <div className="flex justify-between items-center w-full mt-2 md:mt-0 md:w-auto md:gap-4">
+        <div className="flex flex-wrap justify-between items-center gap-2 w-full mt-2 md:mt-0 md:w-auto md:gap-4">
             <div className="flex items-center gap-2">
                 <button
                   onClick={toggleEmAlta}

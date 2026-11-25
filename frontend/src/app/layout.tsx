@@ -117,7 +117,7 @@ export default function RootLayout({
             <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden">
               <ClientOnly>
                 <Header />
-                <main className="pt-16 min-h-screen">
+                <main className="pt-[calc(4rem+env(safe-area-inset-top))] min-h-screen">
                   {children}
                 </main>
                 <Footer />

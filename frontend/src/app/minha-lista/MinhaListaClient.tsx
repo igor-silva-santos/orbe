@@ -43,6 +43,7 @@ export default function MinhaListaClient() {
   const router = useRouter();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const userInteractions = useAppStore((s) => s.userInteractions);
+  const interactionsReady = useAppStore((s) => s.interactionsReady);
   const handleInteraction = useMidiaInteraction();
 
   const [statusFilter, setStatusFilter] = useState<ListaStatusFilter>('todos');
@@ -90,16 +91,17 @@ export default function MinhaListaClient() {
       const live = userInteractions.find(
         (i) => i.midia_id === row.midia_id && i.tipo_midia === row.tipo_midia,
       );
+      if (interactionsReady && !live) return false;
       const status = live?.status ?? row.status;
       if (status === 'oculto') return false;
       if (statusFilter !== 'todos' && status !== statusFilter) return false;
       return true;
     });
-  }, [items, userInteractions, statusFilter]);
+  }, [items, userInteractions, interactionsReady, statusFilter]);
 
   const emptyMessage = useMemo(() => {
     if (statusFilter === 'todos' && tipoFilter === 'todos') {
-      return 'Sua lista está vazia. Use o menu ⋮ nos cards para favoritar, marcar “quero assistir” ou acompanhar.';
+      return 'Sua lista está vazia. Toque nos três pontos do card para favoritar ou marcar “quero assistir”. Toque de novo na mesma opção para desfazer.';
     }
     return 'Nenhum item com esses filtros. Tente outra combinação.';
   }, [statusFilter, tipoFilter]);
@@ -109,20 +111,20 @@ export default function MinhaListaClient() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-10">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10">
       <PageHeader
         title="Minha lista"
         description="Filmes, séries, animes e jogos que você salvou no Orbe — sincronizado com sua conta."
       />
       <MinhaListaNav />
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setStatusFilter(tab.id)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+            className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
               statusFilter === tab.id
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'border-border bg-muted/40 hover:bg-muted'
@@ -133,13 +135,13 @@ export default function MinhaListaClient() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex gap-2 mb-8 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap">
         {TIPO_CHIPS.map((chip) => (
           <button
             key={chip.id}
             type="button"
             onClick={() => setTipoFilter(chip.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm border transition-colors ${
+            className={`shrink-0 px-3 py-1.5 rounded-lg text-xs sm:text-sm border transition-colors ${
               tipoFilter === chip.id
                 ? 'border-primary text-primary bg-primary/10'
                 : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted'

@@ -350,6 +350,14 @@ export const orbeNerdApi = {
     return apiClient.post('/me/interactions', data);
   },
 
+  deleteInteraction: async (midiaId: number, tipoMidia: string) => {
+    const params = new URLSearchParams({
+      midia_id: String(midiaId),
+      tipo_midia: tipoMidia,
+    });
+    return apiClient.delete(`/me/interactions?${params.toString()}`);
+  },
+
   // Notificações
   getNotifications: async () => {
     return apiClient.get('/notifications');

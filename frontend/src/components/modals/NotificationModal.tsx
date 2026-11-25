@@ -139,7 +139,7 @@ const NotificationModal: React.FC = () => {
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className={`text-sm font-medium ${
+                          <h3 className={`text-sm font-medium break-words ${
                             !notification.foi_visualizada ? 'orbe-text-primary' : 'text-muted-foreground'
                           }`}>
                             {notification.message}

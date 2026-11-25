@@ -28,16 +28,16 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ evento, userIntera
   <section className="orbe-block bg-card rounded-[20px] p-4 md:p-6 space-y-4">
     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
       <div className="space-y-2 min-w-0">
-        <h3 className="font-display text-xl md:text-2xl orbe-text-primary flex items-center gap-2">
-          <Gamepad2 className="h-5 w-5 text-[var(--orbe-accent-2)] shrink-0" />
-          {evento.nome}
+        <h3 className="font-display text-lg sm:text-xl md:text-2xl orbe-text-primary flex items-start gap-2 break-words">
+          <Gamepad2 className="h-5 w-5 mt-1 text-[var(--orbe-accent-2)] shrink-0" />
+          <span className="min-w-0">{evento.nome}</span>
         </h3>
-        <p className="text-sm text-muted-foreground flex items-center gap-2">
-          <Calendar className="h-4 w-4 shrink-0" />
-          {formatEventDate(evento.data_inicio, evento.data_fim)}
+        <p className="text-sm text-muted-foreground flex items-start gap-2">
+          <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+          <span className="min-w-0 break-words">{formatEventDate(evento.data_inicio, evento.data_fim)}</span>
         </p>
         {evento.descricao && (
-          <p className="text-sm orbe-text-secondary line-clamp-3">{evento.descricao}</p>
+          <p className="text-sm orbe-text-secondary line-clamp-4 break-words">{evento.descricao}</p>
         )}
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -58,9 +58,9 @@ export const GameEventCard: React.FC<GameEventCardProps> = ({ evento, userIntera
     </div>
 
     {evento.jogos.length > 0 && (
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 -mx-1 px-1 snap-x snap-mandatory">
         {evento.jogos.map((jogo) => (
-          <div key={jogo.id} className="flex-shrink-0 w-[170px] sm:w-[190px]">
+          <div key={jogo.id} className="flex-shrink-0 w-[148px] min-[380px]:w-[170px] sm:w-[190px] snap-start">
             <MidiaCard midia={jogo} type="jogo" userInteractions={userInteractions} onInteraction={onInteraction} />
           </div>
         ))}

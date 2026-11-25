@@ -133,7 +133,7 @@ export default function SettingsPage() {
             <p className="text-sm text-muted-foreground mt-1">Controle quem pode ver sua atividade.</p>
           </div>
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-medium">Perfil Público</p>
                 <p className="text-sm text-muted-foreground">Permitir que outros usuários vejam sua lista e favoritos.</p>

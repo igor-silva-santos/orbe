@@ -24,7 +24,7 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
   return (
     <div className="flex flex-col space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">{filmeTitle}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold break-words">{filmeTitle}</h1>
         {destaqueLabels.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {destaqueLabels.map((label) => (
@@ -38,13 +38,13 @@ const FilmeInfoBlock = ({ filme }: { filme: FilmeDetalhes }) => {
           </div>
         )}
         {filme.originalTitle && filmeTitle !== filme.originalTitle && (
-          <h2 className="text-lg text-gray-400">{filme.originalTitle}</h2>
+          <h2 className="text-base sm:text-lg text-gray-400 break-words">{filme.originalTitle}</h2>
         )}
         {tagline && (
           <p className="text-sm text-muted-foreground italic mt-1">{tagline}</p>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 sm:gap-4 text-sm">
         <div>
           <span className="font-bold text-yellow-500 dark:text-blue-400">Lançamento: </span>
           {filme.releaseDate || (filme as { data_lancamento_api?: string }).data_lancamento_api

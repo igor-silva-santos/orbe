@@ -321,16 +321,19 @@ const SuperModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div className="container mx-auto px-4 py-8 max-w-full">
-        <div className="bg-background rounded-lg shadow-xl max-w-4xl mx-auto super-modal-content transition-colors relative overflow-x-hidden">
+      <div className="mx-auto h-[100dvh] w-full max-w-full sm:h-auto sm:px-4 sm:py-8">
+        <div className="bg-background shadow-xl h-full sm:h-auto sm:max-w-4xl sm:mx-auto sm:rounded-lg super-modal-content transition-colors relative overflow-x-hidden overflow-y-auto sm:overflow-visible">
           <>
-            <div className="absolute top-4 right-4 z-10 flex gap-2">
+            <div
+              className="sticky top-0 z-20 flex justify-end gap-2 border-b border-border/60 bg-background/95 px-3 py-2 backdrop-blur-sm"
+              style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+            >
               {user?.role === 'admin' && (
-                <button onClick={() => setIsEditMode(!isEditMode)} className={`p-2 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors ${isEditMode ? 'bg-primary/20' : ''}`}>
+                <button type="button" onClick={() => setIsEditMode(!isEditMode)} className={`p-2 rounded-full hover:bg-muted transition-colors ${isEditMode ? 'bg-primary/20' : ''}`} aria-label="Editar">
                   <Edit className="h-5 w-5 text-primary" />
                 </button>
               )}
-              <button onClick={handleClose} className="p-2 bg-background/80 backdrop-blur-sm rounded-full hover:bg-background transition-colors">
+              <button type="button" onClick={handleClose} className="p-2 rounded-full hover:bg-muted transition-colors" aria-label="Fechar">
                 <X className="h-5 w-5 text-primary" />
               </button>
             </div>
@@ -339,7 +342,6 @@ const SuperModal: React.FC = () => {
                 <AwardsBlock awards={displayAwards} />
               </div>
             )}
-            {/* The content components now handle their own layout, including poster and info */}
             {renderContent()}
           </>
         </div>

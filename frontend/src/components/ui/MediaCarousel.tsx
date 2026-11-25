@@ -530,7 +530,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     <div className={`${className ?? ''} overflow-hidden max-w-full`}>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 px-2 sm:px-4">
         <h3
-          className="text-xl font-bold h-8 cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors flex items-center gap-2"
+          className="text-lg sm:text-xl font-bold min-h-8 h-auto leading-tight cursor-pointer font-display orbe-text-primary hover:text-primary transition-colors flex items-center gap-2 break-words"
           onClick={emAltaMode ? undefined : scrollToToday}
           title={emAltaMode ? undefined : 'Ir para o mês atual'}
         >
@@ -552,7 +552,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
             />
           )}
         </h3>
-        <div className="flex justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
+        <div className="flex flex-wrap justify-end items-center w-full md:w-auto mt-2 md:mt-0 gap-2">
           <div className="flex items-center gap-2">
             <button
               onClick={toggleEmAlta}

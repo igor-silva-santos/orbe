@@ -59,7 +59,7 @@ const SerieModalContent: React.FC<SerieModalContentProps> = ({ serie }) => {
     <div className="p-4 md:p-8 space-y-6">
       {/* Bloco Superior: Pôster e Informações Principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 w-full max-w-[220px] mx-auto md:max-w-none">
           <SafeImage
             src={serie.poster_curado || serie.poster_url_api}
             alt={`Pôster de ${serie.titulo_curado || serie.titulo_api}`}
