@@ -96,12 +96,12 @@ test:api:
         exit 1
       fi
       REMOTE_HEAD="$(git ls-remote "${GITHUB_REPO}" "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
-      PUSH_OPTS=""
-      if [ -n "${REMOTE_HEAD}" ]; then
-        echo "Branch já existe no GitHub; force-with-lease"
-        PUSH_OPTS="--force-with-lease"
+      if [ -n "${REMOTE_HEAD}" ] && [ "${REMOTE_HEAD}" != "${SHA}" ]; then
+        echo "GitHub em ${REMOTE_HEAD:0:7}; GitLab envia ${SHA:0:7} — espelho forçado (fonte: GitLab)"
+        PUSH_OPTS="--force"
       else
-        echo "Criando branch nova no GitHub"
+        echo "Push fast-forward / branch nova"
+        PUSH_OPTS=""
       fi
       if ! git push ${PUSH_OPTS} "${GITHUB_REPO}" "${SHA}:refs/heads/${BRANCH}" 2> /tmp/push.log; then
         echo "--- git push (erro) ---"
