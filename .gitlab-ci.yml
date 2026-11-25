@@ -75,6 +75,14 @@ test:api:
       BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
       SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
       echo "branch=${BRANCH} sha=${SHA}"
+      echo "MIRROR_SCRIPT=v2 — log esperado: «espelho forçado» (não «force-with-lease»)"
+      if grep -q 'force-with-lease' .gitlab-ci.yml 2>/dev/null && ! grep -q 'espelho forçado' .gitlab-ci.yml 2>/dev/null; then
+        echo ""
+        echo "ERRO: pipeline antigo (mirror com force-with-lease / stale info)."
+        echo "NÃO use «Retry» no job falho. GitLab → CI/CD → Pipelines → Run pipeline"
+        echo "Branch: ${BRANCH} (deve estar em 3265d92 ou mais novo no GitLab)."
+        exit 1
+      fi
       git config user.email "gitlab-cli@orbenerd.local"
       git config user.name "GitLab Mirror"
       git fetch --unshallow 2>/dev/null || true
