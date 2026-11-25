@@ -1,5 +1,5 @@
-# Orbe — GitLab é a fonte de verdade para produção.
-# Push na master do GitLab → testes + deploy (hooks). GitHub não deve disparar Vercel/Render.
+# Orbe — GitLab é a fonte de verdade para código; GitHub espelha a master (Vercel/Render conectados ao GitHub).
+# Push na master do GitLab → test:api + mirror:github → Vercel/Render disparam no GitHub.
 #
 # Ops (sync guard): schedule / pipeline manual (web) com ORBE_OPS_ACTION.
 # Ping longo: Cloudflare Worker ops/render_sync_watch_worker.js
@@ -7,6 +7,7 @@
 # Variáveis CI/CD (Settings → CI/CD → Variables, masked):
 #   RENDER_DEPLOY_HOOK  — Render → Service → Settings → Deploy Hook
 #   VERCEL_DEPLOY_HOOK  — Vercel → Project → Settings → Git → Deploy Hooks (branch master)
+#   GITHUB_MIRROR_TOKEN — PAT GitHub (escrita no repo igor-silva-santos/orbe); sem «Protect variable» se branch não protegida
 
 workflow:
   rules:
@@ -19,6 +20,8 @@ stages:
   - test
   - deploy
   - operations
+
+# Espelho GitHub: job mirror:github na master após merge.
 
 variables:
   NODE_VERSION: "20"
@@ -41,6 +44,83 @@ test:api:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+.mirror_github:
+  image: node:${NODE_VERSION}-bookworm-slim
+  variables:
+    GIT_DEPTH: "0"
+    GIT_STRATEGY: clone
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates
+  script:
+    - |
+      set -e
+      MIRROR_TOKEN="${GITHUB_MIRROR_TOKEN:-${GH_MIRROR_TOKEN:-}}"
+      echo "CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}"
+      echo "GITHUB_MIRROR_TOKEN length=${#MIRROR_TOKEN} (0 = GitLab não passou a variável)"
+      if [ -z "${MIRROR_TOKEN}" ]; then
+        echo "ERRO: GITHUB_MIRROR_TOKEN vazio. GitLab → CI/CD → Variables (desmarque Protect variable)."
+        exit 1
+      fi
+      export GITHUB_MIRROR_TOKEN="${MIRROR_TOKEN}"
+      GITHUB_REPO="https://github.com/igor-silva-santos/orbe.git"
+      BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
+      SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+      echo "MIRROR_SCRIPT=v2 branch=${BRANCH} sha=${SHA}"
+      git config user.email "gitlab-cli@orbenerd.local"
+      git config user.name "GitLab Mirror"
+      git fetch --unshallow 2>/dev/null || true
+      CRED_FILE="$(mktemp)"
+      chmod 600 "${CRED_FILE}"
+      printf 'https://x-access-token:%s@github.com\n' "${GITHUB_MIRROR_TOKEN}" > "${CRED_FILE}"
+      git config --global credential.helper "store --file=${CRED_FILE}"
+      HTTP_CODE="$(curl -sS -o /tmp/gh-repo.json -w '%{http_code}' \
+        -H "Authorization: Bearer ${GITHUB_MIRROR_TOKEN}" \
+        -H "Accept: application/vnd.github+json" \
+        "https://api.github.com/repos/igor-silva-santos/orbe")"
+      echo "API HTTP ${HTTP_CODE}"
+      if [ "${HTTP_CODE}" != "200" ]; then
+        rm -f "${CRED_FILE}"
+        exit 1
+      fi
+      REMOTE_HEAD="$(git ls-remote "${GITHUB_REPO}" "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
+      if [ -n "${REMOTE_HEAD}" ] && [ "${REMOTE_HEAD}" != "${SHA}" ]; then
+        echo "GitHub em ${REMOTE_HEAD:0:7}; GitLab envia ${SHA:0:7} — espelho forçado"
+        PUSH_OPTS="--force"
+      else
+        PUSH_OPTS=""
+      fi
+      if ! git push ${PUSH_OPTS} "${GITHUB_REPO}" "${SHA}:refs/heads/${BRANCH}" 2> /tmp/push.log; then
+        cat /tmp/push.log
+        rm -f "${CRED_FILE}"
+        exit 1
+      fi
+      rm -f "${CRED_FILE}"
+      echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
+
+mirror:github:
+  stage: deploy
+  extends: .mirror_github
+  needs:
+    - job: test:api
+      optional: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+mirror:github:manual:
+  stage: deploy
+  extends: .mirror_github
+  needs: []
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
 
 deploy:production:
   stage: deploy
