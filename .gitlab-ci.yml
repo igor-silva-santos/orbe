@@ -1,5 +1,5 @@
 # Orbe — GitLab é a fonte de verdade para produção.
-# Push na master do GitLab → testes + deploy (hooks). GitHub não deve disparar Vercel/Render.
+# Push na master do GitLab → testes + deploy. O job mirror:github leva essa master para o GitHub.
 #
 # Ops (sync guard): schedule / pipeline manual (web) com ORBE_OPS_ACTION.
 # Ping longo: Cloudflare Worker ops/render_sync_watch_worker.js
@@ -7,6 +7,8 @@
 # Variáveis CI/CD (Settings → CI/CD → Variables, masked):
 #   RENDER_DEPLOY_HOOK  — Render → Service → Settings → Deploy Hook
 #   VERCEL_DEPLOY_HOOK  — Vercel → Project → Settings → Git → Deploy Hooks (branch master)
+#   GITHUB_MIRROR_TOKEN — token do GitHub com escrita no repo igor-silva-santos/orbe.
+#                         Sem ele o job mirror:github falha e a master não chega no GitHub.
 
 workflow:
   rules:
@@ -41,6 +43,24 @@ test:api:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+
+# Copia a master do GitLab para o GitHub sem apagar commits que só existem lá.
+# Se as duas masters divergiram, cria um merge. Não usa force.
+mirror:github:
+  stage: deploy
+  image: node:${NODE_VERSION}-bookworm-slim
+  variables:
+    GIT_DEPTH: "0"
+    GIT_STRATEGY: clone
+  needs:
+    - job: test:api
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "web"'
+  script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates
+    - bash ops/mirror-github-master.sh
 
 deploy:production:
   stage: deploy

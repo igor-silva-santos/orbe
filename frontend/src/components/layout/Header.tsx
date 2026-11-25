@@ -32,6 +32,7 @@ const primaryLinks: NavLink[] = [
 ];
 
 const moreLinks: NavLink[] = [
+  { href: '/promocoes?tab=recomendacoes', label: 'Recomendações' },
   { href: '/promocoes?tab=promocoes', label: 'Promoções' },
   { href: '/eventos', label: 'Eventos' },
   { href: '/promocoes?tab=em-alta', label: 'Jogos em Alta' },
@@ -163,15 +164,18 @@ const Header: React.FC<HeaderProps> = ({
 
           <div className="flex items-center space-x-0.5 sm:space-x-2 shrink-0">
             <button
+              type="button"
               onClick={handleSearchClick}
+              aria-label="Abrir busca"
               className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
-              aria-label="Pesquisar"
             >
               <Search className="h-5 w-5" />
             </button>
 
             <button
+              type="button"
               onClick={handleThemeToggle}
+              aria-label={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
               className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
               title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
             >
@@ -179,7 +183,9 @@ const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              type="button"
               onClick={handleNotificationClick}
+              aria-label="Abrir notificações"
               className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg orbe-text-primary hover:bg-muted transition-colors"
             >
               <Bell className="h-5 w-5" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useId } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { X, Edit, Calendar, Clock, Star, Tv, BookOpen, Gamepad2, Heart, Bookmark, Check, EyeOff, ExternalLink } from 'lucide-react';
@@ -41,6 +41,7 @@ const SuperModal: React.FC = () => {
   const loadInFlightRef = useRef<string | null>(null);
   const pathname = usePathname();
   const openPathRef = useRef<string | null>(null);
+  const dialogTitleId = useId();
 
   const { midia, type } = superModalData;
 
@@ -319,10 +320,29 @@ const SuperModal: React.FC = () => {
   const displayAwards = (details as { premiacoes?: typeof midia.premiacoes })?.premiacoes
     ?? midia.premiacoes;
 
+  const dialogLabel =
+    (details as { title?: string; name?: string })?.title
+    ?? (details as { name?: string })?.name
+    ?? (midia as { title?: string; name?: string }).title
+    ?? (midia as { name?: string }).name
+    ?? 'Detalhes da mídia';
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto overflow-x-hidden" onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div className="mx-auto h-[100dvh] w-full max-w-full sm:h-auto sm:px-4 sm:py-8">
-        <div className="bg-background shadow-xl h-full sm:h-auto sm:max-w-4xl sm:mx-auto sm:rounded-lg super-modal-content transition-colors relative overflow-x-hidden overflow-y-auto sm:overflow-visible">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={dialogTitleId}
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden"
+    >
+      <button
+        type="button"
+        aria-label="Fechar modal"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-default"
+        onClick={handleClose}
+      />
+      <div className="relative mx-auto h-[100dvh] w-full max-w-full pointer-events-none sm:h-auto sm:px-4 sm:py-8">
+        <div className="bg-background shadow-xl h-full pointer-events-auto sm:h-auto sm:max-w-4xl sm:mx-auto sm:rounded-lg super-modal-content transition-colors relative overflow-x-hidden overflow-y-auto sm:overflow-visible">
+          <h2 id={dialogTitleId} className="sr-only">{dialogLabel}</h2>
           <>
             <div
               className="sticky top-0 z-20 flex justify-end gap-2 border-b border-border/60 bg-background/95 px-3 py-2 backdrop-blur-sm"
