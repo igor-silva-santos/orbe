@@ -19,7 +19,7 @@ git config user.email "igordasilvasantos38@gmail.com"
 
 3. `git push origin master` (GitLab).
 4. Pipeline GitLab: **test:api** → **deploy:production** (hooks) **ou** auto-deploy nativo GitLab nos hosts.
-5. Espelhar no GitHub só se precisar: `git push github master` (sem deploy).
+5. O job **mirror:github** publica essa `master` em `github.com/igor-silva-santos/orbe`. Se o GitHub já tiver commits que o GitLab não tem, o job faz um merge e **não** reescreve a master de lá. Sem a variável `GITHUB_MIRROR_TOKEN`, o job falha e o GitHub fica para trás.
 
 ## Sync de catálogo (use GitLab, não GitHub Actions)
 
@@ -56,6 +56,7 @@ Não use **Sync All** no GitHub Actions para o fluxo oficial — o GitHub é esp
 |----------|-----|
 | `RENDER_DEPLOY_HOOK` | POST dispara build/deploy da API |
 | `VERCEL_DEPLOY_HOOK` | POST dispara build/deploy do frontend |
+| `GITHUB_MIRROR_TOKEN` | Token do GitHub com escrita no repo `igor-silva-santos/orbe`. O job `mirror:github` usa isso para publicar a `master` no GitHub depois do merge. |
 
 Com os dois hooks configurados, cada push na `master` roda `.gitlab-ci.yml` → testes da API → curl nos hooks.
 
@@ -67,6 +68,7 @@ Com os dois hooks configurados, cada push na `master` roda `.gitlab-ci.yml` → 
 |-----|-------------|
 | `test:api` | Push na `master`, merge requests |
 | `deploy:production` | Push na `master` (após testes) |
+| `mirror:github` | Push na `master` (após testes) e pipeline manual na `master`. Copia a `master` para o GitHub. Não faz deploy. |
 | `orbe-sync-guard` | Schedule ou pipeline manual (`ORBE_OPS_ACTION`) |
 
 **CI falhou com `libssl.so.1.1` / Prisma:** a imagem `node:20-bookworm-slim` precisa de `openssl` instalado antes de `prisma generate` (já está no `before_script` do `test:api`). Erro típico: 4 testes passam suites internas mas o job morre com `PrismaClientInitializationError`.
@@ -88,10 +90,23 @@ git remote -v
 # github  → github.com/igor-silva-santos/orbe.git (espelho)
 ```
 
-## 5. Checklist rápido
+## 5. Espelho no GitHub
+
+Cada push na `master` do GitLab roda `ops/mirror-github-master.sh`.
+
+1. GitHub → token fine-grained só no repo `igor-silva-santos/orbe`, com **Contents** e **Workflows** em Read and write.
+2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN` (Masked, Environment All).
+   - Master protegida: marque **Protect variable**.
+   - Master sem proteção: deixe **Protect variable** desmarcado. Ligado, o job recebe o token vazio.
+3. Não cole o token no chat. Depois de salvar, rode de novo o pipeline da `master` (Run pipeline). O log do `mirror:github` termina com `OK: https://github.com/igor-silva-santos/orbe/commit/...`.
+
+O deploy de produção continua no GitLab. O espelho só atualiza o GitHub.
+
+## 6. Checklist rápido
 
 - [ ] `master` no GitLab está à frente do que está em produção
 - [ ] Vercel **não** faz deploy em push do GitHub
 - [ ] Render **não** faz deploy em push do GitHub
 - [ ] `RENDER_DEPLOY_HOOK` e `VERCEL_DEPLOY_HOOK` no GitLab **ou** GitLab conectado nos dois dashboards
-- [ ] Pipeline verde após `git push origin master`
+- [ ] `GITHUB_MIRROR_TOKEN` definido no GitLab
+- [ ] Pipeline verde após o merge na `master`, inclusive o job `mirror:github`
