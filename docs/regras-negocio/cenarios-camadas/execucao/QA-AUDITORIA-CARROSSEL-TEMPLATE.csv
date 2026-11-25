@@ -1,0 +1,4 @@
+QA_Nome,Data,Faixa_Carrossel,Rota,Mes_ou_Janela,Tipo_Linha,Comportamento_ou_Titulo,Data_No_Card,Deve_Estar_S_N,ID_Regra,Motivo,Carrossel_Comportamento_OK_S_N,Evidencia,Veredito_TL
+Exemplo Silva,2026-09-22,Filmes,/#filmes,2026-03,midia,Nome do Filme,2026-03-12,S,RN-FILMES-001,Estreia no mês,S,print-card-01,
+Exemplo Silva,2026-09-22,Filmes,/#filmes,2026-03,carrossel,Botão Em alta alterna lista,,,,RN-HOME-EA-001,,S,video ou print-controle,
+,,,,,,,,,,,,,
