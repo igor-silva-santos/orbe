@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import { mapJogoToMidia, mapJogoToCarouselCard } from '../mappers';
+import {
+  buildCatalogMultiplayerFallback,
+  buildGameRecommendations,
+} from '../jogosRecomendacoesService';
 import { fetchDeveloperGamesFromIgdb, fetchIgdbCompanyBrief, fetchJogoDetailsLive } from '../externalDetails';
 import { fetchSteamAppDetails, isPlausibleBrlSteamPriceCents, isPlausibleSteamDiscountPercent } from '../steamClient';
 import { jogoQualityFilter } from '../qualityFilters';
@@ -33,7 +37,7 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
   const { filtro, genero, plataforma, modo, ano, mes } = req.query;
   const { page, limit, skip } = parsePagination(req.query as { page?: string; limit?: string });
   try {
-    const allConditions: Prisma.JogoWhereInput[] = [];
+    const allConditions: Prisma.JogoWhereInput[] = [jogoQualityFilter];
 
     const monthRange = typeof mes === 'string' ? parseMonthQuery(mes, ano as string | undefined) : null;
 
@@ -61,7 +65,7 @@ router.get('/jogos', cacheMiddleware(TWELVE_HOURS), async (req, res) => {
       allConditions.push({ gameModes: { some: { gameMode: { name: modo as string } } } });
     }
 
-    const where: Prisma.JogoWhereInput = allConditions.length > 0 ? { AND: allConditions } : {};
+    const where: Prisma.JogoWhereInput = { AND: allConditions };
 
     // `follows` (quantos usuários seguem o jogo no IGDB) é o sinal de popularidade real;
     // `rating` é nota de qualidade, não indica se o jogo está "em alta" agora.
@@ -574,6 +578,27 @@ router.get('/jogos/em-alta', cacheMiddleware(TWELVE_HOURS), async (_req, res) =>
   } catch (error) {
     logger.error(`Erro ao buscar jogos em alta: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar jogos em alta.' });
+  }
+});
+
+const SIX_HOURS = 6 * 60 * 60;
+
+/** Recomendações diárias: demos e acesso antecipado (Steam), foco multijogador. */
+router.get('/jogos/recomendacoes', cacheMiddleware(SIX_HOURS), async (_req, res) => {
+  try {
+    let payload = await buildGameRecommendations();
+    if (payload.demos.length === 0 && payload.earlyAccess.length === 0) {
+      const fallback = await buildCatalogMultiplayerFallback();
+      payload = {
+        ...payload,
+        highlights: fallback,
+        source: 'steam+orbe',
+      };
+    }
+    res.json(payload);
+  } catch (error) {
+    logger.error(`Erro em /jogos/recomendacoes: ${error}`);
+    res.status(500).json({ error: 'Erro ao buscar recomendações de jogos.' });
   }
 });
 

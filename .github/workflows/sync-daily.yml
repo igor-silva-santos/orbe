@@ -7,9 +7,10 @@ name: Sync Diário (catálogo do ano corrente)
 # um sync ativo e saudável, não faz nada (evita duplicar trabalho).
 #
 # Mesma lógica de decisão do run-sync-backfill-step, aplicada ao sync
-# "atual" em vez do backfill histórico. Não mantém keep-alive próprio: o
-# workflow separado "Keep API Acordada" já garante que o Render não hiberna
-# enquanto o sync roda em background (pode levar horas).
+# "atual" em vez do backfill histórico.
+#
+# Egress: sync completo do ano só aos domingos (UTC); dias úteis só retomam checkpoint.
+# Se o Render estiver suspenso (5 GB), orbe-render-api.sh aborta sem loop.
 #
 # Configuração necessária (Settings → Secrets and variables → Actions):
 #   ORBE_API_URL  — ex.: https://orbe-7bu0.onrender.com (sem barra no final)
@@ -24,29 +25,28 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Acordar API no Render (cold start)
+      - name: Checkout (script de API)
+        uses: actions/checkout@v4
+
+      - name: Acordar API no Render (cold start / detectar suspensão)
         env:
-          API_URL: ${{ secrets.ORBE_API_URL }}
+          ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
         run: |
-          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
-          echo "Aguardando API em ${API_BASE}/api/health ..."
-          for i in $(seq 1 12); do
-            if curl -sf "${API_BASE}/api/health" >/dev/null; then
-              echo "API online."
-              exit 0
-            fi
-            echo "Tentativa ${i}/12 — aguardando 10s..."
-            sleep 10
-          done
-          echo "::error::API não respondeu em 2 minutos."
-          exit 1
+          source .github/scripts/orbe-render-api.sh
+          set +e
+          orbe_wait_health
+          code=$?
+          set -e
+          if [ "$code" = "78" ]; then exit 0; fi
+          exit "$code"
 
       - name: Decidir e disparar (retomar checkpoint ou iniciar sync do ano corrente)
         env:
-          API_URL: ${{ secrets.ORBE_API_URL }}
+          ORBE_API_URL: ${{ secrets.ORBE_API_URL }}
           SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
         run: |
-          API_BASE="${API_URL:-https://orbe-7bu0.onrender.com}"
+          source .github/scripts/orbe-render-api.sh
+          API_BASE="$(orbe_api_base)"
           if [ -z "$SYNC_SECRET" ]; then
             echo "::error::Configure SYNC_SECRET e ORBE_API_URL em Settings → Secrets → Actions"
             exit 1
@@ -68,26 +68,25 @@ jobs:
 
           if [ "$RESUME_AVAIL" = "True" ] || [ "$INTERRUPTED" = "True" ]; then
             echo "▶ Checkpoint pendente — retomando (run-sync-resume)..."
-            RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-resume" \
-              -H "x-sync-secret: ${SYNC_SECRET}" \
-              -H "Content-Type: application/json")
-          else
-            YEAR=$(date -u +%Y)
-            echo "▶ Sem checkpoint pendente — iniciando sync completo do ano ${YEAR} (run-sync-all)..."
-            RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${API_BASE}/api/run-sync-all" \
-              -H "x-sync-secret: ${SYNC_SECRET}" \
-              -H "Content-Type: application/json" \
-              -d "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR}}")
+            set +e
+            orbe_curl_post /api/run-sync-resume
+            code=$?
+            set -e
+            if [ "$code" = "78" ]; then exit 0; fi
+            exit "$code"
           fi
 
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | sed '$d')
-          echo "HTTP ${HTTP_CODE}"
-          echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "::error::API retornou HTTP ${HTTP_CODE}"
-            exit 1
+          DOW=$(date -u +%u)
+          if [ "$DOW" != "7" ]; then
+            echo "▶ Dia útil (UTC) — sync completo só aos domingos para economizar egress. Nada a fazer."
+            exit 0
           fi
 
-          echo "Sync disparado. Acompanhe em GET /api/sync/status ou na tela /admin/sync-logs. O workflow 'Keep API Acordada' mantém o Render vivo até terminar (pode levar horas)."
+          YEAR=$(date -u +%Y)
+          echo "▶ Domingo — iniciando sync completo do ano ${YEAR} (run-sync-all)..."
+          set +e
+          orbe_curl_post /api/run-sync-all "{\"startDate\":\"${YEAR}-01-01\",\"endDate\":\"${YEAR}-12-31\",\"startYear\":${YEAR},\"endYear\":${YEAR}}"
+          code=$?
+          set -e
+          if [ "$code" = "78" ]; then exit 0; fi
+          exit "$code"

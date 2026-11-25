@@ -1,0 +1,687 @@
+========== 173/511 — RN-HEADER-005 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Tema claro/escuro
+Descrição: Alternância visual.
+Pré-condições: Header visível.
+Resultado na tela: Ícone alterna tema; cores do site mudam.
+Como testar: Clicar sol/lua.
+
+========== 174/511 — RN-HEADER-006 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Notificações
+Descrição: Sino de avisos.
+Pré-condições: Conta com ou sem notificações.
+Resultado na tela: Abre painel/modal de notificações; badge com contagem (máx. exibição “9+”).
+Como testar: Conta com notificações pendentes.
+
+========== 175/511 — RN-HEADER-007 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Menu do usuário logado
+Descrição: Conta autenticada.
+Pré-condições: Sessão ativa.
+Resultado na tela: Opções: Minha lista, Meu perfil, Sair (volta à home após sair).
+Como testar: Logar → menu avatar.
+
+========== 176/511 — RN-HEADER-008 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Visitante (desktop)
+Descrição: Sem login em tela média/grande.
+Pré-condições: Anônimo; layout desktop/tablet largo.
+Resultado na tela: Links Entrar e Inscreva-se visíveis.
+Como testar: Anônimo desktop.
+
+========== 177/511 — RN-HEADER-009 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Menu mobile
+Descrição: Telas estreitas.
+Pré-condições: Layout mobile.
+Resultado na tela: Hambúrguer com catálogo, “descobrir” (itens do Mais) e bloco login/lista/perfil.
+Como testar: Testar em viewport mobile.
+
+========== 178/511 — RN-HEADER-010 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Fechar menus
+Descrição: Clique fora.
+Pré-condições: Dropdown “Mais” ou menu usuário aberto.
+Resultado na tela: Fecha ao clicar fora; overlay escuro fecha menu do usuário.
+Como testar: Abrir dropdown → clicar página.
+
+========== 179/511 — RN-HEADER-020 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Resultado abre detalhe
+Descrição: Card de mídia na busca.
+Pré-condições: Busca aberta com resultados.
+Resultado na tela: Clicar card abre modal de detalhe e fecha a busca.
+Como testar: Buscar filme → abrir card.
+
+========== 180/511 — RN-HEADER-021 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Retorno da página pessoa
+Descrição: Veio da busca.
+Pré-condições: Fluxo busca → página pessoa → voltar.
+Resultado na tela: Busca reabre quando o site guardou “voltar para busca”.
+Como testar: Executar RN-BUSCA-021 + voltar do browser ou link voltar.
+
+========== 181/511 — RN-HOJE-001 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Conteúdo após abrir a página
+Descrição: Os cards não vêm “prontos” no primeiro instante; a página busca os destaques ao abrir.
+Pré-condições: Acesso normal à página Hoje.
+Resultado na tela: Breve estado de carregamento (esqueletos/cards cinza) e, em seguida, faixas preenchidas ou mensagens de vazio/erro.
+Como testar: Abrir Hoje com rede normal; observar transição skeleton → conteúdo.
+
+========== 182/511 — RN-HOJE-002 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Data do dia
+Descrição: A página mostra a data atual em português, junto ao título.
+Pré-condições: Página carregada com sucesso.
+Resultado na tela: Linha com ícone de calendário e data por extenso (pt-BR), coerente com o dia de teste.
+Como testar: Comparar data exibida com o relógio do sistema.
+
+========== 183/511 — RN-HOJE-003 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Ligar/desligar blocos
+Descrição: O usuário escolhe quais faixas aparecem; a escolha fica salva no navegador.
+Pré-condições: Mesmo navegador/dispositivo.
+Resultado na tela: Interruptores ou checkboxes por seção; ao recarregar, as seções desmarcadas continuam ocultas.
+Como testar: Desmarcar “Em cartaz nos cinemas”; F5 → faixa não aparece.
+
+========== 184/511 — RN-HOJE-004 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Pelo menos uma seção
+Descrição: Não é possível desativar todas as seções de uma vez.
+Pré-condições: Resta apenas uma seção marcada.
+Resultado na tela: Tentativa de desmarcar a última é ignorada; continua uma seção ativa.
+Como testar: Desmarcar cinco seções; na sexta tentativa, a última permanece ligada.
+
+========== 185/511 — RN-HOJE-005 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Ordem fixa das faixas
+Descrição: A ordem vertical dos blocos não muda conforme preferências.
+Pré-condições: Várias seções habilitadas com conteúdo.
+Resultado na tela: Sempre, de cima para baixo: cinema → estreias da semana → filmes no streaming → séries no streaming → animes em exibição → jogos em destaque (só as habilitadas e com itens).
+Como testar: Habilitar todas; rolar e conferir ordem dos títulos das faixas.
+
+========== 186/511 — RN-HOJE-006 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Faixa sem itens some
+Descrição: Seção ligada mas sem títulos para mostrar não ocupa espaço.
+Pré-condições: Seção habilitada sem destaques naquele dia.
+Resultado na tela: Nenhum título de faixa vazio; bloco inteiro ausente.
+Como testar: Ambiente ou dia em que uma faixa específica vem vazia.
+
+========== 187/511 — RN-HOJE-007 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Nada para mostrar
+Descrição: Todas as faixas visíveis estão vazias, ou o usuário desligou tudo que tinha conteúdo.
+Pré-condições: Filtros de seção deixam zero cards visíveis.
+Resultado na tela: Mensagem “Nenhum destaque disponível para os filtros selecionados.”
+Como testar: Desmarcar seções que tinham conteúdo até só restarem vazias ou desligar todas as que exibem cards.
+
+========== 188/511 — RN-HOJE-008 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Erro ao carregar
+Descrição: Se os destaques não puderem ser obtidos.
+Pré-condições: Simular falha de rede ou indisponibilidade do serviço.
+Resultado na tela: Mensagem do tipo “Não foi possível carregar o conteúdo de hoje.”
+Como testar: Bloquear rede após abrir a página ou usar ambiente offline.
+
+========== 189/511 — RN-HOJE-009 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Esqueletos no carregamento
+Descrição: Enquanto aguarda os dados.
+Pré-condições: Primeiro acesso ou rede lenta.
+Resultado na tela: Grade com vários placeholders de card (cerca de oito).
+Como testar: Throttle de rede e recarregar Hoje.
+
+========== 190/511 — RN-HOJE-010 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Cards iguais ao resto do site
+Descrição: Interações nos cards seguem o mesmo padrão das listagens.
+Pré-condições: Usuário logado; itens visíveis em uma faixa.
+Resultado na tela: Favoritar, listas e demais ações do card funcionam como em Filmes/Séries/Animes/Jogos.
+Como testar: Logar; favoritar um filme em “Em cartaz” e conferir em outra tela.
+
+========== 191/511 — RN-HOJE-011 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Janela “esta semana”
+Descrição: Destaques de streaming e animes priorizam o que teve lançamento ou episódio nos **últimos 7 dias**.
+Pré-condições: Títulos com datas conhecidas (estreia ou episódio).
+Resultado na tela: Obra lançada há mais de uma semana tende a não liderar o pool “esta semana”; pode aparecer só se faltar conteúdo recente.
+Como testar: Comparar filme estreando há 8 dias vs filme estreando ontem na faixa de streaming.
+
+========== 192/511 — RN-HOJE-012 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Em cartaz nos cinemas
+Descrição: Filmes marcados como em exibição comercial no momento.
+Pré-condições: Catálogo com filme em cartaz e filme só em streaming.
+Resultado na tela: Até **12** filmes; foco em popularidade entre os em cartaz; obras de baixa qualidade editorial ou mal localizadas tendem a ficar de fora.
+Como testar: Contar cards na faixa cinema; validar que só entram “em cartaz”.
+
+========== 193/511 — RN-HOJE-013 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Estreias da semana
+Descrição: Filmes estreando na **semana civil brasileira** corrente.
+Pré-condições: Filme com estreia BR na semana vs fora da semana.
+Resultado na tela: Até **24** títulos; cards de estreia da semana podem exibir etiqueta de destaque de estreia.
+Como testar: Cruzar com calendário de estreias BR.
+
+========== 194/511 — RN-HOJE-014 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Etiquetas em filmes
+Descrição: Alguns filmes ganham destaque visual (estreia da semana ou “mais esperado”).
+Pré-condições: Filme estreando na semana vs filme futuro aguardado.
+Resultado na tela: Estreia da semana tem prioridade sobre “mais esperado” no mesmo card.
+Como testar: Inspecionar pills nos cards de estreias e estreias futuras.
+
+========== 195/511 — RN-HOJE-015 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Filmes no streaming esta semana
+Descrição: Filmes disponíveis em streaming, não em cartaz, com preferência por lançamentos na última semana.
+Pré-condições: Pool semanal com menos de 12 títulos.
+Resultado na tela: Até **12** filmes; se faltarem lançamentos recentes, entram títulos populares em streaming para completar, sem duplicar o mesmo filme.
+Como testar: Dia com poucos lançamentos streaming; ver se lista completa até 12.
+
+========== 196/511 — RN-HOJE-016 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Séries no streaming esta semana
+Descrição: Séries com episódio ou estreia recente na última semana, ou fallback por popularidade.
+Pré-condições: Série sem episódio na semana mas popular.
+Resultado na tela: Até **12** séries; mescla recentes + fallback.
+Como testar: Série semanal com ep ontem vs série parada há meses.
+
+========== 197/511 — RN-HOJE-017 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Animes em exibição (prioridade)
+Descrição: Animes **em lançamento** que exibiram episódio na última semana.
+Pré-condições: Anime em exibição sem ep na semana.
+Resultado na tela: Preferência por quem teve episódio nos últimos 7 dias; ordenação por popularidade e nota.
+Como testar: Anime com ep recente vs anime em hiato.
+
+========== 198/511 — RN-HOJE-018 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Animes — completar lista
+Descrição: Se poucos animes tiveram episódio na semana, a lista completa com outros em exibição ou a estrear.
+Pré-condições: Poucos episódios recentes no catálogo.
+Resultado na tela: Até **12** animes no total, sem repetir o mesmo título.
+Como testar: Conferir contagem máxima em dia “fraco” de episódios.
+
+========== 199/511 — RN-HOJE-019 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Jogos em destaque
+Descrição: Jogos com maior expectativa ou nota entre os elegíveis.
+Pré-condições: Catálogo com jogos fracos e fortes.
+Resultado na tela: Até **8** jogos; jogos sem sinal de qualidade tendem a ficar de fora.
+Como testar: Contar faixa; comparar com página Jogos.
+
+========== 200/511 — RN-HOJE-020 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Animes mais exigentes que a listagem
+Descrição: Alguns animes marginais aparecem na listagem geral de animes mas não em Hoje.
+Pré-condições: Anime com nota/popularidade baixa.
+Resultado na tela: Ausente na faixa de animes de Hoje; pode existir na página Animes do menu.
+Como testar: Mesmo título em Animes vs Hoje.
+
+========== 201/511 — RN-HOJE-021 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Textos de sinopse
+Descrição: Sinopses exibidas são as já cadastradas no catálogo (sem tradução instantânea na hora da visita).
+Pré-condições: Abrir detalhe do mesmo título em Hoje e em Filmes.
+Resultado na tela: Mesmo texto de sinopse para a mesma obra.
+Como testar: Abrir modal do filme em Hoje e na listagem Filmes.
+
+========== 202/511 — RN-HOJE-022 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Atualização dos destaques
+Descrição: O conjunto de títulos do dia não muda a cada segundo.
+Pré-condições: Duas visitas no mesmo dia.
+Resultado na tela: Listas podem permanecer estáveis por várias horas até o site atualizar o pacote de “hoje”.
+Como testar: Comparar Hoje de manhã e tarde (mesmo dia).
+
+========== 203/511 — RN-HOJE-023 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Falha grave no servidor
+Descrição: Erro interno ao montar os destaques.
+Pré-condições: Serviço indisponível.
+Resultado na tela: Mesma mensagem de erro de RN-HOJE-008; usuário não vê faixas parciais “quebradas”.
+Como testar: Ambiente de teste com serviço fora.
+
+========== 204/511 — RN-HOJE-024 ==========
+Tela: página **Hoje** do site (menu principal → Hoje), com panorama editorial do dia: cinema, estreias, streaming e jogos em destaque.
+Nome: Seções batem com a tela
+Descrição: Cada faixa visível corresponde a um bloco de destaques (data do dia + listas por tema).
+Pré-condições: Página carregada com sucesso.
+Resultado na tela: Seis tipos possíveis: data, estreias da semana, cinema, três faixas streaming (filmes/séries/animes), jogos — conforme preferências e conteúdo.
+Como testar: Conferir títulos das faixas com a tabela abaixo.
+
+========== 205/511 — RN-HOME-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Ordem das seções
+Descrição: A página segue uma ordem fixa de blocos de cima para baixo.
+Pré-condições: Página inicial carregada com sucesso.
+Resultado na tela: Do topo para baixo: mensagem de boas-vindas → (opcional) Continuar assistindo → Filmes → Séries → Animes → Jogos.
+Como testar: Abrir a página inicial e rolar devagar; conferir a ordem.
+
+========== 206/511 — RN-HOME-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Título da faixa leva à listagem
+Descrição: O nome de cada faixa (Filmes, Séries, etc.) funciona como atalho.
+Pré-condições: Página inicial visível.
+Resultado na tela: Ao clicar no título “Filmes”, o usuário vai para a página de listagem de filmes; o mesmo padrão para Séries, Animes e Jogos.
+Como testar: Clicar em cada título de faixa e verificar a página de destino.
+
+========== 207/511 — RN-HOME-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Página não “quebra” sem conteúdo
+Descrição: Se no primeiro momento não houver títulos para mostrar, a estrutura da página continua aparecendo.
+Pré-condições: Simular rede lenta ou catálogo vazio no primeiro carregamento.
+Resultado na tela: Não aparece tela de erro do navegador; faixas e controles continuam; carrosséis podem mostrar placeholders e depois preencher ao rolar.
+Como testar: Throttle de rede ou ambiente de teste vazio; abrir a página inicial.
+
+========== 208/511 — RN-HOME-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Carregamento tardio das faixas
+Descrição: Filmes e jogos podem começar a buscar mais títulos quando o usuário se aproxima da faixa; séries e animes quando a própria faixa entra na área visível.
+Pré-condições: Usuário abre a página e fica só no topo (boas-vindas).
+Resultado na tela: Ao rolar até Filmes/Jogos/Séries/Animes, novos cards ou animação de carregamento podem aparecer; não é obrigatório tudo carregar antes de rolar.
+Como testar: Abrir a página, não rolar: observar rede/atividade; rolar até cada faixa.
+
+========== 209/511 — RN-HOME-AC-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Dois modos: estreias e semana
+Descrição: A faixa Animes permite alternar entre visão por **temporada/estreias** e **agenda da semana** (por dia).
+Pré-condições: Faixa Animes visível.
+Resultado na tela: Botões/ícones alternam entre modos; título do carrossel muda (temporada vs dia da semana).
+Como testar: Clicar alternância calendário/lista.
+
+========== 210/511 — RN-HOME-AC-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Modo inicial automático
+Descrição: Na **quarta semana em diante** da temporada corrente, a página pode abrir já na agenda semanal; no início da temporada, abre em estreias.
+Pré-condições: Data de teste no fim vs início da temporada.
+Resultado na tela: Modo inicial diferente; só na primeira visita (escolha manual depois é mantida).
+Como testar: Testar em duas datas da mesma temporada.
+
+========== 211/511 — RN-HOME-AC-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Estreias: temporada atual
+Descrição: No modo estreias, título indica estreias da temporada/ano (ex.: “Estreias de Verão 2026”).
+Pré-condições: Modo estreias, temporada corrente.
+Resultado na tela: Copy com nome da estação e ano.
+Como testar: Ler título da faixa.
+
+========== 212/511 — RN-HOME-AC-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Estreias: posição inicial
+Descrição: Foco no próximo anime a estrear (ou último já estreado na temporada).
+Pré-condições: Animes com datas na temporada.
+Resultado na tela: Card central coerente com “próximo” na data de hoje.
+Como testar: Abrir home e ver card central.
+
+========== 213/511 — RN-HOME-AC-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Agenda semanal: só com episódio marcado
+Descrição: No modo semana, entram animes que têm **próximo episódio** agendado; agrupados por dia da semana.
+Pré-condições: Modo semana.
+Resultado na tela: Separadores “Segunda”, “Terça”, etc., com cards abaixo.
+Como testar: Ativar modo semana em temporada ativa.
+
+========== 214/511 — RN-HOME-AC-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Agenda: abrir no dia de hoje
+Descrição: Ao entrar no modo semana, o foco vai para o separador do **dia da semana de hoje**.
+Pré-condições: Modo semana com episódios na semana.
+Resultado na tela: Separador do dia atual visível/central.
+Como testar: Abrir modo semana no meio da semana.
+
+========== 215/511 — RN-HOME-AC-007 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Trocar temporada
+Descrição: Setas mudam ano/temporada (Inverno, Primavera, Verão, Outono).
+Pré-condições: Modo estreias.
+Resultado na tela: Novos cards após breve carregamento se a temporada ainda não estava aberta.
+Como testar: Avançar para próxima temporada.
+
+========== 216/511 — RN-HOME-AC-008 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Em alta em animes
+Descrição: Modo destaque lista animes populares (sem eixo de temporada).
+Pré-condições: Em alta ligado na faixa Animes.
+Resultado na tela: Lista por popularidade; filtros de formato/adulto aplicados na exibição.
+Como testar: Toggle Em alta em Animes.
+
+========== 217/511 — RN-HOME-AC-009 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Fixar na semana (logado)
+Descrição: Usuário logado pode fixar anime no menu do card para destacar na semana.
+Pré-condições: Logado, card de anime.
+Resultado na tela: Opção no menu ⋮; ícone de pin no card quando fixado.
+Como testar: Fixar e ver pin.
+
+========== 218/511 — RN-HOME-AC-010 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Loop na agenda semanal
+Descrição: No modo semana, a rolagem pode ser contínua (volta ao início).
+Pré-condições: Modo semana ativo.
+Resultado na tela: Comportamento de carrossel em loop (diferente do modo estreias).
+Como testar: Rolar até o fim no modo semana.
+
+========== 219/511 — RN-HOME-CA-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Bloco só para usuário logado
+Descrição: A faixa “Continuar assistindo” não aparece para visitante.
+Pré-condições: Usuário **não** está logado.
+Resultado na tela: Nenhum bloco “Continuar assistindo” entre o hero e Filmes.
+Como testar: Abrir a página em anônimo.
+
+========== 220/511 — RN-HOME-CA-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Bloco oculto sem itens
+Descrição: Se o usuário logado não tem nada para continuar, a faixa some.
+Pré-condições: Logado, sem animes em progresso na lista.
+Resultado na tela: Seção ausente.
+Como testar: Conta sem itens “continuar”/“seguir”.
+
+========== 221/511 — RN-HOME-CA-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Até dez títulos
+Descrição: Quando há itens, no máximo dez cards na faixa horizontal.
+Pré-condições: Logado com mais de dez animes em progresso.
+Resultado na tela: Só os dez primeiros (ordem de uso recente) aparecem na home.
+Como testar: Conta com 11+ itens; contar cards.
+
+========== 222/511 — RN-HOME-CA-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Card mostra temporada e episódio
+Descrição: Cada card exibe temporada e número do episódio.
+Pré-condições: Pelo menos um item na faixa.
+Resultado na tela: Texto no formato “S{n} · E{n}” (temporada e episódio).
+Como testar: Ler um card qualquer.
+
+========== 223/511 — RN-HOME-CA-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Tempo restante
+Descrição: Se houver tempo restante do episódio, aparece texto “Restam …”.
+Pré-condições: Item com progresso parcial no episódio.
+Resultado na tela: Linha com tempo restante abaixo do título.
+Como testar: Item com episódio pela metade.
+
+========== 224/511 — RN-HOME-CA-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Abrir no streaming
+Descrição: Se o sistema tem link do Crunchyroll para aquele item, o clique abre em nova aba.
+Pré-condições: Item com link de streaming associado.
+Resultado na tela: Nova aba do navegador no serviço de streaming.
+Como testar: Clicar card com link.
+
+========== 225/511 — RN-HOME-CA-007 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Sem link vai à minha lista
+Descrição: Sem link externo, o clique leva à área de animes da minha lista.
+Pré-condições: Item sem URL de streaming.
+Resultado na tela: Navega para minha lista de animes na mesma aba.
+Como testar: Clicar card sem link externo.
+
+========== 226/511 — RN-HOME-CA-008 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: “Ver todos”
+Descrição: Link no canto da faixa leva à listagem completa de animes da minha lista.
+Pré-condições: Faixa visível.
+Resultado na tela: Abre minha lista de animes.
+Como testar: Clicar “Ver todos”.
+
+========== 227/511 — RN-HOME-CARD-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Abrir detalhe
+Descrição: Toque/clique no card abre painel de detalhe do título (modal).
+Pré-condições: Card visível.
+Resultado na tela: Modal com sinopse, datas, links, etc.
+Como testar: Clicar poster/título.
+
+========== 228/511 — RN-HOME-CARD-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Menu ⋮
+Descrição: Botão de três pontos abre menu de ações sem sair da home.
+Pré-condições: Card visível.
+Resultado na tela: Menu com favoritar, quero assistir, etc.
+Como testar: Abrir menu.
+
+========== 229/511 — RN-HOME-CARD-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Fechar menu ao clicar fora
+Descrição: Clicar fora do menu fecha o menu.
+Pré-condições: Menu aberto.
+Resultado na tela: Menu some.
+Como testar: Clicar área vazia.
+
+========== 230/511 — RN-HOME-CARD-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Favoritar / quero assistir
+Descrição: Ações gravam na conta do usuário quando logado.
+Pré-condições: Logado.
+Resultado na tela: Estado ativo reflete no menu; indicador no card se aplicável.
+Como testar: Favoritar e recarregar página logado.
+
+========== 231/511 — RN-HOME-CARD-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Visitante não grava
+Descrição: Sem login, ações de lista pedem entrada na conta (mensagem).
+Pré-condições: Não logado.
+Resultado na tela: Aviso; nada salvo.
+Como testar: Favoritar deslogado.
+
+========== 232/511 — RN-HOME-CARD-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Acompanhando (série/anime)
+Descrição: Opção extra para série e anime.
+Pré-condições: Card série ou anime.
+Resultado na tela: Item “Acompanhando” no menu.
+Como testar: Abrir menu em série.
+
+========== 233/511 — RN-HOME-CARD-007 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Já assisti / já joguei
+Descrição: Só disponível se o título **já foi lançado** (data de lançamento no passado).
+Pré-condições: Filme/jogo futuro.
+Resultado na tela: Opção desabilitada ou sem efeito.
+Como testar: Tentar em estreia futura.
+
+========== 234/511 — RN-HOME-CARD-008 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Avaliar ao marcar visto
+Descrição: Ao marcar já assisti/joguei em título lançado, abre fluxo de **nota** antes de concluir.
+Pré-condições: Lançado, logado.
+Resultado na tela: Modal de avaliação.
+Como testar: Marcar já assisti em filme antigo.
+
+========== 235/511 — RN-HOME-CARD-009 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Etiqueta de status — filme
+Descrição: Ordem de prioridade visual: **Pré-venda** → **Em cartaz** → **No streaming** (após lançamento) → **Em breve**.
+Pré-condições: Filmes com flags diferentes.
+Resultado na tela: Uma etiqueta principal por card.
+Como testar: Comparar filme em cartaz vs streaming.
+
+========== 236/511 — RN-HOME-CARD-010 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Etiqueta — série/anime
+Descrição: **Novo ep** (24h) → **Em exibição** → **Em breve** → **No streaming**.
+Pré-condições: Episódio exibido há menos de 24h.
+Resultado na tela: “NOVO EP” visível.
+Como testar: Testar dia após estreia de ep.
+
+========== 237/511 — RN-HOME-CARD-011 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Novo ep: regra de 24h
+Descrição: “Novo ep” usa data do último episódio (série) ou regra equivalente no anime.
+Pré-condições: Ep entre 1h e 24h atrás.
+Resultado na tela: Etiqueta presente; após 24h some.
+Como testar: Esperar ou simular data.
+
+========== 238/511 — RN-HOME-CARD-012 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Dublagem no anime
+Descrição: Texto **Dublado** ou **Legendado** vem da informação oficial do título, não da lista de elenco no card.
+Pré-condições: Anime com dublagem BR cadastrada.
+Resultado na tela: “Dublado” no card.
+Como testar: Comparar com título só legendado.
+
+========== 239/511 — RN-HOME-CARD-013 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Contagem para próximo episódio
+Descrição: Rodapé do card pode mostrar contagem regressiva para o próximo episódio.
+Pré-condições: Série/anime com próximo ep futuro.
+Resultado na tela: Texto com dias/horas; abaixo de 1 dia atualiza mais frequentemente.
+Como testar: Card com ep amanhã vs hoje à noite.
+
+========== 240/511 — RN-HOME-CARD-014 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Saga em filme
+Descrição: Filme parte de saga pode mostrar atalho para página de continuações.
+Pré-condições: Filme com saga.
+Resultado na tela: Link de saga; clique **não** abre o modal (só o link).
+Como testar: Clicar saga vs poster.
+
+========== 241/511 — RN-HOME-CARD-015 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Conteúdo adulto no poster
+Descrição: Poster de título adulto aparece desfocado até passar o mouse (desktop) ou interação equivalente.
+Pré-condições: Título marcado adulto ainda permitido.
+Resultado na tela: Blur no poster.
+Como testar: Hover no card adulto.
+
+========== 242/511 — RN-HOME-CARD-016 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Indicador na minha lista
+Descrição: Logado com favorito/quero/acompanhando, o card pode mostrar marca visual de lista.
+Pré-condições: Logado com item na lista.
+Resultado na tela: Borda ou pill de destaque.
+Como testar: Favoritar e olhar o card.
+
+========== 243/511 — RN-HOME-CARD-017 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Ocultar título
+Descrição: “Não me interessa” remove o título das recomendações pessoais conforme política da conta.
+Pré-condições: Logado.
+Resultado na tela: Título some das listas personalizadas subsequentes.
+Como testar: Ocultar e buscar de novo.
+
+========== 244/511 — RN-HOME-CON-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Foco em lançamentos recentes e próximos
+Descrição: Os três carrosséis priorizam títulos com data de lançamento (ou equivalente) nos **últimos 90 dias** e até o **fim do mês seguinte** ao mês atual — não uma lista infinita de clássicos antigos.
+Pré-condições: Data de teste conhecida; título com estreia há mais de 90 dias só por reestreia antiga.
+Resultado na tela: Título muito antigo fora dessa janela **não** aparece no carrossel temporal (pode existir em outras páginas do site).
+Como testar: Comparar título reestreia antiga na home vs página Filmes.
+
+========== 245/511 — RN-HOME-CON-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Filmes: sem shows e concertos na faixa
+Descrição: Gravações de show, stand-up e concertos ao vivo não devem aparecer nos carrosséis de lançamento da home.
+Pré-condições: Catálogo com filme de concerto cadastrado.
+Resultado na tela: Ausente na faixa Filmes da home.
+Como testar: Buscar concerto na página Filmes; verificar ausência na home.
+
+========== 246/511 — RN-HOME-CON-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Filmes: curta duração futura
+Descrição: Filmes de estreia futura com duração conhecida muito curta (abaixo do padrão de “filme de cinema”) não entram na seleção inicial da home.
+Pré-condições: Filme futuro com duração de curta-metragem conhecida.
+Resultado na tela: Não aparece no carrossel inicial de filmes.
+Como testar: Validar com título de teste curto.
+
+========== 247/511 — RN-HOME-CON-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Filmes: destaques no card
+Descrição: Alguns filmes exibem etiqueta extra (ex.: “mais esperado”) conforme regras editoriais do produto.
+Pré-condições: Filme elegível a destaque na semana/mês.
+Resultado na tela: Pill ou etiqueta no card além do status normal.
+Como testar: Comparar cards em destaque na mídia.
+
+========== 248/511 — RN-HOME-CON-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Séries: data do próximo episódio
+Descrição: Série em exibição com episódio futuro aparece posicionada na **data do próximo episódio**, não só na estreia original da série.
+Pré-condições: Série com próximo episódio marcado para data futura.
+Resultado na tela: Card na faixa Séries alinhado ao mês/dia do próximo ep ao rolar a timeline.
+Como testar: Série semanal com ep na sexta; conferir posição na sexta.
+
+========== 249/511 — RN-HOME-CON-006 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Séries: episódio recente
+Descrição: Se não há episódio futuro, mas houve episódio nos últimos 90 dias, a série continua na timeline nessa data recente.
+Pré-condições: Episódio exibido há poucos dias.
+Resultado na tela: Card ainda visível ao navegar no passado recente do carrossel.
+Como testar: Série que estreou ep ontem.
+
+========== 250/511 — RN-HOME-CON-007 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Jogos: plataformas no card
+Descrição: Cards de jogos mostram ícones de até quatro plataformas quando disponíveis.
+Pré-condições: Jogo com várias plataformas.
+Resultado na tela: Até quatro ícones visíveis no card.
+Como testar: Inspecionar card de jogo multiplataforma.
+
+========== 251/511 — RN-HOME-CON-008 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Jogos pouco relevantes
+Descrição: Jogos sem nenhum sinal de interesse (nota, seguidores, expectativa) tendem a não aparecer na seleção da home.
+Pré-condições: Jogo obscuro no catálogo.
+Resultado na tela: Ausente na faixa Jogos da home.
+Como testar: Comparar com página Jogos.
+
+========== 252/511 — RN-HOME-CON-009 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Conteúdo adulto explícito em animes
+Descrição: Animes classificados como conteúdo adulto explícito (ex.: hentai) não aparecem na faixa Animes da home.
+Pré-condições: Título adulto no catálogo geral.
+Resultado na tela: Ausente na home; pode ou não aparecer em outras áreas conforme política do site.
+Como testar: Buscar título adulto; verificar home.
+
+========== 253/511 — RN-HOME-CON-010 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Animes da temporada e agenda
+Descrição: Na faixa Animes entram títulos da temporada corrente, estreias no mês atual/próximo ou com episódio previsto nas **próximas três semanas**.
+Pré-condições: Anime fora de temporada e sem episódio próximo.
+Resultado na tela: Pode não aparecer no carregamento inicial.
+Como testar: Anime antigo fora de exibição.
+
+========== 254/511 — RN-HOME-EA-001 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Ativar Em alta
+Descrição: Botão/controle “Em alta” na faixa troca a lista para destaques de popularidade/expectativa.
+Pré-condições: Faixa Filmes, Séries ou Jogos.
+Resultado na tela: Timeline por mês some; cards em ordem de “em alta”; sem separadores de ano TBD.
+Como testar: Clicar Em alta na faixa Filmes.
+
+========== 255/511 — RN-HOME-EA-002 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Filmes em alta ≠ populares da página Filmes
+Descrição: A lista “Em alta” na home de **filmes** usa critério de **mais esperados** (antecipação de estreia), não o mesmo botão “Populares” da página Filmes.
+Pré-condições: Modo Em alta em Filmes na home.
+Resultado na tela: Ordem/conjunto pode diferir da página Filmes → Populares.
+Como testar: Comparar os mesmos dias home Em alta vs página Filmes Populares.
+
+========== 256/511 — RN-HOME-EA-003 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Séries e jogos em alta
+Descrição: Em Séries e Jogos, Em alta mostra títulos em destaque por popularidade/relevância do catálogo.
+Pré-condições: Modo Em alta ativo.
+Resultado na tela: Lista fixa (~dezena de títulos) sem navegação por mês.
+Como testar: Ativar Em alta em Séries.
+
+========== 257/511 — RN-HOME-EA-004 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Início da lista
+Descrição: Ao ativar Em alta, o carrossel vai para o **primeiro** card da lista em alta.
+Pré-condições: Toggle ligado.
+Resultado na tela: Primeiro slide visível.
+Como testar: Ativar e ver posição.
+
+========== 258/511 — RN-HOME-EA-005 ==========
+Tela: página inicial do site (primeira tela após abrir o endereço principal).
+Nome: Desativar volta à timeline
+Descrição: Ao desligar Em alta, o carrossel retorna ao modo data e reposiciona no contexto de “hoje”.
+Pré-condições: Estava em Em alta.
+Resultado na tela: Modo mês retorna; foco próximo lançamento.
+Como testar: Ligar e desligar Em alta.

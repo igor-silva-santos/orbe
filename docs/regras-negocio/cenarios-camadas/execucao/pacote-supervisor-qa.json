@@ -1,0 +1,462 @@
+{
+  "gerado_em": "2026-09-23T19:10:03Z",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "robo_511": {
+    "fonte": "cenarios-camadas/execucao/metricas-reais-511/metricas-reais-511.csv",
+    "total": 511,
+    "contagem": {
+      "PASS": 12,
+      "PENDENTE_QA_HUMANO": 496,
+      "FAIL": 3
+    },
+    "fail_amostra": [
+      {
+        "ID_Cenario": "CT-RN-MODAL-001-F",
+        "ID_Regra": "RN-MODAL-001",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "4",
+        "Evidencia": "Clique fora não fechou modal",
+        "Testado_Em": "2026-09-23T18:22:22Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-007-F",
+        "ID_Regra": "RN-MODAL-007",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "4",
+        "Evidencia": "Clique fora não fechou modal",
+        "Testado_Em": "2026-09-23T18:25:28Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-MODAL-013-F",
+        "ID_Regra": "RN-MODAL-013",
+        "Arquivo": "08-MODAIS.md",
+        "Veredito": "FAIL",
+        "Tipo_Execucao": "passo_a_passo",
+        "Passos_Executados": "4",
+        "Evidencia": "Clique fora não fechou modal",
+        "Testado_Em": "2026-09-23T18:28:49Z"
+      }
+    ],
+    "pendente_amostra": [
+      {
+        "ID_Cenario": "CT-RN-HOME-003-F",
+        "ID_Regra": "RN-HOME-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-004-F",
+        "ID_Regra": "RN-HOME-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:13Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-001-F",
+        "ID_Regra": "RN-HOME-AC-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:19Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-002-F",
+        "ID_Regra": "RN-HOME-AC-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:25Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-003-F",
+        "ID_Regra": "RN-HOME-AC-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:30Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-004-F",
+        "ID_Regra": "RN-HOME-AC-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:35Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-005-F",
+        "ID_Regra": "RN-HOME-AC-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:41Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-006-F",
+        "ID_Regra": "RN-HOME-AC-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:46Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-007-F",
+        "ID_Regra": "RN-HOME-AC-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:50Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-008-F",
+        "ID_Regra": "RN-HOME-AC-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:43:55Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-009-F",
+        "ID_Regra": "RN-HOME-AC-009",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-AC-010-F",
+        "ID_Regra": "RN-HOME-AC-010",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:05Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-001-F",
+        "ID_Regra": "RN-HOME-CA-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:10Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-002-F",
+        "ID_Regra": "RN-HOME-CA-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:15Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-003-F",
+        "ID_Regra": "RN-HOME-CA-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:19Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-004-F",
+        "ID_Regra": "RN-HOME-CA-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:24Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-005-F",
+        "ID_Regra": "RN-HOME-CA-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:28Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-006-F",
+        "ID_Regra": "RN-HOME-CA-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:32Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-007-F",
+        "ID_Regra": "RN-HOME-CA-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:36Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CA-008-F",
+        "ID_Regra": "RN-HOME-CA-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:40Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-001-F",
+        "ID_Regra": "RN-HOME-CARD-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:44Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-002-F",
+        "ID_Regra": "RN-HOME-CARD-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:48Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-003-F",
+        "ID_Regra": "RN-HOME-CARD-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:52Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-004-F",
+        "ID_Regra": "RN-HOME-CARD-004",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:44:56Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-005-F",
+        "ID_Regra": "RN-HOME-CARD-005",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:00Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-006-F",
+        "ID_Regra": "RN-HOME-CARD-006",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:06Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-007-F",
+        "ID_Regra": "RN-HOME-CARD-007",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:10Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-008-F",
+        "ID_Regra": "RN-HOME-CARD-008",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:14Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-009-F",
+        "ID_Regra": "RN-HOME-CARD-009",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-23T17:45:18Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-010-F",
+        "ID_Regra": "RN-HOME-CARD-010",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:23Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-011-F",
+        "ID_Regra": "RN-HOME-CARD-011",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:27Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-012-F",
+        "ID_Regra": "RN-HOME-CARD-012",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-23T17:45:31Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-013-F",
+        "ID_Regra": "RN-HOME-CARD-013",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:35Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-014-F",
+        "ID_Regra": "RN-HOME-CARD-014",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:39Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-015-F",
+        "ID_Regra": "RN-HOME-CARD-015",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-23T17:45:43Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-016-F",
+        "ID_Regra": "RN-HOME-CARD-016",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:47Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CARD-017-F",
+        "ID_Regra": "RN-HOME-CARD-017",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:51Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-001-F",
+        "ID_Regra": "RN-HOME-CON-001",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "catalogo",
+        "Passos_Executados": "2",
+        "Evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+        "Testado_Em": "2026-09-23T17:45:55Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-002-F",
+        "ID_Regra": "RN-HOME-CON-002",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:45:59Z"
+      },
+      {
+        "ID_Cenario": "CT-RN-HOME-CON-003-F",
+        "ID_Regra": "RN-HOME-CON-003",
+        "Arquivo": "01-HOME.md",
+        "Veredito": "PENDENTE_QA_HUMANO",
+        "Tipo_Execucao": "manual_obrigatorio",
+        "Passos_Executados": "3",
+        "Evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+        "Testado_Em": "2026-09-23T17:46:03Z"
+      }
+    ]
+  },
+  "e2e_playwright": {
+    "status": "missing"
+  },
+  "e2e_report_path": "/workspace/docs/regras-negocio/cenarios-camadas/execucao/e2e-playwright-report.json",
+  "validar_sync_2027_2030": {
+    "exit_code": 1,
+    "stdout": "OK 2027: by-year=1 year-tbd=0\nFAIL 2028: by-year=0 year-tbd=0\nFAIL 2029: by-year=0 year-tbd=0\nFAIL 2030: by-year=0 year-tbd=0"
+  },
+  "fila_supervisor": "cenarios-camadas/execucao/supervisor-fila-qa.json",
+  "instrucoes_agente": [
+    "Comparar FAIL do robô com passos em cenarios-teste-camadas.csv — muitos 08-MODAIS são falso FAIL.",
+    "Reexecutar no browser cenários FAIL e amostra PENDENTE; registrar em QA-EXECUCAO-HUMANA-511.csv.",
+    "E2E PASS não substitui 511 — só smoke de home/filmes.",
+    "Console: ver QA-CONSOLE-TRIAGEM.md (WS, SW, TMDB)."
+  ]
+}

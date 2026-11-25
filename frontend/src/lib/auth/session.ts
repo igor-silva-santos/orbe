@@ -55,3 +55,9 @@ export function clearSession(): void {
   removeToken();
   void clearBrowserSession();
 }
+
+/** Exclui a conta autenticada no servidor e limpa sessão local. */
+export async function deleteAccountWithPassword(password: string): Promise<void> {
+  await orbeNerdApi.deleteAccount(password);
+  clearSession();
+}

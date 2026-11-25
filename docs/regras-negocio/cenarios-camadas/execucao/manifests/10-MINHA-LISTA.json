@@ -1,0 +1,358 @@
+{
+  "arquivo": "10-MINHA-LISTA.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 39,
+  "cenarios": [
+    {
+      "id": "CT-RN-LISTA-001-F",
+      "regra": "RN-LISTA-001",
+      "titulo": "Feliz: Rotas exigem login",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Anônimo tenta abrir lista de animes pelo menu.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Redirecionamento para tela de **Entrar**, com retorno para a página que tentou abrir após login bem-sucedido.",
+      "pre": "Visitante não autenticado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-002-F",
+      "regra": "RN-LISTA-002",
+      "titulo": "Feliz: Camada de UX",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Comparar anônimo (redirect) vs logado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem login não vê conteúdo da lista; logado vê dados pessoais.",
+      "pre": "Visitante vs logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-010-F",
+      "regra": "RN-LISTA-010",
+      "titulo": "Feliz: Quatro tipos de mídia",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Clicar Animes vs Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards: Animes, Filmes, Séries, Jogos; **somente Animes** leva a uma lista ativa hoje.",
+      "pre": "Usuário logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-011-F",
+      "regra": "RN-LISTA-011",
+      "titulo": "Feliz: “Em breve”",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Tentar clicar Filmes no hub.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filmes, Séries e Jogos aparecem esmaecidos, sem link, com selo “Em breve”.",
+      "pre": "Hub aberto.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-012-F",
+      "regra": "RN-LISTA-012",
+      "titulo": "Feliz: Mensagem orientadora",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Ler texto introdutório.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto explicando que a organização começa pelos animes.",
+      "pre": "Hub aberto.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-020-F",
+      "regra": "RN-LISTA-020",
+      "titulo": "Feliz: Abas Catálogo vs Fila",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Alternar entre hub e fila.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Links “Catálogo Orbe” (hub) e “Fila Crunchyroll”; aba atual destacada.",
+      "pre": "Logado em Minha Lista.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-021-F",
+      "regra": "RN-LISTA-021",
+      "titulo": "Feliz: Animes fora da barra",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Confirmar links da nav vs entrada por animes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "A lista de animes não aparece na barra lateral; acesso via hub, header “Mais” ou atalhos.",
+      "pre": "Logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-030-F",
+      "regra": "RN-LISTA-030",
+      "titulo": "Feliz: Exige login na tela",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Abrir rota futura sem cookie.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Redireciona para Entrar; nada da lista é mostrado.",
+      "pre": "Sessão expirada na página.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-031-F",
+      "regra": "RN-LISTA-031",
+      "titulo": "Feliz: Carregar lista pessoal",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Aplicar filtros e recarregar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grid de obras conforme filtros; falha de permissão → Entrar.",
+      "pre": "Logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-032-F",
+      "regra": "RN-LISTA-032",
+      "titulo": "Feliz: Filtro por status",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Clicar cada aba.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abas: Tudo, Quero assistir, Acompanhando, Favoritos, Assistidos/jogados.",
+      "pre": "Lista com itens variados.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-033-F",
+      "regra": "RN-LISTA-033",
+      "titulo": "Feliz: Filtro por tipo",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Filtrar só jogos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Chips: todos, filme, série, anime, jogo restringem o grid.",
+      "pre": "Lista mista.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-034-F",
+      "regra": "RN-LISTA-034",
+      "titulo": "Feliz: Itens ocultos",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Marcar “não me interessa” e voltar à lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não aparecem na lista visível.",
+      "pre": "Itens marcados como ocultos.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-035-F",
+      "regra": "RN-LISTA-035",
+      "titulo": "Feliz: Status ao vivo",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Favoritar na home → abrir minha lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista reflete ação mais recente do usuário sobre o card.",
+      "pre": "Mudar status em outra tela sem recarregar.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-036-F",
+      "regra": "RN-LISTA-036",
+      "titulo": "Feliz: Aviso de itens faltantes",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Conta de teste com `missingCount` se existir.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem com quantidade de itens não encontrados no catálogo.",
+      "pre": "Conta com referências antigas.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-037-F",
+      "regra": "RN-LISTA-037",
+      "titulo": "Feliz: Listas vazias",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Zerar filtros vs filtro impossível.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagens diferentes para “nada na lista” vs “nenhum item neste filtro”.",
+      "pre": "Lista vazia vs filtros restritivos.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-040-F",
+      "regra": "RN-LISTA-040",
+      "titulo": "Feliz: Visitante",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Validar RN-LISTA-001.\n3. Esta regra cobre mensagem na página se aplicável.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "CTA “Entrar no Orbe”; em fluxo normal o redirect de RN-LISTA-001 ocorre antes.",
+      "pre": "Usuário não logado (cenário raro nesta rota).",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-041-F",
+      "regra": "RN-LISTA-041",
+      "titulo": "Feliz: Carregar ao abrir",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Abrir animes logado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao entrar na página, lista e estados carregam automaticamente.",
+      "pre": "Logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-042-F",
+      "regra": "RN-LISTA-042",
+      "titulo": "Feliz: Última sincronização",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Conta nova vs conta com extensão.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Data/hora da última sync ou texto de nunca sincronizado.",
+      "pre": "Conta com/sem sync prévia.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-043-F",
+      "regra": "RN-LISTA-043",
+      "titulo": "Feliz: Ações da barra",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Clicar atualizar.\n3. Importar arquivo demo se disponível.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botões: atualizar lista, importar backup de arquivo, importar demo (ambiente QA).",
+      "pre": "Página animes.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-044-F",
+      "regra": "RN-LISTA-044",
+      "titulo": "Feliz: Banners informativos",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Simular offline.\n3. Ver banner.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Banners de offline e opt-in de notificações push quando aplicável.",
+      "pre": "Página carregada.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-045-F",
+      "regra": "RN-LISTA-045",
+      "titulo": "Feliz: Painel da extensão",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Com/sem extensão instalada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Bloco com status da extensão do navegador e opção de verificar de novo.",
+      "pre": "Página animes.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-046-F",
+      "regra": "RN-LISTA-046",
+      "titulo": "Feliz: Filtros da watchlist",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Alternar abas e contar itens.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abas: todos, em andamento (continuar/seguir), começar, terminado, dublagem PT-BR; contagens por aba.",
+      "pre": "Lista com vários estados.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-047-F",
+      "regra": "RN-LISTA-047",
+      "titulo": "Feliz: Lista vazia orientada",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Conta vazia com/sem extensão.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem e CTAs diferentes se extensão instalada (conectar) vs não instalada (instalar).",
+      "pre": "Zero itens.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-048-F",
+      "regra": "RN-LISTA-048",
+      "titulo": "Feliz: Remover item",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Remover um título → cancelar e confirmar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Diálogo de confirmação do navegador antes de remover.",
+      "pre": "Item na lista.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-049-F",
+      "regra": "RN-LISTA-049",
+      "titulo": "Feliz: Editar progresso",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Editar S2 E5 → salvar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal de edição; salvar atualiza card.",
+      "pre": "Item com progresso.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-050-F",
+      "regra": "RN-LISTA-050",
+      "titulo": "Feliz: Feedback de sync/import",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Sync com sucesso e com erro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Banner verde ou vermelho com opção fechar.",
+      "pre": "Operação concluída.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-051-F",
+      "regra": "RN-LISTA-051",
+      "titulo": "Feliz: Modo offline",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Carregar → offline → recarregar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Itens anteriores permanecem visíveis offline quando possível.",
+      "pre": "Lista já carregada uma vez.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-052-F",
+      "regra": "RN-LISTA-052",
+      "titulo": "Feliz: Backup antigo",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Importar backup legado de QA.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Campos normalizados (identificadores e status antigos mapeados) após import.",
+      "pre": "Arquivo backup formato antigo.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-053-F",
+      "regra": "RN-LISTA-053",
+      "titulo": "Feliz: Adicionar do catálogo",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Adicionar anime pelo catálogo interno.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Fluxo “adicionar do catálogo Orbe” refresca a lista após incluir.",
+      "pre": "Logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-060-F",
+      "regra": "RN-LISTA-060",
+      "titulo": "Feliz: Exige login",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Abrir fila sem login.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Redirect para Entrar.",
+      "pre": "Anônimo.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-061-F",
+      "regra": "RN-LISTA-061",
+      "titulo": "Feliz: Ordem da fila",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Validar ordem dos blocos/linhas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ordem: **Continuar** → **A seguir** → **Começar** (conforme descrição no cabeçalho da página).",
+      "pre": "Logado com fila populada.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-062-F",
+      "regra": "RN-LISTA-062",
+      "titulo": "Feliz: Estados especiais",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Itens de teste nesses estados.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Rótulos em destaque âmbar para “esperando dublagem” e “esperando episódio”.",
+      "pre": "Itens nesses estados.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-063-F",
+      "regra": "RN-LISTA-063",
+      "titulo": "Feliz: Dicas de catálogo CR",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Ler hint sob um anime.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Resumo de episódios no ar, dublados PT-BR e fronteira sub/dub quando existir.",
+      "pre": "Item na fila.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-064-F",
+      "regra": "RN-LISTA-064",
+      "titulo": "Feliz: Trilha de áudio",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Comparar anime dub vs sub.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Linha com temporada/ep e “Trilha PT-BR” ou “Leg/sub”.",
+      "pre": "Item com metadados.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-065-F",
+      "regra": "RN-LISTA-065",
+      "titulo": "Feliz: Abrir detalhe",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Clicar linha com anime resolvido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre modal de detalhe do anime.",
+      "pre": "Anime ligado ao catálogo Orbe.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-066-F",
+      "regra": "RN-LISTA-066",
+      "titulo": "Feliz: Ajuda extensão",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Ler bloco de instruções.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para watchlist Crunchyroll e nota sobre filtro de dublagem PT-BR no popup da extensão.",
+      "pre": "Página fila.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-070-F",
+      "regra": "RN-LISTA-070",
+      "titulo": "Feliz: Login para interagir",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Deslogar e tentar favoritar na lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast pedindo login; ação não conclui.",
+      "pre": "Anônimo em tela que mostra cards (ex. após bug).",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-071-F",
+      "regra": "RN-LISTA-071",
+      "titulo": "Feliz: Significado dos status",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Aplicar cada status.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Favorito, quero assistir, acompanhando; “não me interessa” oculta da lista principal.",
+      "pre": "Logado.",
+      "tela": "Minha lista"
+    },
+    {
+      "id": "CT-RN-LISTA-072-F",
+      "regra": "RN-LISTA-072",
+      "titulo": "Feliz: Acompanhando só anime/série",
+      "passos": "1. Abrir o site e navegar até **Minha lista**.\n2. Abrir menu em filme e anime.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "“Acompanhando” oferecido para anime e série; não para filme/jogo da mesma forma.",
+      "pre": "Card de filme vs anime.",
+      "tela": "Minha lista"
+    }
+  ]
+}
