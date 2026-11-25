@@ -79,10 +79,31 @@ echo "As masters divergiram. Juntando o que já está no GitHub a este commit, s
 git config user.email "gitlab-ci@orbenerd.local"
 git config user.name "GitLab Mirror"
 if ! git merge --no-ff --no-edit -m "merge: preserva a master do GitHub ao espelhar o GitLab" refs/remotes/github/master; then
-  echo "Conflito ao juntar as duas masters. Arquivos:"
-  git diff --name-only --diff-filter=U || true
-  echo "Nada foi forçado no GitHub."
-  exit 1
+  # Nestes arquivos a master do GitLab já contém o ajuste do GitHub (mobile + o que estava só lá).
+  # Qualquer outro conflito para o job, para não apagar trabalho do GitHub.
+  prefer_gitlab="
+.gitlab-ci.yml
+docs/DEPLOY_GITLAB.md
+frontend/src/components/layout/Header.tsx
+frontend/src/components/modals/SuperModal.tsx
+"
+  failed=0
+  while IFS= read -r file; do
+    [ -z "${file}" ] && continue
+    if printf '%s\n' "${prefer_gitlab}" | grep -Fxq "${file}"; then
+      echo "Conflito conhecido, fica a versão do GitLab: ${file}"
+      git checkout --ours -- "${file}"
+      git add -- "${file}"
+    else
+      echo "Conflito inesperado: ${file}"
+      failed=1
+    fi
+  done < <(git diff --name-only --diff-filter=U)
+  if [ "${failed}" -ne 0 ]; then
+    echo "Nada foi forçado no GitHub. O espelho parou para não descartar esses arquivos."
+    exit 1
+  fi
+  git commit --no-edit -m "merge: preserva a master do GitHub ao espelhar o GitLab"
 fi
 
 MERGED="$(git rev-parse HEAD)"
