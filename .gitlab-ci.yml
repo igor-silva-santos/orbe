@@ -1,5 +1,5 @@
-# Orbe — GitLab é a fonte de verdade para produção.
-# Push na master do GitLab → testes + deploy (hooks). GitHub não deve disparar Vercel/Render.
+# Orbe — GitLab é a fonte de verdade para código; GitHub espelha a master (Vercel/Render conectados ao GitHub).
+# Push na master do GitLab → test:api + mirror:github → Vercel/Render disparam no GitHub.
 #
 # Ops (sync guard): schedule / pipeline manual (web) com ORBE_OPS_ACTION.
 # Ping longo: Cloudflare Worker ops/render_sync_watch_worker.js
@@ -7,6 +7,7 @@
 # Variáveis CI/CD (Settings → CI/CD → Variables, masked):
 #   RENDER_DEPLOY_HOOK  — Render → Service → Settings → Deploy Hook
 #   VERCEL_DEPLOY_HOOK  — Vercel → Project → Settings → Git → Deploy Hooks (branch master)
+#   GITHUB_MIRROR_TOKEN — PAT GitHub (escrita no repo igor-silva-santos/orbe); sem «Protect variable» se branch não protegida
 
 workflow:
   rules:
@@ -20,7 +21,7 @@ stages:
   - deploy
   - operations
 
-# Espelho GitHub (igor-silva-santos/orbe): defina GITHUB_MIRROR_TOKEN no GitLab CI/CD (PAT com escrita no repo).
+# Espelho GitHub (igor-silva-santos/orbe): job mirror:github na master após merge.
 
 variables:
   NODE_VERSION: "20"
@@ -140,6 +141,8 @@ mirror:github:manual:
   extends: .mirror_github
   needs: []
   rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: manual
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

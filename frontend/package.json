@@ -16,7 +16,7 @@
     "smoke:prod": "node scripts/smoke-prod-browser.mjs"
   },
   "engines": {
-    "node": "20.x"
+    "node": "26.x"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.16",
