@@ -281,13 +281,20 @@ export function pickAroundToday<T>(
   return [...past, ...future].map((row) => row.item);
 }
 
-export const animeCarouselInclude = {
-  genres: { include: { genero: true } },
-  streamingLinks: { take: 5 },
-  externalLinks: { take: 12 },
-  airingSchedule: {
-    where: { airingAt: { gte: new Date() } },
-    orderBy: { airingAt: 'asc' as const },
-    take: 1,
-  },
-};
+export function getAnimeCarouselInclude(now: Date = new Date()) {
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  return {
+    genres: { include: { genero: true } },
+    streamingLinks: { take: 5 },
+    externalLinks: { take: 12 },
+    airingSchedule: {
+      where: { airingAt: { gte: dayStart } },
+      orderBy: { airingAt: 'asc' as const },
+      take: 1,
+    },
+  };
+}
+
+/** @deprecated use getAnimeCarouselInclude() por request */
+export const animeCarouselInclude = getAnimeCarouselInclude();

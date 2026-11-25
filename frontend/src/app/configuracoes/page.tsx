@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, User, Bell, Lock, Eye, Check, Trash2 } from 'lucide-react';
+import { Save, User, Lock, Eye, Check, Trash2 } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
+import PushNotificationsSettings from '@/components/support/PushNotificationsSettings';
 import { deleteAccountWithPassword } from '@/lib/auth/session';
 import { useAppStore } from '@/stores/appStore';
 
@@ -148,6 +149,8 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        <PushNotificationsSettings />
 
         {/* Privacidade */}
         <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">

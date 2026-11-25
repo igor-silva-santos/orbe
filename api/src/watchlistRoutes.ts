@@ -34,10 +34,16 @@ function isValidWatchlistItem(item: any): boolean {
   return true;
 }
 
+function storageWatchlistItemId(userId: number, clientId: string): string {
+  const safe = clientId.replace(/[^a-zA-Z0-9._:@-]/g, '_').slice(0, 150);
+  return `wl:${userId}:${safe}`;
+}
+
 function mapItemToWatchlistData(userId: number, item: any) {
+  const clientId = typeof item.id === 'string' ? item.id : String(item.id ?? '');
   return {
     userId,
-    id: item.id,
+    id: storageWatchlistItemId(userId, clientId),
     malId: item.malId ?? null,
     anilistId: item.anilistId ?? null,
     tmdbId: item.tmdbId ?? null,
@@ -60,8 +66,9 @@ function mapItemToWatchlistData(userId: number, item: any) {
 async function upsertWatchlistItems(userId: number, items: any[]) {
   const operations = items.map((item) => {
     const data = mapItemToWatchlistData(userId, item);
+    const storageId = storageWatchlistItemId(userId, typeof item.id === 'string' ? item.id : String(item.id ?? ''));
     return prisma.watchlistItem.upsert({
-      where: { userId_id: { userId, id: item.id } },
+      where: { userId_id: { userId, id: storageId } },
       update: data,
       create: data,
     });

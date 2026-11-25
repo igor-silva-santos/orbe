@@ -40,7 +40,7 @@ import {
   getCurrentSeason,
   fetchFilmesForCarousel,
   serieCarouselLiteInclude,
-  animeCarouselInclude,
+  getAnimeCarouselInclude,
   cardListInclude,
   serieCardListInclude,
   pickAroundToday,
@@ -194,7 +194,7 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(HOMEPAGE_CACHE_SECO
         },
         orderBy: { startDate: 'asc' },
         take: CAROUSEL_ITEM_LIMIT,
-        include: animeCarouselInclude,
+        include: getAnimeCarouselInclude(today),
       }),
     ]);
 
@@ -335,7 +335,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         },
         orderBy: [{ popularity: 'desc' }, { averageScore: 'desc' }],
         take: 12,
-        include: animeCarouselInclude,
+        include: getAnimeCarouselInclude(now),
       }),
       prisma.anime.findMany({
         where: {
@@ -343,7 +343,7 @@ router.get('/hoje', cacheMiddleware(TWELVE_HOURS), async (_req, res) => {
         },
         orderBy: [{ popularity: 'desc' }, { averageScore: 'desc' }],
         take: 12,
-        include: animeCarouselInclude,
+        include: getAnimeCarouselInclude(now),
       }),
       prisma.jogo.findMany({
         where: jogoQualityFilter,
@@ -583,7 +583,7 @@ const searchHandler = async (req: import('express').Request, res: import('expres
             ],
           },
           orderBy: { popularity: 'desc' },
-          include: animeCarouselInclude,
+          include: getAnimeCarouselInclude(now),
         }),
       );
     } else {

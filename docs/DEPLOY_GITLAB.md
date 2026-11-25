@@ -69,6 +69,8 @@ Com os dois hooks configurados, cada push na `master` roda `.gitlab-ci.yml` → 
 | `deploy:production` | Push na `master` (após testes) |
 | `orbe-sync-guard` | Schedule ou pipeline manual (`ORBE_OPS_ACTION`) |
 
+**CI falhou com `libssl.so.1.1` / Prisma:** a imagem `node:20-bookworm-slim` precisa de `openssl` instalado antes de `prisma generate` (já está no `before_script` do `test:api`). Erro típico: 4 testes passam suites internas mas o job morre com `PrismaClientInitializationError`.
+
 Sync no GitHub Actions (**Sync All**, keep-alive, etc.) continua independente — não publica frontend/API.
 
 ## 4. Identidade Git (este repo)
@@ -86,7 +88,48 @@ git remote -v
 # github  → github.com/igor-silva-santos/orbe.git (espelho)
 ```
 
-## 5. Checklist rápido
+## 5. Espelhar no GitHub (`igor-silva-santos/orbe`)
+
+O agente na nuvem **não** consegue `git push` no GitHub (só GitLab tem token aqui). Use **uma** destas opções:
+
+### Opção A — Automático no pipeline (recomendado)
+
+1. GitHub → **Fine-grained PAT** no repo `orbe`:
+   - **Contents:** Read and write
+   - **Metadata:** Read
+   - **Workflows:** Read and write *(obrigatório — o repo tem `.github/workflows/`)*  
+   Alternativa mais simples: **Classic PAT** com escopo **`repo`**.
+2. GitLab → **Settings** → **CI/CD** → **Variables** → `GITHUB_MIRROR_TOKEN`:
+   - **Protect variable: OFF** — se estiver ON, jobs na branch `cursor/...` veem **length=0** e falham (log que você viu)
+   - Masked: pode ficar ON
+   - Environment: **All**
+   - Apague e recrie se tiver dúvida (sem espaço no fim do PAT)
+3. Run pipeline na branch `cursor/m2-android-c710` (MR !1). Jobs:
+   - **`mirror:github`** após `test:api` verde, ou
+   - **`mirror:github:manual`** (play) se só quiser espelhar sem esperar testes.
+4. No log deve aparecer `OK: https://github.com/igor-silva-santos/orbe/tree/...`
+
+**Por que o GitHub ficou em “2 months ago”:** o job antigo **saía 0** sem token (`Protect variable` oculta o PAT no MR) ou **`--force-with-lease`** falhava em branch nova — corrigido no commit `5590eb6`.
+
+### Opção B — Push mirror no GitLab (sem CI)
+
+**Settings** → **Repository** → **Mirroring repositories** → **Add new** → **Push mirror**  
+URL: `https://x-access-token:SEU_PAT@github.com/igor-silva-santos/orbe.git`, branch `master` (ou espelho de todas).
+
+### Opção C — Uma vez no seu PC
+
+```bash
+export GITHUB_MIRROR_TOKEN=ghp_...
+./ops/push-github-mirror.sh cursor/m2-android-c710
+```
+
+PowerShell (defina o token na sessão antes):
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -Command "$env:GITHUB_MIRROR_TOKEN='seu_pat'; bash ./ops/push-github-mirror.sh cursor/m2-android-c710"
+```
+
+## 6. Checklist rápido
 
 - [ ] `master` no GitLab está à frente do que está em produção
 - [ ] Vercel **não** faz deploy em push do GitHub

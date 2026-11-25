@@ -1,12 +1,21 @@
 import { Router, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { prisma } from './clients';
 import { logger } from './logger';
 import { authMiddleware, type AuthRequest } from './authMiddleware';
 import type { Notification } from '@prisma/client';
-import { getVapidPublicKey } from './notificationService';
+import { createNotification, getVapidPublicKey } from './notificationService';
 import { isPrismaSchemaError } from './prismaErrors';
 
 const router = Router();
+
+const testPushLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas tentativas de teste. Aguarde alguns minutos.' },
+});
 
 router.get('/notifications/vapid-public-key', (_req, res) => {
   const key = getVapidPublicKey();
@@ -74,6 +83,38 @@ router.put('/notifications/read-all', authMiddleware, async (req: AuthRequest, r
     res.status(500).json({ error: 'Erro ao atualizar notificações.' });
   }
 });
+
+/** Envia notificação in-app + push (se VAPID e subscription) para o usuário logado — teste M2-F. */
+router.post(
+  '/notifications/test-push',
+  authMiddleware,
+  testPushLimiter,
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.userId;
+    const vapidReady = Boolean(getVapidPublicKey());
+
+    try {
+      const notification = await createNotification({
+        userId,
+        type: 'info',
+        message: 'Teste Orbe Nerd — push e in-app configurados.',
+        sendPush: true,
+      });
+
+      res.json({
+        success: true,
+        notificationId: notification.id,
+        pushAttempted: vapidReady,
+        hint: vapidReady
+          ? 'Se não receber push no navegador, ative o banner em Configurações e permita notificações.'
+          : 'Defina VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY na API (Render).',
+      });
+    } catch (error) {
+      logger.error(`Erro no test-push (usuário ${userId}):`, error);
+      res.status(500).json({ error: 'Não foi possível enviar o teste.' });
+    }
+  },
+);
 
 router.post('/notifications/subscribe', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { endpoint, keys } = req.body as {

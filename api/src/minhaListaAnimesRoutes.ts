@@ -155,7 +155,7 @@ router.post('/minha-lista/animes/from-catalog', authMiddleware, async (req: Auth
 
     const item = await prisma.watchlistAnime.create({
       data: {
-        id: buildWatchlistAnimeId(crunchyrollId),
+        id: buildWatchlistAnimeId(userId, crunchyrollId),
         userId,
         crunchyrollId,
         animeId: anime.id,

@@ -20,6 +20,8 @@ stages:
   - deploy
   - operations
 
+# Espelho GitHub (igor-silva-santos/orbe): defina GITHUB_MIRROR_TOKEN no GitLab CI/CD (PAT com escrita no repo).
+
 variables:
   NODE_VERSION: "20"
   # Até configurar RENDER_DEPLOY_HOOK + VERCEL_DEPLOY_HOOK no GitLab, não falha o pipeline
@@ -29,6 +31,8 @@ variables:
 .test_api:
   image: node:${NODE_VERSION}-bookworm-slim
   before_script:
+    # Prisma precisa de openssl no sistema; sem isso o generate cai em libssl 1.1 e os testes falham no CI.
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends openssl ca-certificates
     - cd api && npm ci && npx prisma generate
   script:
     - npm test
@@ -39,6 +43,107 @@ test:api:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Run pipeline (web) na branch — exige test:api para mirror:github (needs)
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+.mirror_github:
+  image: node:${NODE_VERSION}-bookworm-slim
+  variables:
+    GIT_DEPTH: "0"
+    GIT_STRATEGY: clone
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates
+  script:
+    - |
+      set -e
+      MIRROR_TOKEN="${GITHUB_MIRROR_TOKEN:-${GH_MIRROR_TOKEN:-}}"
+      echo "CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}"
+      echo "CI_COMMIT_REF_PROTECTED=${CI_COMMIT_REF_PROTECTED:-false}"
+      echo "GITHUB_MIRROR_TOKEN length=${#MIRROR_TOKEN} (0 = GitLab não passou a variável)"
+      if [ -z "${MIRROR_TOKEN}" ]; then
+        echo "ERRO: GITHUB_MIRROR_TOKEN vazio neste job."
+        echo ""
+        echo "Correção (99% dos casos): GitLab → Settings → CI/CD → Variables → GITHUB_MIRROR_TOKEN"
+        echo "  • DESMARQUE «Protect variable» (branch ${CI_COMMIT_REF_NAME} não é protegida)"
+        echo "  • Environment scope: All (default)"
+        echo "  • Tipo: Variable (não File)"
+        echo "  • Salve de novo e rode o pipeline outra vez (commit 97da51b+)"
+        exit 1
+      fi
+      export GITHUB_MIRROR_TOKEN="${MIRROR_TOKEN}"
+      GITHUB_REPO="https://github.com/igor-silva-santos/orbe.git"
+      BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
+      SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+      echo "branch=${BRANCH} sha=${SHA}"
+      echo "MIRROR_SCRIPT=v2 — log esperado: «espelho forçado» (não «force-with-lease»)"
+      if grep -q 'force-with-lease' .gitlab-ci.yml 2>/dev/null && ! grep -q 'espelho forçado' .gitlab-ci.yml 2>/dev/null; then
+        echo ""
+        echo "ERRO: pipeline antigo (mirror com force-with-lease / stale info)."
+        echo "NÃO use «Retry» no job falho. GitLab → CI/CD → Pipelines → Run pipeline"
+        echo "Branch: ${BRANCH} (deve estar em 3265d92 ou mais novo no GitLab)."
+        exit 1
+      fi
+      git config user.email "gitlab-cli@orbenerd.local"
+      git config user.name "GitLab Mirror"
+      git fetch --unshallow 2>/dev/null || true
+      CRED_FILE="$(mktemp)"
+      chmod 600 "${CRED_FILE}"
+      printf 'https://x-access-token:%s@github.com\n' "${GITHUB_MIRROR_TOKEN}" > "${CRED_FILE}"
+      git config --global credential.helper "store --file=${CRED_FILE}"
+      echo "Testando PAT na API (repos/orbe)..."
+      HTTP_CODE="$(curl -sS -o /tmp/gh-repo.json -w '%{http_code}' \
+        -H "Authorization: Bearer ${GITHUB_MIRROR_TOKEN}" \
+        -H "Accept: application/vnd.github+json" \
+        "https://api.github.com/repos/igor-silva-santos/orbe")"
+      echo "API HTTP ${HTTP_CODE}"
+      if [ "${HTTP_CODE}" != "200" ]; then
+        head -c 400 /tmp/gh-repo.json || true
+        echo ""
+        echo "PAT não autenticou na API (revise token no GitLab, sem aspas nem espaço extra)."
+        rm -f "${CRED_FILE}"
+        exit 1
+      fi
+      REMOTE_HEAD="$(git ls-remote "${GITHUB_REPO}" "refs/heads/${BRANCH}" 2>/dev/null | awk 'NR==1{print $1}')"
+      if [ -n "${REMOTE_HEAD}" ] && [ "${REMOTE_HEAD}" != "${SHA}" ]; then
+        echo "GitHub em ${REMOTE_HEAD:0:7}; GitLab envia ${SHA:0:7} — espelho forçado (fonte: GitLab)"
+        PUSH_OPTS="--force"
+      else
+        echo "Push fast-forward / branch nova"
+        PUSH_OPTS=""
+      fi
+      if ! git push ${PUSH_OPTS} "${GITHUB_REPO}" "${SHA}:refs/heads/${BRANCH}" 2> /tmp/push.log; then
+        echo "--- git push (erro) ---"
+        cat /tmp/push.log
+        if grep -qi workflow /tmp/push.log; then
+          echo "→ PAT: Workflows Read and write no repo orbe"
+        fi
+        rm -f "${CRED_FILE}"
+        exit 1
+      fi
+      rm -f "${CRED_FILE}"
+      echo "OK: https://github.com/igor-silva-santos/orbe/tree/${BRANCH}"
+
+mirror:github:
+  stage: deploy
+  extends: .mirror_github
+  needs:
+    - job: test:api
+      optional: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+# Se test:api falhar mas você só quiser espelhar: Run pipeline → job manual
+mirror:github:manual:
+  stage: deploy
+  extends: .mirror_github
+  needs: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
 
 deploy:production:
   stage: deploy

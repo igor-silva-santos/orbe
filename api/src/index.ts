@@ -317,6 +317,7 @@ import { warmUpDealsCache } from './deals/dealsService';
 import cron from 'node-cron';
 import { checkInterruptedSyncOnStartup, getSyncStatus } from './syncState';
 import { refreshStaleSteamPrices } from './syncSteam';
+import { checkReleaseDates } from './scheduleChecker';
 import {
   dealsWarmupCronSchedule,
   isDealsWarmupCronEnabled,
@@ -344,6 +345,16 @@ if (isDetetiveCronEnabled()) {
 } else {
   logger.info('Cron do Detetive Digital desabilitado (DISABLE_DETETIVE_CRON / ORBE_EGRESS_SAVER).');
 }
+
+// Lembretes de estreia (7d e 1d) para interações favorito / quero assistir
+cron.schedule(
+  '0 8 * * *',
+  () => {
+    logger.info('Executando verificação de lançamentos próximos...');
+    void checkReleaseDates();
+  },
+  { timezone: 'America/Sao_Paulo' },
+);
 
 // Deals: atualiza Redis só se o conteúdo mudou (frontend busca no F5 / "Atualizar")
 if (isDealsWarmupCronEnabled()) {

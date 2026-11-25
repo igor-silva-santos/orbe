@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import orbeNerdApi from '@/lib/api';
+
+const PUSH_ENABLED_KEY = 'orbe.push.enabled';
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -18,6 +20,13 @@ export function usePushNotifications() {
   );
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.localStorage.getItem(PUSH_ENABLED_KEY) === '1') {
+      setStatus('enabled');
+    }
+  }, []);
+
   const subscribe = useCallback(async () => {
     setError(null);
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -31,9 +40,13 @@ export function usePushNotifications() {
       try {
         const keyResponse = await orbeNerdApi.getVapidPublicKey();
         publicKey = keyResponse.publicKey;
-      } catch {
-        setStatus('unsupported');
-        setError('Push ainda não configurado no servidor. Tente novamente após o próximo deploy.');
+      } catch (err: unknown) {
+        const http503 = err instanceof Error && /503/.test(err.message);
+        const msg = http503
+          ? 'VAPID ainda não configurado na API (Render: VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY).'
+          : 'Push ainda não configurado no servidor. Tente novamente após o próximo deploy.';
+        setStatus('idle');
+        setError(msg);
         return;
       }
 
@@ -55,6 +68,7 @@ export function usePushNotifications() {
       });
 
       await orbeNerdApi.subscribePush(subscription.toJSON());
+      window.localStorage.setItem(PUSH_ENABLED_KEY, '1');
       setStatus('enabled');
     } catch (err) {
       setStatus('idle');
