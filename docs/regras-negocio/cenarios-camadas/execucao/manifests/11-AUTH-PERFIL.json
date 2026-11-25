@@ -1,0 +1,277 @@
+{
+  "arquivo": "11-AUTH-PERFIL.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 30,
+  "cenarios": [
+    {
+      "id": "CT-RN-AUTH-001-F",
+      "regra": "RN-AUTH-001",
+      "titulo": "Feliz: Campos obrigatórios",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Enviar vazio → validação nativa.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Email e senha exigidos pelo navegador antes de enviar.",
+      "pre": "Página Entrar aberta.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-002-F",
+      "regra": "RN-AUTH-002",
+      "titulo": "Feliz: Sucesso",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Login OK vindo de Minha Lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Usuário entra; redireciona para página anterior segura ou home; nome aparece no header.",
+      "pre": "Conta existente.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-003-F",
+      "regra": "RN-AUTH-003",
+      "titulo": "Feliz: Erro genérico",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Senha errada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast “Ocorreu um erro ao tentar fazer login” (ou equivalente).",
+      "pre": "Login falha.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-004-F",
+      "regra": "RN-AUTH-004",
+      "titulo": "Feliz: Redirect seguro",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Após login, confirmar retorno à Minha Lista.\n3. Tentar manipular URL de retorno externo se QA tiver cenário.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só redireciona para páginas internas do site; não envia o usuário para sites externos.",
+      "pre": "Link de Entrar vindo de página protegida.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-005-F",
+      "regra": "RN-AUTH-005",
+      "titulo": "Feliz: Mostrar senha",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Clicar olho no campo senha.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ícone alterna texto visível/oculto.",
+      "pre": "Campo senha.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-006-F",
+      "regra": "RN-AUTH-006",
+      "titulo": "Feliz: Ir para cadastro",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Clicar cadastro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para Inscreva-se.",
+      "pre": "Página login.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-010-F",
+      "regra": "RN-AUTH-010",
+      "titulo": "Feliz: Senha mínima",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Senha de 7 chars.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Senha com menos de **8** caracteres bloqueada com aviso antes de enviar.",
+      "pre": "Cadastro novo.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-011-F",
+      "regra": "RN-AUTH-011",
+      "titulo": "Feliz: Confirmar senha",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Senha ≠ confirmar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast de erro; formulário não envia.",
+      "pre": "Senhas diferentes.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-012-F",
+      "regra": "RN-AUTH-012",
+      "titulo": "Feliz: Campos obrigatórios",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Enviar incompleto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, email e senhas required.",
+      "pre": "Formulário.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-013-F",
+      "regra": "RN-AUTH-013",
+      "titulo": "Feliz: Sucesso",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Registrar conta QA.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesmo fluxo pós-login: sessão ativa + redirect seguro.",
+      "pre": "Email novo.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-014-F",
+      "regra": "RN-AUTH-014",
+      "titulo": "Feliz: Erro do servidor",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Registrar email já usado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Toast com mensagem retornada ou genérica.",
+      "pre": "Cadastro recusado.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-020-F",
+      "regra": "RN-AUTH-020",
+      "titulo": "Feliz: Restaurar ao abrir o site",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Login → fechar browser → reabrir.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Continua logado se sessão válida; senão volta anônimo.",
+      "pre": "Fechar aba e reabrir.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-021-F",
+      "regra": "RN-AUTH-021",
+      "titulo": "Feliz: Dados após login",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Ver badge notificação e favoritos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Notificações, interações nos cards e pins de anime da semana carregam.",
+      "pre": "Login bem-sucedido.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-022-F",
+      "regra": "RN-AUTH-022",
+      "titulo": "Feliz: Preferências lembradas",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Mudar tema → F5.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Tema, favoritos e opção de scroll rápido persistem entre visitas no mesmo navegador.",
+      "pre": "Usuário alterou tema ou favoritos.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-023-F",
+      "regra": "RN-AUTH-023",
+      "titulo": "Feliz: Sair",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Sair → header sem avatar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Limpa usuário, notificações, interações e pins; volta estado de visitante.",
+      "pre": "Logado.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-024-F",
+      "regra": "RN-AUTH-024",
+      "titulo": "Feliz: Sessão no navegador",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Permanecer logado overnight (QA).\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sessão mantida por vários dias no mesmo dispositivo (comportamento de “permanecer logado”).",
+      "pre": "Login em produção.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-025-F",
+      "regra": "RN-AUTH-025",
+      "titulo": "Feliz: Tipo de conta",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Comparar contas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Admin vê ferramentas extras (ex. edição no modal, links no perfil); demais usuários não.",
+      "pre": "Admin vs explorador.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-030-F",
+      "regra": "RN-AUTH-030",
+      "titulo": "Feliz: Só para logados",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Abrir Meu perfil sem login.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Redirect para Entrar; falha ao carregar perfil também redireciona.",
+      "pre": "Anônimo ou sessão inválida.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-031-F",
+      "regra": "RN-AUTH-031",
+      "titulo": "Feliz: Dados básicos",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Perfil com avatar externo válido/inválido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, email, papel (Administrador / Explorador); foto só se URL de avatar for de origem permitida.",
+      "pre": "Perfil carregado.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-032-F",
+      "regra": "RN-AUTH-032",
+      "titulo": "Feliz: Bio",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Conta sem bio.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Bio visível ou placeholder convidando a editar em Configurações.",
+      "pre": "Com/sem bio salva.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-033-F",
+      "regra": "RN-AUTH-033",
+      "titulo": "Feliz: Bloco conta",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Ler seção conta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Email, “membro desde” em pt-BR, visibilidade Público/Privado.",
+      "pre": "Perfil OK.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-034-F",
+      "regra": "RN-AUTH-034",
+      "titulo": "Feliz: Atalhos",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Clicar atalhos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Links para Minha lista e Configurações.",
+      "pre": "Perfil aberto.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-035-F",
+      "regra": "RN-AUTH-035",
+      "titulo": "Feliz: Ferramentas admin",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Logar admin.\n3. Usuário comum não vê.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link para logs de sincronização e ação para baixar log de sync (ferramenta temporária de QA/operações).",
+      "pre": "Role admin.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-040-F",
+      "regra": "RN-AUTH-040",
+      "titulo": "Feliz: Só para logados",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Abrir Configurações sem login.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Redirect Entrar se perfil não carrega.",
+      "pre": "Anônimo.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-041-F",
+      "regra": "RN-AUTH-041",
+      "titulo": "Feliz: Campos editáveis",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Alterar nome e salvar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nome, URL do avatar, bio, interruptor perfil público (padrão público se nunca definido).",
+      "pre": "Logado.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-042-F",
+      "regra": "RN-AUTH-042",
+      "titulo": "Feliz: Salvar perfil",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Salvar bio nova → ver perfil.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem inline de sucesso ou erro; perfil reflete mudanças.",
+      "pre": "Dados válidos.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-043-F",
+      "regra": "RN-AUTH-043",
+      "titulo": "Feliz: Texto de privacidade",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Ler copy do toggle.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Explica que perfil público afeta visibilidade de lista/favoritos para outros.",
+      "pre": "Configurações abertas.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-044-F",
+      "regra": "RN-AUTH-044",
+      "titulo": "Feliz: Sem troca de senha aqui",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Confirmar ausência de “alterar senha”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não há campos de senha ou email nesta tela.",
+      "pre": "Configurações.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-050-F",
+      "regra": "RN-AUTH-050",
+      "titulo": "Feliz: Minha lista no menu",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Abrir menu avatar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Entrada para Minha lista no menu do usuário e no mobile.",
+      "pre": "Header desktop/mobile.",
+      "tela": "Entrar e perfil"
+    },
+    {
+      "id": "CT-RN-AUTH-051-F",
+      "regra": "RN-AUTH-051",
+      "titulo": "Feliz: Perfil e configurações",
+      "passos": "1. Abrir o site e navegar até **Entrar e perfil**.\n2. Ir perfil → configurações.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Perfil no menu; Configurações via perfil ou botão dedicado.",
+      "pre": "Logado.",
+      "tela": "Entrar e perfil"
+    }
+  ]
+}

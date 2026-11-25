@@ -1,0 +1,565 @@
+{
+  "arquivo": "03-SERIES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 62,
+  "cenarios": [
+    {
+      "id": "CT-RN-SERIES-001-F",
+      "regra": "RN-SERIES-001",
+      "titulo": "Feliz: Conteúdo na primeira abertura",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir Séries em aba nova.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade e selects visíveis (ou vazio amigável).",
+      "pre": "Site acessível; catálogo com séries.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-002-F",
+      "regra": "RN-SERIES-002",
+      "titulo": "Feliz: Atualização gradual",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Alterar série de teste.\n3. Aguardar.\n4. Recarregar.\n5. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Recarregar após alguns minutos pode mostrar novidades.",
+      "pre": "Catálogo alterado recentemente.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-003-F",
+      "regra": "RN-SERIES-003",
+      "titulo": "Feliz: Falha no carregamento inicial",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Simular falha na abertura.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Página abre; grade vazia; filtros vazios possíveis.",
+      "pre": "Catálogo indisponível na abertura.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-004-F",
+      "regra": "RN-SERIES-004",
+      "titulo": "Feliz: Texto do cabeçalho",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Ler cabeçalho.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título **Séries** e descrição sobre universo de séries.",
+      "pre": "Usuário em Séries.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-005-F",
+      "regra": "RN-SERIES-005",
+      "titulo": "Feliz: Gaveta O que vem aí",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Ambiente com séries futuras.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **O que vem aí** acima dos filtros.",
+      "pre": "Resumo de eventos com séries em **próximos**.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-006-F",
+      "regra": "RN-SERIES-006",
+      "titulo": "Feliz: Sem gaveta Em cartaz",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir Séries com dados de destaque.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Bloco **Em cartaz** **ausente**; só **O que vem aí** + filtros + grade.",
+      "pre": "Destaques recentes de séries existem no resumo.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-007-F",
+      "regra": "RN-SERIES-007",
+      "titulo": "Feliz: Ações na gaveta",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Favoritar na gaveta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Interações refletem na conta logada.",
+      "pre": "Gaveta visível.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-008-F",
+      "regra": "RN-SERIES-008",
+      "titulo": "Feliz: Gaveta após a página",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Observar ordem de carregamento.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Filtros/grade primeiro; gaveta em seguida se houver itens.",
+      "pre": "Página recém-aberta.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-009-F",
+      "regra": "RN-SERIES-009",
+      "titulo": "Feliz: Sem atalhos Em Cartaz/Populares",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Confirmar ausência de atalhos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Apenas linha de filtros; nenhum botão **Populares**.",
+      "pre": "Página Séries.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-010-F",
+      "regra": "RN-SERIES-010",
+      "titulo": "Feliz: Ordem alfabética padrão",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Ler primeiros cards.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards em ordem A–Z pelo título/nome exibido.",
+      "pre": "Todos os filtros em “todos”.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-011-F",
+      "regra": "RN-SERIES-011",
+      "titulo": "Feliz: Ordenação por popularidade (catálogo)",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Confirmar que não há controle de popularidade na UI.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Usuário comum só vê ordem alfabética nesta página.",
+      "pre": "—",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-012-F",
+      "regra": "RN-SERIES-012",
+      "titulo": "Feliz: Gênero “Todos”",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Resetar gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade ampla.",
+      "pre": "**Todos os Gêneros**.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-013-F",
+      "regra": "RN-SERIES-013",
+      "titulo": "Feliz: Capitalização do gênero",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir select de gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Label formatado (ex.: Action).",
+      "pre": "Gêneros listados.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-014-F",
+      "regra": "RN-SERIES-014",
+      "titulo": "Feliz: Ano “Todos”",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Resetar ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Séries de vários anos.",
+      "pre": "**Todos os Anos**.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-015-F",
+      "regra": "RN-SERIES-015",
+      "titulo": "Feliz: Filtro por ano de estreia",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtrar ano e conferir detalhe.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só séries estreadas em 2022.",
+      "pre": "Ano 2022.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-016-F",
+      "regra": "RN-SERIES-016",
+      "titulo": "Feliz: Filtro por mês de estreia",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Combinar mês + ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Séries com estreia em março (com ano definido ou corrente).",
+      "pre": "Março selecionado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-017-F",
+      "regra": "RN-SERIES-017",
+      "titulo": "Feliz: Mês sem ano",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtrar mês atual.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estreias de setembro do ano atual.",
+      "pre": "Setembro + todos os anos.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-018-F",
+      "regra": "RN-SERIES-018",
+      "titulo": "Feliz: Meses em português",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir filtro de mês.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Rótulos PT-BR corretos.",
+      "pre": "Select de mês.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-019-F",
+      "regra": "RN-SERIES-019",
+      "titulo": "Feliz: Filtro por plataforma",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtrar plataforma.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só séries com Netflix nos metadados.",
+      "pre": "Netflix selecionada.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-020-F",
+      "regra": "RN-SERIES-020",
+      "titulo": "Feliz: Filtro por status",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtrar status.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade coerente com status no detalhe.",
+      "pre": "Status escolhido.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-021-F",
+      "regra": "RN-SERIES-021",
+      "titulo": "Feliz: Sem recarga duplicada na abertura",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir página e aguardar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Conteúdo estável até mudar filtro.",
+      "pre": "Primeira visita OK.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-022-F",
+      "regra": "RN-SERIES-022",
+      "titulo": "Feliz: Mudança de filtro recarrega",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Trocar gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner + nova lista.",
+      "pre": "Qualquer filtro mudado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-023-F",
+      "regra": "RN-SERIES-023",
+      "titulo": "Feliz: Atualização após sync",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Manter Séries aberta durante sync.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards/contador mudam sem F5.",
+      "pre": "Sync em andamento.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-024-F",
+      "regra": "RN-SERIES-024",
+      "titulo": "Feliz: Spinner ao filtrar",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Trocar filtro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Spinner até concluir.",
+      "pre": "Filtro alterado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-025-F",
+      "regra": "RN-SERIES-025",
+      "titulo": "Feliz: Contador com total global",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtro amplo.\n3. Ler contador.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Contador alto com subconjunto na grade.",
+      "pre": "> ~48 séries no filtro.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-026-F",
+      "regra": "RN-SERIES-026",
+      "titulo": "Feliz: Contador em carregamento",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Trocar filtro rapidamente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem número antigo.",
+      "pre": "Filtro recém-alterado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-027-F",
+      "regra": "RN-SERIES-027",
+      "titulo": "Feliz: Grade responsiva",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Redimensionar janela.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Layout adapta ao viewport.",
+      "pre": "Resultados > 0.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-028-F",
+      "regra": "RN-SERIES-028",
+      "titulo": "Feliz: Nenhum resultado",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtro restritivo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "**Nenhuma série encontrada** + dica de ajustar filtros.",
+      "pre": "Combinação impossível.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-029-F",
+      "regra": "RN-SERIES-029",
+      "titulo": "Feliz: Falha ao recarregar",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Cortar rede ao filtrar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade pode zerar; sem crash.",
+      "pre": "Rede off ao filtrar.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-030-F",
+      "regra": "RN-SERIES-030",
+      "titulo": "Feliz: Listagem mais permissiva que a home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar mesmo título home vs Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aparece em Séries; pode faltar na home.",
+      "pre": "Série marginal cadastrada.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-031-F",
+      "regra": "RN-SERIES-031",
+      "titulo": "Feliz: Lote inicial na grade",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Contar cards vs contador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Dezenas de cards, contador pode ser maior.",
+      "pre": "Filtro amplo.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-032-F",
+      "regra": "RN-SERIES-032",
+      "titulo": "Feliz: Cards com gêneros e streaming",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Inspecionar card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto/ícones no card.",
+      "pre": "Série com gêneros/plataformas.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-033-F",
+      "regra": "RN-SERIES-033",
+      "titulo": "Feliz: Gêneros visíveis no card",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir card na grade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Gêneros legíveis.",
+      "pre": "Série com gêneros.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-034-F",
+      "regra": "RN-SERIES-034",
+      "titulo": "Feliz: Conteúdo pode demorar a refletir",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Ver RN-SERIES-002.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Recarregar após intervalo.",
+      "pre": "Alteração recente.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-035-F",
+      "regra": "RN-SERIES-035",
+      "titulo": "Feliz: Opções de filtro coerentes",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir cada select.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Menus populados sem opções “vazias”.",
+      "pre": "Catálogo variado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-036-F",
+      "regra": "RN-SERIES-036",
+      "titulo": "Feliz: Anos de estreia no filtro",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Série antiga com ep novo: filtrar ano de estreia.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ano no filtro = ano de estreia, não de episódio recente.",
+      "pre": "Várias temporadas.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-037-F",
+      "regra": "RN-SERIES-037",
+      "titulo": "Feliz: Status em português",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir status.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto PT no dropdown.",
+      "pre": "Status variados.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-038-F",
+      "regra": "RN-SERIES-038",
+      "titulo": "Feliz: Home exige qualidade mínima",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar presença home vs página.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Forte na home e Séries; fraca só em Séries.",
+      "pre": "Série fraca vs forte.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-039-F",
+      "regra": "RN-SERIES-039",
+      "titulo": "Feliz: Home exige ≥ 2 episódios",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar contagens.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na home; pode estar em Séries.",
+      "pre": "Série 1 ep.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-040-F",
+      "regra": "RN-SERIES-040",
+      "titulo": "Feliz: Home exige pôster e sinopse",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Mesmo título duas telas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na home; pode listar em Séries.",
+      "pre": "Série sem sinopse.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-041-F",
+      "regra": "RN-SERIES-041",
+      "titulo": "Feliz: Engajamento na home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Buscar série obscura.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só na listagem Séries.",
+      "pre": "Série obscura.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-042-F",
+      "regra": "RN-SERIES-042",
+      "titulo": "Feliz: Nota mínima na home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Listagem Séries pode ainda mostrar.",
+      "pre": "Série mal avaliada popular.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-043-F",
+      "regra": "RN-SERIES-043",
+      "titulo": "Feliz: Estreias planejadas no carrossel mensal",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Validar na home e em Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode aparecer na home por mês; em Séries aparece se cadastrada.",
+      "pre": "Série Planned futura.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-044-F",
+      "regra": "RN-SERIES-044",
+      "titulo": "Feliz: Data do episódio na timeline home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Série em exibição: home vs filtro mês em Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card na home alinhado ao ep; em Séries filtro mês usa estreia da série.",
+      "pre": "Série com ep semanal.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-045-F",
+      "regra": "RN-SERIES-045",
+      "titulo": "Feliz: Ordem no carrossel mensal",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar ordem home vs Séries filtrada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ordens diferentes entre telas.",
+      "pre": "Mesmo mês.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-046-F",
+      "regra": "RN-SERIES-046",
+      "titulo": "Feliz: Carrossel por ano (home)",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Filtrar ano em Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Home: slides; Séries: grade filtrada.",
+      "pre": "Ano específico.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-047-F",
+      "regra": "RN-SERIES-047",
+      "titulo": "Feliz: Ano sem dia confirmado (home)",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Comparar home vs detalhe em Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Detalhe pode mostrar incerteza; sem separador TBD aqui.",
+      "pre": "Série TBA.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-048-F",
+      "regra": "RN-SERIES-048",
+      "titulo": "Feliz: Contexto de temporadas na home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Caso com nova temp.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Home posiciona por ep; Séries filtra por estreia original se ano/mês de estreia.",
+      "pre": "Nova temporada distante.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-049-F",
+      "regra": "RN-SERIES-049",
+      "titulo": "Feliz: Formato do card home vs grade",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir card home vs card Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Detalhes extras no carrossel home.",
+      "pre": "Mesma série.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-050-F",
+      "regra": "RN-SERIES-050",
+      "titulo": "Feliz: Limite de itens no carrossel home",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Contar visíveis em cada superfície.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Home não lista tudo; Séries lista muito mais via filtros.",
+      "pre": "Catálogo grande.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-051-F",
+      "regra": "RN-SERIES-051",
+      "titulo": "Feliz: Detalhe pelo card",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Clicar card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sinopse, temporadas, links.",
+      "pre": "Card na grade/gaveta.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-052-F",
+      "regra": "RN-SERIES-052",
+      "titulo": "Feliz: Episódios por temporada",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir detalhe → temporada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Episódios visíveis no detalhe.",
+      "pre": "Série com temporadas.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-053-F",
+      "regra": "RN-SERIES-053",
+      "titulo": "Feliz: Sem edição pública",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Inspecionar página.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem controles de admin em Séries.",
+      "pre": "Usuário comum.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-054-F",
+      "regra": "RN-SERIES-054",
+      "titulo": "Feliz: Filtros habilitados",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Usar filtros.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Todos clicáveis.",
+      "pre": "Uso normal.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-055-F",
+      "regra": "RN-SERIES-055",
+      "titulo": "Feliz: Contador coerente",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Anotar contador + amostra.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Número faz sentido com busca manual por título.",
+      "pre": "Filtro ativo.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-056-F",
+      "regra": "RN-SERIES-056",
+      "titulo": "Feliz: Recarregar reseta filtros",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. F5 após filtrar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Selects e lista padrão após reload.",
+      "pre": "Filtros alterados.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-057-F",
+      "regra": "RN-SERIES-057",
+      "titulo": "Feliz: Listagem ampla sem filtro",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir Séries padrão.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade com títulos variados.",
+      "pre": "Catálogo populado.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-058-F",
+      "regra": "RN-SERIES-058",
+      "titulo": "Feliz: Gêneros só com séries",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Revisar lista de gêneros.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente no select.",
+      "pre": "Gênero órfão.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-059-F",
+      "regra": "RN-SERIES-059",
+      "titulo": "Feliz: Plataformas só com séries",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir plataformas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente no select.",
+      "pre": "Plataforma sem séries.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-060-F",
+      "regra": "RN-SERIES-060",
+      "titulo": "Feliz: Erro total na listagem",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Simular indisponibilidade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Empty ou mensagem; página intacta.",
+      "pre": "Catálogo indisponível ao filtrar.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-061-F",
+      "regra": "RN-SERIES-061",
+      "titulo": "Feliz: Erro nos filtros",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Abrir com catálogo down.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ver RN-SERIES-003.",
+      "pre": "Falha na abertura.",
+      "tela": "Séries"
+    },
+    {
+      "id": "CT-RN-SERIES-062-F",
+      "regra": "RN-SERIES-062",
+      "titulo": "Feliz: Série planejada na listagem",
+      "passos": "1. Abrir o site e navegar até **Séries**.\n2. Buscar estreia futura.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card visível; etiqueta **Em breve** quando aplicável.",
+      "pre": "Série Planned.",
+      "tela": "Séries"
+    }
+  ]
+}

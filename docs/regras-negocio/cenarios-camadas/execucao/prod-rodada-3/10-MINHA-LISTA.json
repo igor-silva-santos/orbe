@@ -1,0 +1,280 @@
+{
+  "arquivo": "10-MINHA-LISTA.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior rodada 3 pós-correção #143 (igor-silva-santos)",
+  "cenarios": [
+    {
+      "id": "CT-RN-LISTA-001-F",
+      "regra": "RN-LISTA-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-002-F",
+      "regra": "RN-LISTA-002",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Sem login  vê conteúdo da lista, logado vê dados pessoais",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-010-F",
+      "regra": "RN-LISTA-010",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-011-F",
+      "regra": "RN-LISTA-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-012-F",
+      "regra": "RN-LISTA-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-020-F",
+      "regra": "RN-LISTA-020",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-021-F",
+      "regra": "RN-LISTA-021",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-030-F",
+      "regra": "RN-LISTA-030",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-031-F",
+      "regra": "RN-LISTA-031",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-032-F",
+      "regra": "RN-LISTA-032",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-033-F",
+      "regra": "RN-LISTA-033",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-034-F",
+      "regra": "RN-LISTA-034",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Não aparecem na lista visível",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-035-F",
+      "regra": "RN-LISTA-035",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-036-F",
+      "regra": "RN-LISTA-036",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-037-F",
+      "regra": "RN-LISTA-037",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-040-F",
+      "regra": "RN-LISTA-040",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-041-F",
+      "regra": "RN-LISTA-041",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-042-F",
+      "regra": "RN-LISTA-042",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-043-F",
+      "regra": "RN-LISTA-043",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-044-F",
+      "regra": "RN-LISTA-044",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-045-F",
+      "regra": "RN-LISTA-045",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-046-F",
+      "regra": "RN-LISTA-046",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-047-F",
+      "regra": "RN-LISTA-047",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-048-F",
+      "regra": "RN-LISTA-048",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-049-F",
+      "regra": "RN-LISTA-049",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-050-F",
+      "regra": "RN-LISTA-050",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-051-F",
+      "regra": "RN-LISTA-051",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-052-F",
+      "regra": "RN-LISTA-052",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-053-F",
+      "regra": "RN-LISTA-053",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-060-F",
+      "regra": "RN-LISTA-060",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-061-F",
+      "regra": "RN-LISTA-061",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-062-F",
+      "regra": "RN-LISTA-062",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-063-F",
+      "regra": "RN-LISTA-063",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-064-F",
+      "regra": "RN-LISTA-064",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/3): []",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-065-F",
+      "regra": "RN-LISTA-065",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-066-F",
+      "regra": "RN-LISTA-066",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-070-F",
+      "regra": "RN-LISTA-070",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Toast pedindo login, ação  conclui",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-071-F",
+      "regra": "RN-LISTA-071",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Requer sessão autenticada; runner anônimo em produção.",
+      "testado_em": "2026-09-22T19:44:07Z"
+    },
+    {
+      "id": "CT-RN-LISTA-072-F",
+      "regra": "RN-LISTA-072",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Acompanhando, “Acompanhando” oferecido para anime e série, para filme/jogo da mesma forma",
+      "testado_em": "2026-09-22T19:44:07Z"
+    }
+  ]
+}

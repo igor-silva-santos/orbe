@@ -1,0 +1,268 @@
+{
+  "arquivo": "05-JOGOS.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 29,
+  "cenarios": [
+    {
+      "id": "CT-RN-JOGOS-001-F",
+      "regra": "RN-JOGOS-001",
+      "titulo": "Feliz: Conteúdo na abertura",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir Jogos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards e selects visíveis.",
+      "pre": "Catálogo OK.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-002-F",
+      "regra": "RN-JOGOS-002",
+      "titulo": "Feliz: Falha na abertura",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Simular falha inicial.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Grade vazia; filtros vazios possíveis.",
+      "pre": "Catálogo down.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-003-F",
+      "regra": "RN-JOGOS-003",
+      "titulo": "Feliz: Sem recarga duplicada na abertura",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir e aguardar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estável até mudar filtro.",
+      "pre": "Primeira visita OK.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-004-F",
+      "regra": "RN-JOGOS-004",
+      "titulo": "Feliz: Filtros aplicados",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Alterar cada filtro.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista coerente (ex.: só PlayStation).",
+      "pre": "Valores específicos selecionados.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-005-F",
+      "regra": "RN-JOGOS-005",
+      "titulo": "Feliz: Mês sem ano explícito",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Filtrar mês atual.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Jogos lançados em março do ano atual.",
+      "pre": "Março + todos os anos.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-006-F",
+      "regra": "RN-JOGOS-006",
+      "titulo": "Feliz: Mês com ano",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Combinar mês e ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só lançamentos de jun/2023.",
+      "pre": "Junho 2023.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-007-F",
+      "regra": "RN-JOGOS-007",
+      "titulo": "Feliz: Ordem alfabética",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ler primeiros títulos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "A–Z nos primeiros cards.",
+      "pre": "Filtros em todos.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-008-F",
+      "regra": "RN-JOGOS-008",
+      "titulo": "Feliz: Popularidade (catálogo interno)",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Confirmar ausência de atalho Populares.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Usuário só vê ordem alfabética aqui.",
+      "pre": "—",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-009-F",
+      "regra": "RN-JOGOS-009",
+      "titulo": "Feliz: Listagem mais permissiva que destaques",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Comparar mesma busca.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Visível em Jogos; ausente em Em Alta.",
+      "pre": "Jogo obscuro.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-010-F",
+      "regra": "RN-JOGOS-010",
+      "titulo": "Feliz: Lote inicial na grade",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Contar cards vs contador.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até ~48 cards; contador segue cards visíveis (como Animes).",
+      "pre": "Catálogo grande.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-011-F",
+      "regra": "RN-JOGOS-011",
+      "titulo": "Feliz: Gaveta O que vem aí",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ambiente com jogos futuros.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **O que vem aí** acima dos filtros.",
+      "pre": "Resumo com **próximos jogos**.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-012-F",
+      "regra": "RN-JOGOS-012",
+      "titulo": "Feliz: Gaveta Eventos recentes",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ambiente com eventos no resumo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **Eventos recentes** com cards de evento empilhados.",
+      "pre": "Resumo com **eventos recentes**.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-013-F",
+      "regra": "RN-JOGOS-013",
+      "titulo": "Feliz: Loading, contador e vazio",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Filtro impossível e amplo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Comportamento igual padrão Animes.",
+      "pre": "Filtro vazio ou OK.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-014-F",
+      "regra": "RN-JOGOS-014",
+      "titulo": "Feliz: Atualização após sync",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Manter Jogos aberta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards mudam sem F5.",
+      "pre": "Sync em andamento.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-015-F",
+      "regra": "RN-JOGOS-015",
+      "titulo": "Feliz: Opções de filtro",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir cada select.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Menus populados coerentemente.",
+      "pre": "Catálogo variado.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-016-F",
+      "regra": "RN-JOGOS-016",
+      "titulo": "Feliz: Preço Steam no detalhe/card",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir jogo Steam conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Preço BRL ou indicador de carregamento no detalhe/card conforme produto.",
+      "pre": "Jogo com Steam cadastrado.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-017-F",
+      "regra": "RN-JOGOS-017",
+      "titulo": "Feliz: Redirect para Promoções",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Digitar URL legada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Navegador vai para **Promoções**, aba **Em Alta**.",
+      "pre": "Usuário acessa **/jogos-em-alta**.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-018-F",
+      "regra": "RN-JOGOS-018",
+      "titulo": "Feliz: Menu do site",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Clicar item de menu.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Clique abre Promoções na aba Em Alta.",
+      "pre": "Menu visível.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-019-F",
+      "regra": "RN-JOGOS-019",
+      "titulo": "Feliz: Quem entra no ranking",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Comparar jogo antigo vs lançamento recente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente do **Top da Semana**.",
+      "pre": "Jogo lançado há meses sem destaque.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-020-F",
+      "regra": "RN-JOGOS-020",
+      "titulo": "Feliz: Top da Semana",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Contar cards e badges.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **Top da Semana** aberta por padrão.",
+      "pre": "Pool de destaques não vazio.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-021-F",
+      "regra": "RN-JOGOS-021",
+      "titulo": "Feliz: Mais jogados na Steam",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ambiente com dados Steam.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção **Mais jogados na Steam** com carrossel.",
+      "pre": "Jogos Steam com pico de jogadores.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-022-F",
+      "regra": "RN-JOGOS-022",
+      "titulo": "Feliz: Promoções Steam (dados)",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Comparar jogo em promo Steam entre abas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Verificar ofertas na aba **Promoções** / carrossel catálogo Steam.",
+      "pre": "Jogos com desconto alto na Steam.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-023-F",
+      "regra": "RN-JOGOS-023",
+      "titulo": "Feliz: Por plataforma",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ler seções por plataforma.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Switch só no bloco Nintendo, etc.",
+      "pre": "Jogos multiplataforma.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-024-F",
+      "regra": "RN-JOGOS-024",
+      "titulo": "Feliz: Por modo de jogo",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Achar jogo co-op conhecido.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título listado em **Cooperativo** quando aplicável.",
+      "pre": "Jogos co-op.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-025-F",
+      "regra": "RN-JOGOS-025",
+      "titulo": "Feliz: Por categoria (gênero)",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Contar seções de gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Gênero singleton **não** vira seção.",
+      "pre": "Gênero com 1 só jogo.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-026-F",
+      "regra": "RN-JOGOS-026",
+      "titulo": "Feliz: Semana e métrica (modo completo)",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir `/promocoes?tab=em-alta`.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Na aba Promoções (**compact**), semana/métrica longa **oculta**; banner de promoções visível.",
+      "pre": "Abrir Em Alta em contexto que mostra cabeçalho longo (se existir rota dedicada futura).",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-027-F",
+      "regra": "RN-JOGOS-027",
+      "titulo": "Feliz: Modo compacto na aba Promoções",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Abrir aba Em Alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Banner “Ofertas ao vivo…” + link **Ver promoções ao vivo**; grade compacta.",
+      "pre": "Aba **Em Alta** em Promoções.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-028-F",
+      "regra": "RN-JOGOS-028",
+      "titulo": "Feliz: Erro ao carregar",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Simular falha.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mensagem **Não foi possível carregar os jogos em alta.**",
+      "pre": "Catálogo/indisponibilidade simulada.",
+      "tela": "Jogos"
+    },
+    {
+      "id": "CT-RN-JOGOS-029-F",
+      "regra": "RN-JOGOS-029",
+      "titulo": "Feliz: Conteúdo estável por sessão",
+      "passos": "1. Abrir o site e navegar até **Jogos**.\n2. Ficar na aba.\n3. Depois F5.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Mesmos blocos durante navegação curta; recarregar pode atualizar.",
+      "pre": "Aba aberta.",
+      "tela": "Jogos"
+    }
+  ]
+}

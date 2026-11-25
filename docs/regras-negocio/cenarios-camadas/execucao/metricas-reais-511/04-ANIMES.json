@@ -1,0 +1,226 @@
+{
+  "arquivo": "04-ANIMES.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "cenarios": [
+    {
+      "id": "CT-RN-ANIMES-001-F",
+      "regra": "RN-ANIMES-001",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:10:50Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-002-F",
+      "regra": "RN-ANIMES-002",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:10:56Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-003-F",
+      "regra": "RN-ANIMES-003",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:04Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-004-F",
+      "regra": "RN-ANIMES-004",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:12Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-005-F",
+      "regra": "RN-ANIMES-005",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+      "passos_executados": 1,
+      "tipo_execucao": "catalogo",
+      "testado_em": "2026-09-23T18:11:18Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-006-F",
+      "regra": "RN-ANIMES-006",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:24Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-007-F",
+      "regra": "RN-ANIMES-007",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:31Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-008-F",
+      "regra": "RN-ANIMES-008",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:37Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-009-F",
+      "regra": "RN-ANIMES-009",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+      "passos_executados": 1,
+      "tipo_execucao": "catalogo",
+      "testado_em": "2026-09-23T18:11:44Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-010-F",
+      "regra": "RN-ANIMES-010",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:11:59Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-011-F",
+      "regra": "RN-ANIMES-011",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:12:16Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-012-F",
+      "regra": "RN-ANIMES-012",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:12:29Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-013-F",
+      "regra": "RN-ANIMES-013",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:12:40Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-014-F",
+      "regra": "RN-ANIMES-014",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:12:55Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-015-F",
+      "regra": "RN-ANIMES-015",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:13:09Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-016-F",
+      "regra": "RN-ANIMES-016",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Exige título/dado específico no catálogo — QA preenche planilha humana.",
+      "passos_executados": 1,
+      "tipo_execucao": "catalogo",
+      "testado_em": "2026-09-23T18:13:16Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-017-F",
+      "regra": "RN-ANIMES-017",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:13:24Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-018-F",
+      "regra": "RN-ANIMES-018",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:13:32Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-019-F",
+      "regra": "RN-ANIMES-019",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:13:38Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    },
+    {
+      "id": "CT-RN-ANIMES-020-F",
+      "regra": "RN-ANIMES-020",
+      "arquivo": "04-ANIMES.md",
+      "veredito": "PENDENTE_QA_HUMANO",
+      "evidencia": "Smoke OK — QA deve executar passos completos do CSV e registrar evidência.",
+      "passos_executados": 2,
+      "tipo_execucao": "manual_obrigatorio",
+      "testado_em": "2026-09-23T18:13:51Z",
+      "executor": "executar-feliz-excelencia-todos (QA automatizado passo a passo)"
+    }
+  ]
+}

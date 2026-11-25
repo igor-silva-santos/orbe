@@ -171,6 +171,7 @@ export default function HojeClient() {
               <button
                 key={option.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => toggleSection(option.id)}
                 className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
                   active

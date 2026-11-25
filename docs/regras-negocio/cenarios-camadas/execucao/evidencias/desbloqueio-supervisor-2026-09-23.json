@@ -1,0 +1,94 @@
+{
+  "gerado_em": "2026-09-23T17:41:56.516927Z",
+  "api_2027_by_year": 1,
+  "api_2027_tbd": 0,
+  "sync_active": true,
+  "stats": {
+    "PASS": 417,
+    "FAIL": 59,
+    "BLOQUEADO": 0,
+    "skipped": 35
+  },
+  "amostra": [
+    {
+      "id": "CT-RN-ANIMES-006-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-007-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-008-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-009-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-010-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-011-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-012-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-013-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-014-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-015-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-016-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-017-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-018-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-019-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-ANIMES-020-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-AUTH-001-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-AUTH-002-F",
+      "veredito": "FAIL"
+    },
+    {
+      "id": "CT-RN-AUTH-003-F",
+      "veredito": "PASS"
+    },
+    {
+      "id": "CT-RN-AUTH-004-F",
+      "veredito": "FAIL"
+    },
+    {
+      "id": "CT-RN-AUTH-005-F",
+      "veredito": "PASS"
+    }
+  ]
+}
