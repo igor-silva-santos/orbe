@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Gift, Tag } from 'lucide-react';
+import { dealPosterCandidates } from '@/lib/dealPosters';
 import { getPlatformLabel } from '@/lib/dealFilters';
 import type { UnifiedDeal } from '@/types/deals';
 
@@ -15,10 +16,6 @@ const SOURCE_LABELS: Record<string, string> = {
   itch: 'itch.io',
   itad: 'IsThereAnyDeal',
 };
-
-function steamFallbackImage(appId: number): string {
-  return `https://shared.fastly.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`;
-}
 
 function formatEndsAt(endsAt: string | null | undefined): string | null {
   if (!endsAt) return null;
@@ -45,26 +42,22 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
   const isTemporaryFree = isFree && deal.freeTier !== 'permanent';
   const isPermanentFree = isFree && deal.freeTier === 'permanent';
 
-  const initialImage = useMemo(() => {
-    if (deal.imageUrl) return deal.imageUrl;
-    if (deal.steamAppId) return steamFallbackImage(deal.steamAppId);
-    return null;
-  }, [deal.imageUrl, deal.steamAppId]);
-
-  const [imageSrc, setImageSrc] = useState<string | null>(initialImage);
+  const candidates = useMemo(
+    () => dealPosterCandidates(deal.imageUrl, deal.steamAppId),
+    [deal.imageUrl, deal.steamAppId],
+  );
+  const [attempt, setAttempt] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const imageSrc = candidates[attempt] ?? null;
 
   useEffect(() => {
-    setImageSrc(initialImage);
+    setAttempt(0);
     setImageLoaded(false);
-  }, [initialImage, deal.id]);
+  }, [deal.id, candidates]);
 
   const handleImageError = () => {
-    if (deal.steamAppId && imageSrc !== steamFallbackImage(deal.steamAppId)) {
-      setImageSrc(steamFallbackImage(deal.steamAppId));
-      return;
-    }
-    setImageSrc(null);
+    setImageLoaded(false);
+    setAttempt((current) => current + 1);
   };
 
   return (

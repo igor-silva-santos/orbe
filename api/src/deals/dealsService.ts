@@ -19,9 +19,9 @@ import type { DealsOverview, UnifiedDeal } from './types';
 export const DEALS_HARD_TTL_SECONDS = 60 * 2;
 /** Após este intervalo, requests disparam revalidação em background (usuário não espera). */
 export const DEALS_SOFT_TTL_SECONDS = 60;
-const DEALS_REDIS_KEY = 'deals:overview:v2';
-const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v2';
-const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v2';
+const DEALS_REDIS_KEY = 'deals:overview:v3';
+const DEALS_FINGERPRINT_KEY = 'deals:overview:fingerprint:v3';
+const DEALS_FETCHED_AT_KEY = 'deals:overview:fetchedAt:v3';
 const DEALS_LOCK_KEY = 'lock:deals:overview:refresh';
 const DEALS_LOCK_TTL_SECONDS = 55;
 
