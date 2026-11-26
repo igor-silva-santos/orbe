@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hoje',
     '/promocoes',
     '/continuacoes',
+    '/match',
     '/eventos',
     '/extensao',
     '/extensao/crunchyroll',

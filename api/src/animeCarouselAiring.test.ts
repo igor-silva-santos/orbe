@@ -32,13 +32,44 @@ describe('pickCarouselAirings', () => {
     assert.equal(picked.nextAiringEpisode, null);
   });
 
-  it('não coloca na semana um episódio que só vai ao ar na próxima', () => {
+  it('recoloca o episódio já exibido quando o banco só tem o da próxima semana', () => {
+    // Próxima segunda 30/11 12:00 BRT; o episódio 8 foi nesta segunda.
     const picked = pickCarouselAirings(
-      [{ airingAt: '2026-12-03T15:00:00.000Z', episode: 4 }],
+      [{ airingAt: '2026-11-30T15:00:00.000Z', episode: 9 }],
       now,
     );
 
-    assert.deepEqual(picked.weekAiringEpisodes, []);
-    assert.equal(picked.nextAiringEpisode?.episode, 4);
+    assert.equal(picked.weekAiringEpisodes.length, 1);
+    assert.equal(picked.weekAiringEpisodes[0]?.episode, 8);
+    assert.equal(picked.weekAiringEpisodes[0]?.airingAt, '2026-11-23T15:00:00.000Z');
+    assert.equal(picked.nextAiringEpisode?.episode, 9);
+  });
+
+  it('não inventa episódio de estreia nem de quinzena', () => {
+    const premiere = pickCarouselAirings(
+      [{ airingAt: '2026-12-03T15:00:00.000Z', episode: 1 }],
+      now,
+    );
+    assert.deepEqual(premiere.weekAiringEpisodes, []);
+
+    const biweekly = pickCarouselAirings(
+      [{ airingAt: '2026-12-10T15:00:00.000Z', episode: 6 }],
+      now,
+    );
+    assert.deepEqual(biweekly.weekAiringEpisodes, []);
+    assert.equal(biweekly.nextAiringEpisode?.episode, 6);
+  });
+
+  it('não duplica o dia quando o episódio desta semana já veio no horário', () => {
+    const picked = pickCarouselAirings(
+      [
+        { airingAt: '2026-11-23T15:00:00.000Z', episode: 8 },
+        { airingAt: '2026-11-30T15:00:00.000Z', episode: 9 },
+      ],
+      now,
+    );
+
+    assert.equal(picked.weekAiringEpisodes.length, 1);
+    assert.equal(picked.weekAiringEpisodes[0]?.episode, 8);
   });
 });

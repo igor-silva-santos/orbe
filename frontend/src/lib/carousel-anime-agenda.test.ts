@@ -194,13 +194,39 @@ describe('groupAnimesByBrazilWeekDay', () => {
     assert.equal((days[1] ?? []).length, 0);
   });
 
-  it('ignora o próximo episódio quando ele cai fora desta semana', () => {
+  it('ignora estreia da próxima semana', () => {
     const days = groupAnimesByBrazilWeekDay(
       [mockAnime(9, { airingAt: '2026-12-03T15:00:00.000Z' })],
       reference,
     );
     const total = Object.values(days).reduce((sum, list) => sum + list.length, 0);
     assert.equal(total, 0);
+  });
+
+  it('mantém o episódio de hoje no próprio dia', () => {
+    const anime = {
+      ...mockAnime(4, { airingAt: '2026-11-26T22:00:00.000Z' }),
+      nextAiringEpisode: { episode: 5, airingAt: '2026-11-26T22:00:00.000Z' },
+    };
+    const days = groupAnimesByBrazilWeekDay([anime], reference);
+    assert.equal((days[4] ?? []).length, 1);
+    assert.equal(days[4]?.[0]?.nextAiringEpisode?.episode, 5);
+  });
+
+  it('dias anteriores da semana ainda trazem os animes', () => {
+    // Só existe o episódio da próxima segunda; o de segunda 23/11 já foi ao ar.
+    const anime = {
+      ...mockAnime(11, { airingAt: '2026-11-30T15:00:00.000Z' }),
+      nextAiringEpisode: { episode: 9, airingAt: '2026-11-30T15:00:00.000Z' },
+    };
+    const days = groupAnimesByBrazilWeekDay([anime], reference);
+    const monday = days[1] ?? [];
+
+    assert.equal(monday.length, 1);
+    assert.equal(monday[0]?.id, 11);
+    assert.equal(monday[0]?.nextAiringEpisode?.episode, 8);
+    assert.equal(monday[0]?.nextAiringEpisode?.airingAt, '2026-11-23T15:00:00.000Z');
+    assert.equal((days[4] ?? []).length, 0);
   });
 });
 

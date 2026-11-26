@@ -237,18 +237,24 @@ describe('isCarouselBootstrapReady', () => {
 
 describe('parseMidiaReleaseDate', () => {
   it('prefers a future nextAiringEpisode over an older carousel date', () => {
+    const future = new Date();
+    future.setDate(future.getDate() + 30);
+    future.setHours(12, 0, 0, 0);
+    const older = new Date();
+    older.setDate(older.getDate() - 40);
+    const olderYmd = `${older.getFullYear()}-${String(older.getMonth() + 1).padStart(2, '0')}-${String(older.getDate()).padStart(2, '0')}`;
     const item = {
-      ...mockMidia(1, '2026-09-10'),
+      ...mockMidia(1, olderYmd),
       nextAiringEpisode: {
-        airingAt: '2026-09-21T12:00:00.000Z',
+        airingAt: future.toISOString(),
         episode: 5,
         season: 2,
       },
     };
     const date = parseMidiaReleaseDate(item);
-    assert.equal(date?.getFullYear(), 2026);
-    assert.equal(date?.getMonth(), 8);
-    assert.equal(date?.getDate(), 21);
+    assert.equal(date?.getFullYear(), future.getFullYear());
+    assert.equal(date?.getMonth(), future.getMonth());
+    assert.equal(date?.getDate(), future.getDate());
   });
 });
 

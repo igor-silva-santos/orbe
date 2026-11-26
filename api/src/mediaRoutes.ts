@@ -8,6 +8,7 @@ import jogosRoutes from './routes/jogosRoutes';
 import premiosRoutes from './routes/premiosRoutes';
 import eventosRoutes from './routes/eventosRoutes';
 import continuacoesRoutes from './routes/continuacoesRoutes';
+import matchRoutes from './routes/matchRoutes';
 import imagesRoutes from './routes/imagesRoutes';
 
 // Agregador de rotas de midia. Cada tipo de midia (filmes, series, animes,
@@ -27,5 +28,6 @@ router.use(jogosRoutes);
 router.use(premiosRoutes);
 router.use(eventosRoutes);
 router.use(continuacoesRoutes);
+router.use(matchRoutes);
 
 export default router;

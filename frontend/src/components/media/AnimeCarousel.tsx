@@ -557,9 +557,21 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     setHasInitialPositioning(false);
   }, [hasSettledInitialView, emAltaMode, carouselItems.length]);
 
-  /** Aplica scroll pendente só depois que o React renderizou os novos slides */
+  /**
+   * Os skeletons ocupam o DOM enquanto hasInitialPositioning é true. Solta eles
+   * primeiro; o scroll só no efeito seguinte, quando os slides reais já existem.
+   * Se o scroll rodar nos skeletons, o Embla prende o índice 0 e a quinta fica
+   * no começo — os dias anteriores somem atrás do loop como cards vazios.
+   */
   useEffect(() => {
-    if (pendingScrollIndex === null || !emblaApi || emAltaMode) return;
+    if (pendingScrollIndex === null || emAltaMode || !hasInitialPositioning) return;
+    if (carouselItems.length === 0) return;
+    hasInitialPositioningRef.current = false;
+    setHasInitialPositioning(false);
+  }, [pendingScrollIndex, carouselItems.length, emAltaMode, hasInitialPositioning]);
+
+  useEffect(() => {
+    if (pendingScrollIndex === null || !emblaApi || emAltaMode || hasInitialPositioning) return;
     if (pendingScrollIndex >= carouselItems.length) {
       setPendingScrollIndex(null);
       hasInitialPositioningRef.current = false;
@@ -568,15 +580,12 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     }
 
     emblaApi.reInit();
-    emblaApi.scrollTo(pendingScrollIndex, false);
+    emblaApi.scrollTo(pendingScrollIndex, true);
     previousSelectedIndex.current = pendingScrollIndex;
     setSelectedSnap(pendingScrollIndex);
     updateTitleFromIndex(pendingScrollIndex, carouselItems);
-
     setPendingScrollIndex(null);
-    hasInitialPositioningRef.current = false;
-    setHasInitialPositioning(false);
-  }, [pendingScrollIndex, carouselItems, emblaApi, emAltaMode, updateTitleFromIndex]);
+  }, [pendingScrollIndex, carouselItems, emblaApi, emAltaMode, hasInitialPositioning, updateTitleFromIndex]);
 
   useEffect(() => {
     if (!emblaApi || emAltaMode || pendingScrollIndex !== null) return;
