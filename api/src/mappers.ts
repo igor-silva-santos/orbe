@@ -218,8 +218,8 @@ const animeGenreTranslations: Record<string, string> = {
   Suspense: 'Suspense',
 };
 
-const translateAnimeGenre = (genre: string) => animeGenreTranslations[genre] || genre;
-const translateGameGenre = (genre: string) => gameGenreTranslations[genre] || genre;
+export const translateAnimeGenre = (genre: string) => animeGenreTranslations[genre] || genre;
+export const translateGameGenre = (genre: string) => gameGenreTranslations[genre] || genre;
 const translateGameTheme = (theme: string) => gameThemeTranslations[theme] || translateGameGenre(theme);
 const translateAnimeStatus = (status: string | null | undefined) =>
   status ? (animeStatusTranslations[status] || status.replace(/_/g, ' ')) : null;

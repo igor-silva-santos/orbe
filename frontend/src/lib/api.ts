@@ -439,6 +439,14 @@ export const orbeNerdApi = {
   getContinuacoesFilme: async (tmdbId: number) => apiClient.get(`/continuacoes/filmes/${tmdbId}`),
   getContinuacoesSerie: async (tmdbId: number) => apiClient.get(`/continuacoes/series/${tmdbId}`),
 
+  getMatch: async (params: {
+    tipo: 'filme' | 'serie' | 'anime' | 'jogo';
+    modo: 'solo' | 'dupla';
+    ids?: string;
+    base?: 1;
+    jogo?: 'multiplayer' | 'single';
+  }) => apiClient.get('/match', params),
+
   // Minha Lista (watchlist de animes)
   getWatchlistAnimes: () => apiClient.get('/minha-lista/animes'),
   getContinuarAnimes: () => apiClient.get('/minha-lista/animes/continuar'),
