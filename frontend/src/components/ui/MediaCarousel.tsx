@@ -521,7 +521,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
     }
   };
 
-  const virtualRange = useCarouselVirtualRange(emblaApi, displaySlides.length);
+  const virtualIndexes = useCarouselVirtualRange(emblaApi, displaySlides.length);
   const showPositioningSkeleton = !emAltaMode && hasInitialPositioning && filteredItems.length === 0;
   const showAdjacentPrefetchIndicator =
     !emAltaMode && !hasInitialPositioning && !isNavigating && adjacentPrefetchCount > 0;
@@ -670,7 +670,7 @@ const MediaCarousel: React.FC<MediaCarouselProps> = ({
                       </div>
                     ))
                 : displaySlides.map((slide, index) => {
-                  const isRendered = index >= virtualRange.start && index <= virtualRange.end;
+                  const isRendered = virtualIndexes.has(index);
                   const isPriority = Math.abs(index - selectedSnap) <= 4;
                   if (slide.kind === 'year-tbd-separator') {
                     return (
