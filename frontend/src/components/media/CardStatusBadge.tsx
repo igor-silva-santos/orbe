@@ -10,7 +10,8 @@ type Props = {
 export default function CardStatusBadge({ status, className = '' }: Props) {
   return (
     <div
-      className={`pointer-events-none rounded-full border px-2 py-0.5 text-[10px] font-bold leading-tight sm:text-[10.5px] ${cardStatusClassName(status.variant)} ${className}`}
+      title={status.label}
+      className={`pointer-events-none w-max min-w-0 max-w-full shrink-0 truncate rounded-full border px-2 py-0.5 text-[10px] font-bold leading-none sm:text-[10.5px] ${cardStatusClassName(status.variant)} ${className}`}
     >
       {status.label}
     </div>

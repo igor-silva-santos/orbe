@@ -16,11 +16,13 @@ type Props = {
 };
 
 export default function FilmeDestaquePill({ pill, className = '' }: Props) {
+  const label = LABELS[pill];
   return (
     <span
-      className={`inline-flex max-w-full items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide shadow-sm sm:text-[10px] ${STYLES[pill]} ${className}`}
+      title={label}
+      className={`inline-flex w-max min-w-0 max-w-full shrink-0 items-center overflow-hidden rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wide sm:text-[10px] ${STYLES[pill]} ${className}`}
     >
-      {LABELS[pill]}
+      <span className="min-w-0 truncate">{label}</span>
     </span>
   );
 }
