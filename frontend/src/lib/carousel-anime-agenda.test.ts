@@ -7,6 +7,7 @@ import {
   buildWeeklyItemsFromSchedule,
   filterWeeklyAgendaByGenre,
   getCalendarWeekBounds,
+  groupAnimesByBrazilWeekDay,
   isDateWithinWeek,
   resolveWeeklyAgendaStartIndex,
 } from './carousel-anime-agenda';
@@ -162,6 +163,44 @@ describe('resolveWeeklyAgendaStartIndex', () => {
       items[startIndex]?.type === 'separator' ? items[startIndex].dayName : '',
       'Quarta',
     );
+  });
+});
+
+describe('groupAnimesByBrazilWeekDay', () => {
+  // Quinta 26/11/2026 15:00 BRT. Semana 22 a 28.
+  const reference = new Date('2026-11-26T18:00:00.000Z');
+
+  it('coloca o episódio já exibido no dia anterior, não no próximo', () => {
+    const withWeek = {
+      ...mockAnime(7, { airingAt: '2026-11-30T15:00:00.000Z' }),
+      weekAiringEpisodes: [{ episode: 4, airingAt: '2026-11-23T15:00:00.000Z' }],
+    };
+    const days = groupAnimesByBrazilWeekDay([withWeek], reference);
+    const monday = days[1] ?? [];
+    assert.equal(monday.length, 1);
+    assert.equal(monday[0]?.id, 7);
+    assert.equal(monday[0]?.nextAiringEpisode?.episode, 4);
+    assert.equal((days[0] ?? []).length, 0);
+    assert.equal((days[4] ?? []).length, 0);
+  });
+
+  it('agrupa domingo à noite no Brasil mesmo quando o ISO já é segunda', () => {
+    const anime = {
+      ...mockAnime(3, { airingAt: '2026-11-30T15:00:00.000Z' }),
+      weekAiringEpisodes: [{ episode: 2, airingAt: '2026-11-23T02:00:00.000Z' }],
+    };
+    const days = groupAnimesByBrazilWeekDay([anime], reference);
+    assert.equal((days[0] ?? []).length, 1);
+    assert.equal((days[1] ?? []).length, 0);
+  });
+
+  it('ignora o próximo episódio quando ele cai fora desta semana', () => {
+    const days = groupAnimesByBrazilWeekDay(
+      [mockAnime(9, { airingAt: '2026-12-03T15:00:00.000Z' })],
+      reference,
+    );
+    const total = Object.values(days).reduce((sum, list) => sum + list.length, 0);
+    assert.equal(total, 0);
   });
 });
 

@@ -19,6 +19,7 @@ import {
   parsePagination,
   parsePositiveIntId,
   animeCarouselInclude,
+  getAnimeCarouselInclude,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -319,16 +320,7 @@ router.get('/animes/by-season', cacheMiddleware(TWELVE_HOURS), async (req, res) 
       },
       orderBy: { startDate: 'asc' },
       take: CAROUSEL_ITEM_LIMIT,
-      include: {
-        genres: { include: { genero: true } },
-        streamingLinks: { take: 5 },
-        externalLinks: { take: 12 },
-        airingSchedule: {
-          where: { airingAt: { gte: new Date() } },
-          orderBy: { airingAt: 'asc' },
-          take: 1,
-        },
-      },
+      include: getAnimeCarouselInclude(new Date()),
     });
 
     res.status(200).json(animes.map(mapAnimeToCarouselCard));
