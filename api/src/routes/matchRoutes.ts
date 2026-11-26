@@ -53,7 +53,7 @@ router.get('/match', searchRateLimiter, async (req, res) => {
     return res.status(400).json({ error: 'No match em dupla, escolha dois títulos.' });
   }
 
-  const auth = useBase ? readUserId(req.headers.authorization) : { userId: null, invalid: false };
+  const auth = readUserId(req.headers.authorization);
   if (useBase && auth.invalid) {
     return res.status(401).json({ error: 'Token inválido.' });
   }
@@ -65,7 +65,7 @@ router.get('/match', searchRateLimiter, async (req, res) => {
       ids: useBase ? [] : ids,
       useBase,
       gamePlay,
-      userId: auth.userId,
+      userId: auth.invalid ? null : auth.userId,
     });
     return res.json(payload);
   } catch (error) {

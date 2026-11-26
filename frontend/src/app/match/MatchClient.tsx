@@ -202,7 +202,7 @@ export default function MatchClient() {
     <div className="max-w-5xl mx-auto">
       <PageHeader
         title="Match"
-        description="Escolha filme, série, anime ou jogo. O Orbe cruza os gêneros do que você gosta e sugere outro título no mesmo caminho."
+        description="Escolha filme, série, anime ou jogo. O Orbe compara os atributos do que você gosta e sugere outro título no mesmo caminho."
       />
 
       {step !== 'tipo' && (
