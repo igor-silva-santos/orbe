@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { User, Mail, Calendar, Edit2, Shield, Settings, Download, ScrollText, List } from 'lucide-react';
+import { User, Mail, Calendar, Settings, Download, ScrollText, List } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import orbeNerdApi from '@/lib/api';
 import { API_BASE } from '@/lib/apiBase';
-import { isAllowedRemoteImageHost } from '@/lib/image-utils';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -86,13 +84,13 @@ export default function ProfilePage() {
           <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
               <div className="relative w-32 h-32 mx-auto mb-4 group">
                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-primary/20">
-                  {user.avatar && isAllowedRemoteImageHost(user.avatar) ? (
-                    <Image
-                      src={user.avatar}
-                      alt={user.nome || 'Avatar'}
-                      fill
-                      sizes="128px"
-                      className="object-cover"
+                  {user.avatarUrl ? (
+                    // Foto da conta: <img> evita a otimização de imagens da Vercel.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.nome || 'Foto da conta'}
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -148,20 +146,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Coluna da Direita: Informações e Bio */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Sobre Mim</h3>
-              <button onClick={() => router.push('/configuracoes')} className="p-2 hover:bg-muted rounded-full transition-colors">
-                <Edit2 className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-            <p className="text-muted-foreground leading-relaxed break-words">
-              {user.bio || 'Você ainda não adicionou uma biografia. Vá em configurações para contar um pouco sobre seus gostos nerds!'}
-            </p>
-          </div>
-
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             <h3 className="text-lg font-bold mb-4">Informações da Conta</h3>
             <div className="space-y-4">
@@ -177,13 +162,6 @@ export default function ProfilePage() {
                   <span className="text-muted-foreground break-words">{memberSince}</span>
                 </div>
               )}
-              <div className="flex items-center text-sm">
-                <Shield className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="font-medium mr-2">Visibilidade:</span>
-                <span className="px-2 py-0.5 border border-border rounded-md text-xs">
-                  {user.perfil_publico ? 'Público' : 'Privado'}
-                </span>
-              </div>
             </div>
           </div>
         </div>
