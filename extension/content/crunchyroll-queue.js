@@ -70,49 +70,11 @@
 
   function parseSeasonEpisode(text) {
 
-    if (!text) return { season: 1, episode: 0 };
+    if (typeof globalThis.OrbeQueueProgress !== 'undefined') {
 
-
-
-    const seasonEpisode =
-
-      text.match(/(?:season|temporada|s)\s*(\d+)[^\d]*(?:ep(?:isode)?|\.?)\s*(\d+)/i) ||
-
-      text.match(/s(\d+)\s*e(\d+)/i) ||
-
-      text.match(/(\d+)\s*x\s*(\d+)/i);
-
-
-
-    if (seasonEpisode) {
-
-      return {
-
-        season: parseInt(seasonEpisode[1], 10) || 1,
-
-        episode: parseInt(seasonEpisode[2], 10) || 0,
-
-      };
+      return globalThis.OrbeQueueProgress.parseSeasonEpisode(text);
 
     }
-
-
-
-    const epOnly =
-
-      text.match(/(?:ep(?:isode)?|ep\.?)\s*(\d+)/i) ||
-
-      text.match(/(\d+)\s*(?:\/\s*\d+)?\s*(?:min|mins|remaining|restante)/i);
-
-
-
-    if (epOnly) {
-
-      return { season: 1, episode: parseInt(epOnly[1], 10) || 0 };
-
-    }
-
-
 
     return { season: 1, episode: 0 };
 
@@ -450,6 +412,22 @@
 
     const progress = parseProgressFromElement(el);
 
+    const statusText = [
+
+      el.getAttribute('aria-label'),
+
+      el.getAttribute('title'),
+
+      el.textContent,
+
+    ].filter(Boolean).join(' ');
+
+    const status = typeof globalThis.OrbeQueueProgress !== 'undefined'
+
+      ? globalThis.OrbeQueueProgress.parseQueueStatus(statusText)
+
+      : null;
+
 
 
     return {
@@ -473,6 +451,8 @@
       remainingTimeSec: progress.remainingTimeSec,
 
       hasDub: detectDub(el),
+
+      ...(status ? { status } : {}),
 
     };
 

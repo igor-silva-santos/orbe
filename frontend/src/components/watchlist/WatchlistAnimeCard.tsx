@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Clock, Languages, Trash2, ExternalLink } from 'lucide-react';
 import type { WatchlistAnime } from '@/types';
 import { formatRemainingTime, cn } from '@/lib/utils';
+import { episodeProgressPercent } from '@/lib/watchlist-queue';
 import { Button } from '@/components/ui/button';
 
 interface WatchlistAnimeCardProps {
@@ -20,6 +21,9 @@ const statusLabels: Record<string, string> = {
   seguir: 'Seguindo',
   novamente: 'De novo',
   terminado: 'Terminado',
+  assistido: 'Assistido',
+  pausado: 'Pausado',
+  dropado: 'Dropado',
 };
 
 export default function WatchlistAnimeCard({
@@ -32,6 +36,7 @@ export default function WatchlistAnimeCard({
     item.episode > 0
       ? `S${item.season} · E${item.episode}${item.totalEpisodes ? `/${item.totalEpisodes}` : ''}`
       : 'Não iniciado';
+  const progressPercent = episodeProgressPercent(item.episode, item.totalEpisodes);
 
   return (
     <article className="rounded-xl border bg-card overflow-hidden hover:shadow-md transition-shadow">
@@ -62,6 +67,11 @@ export default function WatchlistAnimeCard({
         </div>
 
         <p className="text-sm font-semibold text-primary">{progressLabel}</p>
+        {progressPercent != null && (
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden" aria-hidden>
+            <div className="h-full bg-primary" style={{ width: `${progressPercent}%` }} />
+          </div>
+        )}
 
         {item.remainingTimeSec != null && item.remainingTimeSec > 0 && (
           <p className="text-xs text-muted-foreground flex items-center gap-1">

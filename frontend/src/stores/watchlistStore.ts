@@ -4,6 +4,9 @@ import { persist } from 'zustand/middleware';
 import type { WatchlistAnime } from '@/types';
 
 import orbeNerdApi, { type WatchlistSyncResponse } from '@/lib/api';
+import { type WatchlistListFilter } from '@/lib/watchlist-queue';
+
+export { filterWatchlistItems } from '@/lib/watchlist-queue';
 
 export interface WatchlistSyncFeedback {
   type: 'success' | 'error';
@@ -26,32 +29,15 @@ function computeLastSyncedAt(items: WatchlistAnime[]): string | null {
   return latest;
 }
 
-function mapLegacyBackupItem(raw: Record<string, unknown>): Record<string, unknown> {
-  return {
-    crunchyrollId: raw.crunchyrollId || raw.malId?.toString() || raw.id,
-    title: raw.title || raw.q,
-    posterUrl: raw.img || raw.posterUrl,
-    crunchyrollUrl: raw.cr,
-    season: raw.s || raw.season || 1,
-    episode: raw.ep || raw.episode || 0,
-    totalEpisodes: raw.tot || raw.totalEpisodes,
-    hasDub: Boolean(raw.dub),
-    status: raw.st || raw.status || 'comecar',
-    lists: raw.lists || [],
-    note: raw.note,
-    malId: raw.malId,
-  };
-}
-
 interface WatchlistState {
   items: WatchlistAnime[];
   lastSyncedAt: string | null;
   isLoading: boolean;
   error: string | null;
   syncFeedback: WatchlistSyncFeedback | null;
-  filter: 'all' | 'andamento' | 'comecar' | 'terminado' | 'dub';
+  filter: WatchlistListFilter;
   fetchItems: () => Promise<void>;
-  setFilter: (filter: WatchlistState['filter']) => void;
+  setFilter: (filter: WatchlistListFilter) => void;
   removeItem: (id: string) => Promise<void>;
   updateItem: (id: string, data: Partial<WatchlistAnime>) => Promise<void>;
   syncItems: (rawItems: Record<string, unknown>[]) => Promise<WatchlistSyncResponse>;
@@ -109,8 +95,7 @@ export const useWatchlistStore = create<WatchlistState>()(
       syncItems: async (rawItems) => {
         set({ syncFeedback: null, error: null });
         try {
-          const itemsPayload = rawItems.map((raw) => mapLegacyBackupItem(raw));
-          const result = await orbeNerdApi.syncWatchlistAnimes(itemsPayload);
+          const result = await orbeNerdApi.syncWatchlistAnimes(rawItems);
           await get().fetchItems();
           set({
             syncFeedback: {
@@ -140,21 +125,3 @@ export const useWatchlistStore = create<WatchlistState>()(
     }
   )
 );
-
-export function filterWatchlistItems(
-  items: WatchlistAnime[],
-  filter: WatchlistState['filter']
-): WatchlistAnime[] {
-  switch (filter) {
-    case 'andamento':
-      return items.filter((item) => ['continuar', 'seguir'].includes(item.status));
-    case 'comecar':
-      return items.filter((item) => item.status === 'comecar');
-    case 'terminado':
-      return items.filter((item) => item.status === 'terminado');
-    case 'dub':
-      return items.filter((item) => item.hasDub);
-    default:
-      return items;
-  }
-}
