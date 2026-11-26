@@ -31,7 +31,7 @@
   "content_scripts": [
     {
       "matches": ["https://*.crunchyroll.com/*"],
-      "js": ["content/crunchyroll-queue.js"],
+      "js": ["lib/queue-progress.js", "content/crunchyroll-queue.js"],
       "run_at": "document_idle"
     },
     {

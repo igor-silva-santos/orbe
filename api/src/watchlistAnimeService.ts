@@ -1,6 +1,11 @@
 ﻿import type { WatchlistAnime } from '@prisma/client';
 import { prisma } from './clients';
-import { findExistingWatchlistItem, matchAnimeInCatalog } from './watchlistMatcher';
+import {
+  enrichCrunchyrollId,
+  findExistingWatchlistItem,
+  mapLegacyWatchlistItem,
+  matchAnimeInCatalog,
+} from './watchlistMatcher';
 import {
   isNonNegativeInt,
   isPositiveInt,
@@ -99,7 +104,7 @@ export function validateCrunchyrollImportPayload(
   if (item.note != null && !isStringWithMaxLength(item.note, MAX_NOTE_LENGTH)) return false;
   if (item.season != null && !isPositiveInt(item.season)) return false;
   if (item.episode != null && !isNonNegativeInt(item.episode)) return false;
-  if (item.totalEpisodes != null && !isPositiveInt(item.totalEpisodes)) return false;
+  if (item.totalEpisodes != null && !isNonNegativeInt(item.totalEpisodes)) return false;
   if (item.episodeDurationSec != null && !isNonNegativeInt(item.episodeDurationSec)) return false;
   if (item.remainingTimeSec != null && !isNonNegativeInt(item.remainingTimeSec)) return false;
   if (item.malId != null && !isPositiveInt(item.malId)) return false;
@@ -118,6 +123,15 @@ export function validateCrunchyrollImportPayload(
   return true;
 }
 
+/** Normaliza item da extensão, do backup legado ou do formato atual antes de gravar. */
+export function resolveWatchlistImportItem(raw: unknown): CrunchyrollImportPayload | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const mapped = mapLegacyWatchlistItem(raw as Record<string, unknown>);
+  if (!mapped) return null;
+  const enriched = enrichCrunchyrollId(mapped);
+  return validateCrunchyrollImportPayload(enriched) ? enriched : null;
+}
+
 export function validateWatchlistAnimeUpdatePayload(
   payload: unknown
 ): payload is WatchlistAnimeUpdatePayload {
@@ -132,7 +146,7 @@ export function validateWatchlistAnimeUpdatePayload(
   if (item.note != null && !isStringWithMaxLength(item.note, MAX_NOTE_LENGTH)) return false;
   if (item.season != null && !isPositiveInt(item.season)) return false;
   if (item.episode != null && !isNonNegativeInt(item.episode)) return false;
-  if (item.totalEpisodes != null && !isPositiveInt(item.totalEpisodes)) return false;
+  if (item.totalEpisodes != null && !isNonNegativeInt(item.totalEpisodes)) return false;
   if (item.episodeDurationSec != null && !isNonNegativeInt(item.episodeDurationSec)) return false;
   if (item.remainingTimeSec != null && !isNonNegativeInt(item.remainingTimeSec)) return false;
   if (item.malId != null && !isPositiveInt(item.malId)) return false;
@@ -175,7 +189,8 @@ export function mapImportPayloadToData(
     genres: payload.genres ?? [],
     season: payload.season ?? 1,
     episode,
-    totalEpisodes: payload.totalEpisodes ?? null,
+    totalEpisodes:
+      payload.totalEpisodes != null && payload.totalEpisodes > 0 ? payload.totalEpisodes : null,
     episodeDurationSec: payload.episodeDurationSec ?? null,
     remainingTimeSec,
     status,

@@ -6,6 +6,15 @@ import { Download, PlugZap, ShieldCheck } from 'lucide-react';
 import type { WatchlistAnime } from '@/types';
 import { Button } from '@/components/ui/button';
 import type { ExtensionDetectStatus } from '@/hooks/useExtensionDetector';
+import { toast } from 'sonner';
+
+const PROGRESS_STATUSES: WatchlistAnime['status'][] = [
+  'comecar',
+  'continuar',
+  'seguir',
+  'novamente',
+  'terminado',
+];
 
 interface EditProgressModalProps {
   item: WatchlistAnime | null;
@@ -22,6 +31,7 @@ export default function EditProgressModal({ item, open, onClose, onSave }: EditP
   const [status, setStatus] = useState<WatchlistAnime['status']>('comecar');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!open || !item) return;
@@ -31,6 +41,7 @@ export default function EditProgressModal({ item, open, onClose, onSave }: EditP
     setRemainingTimeSec(item.remainingTimeSec ?? '');
     setStatus(item.status);
     setNote(item.note || '');
+    setSaveError('');
   }, [open, item]);
 
   if (!open || !item) return null;
@@ -99,7 +110,9 @@ export default function EditProgressModal({ item, open, onClose, onSave }: EditP
             <option value="comecar">Começar</option>
             <option value="continuar">Continuar</option>
             <option value="seguir">Seguindo</option>
+            <option value="novamente">De novo</option>
             <option value="terminado">Terminado</option>
+            {!PROGRESS_STATUSES.includes(status) && <option value={status}>{status}</option>}
           </select>
         </label>
 
@@ -112,22 +125,29 @@ export default function EditProgressModal({ item, open, onClose, onSave }: EditP
           />
         </label>
 
+        {saveError && <p className="text-sm text-destructive">{saveError}</p>}
+
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
           <Button
             disabled={saving}
             onClick={async () => {
               setSaving(true);
+              setSaveError('');
               try {
                 await onSave(item.id, {
                   season,
                   episode,
-                  totalEpisodes: totalEpisodes === '' ? null : totalEpisodes,
+                  totalEpisodes: totalEpisodes === '' || totalEpisodes <= 0 ? null : totalEpisodes,
                   remainingTimeSec: remainingTimeSec === '' ? null : remainingTimeSec,
                   status,
                   note,
                 });
                 onClose();
+              } catch (err) {
+                const message = err instanceof Error ? err.message : 'Não foi possível salvar o progresso.';
+                setSaveError(message);
+                toast.error(message);
               } finally {
                 setSaving(false);
               }
