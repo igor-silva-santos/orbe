@@ -86,12 +86,15 @@ docs/DEPLOY_GITLAB.md
 frontend/src/components/layout/Header.tsx
 frontend/src/components/modals/SuperModal.tsx
 "
-  # Conflito real dos dois lados: junta a lista de testes, ou os imports usados.
+  # Conflito real dos dois lados: junta a lista de testes, os imports usados,
+  # os dois casos do teste de data do carrossel, ou o service worker.
   # Outro conflito para o job, para não apagar trabalho do GitHub.
   combine="
 api/package.json
 frontend/package.json
 api/src/routes/mediaRoutesHelpers.ts
+frontend/src/lib/carousel-utils.test.ts
+frontend/src/app/sw.ts
 "
   failed=0
   while IFS= read -r file; do

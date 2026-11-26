@@ -17,6 +17,21 @@ function safeNonNegativeInt(value: unknown): number | undefined {
   return Number.isInteger(n) && n >= 0 ? n : undefined;
 }
 
+function optionalNonNegativeInt(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  return safeNonNegativeInt(value);
+}
+
+function readHasDub(raw: Record<string, unknown>): boolean {
+  if (typeof raw.hasDub === 'boolean') return raw.hasDub;
+  if (raw.dub === true || raw.dub === 1) return true;
+  if (typeof raw.dub === 'string') {
+    const normalized = raw.dub.trim().toLowerCase();
+    return normalized === '1' || normalized === 'true' || normalized === 'dub';
+  }
+  return false;
+}
+
 function safePosterUrl(value: unknown): string | undefined {
   if (typeof value !== 'string' || !value) return undefined;
   return isValidHttpUrl(value) ? value : undefined;
@@ -28,7 +43,9 @@ function safeStatus(value: unknown): WatchlistStatus | undefined {
 
 export function extractCrunchyrollId(url: unknown): string | null {
   if (typeof url !== 'string' || !url) return null;
-  const match = url.match(/crunchyroll\.com\/(?:[a-z]{2}\/)?(?:series|watch)\/([A-Z0-9]+)/i);
+  const match = url.match(
+    /crunchyroll\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(?:series|watch)\/([A-Z0-9]+)/i
+  );
   return match?.[1]?.toUpperCase() ?? null;
 }
 
@@ -101,25 +118,40 @@ export function mapLegacyWatchlistItem(
         : null;
   if (!title?.trim()) return null;
 
-  const crunchyrollUrl =
+  const crunchyrollUrlRaw =
     typeof raw.cr === 'string'
       ? raw.cr
       : typeof raw.crunchyrollUrl === 'string'
         ? raw.crunchyrollUrl
         : undefined;
+  const crunchyrollUrl =
+    crunchyrollUrlRaw && isValidHttpUrl(crunchyrollUrlRaw) ? crunchyrollUrlRaw : undefined;
 
-  const crunchyrollId =
-    (typeof raw.crunchyrollId === 'string' && raw.crunchyrollId.trim()
+  const explicitId =
+    typeof raw.crunchyrollId === 'string' && raw.crunchyrollId.trim()
       ? raw.crunchyrollId.trim()
-      : undefined) ||
-    extractCrunchyrollId(crunchyrollUrl) ||
+      : undefined;
+  const crunchyrollId =
+    explicitId ||
+    extractCrunchyrollId(crunchyrollUrlRaw) ||
     (raw.malId != null && isPositiveInt(Number(raw.malId))
       ? `mal:${raw.malId}`
-      : raw.id != null
-        ? String(raw.id)
+      : raw.id != null && String(raw.id).trim()
+        ? String(raw.id).trim()
         : undefined);
 
   if (!crunchyrollId) return null;
+
+  const lists = Array.isArray(raw.lists)
+    ? raw.lists
+        .filter((entry): entry is string => typeof entry === 'string' && entry.length <= 100)
+        .slice(0, 50)
+    : undefined;
+  const genres = Array.isArray(raw.genres)
+    ? raw.genres
+        .filter((entry): entry is string => typeof entry === 'string' && entry.length <= 100)
+        .slice(0, 50)
+    : undefined;
 
   const payload: CrunchyrollImportPayload = {
     crunchyrollId,
@@ -127,20 +159,26 @@ export function mapLegacyWatchlistItem(
     crunchyrollUrl,
     posterUrl: safePosterUrl(raw.img ?? raw.posterUrl),
     season: safePositiveInt(raw.s ?? raw.season) ?? 1,
-    episode: safeNonNegativeInt(raw.ep ?? raw.episode) ?? 0,
+    episode: optionalNonNegativeInt(raw.ep ?? raw.episode) ?? 0,
     totalEpisodes: safePositiveInt(raw.tot ?? raw.totalEpisodes),
-    hasDub: Boolean(raw.dub),
+    episodeDurationSec: optionalNonNegativeInt(raw.episodeDurationSec),
+    remainingTimeSec: optionalNonNegativeInt(raw.remainingTimeSec),
+    hasDub: readHasDub(raw),
     status: safeStatus(raw.st ?? raw.status),
-    lists: Array.isArray(raw.lists)
-      ? raw.lists.filter((entry): entry is string => typeof entry === 'string')
-      : undefined,
+    lists: lists && lists.length > 0 ? lists : undefined,
     note: typeof raw.note === 'string' ? raw.note : undefined,
     malId:
       raw.malId != null && isPositiveInt(Number(raw.malId)) ? Number(raw.malId) : undefined,
   };
 
-  if (typeof raw.titleAlt === 'string') {
-    payload.titleAlt = raw.titleAlt;
+  if (typeof raw.titleAlt === 'string' && raw.titleAlt.trim()) {
+    payload.titleAlt = raw.titleAlt.trim();
+  }
+  if (genres && genres.length > 0) {
+    payload.genres = genres;
+  }
+  if (typeof raw.sessionId === 'string' && raw.sessionId.trim()) {
+    payload.sessionId = raw.sessionId.trim();
   }
 
   return payload;

@@ -10,14 +10,14 @@ import {
   useWatchlistStore,
   filterWatchlistItems,
 } from '@/stores/watchlistStore';
+import { sortWatchlistQueue } from '@/lib/watchlist-queue';
+import MinhaListaNav from '@/components/minha-lista/MinhaListaNav';
 import WatchlistAnimeCard, { WatchlistFilterTabs } from '@/components/watchlist/WatchlistAnimeCard';
 import EditProgressModal, {
   ExtensionPanel,
   ImportBackupModal,
 } from '@/components/watchlist/WatchlistModals';
 import AddAnimeFromCatalog from '@/components/watchlist/AddAnimeFromCatalog';
-import { QA_DEMO_WATCHLIST_ITEMS } from '@/lib/watchlist-qa-mock';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import OfflineBanner from '@/components/ui/OfflineBanner';
@@ -44,12 +44,23 @@ export default function MinhaListaAnimesPage() {
   const [editItem, setEditItem] = useState<WatchlistAnime | null>(null);
   const [backupOpen, setBackupOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [loadedOnce, setLoadedOnce] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) fetchItems();
+    if (!isAuthenticated) return;
+    let active = true;
+    fetchItems().finally(() => {
+      if (active) setLoadedOnce(true);
+    });
+    return () => {
+      active = false;
+    };
   }, [isAuthenticated, fetchItems]);
 
-  const filtered = useMemo(() => filterWatchlistItems(items, filter), [items, filter]);
+  const filtered = useMemo(
+    () => sortWatchlistQueue(filterWatchlistItems(items, filter)),
+    [items, filter]
+  );
 
   const counts = useMemo(
     () => ({
@@ -101,10 +112,8 @@ export default function MinhaListaAnimesPage() {
       <PushOptInBanner />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/minha-lista" className="text-sm text-muted-foreground hover:text-primary">
-            ← Minha Lista
-          </Link>
-          <h1 className="text-3xl font-extrabold mt-2">Animes</h1>
+          <h1 className="text-3xl font-extrabold">Animes</h1>
+          <MinhaListaNav />
           <p className="text-muted-foreground mt-1">{items.length} títulos na sua lista</p>
           {lastSyncedLabel ? (
             <p className="text-xs text-muted-foreground mt-1">
@@ -120,19 +129,6 @@ export default function MinhaListaAnimesPage() {
           </Button>
           <Button variant="outline" onClick={() => setBackupOpen(true)}>
             <Upload className="h-4 w-4 mr-2" /> Importar backup
-          </Button>
-          <Button
-            variant="outline"
-            onClick={async () => {
-              try {
-                await syncItems(QA_DEMO_WATCHLIST_ITEMS);
-                toast.success('Lista de demonstração importada para testes.');
-              } catch {
-                toast.error('Não foi possível importar a lista de demonstração.');
-              }
-            }}
-          >
-            Importar demo QA
           </Button>
         </div>
       </div>
@@ -164,7 +160,7 @@ export default function MinhaListaAnimesPage() {
 
       <WatchlistFilterTabs value={filter} onChange={setFilter} counts={counts} />
 
-      {isLoading && (
+      {(!loadedOnce || isLoading) && items.length === 0 && (
         <div className="py-16 text-center text-muted-foreground">Carregando sua lista...</div>
       )}
 
@@ -174,7 +170,7 @@ export default function MinhaListaAnimesPage() {
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {loadedOnce && !isLoading && items.length === 0 && (
         <div className="rounded-xl border border-dashed p-10 text-center space-y-4">
           <p className="text-muted-foreground">
             {extensionStatus === 'installed'
@@ -195,6 +191,12 @@ export default function MinhaListaAnimesPage() {
               Importar backup JSON
             </Button>
           </div>
+        </div>
+      )}
+
+      {!isLoading && items.length > 0 && filtered.length === 0 && (
+        <div className="rounded-xl border border-dashed p-10 text-center">
+          <p className="text-muted-foreground">Nenhum anime neste filtro.</p>
         </div>
       )}
 

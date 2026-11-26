@@ -1,84 +1,66 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { Clock, Languages } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import MinhaListaNav from '@/components/minha-lista/MinhaListaNav';
-import SafeImage from '@/components/ui/SafeImage';
-import orbeNerdApi from '@/lib/api';
+import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/stores/appStore';
-import type { Anime } from '@/types';
+import { useWatchlistStore } from '@/stores/watchlistStore';
+import { isInPersonalQueue, sortWatchlistQueue } from '@/lib/watchlist-queue';
+import { formatRemainingTime } from '@/lib/utils';
 
-type CrCatalog = {
-  episodesSubCount?: number | null;
-  episodesDubPtBrCount?: number | null;
-  subFrontier?: { season: number; episode: number } | null;
-  dubPtBrFrontier?: { season: number; episode: number } | null;
+const STATUS_LABEL: Record<string, string> = {
+  continuar: 'Continuar',
+  seguir: 'Seguindo',
+  novamente: 'De novo',
+  comecar: 'Começar',
 };
-
-type FilaItem = {
-  id: string;
-  title: string | null;
-  st: string;
-  statusLabel: string;
-  badgeLabel: string | null;
-  ep: number | null;
-  season: number | null;
-  dub: number | null;
-  anime: Anime | null;
-  crMeta?: { preferredAudio?: string; catalog?: CrCatalog | null } | null;
-};
-
-function formatTe(pos: { season: number; episode: number } | null | undefined): string | null {
-  if (!pos) return null;
-  return `T${pos.season}E${pos.episode}`;
-}
-
-function catalogHint(row: FilaItem): string | null {
-  const cat = row.crMeta?.catalog;
-  if (!cat) return null;
-  const parts: string[] = [];
-  if (cat.episodesSubCount != null) parts.push(`${cat.episodesSubCount} eps no ar`);
-  if (cat.episodesDubPtBrCount != null) parts.push(`${cat.episodesDubPtBrCount} dublados PT-BR`);
-  const sub = formatTe(cat.subFrontier);
-  const dub = formatTe(cat.dubPtBrFrontier);
-  if (sub) parts.push(`sub até ${sub}`);
-  if (dub) parts.push(`dub até ${dub}`);
-  return parts.length ? parts.join(' · ') : null;
-}
 
 export default function FilaAnimeClient() {
-  const router = useRouter();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
-  const openSuperModal = useAppStore((s) => s.openSuperModal);
-  const [items, setItems] = useState<FilaItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { items, error, fetchItems } = useWatchlistStore();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-    orbeNerdApi
-      .getFilaAnimes()
-      .then((data) => setItems(data.items ?? []))
-      .catch(() => setError('Não foi possível carregar a fila.'))
-      .finally(() => setLoading(false));
-  }, [isAuthenticated, router]);
+    if (!isAuthenticated) return;
+    let active = true;
+    fetchItems().finally(() => {
+      if (active) setReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, fetchItems]);
 
-  if (!isAuthenticated) return null;
+  const queue = useMemo(
+    () => sortWatchlistQueue(items.filter((item) => isInPersonalQueue(item.status))),
+    [items]
+  );
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center space-y-4">
+        <h1 className="text-3xl font-extrabold">Fila de animes</h1>
+        <p className="text-muted-foreground">Faça login para ver sua fila.</p>
+        <Button asChild>
+          <Link href="/login">Entrar no Orbe</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10">
       <PageHeader
         title="Fila de animes"
-        description="Sincronizado da Crunchyroll. A fila segue Continuar, A seguir e Começar. “Aguardando dublagem” é quando a legenda está à frente da dublagem. “Aguardando novo episódio” é quando ainda não entrou no ar."
+        description="O que assistir agora, na ordem Continuar, Seguindo, De novo e Começar. O episódio vem da sua lista e da sincronização com a Crunchyroll."
       />
       <MinhaListaNav />
 
       <p className="text-sm text-muted-foreground mb-6">
-        Use a extensão Orbe na página{' '}
+        Abra a fila em{' '}
         <a
           href="https://www.crunchyroll.com/pt-br/watchlist"
           target="_blank"
@@ -86,69 +68,74 @@ export default function FilaAnimeClient() {
           className="text-primary underline"
         >
           crunchyroll.com/pt-br/watchlist
-        </a>
-        . Ative “só dublagem PT-BR” no popup se quiser filtrar a trilha dublada brasileira.
+        </a>{' '}
+        e sincronize pela extensão Orbe. Títulos já terminados ficam na lista completa.
       </p>
 
-      {loading && (
+      {!ready && queue.length === 0 && (
         <div className="flex justify-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
         </div>
       )}
 
-      {!loading && error && <p className="text-destructive text-center py-12">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="text-center text-muted-foreground py-12 max-w-lg mx-auto">
-          Nenhum anime na fila. Sincronize pela extensão na watchlist da Crunchyroll.
-        </p>
+      {ready && error && queue.length === 0 && (
+        <p className="text-destructive text-center py-12">{error}</p>
       )}
 
-      {!loading && !error && items.length > 0 && (
+      {ready && !error && queue.length === 0 && (
+        <div className="text-center text-muted-foreground py-12 max-w-lg mx-auto space-y-4">
+          <p>Nenhum anime na fila. Sincronize pela extensão ou adicione um título do catálogo.</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <Link href="/minha-lista/animes">Abrir lista de animes</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/extensao/crunchyroll">Instalar extensão</Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {queue.length > 0 && (
         <ul className="space-y-3 max-w-3xl">
-          {items.map((row) => (
-            <li key={row.id}>
-              <button
-                type="button"
-                onClick={() => row.anime && openSuperModal(row.anime, 'anime')}
-                className="w-full flex gap-3 items-center text-left rounded-xl border border-border bg-card p-3 hover:bg-muted/50 transition-colors"
-              >
-                <div className="w-14 h-20 rounded-md overflow-hidden bg-muted shrink-0">
-                  <SafeImage
-                    src={row.anime?.poster_url_api}
-                    alt={row.title || 'Anime'}
-                    width={56}
-                    height={80}
-                    imageSize="w185"
-                    className="w-full h-full object-cover"
-                    fallbackLabel="?"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold orbe-text-primary truncate">{row.title}</p>
-                  <p
-                    className={`text-sm font-medium ${
-                      row.st === 'esperando_dublagem' || row.st === 'esperando_episodio'
-                        ? 'text-amber-600 dark:text-amber-500'
-                        : 'text-primary'
-                    }`}
-                  >
-                    {row.statusLabel}
-                  </p>
-                  {row.badgeLabel && (
-                    <p className="text-xs text-muted-foreground truncate">{row.badgeLabel}</p>
-                  )}
-                  {catalogHint(row) && (
-                    <p className="text-xs text-muted-foreground truncate">{catalogHint(row)}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    T{row.season ?? 1} · E{row.ep ?? '?'}
-                    {row.dub || row.crMeta?.preferredAudio === 'pt-BR' ? ' · Trilha PT-BR' : ' · Leg/sub'}
-                  </p>
-                </div>
-              </button>
-            </li>
-          ))}
+          {queue.map((row) => {
+            const href = row.crunchyrollUrl || '/minha-lista/animes';
+            const external = Boolean(row.crunchyrollUrl);
+            return (
+              <li key={row.id}>
+                <Link
+                  href={href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener noreferrer' : undefined}
+                  className="w-full flex gap-3 items-center text-left rounded-xl border border-border bg-card p-3 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate">{row.title}</p>
+                    <p className="text-sm font-medium text-primary">
+                      {STATUS_LABEL[row.status] || row.status}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span>
+                        T{row.season} · E{row.episode}
+                        {row.totalEpisodes ? `/${row.totalEpisodes}` : ''}
+                      </span>
+                      {row.hasDub && (
+                        <span className="inline-flex items-center gap-1">
+                          <Languages className="h-3 w-3" /> Dublagem
+                        </span>
+                      )}
+                      {row.remainingTimeSec != null && row.remainingTimeSec > 0 && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          Restam {formatRemainingTime(row.remainingTimeSec)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
