@@ -279,6 +279,14 @@ export const orbeNerdApi = {
     return apiClient.get('/premios/destaques');
   },
 
+  getAwardEvents: async (params?: {
+    awardName?: string;
+    year?: number;
+    mediaType?: 'filme' | 'serie' | 'anime' | 'jogo';
+  }) => {
+    return apiClient.get('/premios/eventos', params);
+  },
+
   getEventos: async (status?: 'upcoming' | 'ongoing' | 'past' | 'all') => {
     return apiClient.get('/eventos', status && status !== 'all' ? { status } : undefined);
   },
