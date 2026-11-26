@@ -73,13 +73,12 @@ export default function DealCard({ deal, priority = false }: DealCardProps) {
         )}
         {imageSrc ? (
           <Image
+            key={imageSrc}
             src={imageSrc}
             alt={deal.title}
             fill
             sizes="210px"
-            className={`object-cover transition-transform group-hover:scale-[1.02] ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            className="object-cover transition-transform group-hover:scale-[1.02]"
             priority={priority}
             unoptimized
             onLoad={() => setImageLoaded(true)}

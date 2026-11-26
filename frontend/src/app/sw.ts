@@ -18,12 +18,13 @@ const isDynamicCatalogApi = ({ sameOrigin, url }: { sameOrigin: boolean; url: UR
     /^\/api\/(filmes|series|animes|jogos)\/(by-month|by-season)/.test(url.pathname));
 
 /**
- * Duas coisas ficam fora do SW de propósito:
+ * Três coisas ficam fora do cache do SW de propósito:
  * - Navegação do documento. Se o SW responde e a rede falha sem cópia em cache,
  *   o Chrome registra "network error" e `no-response` (visto em /promocoes).
- * - Capas de promoção (Steam e GamerPower). O cache de imagens guarda resposta
- *   opaca por 30 dias, inclusive quando o CDN respondeu 403/404.
- * Sem rota correspondente, o navegador busca direto.
+ * - `/api/images/`. O defaultCache guarda `/api/*` por 24h; um 502 no proxy
+ *   de capa não pode ficar preso e esconder a imagem que a rede já entrega.
+ * - Capas direto na Steam e na GamerPower, se alguma ainda for pedida. O cache
+ *   de imagens guarda resposta opaca por 30 dias, inclusive um 403/404.
  */
 const DEAL_POSTER_HOSTS = new Set([
   'www.gamerpower.com',
@@ -51,7 +52,15 @@ function matcherSkipsDealPosters(matcher: RuntimeCaching['matcher']): RuntimeCac
   };
 }
 
+const isPosterProxy = ({ sameOrigin, url }: { sameOrigin: boolean; url: URL }) =>
+  sameOrigin && url.pathname.startsWith('/api/images/');
+
 const runtimeCaching: RuntimeCaching[] = [
+  {
+    matcher: isPosterProxy,
+    method: 'GET',
+    handler: new NetworkOnly(),
+  },
   {
     matcher: isDynamicCatalogApi,
     method: 'GET',
