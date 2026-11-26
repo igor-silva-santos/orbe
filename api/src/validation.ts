@@ -46,6 +46,8 @@ export const VALID_WATCHLIST_STATUSES = [
   'comecar',
   'continuar',
   'seguir',
+  'novamente',
+  'terminado',
   'assistido',
   'pausado',
   'dropado',

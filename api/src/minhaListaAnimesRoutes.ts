@@ -9,17 +9,13 @@ import {
 } from './validation';
 import {
   serializeWatchlistAnime,
-  validateCrunchyrollImportPayload,
+  resolveWatchlistImportItem,
   validateWatchlistAnimeUpdatePayload,
   buildWatchlistAnimeId,
   upsertWatchlistImport,
   replaceCrunchyrollExtensionItems,
 } from './watchlistAnimeService';
-import {
-  enrichCrunchyrollId,
-  findExistingWatchlistItem,
-  mapLegacyWatchlistItem,
-} from './watchlistMatcher';
+import { findExistingWatchlistItem } from './watchlistMatcher';
 import { watchlistImportRateLimit } from './watchlistRateLimit';
 import { createNotification } from './notificationService';
 import {
@@ -363,13 +359,12 @@ router.post(
   authMiddleware,
   watchlistImportRateLimit,
   async (req: AuthRequest, res: Response) => {
-    if (!validateCrunchyrollImportPayload(req.body)) {
+    const payload = resolveWatchlistImportItem(req.body);
+    if (!payload) {
       return res.status(400).json({
-        error: 'Payload inv├ílido. Informe crunchyrollId, title e progresso do epis├│dio.',
+        error: 'Payload inválido. Informe crunchyrollId, title e progresso do episódio.',
       });
     }
-
-    const payload = req.body;
     const userId = req.user!.userId;
 
     if (payload.sessionId) {
@@ -422,14 +417,9 @@ router.post('/minha-lista/animes/sync', authMiddleware, async (req: AuthRequest,
 
   try {
     for (const rawItem of items) {
-      const legacyMapped = mapLegacyWatchlistItem(rawItem as Record<string, unknown>);
-      const candidate = validateCrunchyrollImportPayload(rawItem)
-        ? enrichCrunchyrollId(rawItem)
-        : legacyMapped
-          ? enrichCrunchyrollId(legacyMapped)
-          : null;
+      const candidate = resolveWatchlistImportItem(rawItem);
 
-      if (!candidate || !validateCrunchyrollImportPayload(candidate)) {
+      if (!candidate) {
         skipped += 1;
         continue;
       }
@@ -498,9 +488,20 @@ router.patch(
           crunchyrollUrl: payload.crunchyrollUrl ?? existing.crunchyrollUrl,
           season: payload.season ?? existing.season,
           episode: payload.episode ?? existing.episode,
-          totalEpisodes: payload.totalEpisodes ?? existing.totalEpisodes,
-          episodeDurationSec: payload.episodeDurationSec ?? existing.episodeDurationSec,
-          remainingTimeSec: payload.remainingTimeSec ?? existing.remainingTimeSec,
+          totalEpisodes:
+            payload.totalEpisodes === undefined
+              ? existing.totalEpisodes
+              : payload.totalEpisodes != null && payload.totalEpisodes > 0
+                ? payload.totalEpisodes
+                : null,
+          episodeDurationSec:
+            payload.episodeDurationSec === undefined
+              ? existing.episodeDurationSec
+              : payload.episodeDurationSec,
+          remainingTimeSec:
+            payload.remainingTimeSec === undefined
+              ? existing.remainingTimeSec
+              : payload.remainingTimeSec,
           hasDub: payload.hasDub ?? existing.hasDub,
           malId: payload.malId ?? existing.malId,
           animeId: payload.animeId ?? existing.animeId,

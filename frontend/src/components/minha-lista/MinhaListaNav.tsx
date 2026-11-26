@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const links = [
-  { href: '/minha-lista', label: 'Catálogo Orbe' },
-  { href: '/minha-lista/fila', label: 'Fila Crunchyroll' },
+  { href: '/minha-lista', label: 'Minha Lista' },
+  { href: '/minha-lista/animes', label: 'Animes' },
+  { href: '/minha-lista/fila', label: 'Fila' },
 ];
 
 export default function MinhaListaNav() {
