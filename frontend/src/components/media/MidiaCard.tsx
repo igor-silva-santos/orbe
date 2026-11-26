@@ -161,7 +161,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
   const filmeDestaquePill = filme?.destaque_pill ?? null;
   const cardStatus = resolveCardStatus(type, midia, { isNewEpisode });
   const platformItems = type === 'jogo' ? platforms : providers;
-  const hasStatusBadge = Boolean(cardStatus);
   const listHighlight =
     isAuthenticated ? getListHighlight(userInteraction?.status) : null;
   const isWeeklyPinned = isAnime && isAuthenticated && animeWeeklyPinIds.includes(midia.id);
@@ -242,20 +241,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
-                {cardStatus && (
-                  <div
-                    className={`absolute z-10 ${
-                      cardStatus.variant === 'em_cartaz' ? 'bottom-2 left-2' : 'top-2 right-2'
-                    }`}
-                  >
-                    <CardStatusBadge status={cardStatus} />
-                  </div>
-                )}
-                {filmeDestaquePill && (
-                  <div className={`absolute z-20 left-2 max-w-[calc(100%-3rem)] ${hasStatusBadge ? 'top-10' : 'top-2'}`}>
-                    <FilmeDestaquePill pill={filmeDestaquePill} />
-                  </div>
-                )}
                 {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
                 {isWeeklyPinned && !listHighlight && (
                   <span
@@ -285,11 +270,26 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 <CardActionMenu
                   title={cardTitle || 'Este título'}
                   actions={menuActions}
-                  raised={hasStatusBadge}
                   onAction={handleMenuAction}
                 />
               </div>
               <div className="p-3 flex flex-col shrink-0">
+                {/* Duas linhas de altura fixa, logo abaixo do pôster. Os selos ficam
+                    fora da imagem — um por linha, para o texto caber inteiro — e o
+                    espaço existe em todo card para a fileira não desalinhar. */}
+                <div className="mb-1.5 flex h-10 flex-col items-start gap-0.5 overflow-hidden">
+                  {type === 'anime' && dubStatus && (
+                    <span className={`w-max max-w-full shrink-0 truncate text-[10px] font-semibold leading-none px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
+                      {dubStatus}
+                    </span>
+                  )}
+                  {filmeDestaquePill && (
+                    <FilmeDestaquePill pill={filmeDestaquePill} />
+                  )}
+                  {cardStatus && (
+                    <CardStatusBadge status={cardStatus} />
+                  )}
+                </div>
                 <div className="flex justify-between items-start mb-1 min-h-[40px] max-h-[40px]">
                   <h3 className="font-bold text-sm sm:text-base line-clamp-2 pr-2 flex-grow orbe-text-primary leading-tight break-words">{cardTitle}</h3>
                   {rating && (
@@ -333,16 +333,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                     Saga · {filme.saga.nome}
                   </Link>
                 )}
-                {/* Altura sempre reservada (mesmo sem dublagem/tipo != anime) — senão cards do
-                    mesmo carrossel/grade ficam com alturas diferentes dependendo do conteúdo. */}
-                <div className="h-[20px] mb-1 flex items-center">
-                  {type === 'anime' && dubStatus && (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
-                      {dubStatus}
-                    </span>
-                  )}
-                </div>
-                {/* Idem: altura fixa mesmo sem plataformas/providers, pra não desalinhar os cards vizinhos. */}
+                {/* Altura fixa mesmo sem plataformas, pra não desalinhar os cards vizinhos. */}
                 <div className="h-6 flex flex-wrap items-center gap-1.5 shrink-0">
                   {platformItems.map((p) => (
                     <PlatformIcon
