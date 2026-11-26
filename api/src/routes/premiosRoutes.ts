@@ -5,6 +5,7 @@ import { mapFilmeToMidia, mapSerieToMidia, mapAnimeToMidia, mapJogoToMidia } fro
 import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import { TWENTY_FOUR_HOURS, parsePagination } from './mediaRoutesHelpers';
+import { buildAwardEventsResponse, mergeAwardFilterOptions } from '../awardCeremonies';
 
 const router = Router();
 
@@ -32,10 +33,9 @@ router.get('/premios/filtros', async (req, res) => {
       ORDER BY ano DESC, nome ASC
     `;
 
-    const names = [...new Set(results.map((r) => r.nome).filter(Boolean))].sort();
-    const years = [...new Set(results.map((r) => r.ano).filter((y) => y != null && y > 0))].sort(
-      (a, b) => b - a,
-    );
+    const dbNames = results.map((r) => r.nome).filter(Boolean) as string[];
+    const dbYears = results.map((r) => r.ano).filter((y) => y != null && y > 0) as Array<number | string>;
+    const { names, years } = mergeAwardFilterOptions(dbNames, dbYears);
 
     res.json({ names, years });
   } catch (error) {
@@ -231,6 +231,22 @@ router.get('/premios/destaques', cacheMiddleware(TWENTY_FOUR_HOURS), async (_req
     logger.error(`Erro ao buscar destaques de premiações: ${error}`);
     res.status(500).json({ error: 'Erro ao buscar destaques de premiações.' });
   }
+});
+
+// Cerimônias, concorrentes, vencedores (só depois do evento) e votação dos fãs.
+// Sem cache: a fase depende do relógio (votação aberta / cerimônia encerrada).
+router.get('/premios/eventos', (req, res) => {
+  const awardName = typeof req.query.awardName === 'string' && req.query.awardName !== 'todos'
+    ? req.query.awardName
+    : undefined;
+  const yearParam = req.query.year;
+  const parsedYear = yearParam !== undefined && String(yearParam) !== 'todos'
+    ? parseInt(String(yearParam), 10)
+    : undefined;
+  const year = parsedYear !== undefined && !Number.isNaN(parsedYear) ? parsedYear : undefined;
+  const mediaType = parseMediaType(req.query.mediaType);
+
+  res.json(buildAwardEventsResponse({ awardName, year, mediaType }));
 });
 
 // Rota para Premiações
