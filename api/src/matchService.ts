@@ -14,11 +14,15 @@ import {
   MATCH_RESULT_LIMIT,
   matchUserMessage,
   MULTI_MODE_NAMES,
+  overviewTokens,
   rarestAttr,
+  rarityMapKey,
   seedWeightFromPreference,
   sharedStrong,
   SINGLE_MODE_NAMES,
   soloRetrievalAttrs,
+  tokenForms,
+  tuneProfile,
   type GamePlay,
   type GateAttr,
   type MatchAttr,
@@ -28,9 +32,9 @@ import {
   type MatchTipo,
   type RarityIndex,
 } from './matchScore';
+import { loadCandidateIds, rememberOverviewFrequency } from './matchRetrieval';
 
 const BASE_SEED_LIMIT = 40;
-const CANDIDATE_POOL = 300;
 
 const DIRECT_ANIME_RELATIONS = new Set([
   'SEQUEL',
@@ -68,6 +72,7 @@ const filmInclude = {
     take: 5,
     include: { pessoa: personSelect },
   },
+  companies: { include: { company: { select: { id: true, name: true } } } },
 };
 
 const serieInclude = {
@@ -196,6 +201,15 @@ function simpleNamedAttrs(
   return out;
 }
 
+function companyAttrs(list: { company?: { id?: number; name?: string | null } | null }[] | null | undefined): MatchAttr[] {
+  const out: MatchAttr[] = [];
+  for (const item of list ?? []) {
+    const attr = namedAttr('company', item.company);
+    if (attr) out.push(attr);
+  }
+  return out;
+}
+
 function developerAttrs(list: { company?: { id?: number; name?: string | null } | null }[] | null | undefined): MatchAttr[] {
   const out: MatchAttr[] = [];
   for (const item of list ?? []) {
@@ -233,6 +247,8 @@ function toProfile(tipo: MatchTipo, row: CatalogRow, weight = 1): MatchProfile {
         diretor: peopleAttrs(row.crew),
         elenco: castAttrs(row.cast),
         decada: decadeAttr(row.releaseDate, row.releaseYear),
+        trama: overviewTokens(row.overview),
+        produtora: companyAttrs(row.companies),
       },
     };
   }
@@ -246,6 +262,7 @@ function toProfile(tipo: MatchTipo, row: CatalogRow, weight = 1): MatchProfile {
         criador: peopleAttrs([...(row.createdBy ?? []), ...(row.crew ?? [])]),
         elenco: castAttrs(row.cast),
         decada: decadeAttr(row.firstAirDate, row.releaseYear),
+        trama: overviewTokens(row.overview),
       },
     };
   }
@@ -279,9 +296,13 @@ function toProfile(tipo: MatchTipo, row: CatalogRow, weight = 1): MatchProfile {
 }
 
 function displayLabel(tipo: MatchTipo, label: string): string {
-  if (tipo === 'anime') return translateAnimeGenre(label);
-  if (tipo === 'jogo') return translateGameTheme(label);
-  return label;
+  const translated = tipo === 'anime'
+    ? translateAnimeGenre(label)
+    : tipo === 'jogo'
+      ? translateGameTheme(label)
+      : label;
+  if (!translated) return translated;
+  return translated.charAt(0).toLocaleUpperCase('pt-BR') + translated.slice(1);
 }
 
 function mapRow(tipo: MatchTipo, row: CatalogRow): Record<string, unknown> {
@@ -435,41 +456,45 @@ async function loadRows(tipo: MatchTipo, ids: number[]): Promise<CatalogRow[]> {
 async function loadCandidateRows(
   tipo: MatchTipo,
   attrs: GateAttr[],
+  seeds: MatchProfile[],
   excludeIds: number[],
   gamePlay: GamePlay | null,
   allowAdult: boolean,
 ): Promise<CatalogRow[]> {
-  if (gateFilters(tipo, attrs).length === 0) return [];
-  const where = candidateWhere(tipo, attrs, excludeIds, gamePlay, allowAdult);
+  const ids = await loadCandidateIds({ tipo, seeds, attrs, excludeIds, gamePlay });
+  if (ids.length === 0) return [];
   if (tipo === 'filme') {
     return prisma.filme.findMany({
-      where,
+      where: { AND: [sheetWhere(allowAdult), { tmdbId: { in: ids } }] },
       include: filmInclude,
-      take: CANDIDATE_POOL,
-      orderBy: { tmdbId: 'asc' },
     });
   }
   if (tipo === 'serie') {
     return prisma.serie.findMany({
-      where,
+      where: { AND: [sheetWhere(allowAdult), { tmdbId: { in: ids } }] },
       include: serieInclude,
-      take: CANDIDATE_POOL,
-      orderBy: { tmdbId: 'asc' },
     });
   }
   if (tipo === 'anime') {
     return prisma.anime.findMany({
-      where,
+      where: { AND: [animeSafeWhereFilter, { anilistId: { in: ids } }] },
       include: animeInclude,
-      take: CANDIDATE_POOL,
-      orderBy: { anilistId: 'asc' },
     });
   }
   return prisma.jogo.findMany({
-    where,
+    where: {
+      AND: [
+        {
+          OR: [
+            { AND: [{ summary: { not: null } }, { NOT: { summary: '' } }] },
+            { AND: [{ cover: { not: null } }, { NOT: { cover: '' } }] },
+          ],
+        },
+        { igdbId: { in: ids } },
+        ...(gamePlay ? [modeWhere(gamePlay)] : []),
+      ],
+    },
     include: jogoInclude,
-    take: CANDIDATE_POOL,
-    orderBy: { igdbId: 'asc' },
   });
 }
 
@@ -570,6 +595,11 @@ async function loadRarity(tipo: MatchTipo): Promise<RarityIndex> {
         FROM "FilmeCast" fc
         GROUP BY fc."pessoaId"
       `, 'elenco', 'pessoa', df),
+      groupedIds(prisma.$queryRaw`
+        SELECT fc."companyId" AS id, COUNT(DISTINCT fc."filmeId")::int AS df
+        FROM "FilmeCompany" fc
+        GROUP BY fc."companyId"
+      `, 'produtora', 'company', df),
       (async () => {
         const rows = await prisma.$queryRaw<Array<{ decade: unknown; df: unknown }>>`
           SELECT (FLOOR(COALESCE(EXTRACT(YEAR FROM "releaseDate"), "releaseYear"::numeric) / 10) * 10)::int AS decade,
@@ -756,7 +786,15 @@ export async function runMatch(input: {
   if (usable.length === 0 || (!input.useBase && usable.some((seed) => !hasComparableSignal(input.tipo, seed.profile)))) {
     return emptyPayload(meta, 'sem_ficha', { sementes: paired.map((seed) => seed.row) });
   }
-  const profiles = usable.map((seed) => seed.profile);
+  const rawProfiles = usable.map((seed) => seed.profile);
+  if (input.tipo === 'filme' || input.tipo === 'serie') {
+    await rememberOverviewFrequency(
+      input.tipo,
+      rawProfiles.flatMap((profile) => (profile.attrs.trama ?? []).map((attr) => attr.key)),
+      rarity,
+    );
+  }
+  const profiles = rawProfiles.map((profile) => tuneProfile(profile, rarity));
   const seedRows = usable.map((seed) => seed.row);
 
   const strong = input.modo === 'dupla' ? sharedStrong(input.tipo, profiles, rarity) : [];
@@ -779,15 +817,24 @@ export async function runMatch(input: {
   const candidateRows = await loadCandidateRows(
     input.tipo,
     queryAttrs,
+    profiles,
     excludeIds,
     input.gamePlay,
     adultOk,
   );
+  const rawCandidates = candidateRows.map((row) => toProfile(input.tipo, row));
+  if (input.tipo === 'filme' || input.tipo === 'serie') {
+    await rememberOverviewFrequency(
+      input.tipo,
+      rawCandidates.flatMap((profile) => (profile.attrs.trama ?? []).map((attr) => attr.key)),
+      rarity,
+    );
+  }
   const scored = computeMatch({
     tipo: input.tipo,
     modo: input.modo,
     seeds: profiles,
-    candidates: candidateRows.map((row) => toProfile(input.tipo, row)),
+    candidates: rawCandidates.map((profile) => tuneProfile(profile, rarity)),
     rarity,
     gamePlay: input.gamePlay,
     blockedIds,
