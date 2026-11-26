@@ -375,7 +375,12 @@ router.get('/filmes/year-tbd', cacheMiddleware(TWELVE_HOURS), async (req, res) =
   try {
     const filmes = await fetchFilmesForCarousel(
       yearOnlyFilmeWhere(parsedYear),
-      { orderBy: { releaseYear: 'asc' }, take: CAROUSEL_ITEM_LIMIT, year: parsedYear },
+      {
+        orderBy: { releaseYear: 'asc' },
+        take: CAROUSEL_ITEM_LIMIT,
+        year: parsedYear,
+        yearTbd: true,
+      },
     );
     res.json(filmes.map(mapFilmeToCarouselCard));
   } catch (error) {

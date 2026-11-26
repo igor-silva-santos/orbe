@@ -1,5 +1,14 @@
+import type { Metadata } from 'next';
 import SeriesClient from './SeriesClient';
 import { fetchSeriesPageData, type SeriesPageData } from '@/lib/apiServer';
+import { getSiteUrl } from '@/lib/siteUrl';
+
+export const metadata: Metadata = {
+  title: 'Séries — Orbe Nerd',
+  description:
+    'Explore séries populares, lançamentos e clássicos — filtros por gênero, ano, status e plataforma.',
+  alternates: { canonical: `${getSiteUrl()}/series` },
+};
 
 const emptyData: SeriesPageData = {
   results: [],

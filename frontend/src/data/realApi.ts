@@ -178,6 +178,14 @@ export const realApi = {
       return { destaques: [], categorias: [], modos: [], plataformas: [], semana: '' };
     }
   },
+  getGameRecommendations: async () => {
+    try {
+      return await orbeNerdApi.getGameRecommendations();
+    } catch (error) {
+      console.error('Erro ao buscar recomendações de jogos:', error);
+      throw error;
+    }
+  },
   getHoje: async () => {
     try {
       return await orbeNerdApi.getHoje();

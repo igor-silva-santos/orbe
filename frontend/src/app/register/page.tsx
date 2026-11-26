@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/stores/appStore';
 import { registerWithCredentials } from '@/lib/auth/session';
 import { getToken } from '@/lib/auth/token';
-import { establishBrowserSession, safeRedirectPath } from '@/lib/session';
+import { establishBrowserSession, postLoginRedirectFromSearch } from '@/lib/session';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -42,7 +42,7 @@ export default function RegisterPage() {
       if (token) await establishBrowserSession(token);
       login(user);
       const params = new URLSearchParams(window.location.search);
-      window.location.href = safeRedirectPath(params.get('redirect'));
+      window.location.href = postLoginRedirectFromSearch(params);
     } catch (error) {
       console.error('Register API call failed:', error);
       toast.error(error instanceof Error ? error.message : 'Ocorreu um erro ao tentar criar sua conta. Tente novamente.');

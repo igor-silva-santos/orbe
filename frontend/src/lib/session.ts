@@ -11,6 +11,11 @@ export function safeRedirectPath(value: string | null): string {
   return value;
 }
 
+/** Path pós-login a partir da query (`next` tem prioridade; middleware usa `redirect`). */
+export function postLoginRedirectFromSearch(params: URLSearchParams): string {
+  return safeRedirectPath(params.get('next') ?? params.get('redirect'));
+}
+
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 dias — alinhado ao JWT da API
 
 export function getSessionCookieOptions(): {

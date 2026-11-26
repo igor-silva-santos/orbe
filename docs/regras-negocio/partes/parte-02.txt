@@ -1,0 +1,687 @@
+========== 87/511 — RN-DEV-007 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Entrada pelo modal
+Descrição: Link no detalhe do jogo.
+Pré-condições: Modal de jogo aberto.
+Resultado na tela: Link da desenvolvedora leva a esta página.
+Como testar: Jogo → link dev → validar URL.
+
+========== 88/511 — RN-DUB-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Carregar créditos
+Descrição: Página do dublador.
+Pré-condições: ID válido.
+Resultado na tela: Nome, foto e obras dubladas.
+Como testar: Dublador conhecido PT-BR.
+
+========== 89/511 — RN-DUB-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Rótulo de idioma
+Descrição: Contexto da carreira.
+Pré-condições: Metadado de idioma.
+Resultado na tela: Português → “Dublagem em português”; japonês → “Voz original”; outro → texto genérico.
+Como testar: Comparar dublador BR vs seiyuu.
+
+========== 90/511 — RN-DUB-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Tipos na filmografia
+Descrição: Obras dubladas.
+Pré-condições: Créditos variados.
+Resultado na tela: Pode incluir filme, série, anime e jogo com rótulo de tipo.
+Como testar: Grid com anime e filme.
+
+========== 91/511 — RN-DUB-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Personagem no card
+Descrição: Papel dublado.
+Pré-condições: Crédito com personagem.
+Resultado na tela: Nome do personagem no card/poster.
+Como testar: Card “como {personagem}”.
+
+========== 92/511 — RN-DUB-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Abrir detalhe
+Descrição: Clique na obra.
+Pré-condições: Item na grid.
+Resultado na tela: Modal abre para o tipo correto (filme, série, anime, jogo).
+Como testar: Clicar anime dublado.
+
+========== 93/511 — RN-DUB-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Voltar para busca
+Descrição: Contexto de busca.
+Pré-condições: Veio da overlay de busca.
+Resultado na tela: Voltar reabre busca; **não** reabre modal de filme como na página pessoa.
+Como testar: Busca → dublador → voltar.
+
+========== 94/511 — RN-EVT-001 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Ano padrão
+Descrição: Seletor no topo.
+Pré-condições: Página aberta.
+Resultado na tela: Ano atual selecionado; opções = ano atual e cinco anteriores.
+Como testar: Abrir eventos em setembro/2026.
+
+========== 95/511 — RN-EVT-002 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Carregar resumo
+Descrição: Troca de ano.
+Pré-condições: Ano escolhido.
+Resultado na tela: Lista de eventos do ano; erro → estado de falha sem dados.
+Como testar: Trocar ano; simular erro.
+
+========== 96/511 — RN-EVT-003 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Só eventos com jogos
+Descrição: Relevância.
+Pré-condições: Ano com eventos vazios e cheios.
+Resultado na tela: Evento só aparece se tiver pelo menos um jogo associado.
+Como testar: Ano com evento “sem jogos” oculto.
+
+========== 97/511 — RN-EVT-004 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Contador
+Descrição: Badge no cabeçalho da lista.
+Pré-condições: Ano com eventos relevantes.
+Resultado na tela: Número de eventos exibidos naquele ano.
+Como testar: Contar cards vs badge.
+
+========== 98/511 — RN-EVT-005 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Loading e erro
+Descrição: Estados intermediários.
+Pré-condições: Rede lenta ou falha.
+Resultado na tela: Esqueletos durante carga; mensagem/CTA em falha.
+Como testar: Throttle e offline.
+
+========== 99/511 — RN-EVT-006 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Ano vazio
+Descrição: Nenhum evento relevante.
+Pré-condições: Ano sem jogos em eventos.
+Resultado na tela: Sugestão para escolher outro ano.
+Como testar: Selecionar ano antigo vazio.
+
+========== 100/511 — RN-EVT-007 ==========
+Tela: páginas de descoberta e créditos acessadas pelo menu — **Continuações**, **Premiações**, **Eventos**, **Pessoa**, **Dublador** e **Desenvolvedora** — além de abas de continuação dentro do modal de filme/série.
+Nome: Jogos por evento
+Descrição: Card de evento.
+Pré-condições: Evento com jogos.
+Resultado na tela: Cada evento mostra jogos em cards com interações do usuário.
+Como testar: Expandir/rolar evento E3 etc.
+
+========== 101/511 — RN-FILMES-001 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Conteúdo na primeira abertura
+Descrição: A listagem e as opções de filtro já vêm preparadas quando a página abre, sem precisar clicar em nada.
+Pré-condições: Site acessível; catálogo com filmes.
+Resultado na tela: Ao entrar em Filmes, cards e menus de filtro aparecem (ou estado vazio amigável se não houver dados).
+Como testar: Abrir a página Filmes em aba nova; observar grade e selects antes de interagir.
+
+========== 102/511 — RN-FILMES-002 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atualização gradual do catálogo
+Descrição: Mudanças no catálogo podem levar alguns minutos para aparecer na página após uma atualização em massa, mesmo sem o usuário fazer nada.
+Pré-condições: Catálogo alterado recentemente no ambiente de teste.
+Resultado na tela: Após aguardar alguns minutos e recarregar Filmes, novos títulos ou datas podem surgir.
+Como testar: Registrar um filme de teste; aguardar ~5 min; recarregar Filmes.
+
+========== 103/511 — RN-FILMES-003 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Falha no carregamento inicial
+Descrição: Se a listagem não puder ser montada no primeiro momento, a página continua utilizável.
+Pré-condições: Simular indisponibilidade temporária do catálogo na abertura.
+Resultado na tela: Página abre sem erro do navegador; grade vazia; filtros sem opções ou vazios; mensagem de “nenhum filme” se aplicável.
+Como testar: Ambiente com catálogo indisponível no primeiro acesso.
+
+========== 104/511 — RN-FILMES-004 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Texto do cabeçalho
+Descrição: Título e subtítulo da área são fixos.
+Pré-condições: Usuário na página Filmes.
+Resultado na tela: Título **Filmes** e texto sobre cartaz, lançamentos e clássicos no topo.
+Como testar: Ler o cabeçalho da página.
+
+========== 105/511 — RN-FILMES-005 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Gaveta O que vem aí
+Descrição: Bloco horizontal de estreias futuras de filme, acima dos filtros.
+Pré-condições: Resumo de eventos do site inclui filmes em **próximos lançamentos**.
+Resultado na tela: Seção colapsável **O que vem aí** com carrossel horizontal de cards de filme.
+Como testar: Ambiente com lançamentos futuros; abrir Filmes.
+
+========== 106/511 — RN-FILMES-006 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Ações nos cards da gaveta
+Descrição: Favoritar e demais ações do menu ⋮ funcionam igual à grade principal.
+Pré-condições: Gaveta visível; usuário logado ou visitante conforme regra do card.
+Resultado na tela: Menu e estados de lista refletem na conta quando logado.
+Como testar: Favoritar um filme na gaveta; recarregar logado.
+
+========== 107/511 — RN-FILMES-007 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Gaveta Em cartaz
+Descrição: Destaques de filmes **em cartaz** em bloco próprio.
+Pré-condições: Resumo de eventos traz filmes em **destaques recentes / em cartaz**.
+Resultado na tela: Seção **Em cartaz** com ícone de claquete e carrossel horizontal.
+Como testar: Ambiente com destaques em cartaz; abrir Filmes.
+
+========== 108/511 — RN-FILMES-008 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Gavetas carregam após a página
+Descrição: As gavetas podem aparecer um instante depois do restante da página.
+Pré-condições: Página Filmes recém-aberta.
+Resultado na tela: Primeiro aparecem filtros e grade; em seguida as gavetas (se houver conteúdo).
+Como testar: Abrir Filmes e observar ordem de aparecimento dos blocos.
+
+========== 109/511 — RN-FILMES-009 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atalho Todos os Filmes
+Descrição: Restaura a listagem geral sem curadoria de atalho.
+Pré-condições: Qualquer outro atalho ativo.
+Resultado na tela: Botão **Todos os Filmes** destacado; grade ampla (ordenada por título).
+Como testar: Clicar **Todos os Filmes**.
+
+========== 110/511 — RN-FILMES-010 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atalho Em Cartaz
+Descrição: Mostra só filmes marcados como em cartaz.
+Pré-condições: Catálogo com filmes em cartaz e outros.
+Resultado na tela: Grade restrita a títulos em cartaz; contador atualizado.
+Como testar: Clicar **Em Cartaz**; conferir etiquetas nos cards.
+
+========== 111/511 — RN-FILMES-011 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atalho Em Breve
+Descrição: Mostra só estreias futuras curadas como “em breve”.
+Pré-condições: Filmes em breve e já lançados no catálogo.
+Resultado na tela: Só filmes em breve na grade.
+Como testar: Clicar **Em Breve**.
+
+========== 112/511 — RN-FILMES-012 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atalho Populares
+Descrição: Reordena por popularidade (não alfabético).
+Pré-condições: Vários filmes com popularidade distinta.
+Resultado na tela: Ordem diferente de **Todos**; títulos mais populares no topo.
+Como testar: Alternar **Todos** e **Populares** e comparar ordem.
+
+========== 113/511 — RN-FILMES-013 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Destaque visual do atalho
+Descrição: Só um atalho aparece como selecionado.
+Pré-condições: Dois ou mais atalhos disponíveis.
+Resultado na tela: Botão ativo com cor primária; demais em fundo neutro.
+Como testar: Clicar cada atalho e observar estilo.
+
+========== 114/511 — RN-FILMES-014 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Gênero “Todos”
+Descrição: Não restringe por gênero.
+Pré-condições: Select em **Todos os Gêneros**.
+Resultado na tela: Grade ampla dentro do atalho ativo.
+Como testar: Escolher todos os gêneros após filtrar um gênero específico.
+
+========== 115/511 — RN-FILMES-015 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Nome do gênero no menu
+Descrição: Primeira letra do gênero aparece maiúscula no dropdown.
+Pré-condições: Lista de gêneros populada.
+Resultado na tela: Ex.: “action” exibido como “Action”.
+Como testar: Abrir select de gênero.
+
+========== 116/511 — RN-FILMES-016 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Ano “Todos”
+Descrição: Não restringe por ano de estreia.
+Pré-condições: **Todos os Anos** selecionado.
+Resultado na tela: Filmes de vários anos na grade.
+Como testar: Resetar ano para todos.
+
+========== 117/511 — RN-FILMES-017 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Anos no dropdown
+Descrição: Anos disponíveis refletem filmes existentes no catálogo, do mais recente para o mais antigo.
+Pré-condições: Catálogo com vários anos.
+Resultado na tela: Select de ano sem duplicatas; ordem decrescente.
+Como testar: Comparar anos do menu com filmes conhecidos.
+
+========== 118/511 — RN-FILMES-018 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Meses em português
+Descrição: Janeiro a dezembro com rótulos em PT-BR.
+Pré-condições: Select de mês aberto.
+Resultado na tela: Doze meses nomeados corretamente.
+Como testar: Abrir filtro de mês.
+
+========== 119/511 — RN-FILMES-019 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Mês “Todos”
+Descrição: Não restringe por mês.
+Pré-condições: **Todos os Meses**.
+Resultado na tela: Qualquer mês dentro dos demais filtros.
+Como testar: Selecionar todos os meses.
+
+========== 120/511 — RN-FILMES-020 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Status traduzido
+Descrição: Opções de status exibem rótulo em português quando o produto conhece o status.
+Pré-condições: Select de status populado.
+Resultado na tela: Labels legíveis (ex.: lançado, em produção).
+Como testar: Abrir filtro de status.
+
+========== 121/511 — RN-FILMES-021 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtro por plataforma
+Descrição: Restringe a filmes disponíveis na plataforma escolhida (streaming).
+Pré-condições: Netflix (ou outra) selecionada.
+Resultado na tela: Só cards com aquela plataforma nos metadados visíveis.
+Como testar: Filtrar Netflix; abrir detalhe de um card.
+
+========== 122/511 — RN-FILMES-022 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Plataformas ordenadas
+Descrição: Nomes de plataforma no select em ordem alfabética.
+Pré-condições: Várias plataformas no catálogo.
+Resultado na tela: Lista A–Z no dropdown.
+Como testar: Abrir **Todas as Plataformas**.
+
+========== 123/511 — RN-FILMES-023 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtros sempre clicáveis
+Descrição: Menus de filtro permanecem habilitados durante uso normal.
+Pré-condições: Página Filmes estável.
+Resultado na tela: Selects não ficam permanentemente desabilitados.
+Como testar: Usar todos os filtros em sequência.
+
+========== 124/511 — RN-FILMES-024 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Primeira visita sem “piscar” desnecessário
+Descrição: Ao abrir Filmes, a grade inicial não dispara um segundo carregamento imediato só por abrir a página.
+Pré-condições: Primeira visita com catálogo OK.
+Resultado na tela: Conteúdo estável logo após abrir; novo carregamento só ao mudar filtro/atalho.
+Como testar: Abrir Filmes e aguardar sem tocar filtros; observar spinner.
+
+========== 125/511 — RN-FILMES-025 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Mudança de filtro recarrega
+Descrição: Qualquer alteração em atalho ou select atualiza a grade.
+Pré-condições: Filtro ou atalho alterado.
+Resultado na tela: Spinner breve; nova lista e contador.
+Como testar: Trocar gênero ou ano.
+
+========== 126/511 — RN-FILMES-026 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Atualização após sync do site
+Descrição: Quando o site termina uma sincronização de catálogo em segundo plano, a listagem pode atualizar sozinha.
+Pré-condições: Sync disparada com Filmes aberta.
+Resultado na tela: Cards ou contagem mudam sem F5 manual.
+Como testar: Manter Filmes aberta durante sync no ambiente de teste.
+
+========== 127/511 — RN-FILMES-027 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Spinner ao filtrar
+Descrição: Durante nova busca, a grade some e aparece indicador central.
+Pré-condições: Filtro alterado com rede normal.
+Resultado na tela: Spinner no lugar do grid até concluir.
+Como testar: Trocar filtro e observar loading.
+
+========== 128/511 — RN-FILMES-028 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Contador com total global
+Descrição: O texto “X filmes encontrados” usa o **total** que corresponde aos filtros, não só os cards visíveis na primeira “página” interna.
+Pré-condições: Mais de ~48 filmes para o filtro atual.
+Resultado na tela: Contador alto (ex.: 200) com grade mostrando um subconjunto inicial.
+Como testar: Filtro amplo; ler contador vs cards na tela.
+
+========== 129/511 — RN-FILMES-029 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Contador em carregamento
+Descrição: Enquanto recarrega, não mostra número antigo enganoso.
+Pré-condições: Filtro recém-alterado.
+Resultado na tela: Texto **Carregando...**.
+Como testar: Trocar filtro e ler linha acima da grade.
+
+========== 130/511 — RN-FILMES-030 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Grade responsiva
+Descrição: Cards em colunas que aumentam em telas maiores.
+Pré-condições: Resultados > 0; não loading.
+Resultado na tela: 2 a 5 colunas; cards com largura máxima ~210px.
+Como testar: Redimensionar janela do navegador.
+
+========== 131/511 — RN-FILMES-031 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Nenhum resultado
+Descrição: Combinação de filtros sem match.
+Pré-condições: Filtros restritivos.
+Resultado na tela: Ícone de filtro, título **Nenhum filme encontrado**, sugestão de ajustar filtros.
+Como testar: Aplicar filtro impossível.
+
+========== 132/511 — RN-FILMES-032 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Falha ao recarregar no cliente
+Descrição: Erro ao buscar de novo pode esvaziar a grade ou manter último estado, sem quebrar a página.
+Pré-condições: Rede cortada ao mudar filtro.
+Resultado na tela: Página continua; grade pode zerar; sem crash.
+Como testar: Desligar rede ao trocar filtro.
+
+========== 133/511 — RN-FILMES-033 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Limite inicial de cards na tela
+Descrição: A grade mostra um lote inicial de filmes (dezenas), não o catálogo inteiro de uma vez.
+Pré-condições: Filtro amplo com centenas de títulos.
+Resultado na tela: Até ~48 cards visíveis na grade por vez (sem botão “carregar mais” nesta página).
+Como testar: Contar cards com filtro **Todos**.
+
+========== 134/511 — RN-FILMES-034 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Cards com informação de streaming
+Descrição: Quando o filme tem plataformas cadastradas, o card pode exibir ícones/nomes de streaming.
+Pré-condições: Filme com Netflix/Disney+ etc.
+Resultado na tela: Ícones ou pills de plataforma no card.
+Como testar: Inspecionar card de filme em streaming.
+
+========== 135/511 — RN-FILMES-035 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Saga e coleção no card
+Descrição: Filmes parte de saga podem mostrar indício de continuação no card.
+Pré-condições: Filme com saga cadastrada.
+Resultado na tela: Atalho de saga visível no card (detalhe em modais).
+Como testar: Card de filme conhecido em saga.
+
+========== 136/511 — RN-FILMES-036 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Curadoria de exibição padrão
+Descrição: A listagem pública prioriza filmes “apresentáveis”: com pôster, sinopse e relevância mínima, salvo exceções de cartaz/em breve.
+Pré-condições: Filme incompleto no catálogo vs filme em cartaz.
+Resultado na tela: Título sem pôster tende a **não** aparecer; em cartaz pode aparecer mesmo com pouca popularidade.
+Como testar: Comparar filme rascunho vs filme em cartaz.
+
+========== 137/511 — RN-FILMES-037 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Sem pôster
+Descrição: Filmes sem imagem de pôster não entram na grade padrão.
+Pré-condições: Filme de teste sem pôster.
+Resultado na tela: Ausente em Filmes com filtros abertos.
+Como testar: Buscar título sem pôster na busca global.
+
+========== 138/511 — RN-FILMES-038 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Sem sinopse
+Descrição: Filmes sem texto de sinopse tendem a ficar de fora, exceto flags de cartaz/em breve.
+Pré-condições: Filme sem overview.
+Resultado na tela: Ausente na listagem geral.
+Como testar: Validar com dado de teste.
+
+========== 139/511 — RN-FILMES-039 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Conteúdo adulto explícito
+Descrição: Filmes marcados como adultos não aparecem na listagem pública.
+Pré-condições: Filme adulto no catálogo.
+Resultado na tela: Ausente em Filmes.
+Como testar: Buscar título adulto.
+
+========== 140/511 — RN-FILMES-040 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Exceção em cartaz ou em breve
+Descrição: Filmes em cartaz ou em breve podem aparecer mesmo com popularidade baixa.
+Pré-condições: Filme em cartaz com poucos votos.
+Resultado na tela: Presente ao usar atalho **Em Cartaz** ou **Em Breve**.
+Como testar: Testar título em cartaz marginal.
+
+========== 141/511 — RN-FILMES-041 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Nota mínima com muitos votos
+Descrição: Filmes com muitas avaliações e nota muito baixa tendem a ser ocultados.
+Pré-condições: Filme nota ~5,5 com centenas de votos.
+Resultado na tela: Ausente na listagem geral.
+Como testar: Comparar com filme bem avaliado.
+
+========== 142/511 — RN-FILMES-042 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Ano corrente ou futuro mais permissivo
+Descrição: Filtrar pelo **ano atual** (ou futuro) pode incluir estreias ainda sem muita popularidade.
+Pré-condições: Ano = ano corrente no select.
+Resultado na tela: Estreia futura do ano aparece na grade.
+Como testar: Filtrar ano corrente; procurar estreia futura.
+
+========== 143/511 — RN-FILMES-043 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtro por ano civil
+Descrição: Ano escolhido limita a estreias daquele ano calendário.
+Pré-condições: Ano 2020 selecionado.
+Resultado na tela: Só filmes com data de estreia em 2020.
+Como testar: Filtrar 2020 e abrir detalhes de cards.
+
+========== 144/511 — RN-FILMES-044 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtro por mês
+Descrição: Mês escolhido limita estreias daquele mês (com ano definido ou ano corrente).
+Pré-condições: Março + ano 2025.
+Resultado na tela: Só estreias de março/2025.
+Como testar: Combinar mês e ano.
+
+========== 145/511 — RN-FILMES-045 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Mês sem ano usa ano atual
+Descrição: Só mês selecionado assume o ano de “hoje”.
+Pré-condições: Mês = mês atual; ano = todos.
+Resultado na tela: Estreias daquele mês no ano corrente.
+Como testar: Em setembro, filtrar setembro com todos os anos.
+
+========== 146/511 — RN-FILMES-046 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtro por gênero
+Descrição: Gênero escolhido exige correspondência exata no cadastro do filme.
+Pré-condições: Gênero Action.
+Resultado na tela: Só filmes daquele gênero.
+Como testar: Filtrar um gênero raro e validar cards.
+
+========== 147/511 — RN-FILMES-047 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Filtro por status
+Descrição: Status escolhido restringe ao estado cadastral (ex.: lançado, cancelado).
+Pré-condições: Status específico.
+Resultado na tela: Grade coerente com status nos detalhes.
+Como testar: Filtrar status e conferir detalhe.
+
+========== 148/511 — RN-FILMES-048 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Só já lançados (catálogo)
+Descrição: Regra interna de “lançados”: data de estreia no passado.
+Pré-condições: Filme futuro vs passado.
+Resultado na tela: Filme futuro não entra em conjuntos que exigem “já lançado” (ex.: comparar com atalho **Em Breve**).
+Como testar: Estreia futura só em **Em Breve**, não como lançado antigo.
+
+========== 149/511 — RN-FILMES-049 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Só futuros (catálogo)
+Descrição: Regra interna de “futuros”: estreia hoje ou depois.
+Pré-condições: Filme passado e futuro.
+Resultado na tela: **Em Breve** alinhado a futuros curados.
+Como testar: Comparar atalhos **Todos** vs **Em Breve**.
+
+========== 150/511 — RN-FILMES-050 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Disponibilidade cinema (catálogo)
+Descrição: Subconjunto usado em outras áreas para “no cinema”.
+Pré-condições: Filme só streaming vs em cartaz.
+Resultado na tela: **Em Cartaz** e gaveta **Em cartaz** concentram títulos de cinema.
+Como testar: Validar filme em cartaz nos atalhos/gaveta.
+
+========== 151/511 — RN-FILMES-051 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Disponibilidade streaming (catálogo)
+Descrição: Subconjunto de títulos com streaming cadastrado.
+Pré-condições: Filme com plataforma.
+Resultado na tela: Aparece ao filtrar plataforma; etiqueta **No streaming** no card quando aplicável.
+Como testar: Filtrar plataforma + ler etiqueta do card.
+
+========== 152/511 — RN-FILMES-052 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Ordem alfabética em “Todos”
+Descrição: Sem atalho **Populares**, ordem por título.
+Pré-condições: **Todos os Filmes** ativo.
+Resultado na tela: Primeiros cards em ordem A–Z por título.
+Como testar: Ler primeiros títulos da grade.
+
+========== 153/511 — RN-FILMES-053 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Listagem mais ampla que a home
+Descrição: A página Filmes pode mostrar títulos que a faixa Filmes da inicial não mostra.
+Pré-condições: Concerto/gravação ao vivo cadastrada.
+Resultado na tela: Pode aparecer em Filmes e **não** no carrossel da home.
+Como testar: Comparar mesmo título home vs Filmes.
+
+========== 154/511 — RN-FILMES-054 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Opções de filtro só com filmes
+Descrição: Gêneros/plataformas no menu existem porque há pelo menos um filme associado.
+Pré-condições: Gênero órfão no cadastro interno.
+Resultado na tela: Gênero sem filme **não** aparece no select.
+Como testar: Abrir todos os gêneros e buscar um raro inexistente.
+
+========== 155/511 — RN-FILMES-055 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Anos sem duplicata
+Descrição: Cada ano aparece uma vez no filtro de ano.
+Pré-condições: Vários filmes no mesmo ano.
+Resultado na tela: Ano único no dropdown.
+Como testar: Abrir filtro de ano.
+
+========== 156/511 — RN-FILMES-056 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Janela temporal da home
+Descrição: Carrossel da inicial foca lançamentos em janela de anos próximos; Filmes lista histórico amplo.
+Pré-condições: Filme muito antigo fora da janela da home.
+Resultado na tela: Presente em Filmes com filtros; pode faltar na home.
+Como testar: Filme clássico: Filmes vs home.
+
+========== 157/511 — RN-FILMES-057 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Concertos na listagem
+Descrição: Shows, stand-up e concertos ao vivo podem aparecer aqui.
+Pré-condições: Título tipo “Live from…”.
+Resultado na tela: Card visível em Filmes; pode faltar no carrossel da home.
+Como testar: Buscar concerto na página Filmes.
+
+========== 158/511 — RN-FILMES-058 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Curta-metragem futuro na home
+Descrição: Estreias futuras muito curtas podem ser excluídas do carrossel inicial.
+Pré-condições: Curta com duração conhecida e estreia futura.
+Resultado na tela: Pode aparecer em Filmes filtrando ano/mês; pode faltar na home.
+Como testar: Comparar home vs Filmes.
+
+========== 159/511 — RN-FILMES-059 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Duração mínima só na home
+Descrição: Regra de “filme de estreia” longo para destaque na home não se aplica à listagem Filmes.
+Pré-condições: Filme futuro curto.
+Resultado na tela: Visível em Filmes se passar curadoria da listagem.
+Como testar: Mesmo título home vs Filmes.
+
+========== 160/511 — RN-FILMES-060 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Abrir detalhe pelo card
+Descrição: Clique no card abre painel/modal de detalhe do filme.
+Pré-condições: Card na grade ou gaveta.
+Resultado na tela: Modal com sinopse, datas, links.
+Como testar: Clicar poster/título.
+
+========== 161/511 — RN-FILMES-061 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Destaques no detalhe
+Descrição: Alguns filmes exibem etiquetas extras (ex.: mais esperado) no detalhe.
+Pré-condições: Filme elegível a destaque editorial.
+Resultado na tela: Pills no modal além do status normal.
+Como testar: Abrir detalhe de estreia aguardada.
+
+========== 162/511 — RN-FILMES-062 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Edição administrativa
+Descrição: Alterações de cadastro feitas por equipe interna não são testadas nesta tela pública.
+Pré-condições: Conta visitante ou usuário comum.
+Resultado na tela: Comportamento da listagem reflete catálogo já publicado; sem UI de edição aqui.
+Como testar: Confirmar ausência de controles de admin na página Filmes.
+
+========== 163/511 — RN-FILMES-063 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Ranking “mais esperados”
+Descrição: Lista de antecipação de estreias alimenta destaques em outras áreas (ex.: **Em alta** na home), não um bloco dedicado em Filmes.
+Pré-condições: Estreias próximas no catálogo.
+Resultado na tela: Filmes pode mostrar pills nos cards/detalhe; ranking completo não é seção fixa aqui.
+Como testar: Comparar filme “mais esperado” na home vs Filmes.
+
+========== 164/511 — RN-FILMES-064 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Timeline por ano (outras telas)
+Descrição: Navegação mês a mês por carrossel existe na home, não como timeline na página Filmes.
+Pré-condições: Usuário em Filmes.
+Resultado na tela: Filmes usa grade + filtros ano/mês, não carrossel temporal contínuo.
+Como testar: Confirmar ausência de carrossel mensal contínuo em Filmes.
+
+========== 165/511 — RN-FILMES-065 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Timeline por mês (outras telas)
+Descrição: Agrupamento fino por mês no carrossel da home; aqui filtro de mês na grade.
+Pré-condições: Mês selecionado.
+Resultado na tela: Grade estática filtrada, não slide por slide de timeline.
+Como testar: Filtrar mês e rolar grade.
+
+========== 166/511 — RN-FILMES-066 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Só ano confirmado (outras telas)
+Descrição: Blocos “sem data confirmada” aparecem no carrossel da home; em Filmes use filtro de ano e status.
+Pré-condições: Filme TBA só com ano.
+Resultado na tela: Pode listar com data incompleta nos detalhes; sem separador TBD como na home.
+Como testar: Filme “2027 — data a confirmar” em Filmes vs home.
+
+========== 167/511 — RN-FILMES-067 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Contador alinhado ao total filtrado
+Descrição: Número exibido corresponde ao conjunto filtrado no servidor, não a páginas visuais futuras.
+Pré-condições: Filtro restritivo.
+Resultado na tela: Contador = quantidade lógica do filtro.
+Como testar: Anotar contador e amostrar busca por título.
+
+========== 168/511 — RN-FILMES-068 ==========
+Tela: página **Filmes** do site (listagem completa de filmes, acessível pelo menu ou pelo título da faixa Filmes na página inicial).
+Nome: Coerência após recarregar
+Descrição: Recarregar a página mantém filtros no estado inicial (não persistem na URL por padrão).
+Pré-condições: Filtros alterados; F5.
+Resultado na tela: Atalho **Todos** e selects voltam ao padrão; nova carga inicial.
+Como testar: Alterar filtros e recarregar navegador.
+
+========== 169/511 — RN-HEADER-001 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Links principais (desktop)
+Descrição: Navegação do catálogo em telas largas.
+Pré-condições: Janela larga (layout desktop).
+Resultado na tela: Links visíveis: Filmes, Séries, Animes, Jogos, Continuações, Hoje.
+Como testar: Redimensionar janela; clicar cada link.
+
+========== 170/511 — RN-HEADER-002 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Menu “Mais”
+Descrição: Atalhos secundários.
+Pré-condições: Desktop.
+Resultado na tela: Dropdown: Promoções, Eventos, Jogos em Alta, Premiações, Minha Lista (animes), Extensão CR.
+Como testar: Abrir “Mais” e seguir um item.
+
+========== 171/511 — RN-HEADER-003 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Item ativo
+Descrição: Página atual destacada.
+Pré-condições: Navegar entre seções.
+Resultado na tela: Link da rota atual com estilo primário/negrito; “Mais” destaca se algum sublink está ativo.
+Como testar: Estar em Promoções e olhar o header.
+
+========== 172/511 — RN-HEADER-004 ==========
+Tela: em qualquer página do site com o **cabeçalho** fixo (menu, busca, tema, conta) e/ou com a **busca global** aberta em tela cheia sobre o conteúdo.
+Nome: Abrir busca
+Descrição: Ícone de lupa.
+Pré-condições: Qualquer página.
+Resultado na tela: Abre overlay; fecha menu mobile se estiver aberto.
+Como testar: Mobile: abrir menu → busca.

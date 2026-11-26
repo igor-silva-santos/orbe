@@ -5,6 +5,7 @@ import { classifyFreeTier } from './freeTier';
 import { mapItchBrowseGame, parseItchBrowseHtml } from './itchClient';
 import { parseItchRssXml } from './itchRss';
 import { mapItadListItem, ITAD_SHOP_EPIC, ITAD_SHOP_EA } from './itadClient';
+import { parsePriceNumber } from './dealPricing';
 import { normalizeDealToBrl } from './normalizeDeals';
 import { paginateDeals, sourcesHealth } from './dealsService';
 import type { DealsOverview, UnifiedDeal } from './types';
@@ -360,5 +361,22 @@ describe('itadClient mapping', () => {
     assert.ok(deal);
     assert.equal(deal.platform, 'origin');
     assert.equal(deal.kind, 'sale');
+  });
+});
+
+describe('parsePriceNumber', () => {
+  it('interpreta decimal americano ($34.50)', () => {
+    assert.equal(parsePriceNumber('$34.50'), 34.5);
+    assert.equal(parsePriceNumber('USD 34.50'), 34.5);
+  });
+
+  it('interpreta real brasileiro (R$ 34,50)', () => {
+    assert.equal(parsePriceNumber('R$ 34,50'), 34.5);
+    assert.equal(parsePriceNumber('R$ 1.234,56'), 1234.56);
+  });
+
+  it('não confunde 34.50 com 3450', () => {
+    assert.notEqual(parsePriceNumber('34.50'), 3450);
+    assert.equal(parsePriceNumber('34.50'), 34.5);
   });
 });

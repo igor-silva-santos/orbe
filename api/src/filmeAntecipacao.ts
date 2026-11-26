@@ -1,7 +1,7 @@
 import { isConcertOrLiveRecording } from './qualityFilters';
 
 export const ANTECIPACAO_HORIZON_DAYS = 120;
-export const HOME_LAUNCH_MIN_RUNTIME_MINUTES = 40;
+export const HOME_LAUNCH_MIN_RUNTIME_MINUTES = 35;
 
 export type FilmeAntecipacaoCandidate = {
   title: string;
@@ -13,6 +13,7 @@ export type FilmeAntecipacaoCandidate = {
   collectionId?: number | null;
   emBreve?: boolean | null;
   em_prevenda?: boolean | null;
+  emCartaz?: boolean | null;
   localizacaoPtBr?: boolean | null;
   runtime?: number | null;
   genres?: { genero: { tmdbId: number } }[];
@@ -34,10 +35,13 @@ export function isFilmeUpcoming(
 }
 
 export function hasFichaMinimaAntecipacao(filme: FilmeAntecipacaoCandidate): boolean {
-  const overviewOk = (filme.overview?.trim().length ?? 0) >= 40;
-  const tentpole = (filme.popularity ?? 0) >= 35;
-  const marketing = Boolean(filme.emBreve || filme.em_prevenda || filme.localizacaoPtBr);
-  return overviewOk || tentpole || marketing;
+  const overviewOk = (filme.overview?.trim().length ?? 0) >= 28;
+  const tentpole = (filme.popularity ?? 0) >= 22;
+  const marketing = Boolean(
+    filme.emBreve || filme.em_prevenda || filme.emCartaz || filme.localizacaoPtBr,
+  );
+  const engaged = (filme.voteCount ?? 0) >= 15;
+  return overviewOk || tentpole || marketing || engaged;
 }
 
 export function scoreFilmeAntecipacao(filme: FilmeAntecipacaoCandidate, now: Date = new Date()): number {
@@ -58,10 +62,10 @@ export function scoreFilmeAntecipacao(filme: FilmeAntecipacaoCandidate, now: Dat
 }
 
 export function computeAdaptivePopularityFloor(popularities: number[]): number {
-  if (popularities.length === 0) return 22;
+  if (popularities.length === 0) return 14;
   const sorted = [...popularities].sort((a, b) => a - b);
   const p70 = sorted[Math.floor(sorted.length * 0.7)] ?? 0;
-  return Math.max(8, Math.min(22, p70 * 0.45));
+  return Math.max(5, Math.min(18, p70 * 0.35));
 }
 
 function passesConcertExclusion(filme: FilmeAntecipacaoCandidate): boolean {
@@ -84,12 +88,14 @@ export function filterFilmesAntecipacaoGate<T extends FilmeAntecipacaoCandidate>
   return filmes.filter((f) => {
     if (!isFilmeUpcoming(f, now)) return true;
     if (!passesConcertExclusion(f) || !hasFichaMinimaAntecipacao(f)) return false;
+    if (f.emBreve || f.em_prevenda || f.emCartaz) return true;
     return (f.popularity ?? 0) >= floor;
   });
 }
 
 export function passesHomeLaunchRuntime(filme: FilmeAntecipacaoCandidate): boolean {
   if (filme.runtime == null) return true;
+  if (filme.emBreve || filme.em_prevenda || filme.emCartaz) return true;
   return filme.runtime >= HOME_LAUNCH_MIN_RUNTIME_MINUTES;
 }
 

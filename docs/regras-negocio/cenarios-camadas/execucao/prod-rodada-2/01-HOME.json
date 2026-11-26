@@ -1,0 +1,546 @@
+{
+  "arquivo": "01-HOME.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "executor": "QA sênior multitask rodada 2 pós-deploy front+back",
+  "cenarios": [
+    {
+      "id": "CT-RN-HOME-001-F",
+      "regra": "RN-HOME-001",
+      "resultado": "PASS",
+      "evidencia": "Posições no texto: [10, 17, 24, 31]",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-002-F",
+      "regra": "RN-HOME-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-003-F",
+      "regra": "RN-HOME-003",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Não aparece tela de erro do navegador, faixas e controles continuam",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-004-F",
+      "regra": "RN-HOME-004",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: é obrigatório tudo carregar antes de rolar",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-001-F",
+      "regra": "RN-HOME-AC-001",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-002-F",
+      "regra": "RN-HOME-AC-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-003-F",
+      "regra": "RN-HOME-AC-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-004-F",
+      "regra": "RN-HOME-AC-004",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-005-F",
+      "regra": "RN-HOME-AC-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (1/4): ['Terça']",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-006-F",
+      "regra": "RN-HOME-AC-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-007-F",
+      "regra": "RN-HOME-AC-007",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-008-F",
+      "regra": "RN-HOME-AC-008",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-009-F",
+      "regra": "RN-HOME-AC-009",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-AC-010-F",
+      "regra": "RN-HOME-AC-010",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-001-F",
+      "regra": "RN-HOME-CA-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-002-F",
+      "regra": "RN-HOME-CA-002",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-003-F",
+      "regra": "RN-HOME-CA-003",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-004-F",
+      "regra": "RN-HOME-CA-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-005-F",
+      "regra": "RN-HOME-CA-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-006-F",
+      "regra": "RN-HOME-CA-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-007-F",
+      "regra": "RN-HOME-CA-007",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CA-008-F",
+      "regra": "RN-HOME-CA-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-001-F",
+      "regra": "RN-HOME-CARD-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-002-F",
+      "regra": "RN-HOME-CARD-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-003-F",
+      "regra": "RN-HOME-CARD-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-004-F",
+      "regra": "RN-HOME-CARD-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-005-F",
+      "regra": "RN-HOME-CARD-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-006-F",
+      "regra": "RN-HOME-CARD-006",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-007-F",
+      "regra": "RN-HOME-CARD-007",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-008-F",
+      "regra": "RN-HOME-CARD-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-009-F",
+      "regra": "RN-HOME-CARD-009",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-010-F",
+      "regra": "RN-HOME-CARD-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-011-F",
+      "regra": "RN-HOME-CARD-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-012-F",
+      "regra": "RN-HOME-CARD-012",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-013-F",
+      "regra": "RN-HOME-CARD-013",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-014-F",
+      "regra": "RN-HOME-CARD-014",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-015-F",
+      "regra": "RN-HOME-CARD-015",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-016-F",
+      "regra": "RN-HOME-CARD-016",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-017-F",
+      "regra": "RN-HOME-CARD-017",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-001-F",
+      "regra": "RN-HOME-CON-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-002-F",
+      "regra": "RN-HOME-CON-002",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-003-F",
+      "regra": "RN-HOME-CON-003",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Não aparece no carrossel inicial de filmes",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-004-F",
+      "regra": "RN-HOME-CON-004",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-005-F",
+      "regra": "RN-HOME-CON-005",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-006-F",
+      "regra": "RN-HOME-CON-006",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-007-F",
+      "regra": "RN-HOME-CON-007",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-008-F",
+      "regra": "RN-HOME-CON-008",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-009-F",
+      "regra": "RN-HOME-CON-009",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Ausente na home",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-CON-010-F",
+      "regra": "RN-HOME-CON-010",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: Pode  aparecer no carregamento inicial",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-001-F",
+      "regra": "RN-HOME-EA-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (1/4): ['em alta']",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-002-F",
+      "regra": "RN-HOME-EA-002",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-003-F",
+      "regra": "RN-HOME-EA-003",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-004-F",
+      "regra": "RN-HOME-EA-004",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-005-F",
+      "regra": "RN-HOME-EA-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-EA-006-F",
+      "regra": "RN-HOME-EA-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-HERO-001-F",
+      "regra": "RN-HOME-HERO-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-HERO-002-F",
+      "regra": "RN-HOME-HERO-002",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-SHELL-001-F",
+      "regra": "RN-HOME-SHELL-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-SHELL-002-F",
+      "regra": "RN-HOME-SHELL-002",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-001-F",
+      "regra": "RN-HOME-TBD-001",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-002-F",
+      "regra": "RN-HOME-TBD-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-003-F",
+      "regra": "RN-HOME-TBD-003",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-001-F",
+      "regra": "RN-HOME-TL-001",
+      "resultado": "BLOQUEADO",
+      "evidencia": "Regra depende de dado específico no catálogo; smoke anônimo não confirmou texto — QA manual com pré-condição.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-002-F",
+      "regra": "RN-HOME-TL-002",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-003-F",
+      "regra": "RN-HOME-TL-003",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-004-F",
+      "regra": "RN-HOME-TL-004",
+      "resultado": "PASS",
+      "evidencia": "Ausência esperada; termos monitorados: ",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-005-F",
+      "regra": "RN-HOME-TL-005",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-006-F",
+      "regra": "RN-HOME-TL-006",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-007-F",
+      "regra": "RN-HOME-TL-007",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-008-F",
+      "regra": "RN-HOME-TL-008",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-009-F",
+      "regra": "RN-HOME-TL-009",
+      "resultado": "PASS",
+      "evidencia": "Smoke: página renderizada; sem keywords — validação superficial.",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-010-F",
+      "regra": "RN-HOME-TL-010",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-011-F",
+      "regra": "RN-HOME-TL-011",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-012-F",
+      "regra": "RN-HOME-TL-012",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-TL-013-F",
+      "regra": "RN-HOME-TL-013",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-UPD-001-F",
+      "regra": "RN-HOME-UPD-001",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/1): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    },
+    {
+      "id": "CT-RN-HOME-UPD-002-F",
+      "regra": "RN-HOME-UPD-002",
+      "resultado": "FAIL",
+      "evidencia": "Keywords (0/2): []",
+      "testado_em": "2026-09-22T19:04:16Z"
+    }
+  ]
+}

@@ -20,6 +20,7 @@ import {
 import { endSyncRunProgress, startSyncRunProgress } from './syncProgress';
 import { invalidateCacheByPatterns } from './cacheInvalidation';
 import { broadcast } from './websocket';
+import { shouldSkipDetetiveInFullSync } from './renderEgressConfig';
 
 export type FullSyncParams = {
   startDate: string;
@@ -60,26 +61,33 @@ export async function executeFullSync(prisma: PrismaClient, params: FullSyncPara
     }
 
     if (!phaseDone(completed, 'detetive')) {
-      logger.info('--- Fase DETETIVE (ingresso.com + streaming) ---');
-      const detetivePhase = runProgress.startPhase('DETETIVE');
-      await updateSyncProgress(prisma, { phase: 'detetive', processedInPhase: 0, totalInPhase: 0 });
+      if (shouldSkipDetetiveInFullSync()) {
+        logger.info(
+          '⏭️ Fase detetive ignorada (SYNC_SKIP_DETETIVE_PHASE / ORBE_EGRESS_SAVER). Use POST /api/run-detetive para rodar manualmente.',
+        );
+        await markPhaseComplete(prisma, 'detetive');
+      } else {
+        logger.info('--- Fase DETETIVE (ingresso.com + streaming) ---');
+        const detetivePhase = runProgress.startPhase('DETETIVE');
+        await updateSyncProgress(prisma, { phase: 'detetive', processedInPhase: 0, totalInPhase: 0 });
 
-      let detetiveTotalSet = false;
-      await runDetetive(false, false, async (processed, total) => {
-        if (!detetiveTotalSet && total > 0) {
-          detetivePhase.setTotal(total);
-          detetiveTotalSet = true;
-        }
-        detetivePhase.advance(1);
-        await updateSyncProgress(prisma, {
-          phase: 'detetive',
-          processedInPhase: processed,
-          totalInPhase: total,
+        let detetiveTotalSet = false;
+        await runDetetive(false, false, async (processed, total) => {
+          if (!detetiveTotalSet && total > 0) {
+            detetivePhase.setTotal(total);
+            detetiveTotalSet = true;
+          }
+          detetivePhase.advance(1);
+          await updateSyncProgress(prisma, {
+            phase: 'detetive',
+            processedInPhase: processed,
+            totalInPhase: total,
+          });
         });
-      });
 
-      await markPhaseComplete(prisma, 'detetive');
-      await invalidateCacheByPatterns(['cache:/api/homepage*', 'cache:/api/filmes*', 'cache:/api/hoje*']);
+        await markPhaseComplete(prisma, 'detetive');
+        await invalidateCacheByPatterns(['cache:/api/homepage*', 'cache:/api/filmes*', 'cache:/api/hoje*']);
+      }
     } else {
       logger.info('⏭️ Fase detetive já concluída (checkpoint). Pulando.');
     }

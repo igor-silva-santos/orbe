@@ -1,0 +1,647 @@
+========== 431/511 — RN-PROMO-017 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Filtro por plataforma/loja
+Descrição: Chips só aparecem para lojas que têm oferta no momento; filtro ativo some se a loja deixar de ter itens.
+Pré-condições: Filtrar e atualizar.
+Resultado na tela: Chip some ou volta para **Todas**.
+Como testar: Filtrar Steam; atualizar se vazio.
+
+========== 432/511 — RN-PROMO-018 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Busca por título
+Descrição: Campo **Buscar jogo...** filtra temporários, permanentes e destaques (case insensitive).
+Pré-condições: Texto parcial do título.
+Resultado na tela: Grid reduzido.
+Como testar: Buscar substring.
+
+========== 433/511 — RN-PROMO-019 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Destaques itch.io e EA App
+Descrição: Com filtro **Todas** e sem busca, ofertas itch.io e EA App podem aparecer em seções colapsáveis próprias, removidas do bloco principal para não duplicar.
+Pré-condições: Deals nessas lojas.
+Resultado na tela: Seções **Grátis na itch.io** / **Grátis na EA** (ou equivalente).
+Como testar: Confirmar que itch não repete no grid principal.
+
+========== 434/511 — RN-PROMO-020 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Agrupamento por loja
+Descrição: Com **Todas** plataformas, lista principal agrupa subtítulos por loja (uppercase).
+Pré-condições: Várias lojas.
+Resultado na tela: Subtítulos EPIC, STEAM, etc., cada um com grid.
+Como testar: Ver aba Grátis com muitas fontes.
+
+========== 435/511 — RN-PROMO-021 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Contador na aba Grátis
+Descrição: Número ao lado do nome da aba reflete ofertas grátis **após** filtro de plataforma e busca.
+Pré-condições: Busca ativa.
+Resultado na tela: Badge diminui.
+Como testar: Buscar título raro.
+
+========== 436/511 — RN-PROMO-022 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Vazio grátis
+Descrição: Sem temporários ou sem permanentes.
+Pré-condições: Lista filtrada vazia.
+Resultado na tela: Mensagens específicas por seção.
+Como testar: Filtrar loja sem giveaways.
+
+========== 437/511 — RN-PROMO-023 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Ordenação padrão promo
+Descrição: **Popularidade** (melhor avaliação de deal).
+Pré-condições: Aba Promoções.
+Resultado na tela: Trocar para **Maior desconto** reordena grid.
+Como testar: Usar select de ordenação.
+
+========== 438/511 — RN-PROMO-024 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Faixa catálogo Steam
+Descrição: Carrossel no topo quando há jogos do catálogo Orbe em desconto na Steam.
+Pré-condições: Pelo menos um jogo Orbe em promo na Steam.
+Resultado na tela: Seção com link **Ver aba Em Alta →**.
+Como testar: Abrir Promoções com catálogo em promo.
+
+========== 439/511 — RN-PROMO-025 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Carregar mais
+Descrição: Botão só com filtro **Todas**, sem busca, e quando ainda há páginas.
+Pré-condições: >48 promoções.
+Resultado na tela: **Carregar mais promoções** append cards; com busca o botão some.
+Como testar: Buscar título → botão ausente.
+
+========== 440/511 — RN-PROMO-026 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Contador aba Promoções
+Descrição: Badge = ofertas ao vivo filtradas + itens do carrossel catálogo Steam filtrados.
+Pré-condições: Filtro plataforma.
+Resultado na tela: Número atualiza.
+Como testar: Filtrar Epic.
+
+========== 441/511 — RN-PROMO-027 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Wishlist Steam (em breve)
+Descrição: Caixa tracejada informativa, **sem** botão funcional de login Steam.
+Pré-condições: Aba Promoções visível.
+Resultado na tela: Texto **Lista de desejos Steam (em breve)**.
+Como testar: Ler bloco no topo da aba.
+
+========== 442/511 — RN-PROMO-028 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Em Alta embutido
+Descrição: Mesmo conteúdo de jogos em alta (Top da Semana, Steam, plataformas…) em modo compacto + banner para promoções.
+Pré-condições: Tab `em-alta`.
+Resultado na tela: Ver regras RN-JOGOS-019–029 em `05-JOGOS.md`.
+Como testar: Abrir aba Em Alta.
+
+========== 443/511 — RN-PROMO-029 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Bookmark antigo
+Descrição: `/jogos-em-alta` redireciona para esta aba.
+Pré-condições: URL legada.
+Resultado na tela: Endereço final `?tab=em-alta`.
+Como testar: Acessar URL antiga.
+
+========== 444/511 — RN-PROMO-030 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Atualizar agora
+Descrição: Recarrega aba ativa **Grátis** ou **Promoções**; **Em Alta** não usa este botão para ofertas de loja.
+Pré-condições: Botão no hero.
+Resultado na tela: Spinner no ícone; horário atualiza (abas de deal).
+Como testar: Clicar em Grátis vs Em Alta.
+
+========== 445/511 — RN-PROMO-031 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Erro global de ofertas
+Descrição: Falha ao buscar grátis/promo.
+Pré-condições: Indisponibilidade.
+Resultado na tela: **Não foi possível carregar promoções e jogos grátis.** + **Tentar novamente**.
+Como testar: Simular falha.
+
+========== 446/511 — RN-PROMO-032 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Skeleton inicial
+Descrição: Primeira carga de Grátis/Promo mostra 12 placeholders shimmer.
+Pré-condições: Rede lenta, aba ≠ Em Alta.
+Resultado na tela: Skeleton antes dos cards reais.
+Como testar: Throttle + abrir Promoções.
+
+========== 447/511 — RN-PROMO-033 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Banner de degradação
+Descrição: Mesmo RN-PROMO-010 — lista fontes com falha.
+Pré-condições: Fontes parciais down.
+Resultado na tela: Banner âmbar/vermelho.
+Como testar: Ambiente degradado.
+
+========== 448/511 — RN-PROMO-034 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Rodapé de fontes
+Descrição: Contagens por loja com cor verde (ok) ou vermelho (erro).
+Pré-condições: Após load grátis/promo.
+Resultado na tela: Linha **Fontes:** Epic (n), Steam (n)…
+Como testar: Comparar com quantidade visível.
+
+========== 449/511 — RN-PROMO-035 ==========
+Tela: página **Promoções & Jogos Grátis** (`/promocoes`), com três abas: **Jogos de Graça**, **Promoções** e **Em Alta**. O parâmetro de endereço `?tab=promocoes` ou `?tab=em-alta` escolhe a aba inicial; sem parâmetro ou valor inválido abre **Jogos de Graça**.
+Nome: Tamanho da primeira página promo
+Descrição: Primeira leva de **Ofertas ao vivo** alinhada a ~48 itens antes de **Carregar mais**.
+Pré-condições: Muitas ofertas.
+Resultado na tela: Grid inicial ~48; botão carrega resto.
+Como testar: Contar antes de carregar mais.
+
+========== 450/511 — RN-SERIES-001 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Conteúdo na primeira abertura
+Descrição: Listagem e opções de filtro já vêm na abertura da página.
+Pré-condições: Site acessível; catálogo com séries.
+Resultado na tela: Grade e selects visíveis (ou vazio amigável).
+Como testar: Abrir Séries em aba nova.
+
+========== 451/511 — RN-SERIES-002 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Atualização gradual
+Descrição: Mudanças no catálogo podem demorar alguns minutos para refletir após atualização em massa.
+Pré-condições: Catálogo alterado recentemente.
+Resultado na tela: Recarregar após alguns minutos pode mostrar novidades.
+Como testar: Alterar série de teste; aguardar; recarregar.
+
+========== 452/511 — RN-SERIES-003 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Falha no carregamento inicial
+Descrição: Indisponibilidade temporária não quebra a rota.
+Pré-condições: Catálogo indisponível na abertura.
+Resultado na tela: Página abre; grade vazia; filtros vazios possíveis.
+Como testar: Simular falha na abertura.
+
+========== 453/511 — RN-SERIES-004 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Texto do cabeçalho
+Descrição: Copy fixa da área.
+Pré-condições: Usuário em Séries.
+Resultado na tela: Título **Séries** e descrição sobre universo de séries.
+Como testar: Ler cabeçalho.
+
+========== 454/511 — RN-SERIES-005 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Gaveta O que vem aí
+Descrição: Estreias futuras de séries em carrossel horizontal.
+Pré-condições: Resumo de eventos com séries em **próximos**.
+Resultado na tela: Seção **O que vem aí** acima dos filtros.
+Como testar: Ambiente com séries futuras.
+
+========== 455/511 — RN-SERIES-006 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Sem gaveta Em cartaz
+Descrição: Diferente da página Filmes, **não** há bloco **Em cartaz** para séries.
+Pré-condições: Destaques recentes de séries existem no resumo.
+Resultado na tela: Bloco **Em cartaz** **ausente**; só **O que vem aí** + filtros + grade.
+Como testar: Abrir Séries com dados de destaque.
+
+========== 456/511 — RN-SERIES-007 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ações na gaveta
+Descrição: Menu ⋮ e favoritos iguais à grade.
+Pré-condições: Gaveta visível.
+Resultado na tela: Interações refletem na conta logada.
+Como testar: Favoritar na gaveta.
+
+========== 457/511 — RN-SERIES-008 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Gaveta após a página
+Descrição: Carrossel editorial pode aparecer logo após o restante.
+Pré-condições: Página recém-aberta.
+Resultado na tela: Filtros/grade primeiro; gaveta em seguida se houver itens.
+Como testar: Observar ordem de carregamento.
+
+========== 458/511 — RN-SERIES-009 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Sem atalhos Em Cartaz/Populares
+Descrição: Curadoria por botões não existe; só selects.
+Pré-condições: Página Séries.
+Resultado na tela: Apenas linha de filtros; nenhum botão **Populares**.
+Como testar: Confirmar ausência de atalhos.
+
+========== 459/511 — RN-SERIES-010 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ordem alfabética padrão
+Descrição: Listagem ordenada por nome da série.
+Pré-condições: Todos os filtros em “todos”.
+Resultado na tela: Cards em ordem A–Z pelo título/nome exibido.
+Como testar: Ler primeiros cards.
+
+========== 460/511 — RN-SERIES-011 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ordenação por popularidade (catálogo)
+Descrição: Modo “populares” existe no catálogo interno, mas **não** há botão na tela.
+Pré-condições: —
+Resultado na tela: Usuário comum só vê ordem alfabética nesta página.
+Como testar: Confirmar que não há controle de popularidade na UI.
+
+========== 461/511 — RN-SERIES-012 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Gênero “Todos”
+Descrição: Sem restrição de gênero.
+Pré-condições: **Todos os Gêneros**.
+Resultado na tela: Grade ampla.
+Como testar: Resetar gênero.
+
+========== 462/511 — RN-SERIES-013 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Capitalização do gênero
+Descrição: Primeira letra maiúscula no dropdown.
+Pré-condições: Gêneros listados.
+Resultado na tela: Label formatado (ex.: Action).
+Como testar: Abrir select de gênero.
+
+========== 463/511 — RN-SERIES-014 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ano “Todos”
+Descrição: Sem restrição de ano.
+Pré-condições: **Todos os Anos**.
+Resultado na tela: Séries de vários anos.
+Como testar: Resetar ano.
+
+========== 464/511 — RN-SERIES-015 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Filtro por ano de estreia
+Descrição: Ano limita à **data de estreia** da série (primeiro episódio / estreia).
+Pré-condições: Ano 2022.
+Resultado na tela: Só séries estreadas em 2022.
+Como testar: Filtrar ano e conferir detalhe.
+
+========== 465/511 — RN-SERIES-016 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Filtro por mês de estreia
+Descrição: Mês limita estreias daquele mês.
+Pré-condições: Março selecionado.
+Resultado na tela: Séries com estreia em março (com ano definido ou corrente).
+Como testar: Combinar mês + ano.
+
+========== 466/511 — RN-SERIES-017 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Mês sem ano
+Descrição: Mês sozinho usa ano corrente.
+Pré-condições: Setembro + todos os anos.
+Resultado na tela: Estreias de setembro do ano atual.
+Como testar: Filtrar mês atual.
+
+========== 467/511 — RN-SERIES-018 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Meses em português
+Descrição: Janeiro–dezembro no select.
+Pré-condições: Select de mês.
+Resultado na tela: Rótulos PT-BR corretos.
+Como testar: Abrir filtro de mês.
+
+========== 468/511 — RN-SERIES-019 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Filtro por plataforma
+Descrição: Restringe a séries com streaming na plataforma.
+Pré-condições: Netflix selecionada.
+Resultado na tela: Só séries com Netflix nos metadados.
+Como testar: Filtrar plataforma.
+
+========== 469/511 — RN-SERIES-020 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Filtro por status
+Descrição: Status cadastral (ex.: em exibição, encerrada).
+Pré-condições: Status escolhido.
+Resultado na tela: Grade coerente com status no detalhe.
+Como testar: Filtrar status.
+
+========== 470/511 — RN-SERIES-021 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Sem recarga duplicada na abertura
+Descrição: Abrir Séries não dispara segundo loading imediato.
+Pré-condições: Primeira visita OK.
+Resultado na tela: Conteúdo estável até mudar filtro.
+Como testar: Abrir página e aguardar.
+
+========== 471/511 — RN-SERIES-022 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Mudança de filtro recarrega
+Descrição: Alterar select atualiza grade.
+Pré-condições: Qualquer filtro mudado.
+Resultado na tela: Spinner + nova lista.
+Como testar: Trocar gênero.
+
+========== 472/511 — RN-SERIES-023 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Atualização após sync
+Descrição: Sync do catálogo pode atualizar a grade com a página aberta.
+Pré-condições: Sync em andamento.
+Resultado na tela: Cards/contador mudam sem F5.
+Como testar: Manter Séries aberta durante sync.
+
+========== 473/511 — RN-SERIES-024 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Spinner ao filtrar
+Descrição: Loading central substitui grade.
+Pré-condições: Filtro alterado.
+Resultado na tela: Spinner até concluir.
+Como testar: Trocar filtro.
+
+========== 474/511 — RN-SERIES-025 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Contador com total global
+Descrição: “X séries encontradas” usa total lógico do filtro.
+Pré-condições: > ~48 séries no filtro.
+Resultado na tela: Contador alto com subconjunto na grade.
+Como testar: Filtro amplo; ler contador.
+
+========== 475/511 — RN-SERIES-026 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Contador em carregamento
+Descrição: Texto **Carregando...** durante busca.
+Pré-condições: Filtro recém-alterado.
+Resultado na tela: Sem número antigo.
+Como testar: Trocar filtro rapidamente.
+
+========== 476/511 — RN-SERIES-027 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Grade responsiva
+Descrição: 2–5 colunas; cards ~210px.
+Pré-condições: Resultados > 0.
+Resultado na tela: Layout adapta ao viewport.
+Como testar: Redimensionar janela.
+
+========== 477/511 — RN-SERIES-028 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Nenhum resultado
+Descrição: Filtro sem match.
+Pré-condições: Combinação impossível.
+Resultado na tela: **Nenhuma série encontrada** + dica de ajustar filtros.
+Como testar: Filtro restritivo.
+
+========== 478/511 — RN-SERIES-029 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Falha ao recarregar
+Descrição: Erre de rede ao filtrar não derruba página.
+Pré-condições: Rede off ao filtrar.
+Resultado na tela: Grade pode zerar; sem crash.
+Como testar: Cortar rede ao filtrar.
+
+========== 479/511 — RN-SERIES-030 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Listagem mais permissiva que a home
+Descrição: A página Séries pode incluir séries “fracas” (poucos episódios, sem sinopse) que o carrossel Séries da **inicial** exclui.
+Pré-condições: Série marginal cadastrada.
+Resultado na tela: Aparece em Séries; pode faltar na home.
+Como testar: Comparar mesmo título home vs Séries.
+
+========== 480/511 — RN-SERIES-031 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Lote inicial na grade
+Descrição: ~48 cards visíveis por vez sem “carregar mais”.
+Pré-condições: Filtro amplo.
+Resultado na tela: Dezenas de cards, contador pode ser maior.
+Como testar: Contar cards vs contador.
+
+========== 481/511 — RN-SERIES-032 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Cards com gêneros e streaming
+Descrição: Informações aparecem quando cadastradas.
+Pré-condições: Série com gêneros/plataformas.
+Resultado na tela: Texto/ícones no card.
+Como testar: Inspecionar card.
+
+========== 482/511 — RN-SERIES-033 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Gêneros visíveis no card
+Descrição: Lista de gêneros no card quando existir.
+Pré-condições: Série com gêneros.
+Resultado na tela: Gêneros legíveis.
+Como testar: Abrir card na grade.
+
+========== 483/511 — RN-SERIES-034 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Conteúdo pode demorar a refletir
+Descrição: Mesma lógica de atualização gradual do catálogo.
+Pré-condições: Alteração recente.
+Resultado na tela: Recarregar após intervalo.
+Como testar: Ver RN-SERIES-002.
+
+========== 484/511 — RN-SERIES-035 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Opções de filtro coerentes
+Descrição: Gêneros/status/plataformas só aparecem se há séries associadas.
+Pré-condições: Catálogo variado.
+Resultado na tela: Menus populados sem opções “vazias”.
+Como testar: Abrir cada select.
+
+========== 485/511 — RN-SERIES-036 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Anos de estreia no filtro
+Descrição: Anos derivados da data de **estreia** da série.
+Pré-condições: Várias temporadas.
+Resultado na tela: Ano no filtro = ano de estreia, não de episódio recente.
+Como testar: Série antiga com ep novo: filtrar ano de estreia.
+
+========== 486/511 — RN-SERIES-037 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Status em português
+Descrição: Labels traduzidos no select quando possível.
+Pré-condições: Status variados.
+Resultado na tela: Texto PT no dropdown.
+Como testar: Abrir status.
+
+========== 487/511 — RN-SERIES-038 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Home exige qualidade mínima
+Descrição: Carrossel da inicial só mostra séries com pôster, sinopse, engajamento e nota mínima quando há muitos votos.
+Pré-condições: Série fraca vs forte.
+Resultado na tela: Forte na home e Séries; fraca só em Séries.
+Como testar: Comparar presença home vs página.
+
+========== 488/511 — RN-SERIES-039 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Home exige ≥ 2 episódios
+Descrição: Carrossel inicial ignora séries com um único episódio cadastrado (salvo exceções de carrossel mensal).
+Pré-condições: Série 1 ep.
+Resultado na tela: Ausente na home; pode estar em Séries.
+Como testar: Comparar contagens.
+
+========== 489/511 — RN-SERIES-040 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Home exige pôster e sinopse
+Descrição: Campos obrigatórios no carrossel da home.
+Pré-condições: Série sem sinopse.
+Resultado na tela: Ausente na home; pode listar em Séries.
+Como testar: Mesmo título duas telas.
+
+========== 490/511 — RN-SERIES-041 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Engajamento na home
+Descrição: Popularidade ou volume de votos mínimo no carrossel.
+Pré-condições: Série obscura.
+Resultado na tela: Só na listagem Séries.
+Como testar: Buscar série obscura.
+
+========== 491/511 — RN-SERIES-042 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Nota mínima na home
+Descrição: Muitos votos + nota baixa excluídos do carrossel.
+Pré-condições: Série mal avaliada popular.
+Resultado na tela: Listagem Séries pode ainda mostrar.
+Como testar: Comparar.
+
+========== 492/511 — RN-SERIES-043 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Estreias planejadas no carrossel mensal
+Descrição: Modo timeline da home pode incluir séries “planejadas” com critério mais flexível.
+Pré-condições: Série Planned futura.
+Resultado na tela: Pode aparecer na home por mês; em Séries aparece se cadastrada.
+Como testar: Validar na home e em Séries.
+
+========== 493/511 — RN-SERIES-044 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Data do episódio na timeline home
+Descrição: Posição no carrossel da home usa **próximo episódio**, não só estreia da série.
+Pré-condições: Série com ep semanal.
+Resultado na tela: Card na home alinhado ao ep; em Séries filtro mês usa estreia da série.
+Como testar: Série em exibição: home vs filtro mês em Séries.
+
+========== 494/511 — RN-SERIES-045 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ordem no carrossel mensal
+Descrição: Ordem na home por data de exibição/episódio; em Séries ordem alfabética (padrão).
+Pré-condições: Mesmo mês.
+Resultado na tela: Ordens diferentes entre telas.
+Como testar: Comparar ordem home vs Séries filtrada.
+
+========== 495/511 — RN-SERIES-046 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Carrossel por ano (home)
+Descrição: Navegação por ano no carrossel da inicial; em Séries use filtro de ano.
+Pré-condições: Ano específico.
+Resultado na tela: Home: slides; Séries: grade filtrada.
+Como testar: Filtrar ano em Séries.
+
+========== 496/511 — RN-SERIES-047 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Ano sem dia confirmado (home)
+Descrição: Blocos TBD existem na home; em Séries use status/detalhe.
+Pré-condições: Série TBA.
+Resultado na tela: Detalhe pode mostrar incerteza; sem separador TBD aqui.
+Como testar: Comparar home vs detalhe em Séries.
+
+========== 497/511 — RN-SERIES-048 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Contexto de temporadas na home
+Descrição: Cards do carrossel podem considerar datas de temporadas.
+Pré-condições: Nova temporada distante.
+Resultado na tela: Home posiciona por ep; Séries filtra por estreia original se ano/mês de estreia.
+Como testar: Caso com nova temp.
+
+========== 498/511 — RN-SERIES-049 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Formato do card home vs grade
+Descrição: Campos visuais podem diferir levemente (próximo ep, contagem).
+Pré-condições: Mesma série.
+Resultado na tela: Detalhes extras no carrossel home.
+Como testar: Abrir card home vs card Séries.
+
+========== 499/511 — RN-SERIES-050 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Limite de itens no carrossel home
+Descrição: Faixa horizontal da home mostra subconjunto curado (~dezenas/centenas internas); Séries pagina ~48 visíveis.
+Pré-condições: Catálogo grande.
+Resultado na tela: Home não lista tudo; Séries lista muito mais via filtros.
+Como testar: Contar visíveis em cada superfície.
+
+========== 500/511 — RN-SERIES-051 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Detalhe pelo card
+Descrição: Clique abre modal/página de detalhe.
+Pré-condições: Card na grade/gaveta.
+Resultado na tela: Sinopse, temporadas, links.
+Como testar: Clicar card.
+
+========== 501/511 — RN-SERIES-052 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Episódios por temporada
+Descrição: Lista de episódios acessível no fluxo de detalhe (não na grade).
+Pré-condições: Série com temporadas.
+Resultado na tela: Episódios visíveis no detalhe.
+Como testar: Abrir detalhe → temporada.
+
+========== 502/511 — RN-SERIES-053 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Sem edição pública
+Descrição: Cadastro alterado só por equipe interna.
+Pré-condições: Usuário comum.
+Resultado na tela: Sem controles de admin em Séries.
+Como testar: Inspecionar página.
+
+========== 503/511 — RN-SERIES-054 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Filtros habilitados
+Descrição: Selects não ficam permanentemente desabilitados.
+Pré-condições: Uso normal.
+Resultado na tela: Todos clicáveis.
+Como testar: Usar filtros.
+
+========== 504/511 — RN-SERIES-055 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Contador coerente
+Descrição: Total exibido alinhado ao filtro aplicado.
+Pré-condições: Filtro ativo.
+Resultado na tela: Número faz sentido com busca manual por título.
+Como testar: Anotar contador + amostra.
+
+========== 505/511 — RN-SERIES-056 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Recarregar reseta filtros
+Descrição: F5 volta ao estado inicial da página.
+Pré-condições: Filtros alterados.
+Resultado na tela: Selects e lista padrão após reload.
+Como testar: F5 após filtrar.
+
+========== 506/511 — RN-SERIES-057 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Listagem ampla sem filtro
+Descrição: Abrir Séries sem filtros mostra séries diversas do catálogo (paginadas).
+Pré-condições: Catálogo populado.
+Resultado na tela: Grade com títulos variados.
+Como testar: Abrir Séries padrão.
+
+========== 507/511 — RN-SERIES-058 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Gêneros só com séries
+Descrição: Gênero sem nenhuma série não aparece no menu.
+Pré-condições: Gênero órfão.
+Resultado na tela: Ausente no select.
+Como testar: Revisar lista de gêneros.
+
+========== 508/511 — RN-SERIES-059 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Plataformas só com séries
+Descrição: Mesma regra para streaming.
+Pré-condições: Plataforma sem séries.
+Resultado na tela: Ausente no select.
+Como testar: Abrir plataformas.
+
+========== 509/511 — RN-SERIES-060 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Erro total na listagem
+Descrição: Falha grave ao montar lista mostra estado vazio/erro amigável, não tela branca.
+Pré-condições: Catálogo indisponível ao filtrar.
+Resultado na tela: Empty ou mensagem; página intacta.
+Como testar: Simular indisponibilidade.
+
+========== 510/511 — RN-SERIES-061 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Erro nos filtros
+Descrição: Se opções de filtro não carregarem, selects podem ficar vazios mas página abre.
+Pré-condições: Falha na abertura.
+Resultado na tela: Ver RN-SERIES-003.
+Como testar: Abrir com catálogo down.
+
+========== 511/511 — RN-SERIES-062 ==========
+Tela: página **Séries** do site (listagem completa de séries, acessível pelo menu ou pelo título da faixa Séries na página inicial).
+Nome: Série planejada na listagem
+Descrição: Séries futuras “planejadas” podem aparecer na grade se cadastradas.
+Pré-condições: Série Planned.
+Resultado na tela: Card visível; etiqueta **Em breve** quando aplicável.
+Como testar: Buscar estreia futura.
