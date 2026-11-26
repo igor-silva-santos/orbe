@@ -8,6 +8,7 @@ import { isAnimeRelevantForSeasonalSync } from './qualityFilters';
 import { isLikelyEnglish, translateSynopsisForStorage } from './translation';
 import { addSkipReasons } from './syncState';
 import { dedupeBy } from './syncUtils';
+import { getBrazilCalendarWeekBounds } from './brazilTimezone';
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function prismaUpdateWithRetry<T>(
@@ -168,8 +169,12 @@ async function processAnimeBatch(
         );
     };
 
+    const { start: weekStart } = getBrazilCalendarWeekBounds();
+    // AniList usa "greater" exclusivo; um segundo antes inclui o instante do domingo.
+    const airingFrom = Math.floor(weekStart.getTime() / 1000) - 1;
+
     const detailQuery = `
-      query ($id: Int) {
+      query ($id: Int, $airingFrom: Int) {
         Media(id: $id, type: ANIME) {
           id
           idMal
@@ -220,7 +225,6 @@ async function processAnimeBatch(
           trailer { id site }
           externalLinks { id url site }
           rankings { id rank type context year allTime }
-          airingSchedule(notYetAired: true, perPage: 5) { nodes { airingAt episode } }
           relations {
             edges {
               relationType
@@ -229,17 +233,34 @@ async function processAnimeBatch(
           }
         }
       }
+      Page(page: 1, perPage: 20) {
+        airingSchedules(mediaId: $id, airingAt_greater: $airingFrom, sort: [TIME]) {
+          airingAt
+          episode
+        }
+      }
     `;
 
     for (const id of animeIds) {
         try {
-            const response = await anilistApiWithRetry(detailQuery, { id });
+            const response = await anilistApiWithRetry(detailQuery, { id, airingFrom });
             const anime = response.data.data.Media;
 
             if (!anime) {
                 bumpSkip('not_found', { id, year: batchPeriod?.year });
                 continue;
             }
+
+            // `notYetAired` apagava o episódio assim que ia ao ar e o dia sumia do carrossel.
+            // A Page traz do domingo desta semana em diante, passado incluso.
+            const airedThisWeek = response.data.data.Page?.airingSchedules ?? [];
+            anime.airingSchedule = {
+                nodes: dedupeBy(
+                    airedThisWeek,
+                    (schedule: { episode?: number; airingAt?: number }) =>
+                        `${schedule.episode ?? ''}-${schedule.airingAt ?? ''}`,
+                ),
+            };
 
             const eventYear = anime.startDate?.year ?? batchPeriod?.year;
             const eventMonth = anime.startDate?.month;

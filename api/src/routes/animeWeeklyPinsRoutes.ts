@@ -3,7 +3,7 @@ import { prisma } from '../clients';
 import { logger } from '../logger';
 import { authMiddleware, type AuthRequest } from '../authMiddleware';
 import { mapAnimeToCarouselCard } from '../mappers';
-import { parsePositiveIntId, animeCarouselInclude } from './mediaRoutesHelpers';
+import { parsePositiveIntId, getAnimeCarouselInclude } from './mediaRoutesHelpers';
 
 const router = Router();
 const MAX_PINS_PER_USER = 40;
@@ -21,7 +21,7 @@ router.get('/animes/weekly-pins', authMiddleware, async (req: AuthRequest, res: 
     }
     const animes = await prisma.anime.findMany({
       where: { anilistId: { in: anilistIds } },
-      include: animeCarouselInclude,
+      include: getAnimeCarouselInclude(new Date()),
     });
     const byId = new Map(animes.map((a) => [a.anilistId, a]));
     const ordered = anilistIds

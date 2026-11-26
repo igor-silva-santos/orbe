@@ -1,5 +1,6 @@
 import type { Anime } from '@/types';
 import { brazilLocalToUtc, getBrazilCalendarWeekBounds, getWeekdayInBrazil } from '@/lib/brazil-timezone';
+import { getWeekBoundsBr, isYmdInRange, ymdInBr } from '@/lib/week-br';
 
 export const ANIME_AGENDA_UNSCHEDULED_LABEL = 'Sem episódio agendado';
 
@@ -20,6 +21,47 @@ export function getCalendarWeekBounds(reference: Date = new Date()): WeekBounds 
 
 export function isDateWithinWeek(date: Date, week: WeekBounds): boolean {
   return date >= week.start && date <= week.end;
+}
+
+type PlacementAiring = { airingAt: string; episode: number };
+
+/** Episódios que posicionam o título na semana. Prefere os da semana corrente, já exibidos ou não. */
+export function getWeekPlacementAirings(anime: Anime): PlacementAiring[] {
+  const fromWeek = (anime.weekAiringEpisodes ?? []).filter((entry) => Boolean(entry?.airingAt));
+  if (fromWeek.length > 0) return fromWeek;
+  if (anime.weekAiringEpisode?.airingAt) return [anime.weekAiringEpisode];
+  if (anime.nextAiringEpisode?.airingAt) return [anime.nextAiringEpisode];
+  return [];
+}
+
+/**
+ * Agrupa cada título no dia brasileiro em que o episódio da semana vai (ou foi) ao ar.
+ * Um anime diário pode ocupar mais de um dia; o mesmo dia não repete o título.
+ */
+export function groupAnimesByBrazilWeekDay(
+  animes: Anime[],
+  reference: Date = new Date(),
+): Record<number, Anime[]> {
+  const { startYmd, endYmd } = getWeekBoundsBr(reference);
+  const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+
+  for (const anime of animes) {
+    const seenDays = new Set<number>();
+    for (const placement of getWeekPlacementAirings(anime)) {
+      const at = new Date(placement.airingAt);
+      if (Number.isNaN(at.getTime())) continue;
+      if (!isYmdInRange(ymdInBr(at), startYmd, endYmd)) continue;
+      const dayIndex = getWeekdayInBrazil(at);
+      if (seenDays.has(dayIndex)) continue;
+      seenDays.add(dayIndex);
+      animesByDay[dayIndex].push({
+        ...anime,
+        nextAiringEpisode: placement,
+      });
+    }
+  }
+
+  return animesByDay;
 }
 
 export function getAnimeAgendaDate(anime: Anime): Date | null {
