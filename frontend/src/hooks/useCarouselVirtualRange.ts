@@ -22,8 +22,9 @@ function setsEqual(a: ReadonlySet<number>, b: ReadonlySet<number>) {
 
 /**
  * Slides perto do snap selecionado, mais os que o loop do Embla translada para o
- * viewport. Sem isso, o fim da lista aparece à esquerda do primeiro dia como
- * card roxo vazio — o nó existe, mas o conteúdo foi trocado pelo placeholder.
+ * viewport. slidesInView só chega depois do IntersectionObserver; os loopPoints
+ * já listam esses slides. Sem eles, o fim da lista aparece à esquerda do dia
+ * como card roxo vazio.
  */
 export function useCarouselVirtualRange(
   emblaApi: EmblaCarouselType | undefined,
@@ -45,6 +46,15 @@ export function useCarouselVirtualRange(
       addRange(next, emblaApi.selectedScrollSnap(), overscan, itemCount);
       for (const index of emblaApi.slidesInView()) {
         addRange(next, index, LOOP_EDGE_PAD, itemCount);
+      }
+      // slidesInView depende do IntersectionObserver e chega tarde. Os pontos
+      // de loop já dizem quais slides o Embla encosta no outro lado — sem isso
+      // eles ficam no viewport como retângulo vazio.
+      const engine = emblaApi.internalEngine();
+      if (engine.options.loop) {
+        for (const point of engine.slideLooper.loopPoints) {
+          addRange(next, point.index, LOOP_EDGE_PAD, itemCount);
+        }
       }
       setIndexes((current) => (setsEqual(current, next) ? current : next));
     };

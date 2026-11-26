@@ -80,12 +80,18 @@ git config user.email "gitlab-ci@orbenerd.local"
 git config user.name "GitLab Mirror"
 if ! git merge --no-ff --no-edit -m "merge: preserva a master do GitHub ao espelhar o GitLab" refs/remotes/github/master; then
   # Nestes arquivos a master do GitLab já contém o ajuste do GitHub (mobile + o que estava só lá).
-  # Qualquer outro conflito para o job, para não apagar trabalho do GitHub.
   prefer_gitlab="
 .gitlab-ci.yml
 docs/DEPLOY_GITLAB.md
 frontend/src/components/layout/Header.tsx
 frontend/src/components/modals/SuperModal.tsx
+"
+  # Conflito real dos dois lados: junta a lista de testes, ou os imports usados.
+  # Outro conflito para o job, para não apagar trabalho do GitHub.
+  combine="
+api/package.json
+frontend/package.json
+api/src/routes/mediaRoutesHelpers.ts
 "
   failed=0
   while IFS= read -r file; do
@@ -94,6 +100,13 @@ frontend/src/components/modals/SuperModal.tsx
       echo "Conflito conhecido, fica a versão do GitLab: ${file}"
       git checkout --ours -- "${file}"
       git add -- "${file}"
+    elif printf '%s\n' "${combine}" | grep -Fxq "${file}"; then
+      echo "Conflito conhecido, junta os dois lados: ${file}"
+      if ! node "$(dirname "$0")/mirror-resolve-conflicts.mjs" "${file}"; then
+        failed=1
+      else
+        git add -- "${file}"
+      fi
     else
       echo "Conflito inesperado: ${file}"
       failed=1
