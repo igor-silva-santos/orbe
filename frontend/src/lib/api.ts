@@ -1,4 +1,5 @@
 import type { Filme, Serie, Anime, Jogo, EventoResumo } from '@/types';
+import { normalizeHomeLayout, type HomeCarouselId } from './home-layout';
 import type { DealsOverview, DealsGratisResponse, DealsPromocoesResponse } from '@/types/deals';
 import { API_BASE } from './apiBase';
 import { clearBrowserSession } from './session';
@@ -327,8 +328,60 @@ export const orbeNerdApi = {
     return apiClient.get('/users/me');
   },
 
-  updateUserProfile: async (data: { nome?: string; bio?: string; avatar?: string; preferencias?: any; perfil_publico?: boolean }) => {
+  /**
+   * Ordem da home para quem está logado. Não redireciona em 401: a home pública
+   * continua no layout padrão se a sessão não servir.
+   * `null` = sem sessão ou falha. Lista vazia = a pessoa ocultou todos os carrosséis.
+   */
+  getHomeLayout: async (): Promise<HomeCarouselId[] | null> => {
+    const token = getToken();
+    if (!token) return null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+      });
+      if (!response.ok) return null;
+      const profile = await response.json().catch(() => null);
+      return normalizeHomeLayout(profile?.homeLayout);
+    } catch {
+      return null;
+    }
+  },
+
+  updateUserProfile: async (data: { nome?: string; homeLayout?: HomeCarouselId[] }) => {
     return apiClient.patch('/users/me', data);
+  },
+
+  uploadAvatar: async (blob: Blob, contentType: string) => {
+    const headers: Record<string, string> = { 'Content-Type': contentType };
+    const token = getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
+      method: 'POST',
+      headers,
+      body: blob,
+      signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+    });
+
+    if (response.status === 401) {
+      removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?error=session_expired';
+      }
+      throw new Error('Sessão expirada. Por favor, faça login novamente.');
+    }
+
+    if (!response.ok) {
+      await throwHttpError(response);
+    }
+
+    return response.json();
+  },
+
+  deleteAvatar: async () => {
+    return apiClient.delete('/users/me/avatar');
   },
 
   // Interações do Usuário
