@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Junta conflitos conhecidos do espelho sem escolher um lado só.
 // package.json: une a lista de testes. mediaRoutesHelpers.ts: une imports e
-// descarta só o que o arquivo juntado não usa. Qualquer outro conflito falha.
+// descarta só o que o arquivo juntado não usa. carousel-utils.test.ts: fica
+// com o episódio futuro do GitLab e com a data fixa do GitHub.
+// Qualquer outro conflito falha.
 
 import fs from 'node:fs';
 
@@ -249,10 +251,73 @@ function resolveHelpers(content) {
   return { ok: true, content: next };
 }
 
+function normalizeBlock(block) {
+  return block.replace(/\s+$/g, '').replace(/^\s+/g, '');
+}
+
+const CAROUSEL_AIRING_OURS = 'airingAt: future.toISOString(),';
+const CAROUSEL_AIRING_THEIRS = "airingAt: '2026-10-15T12:00:00.000Z',";
+const CAROUSEL_ASSERT_OURS = `assert.equal(date?.getFullYear(), future.getFullYear());
+    assert.equal(date?.getMonth(), future.getMonth());
+    assert.equal(date?.getDate(), future.getDate());`;
+const CAROUSEL_ASSERT_THEIRS = `assert.equal(date?.getFullYear(), 2026);
+    assert.equal(date?.getMonth(), 9);
+    assert.equal(date?.getDate(), 15);`;
+
+const CAROUSEL_FIXED_DATE_TEST = `
+  it('keeps the 15 Oct 2026 airing while that date is still today or later', () => {
+    const fixed = new Date(2026, 9, 15);
+    const item = {
+      ...mockMidia(1, '2026-09-10'),
+      nextAiringEpisode: {
+        airingAt: '2026-10-15T12:00:00.000Z',
+        episode: 5,
+        season: 2,
+      },
+    };
+    const date = parseMidiaReleaseDate(item);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (fixed >= today) {
+      assert.equal(date?.getFullYear(), 2026);
+      assert.equal(date?.getMonth(), 9);
+      assert.equal(date?.getDate(), 15);
+    } else {
+      assert.equal(date?.getFullYear(), 2026);
+      assert.equal(date?.getMonth(), 8);
+      assert.equal(date?.getDate(), 10);
+    }
+  });
+`;
+
+function resolveCarouselUtilsTest(content) {
+  const hunks = [...content.matchAll(HUNK)];
+  if (hunks.length !== 2) return { ok: false, reason: 'conflito fora do teste de data do carrossel' };
+  const [airing, assertion] = hunks;
+  if (normalizeBlock(airing[1]) !== CAROUSEL_AIRING_OURS || normalizeBlock(airing[2]) !== CAROUSEL_AIRING_THEIRS) {
+    return { ok: false, reason: 'data do episódio diferente do conflito conhecido' };
+  }
+  if (normalizeBlock(assertion[1]) !== CAROUSEL_ASSERT_OURS || normalizeBlock(assertion[2]) !== CAROUSEL_ASSERT_THEIRS) {
+    return { ok: false, reason: 'asserção diferente do conflito conhecido' };
+  }
+
+  let next = content.replace(airing[0], airing[1]).replace(assertion[0], assertion[1]);
+  const describeAt = next.indexOf("describe('parseMidiaReleaseDate'");
+  if (describeAt < 0) return { ok: false, reason: 'describe parseMidiaReleaseDate sumiu' };
+  const closeAt = next.indexOf('\n});', describeAt);
+  if (closeAt < 0) return { ok: false, reason: 'fim do describe não encontrado' };
+  next = `${next.slice(0, closeAt)}\n${CAROUSEL_FIXED_DATE_TEST.trimEnd()}${next.slice(closeAt)}`;
+  if (next.includes('<<<<<<<') || next.includes('>>>>>>>')) {
+    return { ok: false, reason: 'marcador sobrou' };
+  }
+  return { ok: true, content: next };
+}
+
 export function resolveConflict(filename, content) {
   const base = filename.replace(/\\/g, '/');
   if (base.endsWith('package.json')) return resolvePackageJson(content);
   if (base.endsWith('api/src/routes/mediaRoutesHelpers.ts')) return resolveHelpers(content);
+  if (base.endsWith('frontend/src/lib/carousel-utils.test.ts')) return resolveCarouselUtilsTest(content);
   return { ok: false, reason: 'arquivo sem regra de junção' };
 }
 

@@ -120,3 +120,54 @@ test('não chuta conflito no corpo do helper', () => {
   const result = resolveConflict('api/src/routes/mediaRoutesHelpers.ts', content);
   assert.equal(result.ok, false);
 });
+
+const carouselTest = `describe('parseMidiaReleaseDate', () => {
+  it('prefers a future nextAiringEpisode over an older carousel date', () => {
+    const future = new Date();
+    const item = {
+      nextAiringEpisode: {
+<<<<<<< HEAD
+        airingAt: future.toISOString(),
+=======
+        airingAt: '2026-10-15T12:00:00.000Z',
+>>>>>>> refs/remotes/github/master
+        episode: 5,
+      },
+    };
+    const date = parseMidiaReleaseDate(item);
+<<<<<<< HEAD
+    assert.equal(date?.getFullYear(), future.getFullYear());
+    assert.equal(date?.getMonth(), future.getMonth());
+    assert.equal(date?.getDate(), future.getDate());
+=======
+    assert.equal(date?.getFullYear(), 2026);
+    assert.equal(date?.getMonth(), 9);
+    assert.equal(date?.getDate(), 15);
+>>>>>>> refs/remotes/github/master
+  });
+});
+`;
+
+test('teste do carrossel fica com a data futura e com 15/10/2026', () => {
+  const result = resolveConflict('frontend/src/lib/carousel-utils.test.ts', carouselTest);
+  assert.equal(result.ok, true);
+  assert.match(result.content, /airingAt: future\.toISOString\(\)/);
+  assert.match(result.content, /airingAt: '2026-10-15T12:00:00\.000Z'/);
+  assert.match(result.content, /future\.getDate\(\)/);
+  assert.match(result.content, /getDate\(\), 15\)/);
+  assert.match(result.content, /getDate\(\), 10\)/);
+  assert.equal(result.content.includes('<<<<<<<'), false);
+});
+
+test('não chuta outro conflito no teste do carrossel', () => {
+  const content = `describe('parseMidiaReleaseDate', () => {
+<<<<<<< HEAD
+  const a = 1;
+=======
+  const a = 2;
+>>>>>>> refs/remotes/github/master
+});
+`;
+  const result = resolveConflict('frontend/src/lib/carousel-utils.test.ts', content);
+  assert.equal(result.ok, false);
+});
