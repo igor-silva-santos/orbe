@@ -1,6 +1,8 @@
-import { Router } from 'express';
+import { Router, type Response } from 'express';
 import axios from 'axios';
 import { logger } from '../logger';
+import { isAllowedPosterUrl, steamLibraryImageUrl } from '../deals/dealImages';
+import { fetchAllowedPoster, lookupSteamHeaderImage } from '../deals/posterProxy';
 
 const router = Router();
 
@@ -46,6 +48,54 @@ router.get('/images/igdb/*imagePath', async (req, res) => {
     logger.error(`Erro ao buscar imagem IGDB (${imagePath}): ${error}`);
     res.status(502).json({ error: 'Error fetching image.' });
   }
+});
+
+function sendPoster(res: Response, poster: { data: Buffer; contentType: string }) {
+  res.setHeader('Content-Type', poster.contentType);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(poster.data);
+}
+
+router.get('/images/poster', async (req, res) => {
+  const raw = req.query.url;
+  const imageUrl = typeof raw === 'string' ? raw : '';
+  if (!isAllowedPosterUrl(imageUrl)) {
+    return res.status(400).json({ error: 'URL de imagem não permitida.' });
+  }
+
+  const poster = await fetchAllowedPoster(imageUrl);
+  if (!poster) {
+    return res.status(502).json({ error: 'Error fetching image.' });
+  }
+
+  sendPoster(res, poster);
+});
+
+router.get('/images/steam/:appId', async (req, res) => {
+  const rawParam = req.params.appId;
+  const raw = Array.isArray(rawParam) ? rawParam[0] : rawParam;
+  if (!raw || !/^\d{1,10}$/.test(raw)) {
+    return res.status(400).json({ error: 'App id inválido.' });
+  }
+
+  const appId = Number(raw);
+  const library = await fetchAllowedPoster(steamLibraryImageUrl(appId));
+  if (library) {
+    sendPoster(res, library);
+    return;
+  }
+
+  const headerUrl = await lookupSteamHeaderImage(appId);
+  if (!headerUrl) {
+    return res.status(404).json({ error: 'Capa não encontrada.' });
+  }
+
+  const header = await fetchAllowedPoster(headerUrl);
+  if (!header) {
+    return res.status(502).json({ error: 'Error fetching image.' });
+  }
+
+  sendPoster(res, header);
 });
 
 export default router;
