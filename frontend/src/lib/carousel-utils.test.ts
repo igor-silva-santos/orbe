@@ -9,6 +9,7 @@ import {
   resolveCarouselOpenIndex,
   resolveCarouselOpenMonthKey,
   filterMidiaForCarouselTimeline,
+  indexOfYearTbdSeparator,
   isCarouselBootstrapReady,
   parseMidiaReleaseDate,
 } from './carousel-utils';
@@ -205,6 +206,17 @@ describe('findMonthBounds', () => {
   });
 });
 
+describe('indexOfYearTbdSeparator', () => {
+  it('aponta para o separador após os cards datados', () => {
+    const ref = new Date('2026-09-22');
+    const slidesByYear: Record<number, unknown[]> = {
+      2026: [{ kind: 'sep' }, { kind: 'media' }],
+      2027: [{ kind: 'sep' }, { kind: 'media' }, { kind: 'media' }],
+    };
+    assert.equal(indexOfYearTbdSeparator(2027, 40, slidesByYear, ref), 42);
+  });
+});
+
 describe('filterMidiaForCarouselTimeline', () => {
   it('removes historical re-releases outside the 90-day window', () => {
     const items = [
@@ -255,6 +267,30 @@ describe('parseMidiaReleaseDate', () => {
     assert.equal(date?.getFullYear(), future.getFullYear());
     assert.equal(date?.getMonth(), future.getMonth());
     assert.equal(date?.getDate(), future.getDate());
+  });
+
+  it('keeps the 15 Oct 2026 airing while that date is still today or later', () => {
+    const fixed = new Date(2026, 9, 15);
+    const item = {
+      ...mockMidia(1, '2026-09-10'),
+      nextAiringEpisode: {
+        airingAt: '2026-10-15T12:00:00.000Z',
+        episode: 5,
+        season: 2,
+      },
+    };
+    const date = parseMidiaReleaseDate(item);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (fixed >= today) {
+      assert.equal(date?.getFullYear(), 2026);
+      assert.equal(date?.getMonth(), 9);
+      assert.equal(date?.getDate(), 15);
+    } else {
+      assert.equal(date?.getFullYear(), 2026);
+      assert.equal(date?.getMonth(), 8);
+      assert.equal(date?.getDate(), 10);
+    }
   });
 });
 

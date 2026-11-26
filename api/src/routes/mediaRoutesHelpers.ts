@@ -6,12 +6,12 @@ import { prisma } from '../clients';
 import { Prisma } from '@prisma/client';
 import {
   filmeCarouselBalancedWhereInput,
+  filmeCarouselConcertExclusionFilter,
+  filterFilmesExcludeConcerts,
   filterFilmesForCarouselBalanced,
+  getFilmeQualityFilterForYear,
 } from '../qualityFilters';
-import {
-  filterFilmesHomeLaunchCarousel,
-  HOME_LAUNCH_MIN_RUNTIME_MINUTES,
-} from '../filmeAntecipacao';
+import { filterFilmesHomeLaunchCarousel } from '../filmeAntecipacao';
 import { getBrazilCalendarWeekBounds } from '../brazilTimezone';
 
 export const TWELVE_HOURS = 43200;
@@ -142,6 +142,12 @@ export const cardListInclude = {
   collection: { select: { id: true, name: true } },
 };
 
+/** Séries não têm `collection` no schema — não reutilizar cardListInclude nelas. */
+export const serieCardListInclude = {
+  genres: { include: { genero: true } },
+  streamingProviders: { include: { provider: true }, take: 4 },
+};
+
 export async function fetchFilmesForCarousel(
   extraWhere: Prisma.FilmeWhereInput,
   options: {
@@ -151,24 +157,33 @@ export async function fetchFilmesForCarousel(
     year?: number;
     /** Carrossel de lançamento da home: gate de antecipação + runtime mínimo */
     homeLaunch?: boolean;
+    /** Lançamentos só com ano (TBA) — sem gate de data futura */
+    yearTbd?: boolean;
   } = {},
 ) {
   const include = options.homeLaunch
     ? { ...carouselLiteInclude, videos: { where: { type: 'Trailer' }, take: 1, select: { type: true } } }
     : carouselLiteInclude;
 
-  const homeLaunchRuntimeWhere: Prisma.FilmeWhereInput | null = options.homeLaunch
-    ? {
-        OR: [{ runtime: null }, { runtime: { gte: HOME_LAUNCH_MIN_RUNTIME_MINUTES } }],
-      }
-    : null;
+  const year = options.year ?? new Date().getFullYear();
+  const qualityClause = getFilmeQualityFilterForYear(year);
+
+  const prismaCarouselWhere: Prisma.FilmeWhereInput =
+    options.homeLaunch || options.yearTbd
+      ? {
+          AND: [
+            qualityClause,
+            filmeCarouselConcertExclusionFilter,
+            ...(options.yearTbd ? [{ posterPath: { not: null } }] : []),
+          ],
+        }
+      : filmeCarouselBalancedWhereInput;
 
   const filmes = await prisma.filme.findMany({
     where: {
       AND: [
-        filmeCarouselBalancedWhereInput,
+        prismaCarouselWhere,
         extraWhere,
-        ...(homeLaunchRuntimeWhere ? [homeLaunchRuntimeWhere] : []),
       ],
     },
     orderBy: options.orderBy ?? { releaseDate: 'asc' },
@@ -176,8 +191,10 @@ export async function fetchFilmesForCarousel(
     include,
   });
 
-  let result = filterFilmesForCarouselBalanced(filmes);
-  if (options.homeLaunch) {
+  let result = options.yearTbd
+    ? filterFilmesExcludeConcerts(filmes)
+    : filterFilmesForCarouselBalanced(filmes);
+  if (options.homeLaunch && !options.yearTbd) {
     result = filterFilmesHomeLaunchCarousel(result);
   }
   return result;

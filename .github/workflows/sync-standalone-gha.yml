@@ -1,0 +1,79 @@
+name: Sync standalone (GitHub Actions)
+
+# Roda o sync completo DIRETO no runner (npm run sync:full), sem depender do Render
+# para CPU/egress do sync. Útil com API em PC + Cloudflare Tunnel (ver docs/MIGRAR-API-SEM-CARTAO.md).
+#
+# Limite: job free do GitHub = 6 h — se estourar, rode de novo com input resume=true.
+#
+# Secrets necessários (Settings → Secrets → Actions):
+#   DATABASE_URL, DIRECT_URL (migrate não roda aqui; pooler ok para sync)
+#   TMDB_API_KEY, IGDB_CLIENT_ID, IGDB_CLIENT_SECRET
+#   JWT_SECRET, SYNC_SECRET (exigidos pelo loadEnv da API — use os mesmos da produção)
+# Opcionais: STEAM_API_KEY, ITAD_API_KEY, REDIS_URL
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+    inputs:
+      resume:
+        description: 'Retomar checkpoint (--resume) em vez de sync novo do ano'
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Instalar Chromium (detetive / Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends chromium fonts-liberation libnss3
+          echo "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true" >> "$GITHUB_ENV"
+          echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> "$GITHUB_ENV"
+
+      - name: Instalar dependências e Prisma
+        working-directory: api
+        run: |
+          npm ci
+          npx prisma generate
+
+      - name: Decidir resume vs sync do ano corrente
+        id: plan
+        run: |
+          if [ "${{ inputs.resume }}" = "true" ]; then
+            echo "args=--resume" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          YEAR=$(date -u +%Y)
+          echo "args=${YEAR}-01-01 ${YEAR}-12-31 ${YEAR} ${YEAR}" >> "$GITHUB_OUTPUT"
+
+      - name: Executar sync:full
+        working-directory: api
+        env:
+          NODE_ENV: production
+          SYNC_RUNNER: github-actions
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          ALLOW_INSECURE_DEV_SECRETS: ''
+        run: |
+          set -e
+          EXTRA="${{ steps.plan.outputs.args }}"
+          npm run sync:full -- $EXTRA

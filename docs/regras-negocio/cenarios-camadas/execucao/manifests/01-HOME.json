@@ -1,0 +1,700 @@
+{
+  "arquivo": "01-HOME.md",
+  "ambiente": "https://orbe-seven.vercel.app",
+  "total": 77,
+  "cenarios": [
+    {
+      "id": "CT-RN-HOME-001-F",
+      "regra": "RN-HOME-001",
+      "titulo": "Feliz: Ordem das seções",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir a página inicial e rolar devagar.\n3. Conferir a ordem.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Do topo para baixo: mensagem de boas-vindas → (opcional) Continuar assistindo → Filmes → Séries → Animes → Jogos.",
+      "pre": "Página inicial carregada com sucesso.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-002-F",
+      "regra": "RN-HOME-002",
+      "titulo": "Feliz: Título da faixa leva à listagem",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar em cada título de faixa e verificar a página de destino.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao clicar no título “Filmes”, o usuário vai para a página de listagem de filmes; o mesmo padrão para Séries, Animes e Jogos.",
+      "pre": "Página inicial visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-003-F",
+      "regra": "RN-HOME-003",
+      "titulo": "Feliz: Página não “quebra” sem conteúdo",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Throttle de rede ou ambiente de teste vazio.\n3. Abrir a página inicial.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não aparece tela de erro do navegador; faixas e controles continuam; carrosséis podem mostrar placeholders e depois preencher ao rolar.",
+      "pre": "Simular rede lenta ou catálogo vazio no primeiro carregamento.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-004-F",
+      "regra": "RN-HOME-004",
+      "titulo": "Feliz: Carregamento tardio das faixas",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir a página, não rolar: observar rede/atividade.\n3. Rolar até cada faixa.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao rolar até Filmes/Jogos/Séries/Animes, novos cards ou animação de carregamento podem aparecer; não é obrigatório tudo carregar antes de rolar.",
+      "pre": "Usuário abre a página e fica só no topo (boas-vindas).",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-001-F",
+      "regra": "RN-HOME-AC-001",
+      "titulo": "Feliz: Dois modos: estreias e semana",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar alternância calendário/lista.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Botões/ícones alternam entre modos; título do carrossel muda (temporada vs dia da semana).",
+      "pre": "Faixa Animes visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-002-F",
+      "regra": "RN-HOME-AC-002",
+      "titulo": "Feliz: Modo inicial automático",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Testar em duas datas da mesma temporada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modo inicial diferente; só na primeira visita (escolha manual depois é mantida).",
+      "pre": "Data de teste no fim vs início da temporada.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-003-F",
+      "regra": "RN-HOME-AC-003",
+      "titulo": "Feliz: Estreias: temporada atual",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ler título da faixa.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Copy com nome da estação e ano.",
+      "pre": "Modo estreias, temporada corrente.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-004-F",
+      "regra": "RN-HOME-AC-004",
+      "titulo": "Feliz: Estreias: posição inicial",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir home e ver card central.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card central coerente com “próximo” na data de hoje.",
+      "pre": "Animes com datas na temporada.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-005-F",
+      "regra": "RN-HOME-AC-005",
+      "titulo": "Feliz: Agenda semanal: só com episódio marcado",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ativar modo semana em temporada ativa.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Separadores “Segunda”, “Terça”, etc., com cards abaixo.",
+      "pre": "Modo semana.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-006-F",
+      "regra": "RN-HOME-AC-006",
+      "titulo": "Feliz: Agenda: abrir no dia de hoje",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir modo semana no meio da semana.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Separador do dia atual visível/central.",
+      "pre": "Modo semana com episódios na semana.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-007-F",
+      "regra": "RN-HOME-AC-007",
+      "titulo": "Feliz: Trocar temporada",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Avançar para próxima temporada.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Novos cards após breve carregamento se a temporada ainda não estava aberta.",
+      "pre": "Modo estreias.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-008-F",
+      "regra": "RN-HOME-AC-008",
+      "titulo": "Feliz: Em alta em animes",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Toggle Em alta em Animes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista por popularidade; filtros de formato/adulto aplicados na exibição.",
+      "pre": "Em alta ligado na faixa Animes.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-009-F",
+      "regra": "RN-HOME-AC-009",
+      "titulo": "Feliz: Fixar na semana (logado)",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Fixar e ver pin.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Opção no menu ⋮; ícone de pin no card quando fixado.",
+      "pre": "Logado, card de anime.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-AC-010-F",
+      "regra": "RN-HOME-AC-010",
+      "titulo": "Feliz: Loop na agenda semanal",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Rolar até o fim no modo semana.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Comportamento de carrossel em loop (diferente do modo estreias).",
+      "pre": "Modo semana ativo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-001-F",
+      "regra": "RN-HOME-CA-001",
+      "titulo": "Feliz: Bloco só para usuário logado",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir a página em anônimo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nenhum bloco “Continuar assistindo” entre o hero e Filmes.",
+      "pre": "Usuário **não** está logado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-002-F",
+      "regra": "RN-HOME-CA-002",
+      "titulo": "Feliz: Bloco oculto sem itens",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Conta sem itens “continuar”/“seguir”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Seção ausente.",
+      "pre": "Logado, sem animes em progresso na lista.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-003-F",
+      "regra": "RN-HOME-CA-003",
+      "titulo": "Feliz: Até dez títulos",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Conta com 11+ itens.\n3. Contar cards.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só os dez primeiros (ordem de uso recente) aparecem na home.",
+      "pre": "Logado com mais de dez animes em progresso.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-004-F",
+      "regra": "RN-HOME-CA-004",
+      "titulo": "Feliz: Card mostra temporada e episódio",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ler um card qualquer.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto no formato “S{n} · E{n}” (temporada e episódio).",
+      "pre": "Pelo menos um item na faixa.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-005-F",
+      "regra": "RN-HOME-CA-005",
+      "titulo": "Feliz: Tempo restante",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Item com episódio pela metade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Linha com tempo restante abaixo do título.",
+      "pre": "Item com progresso parcial no episódio.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-006-F",
+      "regra": "RN-HOME-CA-006",
+      "titulo": "Feliz: Abrir no streaming",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar card com link.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Nova aba do navegador no serviço de streaming.",
+      "pre": "Item com link de streaming associado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-007-F",
+      "regra": "RN-HOME-CA-007",
+      "titulo": "Feliz: Sem link vai à minha lista",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar card sem link externo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Navega para minha lista de animes na mesma aba.",
+      "pre": "Item sem URL de streaming.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CA-008-F",
+      "regra": "RN-HOME-CA-008",
+      "titulo": "Feliz: “Ver todos”",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar “Ver todos”.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre minha lista de animes.",
+      "pre": "Faixa visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-001-F",
+      "regra": "RN-HOME-CARD-001",
+      "titulo": "Feliz: Abrir detalhe",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar poster/título.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal com sinopse, datas, links, etc.",
+      "pre": "Card visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-002-F",
+      "regra": "RN-HOME-CARD-002",
+      "titulo": "Feliz: Menu ⋮",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir menu.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Menu com favoritar, quero assistir, etc.",
+      "pre": "Card visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-003-F",
+      "regra": "RN-HOME-CARD-003",
+      "titulo": "Feliz: Fechar menu ao clicar fora",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar área vazia.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Menu some.",
+      "pre": "Menu aberto.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-004-F",
+      "regra": "RN-HOME-CARD-004",
+      "titulo": "Feliz: Favoritar / quero assistir",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Favoritar e recarregar página logado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Estado ativo reflete no menu; indicador no card se aplicável.",
+      "pre": "Logado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-005-F",
+      "regra": "RN-HOME-CARD-005",
+      "titulo": "Feliz: Visitante não grava",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Favoritar deslogado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Aviso; nada salvo.",
+      "pre": "Não logado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-006-F",
+      "regra": "RN-HOME-CARD-006",
+      "titulo": "Feliz: Acompanhando (série/anime)",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir menu em série.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Item “Acompanhando” no menu.",
+      "pre": "Card série ou anime.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-007-F",
+      "regra": "RN-HOME-CARD-007",
+      "titulo": "Feliz: Já assisti / já joguei",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Tentar em estreia futura.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Opção desabilitada ou sem efeito.",
+      "pre": "Filme/jogo futuro.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-008-F",
+      "regra": "RN-HOME-CARD-008",
+      "titulo": "Feliz: Avaliar ao marcar visto",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Marcar já assisti em filme antigo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modal de avaliação.",
+      "pre": "Lançado, logado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-009-F",
+      "regra": "RN-HOME-CARD-009",
+      "titulo": "Feliz: Etiqueta de status — filme",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar filme em cartaz vs streaming.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Uma etiqueta principal por card.",
+      "pre": "Filmes com flags diferentes.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-010-F",
+      "regra": "RN-HOME-CARD-010",
+      "titulo": "Feliz: Etiqueta — série/anime",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Testar dia após estreia de ep.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "“NOVO EP” visível.",
+      "pre": "Episódio exibido há menos de 24h.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-011-F",
+      "regra": "RN-HOME-CARD-011",
+      "titulo": "Feliz: Novo ep: regra de 24h",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Esperar ou simular data.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Etiqueta presente; após 24h some.",
+      "pre": "Ep entre 1h e 24h atrás.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-012-F",
+      "regra": "RN-HOME-CARD-012",
+      "titulo": "Feliz: Dublagem no anime",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar com título só legendado.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "“Dublado” no card.",
+      "pre": "Anime com dublagem BR cadastrada.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-013-F",
+      "regra": "RN-HOME-CARD-013",
+      "titulo": "Feliz: Contagem para próximo episódio",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Card com ep amanhã vs hoje à noite.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto com dias/horas; abaixo de 1 dia atualiza mais frequentemente.",
+      "pre": "Série/anime com próximo ep futuro.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-014-F",
+      "regra": "RN-HOME-CARD-014",
+      "titulo": "Feliz: Saga em filme",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar saga vs poster.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Link de saga; clique **não** abre o modal (só o link).",
+      "pre": "Filme com saga.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-015-F",
+      "regra": "RN-HOME-CARD-015",
+      "titulo": "Feliz: Conteúdo adulto no poster",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Hover no card adulto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Blur no poster.",
+      "pre": "Título marcado adulto ainda permitido.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-016-F",
+      "regra": "RN-HOME-CARD-016",
+      "titulo": "Feliz: Indicador na minha lista",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Favoritar e olhar o card.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Borda ou pill de destaque.",
+      "pre": "Logado com item na lista.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CARD-017-F",
+      "regra": "RN-HOME-CARD-017",
+      "titulo": "Feliz: Ocultar título",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ocultar e buscar de novo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título some das listas personalizadas subsequentes.",
+      "pre": "Logado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-001-F",
+      "regra": "RN-HOME-CON-001",
+      "titulo": "Feliz: Foco em lançamentos recentes e próximos",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar título reestreia antiga na home vs página Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Título muito antigo fora dessa janela **não** aparece no carrossel temporal (pode existir em outras páginas do site).",
+      "pre": "Data de teste conhecida; título com estreia há mais de 90 dias só por reestreia antiga.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-002-F",
+      "regra": "RN-HOME-CON-002",
+      "titulo": "Feliz: Filmes: sem shows e concertos na faixa",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Buscar concerto na página Filmes.\n3. Verificar ausência na home.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na faixa Filmes da home.",
+      "pre": "Catálogo com filme de concerto cadastrado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-003-F",
+      "regra": "RN-HOME-CON-003",
+      "titulo": "Feliz: Filmes: curta duração futura",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Validar com título de teste curto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Não aparece no carrossel inicial de filmes.",
+      "pre": "Filme futuro com duração de curta-metragem conhecida.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-004-F",
+      "regra": "RN-HOME-CON-004",
+      "titulo": "Feliz: Filmes: destaques no card",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar cards em destaque na mídia.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pill ou etiqueta no card além do status normal.",
+      "pre": "Filme elegível a destaque na semana/mês.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-005-F",
+      "regra": "RN-HOME-CON-005",
+      "titulo": "Feliz: Séries: data do próximo episódio",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Série semanal com ep na sexta.\n3. Conferir posição na sexta.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card na faixa Séries alinhado ao mês/dia do próximo ep ao rolar a timeline.",
+      "pre": "Série com próximo episódio marcado para data futura.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-006-F",
+      "regra": "RN-HOME-CON-006",
+      "titulo": "Feliz: Séries: episódio recente",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Série que estreou ep ontem.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card ainda visível ao navegar no passado recente do carrossel.",
+      "pre": "Episódio exibido há poucos dias.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-007-F",
+      "regra": "RN-HOME-CON-007",
+      "titulo": "Feliz: Jogos: plataformas no card",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Inspecionar card de jogo multiplataforma.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até quatro ícones visíveis no card.",
+      "pre": "Jogo com várias plataformas.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-008-F",
+      "regra": "RN-HOME-CON-008",
+      "titulo": "Feliz: Jogos pouco relevantes",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar com página Jogos.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na faixa Jogos da home.",
+      "pre": "Jogo obscuro no catálogo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-009-F",
+      "regra": "RN-HOME-CON-009",
+      "titulo": "Feliz: Conteúdo adulto explícito em animes",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Buscar título adulto.\n3. Verificar home.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ausente na home; pode ou não aparecer em outras áreas conforme política do site.",
+      "pre": "Título adulto no catálogo geral.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-CON-010-F",
+      "regra": "RN-HOME-CON-010",
+      "titulo": "Feliz: Animes da temporada e agenda",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Anime antigo fora de exibição.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Pode não aparecer no carregamento inicial.",
+      "pre": "Anime fora de temporada e sem episódio próximo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-001-F",
+      "regra": "RN-HOME-EA-001",
+      "titulo": "Feliz: Ativar Em alta",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar Em alta na faixa Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Timeline por mês some; cards em ordem de “em alta”; sem separadores de ano TBD.",
+      "pre": "Faixa Filmes, Séries ou Jogos.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-002-F",
+      "regra": "RN-HOME-EA-002",
+      "titulo": "Feliz: Filmes em alta ≠ populares da página Filmes",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Comparar os mesmos dias home Em alta vs página Filmes Populares.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ordem/conjunto pode diferir da página Filmes → Populares.",
+      "pre": "Modo Em alta em Filmes na home.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-003-F",
+      "regra": "RN-HOME-EA-003",
+      "titulo": "Feliz: Séries e jogos em alta",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ativar Em alta em Séries.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Lista fixa (~dezena de títulos) sem navegação por mês.",
+      "pre": "Modo Em alta ativo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-004-F",
+      "regra": "RN-HOME-EA-004",
+      "titulo": "Feliz: Início da lista",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ativar e ver posição.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Primeiro slide visível.",
+      "pre": "Toggle ligado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-005-F",
+      "regra": "RN-HOME-EA-005",
+      "titulo": "Feliz: Desativar volta à timeline",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ligar e desligar Em alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Modo mês retorna; foco próximo lançamento.",
+      "pre": "Estava em Em alta.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-EA-006-F",
+      "regra": "RN-HOME-EA-006",
+      "titulo": "Feliz: Gênero em Em alta",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Filtrar gênero em Em alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Dropdown coerente com cards visíveis.",
+      "pre": "Em alta com vários gêneros.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-HERO-001-F",
+      "regra": "RN-HOME-HERO-001",
+      "titulo": "Feliz: Botão “Começar agora”",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar “Começar agora” e verificar scroll até Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao clicar, a página rola suavemente até a seção Filmes; o endereço do navegador **não** precisa mudar de página.",
+      "pre": "Página inicial no topo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-HERO-002-F",
+      "regra": "RN-HOME-HERO-002",
+      "titulo": "Feliz: Link “Ver jogos em alta”",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar no link e conferir aba/conteúdo de em alta.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Abre a página de promoções já na aba/visualização de jogos em alta.",
+      "pre": "Página inicial no topo.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-SHELL-001-F",
+      "regra": "RN-HOME-SHELL-001",
+      "titulo": "Feliz: Menu superior e busca",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Usar busca e menu no topo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Busca abre overlay; login leva à entrada.",
+      "pre": "Qualquer estado de login.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-SHELL-002-F",
+      "regra": "RN-HOME-SHELL-002",
+      "titulo": "Feliz: Sem popup de “consentimento +18”",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Navegar home com título adulto.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Apenas blur/exclusão, sem popup dedicado.",
+      "pre": "Título adulto permitido.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-001-F",
+      "regra": "RN-HOME-TBD-001",
+      "titulo": "Feliz: Separador de ano sem dia",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Rolar até o fim da timeline datada em Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cartão separador + cards desses títulos **depois** da parte datada.",
+      "pre": "Existem títulos com ano mas sem dia/mês confirmado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-002-F",
+      "regra": "RN-HOME-TBD-002",
+      "titulo": "Feliz: Título ao focar TBD",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Focar separador de ano.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto “sem data confirmada” no cabeçalho do carrossel.",
+      "pre": "Usuário focou slide TBD.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TBD-003-F",
+      "regra": "RN-HOME-TBD-003",
+      "titulo": "Feliz: Anos futuros na fila",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Rolar até virada de ano no carrossel.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Ao avançar meses/anos, aparecem novos blocos TBD conforme o ano.",
+      "pre": "Carrossel em modo timeline (não “Em alta”).",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-001-F",
+      "regra": "RN-HOME-TL-001",
+      "titulo": "Feliz: Título do mês no carrossel",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir faixa Filmes e ler o título superior.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Texto em português com mês por extenso.",
+      "pre": "Carrossel carregado com pelo menos um título datado.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-002-F",
+      "regra": "RN-HOME-TL-002",
+      "titulo": "Feliz: Abrir no próximo lançamento",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir home em dia com estreias futuras.\n3. Ver qual card está ao centro.\n4. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Card central (ou focado) é o próximo lançamento, não o primeiro da lista histórica.",
+      "pre": "Existe estreia futura na faixa.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-003-F",
+      "regra": "RN-HOME-TL-003",
+      "titulo": "Feliz: Sem futuro: último lançado",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Testar em dia sem estreias futuras carregadas.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Foco no lançamento mais recente já ocorrido.",
+      "pre": "Só passado recente na faixa.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-004-F",
+      "regra": "RN-HOME-TL-004",
+      "titulo": "Feliz: Série/anime: data do episódio",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Série com nova temporada distante mas ep semanal próximo.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Posição no carrossel coerente com a data do episódio, não só estreia da série.",
+      "pre": "Card com “próximo episódio” visível.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-005-F",
+      "regra": "RN-HOME-TL-005",
+      "titulo": "Feliz: Placeholders no início",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Recarregar com rede lenta na faixa Filmes.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Até ~10 placeholders; depois substituídos por cards reais na posição correta.",
+      "pre": "Primeiro acesso ou rede lenta.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-006-F",
+      "regra": "RN-HOME-TL-006",
+      "titulo": "Feliz: Rolagem horizontal",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Arrastar carrossel e usar setas laterais.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Movimento horizontal; card central em destaque (anel/foco).",
+      "pre": "Faixa com vários cards.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-007-F",
+      "regra": "RN-HOME-TL-007",
+      "titulo": "Feliz: Ctrl + roda do mouse",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Testar em navegador desktop.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Carrossel muda de slide com Ctrl+scroll.",
+      "pre": "Desktop, foco na faixa.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-008-F",
+      "regra": "RN-HOME-TL-008",
+      "titulo": "Feliz: Carregar meses ao navegar",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Rolar rapidamente 3–4 meses à frente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Novos cards aparecem; título do mês no topo atualiza.",
+      "pre": "Usuário rola vários meses para frente ou para trás.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-009-F",
+      "regra": "RN-HOME-TL-009",
+      "titulo": "Feliz: Não “pular” ao puxar o passado",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Rolar para trás até disparar carga de mês anterior.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "O mesmo título permanece em foco (sem salto brusco).",
+      "pre": "Usuário no meio do carrossel; sistema carrega mês anterior.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-010-F",
+      "regra": "RN-HOME-TL-010",
+      "titulo": "Feliz: Setas de mudança de mês",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Clicar setas de mês repetidamente.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Avanço/retrocesso por mês; após vários meses sem título, para de avançar em vazio.",
+      "pre": "Carrossel com navegação por mês habilitada.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-011-F",
+      "regra": "RN-HOME-TL-011",
+      "titulo": "Feliz: Filtro por gênero",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Abrir filtro, escolher um gênero.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Só cards daquele gênero; lista de gêneros reflete o que existe nos cards carregados.",
+      "pre": "Vários gêneros na faixa.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-012-F",
+      "regra": "RN-HOME-TL-012",
+      "titulo": "Feliz: Troca de gênero reposiciona",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Filtrar gênero raro e observar card central.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Posição inicial coerente com o subconjunto filtrado.",
+      "pre": "Filtro alterado com resultados.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-TL-013-F",
+      "regra": "RN-HOME-TL-013",
+      "titulo": "Feliz: Scroll rápido (ícone raio)",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Ligar/desligar e comparar velocidade.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Transições mais rápidas; mais cards pré-carregados ao rolar forte.",
+      "pre": "Usuário ativa ícone de raio/Zap no controle da faixa (se visível).",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-UPD-001-F",
+      "regra": "RN-HOME-UPD-001",
+      "titulo": "Feliz: Atualizar após sincronização do catálogo",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Após sync, manter home aberta e observar.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Cards novos ou datas alteradas após evento.",
+      "pre": "Ambiente onde sync/disparo de atualização ocorre.",
+      "tela": "Página inicial"
+    },
+    {
+      "id": "CT-RN-HOME-UPD-002-F",
+      "regra": "RN-HOME-UPD-002",
+      "titulo": "Feliz: Falha na atualização silenciosa",
+      "passos": "1. Abrir o site e navegar até **Página inicial**.\n2. Cortar rede após sync.\n3. Confirmar na tela o **resultado feliz** descrito na regra.",
+      "resultado_esperado": "Sem mensagem obrigatória; conteúdo antigo permanece.",
+      "pre": "Falha de rede na atualização.",
+      "tela": "Página inicial"
+    }
+  ]
+}
