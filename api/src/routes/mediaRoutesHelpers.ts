@@ -12,6 +12,7 @@ import {
   filterFilmesHomeLaunchCarousel,
   HOME_LAUNCH_MIN_RUNTIME_MINUTES,
 } from '../filmeAntecipacao';
+import { getBrazilCalendarWeekBounds } from '../brazilTimezone';
 
 export const TWELVE_HOURS = 43200;
 export const TWENTY_FOUR_HOURS = 86400;
@@ -243,6 +244,28 @@ export function mergeCarouselRowsByFirstReleaseDateAsc<T extends { igdbId: numbe
     });
 }
 
+/**
+ * Data usada para posicionar o anime no recorte da homepage.
+ * Ignora episódios já exibidos nesta semana: o primeiro horário a partir de
+ * hoje (ou a data de estreia) continua sendo a âncora.
+ */
+export function animeCarouselAnchorDate(
+  airingSchedule: { airingAt?: Date | string | null }[] | null | undefined,
+  fallback: Date | null,
+  now: Date,
+): Date | null {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const upcoming = (airingSchedule ?? [])
+    .map((row) => (row?.airingAt != null ? new Date(row.airingAt) : null))
+    .filter((date): date is Date => date != null && !Number.isNaN(date.getTime()) && date >= today)
+    .sort((a, b) => a.getTime() - b.getTime())[0];
+  if (!upcoming) return fallback;
+  const date = new Date(upcoming);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
 /** Recorta a lista ordenada por data: N itens antes de hoje + N a partir de hoje. */
 export function pickAroundToday<T>(
   items: T[],
@@ -264,20 +287,25 @@ export function pickAroundToday<T>(
   return [...past, ...future].map((row) => row.item);
 }
 
+/**
+ * Horários a partir do domingo desta semana no Brasil, não só de agora.
+ * `take` cobre um anime diário na semana corrente mais o próximo episódio.
+ * Passe `new Date()` em cada request — um valor congelado no load do módulo
+ * deixa de incluir a semana atual depois que o processo fica no ar.
+ */
 export function getAnimeCarouselInclude(now: Date = new Date()) {
-  const dayStart = new Date(now);
-  dayStart.setHours(0, 0, 0, 0);
+  const { start } = getBrazilCalendarWeekBounds(now);
   return {
     genres: { include: { genero: true } },
     streamingLinks: { take: 5 },
     externalLinks: { take: 12 },
     airingSchedule: {
-      where: { airingAt: { gte: dayStart } },
+      where: { airingAt: { gte: start } },
       orderBy: { airingAt: 'asc' as const },
-      take: 1,
+      take: 10,
     },
   };
 }
 
-/** @deprecated use getAnimeCarouselInclude() por request */
+/** @deprecated use getAnimeCarouselInclude(new Date()) por request */
 export const animeCarouselInclude = getAnimeCarouselInclude();

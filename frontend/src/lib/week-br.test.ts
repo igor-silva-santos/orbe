@@ -8,8 +8,10 @@ describe('week-br', () => {
     assert.equal(isYmdInRange('2026-09-27', '2026-09-20', '2026-09-26'), false);
   });
 
-  it('airingYmdFromIso', () => {
+  it('airingYmdFromIso usa o calendário de Brasília', () => {
     assert.equal(airingYmdFromIso('2026-09-21T12:00:00.000Z'), '2026-09-21');
+    // 02:00 UTC ainda é o dia anterior no Brasil (UTC-3)
+    assert.equal(airingYmdFromIso('2026-09-21T02:00:00.000Z'), '2026-09-20');
   });
 
   it('getWeekBoundsBr span 7 dias', () => {

@@ -2,6 +2,7 @@ import { translateTmdbStatus } from './statusLabels';
 import { filterGamesForEvent } from './eventGameFilters';
 import { resolveIgdbImageUrl } from './igdbImageUrl';
 import { calendarDateKeyFromValue, isCalendarDateTodayOrFutureBr } from './calendarBr';
+import { pickCarouselAirings } from './animeCarouselAiring';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const TMDB_CAROUSEL_POSTER_URL = 'https://image.tmdb.org/t/p/w342';
@@ -806,9 +807,7 @@ export const mapJogoToCarouselCard = (jogo: any) => ({
 });
 
 export const mapAnimeToCarouselCard = (anime: any) => {
-  const nextAiring = anime.airingSchedule
-    ?.filter((s: any) => new Date(s.airingAt) > new Date())
-    .sort((a: any, b: any) => new Date(a.airingAt).getTime() - new Date(b.airingAt).getTime())[0];
+  const { nextAiringEpisode, weekAiringEpisodes } = pickCarouselAirings(anime.airingSchedule);
 
   const streamingFromLinks = collectAnimeStreamingPlatforms(anime);
 
@@ -828,10 +827,9 @@ export const mapAnimeToCarouselCard = (anime: any) => {
     format: anime.format,
     isAdult: anime.isAdult,
     dublagem_info: anime.dublagemPtBr ?? false,
-    nextAiringEpisode: nextAiring
-      ? { airingAt: new Date(nextAiring.airingAt).toISOString(), episode: nextAiring.episode }
-      : null,
-    numero_episodio_atual: nextAiring?.episode ?? null,
+    nextAiringEpisode,
+    weekAiringEpisodes,
+    numero_episodio_atual: nextAiringEpisode?.episode ?? weekAiringEpisodes[0]?.episode ?? null,
   };
 };
 

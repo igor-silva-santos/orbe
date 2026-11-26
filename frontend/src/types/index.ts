@@ -108,6 +108,10 @@ export interface Midia {
   steam_discount_percent?: number | null;
   /** Próximo episódio (séries/animes) — usado no carrossel e countdown do card */
   nextAiringEpisode?: NextAiringEpisode | null;
+  /** Episódio da semana corrente no card de anime, quando a API manda só um. */
+  weekAiringEpisode?: NextAiringEpisode | null;
+  /** Episódios que caem na semana corrente, inclusive os que já foram ao ar. */
+  weekAiringEpisodes?: NextAiringEpisode[] | null;
 }
 
 // Interfaces específicas por tipo de mídia

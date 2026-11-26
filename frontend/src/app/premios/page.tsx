@@ -1,32 +1,49 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Award, Calendar, ChevronLeft, ChevronRight, Film, Gamepad2, Sparkles, Tv } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Award, Calendar, ExternalLink, Film, Gamepad2, Sparkles, Tv } from 'lucide-react';
 import orbeNerdApi from '@/lib/api';
-import MidiaCard from '@/components/media/MidiaCard';
-import type { Filme, Serie, Anime, Jogo, TipoMidia } from '@/types';
-
-type AwardItem = (Filme | Serie | Anime | Jogo) & { type: TipoMidia };
+import PageHeader from '@/components/layout/PageHeader';
 
 type MediaTypeFilter = 'todos' | 'filme' | 'serie' | 'anime' | 'jogo';
+type CeremonyPhase = 'votacao_aberta' | 'aguardando' | 'encerrado';
 
-type AwardHighlight = {
-  award: { nome: string; ano: number } | null;
-  results: AwardItem[];
+type AwardNominee = { titulo: string; tipo: 'filme' | 'serie' | 'anime' | 'jogo' };
+type AwardCategory = {
+  nome: string;
+  indicados: AwardNominee[];
+  vencedor: string | null;
 };
 
-type AwardHighlights = {
-  filmes: AwardHighlight;
-  series: AwardHighlight;
-  animes: AwardHighlight;
-  jogos: AwardHighlight;
+type AwardCeremony = {
+  id: string;
+  nome: string;
+  ano: number;
+  tipos: Array<'filme' | 'serie' | 'anime' | 'jogo'>;
+  data: string;
+  descricao: string;
+  url: string | null;
+  fase: CeremonyPhase;
+  votacaoAberta: boolean;
+  avisoVotacao: string | null;
+  urlVotacao: string | null;
+  categorias: AwardCategory[];
 };
 
-import PageHeader from '@/components/layout/PageHeader';
-import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
-import { useAppStore } from '@/stores/appStore';
+type OpenFanVote = {
+  id: string;
+  nome: string;
+  ano: number;
+  aviso: string;
+  url: string | null;
+};
 
-const PAGE_SIZE = 48;
+type AwardEventsPayload = {
+  names: string[];
+  years: number[];
+  votacoesAbertas: OpenFanVote[];
+  eventos: AwardCeremony[];
+};
 
 const MEDIA_TYPE_OPTIONS: { id: MediaTypeFilter; label: string }[] = [
   { id: 'todos', label: 'Tudo' },
@@ -36,135 +53,73 @@ const MEDIA_TYPE_OPTIONS: { id: MediaTypeFilter; label: string }[] = [
   { id: 'jogo', label: 'Jogos' },
 ];
 
-const isDefaultFilters = (
-  mediaType: MediaTypeFilter,
-  awardName: string,
-  year: string,
-) => mediaType === 'todos' && awardName === 'todos' && year === 'todos';
+const TYPE_META = {
+  filme: { label: 'Filmes', Icon: Film },
+  serie: { label: 'Séries', Icon: Tv },
+  anime: { label: 'Animes', Icon: Sparkles },
+  jogo: { label: 'Jogos', Icon: Gamepad2 },
+} as const;
+
+const PHASE_LABEL: Record<CeremonyPhase, string> = {
+  votacao_aberta: 'Votação aberta',
+  aguardando: 'Aguardando cerimônia',
+  encerrado: 'Cerimônia encerrada',
+};
+
+const PHASE_CLASS: Record<CeremonyPhase, string> = {
+  votacao_aberta: 'bg-[var(--orbe-accent-2)]/15 text-[var(--orbe-accent-2)]',
+  aguardando: 'bg-muted text-muted-foreground',
+  encerrado: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200',
+};
 
 export default function PremiosPage() {
-  const handleInteraction = useMidiaInteraction();
-  const userInteractions = useAppStore((s) => s.userInteractions);
-  const [awards, setAwards] = useState<AwardItem[]>([]);
-  const [highlights, setHighlights] = useState<AwardHighlights | null>(null);
-  const [totalResults, setTotalResults] = useState(0);
-  const [page, setPage] = useState(1);
+  const [payload, setPayload] = useState<AwardEventsPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedAwardName, setSelectedAwardName] = useState<string>('todos');
-  const [selectedYear, setSelectedYear] = useState<string>('todos');
+  const [loadError, setLoadError] = useState(false);
+  const [selectedAwardName, setSelectedAwardName] = useState('todos');
+  const [selectedYear, setSelectedYear] = useState('todos');
   const [selectedMediaType, setSelectedMediaType] = useState<MediaTypeFilter>('todos');
 
-  const [availableAwards, setAvailableAwards] = useState<string[]>([]);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
-
-  const showHighlights = isDefaultFilters(selectedMediaType, selectedAwardName, selectedYear);
-  const totalPages = Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
-
   useEffect(() => {
-    const loadFilters = async () => {
-      try {
-        const filters = await orbeNerdApi.getAwardFilters();
-        setAvailableAwards(filters.names ?? []);
-        setAvailableYears((filters.years ?? []).filter((y: number) => y > 0));
-      } catch (error) {
-        console.error('Erro ao carregar filtros de prêmios:', error);
-      }
-    };
-    loadFilters();
-  }, []);
+    let cancelled = false;
 
-  useEffect(() => {
-    setPage(1);
-  }, [selectedAwardName, selectedYear, selectedMediaType]);
-
-  useEffect(() => {
-    const loadContent = async () => {
+    const loadEvents = async () => {
       setIsLoading(true);
+      setLoadError(false);
       try {
-        if (showHighlights) {
-          const data = await orbeNerdApi.getAwardHighlights();
-          setHighlights(data);
-          setAwards([]);
-          setTotalResults(0);
-        } else {
-          const response = await orbeNerdApi.getAwards({
-            awardName: selectedAwardName === 'todos' ? undefined : selectedAwardName,
-            year: selectedYear === 'todos' ? undefined : parseInt(selectedYear, 10),
-            mediaType: selectedMediaType === 'todos' ? undefined : selectedMediaType,
-            page,
-            limit: PAGE_SIZE,
-          });
-          setAwards(response.results ?? []);
-          setTotalResults(response.total ?? 0);
-          setHighlights(null);
-        }
+        const data = await orbeNerdApi.getAwardEvents({
+          awardName: selectedAwardName === 'todos' ? undefined : selectedAwardName,
+          year: selectedYear === 'todos' ? undefined : parseInt(selectedYear, 10),
+          mediaType: selectedMediaType === 'todos' ? undefined : selectedMediaType,
+        });
+        if (!cancelled) setPayload(data);
       } catch (error) {
         console.error('Erro ao carregar premiações:', error);
+        if (!cancelled) {
+          setPayload(null);
+          setLoadError(true);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    loadContent();
-  }, [selectedAwardName, selectedYear, selectedMediaType, page, showHighlights]);
+    void loadEvents();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAwardName, selectedYear, selectedMediaType]);
 
-  const highlightSections = useMemo(() => {
-    if (!highlights) return [];
-    const sections = [
-      {
-        key: 'filmes',
-        title: 'Última premiação — Filmes',
-        icon: Film,
-        award: highlights.filmes.award,
-        items: highlights.filmes.results,
-      },
-      {
-        key: 'series',
-        title: 'Última premiação — Séries',
-        icon: Tv,
-        award: highlights.series.award,
-        items: highlights.series.results,
-      },
-      {
-        key: 'animes',
-        title: 'Última premiação — Animes',
-        icon: Sparkles,
-        award: highlights.animes.award,
-        items: highlights.animes.results,
-      },
-      {
-        key: 'jogos',
-        title: 'Última premiação — Jogos',
-        icon: Gamepad2,
-        award: highlights.jogos.award,
-        items: highlights.jogos.results,
-      },
-    ];
-    if (selectedMediaType !== 'todos') {
-      const map: Record<MediaTypeFilter, string> = {
-        todos: '',
-        filme: 'filmes',
-        serie: 'series',
-        anime: 'animes',
-        jogo: 'jogos',
-      };
-      return sections.filter((section) => section.key === map[selectedMediaType]);
-    }
-    return sections;
-  }, [highlights, selectedMediaType]);
-
-  const applyHighlightFilter = (award: { nome: string; ano: number } | null, mediaType: MediaTypeFilter) => {
-    if (!award) return;
-    setSelectedMediaType(mediaType);
-    setSelectedAwardName(award.nome);
-    setSelectedYear(String(award.ano));
-  };
+  const names = payload?.names ?? [];
+  const years = payload?.years ?? [];
+  const eventos = payload?.eventos ?? [];
+  const votacoesAbertas = payload?.votacoesAbertas ?? [];
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 md:py-8">
       <PageHeader
         title="Premiações"
-        description="Vencedores e indicados dos maiores prêmios — por padrão, a última edição de cada categoria."
+        description="Eventos de premiação, os títulos que concorrem e, quando a cerimônia já aconteceu, quem venceu cada categoria."
       />
 
       <div className="mb-6 md:mb-8 space-y-4">
@@ -174,6 +129,7 @@ export default function PremiosPage() {
             <select
               value={selectedMediaType}
               onChange={(e) => setSelectedMediaType(e.target.value as MediaTypeFilter)}
+              aria-label="Tipo de mídia"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {MEDIA_TYPE_OPTIONS.map((option) => (
@@ -186,10 +142,11 @@ export default function PremiosPage() {
             <select
               value={selectedAwardName}
               onChange={(e) => setSelectedAwardName(e.target.value)}
+              aria-label="Prêmio"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="todos">Todos os Prêmios</option>
-              {availableAwards.map((name) => (
+              {names.map((name) => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
@@ -199,10 +156,11 @@ export default function PremiosPage() {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
+              aria-label="Ano"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm orbe-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="todos">Todos os Anos</option>
-              {availableYears.map((year) => (
+              {years.map((year) => (
                 <option key={year} value={year.toString()}>{year}</option>
               ))}
             </select>
@@ -214,112 +172,121 @@ export default function PremiosPage() {
         <div className="flex items-center justify-center py-12">
           <div className="loading-spinner h-8 w-8" />
         </div>
-      ) : showHighlights ? (
-        <div className="space-y-12">
-          {highlightSections.map((section) => (
-            <section key={section.key} className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h2 className="font-display text-base sm:text-lg orbe-text-primary flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-                  <section.icon className="h-5 w-5 text-primary shrink-0" />
-                  <span className="break-words">{section.title}</span>
-                  {section.award && (
-                    <span className="text-sm font-normal text-muted-foreground break-words">
-                      ({section.award.nome} · {section.award.ano})
-                    </span>
-                  )}
-                </h2>
-                {section.award && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      applyHighlightFilter(
-                        section.award,
-                        section.key === 'filmes'
-                          ? 'filme'
-                          : section.key === 'series'
-                            ? 'serie'
-                            : section.key === 'animes'
-                              ? 'anime'
-                              : 'jogo',
-                      )
-                    }
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Ver todos desta premiação
-                  </button>
-                )}
-              </div>
-              {section.items.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-                  {section.items.map((awardItem) => (
-                    <MidiaCard
-                      key={`${awardItem.type}-${awardItem.id}`}
-                      midia={awardItem}
-                      type={awardItem.type as TipoMidia}
-                      userInteractions={userInteractions}
-                      onInteraction={handleInteraction}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhum vencedor cadastrado para esta categoria.</p>
-              )}
-            </section>
-          ))}
+      ) : loadError ? (
+        <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+          <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-lg font-semibold orbe-text-primary mb-2">Não foi possível carregar as premiações</h2>
+          <p className="text-muted-foreground">Tente novamente em alguns instantes.</p>
         </div>
       ) : (
-        <>
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <p className="text-muted-foreground">
-              {`${totalResults} ${totalResults === 1 ? 'premiação encontrada' : 'premiações encontradas'}`}
-            </p>
-            {totalPages > 1 && (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page <= 1}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-border disabled:opacity-40"
+        <div className="space-y-6">
+          {votacoesAbertas.map((votacao) => (
+            <aside
+              key={votacao.id}
+              className="orbe-block bg-card rounded-[20px] border-l-4 border-[var(--orbe-accent-2)] p-4 md:p-5"
+            >
+              <p className="font-semibold orbe-text-primary">Votação dos fãs aberta</p>
+              <p className="text-sm text-muted-foreground mt-1">{votacao.aviso}</p>
+              {votacao.url && (
+                <a
+                  href={votacao.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-primary hover:underline"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
-                </button>
-                <span className="text-sm text-muted-foreground">
-                  Página {page} de {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                  disabled={page >= totalPages}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-border disabled:opacity-40"
-                >
-                  Próxima
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
+                  Votar no site oficial
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </aside>
+          ))}
 
-          {awards.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-              {awards.map((awardItem) => (
-                <MidiaCard
-                  key={`${awardItem.type}-${awardItem.id}`}
-                  midia={awardItem}
-                  type={awardItem.type as TipoMidia}
-                  userInteractions={userInteractions}
-                  onInteraction={handleInteraction}
-                />
-              ))}
+          {eventos.length === 0 ? (
+            <div className="orbe-block bg-card rounded-[20px] p-10 text-center">
+              <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-lg font-semibold orbe-text-primary mb-2">Nenhum evento de premiação para esses filtros</h2>
+              <p className="text-muted-foreground">Tente outro prêmio, ano ou tipo de mídia.</p>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold orbe-text-primary mb-2">Nenhuma premiação encontrada</h3>
-              <p className="text-muted-foreground">Tente ajustar os filtros para encontrar mais resultados</p>
-            </div>
+            eventos.map((evento) => (
+              <article key={evento.id} className="orbe-block bg-card rounded-[20px] p-4 md:p-6 space-y-5">
+                <header className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {evento.tipos.map((tipo) => {
+                        const meta = TYPE_META[tipo];
+                        const Icon = meta.Icon;
+                        return (
+                          <span key={tipo} className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                            <Icon className="h-4 w-4 text-primary" />
+                            {meta.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <h2 className="font-display text-lg sm:text-xl md:text-2xl orbe-text-primary break-words">
+                      {evento.nome} {evento.ano}
+                    </h2>
+                    <p className="text-sm text-muted-foreground flex items-start gap-2">
+                      <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+                      <span>{evento.data}</span>
+                    </p>
+                    <p className="text-sm orbe-text-secondary">{evento.descricao}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${PHASE_CLASS[evento.fase]}`}>
+                      {PHASE_LABEL[evento.fase]}
+                    </span>
+                    {evento.url && (
+                      <a
+                        href={evento.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="orbe-block-sm inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-[10px]"
+                      >
+                        Site
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                </header>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {evento.categorias.map((categoria) => (
+                    <section key={categoria.nome} className="rounded-xl border border-border p-3 sm:p-4 space-y-3">
+                      <h3 className="font-semibold orbe-text-primary">{categoria.nome}</h3>
+                      {categoria.vencedor && (
+                        <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                          Vencedor: {categoria.vencedor}
+                        </p>
+                      )}
+                      {evento.fase === 'encerrado' && !categoria.vencedor && (
+                        <p className="text-sm text-muted-foreground">O resultado desta categoria ainda não foi publicado.</p>
+                      )}
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Concorrendo</p>
+                        <ul className="space-y-1.5">
+                          {categoria.indicados.map((indicado) => {
+                            const venceu = categoria.vencedor === indicado.titulo;
+                            return (
+                              <li
+                                key={indicado.titulo}
+                                className={`text-sm rounded-lg px-2 py-1 orbe-text-primary ${venceu ? 'bg-emerald-500/10 font-semibold' : ''}`}
+                              >
+                                {indicado.titulo}
+                                {venceu && <span className="ml-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">Vencedor</span>}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </article>
+            ))
           )}
-        </>
+        </div>
       )}
     </div>
   );
