@@ -37,10 +37,14 @@ export function getWeekBoundsBr(reference: Date = new Date()): {
   };
 }
 
+/** Dia civil em Brasília. O prefixo UTC do ISO cai no dia seguinte para episódios tarde da noite. */
 export function airingYmdFromIso(airingAt: string): string {
-  const match = airingAt.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (match) return match[1];
-  return ymdInBr(new Date(airingAt));
+  const date = new Date(airingAt);
+  if (Number.isNaN(date.getTime())) {
+    const match = airingAt.match(/^(\d{4}-\d{2}-\d{2})/);
+    return match?.[1] ?? '';
+  }
+  return ymdInBr(date);
 }
 
 export function isYmdInRange(ymd: string, startYmd: string, endYmd: string): boolean {

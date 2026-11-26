@@ -20,13 +20,9 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMidiaInteraction } from '@/lib/hooks/useMidiaInteraction';
 import { useAppStore } from '@/stores/appStore';
 import orbeNerdApi from '@/lib/api';
-import {
-  airingYmdFromIso,
-  formatWeeklyCarouselTitle,
-  getWeekBoundsBr,
-  isYmdInRange,
-  ymdInBr,
-} from '@/lib/week-br';
+import { formatWeeklyCarouselTitle } from '@/lib/week-br';
+import { getWeekdayInBrazil } from '@/lib/brazil-timezone';
+import { groupAnimesByBrazilWeekDay } from '@/lib/carousel-anime-agenda';
 
 type CarouselItem = 
   | { type: 'media'; data: Anime }
@@ -163,7 +159,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         title = formatWeeklyCarouselTitle(item.dayName);
       } else if (item.data.nextAiringEpisode) {
         const airingDate = new Date(item.data.nextAiringEpisode.airingAt);
-        const dayName = DAY_NAMES[airingDate.getDay()];
+        const dayName = DAY_NAMES[getWeekdayInBrazil(airingDate)];
         titleKey = `day-${dayName}`;
         title = formatWeeklyCarouselTitle(dayName);
       }
@@ -500,16 +496,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         });
         const mergedWeeklyList = Array.from(weeklyAnimes.values());
 
-        const { startYmd, endYmd } = getWeekBoundsBr();
-        const animesByDay: Record<number, Anime[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-        mergedWeeklyList.forEach(anime => {
-            if (!anime.nextAiringEpisode) return;
-            const ymd = airingYmdFromIso(anime.nextAiringEpisode.airingAt);
-            if (!isYmdInRange(ymd, startYmd, endYmd)) return;
-            const localAiringDate = new Date(anime.nextAiringEpisode.airingAt);
-            const dayIndex = localAiringDate.getDay();
-            animesByDay[dayIndex].push(anime);
-        });
+        const animesByDay = groupAnimesByBrazilWeekDay(mergedWeeklyList);
 
         const processedItems: CarouselItem[] = [];
         for (let dayIndex = 0; dayIndex <= 6; dayIndex++) {
@@ -530,9 +517,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
         }
         
         newCarouselItems = processedItems;
-        const todayYmd = ymdInBr();
-        const todayDate = new Date(`${todayYmd}T12:00:00`);
-        const currentDayIndex = todayDate.getDay();
+        const currentDayIndex = getWeekdayInBrazil(new Date());
         const startIndexCandidate = newCarouselItems.findIndex(item => item.type === 'separator' && item.dayName === DAY_NAMES[currentDayIndex]);
         newStartIndex = startIndexCandidate > -1 ? startIndexCandidate : 0;
     }
@@ -647,7 +632,7 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
     }
   };
 
-  const virtualRange = useCarouselVirtualRange(emblaApi, carouselItems.length);
+  const virtualIndexes = useCarouselVirtualRange(emblaApi, carouselItems.length);
   const showPositioningSkeleton = !emAltaMode && hasInitialPositioning;
 
   return (
@@ -769,11 +754,11 @@ const AnimeCarousel: React.FC<AnimeCarouselProps> = ({ initialData, bootstrapEna
                     </div>
                   ))
             : carouselItems.map((item, index) => {
-                const isRendered = index >= virtualRange.start && index <= virtualRange.end;
+                const isRendered = virtualIndexes.has(index);
                 const isPriority = Math.abs(index - selectedSnap) <= 4;
                 return (
                 <div
-                  key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}`}
+                  key={item.type === 'separator' ? `sep-${item.dayName}` : `media-${item.data.id}-${item.data.nextAiringEpisode?.airingAt ?? 'sem-data'}`}
                   className={SLIDE_CLASS}
                 >
                   {!isRendered ? (

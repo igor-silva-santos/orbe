@@ -43,6 +43,7 @@ import {
   getAnimeCarouselInclude,
   cardListInclude,
   pickAroundToday,
+  animeCarouselAnchorDate,
 } from './mediaRoutesHelpers';
 
 const router = Router();
@@ -208,14 +209,9 @@ router.get('/homepage', homepageRateLimiter, cacheMiddleware(TWELVE_HOURS), asyn
     const animesAround = pickAroundToday(
       animes,
       (anime) => {
-        const next = anime.airingSchedule?.[0]?.airingAt;
-        if (next) {
-          const date = new Date(next);
-          date.setHours(0, 0, 0, 0);
-          return date;
-        }
         const parts = toCalendarDateParts(anime.startDate);
-        return parts ? new Date(parts.year, parts.month - 1, parts.day) : null;
+        const fallback = parts ? new Date(parts.year, parts.month - 1, parts.day) : null;
+        return animeCarouselAnchorDate(anime.airingSchedule, fallback, today);
       },
       HOMEPAGE_AROUND_PAST,
       HOMEPAGE_AROUND_FUTURE,
