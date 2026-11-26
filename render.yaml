@@ -43,3 +43,9 @@ services:
         value: "false"
       - key: IGDB_WEBHOOK_SECRET
         sync: false
+      # Foto da conta no Storage grátis do Supabase (bucket público "avatars").
+      # Sem as duas, a API guarda o arquivo em disco local — efêmero no plano free.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
