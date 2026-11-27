@@ -21,7 +21,9 @@ export type MatchPart =
   | 'estudio'
   | 'temas'
   | 'perspectiva'
-  | 'desenvolvedora';
+  | 'desenvolvedora'
+  | 'trama'
+  | 'produtora';
 
 export type MatchAttr = {
   key: string;
@@ -78,13 +80,38 @@ export type GateAttr = {
 };
 
 export const GENERIC_DF_RATIO = 0.35;
+export const PLOT_DF_RATIO = 0.05;
 export const MATCH_RESULT_LIMIT = 5;
 export const FORMAT_BONUS = 0.05;
 export const CAST_LIMIT = 5;
+export const PLOT_TOKEN_LIMIT = 12;
+export const OVERVIEW_TOKEN_CAP = 40;
+
+export const FOLD_FROM = 'áàâãäåéèêëíìîïóòôõöúùûüýÿçñ';
+export const FOLD_TO = 'aaaaaaeeeeiiiiooooouuuuyycn';
+
+const PLOT_STOPWORDS = new Set([
+  'anos', 'ano', 'apos', 'aquele', 'aquela', 'aqui', 'ali', 'algum', 'alguma', 'alguns', 'algumas',
+  'ainda', 'apenas', 'assim', 'ate', 'atraves', 'antes', 'bem', 'cada', 'casa', 'cerca', 'cidade',
+  'coisa', 'coisas', 'com', 'como', 'contra', 'da', 'das', 'de', 'depois', 'desde', 'dia', 'dias',
+  'dentro', 'dois', 'duas', 'durante', 'e', 'ela', 'elas', 'ele', 'eles', 'em', 'entao', 'entre',
+  'era', 'eram', 'essa', 'essas', 'esse', 'esses', 'esta', 'estao', 'estar', 'este', 'eu', 'faz',
+  'fazer', 'feito', 'filme', 'filmes', 'foi', 'fora', 'forma', 'geracao', 'grande', 'grandes', 'ha',
+  'historia', 'historias', 'hoje', 'homem', 'homens', 'isso', 'isto', 'ja', 'jovem', 'jovens', 'la',
+  'lugar', 'lugares', 'mais', 'mal', 'mas', 'meio', 'menos', 'mesmo', 'mesma', 'meu', 'minha',
+  'muito', 'mulher', 'mulheres', 'mundo', 'na', 'nao', 'nas', 'nenhum', 'nenhuma', 'ninguem', 'no',
+  'nos', 'nova', 'novo', 'novos', 'novas', 'nunca', 'onde', 'os', 'ou', 'outra', 'outro', 'outras',
+  'outros', 'para', 'parte', 'partes', 'pela', 'pelas', 'pelo', 'pelos', 'pessoa', 'pessoas',
+  'pode', 'podem', 'pouco', 'porque', 'por', 'primeiro', 'primeira', 'propria', 'proprio', 'qual',
+  'qualquer', 'quando', 'quanto', 'que', 'quem', 'sao', 'se', 'seu', 'seus', 'sem', 'sempre', 'ser',
+  'sua', 'suas', 'sobre', 'sob', 'tambem', 'tanto', 'tem', 'tempo', 'ter', 'todo', 'toda', 'todos',
+  'todas', 'tres', 'tudo', 'uma', 'umas', 'uns', 'vai', 'vao', 'varios', 'varias', 'vez', 'vezes',
+  'vida', 'voce', 'voces',
+]);
 
 export const PART_WEIGHTS: Record<MatchTipo, Partial<Record<MatchPart, number>>> = {
-  filme: { generos: 0.5, diretor: 0.25, elenco: 0.15, decada: 0.1 },
-  serie: { generos: 0.5, criador: 0.25, elenco: 0.15, decada: 0.1 },
+  filme: { generos: 0.34, trama: 0.28, diretor: 0.18, produtora: 0.08, elenco: 0.08, decada: 0.04 },
+  serie: { generos: 0.36, trama: 0.26, criador: 0.2, elenco: 0.12, decada: 0.06 },
   anime: { tags: 0.55, generos: 0.25, estudio: 0.2 },
   jogo: { generos: 0.45, temas: 0.35, perspectiva: 0.1, desenvolvedora: 0.1 },
 };
@@ -115,6 +142,89 @@ const FALLBACK_PARTS: Record<MatchTipo, MatchPart[]> = {
 
 export function normalizeMatchLabel(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+export function foldMatchText(value: string): string {
+  const lower = value.toLocaleLowerCase('pt-BR');
+  let out = '';
+  for (const ch of lower) {
+    const index = FOLD_FROM.indexOf(ch);
+    out += index >= 0 ? FOLD_TO[index] : ch;
+  }
+  return out;
+}
+
+export function stemPlotToken(folded: string): string {
+  if (folded.endsWith('oes') && folded.length > 4) return `${folded.slice(0, -3)}ao`;
+  if (folded.endsWith('aes') && folded.length > 4) return `${folded.slice(0, -3)}ao`;
+  if (folded.endsWith('ns') && folded.length > 4) return `${folded.slice(0, -2)}m`;
+  if (folded.endsWith('s') && !folded.endsWith('ss') && folded.length > 4) return folded.slice(0, -1);
+  return folded;
+}
+
+/** Formas dobradas que o SQL precisa contar junto: dragao casa com dragões. */
+export function tokenForms(stem: string): string[] {
+  if (!/^[a-z0-9]+$/.test(stem)) return [];
+  const forms = new Set<string>([stem, `${stem}s`]);
+  if (stem.endsWith('ao')) forms.add(`${stem.slice(0, -2)}oes`);
+  if (stem.endsWith('m')) forms.add(`${stem.slice(0, -1)}ns`);
+  return [...forms];
+}
+
+export function overviewTokens(text: string | null | undefined, limit = OVERVIEW_TOKEN_CAP): MatchAttr[] {
+  if (!text) return [];
+  const surfaces = text.match(/[A-Za-zÀ-ÿ0-9]+/g) ?? [];
+  const seen = new Set<string>();
+  const out: MatchAttr[] = [];
+  for (const surface of surfaces) {
+    const stem = stemPlotToken(foldMatchText(surface));
+    if (stem.length < 4 || PLOT_STOPWORDS.has(stem) || seen.has(stem) || /^\d+$/.test(stem)) continue;
+    seen.add(stem);
+    out.push({ key: stem, label: surface.toLocaleLowerCase('pt-BR') });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+export function plotTokenIsDistinctive(n: number, df: number): boolean {
+  if (!(n > 0) || !(df >= 2)) return false;
+  return df / n <= PLOT_DF_RATIO;
+}
+
+export function tuneProfile(profile: MatchProfile, rarity: RarityIndex): MatchProfile {
+  const trama = tunePlotAttrs(profile.attrs.trama ?? [], rarity);
+  const produtora = (profile.attrs.produtora ?? []).filter((attr) => {
+    const df = rarity.df[rarityMapKey('produtora', attr.key)];
+    return df != null && df > 0 && !isTooGeneric(rarity.n, df);
+  });
+  return { ...profile, attrs: { ...profile.attrs, trama, produtora } };
+}
+
+function tunePlotAttrs(tokens: MatchAttr[], rarity: RarityIndex): MatchAttr[] {
+  return uniqueAttrs(tokens)
+    .filter((token) => {
+      const df = rarity.df[rarityMapKey('trama', token.key)];
+      return df != null && plotTokenIsDistinctive(rarity.n, df);
+    })
+    .sort((a, b) => {
+      const left = rarity.df[rarityMapKey('trama', a.key)] ?? 0;
+      const right = rarity.df[rarityMapKey('trama', b.key)] ?? 0;
+      return left - right || a.key.localeCompare(b.key);
+    })
+    .slice(0, PLOT_TOKEN_LIMIT);
+}
+
+export function mergeCandidateIds(byOverlap: number[], mustInclude: number[], limit: number): number[] {
+  const out: number[] = [];
+  const seen = new Set<number>();
+  const push = (id: number) => {
+    if (!Number.isInteger(id) || id <= 0 || seen.has(id) || out.length >= limit) return;
+    seen.add(id);
+    out.push(id);
+  };
+  for (const id of mustInclude) push(id);
+  for (const id of byOverlap) push(id);
+  return out;
 }
 
 export function rarityMapKey(part: MatchPart, attrKey: string): string {
@@ -231,9 +341,11 @@ function diceSimilarity(
     const dice = weightedDice(a, b, (attr) => attributeRarity(rarity.n, dfOf(rarity, part, attr.key)));
     if (dice === null) continue;
     const rightKeys = new Set(b.map((attr) => attr.key));
-    const shared = a
-      .filter((attr) => rightKeys.has(attr.key))
-      .map((attr) => ({ part, key: attr.key, label: attr.label }));
+    const shared = part === 'decada'
+      ? []
+      : a
+        .filter((attr) => rightKeys.has(attr.key))
+        .map((attr) => ({ part, key: attr.key, label: attr.label }));
     active.push({ weight: weights[part] ?? 0, dice, shared });
   }
 
@@ -286,11 +398,20 @@ export function hasComparableSignal(tipo: MatchTipo, profile: MatchProfile): boo
 }
 
 export function strongParts(tipo: MatchTipo, left: MatchProfile, right: MatchProfile): MatchPart[] {
-  if (tipo === 'filme') return ['generos', 'diretor'];
-  if (tipo === 'serie') return ['generos', 'criador'];
+  if (tipo === 'filme') return ['generos', 'diretor', 'trama', 'produtora'];
+  if (tipo === 'serie') return ['generos', 'criador', 'trama'];
   if (tipo === 'jogo') return ['generos', 'temas', 'desenvolvedora'];
   const bothHaveTags = partList(left, 'tags').length > 0 && partList(right, 'tags').length > 0;
   return bothHaveTags ? ['tags', 'estudio'] : ['generos', 'estudio'];
+}
+
+function countsAsStrong(attr: GateAttr, rarity: RarityIndex): boolean {
+  const known = rarity.df[rarityMapKey(attr.part, attr.key)];
+  const df = known != null && known > 0 ? known : dfOf(rarity, attr.part, attr.key);
+  if (isTooGeneric(rarity.n, df)) return false;
+  if (attr.part === 'trama') return known != null && plotTokenIsDistinctive(rarity.n, known);
+  if (attr.part === 'produtora') return known != null && known >= 2 && known / rarity.n <= 0.08;
+  return true;
 }
 
 export function sharedStrong(tipo: MatchTipo, seeds: MatchProfile[], rarity: RarityIndex): GateAttr[] {
@@ -306,7 +427,7 @@ export function sharedStrong(tipo: MatchTipo, seeds: MatchProfile[], rarity: Rar
     const other = rightByPart.get(part) ?? new Map();
     for (const attr of partList(left, part)) {
       if (!other.has(attr.key)) continue;
-      if (isTooGeneric(rarity.n, dfOf(rarity, part, attr.key))) continue;
+      if (!countsAsStrong({ part, key: attr.key, label: attr.label }, rarity)) continue;
       shared.push({ part, key: attr.key, label: attr.label, ref: attr.ref });
     }
   }
@@ -346,12 +467,56 @@ function hasAttr(profile: MatchProfile, attr: GateAttr): boolean {
   return partList(profile, attr.part).some((item) => item.key === attr.key);
 }
 
+function leadPart(tipo: MatchTipo): MatchPart | null {
+  if (tipo === 'filme') return 'diretor';
+  if (tipo === 'serie') return 'criador';
+  return null;
+}
+
+function sameFranchise(seed: MatchProfile, candidate: MatchProfile): boolean {
+  return seed.collectionId != null
+    && candidate.collectionId != null
+    && seed.collectionId === candidate.collectionId;
+}
+
+function distinctivePlot(attrs: GateAttr[], rarity: RarityIndex): GateAttr[] {
+  return attrs.filter((attr) => {
+    if (attr.part !== 'trama') return false;
+    const df = rarity.df[rarityMapKey('trama', attr.key)];
+    return df != null && plotTokenIsDistinctive(rarity.n, df);
+  });
+}
+
+function seedHasDistinctiveSignal(tipo: MatchTipo, seed: MatchProfile, rarity: RarityIndex): boolean {
+  if (tipo !== 'filme' && tipo !== 'serie') return false;
+  const lead = leadPart(tipo);
+  if (lead && partList(seed, lead).length > 0) return true;
+  return distinctivePlot(withPart(seed, ['trama']), rarity).length > 0;
+}
+
 function passesSoloGate(tipo: MatchTipo, seed: MatchProfile, candidate: MatchProfile, rarity: RarityIndex): boolean {
   const seedAttrs = withPart(seed, Object.keys(PART_WEIGHTS[tipo]) as MatchPart[]);
   const shared = seedAttrs.filter((attr) => hasAttr(candidate, attr));
-  if (shared.length === 0) return false;
-  if (nonGeneric(seedAttrs, rarity).length === 0) return true;
-  return nonGeneric(shared, rarity).length > 0;
+  const franchise = sameFranchise(seed, candidate);
+  const lead = leadPart(tipo);
+
+  if (seedHasDistinctiveSignal(tipo, seed, rarity)) {
+    if (franchise) return true;
+    if (lead && shared.some((attr) => attr.part === lead)) return true;
+    const genres = shared.filter((attr) =>
+      (attr.part === 'generos' || attr.part === 'tags' || attr.part === 'temas')
+      && !isTooGeneric(rarity.n, dfOf(rarity, attr.part, attr.key)),
+    );
+    return distinctivePlot(shared, rarity).length > 0 && genres.length > 0;
+  }
+
+  if (shared.length === 0 && !franchise) return false;
+  const comparable = seedAttrs.filter((attr) => attr.part !== 'decada' && attr.part !== 'elenco');
+  const sharedComparable = shared.filter((attr) => attr.part !== 'decada' && attr.part !== 'elenco');
+  if (nonGeneric(comparable, rarity).length === 0) {
+    return sharedComparable.some((attr) => attr.part === 'generos' || attr.part === 'tags' || attr.part === 'temas');
+  }
+  return nonGeneric(sharedComparable, rarity).length > 0 || franchise;
 }
 
 function allowsAdult(modo: MatchModo, seeds: MatchProfile[], candidate: MatchProfile): boolean {
@@ -363,6 +528,14 @@ function allowsAdult(modo: MatchModo, seeds: MatchProfile[], candidate: MatchPro
 
 function weightOf(seed: MatchProfile): number {
   return seed.seedWeight != null && seed.seedWeight > 0 ? seed.seedWeight : 1;
+}
+
+function distinctiveLabels(tipo: MatchTipo, seed: MatchProfile, rarity: RarityIndex): string[] {
+  const labels: string[] = [];
+  const lead = leadPart(tipo);
+  if (lead) labels.push(...partList(seed, lead).map((attr) => attr.label));
+  labels.push(...distinctivePlot(withPart(seed, ['trama']), rarity).map((attr) => attr.label));
+  return uniqueLabels(labels).slice(0, 4);
 }
 
 function uniqueLabels(labels: string[]): string[] {
@@ -447,9 +620,7 @@ export function computeMatch(input: {
 
     const passesGate = input.modo === 'dupla'
       ? Boolean(rarest && hasAttr(candidate, rarest))
-      : input.seeds.length === 1
-        ? passesSoloGate(input.tipo, input.seeds[0], candidate, input.rarity)
-        : soloScore(input.tipo, input.seeds, candidate, input.rarity).score > 0;
+      : input.seeds.some((seed) => passesSoloGate(input.tipo, seed, candidate, input.rarity));
 
     const passesMode = !input.gamePlay || gameMatchesPlay(candidate.modes ?? [], input.gamePlay);
     if (!passesMode) {
@@ -486,7 +657,10 @@ export function computeMatch(input: {
   }
 
   if (ranked.length === 0) {
-    return emptyResult('sem_afinidade', paralelo, modeDroppedGate);
+    const soloHint = input.modo === 'solo' && input.seeds.length === 1
+      ? distinctiveLabels(input.tipo, input.seeds[0], input.rarity)
+      : [];
+    return emptyResult('sem_afinidade', soloHint.length > 0 ? soloHint : paralelo, modeDroppedGate);
   }
 
   ranked.sort((a, b) => b.score - a.score || b.franchise - a.franchise || a.id - b.id);

@@ -7,6 +7,8 @@ import {
   gameMatchesPlay,
   isTooGeneric,
   matchUserMessage,
+  mergeCandidateIds,
+  overviewTokens,
   parseMatchIds,
   rarityMapKey,
   seedWeightFromPreference,
@@ -502,6 +504,108 @@ describe('modos e fichas', () => {
     });
     assert.equal(result.items.length, 5);
     assert.deepEqual(result.items.map((item) => item.id), [2, 3, 4, 5, 6]);
+  });
+});
+
+describe('trama, diretor e ano', () => {
+  it('junta o plural da sinopse no mesmo vestígio', () => {
+    const keys = overviewTokens(
+      'Na montanhosa Ilha de Berk, vikings e dragões são inimigos há gerações, mas Soluço faz amizade com um dragão.',
+    ).map((token) => token.key);
+    assert.equal(keys.filter((key) => key === 'dragao').length, 1);
+    assert.equal(keys.includes('viking'), true);
+    assert.equal(keys.includes('berk'), true);
+    assert.equal(keys.includes('ilha'), true);
+    assert.equal(keys.includes('soluco'), true);
+    assert.equal(keys.includes('sao'), false);
+    assert.equal(keys.includes('geracao'), false);
+  });
+
+  it('não deixa o ano nem um ator sozinho recomendarem outro filme', () => {
+    const rarity = catalog(200, [
+      ['generos', 'Fantasia', 30],
+      ['generos', 'Ação', 40],
+      ['generos', 'Família', 24],
+      ['generos', 'Aventura', 36],
+      ['generos', 'Animação', 16],
+      ['diretor', 'pessoa:7', 3],
+      ['diretor', 'pessoa:8', 4],
+      ['diretor', 'pessoa:9', 2],
+      ['elenco', 'pessoa:639', 6],
+      ['trama', 'dragao', 6],
+      ['trama', 'viking', 3],
+      ['decada', '2020', 40],
+      ['decada', '2000', 20],
+    ]);
+    const seed = title(1087192, {
+      generos: [attr('Fantasia'), attr('Ação'), attr('Família'), attr('Aventura')],
+      diretor: [person(7, 'Dean DeBlois')],
+      elenco: [person(639, 'Gerard Butler')],
+      decada: [{ key: '2020', label: 'anos 2020' }],
+      trama: [
+        { key: 'dragao', label: 'dragões' },
+        { key: 'viking', label: 'vikings' },
+      ],
+    });
+    const result = computeMatch({
+      tipo: 'filme',
+      modo: 'solo',
+      rarity,
+      seeds: [seed],
+      candidates: [
+        title(13494, {
+          generos: [attr('Fantasia'), attr('Ação'), attr('Aventura')],
+          diretor: [person(8, 'Outra pessoa')],
+          decada: [{ key: '2020', label: 'anos 2020' }],
+        }),
+        title(527774, {
+          generos: [attr('Fantasia'), attr('Ação'), attr('Família'), attr('Aventura'), attr('Animação')],
+          diretor: [person(8, 'Outra pessoa')],
+          decada: [{ key: '2020', label: 'anos 2020' }],
+          trama: [{ key: 'dragao', label: 'dragões' }],
+        }),
+        title(8338, {
+          generos: [attr('Família')],
+          diretor: [person(7, 'Dean DeBlois')],
+          decada: [{ key: '2000', label: 'anos 2000' }],
+        }),
+        title(1996, {
+          generos: [attr('Fantasia'), attr('Ação'), attr('Aventura')],
+          diretor: [person(9, 'Jan de Bont')],
+          elenco: [person(639, 'Gerard Butler')],
+          decada: [{ key: '2000', label: 'anos 2000' }],
+        }),
+      ],
+    });
+    assert.deepEqual(result.items.map((item) => item.id), [527774, 8338]);
+    assert.equal(result.items[0].shared.includes('dragões'), true);
+    assert.equal(result.items[0].shared.includes('Dean DeBlois'), false);
+    assert.equal(result.items[0].shared.some((label) => label.includes('2020')), false);
+    assert.equal(result.items[1].shared.includes('Dean DeBlois'), true);
+    assert.ok(result.items[0].score > result.items[1].score);
+  });
+
+  it('não usa o ano como explicação', () => {
+    const result = computeMatch({
+      tipo: 'filme',
+      modo: 'solo',
+      rarity: filmCatalog(),
+      seeds: [title(1, { generos: [attr(RARE)], decada: [{ key: '1990', label: 'anos 1990' }] })],
+      candidates: [title(2, { generos: [attr(RARE)], decada: [{ key: '1990', label: 'anos 1990' }] })],
+    });
+    assert.deepEqual(result.items[0].shared, [RARE]);
+  });
+
+  it('não corta diretor nem trama quando o recorte por gênero já lotou', () => {
+    const ids = mergeCandidateIds(
+      Array.from({ length: 300 }, (_, index) => index + 1),
+      [527774, 8338],
+      300,
+    );
+    assert.equal(ids[0], 527774);
+    assert.equal(ids[1], 8338);
+    assert.equal(ids.length, 300);
+    assert.equal(ids.includes(300), false);
   });
 });
 
