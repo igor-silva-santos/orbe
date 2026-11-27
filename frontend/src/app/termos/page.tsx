@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { FileText } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Termos de Uso | Orbe Nerd',
@@ -10,8 +11,8 @@ export default function TermosPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 text-2xl" aria-hidden>
-            📄
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden>
+            <FileText className="h-6 w-6" />
           </div>
           <h1 className="text-4xl font-bold orbe-text-primary mb-4">Termos de Uso</h1>
           <p className="text-lg text-muted-foreground">

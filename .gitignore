@@ -97,6 +97,9 @@ frontend/INTEGRACAO_BACKEND.md
 api/TMDB_API_ANALYSIS.md
 .vercel
 .env*
+
+# Avatares locais quando o Supabase Storage não está configurado
+api/data/avatars/
 !.env.example
 !**/.env.example
 frontend/playwright-report.json

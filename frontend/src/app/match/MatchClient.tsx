@@ -66,6 +66,24 @@ function titleOf(hit: SearchHit | MatchItem): string {
   return ('titulo_curado' in hit && hit.titulo_curado) || hit.titulo_api || 'Sem título';
 }
 
+function PosterThumb({ src, alt }: { src: string | null | undefined; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className="relative h-14 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
+      {src && !failed ? (
+        <img
+          src={src}
+          alt={alt}
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <Film className="absolute inset-0 m-auto h-4 w-4 text-muted-foreground" aria-hidden />
+      )}
+    </span>
+  );
+}
+
 export default function MatchClient() {
   const handleInteraction = useMidiaInteraction();
   const userInteractions = useAppStore((s) => s.userInteractions);
@@ -289,8 +307,15 @@ export default function MatchClient() {
               ))}
             </div>
           )}
-          {modo === 'solo' && picks[0] && (
-            <p className="text-sm orbe-text-primary">Título: {picks[0].titulo}</p>
+          {picks.some(Boolean) && (
+            <div className="flex flex-wrap gap-3">
+              {picks.filter((pick): pick is PickedTitle => Boolean(pick)).map((pick) => (
+                <div key={pick.id} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2">
+                  <PosterThumb src={pick.poster} alt={pick.titulo} />
+                  <span className="text-sm font-medium orbe-text-primary">{pick.titulo}</span>
+                </div>
+              ))}
+            </div>
           )}
           <label className="block text-sm text-muted-foreground">
             Buscar no catálogo
@@ -301,20 +326,35 @@ export default function MatchClient() {
               className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 orbe-text-primary"
             />
           </label>
-          {searching && <p className="text-sm text-muted-foreground">Buscando...</p>}
+          {searching && (
+            <div className="space-y-2" aria-live="polite">
+              <p className="text-sm text-muted-foreground">Buscando...</p>
+              <ul className="space-y-2">
+                {[0, 1, 2].map((index) => (
+                  <li key={index} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2">
+                    <span className="h-14 w-10 shrink-0 animate-pulse rounded-md bg-muted" />
+                    <span className="h-3 w-40 animate-pulse rounded bg-muted" />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {searchError && <p className="text-sm text-muted-foreground">{searchError}</p>}
           {!searching && !searchError && query.trim().length >= 2 && hits.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhum título com esse nome no catálogo.</p>
           )}
+          {!searching && !loading && (
           <ul className="space-y-2">
             {hits.map((hit) => (
               <li key={hit.id}>
                 <button type="button" onClick={() => pickTitle(hit)} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-3 py-2 text-left hover:border-primary">
+                  <PosterThumb src={hit.poster_url_api} alt={titleOf(hit)} />
                   <span className="font-medium orbe-text-primary">{titleOf(hit)}</span>
                 </button>
               </li>
             ))}
           </ul>
+          )}
           {sameTitle && <p className="text-sm text-muted-foreground">Cada pessoa escolhe um título diferente.</p>}
           <button
             type="button"
@@ -324,6 +364,16 @@ export default function MatchClient() {
           >
             {loading ? 'Calculando...' : 'Ver match'}
           </button>
+          {loading && (
+            <div className="flex flex-wrap gap-3" aria-live="polite">
+              {picks.filter((pick): pick is PickedTitle => Boolean(pick)).map((pick) => (
+                <div key={pick.id} className="flex items-center gap-3">
+                  <PosterThumb src={pick.poster} alt={pick.titulo} />
+                  <span className="text-sm text-muted-foreground">Calculando a partir de {pick.titulo}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
         </section>
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import MediaCarousel from '@/components/ui/MediaCarousel';
 import AnimeCarousel from '@/components/media/AnimeCarousel';
@@ -10,6 +10,14 @@ import { resolveCarouselOpenIndex, filterMidiaForCarouselTimeline } from '@/lib/
 import orbeNerdApi from '@/lib/api';
 import { useOrbeDataRefresh } from '@/lib/hooks/useOrbeDataRefresh';
 import { useSectionVisible } from '@/hooks/useSectionVisible';
+import { getToken } from '@/lib/auth/token';
+import { useAppStore } from '@/stores/appStore';
+import {
+  DEFAULT_HOME_LAYOUT,
+  HOME_CAROUSEL_HREFS,
+  HOME_CAROUSEL_LABELS,
+  type HomeCarouselId,
+} from '@/lib/home-layout';
 
 export interface HomepageData {
   filmes: Midia[];
@@ -22,29 +30,50 @@ interface HomeClientProps {
   initialData: HomepageData;
 }
 
+const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+function sameLayout(a: HomeCarouselId[], b: HomeCarouselId[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
 export default function HomeClient({ initialData }: HomeClientProps) {
   const [data, setData] = useState(initialData);
+  const [homeLayout, setHomeLayout] = useState<HomeCarouselId[]>(DEFAULT_HOME_LAYOUT);
+  const [accountLayoutPending, setAccountLayoutPending] = useState(false);
+  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
 
   const heroRef = useRef<HTMLElement>(null);
-  const filmesRef = useRef<HTMLElement>(null);
-  const seriesRef = useRef<HTMLElement>(null);
-  const animesRef = useRef<HTMLElement>(null);
-  const jogosRef = useRef<HTMLElement>(null);
-
   const heroVisible = useSectionVisible(heroRef);
-  const filmesVisible = useSectionVisible(filmesRef);
-  const seriesVisible = useSectionVisible(seriesRef);
-  const animesVisible = useSectionVisible(animesRef);
-  const jogosVisible = useSectionVisible(jogosRef);
-
-  /** Filmes e jogos bootstraps quando o hero ou a própria seção estão perto do viewport */
-  const filmesBootstrapEnabled = heroVisible || filmesVisible;
-  const jogosBootstrapEnabled = heroVisible || jogosVisible;
-  const animesBootstrapEnabled = heroVisible || animesVisible;
 
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
+
+  useIsoLayoutEffect(() => {
+    let cancelled = false;
+    if (!getToken()) {
+      setAccountLayoutPending(false);
+      setHomeLayout((current) => (sameLayout(current, DEFAULT_HOME_LAYOUT) ? current : DEFAULT_HOME_LAYOUT));
+      return;
+    }
+
+    setAccountLayoutPending(true);
+    void orbeNerdApi.getHomeLayout().then((saved) => {
+      if (cancelled) return;
+      setHomeLayout(saved ?? DEFAULT_HOME_LAYOUT);
+      setAccountLayoutPending(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (getToken()) return;
+    setAccountLayoutPending(false);
+    setHomeLayout((current) => (sameLayout(current, DEFAULT_HOME_LAYOUT) ? current : DEFAULT_HOME_LAYOUT));
+  }, [isAuthenticated]);
 
   const refreshHomepage = useCallback(async () => {
     try {
@@ -61,6 +90,8 @@ export default function HomeClient({ initialData }: HomeClientProps) {
   }, []);
 
   useOrbeDataRefresh(refreshHomepage);
+
+  const firstSection = homeLayout[0];
 
   return (
     <div className="bg-background overflow-x-hidden">
@@ -79,7 +110,10 @@ export default function HomeClient({ initialData }: HomeClientProps) {
             <div className="flex gap-3.5 flex-wrap justify-center">
               <button
                 type="button"
-                onClick={() => document.getElementById('filmes')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  if (!firstSection) return;
+                  document.getElementById(firstSection)?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="bg-primary text-primary-foreground rounded-lg px-6 py-3 font-medium"
               >
                 ▶ Começar agora
@@ -97,45 +131,59 @@ export default function HomeClient({ initialData }: HomeClientProps) {
 
       <main className="container mx-auto py-12 space-y-14 px-2 sm:px-4 overflow-x-hidden">
         <ContinuarAssistindoSection />
-        <section ref={filmesRef} id="filmes" className="overflow-hidden">
-          <SectionHeading title="Filmes" href="/filmes" />
-          <MediaCarousel
-            mediaType="filmes"
-            initialData={data.filmes}
-            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.filmes))}
-            bootstrapEnabled={filmesBootstrapEnabled}
-          />
-        </section>
-
-        <section ref={seriesRef} id="series" className="overflow-hidden">
-          <SectionHeading title="Séries" href="/series" />
-          <MediaCarousel
-            mediaType="series"
-            initialData={data.series}
-            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.series))}
-            bootstrapEnabled={seriesVisible}
-          />
-        </section>
-
-        <section ref={animesRef} id="animes" className="overflow-hidden">
-          <SectionHeading title="Animes" href="/animes" />
-          <AnimeCarousel
-            initialData={data.animes}
-            bootstrapEnabled={animesBootstrapEnabled}
-          />
-        </section>
-
-        <section ref={jogosRef} id="jogos" className="overflow-hidden">
-          <SectionHeading title="Jogos" href="/jogos" />
-          <MediaCarousel
-            mediaType="jogos"
-            initialData={data.jogos}
-            startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(data.jogos))}
-            bootstrapEnabled={jogosBootstrapEnabled}
-          />
-        </section>
+        {accountLayoutPending ? (
+          <p className="text-center text-muted-foreground">Carregando sua tela inicial...</p>
+        ) : homeLayout.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            Nenhum carrossel na tela inicial.{' '}
+            <Link href="/configuracoes" className="text-primary underline underline-offset-4">
+              Mostre de novo em Configurações
+            </Link>
+            .
+          </p>
+        ) : (
+          homeLayout.map((id) => (
+            <HomeCarouselSection key={id} id={id} data={data} heroVisible={heroVisible} />
+          ))
+        )}
       </main>
     </div>
+  );
+}
+
+function HomeCarouselSection({
+  id,
+  data,
+  heroVisible,
+}: {
+  id: HomeCarouselId;
+  data: HomepageData;
+  heroVisible: boolean;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const visible = useSectionVisible(ref);
+  const bootstrapEnabled = id === 'filmes' || id === 'jogos' ? heroVisible || visible : visible;
+
+  let carousel;
+  if (id === 'animes') {
+    carousel = <AnimeCarousel initialData={data.animes} bootstrapEnabled={bootstrapEnabled} />;
+  } else {
+    const items = id === 'filmes' ? data.filmes : id === 'series' ? data.series : data.jogos;
+    carousel = (
+      <MediaCarousel
+        mediaType={id}
+        initialData={items}
+        startIndex={resolveCarouselOpenIndex(filterMidiaForCarouselTimeline(items))}
+        bootstrapEnabled={bootstrapEnabled}
+      />
+    );
+  }
+
+  return (
+    <section ref={ref} id={id} className="overflow-hidden">
+      <SectionHeading title={HOME_CAROUSEL_LABELS[id]} href={HOME_CAROUSEL_HREFS[id]} />
+      {carousel}
+    </section>
   );
 }
 

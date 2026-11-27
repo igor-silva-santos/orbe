@@ -1,22 +1,14 @@
 /**
- * Ordem de tentativa das capas em Promoções e jogos grátis.
- * A capsule antiga da Steam (`.../capsule_616x353.jpg` no Fastly) responde 403/404.
- * GamerPower às vezes responde 403 no navegador; o último recurso é o proxy same-origin.
+ * Capas que o navegador pode pedir em Promoções.
+ *
+ * A CDN da Steam e o site da GamerPower respondem 403 no navegador (hotlink).
+ * Cada URL dessas vira um erro no console e o Next ainda faz preload dela.
+ * O browser só recebe o proxy da própria origem (`/api/images/...`), que busca
+ * a imagem no servidor. Epic, itch e IGDB seguem com a URL original.
  */
 
 const DEAD_STEAM_CAPSULE = /\/steam\/apps\/\d+\/capsule_616x353\.jpg(?:$|\?)/i;
-
-function steamLibraryImageUrl(appId: number): string {
-  return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/library_600x900.jpg`;
-}
-
-function steamHeaderImageUrl(appId: number): string {
-  return `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
-}
-
-function steamStoreHeaderImageUrl(appId: number): string {
-  return `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appId}/header.jpg`;
-}
+const STEAM_APP_IN_URL = /\/steam\/apps\/(\d+)\//i;
 
 function isGamerPowerImage(url: string): boolean {
   try {
@@ -25,6 +17,28 @@ function isGamerPowerImage(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function isSteamCdnImage(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return false;
+    const host = parsed.hostname;
+    return host === 'steamcdn-a.akamaihd.net' || host === 'media.steampowered.com' || host.endsWith('steamstatic.com');
+  } catch {
+    return false;
+  }
+}
+
+function appIdFromImage(url: string): number | null {
+  const match = url.match(STEAM_APP_IN_URL);
+  if (!match) return null;
+  const id = Number(match[1]);
+  return Number.isFinite(id) && id > 0 ? Math.trunc(id) : null;
+}
+
+function posterProxy(url: string): string {
+  return `/api/images/poster?url=${encodeURIComponent(url)}&v=1`;
 }
 
 export function dealPosterCandidates(
@@ -41,20 +55,24 @@ export function dealPosterCandidates(
 
   const trimmedImage = imageUrl?.trim() ?? '';
   const imageIsDead = trimmedImage !== '' && DEAD_STEAM_CAPSULE.test(trimmedImage);
-  if (!imageIsDead) push(trimmedImage);
-
-  const appId =
+  const fromArg =
     steamAppId != null && Number.isFinite(steamAppId) && steamAppId > 0 ? Math.trunc(steamAppId) : null;
+  const appId = fromArg ?? (trimmedImage ? appIdFromImage(trimmedImage) : null);
+  const steamCdn = trimmedImage !== '' && isSteamCdnImage(trimmedImage);
+  const gamerPower = trimmedImage !== '' && isGamerPowerImage(trimmedImage);
+
+  if (trimmedImage && !imageIsDead && !steamCdn && !gamerPower) {
+    push(trimmedImage);
+  }
 
   if (appId) {
-    push(steamLibraryImageUrl(appId));
-    push(steamHeaderImageUrl(appId));
-    push(steamStoreHeaderImageUrl(appId));
     push(`/api/images/steam/${appId}`);
   }
 
-  if (!imageIsDead && isGamerPowerImage(trimmedImage)) {
-    push(`/api/images/poster?url=${encodeURIComponent(trimmedImage)}&v=1`);
+  if (gamerPower && !imageIsDead) {
+    push(posterProxy(trimmedImage));
+  } else if (steamCdn && !imageIsDead && !appId) {
+    push(posterProxy(trimmedImage));
   }
 
   return list;

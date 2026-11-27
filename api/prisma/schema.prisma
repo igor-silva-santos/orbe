@@ -831,8 +831,8 @@ model User {
   hashed_password String
   nome            String?
   bio             String?                      @db.Text
-  avatar          String?                      // URL ou caminho da imagem
-  preferencias    Json?                        // Armazena temas, notificações, etc.
+  avatar          String?                      // Referência curta (sb: ou file:). Sem binário e sem base64.
+  preferencias    Json?                        // Inclui homeLayout: ordem dos carrosséis da home
   perfil_publico  Boolean                      @default(true)
   role            String                       @default("user")
   quer_avaliar    Boolean                      @default(true)
