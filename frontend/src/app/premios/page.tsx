@@ -8,7 +8,11 @@ import PageHeader from '@/components/layout/PageHeader';
 type MediaTypeFilter = 'todos' | 'filme' | 'serie' | 'anime' | 'jogo';
 type CeremonyPhase = 'votacao_aberta' | 'aguardando' | 'encerrado';
 
-type AwardNominee = { titulo: string; tipo: 'filme' | 'serie' | 'anime' | 'jogo' };
+type AwardNominee = {
+  titulo: string;
+  tipo: 'filme' | 'serie' | 'anime' | 'jogo';
+  poster?: string | null;
+};
 type AwardCategory = {
   nome: string;
   indicados: AwardNominee[];
@@ -255,26 +259,30 @@ export default function PremiosPage() {
                   {evento.categorias.map((categoria) => (
                     <section key={categoria.nome} className="rounded-xl border border-border p-3 sm:p-4 space-y-3">
                       <h3 className="font-semibold orbe-text-primary">{categoria.nome}</h3>
-                      {categoria.vencedor && (
-                        <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-                          Vencedor: {categoria.vencedor}
-                        </p>
-                      )}
                       {evento.fase === 'encerrado' && !categoria.vencedor && (
                         <p className="text-sm text-muted-foreground">O resultado desta categoria ainda não foi publicado.</p>
                       )}
                       <div>
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Concorrendo</p>
-                        <ul className="space-y-1.5">
+                        <p className="mb-2 text-sm text-muted-foreground">Indicados</p>
+                        <ul className="space-y-2">
                           {categoria.indicados.map((indicado) => {
                             const venceu = categoria.vencedor === indicado.titulo;
                             return (
                               <li
                                 key={indicado.titulo}
-                                className={`text-sm rounded-lg px-2 py-1 orbe-text-primary ${venceu ? 'bg-emerald-500/10 font-semibold' : ''}`}
+                                className={`flex items-center gap-3 rounded-lg px-1 py-1 text-sm orbe-text-primary ${venceu ? 'bg-emerald-500/10 font-semibold' : ''}`}
                               >
-                                {indicado.titulo}
-                                {venceu && <span className="ml-2 text-xs font-bold text-emerald-800 dark:text-emerald-200">Vencedor</span>}
+                                <span className="relative h-14 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
+                                  {indicado.poster ? (
+                                    <img src={indicado.poster} alt="" className="h-full w-full object-cover" />
+                                  ) : (
+                                    <Film className="absolute inset-0 m-auto h-4 w-4 text-muted-foreground" aria-hidden />
+                                  )}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block leading-snug">{indicado.titulo}</span>
+                                  {venceu && <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Venceu</span>}
+                                </span>
                               </li>
                             );
                           })}

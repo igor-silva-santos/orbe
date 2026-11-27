@@ -20,7 +20,7 @@ export default function FilmeDestaquePill({ pill, className = '' }: Props) {
   return (
     <span
       title={label}
-      className={`inline-flex w-max min-w-0 max-w-full shrink-0 items-center overflow-hidden rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wide sm:text-[10px] ${STYLES[pill]} ${className}`}
+      className={`inline-flex w-max min-w-0 max-w-full shrink-0 items-center overflow-hidden rounded-full border px-1.5 py-px text-[8px] font-semibold leading-none sm:text-[9px] ${STYLES[pill]} ${className}`}
     >
       <span className="min-w-0 truncate">{label}</span>
     </span>

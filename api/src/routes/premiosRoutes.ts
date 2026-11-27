@@ -6,6 +6,7 @@ import { logger } from '../logger';
 import cacheMiddleware from '../cacheMiddleware';
 import { TWENTY_FOUR_HOURS, parsePagination } from './mediaRoutesHelpers';
 import { buildAwardEventsResponse, mergeAwardFilterOptions } from '../awardCeremonies';
+import { attachAwardPosters } from '../awardPosters';
 
 const router = Router();
 
@@ -235,7 +236,7 @@ router.get('/premios/destaques', cacheMiddleware(TWENTY_FOUR_HOURS), async (_req
 
 // Cerimônias, concorrentes, vencedores (só depois do evento) e votação dos fãs.
 // Sem cache: a fase depende do relógio (votação aberta / cerimônia encerrada).
-router.get('/premios/eventos', (req, res) => {
+router.get('/premios/eventos', async (req, res) => {
   const awardName = typeof req.query.awardName === 'string' && req.query.awardName !== 'todos'
     ? req.query.awardName
     : undefined;
@@ -246,7 +247,13 @@ router.get('/premios/eventos', (req, res) => {
   const year = parsedYear !== undefined && !Number.isNaN(parsedYear) ? parsedYear : undefined;
   const mediaType = parseMediaType(req.query.mediaType);
 
-  res.json(buildAwardEventsResponse({ awardName, year, mediaType }));
+  const payload = buildAwardEventsResponse({ awardName, year, mediaType });
+  try {
+    res.json(await attachAwardPosters(payload));
+  } catch (error) {
+    logger.error(`Erro ao buscar pôsteres das premiações: ${error}`);
+    res.json(payload);
+  }
 });
 
 // Rota para Premiações
