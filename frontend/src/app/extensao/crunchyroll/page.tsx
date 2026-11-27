@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link';
 import {
+  Check,
   Code2,
   Download,
   Eye,
@@ -7,7 +8,9 @@ import {
   PlugZap,
   Shield,
   ShieldCheck,
+  Star,
   Workflow,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -115,8 +118,8 @@ export default function ExtensaoCrunchyrollPage() {
             </div>
           </li>
           <li className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm">
-              ★
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+              <Star className="h-4 w-4" aria-hidden />
             </span>
             <div>
               <p className="font-semibold text-foreground">Versão oficial (em breve)</p>
@@ -238,7 +241,7 @@ export default function ExtensaoCrunchyrollPage() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {SENDS.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-green-600">✓</span> {item}
+                  <Check className="h-4 w-4 shrink-0 text-green-600" aria-hidden /> {item}
                 </li>
               ))}
             </ul>
@@ -250,7 +253,7 @@ export default function ExtensaoCrunchyrollPage() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               {NOT_SENDS.map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-red-500">✗</span> {item}
+                  <X className="h-4 w-4 shrink-0 text-red-500" aria-hidden /> {item}
                 </li>
               ))}
             </ul>

@@ -10,7 +10,7 @@ type Props = {
 export default function CardListHighlightPill({ highlight, className = '' }: Props) {
   return (
     <span
-      className={`absolute top-2 left-2 z-20 max-w-[calc(100%-3rem)] truncate rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide shadow-sm sm:text-[10px] ${highlight.pillClass} ${className}`}
+      className={`inline-flex w-max min-w-0 max-w-full shrink-0 truncate rounded-full border px-1.5 py-px text-[8px] font-semibold leading-none sm:text-[9px] ${highlight.pillClass} ${className}`}
       title={highlight.label}
     >
       {highlight.label}

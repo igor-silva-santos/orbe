@@ -241,7 +241,6 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   className={`object-cover object-center transition-opacity duration-300 group-hover:opacity-90 w-full h-full ${isAdultContent ? 'blur-md hover:blur-none' : ''}`}
                   fallbackLabel="Sem imagem"
                 />
-                {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
                 {isWeeklyPinned && !listHighlight && (
                   <span
                     className="absolute top-2 left-2 z-20 rounded-full bg-violet-600/95 text-white p-1.5 shadow-sm"
@@ -252,7 +251,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   </span>
                 )}
                 {topAward && (
-                  <div className={`absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)] ${listHighlight ? 'top-10' : ''}`}>
+                  <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-3rem)]">
                     <AwardIcon
                       award={topAward.nome}
                       status={topAward.status}
@@ -274,12 +273,12 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                 />
               </div>
               <div className="p-3 flex flex-col shrink-0">
-                {/* Duas linhas de altura fixa, logo abaixo do pôster. Os selos ficam
-                    fora da imagem — um por linha, para o texto caber inteiro — e o
-                    espaço existe em todo card para a fileira não desalinhar. */}
-                <div className="mb-1.5 flex h-10 flex-col items-start gap-0.5 overflow-hidden">
+                {/* Faixa reservada logo abaixo do pôster. Os selos ficam fora da
+                    imagem, menores e com espaço entre eles, para a fileira não desalinhar. */}
+                <div className="mb-2 flex h-14 flex-col items-start justify-start gap-1.5 overflow-hidden">
+                  {listHighlight && <CardListHighlightPill highlight={listHighlight} />}
                   {type === 'anime' && dubStatus && (
-                    <span className={`w-max max-w-full shrink-0 truncate text-[10px] font-semibold leading-none px-2 py-0.5 rounded-full ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
+                    <span className={`w-max max-w-full shrink-0 truncate rounded-full px-1.5 py-px text-[8px] font-semibold leading-none sm:text-[9px] ${dubStatus === 'Dublado' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'} transition-colors`}>
                       {dubStatus}
                     </span>
                   )}
@@ -304,7 +303,7 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   isFutureRelease ? (
                     <p className="text-xs text-gray-400 truncate">Lançamento: {formatReleaseDate()}</p>
                   ) : hasNextEpisode && nextEpisodeCardLabel ? (
-                    <span className="inline-flex max-w-full items-center rounded-full border border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-orange-700 dark:text-orange-300 sm:text-[10px] whitespace-nowrap truncate">
+                    <span className="inline-flex max-w-full items-center truncate whitespace-nowrap rounded-full border border-[var(--orbe-block-border)] bg-[var(--orbe-accent)]/10 px-1.5 py-px text-[8px] font-semibold leading-none text-orange-700 dark:text-orange-300 sm:text-[9px]">
                       {nextEpisodeCardLabel}
                     </span>
                   ) : (
@@ -316,9 +315,9 @@ const MidiaCard = React.memo(React.forwardRef<HTMLDivElement, MidiaCardProps>((
                   </p>
                 )}
                 </div>
-                <div className="flex flex-wrap items-center gap-1 mb-1 min-h-[22px] max-h-[22px] overflow-hidden">
+                <div className="mb-1 flex min-h-[22px] max-h-[22px] flex-wrap items-center gap-1.5 overflow-hidden">
                   {genres.slice(0, 2).map(genre => (
-                    <span key={genre} className="bg-[var(--orbe-accent)]/15 text-[var(--orbe-accent)] border border-[var(--orbe-accent)]/30 px-2 py-0.5 rounded-full text-[10px] font-semibold truncate transition-colors">
+                    <span key={genre} className="truncate rounded-full border border-[var(--orbe-accent)]/30 bg-[var(--orbe-accent)]/15 px-1.5 py-px text-[8px] font-semibold text-[var(--orbe-accent)] transition-colors sm:text-[9px]">
                       {genre}
                     </span>
                   ))}
